@@ -5,7 +5,6 @@ const expressValidator = require('express-validator');
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require('cors');
-const emitter = require('./api/socket-io-api');
 const net = require('net');
 
 const app = express();
@@ -18,19 +17,15 @@ const server = http.createServer(app);
 
 const io = socketIo(server); 
 io.origins(['http://localhost:4000']);
-/*
-let interval;
+
 
 io.on("connection", socket => {
   console.log(`New client connected. Socket #${socket.id} `);
-  if (interval) {
-    clearInterval(interval);
-  }
-  interval = setInterval(() => emitter.getApiAndEmit(socket), 1000);
+
   socket.on("disconnect", () => {
     console.log(`Client disconnected Socket #${socket.id}`);
   });
-});*/
+});
 ///////////
 
 
@@ -42,21 +37,18 @@ var client = new net.Socket();
 
 
 client.connect(PORT, HOST, function() {
-  console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+  console.log('CONNECTED TO C++ Socket: ' + HOST + ':' + PORT);
   // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client
-  client.write('---- Ping from Client! ----');
+  client.write('---- Ping from Nodejs Client! ----');
 });
 
 // data is what the server sent to this socket
   client.on('data', function(data) {
     let temp = data.toString();
+    io.emit('FromC', temp);
     //write message to c++ so that it knows we are still connected
     client.write('I am alive!');
-    
-    io.emit('FromC', temp);
-    
 });
-
 
 client.on('close', function() {
   console.log('Connection closed');
@@ -72,7 +64,6 @@ const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 
-var profiles = require('./api/profiles/profiles');
 var machines = require('./api/machines/machines');
 
 global.SERVER_APP_ROOT = __dirname;
@@ -83,8 +74,7 @@ nextApp
  
     app.use(expressValidator());
 
-    app.use('/api/profiles', profiles);
-    app.use('/api/machines', machines);
+    //app.use('/api/machines', machines);
     
     app.use(cors({ origin: '*' }));
 

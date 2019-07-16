@@ -31,7 +31,7 @@ const UiTableWithStyles = ({rows}) => {
 
   //i do not now why this step is necessary. the arrays before and after seem to be identical but apparently they are not
   // i had to do the same in api/machines
-  const machines = util.machine_results_to_array(rows);
+  const machines = rows;
 
   return (
     <div className={mergeClasses.root}>

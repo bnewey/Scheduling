@@ -3,6 +3,8 @@ const router = express.Router()
 const pool = require('../../lib/db.js')
 const util = require('../../util/util')
 
+//NOT BEING USED CURRENTLY !!!!!!!!!!!!!
+
 router.get('/', function(req, res, next) {
 	pool.query('SELECT * from machines', function (error, results) {
 	  	if(error){

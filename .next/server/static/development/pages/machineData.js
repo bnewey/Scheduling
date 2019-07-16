@@ -88,7 +88,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -160,16 +160,16 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./components/Machine/Ui.js":
-/*!**********************************!*\
-  !*** ./components/Machine/Ui.js ***!
-  \**********************************/
+/***/ "./components/Machine/DenseTable.js":
+/*!******************************************!*\
+  !*** ./components/Machine/DenseTable.js ***!
+  \******************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Ui; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DenseTable; });
 /* harmony import */ var _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime-corejs2/regenerator */ "./node_modules/@babel/runtime-corejs2/regenerator/index.js");
 /* harmony import */ var _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime-corejs2/helpers/esm/asyncToGenerator.js");
@@ -180,20 +180,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_assertThisInitialized__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/assertThisInitialized */ "./node_modules/@babel/runtime-corejs2/helpers/esm/assertThisInitialized.js");
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_inherits__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/inherits */ "./node_modules/@babel/runtime-corejs2/helpers/esm/inherits.js");
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/defineProperty */ "./node_modules/@babel/runtime-corejs2/helpers/esm/defineProperty.js");
-/* harmony import */ var styled_jsx_style__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! styled-jsx/style */ "./node_modules/styled-jsx/style.js");
-/* harmony import */ var styled_jsx_style__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(styled_jsx_style__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var _material_ui_core_styles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @material-ui/core/styles */ "@material-ui/core/styles");
-/* harmony import */ var _material_ui_core_styles__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_11__);
-/* harmony import */ var _material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @material-ui/core/Paper */ "@material-ui/core/Paper");
-/* harmony import */ var _material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12__);
-/* harmony import */ var _material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @material-ui/core/Grid */ "@material-ui/core/Grid");
-/* harmony import */ var _material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13__);
-/* harmony import */ var _material_ui_styles__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @material-ui/styles */ "@material-ui/styles");
-/* harmony import */ var _material_ui_styles__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(_material_ui_styles__WEBPACK_IMPORTED_MODULE_14__);
-/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! socket.io-client */ "socket.io-client");
-/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(socket_io_client__WEBPACK_IMPORTED_MODULE_15__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var _material_ui_core_styles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @material-ui/core/styles */ "@material-ui/core/styles");
+/* harmony import */ var _material_ui_core_styles__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var _material_ui_core_Table__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @material-ui/core/Table */ "@material-ui/core/Table");
+/* harmony import */ var _material_ui_core_Table__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_Table__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var _material_ui_core_TableBody__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @material-ui/core/TableBody */ "@material-ui/core/TableBody");
+/* harmony import */ var _material_ui_core_TableBody__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_TableBody__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var _material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @material-ui/core/TableCell */ "@material-ui/core/TableCell");
+/* harmony import */ var _material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13__);
+/* harmony import */ var _material_ui_core_TableHead__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @material-ui/core/TableHead */ "@material-ui/core/TableHead");
+/* harmony import */ var _material_ui_core_TableHead__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_TableHead__WEBPACK_IMPORTED_MODULE_14__);
+/* harmony import */ var _material_ui_core_TableRow__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @material-ui/core/TableRow */ "@material-ui/core/TableRow");
+/* harmony import */ var _material_ui_core_TableRow__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_TableRow__WEBPACK_IMPORTED_MODULE_15__);
+/* harmony import */ var _material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @material-ui/core/Paper */ "@material-ui/core/Paper");
+/* harmony import */ var _material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_16__);
+/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! socket.io-client */ "socket.io-client");
+/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(socket_io_client__WEBPACK_IMPORTED_MODULE_17__);
+
+
 
 
 
@@ -214,157 +220,63 @@ __webpack_require__.r(__webpack_exports__);
 var util = __webpack_require__(/*! ../../util/util */ "./util/util.js"); //Necessary to use this function to allow the useStyles hook to work
 
 
-var UiTableWithStyles = function UiTableWithStyles(_ref) {
+var DenseTableWithStyles = function DenseTableWithStyles(_ref) {
   var rows = _ref.rows;
-  var useStyles = Object(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_11__["makeStyles"])(function (theme) {
+  var useStyles = Object(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_10__["makeStyles"])(function (theme) {
     return {
       root: {
-        flexGrow: 1,
-        padding: '30px'
+        width: '70%'
       },
-      paper: Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])({
-        padding: theme.spacing(2),
-        textAlign: 'center',
-        color: theme.palette.text.secondary
-      }, "padding", '30px 15px 32px 15px')
+      paper: {
+        marginTop: theme.spacing(3),
+        width: '70%',
+        overflowX: 'auto',
+        marginBottom: theme.spacing(2)
+      },
+      table: {
+        minWidth: 650
+      }
     };
   }); //only works inside a functional component
 
-  var classes = useStyles(); //i do not now why this step is necessary. the arrays before and after seem to be identical but apparently they are not
-  // i had to do the same in api/machines
-
+  var classes = useStyles();
   var machines = rows;
-  return react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("div", {
-    className: "jsx-3310407215" + " " + (_material_ui_styles__WEBPACK_IMPORTED_MODULE_14__["mergeClasses"].root || "")
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(styled_jsx_style__WEBPACK_IMPORTED_MODULE_9___default.a, {
-    id: "3310407215"
-  }, "..jsx-3310407215{mergeClasses.root;}.jsx-3310407215{margin:2% 2% 3% 2%;}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL2JibmV3ZXkvbm9kZS13b3Jrc3BhY2UvbmV4dC1teXNxbC9jb21wb25lbnRzL01hY2hpbmUvVWkuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBcUNZLEFBRXVCLEFBQXVCLGtCQUF0QixDQUF1QiIsImZpbGUiOiIvaG9tZS9iYm5ld2V5L25vZGUtd29ya3NwYWNlL25leHQtbXlzcWwvY29tcG9uZW50cy9NYWNoaW5lL1VpLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IG1ha2VTdHlsZXMgfSBmcm9tICdAbWF0ZXJpYWwtdWkvY29yZS9zdHlsZXMnO1xuaW1wb3J0IFBhcGVyIGZyb20gJ0BtYXRlcmlhbC11aS9jb3JlL1BhcGVyJztcblxuaW1wb3J0IEdyaWQgZnJvbSAnQG1hdGVyaWFsLXVpL2NvcmUvR3JpZCc7XG5pbXBvcnQgeyBtZXJnZUNsYXNzZXMgfSBmcm9tICdAbWF0ZXJpYWwtdWkvc3R5bGVzJztcblxuaW1wb3J0IHNvY2tldElPQ2xpZW50IGZyb20gJ3NvY2tldC5pby1jbGllbnQnXG5jb25zdCB1dGlsID0gcmVxdWlyZSgnLi4vLi4vdXRpbC91dGlsJylcblxuLy9OZWNlc3NhcnkgdG8gdXNlIHRoaXMgZnVuY3Rpb24gdG8gYWxsb3cgdGhlIHVzZVN0eWxlcyBob29rIHRvIHdvcmtcbmNvbnN0IFVpVGFibGVXaXRoU3R5bGVzID0gKHtyb3dzfSkgPT4ge1xuICBjb25zdCB1c2VTdHlsZXMgPSBtYWtlU3R5bGVzKHRoZW1lID0+ICh7XG4gICAgcm9vdDoge1xuICAgICAgZmxleEdyb3c6IDEsXG4gICAgICBwYWRkaW5nOiAnMzBweCcsXG4gICAgICBcbiAgICAgIFxuICAgIH0sXG4gICAgcGFwZXI6IHtcbiAgICAgIHBhZGRpbmc6IHRoZW1lLnNwYWNpbmcoMiksXG4gICAgICB0ZXh0QWxpZ246ICdjZW50ZXInLFxuICAgICAgY29sb3I6IHRoZW1lLnBhbGV0dGUudGV4dC5zZWNvbmRhcnksXG4gICAgICBwYWRkaW5nOiAnMzBweCAxNXB4IDMycHggMTVweCcsXG4gICAgfSxcbiAgXG4gIH0pKTtcblxuICAvL29ubHkgd29ya3MgaW5zaWRlIGEgZnVuY3Rpb25hbCBjb21wb25lbnRcbiAgY29uc3QgY2xhc3NlcyA9IHVzZVN0eWxlcygpO1xuXG4gIC8vaSBkbyBub3Qgbm93IHdoeSB0aGlzIHN0ZXAgaXMgbmVjZXNzYXJ5LiB0aGUgYXJyYXlzIGJlZm9yZSBhbmQgYWZ0ZXIgc2VlbSB0byBiZSBpZGVudGljYWwgYnV0IGFwcGFyZW50bHkgdGhleSBhcmUgbm90XG4gIC8vIGkgaGFkIHRvIGRvIHRoZSBzYW1lIGluIGFwaS9tYWNoaW5lc1xuICBjb25zdCBtYWNoaW5lcyA9IHJvd3M7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT17bWVyZ2VDbGFzc2VzLnJvb3R9PlxuPHN0eWxlIGpzeD57YFxuICAgICAue21lcmdlQ2xhc3Nlcy5yb290fSB7ICBtYXJnaW46IDIlIDIlIDMlIDIlOyB9XG4gYH08L3N0eWxlPlxuPEdyaWQgY29udGFpbmVyIHNwYWNpbmc9ezN9PlxuIDxHcmlkIGl0ZW0geHM9ezF9PlxuICAgICA8bGFiZWw+QWlyIENvbXByZXNzb3I8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuIDxHcmlkIGl0ZW0geHM9ezF9PlxuIDxsYWJlbD5BaXIgRHJ5ZXI8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuIDxHcmlkIGl0ZW0geHM9ezJ9PlxuIDxsYWJlbD5UYW5rIDE8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuIDxHcmlkIGl0ZW0geHM9ezN9PiAgXG4gICAgPEdyaWQgY29udGFpbmVyIHNwYWNpbmc9ezF9PlxuICAgICAgICA8R3JpZCBpdGVtIHhzPXs0fT4gIFxuICAgICAgICAgICAgPGxhYmVsPjE8L2xhYmVsPlxuICAgICAgICAgICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gICAgICAgIDwvR3JpZD5cbiAgICAgICAgPEdyaWQgaXRlbSB4cz17NH0+ICBcbiAgICAgICAgICAgIDxsYWJlbD4yPC9sYWJlbD5cbiAgICAgICAgICAgIDxQYXBlciBjbGFzc05hbWU9e2NsYXNzZXMucGFwZXJ9PjxzcGFuPjc1Rjwvc3Bhbj48YnIvPjxzcGFuPjc1Rjwvc3Bhbj48L1BhcGVyPlxuICAgICAgICA8L0dyaWQ+XG4gICAgICAgIDxHcmlkIGl0ZW0geHM9ezR9PiAgXG4gICAgICAgICAgICA8bGFiZWw+MzwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj43NUY8L3NwYW4+PGJyLz48c3Bhbj43NUY8L3NwYW4+PC9QYXBlcj5cbiAgICAgICAgPC9HcmlkPlxuICAgIDwvR3JpZD5cbiA8L0dyaWQ+ICBcbiA8R3JpZCBpdGVtIHhzPXsyfT5cbiA8bGFiZWw+UmFuZG9tIEJveDwvbGFiZWw+XG4gICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj43NUY8L3NwYW4+PGJyLz48c3Bhbj43NUY8L3NwYW4+PC9QYXBlcj5cbiA8L0dyaWQ+XG4gPEdyaWQgaXRlbSB4cz17Mn0+XG4gPGxhYmVsPk5pdHJvZ2VuIFRhbms8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuPC9HcmlkPlxuXG48L2Rpdj5cbiAgKVxufVxuXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBVaSBleHRlbmRzIFJlYWN0LkNvbXBvbmVudCB7XG4gICAgXG4gICAgX2lzTW91bnRlZCA9IGZhbHNlO1xuXG4gICAgY29uc3RydWN0b3IocHJvcHMpe1xuICAgICAgICBzdXBlcihwcm9wcyk7XG4gICAgICAgIHRoaXMuc3RhdGUgPSB7XG4gICAgICAgICAgcm93czogXCJcIixcbiAgICAgICAgICBlbmRwb2ludDogXCJodHRwOi8vbG9jYWxob3N0OjQwMDBcIlxuICAgICAgICB9O1xuICAgICAgICBcbiAgICB9XG5cbiAgICBjb21wb25lbnREaWRNb3VudCgpe1xuICAgICAgLy9faXNNb3VudGVkIGNoZWNrcyBpZiB0aGUgY29tcG9uZW50IGlzIG1vdW50ZWQgYmVmb3JlIGNhbGxpbmcgYXBpIHRvIHByZXZlbnQgbWVtb3J5IGxlYWtcbiAgICAgICAgdGhpcy5faXNNb3VudGVkID0gdHJ1ZTtcbiAgICAgICAgY29uc3QgeyBlbmRwb2ludCB9ID0gdGhpcy5zdGF0ZTtcbiAgICAgICAgY29uc3Qgc29ja2V0ID0gc29ja2V0SU9DbGllbnQoZW5kcG9pbnQpO1xuICAgICAgICBzb2NrZXQub24oXCJGcm9tQ1wiLCBhc3luYyBkYXRhID0+IHtcbiAgICAgICAgICAgIGlmKHRoaXMuX2lzTW91bnRlZCkge1xuICAgICAgICAgICAgICB2YXIganNvbiA9IGF3YWl0IEpTT04ucGFyc2UoZGF0YSk7XG4gICAgICAgICAgICAgIHRoaXMuc2V0U3RhdGUoeyByb3dzOiBqc29uLm1hY2hpbmVzIH0pO1xuICAgICAgICAgICAgfVxuICAgICAgICB9KTsgXG4gICAgfVxuXG4gICAgY29tcG9uZW50V2lsbFVubW91bnQoKXtcbiAgICAgICAgdGhpcy5faXNNb3VudGVkID0gZmFsc2U7XG4gICAgfVxuXG4gICAgcmVuZGVyKCkge1xuICAgICAgY29uc3QgIHJvd3MgICA9IHRoaXMuc3RhdGUucm93cztcblxuICAgICAgcmV0dXJuIChcbiAgICAgICAgPGgxPk1hY2hpbmUgbGlzdCB7cm93cyAgPyAgPHA+PFVpVGFibGVXaXRoU3R5bGVzIHJvd3M9e3Jvd3N9Lz48L3A+IDogPHA+TG9hZGluZy4uLjwvcD59IDwvaDE+XG4gICAgICApO1xuICAgIH1cbn0iXX0= */\n/*@ sourceURL=/home/bbnewey/node-workspace/next-mysql/components/Machine/Ui.js */"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    container: true,
-    spacing: 3
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 1
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Air Compressor"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+  return react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement("div", {
+    className: classes.root
+  }, react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_16___default.a, {
     className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 1
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Air Dryer"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
-    className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 2
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Tank 1"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
-    className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 3
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    container: true,
-    spacing: 1
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 4
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "1"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
-    className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 4
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "2"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
-    className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 4
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "3"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
-    className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 2
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Random Box"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
-    className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 2
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Nitrogen Tank"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
-    className: classes.paper
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
-  }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F")))));
+  }, react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_Table__WEBPACK_IMPORTED_MODULE_11___default.a, {
+    className: classes.table,
+    size: "small"
+  }, react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableHead__WEBPACK_IMPORTED_MODULE_14___default.a, null, react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableRow__WEBPACK_IMPORTED_MODULE_15___default.a, null, react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13___default.a, null, "Name"), react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    align: "right"
+  }, "Temperature F"), react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    align: "right"
+  }, "Pressure"))), react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableBody__WEBPACK_IMPORTED_MODULE_12___default.a, null, machines.map(function (row) {
+    return react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableRow__WEBPACK_IMPORTED_MODULE_15___default.a, {
+      key: row.name
+    }, react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13___default.a, {
+      component: "th",
+      scope: "row"
+    }, row.name), react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13___default.a, {
+      align: "right"
+    }, row.temp), react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(_material_ui_core_TableCell__WEBPACK_IMPORTED_MODULE_13___default.a, {
+      align: "right"
+    }, row.pressure));
+  })))));
 };
 
-var Ui =
+var DenseTable =
 /*#__PURE__*/
 function (_React$Component) {
-  Object(_babel_runtime_corejs2_helpers_esm_inherits__WEBPACK_IMPORTED_MODULE_7__["default"])(Ui, _React$Component);
+  Object(_babel_runtime_corejs2_helpers_esm_inherits__WEBPACK_IMPORTED_MODULE_7__["default"])(DenseTable, _React$Component);
 
-  function Ui(props) {
+  function DenseTable(props) {
     var _this;
 
-    Object(_babel_runtime_corejs2_helpers_esm_classCallCheck__WEBPACK_IMPORTED_MODULE_2__["default"])(this, Ui);
+    Object(_babel_runtime_corejs2_helpers_esm_classCallCheck__WEBPACK_IMPORTED_MODULE_2__["default"])(this, DenseTable);
 
-    _this = Object(_babel_runtime_corejs2_helpers_esm_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_4__["default"])(this, Object(_babel_runtime_corejs2_helpers_esm_getPrototypeOf__WEBPACK_IMPORTED_MODULE_5__["default"])(Ui).call(this, props));
+    _this = Object(_babel_runtime_corejs2_helpers_esm_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_4__["default"])(this, Object(_babel_runtime_corejs2_helpers_esm_getPrototypeOf__WEBPACK_IMPORTED_MODULE_5__["default"])(DenseTable).call(this, props));
 
     Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])(Object(_babel_runtime_corejs2_helpers_esm_assertThisInitialized__WEBPACK_IMPORTED_MODULE_6__["default"])(_this), "_isMounted", false);
 
@@ -375,7 +287,7 @@ function (_React$Component) {
     return _this;
   }
 
-  Object(_babel_runtime_corejs2_helpers_esm_createClass__WEBPACK_IMPORTED_MODULE_3__["default"])(Ui, [{
+  Object(_babel_runtime_corejs2_helpers_esm_createClass__WEBPACK_IMPORTED_MODULE_3__["default"])(DenseTable, [{
     key: "componentDidMount",
     value: function componentDidMount() {
       var _this2 = this;
@@ -383,7 +295,7 @@ function (_React$Component) {
       //_isMounted checks if the component is mounted before calling api to prevent memory leak
       this._isMounted = true;
       var endpoint = this.state.endpoint;
-      var socket = socket_io_client__WEBPACK_IMPORTED_MODULE_15___default()(endpoint);
+      var socket = socket_io_client__WEBPACK_IMPORTED_MODULE_17___default()(endpoint);
       socket.on("FromC",
       /*#__PURE__*/
       function () {
@@ -432,14 +344,14 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       var rows = this.state.rows;
-      return react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("h1", null, "Machine list ", rows ? react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("p", null, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(UiTableWithStyles, {
+      return react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement("h1", null, "Machine list ", rows ? react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement("p", null, react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement(DenseTableWithStyles, {
         rows: rows
-      })) : react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("p", null, "Loading..."), " ");
+      })) : react__WEBPACK_IMPORTED_MODULE_9___default.a.createElement("p", null, "Loading..."), " ");
     }
   }]);
 
-  return Ui;
-}(react__WEBPACK_IMPORTED_MODULE_10___default.a.Component);
+  return DenseTable;
+}(react__WEBPACK_IMPORTED_MODULE_9___default.a.Component);
 
 
 
@@ -2189,29 +2101,30 @@ module.exports = __webpack_require__(/*! ./dist/style */ "./node_modules/styled-
 
 /***/ }),
 
-/***/ "./pages/index.js":
-/*!************************!*\
-  !*** ./pages/index.js ***!
-  \************************/
+/***/ "./pages/machineData.js":
+/*!******************************!*\
+  !*** ./pages/machineData.js ***!
+  \******************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Index; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MachineData; });
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/classCallCheck */ "./node_modules/@babel/runtime-corejs2/helpers/esm/classCallCheck.js");
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_createClass__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/createClass */ "./node_modules/@babel/runtime-corejs2/helpers/esm/createClass.js");
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/possibleConstructorReturn */ "./node_modules/@babel/runtime-corejs2/helpers/esm/possibleConstructorReturn.js");
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/getPrototypeOf */ "./node_modules/@babel/runtime-corejs2/helpers/esm/getPrototypeOf.js");
 /* harmony import */ var _babel_runtime_corejs2_helpers_esm_inherits__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/inherits */ "./node_modules/@babel/runtime-corejs2/helpers/esm/inherits.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _components_Layouts_Main__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../components/Layouts/Main */ "./components/Layouts/Main.js");
-/* harmony import */ var next_link__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! next/link */ "./node_modules/next/link.js");
-/* harmony import */ var next_link__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(next_link__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var _components_Machine_Ui__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../components/Machine/Ui */ "./components/Machine/Ui.js");
-/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! socket.io-client */ "socket.io-client");
-/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(socket_io_client__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @babel/runtime-corejs2/regenerator */ "./node_modules/@babel/runtime-corejs2/regenerator/index.js");
+/* harmony import */ var _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _babel_runtime_corejs2_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime-corejs2/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! isomorphic-unfetch */ "isomorphic-unfetch");
+/* harmony import */ var isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var _components_Layouts_Main__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../components/Layouts/Main */ "./components/Layouts/Main.js");
+/* harmony import */ var _components_Machine_DenseTable__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../components/Machine/DenseTable */ "./components/Machine/DenseTable.js");
 
 
 
@@ -2222,42 +2135,120 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+ //Check between for client or server
 
-var PostLink = function PostLink(props) {
-  return react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement("li", null, react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(next_link__WEBPACK_IMPORTED_MODULE_7___default.a, {
-    href: "".concat(props.id)
-  }, react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement("a", null, props.title)));
-};
+var conditionalDataProvider = null;
 
-var Index =
+if (false) {} else {
+  //server
+  conditionalDataProvider =
+  /*#__PURE__*/
+  function () {
+    var _ref2 = Object(_babel_runtime_corejs2_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])(
+    /*#__PURE__*/
+    _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_5___default.a.mark(function _callee2(req) {
+      var baseUrl, res, machines;
+      return _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_5___default.a.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.prev = 0;
+              _context2.next = 3;
+              return req;
+
+            case 3:
+              if (!_context2.sent) {
+                _context2.next = 7;
+                break;
+              }
+
+              _context2.t0 = "".concat(req.protocol, "://").concat(req.get('Host'));
+              _context2.next = 8;
+              break;
+
+            case 7:
+              _context2.t0 = '';
+
+            case 8:
+              baseUrl = _context2.t0;
+              _context2.next = 11;
+              return eval("fetch('" + baseUrl + "/api/machines')");
+
+            case 11:
+              res = _context2.sent;
+              _context2.next = 14;
+              return res.json();
+
+            case 14:
+              machines = _context2.sent;
+              return _context2.abrupt("return", machines);
+
+            case 18:
+              _context2.prev = 18;
+              _context2.t1 = _context2["catch"](0);
+              console.log(_context2.t1);
+
+            case 21:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, null, [[0, 18]]);
+    }));
+
+    return function conditionalDataProvider(_x2) {
+      return _ref2.apply(this, arguments);
+    };
+  }();
+}
+
+var MachineData =
 /*#__PURE__*/
 function (_React$Component) {
-  Object(_babel_runtime_corejs2_helpers_esm_inherits__WEBPACK_IMPORTED_MODULE_4__["default"])(Index, _React$Component);
+  Object(_babel_runtime_corejs2_helpers_esm_inherits__WEBPACK_IMPORTED_MODULE_4__["default"])(MachineData, _React$Component);
 
-  function Index() {
-    Object(_babel_runtime_corejs2_helpers_esm_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, Index);
+  function MachineData() {
+    Object(_babel_runtime_corejs2_helpers_esm_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, MachineData);
 
-    return Object(_babel_runtime_corejs2_helpers_esm_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_2__["default"])(this, Object(_babel_runtime_corejs2_helpers_esm_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__["default"])(Index).apply(this, arguments));
+    return Object(_babel_runtime_corejs2_helpers_esm_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_2__["default"])(this, Object(_babel_runtime_corejs2_helpers_esm_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__["default"])(MachineData).apply(this, arguments));
   }
 
-  Object(_babel_runtime_corejs2_helpers_esm_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(Index, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {}
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {}
-  }, {
+  Object(_babel_runtime_corejs2_helpers_esm_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(MachineData, [{
     key: "render",
     value: function render() {
-      return react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(_components_Layouts_Main__WEBPACK_IMPORTED_MODULE_6__["default"], null, react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement("h1", null, "Nitrogen Machine"), react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement("ul", null, react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(PostLink, {
-        id: "machineData",
-        title: "List of Machines"
-      })), react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(_components_Machine_Ui__WEBPACK_IMPORTED_MODULE_8__["default"], null));
+      return react__WEBPACK_IMPORTED_MODULE_7___default.a.createElement(_components_Layouts_Main__WEBPACK_IMPORTED_MODULE_9__["default"], null, react__WEBPACK_IMPORTED_MODULE_7___default.a.createElement(_components_Machine_DenseTable__WEBPACK_IMPORTED_MODULE_10__["default"], null));
     }
+  }], [{
+    key: "getInitialProps",
+    value: function () {
+      var _getInitialProps = Object(_babel_runtime_corejs2_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])(
+      /*#__PURE__*/
+      _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_5___default.a.mark(function _callee3(_ref3) {
+        var req;
+        return _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_5___default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                req = _ref3.req;
+
+              case 1:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }));
+
+      function getInitialProps(_x3) {
+        return _getInitialProps.apply(this, arguments);
+      }
+
+      return getInitialProps;
+    }()
   }]);
 
-  return Index;
-}(react__WEBPACK_IMPORTED_MODULE_5___default.a.Component);
+  return MachineData;
+}(react__WEBPACK_IMPORTED_MODULE_7___default.a.Component);
 
 
 
@@ -2310,26 +2301,15 @@ module.exports = {
 
 /***/ }),
 
-/***/ 4:
-/*!******************************!*\
-  !*** multi ./pages/index.js ***!
-  \******************************/
+/***/ 3:
+/*!************************************!*\
+  !*** multi ./pages/machineData.js ***!
+  \************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /home/bbnewey/node-workspace/next-mysql/pages/index.js */"./pages/index.js");
+module.exports = __webpack_require__(/*! /home/bbnewey/node-workspace/next-mysql/pages/machineData.js */"./pages/machineData.js");
 
-
-/***/ }),
-
-/***/ "@material-ui/core/Grid":
-/*!*****************************************!*\
-  !*** external "@material-ui/core/Grid" ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("@material-ui/core/Grid");
 
 /***/ }),
 
@@ -2344,6 +2324,61 @@ module.exports = require("@material-ui/core/Paper");
 
 /***/ }),
 
+/***/ "@material-ui/core/Table":
+/*!******************************************!*\
+  !*** external "@material-ui/core/Table" ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@material-ui/core/Table");
+
+/***/ }),
+
+/***/ "@material-ui/core/TableBody":
+/*!**********************************************!*\
+  !*** external "@material-ui/core/TableBody" ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@material-ui/core/TableBody");
+
+/***/ }),
+
+/***/ "@material-ui/core/TableCell":
+/*!**********************************************!*\
+  !*** external "@material-ui/core/TableCell" ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@material-ui/core/TableCell");
+
+/***/ }),
+
+/***/ "@material-ui/core/TableHead":
+/*!**********************************************!*\
+  !*** external "@material-ui/core/TableHead" ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@material-ui/core/TableHead");
+
+/***/ }),
+
+/***/ "@material-ui/core/TableRow":
+/*!*********************************************!*\
+  !*** external "@material-ui/core/TableRow" ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@material-ui/core/TableRow");
+
+/***/ }),
+
 /***/ "@material-ui/core/styles":
 /*!*******************************************!*\
   !*** external "@material-ui/core/styles" ***!
@@ -2352,17 +2387,6 @@ module.exports = require("@material-ui/core/Paper");
 /***/ (function(module, exports) {
 
 module.exports = require("@material-ui/core/styles");
-
-/***/ }),
-
-/***/ "@material-ui/styles":
-/*!**************************************!*\
-  !*** external "@material-ui/styles" ***!
-  \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("@material-ui/styles");
 
 /***/ }),
 
@@ -2473,6 +2497,17 @@ module.exports = require("core-js/library/fn/symbol");
 /***/ (function(module, exports) {
 
 module.exports = require("core-js/library/fn/symbol/iterator");
+
+/***/ }),
+
+/***/ "isomorphic-unfetch":
+/*!*************************************!*\
+  !*** external "isomorphic-unfetch" ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("isomorphic-unfetch");
 
 /***/ }),
 
@@ -2587,4 +2622,4 @@ module.exports = require("url");
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=machineData.js.map
