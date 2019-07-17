@@ -1,0 +1,5 @@
+# Ignore folder named `.next`
+.next/
+
+# Ignore folder named `.vscode`
+.vscode/
