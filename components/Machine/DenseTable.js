@@ -6,6 +6,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import socketIOClient from 'socket.io-client'
 const util = require('../../util/util')
@@ -94,7 +95,7 @@ export default class DenseTable extends React.Component {
       const  rows   = this.state.rows;
 
       return (
-        <h1>Machine list {rows  ?  <p><DenseTableWithStyles rows={rows}/></p> : <p>Loading...</p>} </h1>
+        <h1>Machine list {rows  ?  <div><DenseTableWithStyles rows={rows}/></div> : <p><CircularProgress /></p>} </h1>
       );
     }
 }

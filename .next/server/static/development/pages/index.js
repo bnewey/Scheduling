@@ -88,7 +88,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -192,8 +192,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13__);
 /* harmony import */ var _material_ui_styles__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @material-ui/styles */ "@material-ui/styles");
 /* harmony import */ var _material_ui_styles__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(_material_ui_styles__WEBPACK_IMPORTED_MODULE_14__);
-/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! socket.io-client */ "socket.io-client");
-/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(socket_io_client__WEBPACK_IMPORTED_MODULE_15__);
+/* harmony import */ var _material_ui_core_CircularProgress__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @material-ui/core/CircularProgress */ "@material-ui/core/CircularProgress");
+/* harmony import */ var _material_ui_core_CircularProgress__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(_material_ui_core_CircularProgress__WEBPACK_IMPORTED_MODULE_15__);
+/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! socket.io-client */ "socket.io-client");
+/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(socket_io_client__WEBPACK_IMPORTED_MODULE_16__);
+/* harmony import */ var zlib__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! zlib */ "zlib");
+/* harmony import */ var zlib__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(zlib__WEBPACK_IMPORTED_MODULE_17__);
+
+
 
 
 
@@ -217,141 +223,181 @@ var util = __webpack_require__(/*! ../../util/util */ "./util/util.js"); //Neces
 var UiTableWithStyles = function UiTableWithStyles(_ref) {
   var rows = _ref.rows;
   var useStyles = Object(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_11__["makeStyles"])(function (theme) {
+    var _paper;
+
     return {
       root: {
         flexGrow: 1,
-        padding: '30px'
+        padding: '30px',
+        fontSize: '25px'
       },
-      paper: Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])({
+      paper: (_paper = {
         padding: theme.spacing(2),
         textAlign: 'center',
         color: theme.palette.text.secondary
-      }, "padding", '30px 15px 32px 15px')
+      }, Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])(_paper, "padding", '30px 15px 32px 15px'), Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])(_paper, "backgroundImage", "url(/static/green_tank.png)"), Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])(_paper, "height", '288px'), Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])(_paper, "width", '144px'), Object(_babel_runtime_corejs2_helpers_esm_defineProperty__WEBPACK_IMPORTED_MODULE_8__["default"])(_paper, "fontSize", '68px'), _paper),
+      machine_0: {
+        margin: '1.5%'
+      },
+      machine_1: {
+        margin: '1.5%'
+      },
+      machine_2: {
+        margin: '1.5%'
+      },
+      machine_3: {
+        margin: '1.5%'
+      },
+      machine_4: {
+        margin: '1.5%'
+      },
+      machine_5: {
+        margin: '1.5%'
+      },
+      machine_6: {
+        margin: '1.5%'
+      },
+      machine_7: {
+        margin: '1.5%'
+      }
     };
   }); //only works inside a functional component
 
-  var classes = useStyles(); //i do not now why this step is necessary. the arrays before and after seem to be identical but apparently they are not
-  // i had to do the same in api/machines
+  var classes = useStyles();
+
+  for (var i = 0; i < 8; i++) {
+    console.log("Item name: " + rows[i].id);
+    console.log("Item name: " + rows[i].temp);
+  }
+  /*{machines.map(row => (
+          <Grid item xs={1} className={row.id}>
+          <label className="label">{row.name}</label>
+            <Paper className={classes.paper}><span>{row.temp}&#176;</span><br/><span>{row.pressure}</span></Paper>
+          </Grid>
+        ))}*/
+
 
   var machines = rows;
   return react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("div", {
-    className: "jsx-3310407215" + " " + (_material_ui_styles__WEBPACK_IMPORTED_MODULE_14__["mergeClasses"].root || "")
+    className: "jsx-827933388" + " " + (_material_ui_styles__WEBPACK_IMPORTED_MODULE_14__["mergeClasses"].root || "")
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(styled_jsx_style__WEBPACK_IMPORTED_MODULE_9___default.a, {
-    id: "3310407215"
-  }, "..jsx-3310407215{mergeClasses.root;}.jsx-3310407215{margin:2% 2% 3% 2%;}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL2JibmV3ZXkvbm9kZS13b3Jrc3BhY2UvbmV4dC1teXNxbC9jb21wb25lbnRzL01hY2hpbmUvVWkuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBcUNZLEFBRXVCLEFBQXVCLGtCQUF0QixDQUF1QiIsImZpbGUiOiIvaG9tZS9iYm5ld2V5L25vZGUtd29ya3NwYWNlL25leHQtbXlzcWwvY29tcG9uZW50cy9NYWNoaW5lL1VpLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IG1ha2VTdHlsZXMgfSBmcm9tICdAbWF0ZXJpYWwtdWkvY29yZS9zdHlsZXMnO1xuaW1wb3J0IFBhcGVyIGZyb20gJ0BtYXRlcmlhbC11aS9jb3JlL1BhcGVyJztcblxuaW1wb3J0IEdyaWQgZnJvbSAnQG1hdGVyaWFsLXVpL2NvcmUvR3JpZCc7XG5pbXBvcnQgeyBtZXJnZUNsYXNzZXMgfSBmcm9tICdAbWF0ZXJpYWwtdWkvc3R5bGVzJztcblxuaW1wb3J0IHNvY2tldElPQ2xpZW50IGZyb20gJ3NvY2tldC5pby1jbGllbnQnXG5jb25zdCB1dGlsID0gcmVxdWlyZSgnLi4vLi4vdXRpbC91dGlsJylcblxuLy9OZWNlc3NhcnkgdG8gdXNlIHRoaXMgZnVuY3Rpb24gdG8gYWxsb3cgdGhlIHVzZVN0eWxlcyBob29rIHRvIHdvcmtcbmNvbnN0IFVpVGFibGVXaXRoU3R5bGVzID0gKHtyb3dzfSkgPT4ge1xuICBjb25zdCB1c2VTdHlsZXMgPSBtYWtlU3R5bGVzKHRoZW1lID0+ICh7XG4gICAgcm9vdDoge1xuICAgICAgZmxleEdyb3c6IDEsXG4gICAgICBwYWRkaW5nOiAnMzBweCcsXG4gICAgICBcbiAgICAgIFxuICAgIH0sXG4gICAgcGFwZXI6IHtcbiAgICAgIHBhZGRpbmc6IHRoZW1lLnNwYWNpbmcoMiksXG4gICAgICB0ZXh0QWxpZ246ICdjZW50ZXInLFxuICAgICAgY29sb3I6IHRoZW1lLnBhbGV0dGUudGV4dC5zZWNvbmRhcnksXG4gICAgICBwYWRkaW5nOiAnMzBweCAxNXB4IDMycHggMTVweCcsXG4gICAgfSxcbiAgXG4gIH0pKTtcblxuICAvL29ubHkgd29ya3MgaW5zaWRlIGEgZnVuY3Rpb25hbCBjb21wb25lbnRcbiAgY29uc3QgY2xhc3NlcyA9IHVzZVN0eWxlcygpO1xuXG4gIC8vaSBkbyBub3Qgbm93IHdoeSB0aGlzIHN0ZXAgaXMgbmVjZXNzYXJ5LiB0aGUgYXJyYXlzIGJlZm9yZSBhbmQgYWZ0ZXIgc2VlbSB0byBiZSBpZGVudGljYWwgYnV0IGFwcGFyZW50bHkgdGhleSBhcmUgbm90XG4gIC8vIGkgaGFkIHRvIGRvIHRoZSBzYW1lIGluIGFwaS9tYWNoaW5lc1xuICBjb25zdCBtYWNoaW5lcyA9IHJvd3M7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT17bWVyZ2VDbGFzc2VzLnJvb3R9PlxuPHN0eWxlIGpzeD57YFxuICAgICAue21lcmdlQ2xhc3Nlcy5yb290fSB7ICBtYXJnaW46IDIlIDIlIDMlIDIlOyB9XG4gYH08L3N0eWxlPlxuPEdyaWQgY29udGFpbmVyIHNwYWNpbmc9ezN9PlxuIDxHcmlkIGl0ZW0geHM9ezF9PlxuICAgICA8bGFiZWw+QWlyIENvbXByZXNzb3I8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuIDxHcmlkIGl0ZW0geHM9ezF9PlxuIDxsYWJlbD5BaXIgRHJ5ZXI8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuIDxHcmlkIGl0ZW0geHM9ezJ9PlxuIDxsYWJlbD5UYW5rIDE8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuIDxHcmlkIGl0ZW0geHM9ezN9PiAgXG4gICAgPEdyaWQgY29udGFpbmVyIHNwYWNpbmc9ezF9PlxuICAgICAgICA8R3JpZCBpdGVtIHhzPXs0fT4gIFxuICAgICAgICAgICAgPGxhYmVsPjE8L2xhYmVsPlxuICAgICAgICAgICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gICAgICAgIDwvR3JpZD5cbiAgICAgICAgPEdyaWQgaXRlbSB4cz17NH0+ICBcbiAgICAgICAgICAgIDxsYWJlbD4yPC9sYWJlbD5cbiAgICAgICAgICAgIDxQYXBlciBjbGFzc05hbWU9e2NsYXNzZXMucGFwZXJ9PjxzcGFuPjc1Rjwvc3Bhbj48YnIvPjxzcGFuPjc1Rjwvc3Bhbj48L1BhcGVyPlxuICAgICAgICA8L0dyaWQ+XG4gICAgICAgIDxHcmlkIGl0ZW0geHM9ezR9PiAgXG4gICAgICAgICAgICA8bGFiZWw+MzwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj43NUY8L3NwYW4+PGJyLz48c3Bhbj43NUY8L3NwYW4+PC9QYXBlcj5cbiAgICAgICAgPC9HcmlkPlxuICAgIDwvR3JpZD5cbiA8L0dyaWQ+ICBcbiA8R3JpZCBpdGVtIHhzPXsyfT5cbiA8bGFiZWw+UmFuZG9tIEJveDwvbGFiZWw+XG4gICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj43NUY8L3NwYW4+PGJyLz48c3Bhbj43NUY8L3NwYW4+PC9QYXBlcj5cbiA8L0dyaWQ+XG4gPEdyaWQgaXRlbSB4cz17Mn0+XG4gPGxhYmVsPk5pdHJvZ2VuIFRhbms8L2xhYmVsPlxuICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+NzVGPC9zcGFuPjxici8+PHNwYW4+NzVGPC9zcGFuPjwvUGFwZXI+XG4gPC9HcmlkPlxuPC9HcmlkPlxuXG48L2Rpdj5cbiAgKVxufVxuXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBVaSBleHRlbmRzIFJlYWN0LkNvbXBvbmVudCB7XG4gICAgXG4gICAgX2lzTW91bnRlZCA9IGZhbHNlO1xuXG4gICAgY29uc3RydWN0b3IocHJvcHMpe1xuICAgICAgICBzdXBlcihwcm9wcyk7XG4gICAgICAgIHRoaXMuc3RhdGUgPSB7XG4gICAgICAgICAgcm93czogXCJcIixcbiAgICAgICAgICBlbmRwb2ludDogXCJodHRwOi8vbG9jYWxob3N0OjQwMDBcIlxuICAgICAgICB9O1xuICAgICAgICBcbiAgICB9XG5cbiAgICBjb21wb25lbnREaWRNb3VudCgpe1xuICAgICAgLy9faXNNb3VudGVkIGNoZWNrcyBpZiB0aGUgY29tcG9uZW50IGlzIG1vdW50ZWQgYmVmb3JlIGNhbGxpbmcgYXBpIHRvIHByZXZlbnQgbWVtb3J5IGxlYWtcbiAgICAgICAgdGhpcy5faXNNb3VudGVkID0gdHJ1ZTtcbiAgICAgICAgY29uc3QgeyBlbmRwb2ludCB9ID0gdGhpcy5zdGF0ZTtcbiAgICAgICAgY29uc3Qgc29ja2V0ID0gc29ja2V0SU9DbGllbnQoZW5kcG9pbnQpO1xuICAgICAgICBzb2NrZXQub24oXCJGcm9tQ1wiLCBhc3luYyBkYXRhID0+IHtcbiAgICAgICAgICAgIGlmKHRoaXMuX2lzTW91bnRlZCkge1xuICAgICAgICAgICAgICB2YXIganNvbiA9IGF3YWl0IEpTT04ucGFyc2UoZGF0YSk7XG4gICAgICAgICAgICAgIHRoaXMuc2V0U3RhdGUoeyByb3dzOiBqc29uLm1hY2hpbmVzIH0pO1xuICAgICAgICAgICAgfVxuICAgICAgICB9KTsgXG4gICAgfVxuXG4gICAgY29tcG9uZW50V2lsbFVubW91bnQoKXtcbiAgICAgICAgdGhpcy5faXNNb3VudGVkID0gZmFsc2U7XG4gICAgfVxuXG4gICAgcmVuZGVyKCkge1xuICAgICAgY29uc3QgIHJvd3MgICA9IHRoaXMuc3RhdGUucm93cztcblxuICAgICAgcmV0dXJuIChcbiAgICAgICAgPGgxPk1hY2hpbmUgbGlzdCB7cm93cyAgPyAgPHA+PFVpVGFibGVXaXRoU3R5bGVzIHJvd3M9e3Jvd3N9Lz48L3A+IDogPHA+TG9hZGluZy4uLjwvcD59IDwvaDE+XG4gICAgICApO1xuICAgIH1cbn0iXX0= */\n/*@ sourceURL=/home/bbnewey/node-workspace/next-mysql/components/Machine/Ui.js */"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    id: "827933388"
+  }, "..jsx-827933388{mergeClasses.root;}.jsx-827933388{margin:2% 2% 3% 2%;}..jsx-827933388{label;}.jsx-827933388{font-size:16px;}..jsx-827933388{machine_1;}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL2JibmV3ZXkvbm9kZS13b3Jrc3BhY2UvbmV4dC1teXNxbC9jb21wb25lbnRzL01hY2hpbmUvVWkuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBZ0ZrQixBQUU0QixBQUF1QixBQUNuQyxBQUFpQixBQUNiLE1BREgsSUFDSSxLQURhLEdBREwsQ0FBdUIiLCJmaWxlIjoiL2hvbWUvYmJuZXdleS9ub2RlLXdvcmtzcGFjZS9uZXh0LW15c3FsL2NvbXBvbmVudHMvTWFjaGluZS9VaS5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBSZWFjdCBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBtYWtlU3R5bGVzIH0gZnJvbSAnQG1hdGVyaWFsLXVpL2NvcmUvc3R5bGVzJztcbmltcG9ydCBQYXBlciBmcm9tICdAbWF0ZXJpYWwtdWkvY29yZS9QYXBlcic7XG5cblxuaW1wb3J0IEdyaWQgZnJvbSAnQG1hdGVyaWFsLXVpL2NvcmUvR3JpZCc7XG5pbXBvcnQgeyBtZXJnZUNsYXNzZXMgfSBmcm9tICdAbWF0ZXJpYWwtdWkvc3R5bGVzJztcbmltcG9ydCBDaXJjdWxhclByb2dyZXNzIGZyb20gJ0BtYXRlcmlhbC11aS9jb3JlL0NpcmN1bGFyUHJvZ3Jlc3MnO1xuXG5pbXBvcnQgc29ja2V0SU9DbGllbnQgZnJvbSAnc29ja2V0LmlvLWNsaWVudCc7XG5pbXBvcnQgeyBaX0JMT0NLIH0gZnJvbSAnemxpYic7XG5cblxuY29uc3QgdXRpbCA9IHJlcXVpcmUoJy4uLy4uL3V0aWwvdXRpbCcpXG5cbi8vTmVjZXNzYXJ5IHRvIHVzZSB0aGlzIGZ1bmN0aW9uIHRvIGFsbG93IHRoZSB1c2VTdHlsZXMgaG9vayB0byB3b3JrXG5jb25zdCBVaVRhYmxlV2l0aFN0eWxlcyA9ICh7cm93c30pID0+IHtcbiAgY29uc3QgdXNlU3R5bGVzID0gbWFrZVN0eWxlcyh0aGVtZSA9PiAoe1xuICAgIHJvb3Q6IHtcbiAgICAgIGZsZXhHcm93OiAxLFxuICAgICAgcGFkZGluZzogJzMwcHgnLFxuICAgICAgZm9udFNpemU6ICcyNXB4JywgICBcbiAgICB9LFxuICAgIHBhcGVyOiB7XG4gICAgICBwYWRkaW5nOiB0aGVtZS5zcGFjaW5nKDIpLFxuICAgICAgdGV4dEFsaWduOiAnY2VudGVyJyxcbiAgICAgIGNvbG9yOiB0aGVtZS5wYWxldHRlLnRleHQuc2Vjb25kYXJ5LFxuICAgICAgcGFkZGluZzogJzMwcHggMTVweCAzMnB4IDE1cHgnLGJhY2tncm91bmRJbWFnZSA6IGB1cmwoL3N0YXRpYy9ncmVlbl90YW5rLnBuZylgLFxuICAgICAgaGVpZ2h0OiAnMjg4cHgnLFxuICAgICAgd2lkdGg6ICcxNDRweCcsXG4gICAgICBmb250U2l6ZTogJzY4cHgnXG4gICAgICBcbiAgICB9LFxuICAgIG1hY2hpbmVfMDoge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9LFxuICAgIG1hY2hpbmVfMToge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9LFxuICAgIG1hY2hpbmVfMjoge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9LFxuICAgIG1hY2hpbmVfMzoge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9LFxuICAgIG1hY2hpbmVfNDoge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9LFxuICAgIG1hY2hpbmVfNToge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9LFxuICAgIG1hY2hpbmVfNjoge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9LFxuICAgIG1hY2hpbmVfNzoge1xuICAgICAgbWFyZ2luOiAnMS41JSdcbiAgICB9XG4gIFxuICB9KSk7XG5cbiAgLy9vbmx5IHdvcmtzIGluc2lkZSBhIGZ1bmN0aW9uYWwgY29tcG9uZW50XG4gIGNvbnN0IGNsYXNzZXMgPSB1c2VTdHlsZXMoKTtcblxuICBmb3IodmFyIGkgPTAgOyBpPCA4O2krKyl7XG4gICAgY29uc29sZS5sb2coXCJJdGVtIG5hbWU6IFwiK3Jvd3NbaV0uaWQpO1xuICAgIGNvbnNvbGUubG9nKFwiSXRlbSBuYW1lOiBcIityb3dzW2ldLnRlbXApO1xuXG4gIH1cbiAgLyp7bWFjaGluZXMubWFwKHJvdyA9PiAoXG4gICAgICAgICAgPEdyaWQgaXRlbSB4cz17MX0gY2xhc3NOYW1lPXtyb3cuaWR9PlxuICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJsYWJlbFwiPntyb3cubmFtZX08L2xhYmVsPlxuICAgICAgICAgICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+e3Jvdy50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3cucHJlc3N1cmV9PC9zcGFuPjwvUGFwZXI+XG4gICAgICAgICAgPC9HcmlkPlxuICAgICAgICApKX0qL1xuXG4gIGNvbnN0IG1hY2hpbmVzID0gcm93cztcbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT17bWVyZ2VDbGFzc2VzLnJvb3R9PlxuXG5cbiAgICAgIDxzdHlsZSBqc3g+e2BcbiAgICAgICAgICAue21lcmdlQ2xhc3Nlcy5yb290fSB7ICBtYXJnaW46IDIlIDIlIDMlIDIlOyB9XG4gICAgICAgICAgLntsYWJlbH0ge2ZvbnQtc2l6ZTogMTZweDt9XG4gICAgICAgICAgLnttYWNoaW5lXzF9XG4gICAgICBgfTwvc3R5bGU+XG5cblxuICAgICAgPEdyaWQgY29udGFpbmVyIHNwYWNpbmc9ezJ9PlxuICBcbiAgICAgICAgPEdyaWQgaXRlbSB4cz17MX0gY2xhc3NOYW1lPXtjbGFzc2VzLm1hY2hpbmVfMH0+XG4gICAgICAgICAgPGxhYmVsIGNsYXNzTmFtZT1cImxhYmVsXCI+e3Jvd3NbMF0ubmFtZX08L2xhYmVsPlxuICAgICAgICAgICAgPFBhcGVyIGNsYXNzTmFtZT17Y2xhc3Nlcy5wYXBlcn0+PHNwYW4+e3Jvd3NbMF0udGVtcH0mIzE3Njs8L3NwYW4+PGJyLz48c3Bhbj57cm93c1swXS5wcmVzc3VyZX08L3NwYW4+PC9QYXBlcj5cbiAgICAgICAgPC9HcmlkPlxuICAgICAgICA8R3JpZCBpdGVtIHhzPXsxfSBjbGFzc05hbWU9e2NsYXNzZXMubWFjaGluZV8xfT5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwibGFiZWxcIj57cm93c1sxXS5uYW1lfTwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj57cm93c1sxXS50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3dzWzFdLnByZXNzdXJlfTwvc3Bhbj48L1BhcGVyPlxuICAgICAgICAgIDwvR3JpZD5cbiAgICAgICAgICA8R3JpZCBpdGVtIHhzPXsxfSBjbGFzc05hbWU9e2NsYXNzZXMubWFjaGluZV8yfT5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwibGFiZWxcIj57cm93c1syXS5uYW1lfTwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj57cm93c1syXS50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3dzWzJdLnByZXNzdXJlfTwvc3Bhbj48L1BhcGVyPlxuICAgICAgICAgIDwvR3JpZD5cbiAgICAgICAgICA8R3JpZCBpdGVtIHhzPXsxfSBjbGFzc05hbWU9e2NsYXNzZXMubWFjaGluZV8zfT5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwibGFiZWxcIj57cm93c1szXS5uYW1lfTwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj57cm93c1szXS50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3dzWzNdLnByZXNzdXJlfTwvc3Bhbj48L1BhcGVyPlxuICAgICAgICAgIDwvR3JpZD5cbiAgICAgICAgICA8R3JpZCBpdGVtIHhzPXsxfSBjbGFzc05hbWU9e2NsYXNzZXMubWFjaGluZV80fT5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwibGFiZWxcIj57cm93c1s0XS5uYW1lfTwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj57cm93c1s0XS50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3dzWzRdLnByZXNzdXJlfTwvc3Bhbj48L1BhcGVyPlxuICAgICAgICAgIDwvR3JpZD5cbiAgICAgICAgICA8R3JpZCBpdGVtIHhzPXsxfSBjbGFzc05hbWU9e2NsYXNzZXMubWFjaGluZV81fT5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwibGFiZWxcIj57cm93c1s1XS5uYW1lfTwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj57cm93c1s1XS50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3dzWzVdLnByZXNzdXJlfTwvc3Bhbj48L1BhcGVyPlxuICAgICAgICAgIDwvR3JpZD5cbiAgICAgICAgICA8R3JpZCBpdGVtIHhzPXsxfSBjbGFzc05hbWU9e2NsYXNzZXMubWFjaGluZV82fT5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwibGFiZWxcIj57cm93c1s2XS5uYW1lfTwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj57cm93c1s2XS50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3dzWzZdLnByZXNzdXJlfTwvc3Bhbj48L1BhcGVyPlxuICAgICAgICAgIDwvR3JpZD5cbiAgICAgICAgICA8R3JpZCBpdGVtIHhzPXsxfSBjbGFzc05hbWU9e2NsYXNzZXMubWFjaGluZV83fT5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwibGFiZWxcIj57cm93c1s3XS5uYW1lfTwvbGFiZWw+XG4gICAgICAgICAgICA8UGFwZXIgY2xhc3NOYW1lPXtjbGFzc2VzLnBhcGVyfT48c3Bhbj57cm93c1s3XS50ZW1wfSYjMTc2Ozwvc3Bhbj48YnIvPjxzcGFuPntyb3dzWzddLnByZXNzdXJlfTwvc3Bhbj48L1BhcGVyPlxuICAgICAgICAgIDwvR3JpZD5cbiAgICAgICBcbiAgICAgIDwvR3JpZD5cblxuXG4gICAgPC9kaXY+XG4gIClcbn1cblxuZXhwb3J0IGRlZmF1bHQgY2xhc3MgVWkgZXh0ZW5kcyBSZWFjdC5Db21wb25lbnQge1xuICAgIFxuICAgIF9pc01vdW50ZWQgPSBmYWxzZTtcblxuICAgIGNvbnN0cnVjdG9yKHByb3BzKXtcbiAgICAgIHN1cGVyKHByb3BzKTtcbiAgICAgIHRoaXMuc3RhdGUgPSB7XG4gICAgICAgIHJvd3M6IFwiXCIsXG4gICAgICAgIGVuZHBvaW50OiBcImh0dHA6Ly9sb2NhbGhvc3Q6NDAwMFwiXG4gICAgICB9O1xuICAgIH1cblxuICAgIGNvbXBvbmVudERpZE1vdW50KCl7XG4gICAgICAvL19pc01vdW50ZWQgY2hlY2tzIGlmIHRoZSBjb21wb25lbnQgaXMgbW91bnRlZCBiZWZvcmUgY2FsbGluZyBhcGkgdG8gcHJldmVudCBtZW1vcnkgbGVha1xuICAgICAgdGhpcy5faXNNb3VudGVkID0gdHJ1ZTtcbiAgICAgIGNvbnN0IHsgZW5kcG9pbnQgfSA9IHRoaXMuc3RhdGU7XG4gICAgICBjb25zdCBzb2NrZXQgPSBzb2NrZXRJT0NsaWVudChlbmRwb2ludCk7XG4gICAgICBzb2NrZXQub24oXCJGcm9tQ1wiLCBhc3luYyBkYXRhID0+IHtcbiAgICAgICAgICBpZih0aGlzLl9pc01vdW50ZWQpIHtcbiAgICAgICAgICAgIHZhciBqc29uID0gYXdhaXQgSlNPTi5wYXJzZShkYXRhKTtcbiAgICAgICAgICAgIHRoaXMuc2V0U3RhdGUoeyByb3dzOiBqc29uLm1hY2hpbmVzIH0pO1xuICAgICAgICAgIH1cbiAgICAgIH0pOyBcbiAgICB9XG5cbiAgICBjb21wb25lbnRXaWxsVW5tb3VudCgpe1xuICAgICAgdGhpcy5faXNNb3VudGVkID0gZmFsc2U7XG4gICAgfVxuXG4gICAgcmVuZGVyKCkge1xuICAgICAgY29uc3QgIHJvd3MgICA9IHRoaXMuc3RhdGUucm93cztcblxuICAgICAgcmV0dXJuIChcbiAgICAgICAgPGRpdj48aDE+TWFjaGluZSBsaXN0PC9oMT4ge3Jvd3MgID8gIDxkaXY+PFVpVGFibGVXaXRoU3R5bGVzIHJvd3M9e3Jvd3N9Lz48L2Rpdj4gOiA8ZGl2ID48Q2lyY3VsYXJQcm9ncmVzcyAvPjwvZGl2Pn0gPC9kaXY+XG4gICAgICApO1xuICAgIH1cbn0iXX0= */\n/*@ sourceURL=/home/bbnewey/node-workspace/next-mysql/components/Machine/Ui.js */"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     container: true,
-    spacing: 3
+    spacing: 2
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 1
+    xs: 1,
+    className: classes.machine_0
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Air Compressor"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[0].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[0].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    className: "jsx-827933388"
+  }, rows[0].pressure))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 1
+    xs: 1,
+    className: classes.machine_1
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Air Dryer"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[1].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[1].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    className: "jsx-827933388"
+  }, rows[1].pressure))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 2
+    xs: 1,
+    className: classes.machine_2
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Tank 1"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[2].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[2].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    className: "jsx-827933388"
+  }, rows[2].pressure))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 3
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    container: true,
-    spacing: 1
-  }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
-    item: true,
-    xs: 4
+    xs: 1,
+    className: classes.machine_3
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "1"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[3].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[3].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    className: "jsx-827933388"
+  }, rows[3].pressure))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 4
+    xs: 1,
+    className: classes.machine_4
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "2"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[4].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[4].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    className: "jsx-827933388"
+  }, rows[4].pressure))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 4
+    xs: 1,
+    className: classes.machine_5
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "3"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[5].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[5].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    className: "jsx-827933388"
+  }, rows[5].pressure))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 2
+    xs: 1,
+    className: classes.machine_6
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Random Box"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[6].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[6].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
+    className: "jsx-827933388"
+  }, rows[6].pressure))), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Grid__WEBPACK_IMPORTED_MODULE_13___default.a, {
     item: true,
-    xs: 2
+    xs: 1,
+    className: classes.machine_7
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("label", {
-    className: "jsx-3310407215"
-  }, "Nitrogen Tank"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
+    className: "jsx-827933388" + " " + "label"
+  }, rows[7].name), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_12___default.a, {
     className: classes.paper
   }, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
-    className: "jsx-3310407215"
+    className: "jsx-827933388"
+  }, rows[7].temp, "\xB0"), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("br", {
+    className: "jsx-827933388"
   }), react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("span", {
-    className: "jsx-3310407215"
-  }, "75F")))));
+    className: "jsx-827933388"
+  }, rows[7].pressure)))));
 };
 
 var Ui =
@@ -383,7 +429,7 @@ function (_React$Component) {
       //_isMounted checks if the component is mounted before calling api to prevent memory leak
       this._isMounted = true;
       var endpoint = this.state.endpoint;
-      var socket = socket_io_client__WEBPACK_IMPORTED_MODULE_15___default()(endpoint);
+      var socket = socket_io_client__WEBPACK_IMPORTED_MODULE_16___default()(endpoint);
       socket.on("FromC",
       /*#__PURE__*/
       function () {
@@ -432,9 +478,9 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       var rows = this.state.rows;
-      return react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("h1", null, "Machine list ", rows ? react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("p", null, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(UiTableWithStyles, {
+      return react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("h1", null, "Machine list"), " ", rows ? react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(UiTableWithStyles, {
         rows: rows
-      })) : react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("p", null, "Loading..."), " ");
+      })) : react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(_material_ui_core_CircularProgress__WEBPACK_IMPORTED_MODULE_15___default.a, null)), " ");
     }
   }]);
 
@@ -2310,7 +2356,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 4:
+/***/ 3:
 /*!******************************!*\
   !*** multi ./pages/index.js ***!
   \******************************/
@@ -2319,6 +2365,17 @@ module.exports = {
 
 module.exports = __webpack_require__(/*! /home/bbnewey/node-workspace/next-mysql/pages/index.js */"./pages/index.js");
 
+
+/***/ }),
+
+/***/ "@material-ui/core/CircularProgress":
+/*!*****************************************************!*\
+  !*** external "@material-ui/core/CircularProgress" ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@material-ui/core/CircularProgress");
 
 /***/ }),
 
@@ -2583,6 +2640,17 @@ module.exports = require("styled-components");
 /***/ (function(module, exports) {
 
 module.exports = require("url");
+
+/***/ }),
+
+/***/ "zlib":
+/*!***********************!*\
+  !*** external "zlib" ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("zlib");
 
 /***/ })
 
