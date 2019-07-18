@@ -21,11 +21,81 @@ const UiTableWithStyles = ({rows}) => {
       padding: '30px',
       fontSize: '25px',   
     },
-    paper: {
+    paper_machine_0: {
       padding: theme.spacing(2),
       textAlign: 'center',
       color: theme.palette.text.secondary,
       padding: '30px 15px 32px 15px',backgroundImage : `url(/static/green_tank.png)`,
+      height: '288px',
+      width: '144px',
+      fontSize: '68px'
+      
+    },
+    paper_machine_1: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      padding: '30px 15px 32px 15px',backgroundImage : `url(/static/green_tank.png)`,
+      height: '288px',
+      width: '144px',
+      fontSize: '68px'
+      
+    },
+    paper_machine_2: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      padding: '30px 15px 32px 15px',backgroundImage : `url(/static/green_tank.png)`,
+      height: '288px',
+      width: '144px',
+      fontSize: '68px'
+      
+    },
+    paper_machine_3: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      padding: '30px 15px 32px 15px',backgroundImage : `url(/static/sm_grey_tank.png)`,
+      height: '288px',
+      width: '144px',
+      fontSize: '68px'
+      
+    },
+    paper_machine_4: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      padding: '30px 15px 32px 15px',backgroundImage : `url(/static/sm_grey_tank.png)`,
+      height: '288px',
+      width: '144px',
+      fontSize: '68px'
+      
+    },
+    paper_machine_5: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      padding: '30px 15px 32px 15px',backgroundImage : `url(/static/sm_grey_tank.png)`,
+      height: '288px',
+      width: '144px',
+      fontSize: '68px'
+      
+    },
+    paper_machine_6: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      padding: '15px 15px 15px 15px',backgroundImage : `url(/static/generator_grey.png)`,
+      height: '288px',
+      width: '200px',
+      fontSize: '68px'
+      
+    },
+    paper_machine_7: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      padding: '30px 15px 32px 15px',backgroundImage : `url(/static/sm_green_tank.png)`,
       height: '288px',
       width: '144px',
       fontSize: '68px'
@@ -50,7 +120,7 @@ const UiTableWithStyles = ({rows}) => {
       margin: '1.5%'
     },
     machine_6: {
-      margin: '1.5%'
+      margin: '1.5% 3.5% 1.5% 1.5%'
     },
     machine_7: {
       margin: '1.5%'
@@ -89,35 +159,35 @@ const UiTableWithStyles = ({rows}) => {
   
         <Grid item xs={1} className={classes.machine_0}>
           <label className="label">{rows[0].name}</label>
-            <Paper className={classes.paper}><span>{rows[0].temp}&#176;</span><br/><span>{rows[0].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_0}><span>{rows[0].temp}&#176;</span><br/><span>{rows[0].pressure}</span></Paper>
         </Grid>
         <Grid item xs={1} className={classes.machine_1}>
           <label className="label">{rows[1].name}</label>
-            <Paper className={classes.paper}><span>{rows[1].temp}&#176;</span><br/><span>{rows[1].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_1}><span>{rows[1].temp}&#176;</span><br/><span>{rows[1].pressure}</span></Paper>
           </Grid>
           <Grid item xs={1} className={classes.machine_2}>
           <label className="label">{rows[2].name}</label>
-            <Paper className={classes.paper}><span>{rows[2].temp}&#176;</span><br/><span>{rows[2].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_2}><span>{rows[2].temp}&#176;</span><br/><span>{rows[2].pressure}</span></Paper>
           </Grid>
           <Grid item xs={1} className={classes.machine_3}>
           <label className="label">{rows[3].name}</label>
-            <Paper className={classes.paper}><span>{rows[3].temp}&#176;</span><br/><span>{rows[3].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_3}><span>{rows[3].temp}&#176;</span><br/><span>{rows[3].pressure}</span></Paper>
           </Grid>
           <Grid item xs={1} className={classes.machine_4}>
           <label className="label">{rows[4].name}</label>
-            <Paper className={classes.paper}><span>{rows[4].temp}&#176;</span><br/><span>{rows[4].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_4}><span>{rows[4].temp}&#176;</span><br/><span>{rows[4].pressure}</span></Paper>
           </Grid>
           <Grid item xs={1} className={classes.machine_5}>
           <label className="label">{rows[5].name}</label>
-            <Paper className={classes.paper}><span>{rows[5].temp}&#176;</span><br/><span>{rows[5].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_5}><span>{rows[5].temp}&#176;</span><br/><span>{rows[5].pressure}</span></Paper>
           </Grid>
           <Grid item xs={1} className={classes.machine_6}>
           <label className="label">{rows[6].name}</label>
-            <Paper className={classes.paper}><span>{rows[6].temp}&#176;</span><br/><span>{rows[6].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_6}><span>{rows[6].temp}&#176;</span><br/><span>{rows[6].pressure}</span></Paper>
           </Grid>
           <Grid item xs={1} className={classes.machine_7}>
           <label className="label">{rows[7].name}</label>
-            <Paper className={classes.paper}><span>{rows[7].temp}&#176;</span><br/><span>{rows[7].pressure}</span></Paper>
+            <Paper className={classes.paper_machine_7}><span>{rows[7].temp}&#176;</span><br/><span>{rows[7].pressure}</span></Paper>
           </Grid>
        
       </Grid>
