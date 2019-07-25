@@ -11,10 +11,10 @@ const app = express();
 const server = http.createServer(app);
 
 //Create and maintain socket connections..
-const HOST = '127.0.0.1'; //for socket
-const PORT = 8081; //for socket
-
+const HOST = '10.0.0.109'; //for c++ socket
+const PORT = 8081; //for c++ socket
 const socketModule = require('./sockets');
+//Handles both c++ and socketio sockets
 socketModule(server, HOST, PORT);
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -41,8 +41,9 @@ nextApp
 
     server.listen(4000, err => {
       if (err) throw err;
-      console.log('> Ready on http://localhost:4000');
+      console.log('> Ready on 10.0.0.109:4000');
     });
+
 
   })
   .catch(ex => {

@@ -9,6 +9,7 @@ module.exports = function(server, HOST, PORT){
     //Socket IO | sends data from node server to next frontend
 
     const io = socketIo(server); 
+    
     //io.origins(['http://localhost:4000']);
 
 

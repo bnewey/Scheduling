@@ -69,7 +69,7 @@ export default class DenseTable extends React.Component {
         super(props);
         this.state = {
           rows: "",
-          endpoint: "http://localhost:4000"
+          endpoint: "10.0.0.109:4000"
         };
         
     }
