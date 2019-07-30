@@ -17,12 +17,13 @@ export default ({ children, title = 'Nitrogen Machine' }) => (
         { children }
         
         <style jsx>{`
-            .main-wrapper {  margin: 3% 4% 5% 4%; }
+            
         `}</style>
       </main>
   
       <Footer>
         Footer
       </Footer>
+      
     </Wrapper>
   )

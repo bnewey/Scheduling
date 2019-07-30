@@ -2,6 +2,8 @@ import styled from 'styled-components'
 
 const Wrapper = styled.div`
   border-bottom: 1px solid #ddd;
+  background-color: #ececec;
+  padding: 0% 0% 2% 0%;
   a {
     padding: 15px;
     text-decoration: none;

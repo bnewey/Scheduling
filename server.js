@@ -3,7 +3,6 @@ const path = require('path');
 const next = require('next');
 const expressValidator = require('express-validator');
 const http = require("http");
-
 const cors = require('cors');
 
 
@@ -39,9 +38,9 @@ nextApp
       return handle(req, res);
     });
 
-    server.listen(4000, err => {
+    server.listen(8000, err => {
       if (err) throw err;
-      console.log('> Ready on 10.0.0.109:4000');
+      console.log('> Ready on 10.0.0.109:8000');
     });
 
 

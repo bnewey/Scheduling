@@ -17,12 +17,12 @@ import { textAlign } from '@material-ui/system';
 const util = require('../../util/util')
 
 //Necessary to use this function to allow the useStyles hook to work
-const UiTableWithStyles = ({rows}) => {
+const UiTableWithStyles = ({rows , endpoint}) => {
   const useStyles = makeStyles(theme => ({
     root: {
-      flexGrow: 1,
-      padding: '30px',
-      fontSize: '25px',   
+      width: 'auto',
+      padding: '2% 3% 4% 3%',
+      backgroundColor: '#ffffff'
     },
     paper_machine_0: {
       padding: theme.spacing(2),
@@ -161,73 +161,74 @@ const UiTableWithStyles = ({rows}) => {
         ))}*/
 
   const machines = rows;
+
   return (
-    <div className={mergeClasses.root}>
+    <div className={classes.root}>
 
 
       <style jsx>{`
-          .{mergeClasses.root} {  margin: 2% 2% 3% 2%; }
+          
       
           .{machine_1}
       `}</style>
 
-
+      <SplitButton endpoint={endpoint} name={"all_machines"} options={['Turn On All Machines', 'Turn Off All Machines', 'Restart All Machines']}/>
       <Grid container spacing={2}>
   
         <Grid item xs={1} className={classes.machine_0}>          
             <Paper className={classes.paper_machine_0}><span className={classes.sm_box}>{rows[0].temp}&#176;</span>
             <br/><span className={classes.sm_box}>{rows[0].pressure}</span></Paper> <br/><label className={classes.Label}>{rows[0].name}</label>
             <div className={classes.SplitButtonWrapper}>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"air_compressor"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.machine_1}>          
             <Paper className={classes.paper_machine_1}><span className={classes.sm_box}>{rows[1].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[1].pressure}</span></Paper>
             <br/><label className={classes.Label}>{rows[1].name}</label>
             <div>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"air_dryer"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.machine_2}>         
           <Paper className={classes.paper_machine_2}><span className={classes.sm_box}>{rows[2].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[2].pressure}</span></Paper>
           <br/> <label className={classes.Label}>{rows[2].name}</label>
           <div>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"tank_1"} options={['Turn On', 'Turn Off', 'Restart']} />
             </div>
         </Grid>
         <Grid item xs={1} className={classes.machine_3}>          
           <Paper className={classes.paper_machine_3}><span className={classes.sm_box}>{rows[3].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[3].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[3].name}</label>
           <div>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"tank1_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.machine_4}>          
           <Paper className={classes.paper_machine_4}><span className={classes.sm_box}>{rows[4].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[4].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[4].name}</label>
           <div>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"tank2_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.machine_5}>          
           <Paper className={classes.paper_machine_5}><span className={classes.sm_box}>{rows[5].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[5].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[5].name}</label>
           <div>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"tank3_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.machine_6}>
           <Paper className={classes.paper_machine_6}><span className={classes.sm_box}>{rows[6].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[6].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[6].name}</label>
           <div>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"generator"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.machine_7}>
           <Paper className={classes.paper_machine_7}><span className={classes.sm_box}>{rows[7].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[7].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[7].name}</label>
           <div>
-             <SplitButton/>
+             <SplitButton endpoint={endpoint} name={"nitrogen_tank"} options={['Turn On', 'Turn Off', 'Restart']} />
             </div>
         </Grid>
       </Grid>
@@ -245,7 +246,7 @@ export default class Ui extends React.Component {
       super(props);
       this.state = {
         rows: "",
-        endpoint: "10.0.0.109:4000"
+        endpoint: "10.0.0.109:8000"
       };
     }
 
@@ -259,6 +260,7 @@ export default class Ui extends React.Component {
             var json = await JSON.parse(data);
             this.setState({ rows: json.machines });
           }
+          
       }); 
     }
 
@@ -268,9 +270,10 @@ export default class Ui extends React.Component {
 
     render() {
       const  rows   = this.state.rows;
+      const endpoint = this.state.endpoint;
 
       return (
-        <div><h1>Machine list</h1> {rows  ?  <div><UiTableWithStyles rows={rows}/></div> : <div ><CircularProgress /></div>} </div>
+        <div>{rows  ?  <div><UiTableWithStyles rows={rows} endpoint={endpoint}/></div> : <div ><CircularProgress /></div>} </div>
       );
     }
 }

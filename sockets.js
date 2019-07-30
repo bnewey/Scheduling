@@ -7,14 +7,34 @@ var retrying = false;
 module.exports = function(server, HOST, PORT){
     
     //Socket IO | sends data from node server to next frontend
-
     const io = socketIo(server); 
-    
-    //io.origins(['http://localhost:4000']);
-
 
     io.on("connection", socket => {
         console.log(`New client connected. Socket #${socket.id} `);
+
+        //Handle event from UI Splitbutton click
+        socket.on("Turn On", (name) => {
+            console.log(`${name} | On `);
+        });
+        socket.on("Turn Off", (name) => {
+            console.log(`${name} | Off `);
+        });
+        socket.on("Restart", (name) => {
+            console.log(`${name} | Restart `);
+        });
+
+        //Handle event from UI All Splitbutton click
+        socket.on("Turn On All Machines", (name) => {
+            console.log(`${name} | On `);
+        });
+        socket.on("Turn Off All Machines", (name) => {
+            console.log(`${name} | Off `);
+        });
+        socket.on("Restart All Machines", (name) => {
+            console.log(`${name} | Restart `);
+        });
+
+
 
         socket.on("disconnect", () => {
             console.log(`Client disconnected Socket #${socket.id}`);
@@ -22,10 +42,7 @@ module.exports = function(server, HOST, PORT){
     });
     ///////////
 
-    //currently state:
-    //will reconnect if c++ code stops and starts, but it attempts and makes multiple connections when c++ finally comes back
-    //need to find out how to timeout connection attempts every time a new reconnect happens 
-
+   
 
     //TCP SOCKET | c++ to node
     var client = new net.Socket();
@@ -67,6 +84,7 @@ module.exports = function(server, HOST, PORT){
     // data is what the server sent to this socket
     client.on('data', function(data) {
         let temp = data.toString();
+        //Emit to nextjs components using SocketIO
         io.emit('FromC', temp);
         //write message to c++ so that it knows we are still connected
         client.write('I am alive!');
