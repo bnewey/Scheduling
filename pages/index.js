@@ -19,9 +19,8 @@ export default class Index extends React.Component {
     render() {           
         return (
             <MainLayout>
-                <IndexHead />
-                
-                <Ui />
+                <IndexHead >Nitrogen Display</IndexHead>
+                <Ui />        
 
             </MainLayout>
         );

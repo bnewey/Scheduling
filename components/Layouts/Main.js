@@ -3,11 +3,11 @@ import Wrapper from '../Machine/Wrapper'
 import Nav from '../Nav'
 import Footer from '../Footer'
 
-
-export default ({ children, title = 'Nitrogen Machine' }) => (
+export default ({ children, title = 'Nitrogen Display' }) => (
     <Wrapper>
       <Head>
         <title>{ title }</title>
+        
       </Head>
       <header>
         <Nav />
@@ -15,14 +15,13 @@ export default ({ children, title = 'Nitrogen Machine' }) => (
     
       <main className='main-wrapper'>
         { children }
-        
         <style jsx>{`
             
         `}</style>
       </main>
   
       <Footer>
-        Footer
+        Rainey Electronics - Nitrogen Display
       </Footer>
       
     </Wrapper>

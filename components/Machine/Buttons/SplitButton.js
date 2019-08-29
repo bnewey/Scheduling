@@ -33,11 +33,15 @@ export default function SplitButton({endpoint, name, options}) {
           backgroundColor: '#5e0606'
         }
         
+      },
+      a: {
+        backgroundColor: '#932323'
       }
     })
   );
 
   const classes = useStyles();
+  const classSelected = options[selectedIndex]; 
   /////
 
   const [open, setOpen] = React.useState(false);
@@ -77,7 +81,7 @@ export default function SplitButton({endpoint, name, options}) {
     <Grid container className={classes.root}>
       <Grid item xs={12} align="center">
         <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="Split button">
-          <Button className={classes.button} onClick={handleClick}>{options[selectedIndex]}</Button>
+          <Button className={classes.classSelected} onClick={handleClick}>{options[selectedIndex]}</Button>
           <Button className={classes.arrow} 
             color="primary"
             variant="contained"

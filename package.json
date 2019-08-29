@@ -24,6 +24,7 @@
     "next": "^8.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "serve-favicon": "^2.5.0",
     "serverless-mysql": "^1.4.0",
     "socket.io": "^2.2.0",
     "sql-template-strings": "^2.2.2",

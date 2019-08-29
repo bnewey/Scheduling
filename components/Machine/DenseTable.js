@@ -15,7 +15,9 @@ const util = require('../../util/util')
 const DenseTableWithStyles = ({rows}) => {
   const useStyles = makeStyles(theme => ({
     root: {
-      width: '70%',
+      width: 'auto',
+      maxWidth: '70%',
+      padding: '1% 3% 3% 3%'
     },
     paper: {
       marginTop: theme.spacing(3),
@@ -95,7 +97,7 @@ export default class DenseTable extends React.Component {
       const  rows   = this.state.rows;
 
       return (
-        <h1>Machine list {rows  ?  <div><DenseTableWithStyles rows={rows}/></div> : <p><CircularProgress /></p>} </h1>
+        <div>{rows  ?  <div><DenseTableWithStyles rows={rows}/></div> : <p><CircularProgress /></p>} </div>
       );
     }
 }

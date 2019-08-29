@@ -1,10 +1,12 @@
 const socketIo = require("socket.io");
 const net = require('net');
 
+
+
 const timeout = 10000;
 var retrying = false;
 
-module.exports = function(server, HOST, PORT){
+module.exports = function(server, HOST, PORT, database){
     
     //Socket IO | sends data from node server to next frontend
     const io = socketIo(server); 
@@ -80,7 +82,7 @@ module.exports = function(server, HOST, PORT){
         retrying = false;
     });
 
-
+    var i = 0;
     // data is what the server sent to this socket
     client.on('data', function(data) {
         let temp = data.toString();
@@ -88,6 +90,12 @@ module.exports = function(server, HOST, PORT){
         io.emit('FromC', temp);
         //write message to c++ so that it knows we are still connected
         client.write('I am alive!');
+
+        //Send to logging mysql database every 1000 reads (around 5 minutes)
+        if(i % 1000 == 0){ 
+         database.sendReadToSQL(temp);
+        }
+        i++;
     });
 
     client.on('end',     endEventHandler);
@@ -101,4 +109,6 @@ module.exports = function(server, HOST, PORT){
     });
 
     makeConnection();
+
+    
 }

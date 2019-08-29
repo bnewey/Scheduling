@@ -3,7 +3,7 @@ import 'isomorphic-unfetch'
 
 import Layout from '../components/Layouts/Main'
 import DenseTable from '../components/Machine/DenseTable';
-
+import IndexHead from '../components/UI/IndexHead.js';
 
 
 export default class MachineData extends React.Component {
@@ -14,6 +14,7 @@ export default class MachineData extends React.Component {
 	render() {
         return (
             <Layout>
+                <IndexHead>Machines List</IndexHead>
                 <DenseTable />
             </Layout>
         )

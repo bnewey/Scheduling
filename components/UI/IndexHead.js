@@ -11,30 +11,27 @@ const PostLink = props => (
   </li>
 );
 
-
-
-const IndexHead = () => {
+const IndexHead = ({children}) => {
   const useStyles = makeStyles(theme => ({
     root: {
       width: 'auto',
-      padding: '.5% 3% .7% 3%',
+      padding: '.7% 0% .7% 3%',
       margin: '1% 0% 2% 0%',
       backgroundColor: '#d6d6d68c'
     },
+    h1: {
+      fontSize: '35px'
+
+    }
    
   }));
 
   //only works inside a functional component
   const classes = useStyles();
 
-
-
   return (
     <div className={classes.root}>
-                <h1>Nitrogen Machine</h1>
-                <ul>
-                    <PostLink id="machineData" title="List of Machines"/>
-                </ul>
+                <h1 className={classes.h1}>{children}</h1>
           </div>
   )
 }
