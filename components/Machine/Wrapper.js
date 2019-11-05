@@ -9,8 +9,8 @@ const Wrapper = styled.div`
     text-decoration: none;
     display: block;
     &:hover {
-      background: #F5F5F5;
-      h3 { color: #387EF5 }
+      background: #414d5a;
+      color: #c8dee4;
     }
   }
   h3 {

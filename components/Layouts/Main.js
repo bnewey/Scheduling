@@ -10,13 +10,14 @@ export default ({ children, title = 'Nitrogen Display' }) => (
         
       </Head>
       <header>
+        
         <Nav />
       </header>
     
       <main className='main-wrapper'>
         { children }
         <style jsx>{`
-            
+            margin: 0% 5% 2% 5%
         `}</style>
       </main>
   

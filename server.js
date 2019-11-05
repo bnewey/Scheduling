@@ -14,16 +14,16 @@ const server = http.createServer(app);
 
 //Create and maintain socket connections..
 const HOST = '10.0.0.109'; //for c++ socket
-const PORT = 8081; //for c++ socket
+const SOCKET_PORT = 8081; //for c++ socket
 
 //Handle Database
 const database = require('./lib/db');
 
 //Handles both c++ and socketio sockets
-socketModule(server, HOST, PORT, database);
+socketModule(server, HOST, SOCKET_PORT, database);
 
 
-
+const PORT = process.env.PORT || 8000;
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
@@ -47,9 +47,9 @@ nextApp
       return handle(req, res);
     });
 
-    server.listen(8000, err => {
+    server.listen(PORT, err => {
       if (err) throw err;
-      console.log('> Ready on 10.0.0.109:8000');
+      console.log(`> Ready on 10.0.0.109:${PORT}`);
     });
 
 
@@ -59,7 +59,7 @@ nextApp
     process.exit(1);
   });
 
-  if(process.env.NODE_ENV !== 'production') {
+  if(dev) {
     process.once('uncaughtException', function(err) {
       console.error('FATAL: Uncaught exception.');
       console.error(err.stack||err);

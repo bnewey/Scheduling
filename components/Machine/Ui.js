@@ -22,125 +22,63 @@ const UiTableWithStyles = ({rows , endpoint}) => {
     root: {
       width: 'auto',
       padding: '2% 3% 4% 3%',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      boxShadow: '-11px 12px 6px -5px rgba(0,0,0,0.2), 0px 0px 1px 0px rgba(0,0,0,0.14), 0px 0px 1px -1px rgba(0,0,0,0.12)',
+      
     },
-    paper_machine_0: {
-      padding: theme.spacing(2),
+    machine:{
+      boxShadow: '-1px 10px 24px -5px rgba(0,0,0,0.003), 0px 0px 1px 0px rgba(0,0,0,0.14), 0px 0px 1px -1px rgba(0,0,0,0.12)',
+      backgroundColor: '#fff',
+      padding: '110px 15px 94px 15px',
       textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/sm_grey_box.png)`,
-      height: '288px',
-      width: '200px',
+      color: theme.palette.text.primary
     },
     Label:{
-      fontSize: '20px',
-      
+      fontSize: '20px', 
+    },
+    machine_type_1: {
+      height: '288px',
+      width: '200px', 
+    },
+    machine_type_2: {
+      height: '288px',
+      width: '144px'
+    },
+    paper_machine_0: { 
+      backgroundImage : `url(/static/sm_grey_box.png)`,
     },
     paper_machine_1: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/sm_light_blue.png)`,
-      height: '288px',
-      width: '200px'
-      
+      backgroundImage : `url(/static/sm_light_blue.png)`      
     },
     paper_machine_2: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/green_tank.png)`,
-      height: '288px',
-      width: '144px'
-      
+      backgroundImage : `url(/static/green_tank.png)`
     },
     paper_machine_3: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/big_grey_tank.png)`,
-      height: '288px',
-      width: '144px'
-      
+      backgroundImage : `url(/static/big_grey_tank.png)`
     },
     paper_machine_4: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/big_grey_tank.png)`,
-      height: '288px',
-      width: '144px'
-      
+      backgroundImage : `url(/static/big_grey_tank.png)`      
     },
     paper_machine_5: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/big_grey_tank.png)`,
-      height: '288px',
-      width: '144px'
-      
+      backgroundImage : `url(/static/big_grey_tank.png)`
     },
     paper_machine_6: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/generator_grey.png)`,
-      height: '288px',
-      width: '200px'
-      
+      backgroundImage : `url(/static/generator_grey.png)`
     },
     paper_machine_7: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-      padding: '110px 15px 94px 15px',backgroundImage : `url(/static/sm_green_tank.png)`,
-      height: '288px',
-      width: '144px'
+      backgroundImage : `url(/static/sm_green_tank.png)`
       
     },
-    machine_0: {
+    grid_machine_large: {
       margin: '1.5% .5% 1.5% .5%',
       minWidth: '216px',
       textAlign: 'center'
     },
-    machine_1: {
-      margin: '1.5% .5% 1.5% .5%',
-      minWidth: '216px',
-      textAlign: 'center'
-    },
-    machine_2: {
+    grid_machine_small: {
       margin: '1.5% .5% 1.5% .5%',
       minWidth: '165px',
       textAlign: 'center'
     },
-    machine_3: {
-      margin: '1.5% .5% 1.5% .5%',
-      minWidth: '165px',
-      textAlign: 'center'
-    },
-    machine_4: {
-      margin: '1.5% .5% 1.5% .5%',
-      minWidth: '165px',
-      textAlign: 'center'
-    },
-    machine_5: {
-      margin: '1.5% .5% 1.5% .5%',
-      minWidth: '165px',
-      textAlign: 'center'
-    },
-    machine_6: {
-      margin: '1.5% .5% 1.5% .5%',
-      minWidth: '216px',
-      textAlign: 'center'
-    },
-    machine_7: {
-      margin: '1.5% .5% 1.5% .5%',
-      minWidth: '165px',
-      textAlign: 'center'
-    },
-
-
     sm_box: {
       fontSize: '24px'
     },
@@ -153,80 +91,67 @@ const UiTableWithStyles = ({rows , endpoint}) => {
   //only works inside a functional component
   const classes = useStyles();
 
-  /*{machines.map(row => (
-          <Grid item xs={1} className={row.id}>
-          <label className="label">{row.name}</label>
-            <Paper className={classes.paper}><span>{row.temp}&#176;</span><br/><span>{row.pressure}</span></Paper>
-          </Grid>
-        ))}*/
-
   const machines = rows;
 
   return (
-    <div className={classes.root}>
-
-
-      <style jsx>{`
-          
+    <Paper classes={{root:classes.root}} className={classes.root}>
       
-          .{machine_1}
-      `}</style>
-
       <SplitButton endpoint={endpoint} name={"all_machines"} options={['Turn On All Machines', 'Turn Off All Machines', 'Restart All Machines']}/>
+      <br/><hr/>
       <Grid container spacing={2}>
   
-        <Grid item xs={1} className={classes.machine_0}>          
-            <Paper className={classes.paper_machine_0}><span className={classes.sm_box}>{rows[0].temp}&#176;</span>
-            <br/><span className={classes.sm_box}>{rows[0].pressure}</span></Paper> <br/><label className={classes.Label}>{rows[0].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_large}>          
+            <Paper classes={{root:classes.machine}} className={[classes.paper_machine_0,classes.machine_type_1]}><span className={classes.sm_box}>{rows[0].temp}&#176;</span>
+            <br/><span className={classes.sm_box}>{rows[0].pressure}</span></Paper> <br/><label className={classes.Label}>{rows[0].name}</label><hr/>
             <div className={classes.SplitButtonWrapper}>
              <SplitButton endpoint={endpoint} name={"air_compressor"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
-        <Grid item xs={1} className={classes.machine_1}>          
-            <Paper className={classes.paper_machine_1}><span className={classes.sm_box}>{rows[1].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[1].pressure}</span></Paper>
-            <br/><label className={classes.Label}>{rows[1].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_large}>          
+            <Paper classes={{root:classes.machine}} className={[classes.paper_machine_1,classes.machine_type_1]}><span className={classes.sm_box}>{rows[1].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[1].pressure}</span></Paper>
+            <br/><label className={classes.Label}>{rows[1].name}</label><hr/>
             <div>
              <SplitButton endpoint={endpoint} name={"air_dryer"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
-        <Grid item xs={1} className={classes.machine_2}>         
-          <Paper className={classes.paper_machine_2}><span className={classes.sm_box}>{rows[2].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[2].pressure}</span></Paper>
-          <br/> <label className={classes.Label}>{rows[2].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_small}>         
+          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_2,classes.machine_type_2]}><span className={classes.sm_box}>{rows[2].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[2].pressure}</span></Paper>
+          <br/> <label className={classes.Label}>{rows[2].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank_1"} options={['Turn On', 'Turn Off', 'Restart']} />
             </div>
         </Grid>
-        <Grid item xs={1} className={classes.machine_3}>          
-          <Paper className={classes.paper_machine_3}><span className={classes.sm_box}>{rows[3].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[3].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[3].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_small}>          
+          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_3,classes.machine_type_2]}><span className={classes.sm_box}>{rows[3].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[3].pressure}</span></Paper>
+          <br/><label className={classes.Label}>{rows[3].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank1_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
-        <Grid item xs={1} className={classes.machine_4}>          
-          <Paper className={classes.paper_machine_4}><span className={classes.sm_box}>{rows[4].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[4].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[4].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_small}>          
+          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_4,classes.machine_type_2]}><span className={classes.sm_box}>{rows[4].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[4].pressure}</span></Paper>
+          <br/><label className={classes.Label}>{rows[4].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank2_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
-        <Grid item xs={1} className={classes.machine_5}>          
-          <Paper className={classes.paper_machine_5}><span className={classes.sm_box}>{rows[5].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[5].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[5].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_small}>          
+          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_5,classes.machine_type_2]}><span className={classes.sm_box}>{rows[5].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[5].pressure}</span></Paper>
+          <br/><label className={classes.Label}>{rows[5].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank3_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
-        <Grid item xs={1} className={classes.machine_6}>
-          <Paper className={classes.paper_machine_6}><span className={classes.sm_box}>{rows[6].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[6].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[6].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_large}>
+          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_6,classes.machine_type_1]}><span className={classes.sm_box}>{rows[6].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[6].pressure}</span></Paper>
+          <br/><label className={classes.Label}>{rows[6].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"generator"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
-        <Grid item xs={1} className={classes.machine_7}>
-          <Paper className={classes.paper_machine_7}><span className={classes.sm_box}>{rows[7].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[7].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[7].name}</label>
+        <Grid item xs={1} className={classes.grid_machine_small}>
+          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_7, classes.machine_type_2]}><span className={classes.sm_box}>{rows[7].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[7].pressure}</span></Paper>
+          <br/><label className={classes.Label}>{rows[7].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"nitrogen_tank"} options={['Turn On', 'Turn Off', 'Restart']} />
             </div>
@@ -234,7 +159,7 @@ const UiTableWithStyles = ({rows , endpoint}) => {
       </Grid>
 
 
-    </div>
+    </Paper>
   )
 }
 
@@ -273,7 +198,7 @@ export default class Ui extends React.Component {
       const endpoint = this.state.endpoint;
 
       return (
-        <div>{rows  ?  <div><UiTableWithStyles rows={rows} endpoint={endpoint}/></div> : <div ><CircularProgress /></div>} </div>
+        <div>{rows  ?  <div><UiTableWithStyles rows={rows} endpoint={endpoint}/></div> : <div ><CircularProgress style={{marginLeft: "47%"}}/></div>} </div>
       );
     }
 }

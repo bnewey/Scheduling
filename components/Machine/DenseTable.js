@@ -97,7 +97,7 @@ export default class DenseTable extends React.Component {
       const  rows   = this.state.rows;
 
       return (
-        <div>{rows  ?  <div><DenseTableWithStyles rows={rows}/></div> : <p><CircularProgress /></p>} </div>
+        <div>{rows  ?  <div><DenseTableWithStyles rows={rows}/></div> : <div><CircularProgress style={{marginLeft: "47%"}}/></div>} </div>
       );
     }
 }

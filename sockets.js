@@ -1,12 +1,9 @@
 const socketIo = require("socket.io");
 const net = require('net');
-
-
-
-const timeout = 10000;
+const timeout = 10000; //timeout for retrying c++ socket connection
 var retrying = false;
 
-module.exports = function(server, HOST, PORT, database){
+module.exports = function(server, HOST, SOCKET_PORT, database){
     
     //Socket IO | sends data from node server to next frontend
     const io = socketIo(server); 
@@ -17,6 +14,7 @@ module.exports = function(server, HOST, PORT, database){
         //Handle event from UI Splitbutton click
         socket.on("Turn On", (name) => {
             console.log(`${name} | On `);
+            client.write("01");
         });
         socket.on("Turn Off", (name) => {
             console.log(`${name} | Off `);
@@ -49,10 +47,9 @@ module.exports = function(server, HOST, PORT, database){
     //TCP SOCKET | c++ to node
     var client = new net.Socket();
 
-
     function makeConnection () {
-        client.connect(PORT, HOST, function() {
-            console.log('CONNECTED TO C++ Socket: ' + HOST + ':' + PORT);   
+        client.connect(SOCKET_PORT, HOST, function() {
+            console.log('CONNECTED TO C++ Socket: ' + HOST + ':' + SOCKET_PORT);   
         });
     }
 
@@ -67,7 +64,6 @@ module.exports = function(server, HOST, PORT, database){
     }
 
     function closeEventHandler () {
-        // console.log('close');
         client.destroy();
         if (!retrying) {
             retrying = true;
@@ -78,7 +74,7 @@ module.exports = function(server, HOST, PORT, database){
 
     client.on('connect', function(){
         // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client
-        client.write('---- Ping from Nodejs Client! ----');
+        client.write('--');
         retrying = false;
     });
 
@@ -88,8 +84,9 @@ module.exports = function(server, HOST, PORT, database){
         let temp = data.toString();
         //Emit to nextjs components using SocketIO
         io.emit('FromC', temp);
+        
         //write message to c++ so that it knows we are still connected
-        client.write('I am alive!');
+        client.write('00');
 
         //Send to logging mysql database every 1000 reads (around 5 minutes)
         if(i % 1000 == 0){ 
