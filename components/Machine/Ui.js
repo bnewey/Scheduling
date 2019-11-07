@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 
@@ -13,8 +14,13 @@ import { Z_BLOCK } from 'zlib';
 import SplitButton from './Buttons/SplitButton';
 import { textAlign } from '@material-ui/system';
 
+import getConfig from 'next/config';
+const {publicRuntimeConfig} = getConfig();
+const {ENDPOINT_PORT} = publicRuntimeConfig;
+console.log(process.env.PORT);
 
-const util = require('../../util/util')
+const util = require('../../util/util');
+
 
 //Necessary to use this function to allow the useStyles hook to work
 const UiTableWithStyles = ({rows , endpoint}) => {
@@ -101,56 +107,56 @@ const UiTableWithStyles = ({rows , endpoint}) => {
       <Grid container spacing={2}>
   
         <Grid item xs={1} className={classes.grid_machine_large}>          
-            <Paper classes={{root:classes.machine}} className={[classes.paper_machine_0,classes.machine_type_1]}><span className={classes.sm_box}>{rows[0].temp}&#176;</span>
+            <Paper classes={{root:classes.machine}} className={classes.paper_machine_0 + " " + classes.machine_type_1}><span className={classes.sm_box}>{rows[0].temp}&#176;</span>
             <br/><span className={classes.sm_box}>{rows[0].pressure}</span></Paper> <br/><label className={classes.Label}>{rows[0].name}</label><hr/>
             <div className={classes.SplitButtonWrapper}>
              <SplitButton endpoint={endpoint} name={"air_compressor"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.grid_machine_large}>          
-            <Paper classes={{root:classes.machine}} className={[classes.paper_machine_1,classes.machine_type_1]}><span className={classes.sm_box}>{rows[1].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[1].pressure}</span></Paper>
+            <Paper classes={{root:classes.machine}} className={classes.paper_machine_1+" "+classes.machine_type_1}><span className={classes.sm_box}>{rows[1].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[1].pressure}</span></Paper>
             <br/><label className={classes.Label}>{rows[1].name}</label><hr/>
             <div>
              <SplitButton endpoint={endpoint} name={"air_dryer"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.grid_machine_small}>         
-          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_2,classes.machine_type_2]}><span className={classes.sm_box}>{rows[2].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[2].pressure}</span></Paper>
+          <Paper classes={{root:classes.machine}} className={classes.paper_machine_2+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[2].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[2].pressure}</span></Paper>
           <br/> <label className={classes.Label}>{rows[2].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank_1"} options={['Turn On', 'Turn Off', 'Restart']} />
             </div>
         </Grid>
         <Grid item xs={1} className={classes.grid_machine_small}>          
-          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_3,classes.machine_type_2]}><span className={classes.sm_box}>{rows[3].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[3].pressure}</span></Paper>
+          <Paper classes={{root:classes.machine}} className={classes.paper_machine_3+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[3].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[3].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[3].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank1_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.grid_machine_small}>          
-          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_4,classes.machine_type_2]}><span className={classes.sm_box}>{rows[4].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[4].pressure}</span></Paper>
+          <Paper classes={{root:classes.machine}} className={classes.paper_machine_4+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[4].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[4].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[4].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank2_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.grid_machine_small}>          
-          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_5,classes.machine_type_2]}><span className={classes.sm_box}>{rows[5].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[5].pressure}</span></Paper>
+          <Paper classes={{root:classes.machine}} className={classes.paper_machine_5+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[5].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[5].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[5].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"tank3_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.grid_machine_large}>
-          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_6,classes.machine_type_1]}><span className={classes.sm_box}>{rows[6].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[6].pressure}</span></Paper>
+          <Paper classes={{root:classes.machine}} className={classes.paper_machine_6+" "+classes.machine_type_1}><span className={classes.sm_box}>{rows[6].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[6].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[6].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"generator"} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
         </Grid>
         <Grid item xs={1} className={classes.grid_machine_small}>
-          <Paper classes={{root:classes.machine}} className={[classes.paper_machine_7, classes.machine_type_2]}><span className={classes.sm_box}>{rows[7].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[7].pressure}</span></Paper>
+          <Paper classes={{root:classes.machine}} className={classes.paper_machine_7+" "+ classes.machine_type_2}><span className={classes.sm_box}>{rows[7].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[7].pressure}</span></Paper>
           <br/><label className={classes.Label}>{rows[7].name}</label><hr/>
           <div>
              <SplitButton endpoint={endpoint} name={"nitrogen_tank"} options={['Turn On', 'Turn Off', 'Restart']} />
@@ -169,17 +175,20 @@ export default class Ui extends React.Component {
 
     constructor(props){
       super(props);
+
+      var endpoint = "10.0.0.109:" + ENDPOINT_PORT;
+
       this.state = {
         rows: "",
-        endpoint: "10.0.0.109:8000"
-      };
+        endpoint: endpoint,
+        socket: socketIOClient(endpoint)
+      };      
     }
 
     componentDidMount(){
       //_isMounted checks if the component is mounted before calling api to prevent memory leak
       this._isMounted = true;
-      const { endpoint } = this.state;
-      const socket = socketIOClient(endpoint);
+      const { endpoint,socket } = this.state;
       socket.on("FromC", async data => {
           if(this._isMounted) {
             var json = await JSON.parse(data);
@@ -191,6 +200,8 @@ export default class Ui extends React.Component {
 
     componentWillUnmount(){
       this._isMounted = false;
+      const {socket } = this.state;
+      socket.disconnect();
     }
 
     render() {

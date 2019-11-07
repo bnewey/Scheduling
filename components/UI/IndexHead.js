@@ -44,8 +44,9 @@ const IndexHead = ({children}) => {
 
   return (
     <Paper className={classes.root}>
-                <div className={classes.imageWrapper}><img src={`/static/sm_grey_box.png`} className={classes.image}/></div><h1 className={classes.h1}>{children}</h1>
+                <div className={classes.imageWrapper}><img src={`static/sm_grey_box.png`} className={classes.image}/></div><h1 className={classes.h1}>{children}</h1>
           </Paper>
   )
 }
 export default IndexHead;
+

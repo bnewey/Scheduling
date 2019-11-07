@@ -2,11 +2,24 @@ const socketIo = require("socket.io");
 const net = require('net');
 const timeout = 10000; //timeout for retrying c++ socket connection
 var retrying = false;
+var io = null;
 
-module.exports = function(server, HOST, SOCKET_PORT, database){
+const getSocket = function(socketId){
+    if(!io){
+        return null;
+    }
+
+    if(socketId && io.sockets.connected[socketId]){
+        return io.sockets.connected[socketId].broadcast;
+    }else{
+        return io;
+    }
+}
+
+ exports.setupIo = function(server, HOST, SOCKET_PORT){
     
     //Socket IO | sends data from node server to next frontend
-    const io = socketIo(server); 
+    io = socketIo(server);
 
     io.on("connection", socket => {
         console.log(`New client connected. Socket #${socket.id} `);
@@ -40,12 +53,26 @@ module.exports = function(server, HOST, SOCKET_PORT, database){
             console.log(`Client disconnected Socket #${socket.id}`);
         });
     });
-    ///////////
 
    
+}
 
-    //TCP SOCKET | c++ to node
-    var client = new net.Socket();
+const emitToFrontend = function(event, data) {
+   let io = getSocket();
+   if(!io){
+       console.log("No connection to FrontEnd found");
+       return
+   }
+   io.emit(event, data);
+}
+
+
+     ////////////////////////////////////
+
+ //TCP SOCKET | c++ to node
+var client = new net.Socket();
+   
+exports.setupTCP = function(HOST, SOCKET_PORT,database) {
 
     function makeConnection () {
         client.connect(SOCKET_PORT, HOST, function() {
@@ -54,13 +81,13 @@ module.exports = function(server, HOST, SOCKET_PORT, database){
     }
 
     function endEventHandler() {
-         console.log('end');
+        console.log('end');
     }
     function timeoutEventHandler() {
-         console.log('timeout');
+        console.log('timeout');
     }
     function drainEventHandler() {
-         console.log('drain');
+        console.log('drain');
     }
 
     function closeEventHandler () {
@@ -74,23 +101,24 @@ module.exports = function(server, HOST, SOCKET_PORT, database){
 
     client.on('connect', function(){
         // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client
-        client.write('--');
+        client.write('10');
         retrying = false;
     });
 
     var i = 0;
     // data is what the server sent to this socket
     client.on('data', function(data) {
+        
         let temp = data.toString();
         //Emit to nextjs components using SocketIO
-        io.emit('FromC', temp);
+        emitToFrontend('FromC', temp);
         
         //write message to c++ so that it knows we are still connected
         client.write('00');
 
         //Send to logging mysql database every 1000 reads (around 5 minutes)
         if(i % 1000 == 0){ 
-         database.sendReadToSQL(temp);
+        database.sendReadToSQL(temp);
         }
         i++;
     });
@@ -106,6 +134,5 @@ module.exports = function(server, HOST, SOCKET_PORT, database){
     });
 
     makeConnection();
-
-    
 }
+    

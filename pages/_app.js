@@ -1,40 +1,50 @@
 import React from "react";
 import App, { Container } from "next/app";
 import Head from "next/head";
+import { StylesProvider, ThemeProvider } from "@material-ui/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import getPageContext from "../src/getPageContext";
 
-export default class Nitrogen extends App {
-  static async getInitialProps({ Component, ctx }) {
-    let pageProps = {};
-
-    if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps(ctx);
-    }
-
-    return { pageProps };
+class MyApp extends App {
+  constructor() {
+    super();
+    this.pageContext = getPageContext();
   }
 
-  //overwriting _app to use googles roboto font 
-  renderHead() {
-    return (
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
-        />
-      </Head>
-    );
+  componentDidMount() {
+    // Remove the server-side injected CSS.
+    const jssStyles = document.querySelector("#jss-server-side");
+    if (jssStyles) {
+      jssStyles.parentNode.removeChild(jssStyles);
+    }
   }
 
   render() {
     const { Component, pageProps } = this.props;
     return (
-      <Container>
-        {this.renderHead()}
-        <CssBaseline />
-        <Component {...pageProps} />
-      </Container>
+      <React.Fragment>
+        <Head>
+          <title>My page</title>
+        </Head>
+        {/* Wrap every page in Styles and Theme providers */}
+        <StylesProvider
+          generateClassName={this.pageContext.generateClassName}
+          sheetsRegistry={this.pageContext.sheetsRegistry}
+          sheetsManager={this.pageContext.sheetsManager}
+        >
+          {/* ThemeProvider makes the theme available down the React
+              tree thanks to React context. */}
+          <ThemeProvider theme={this.pageContext.theme}>
+            {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+            <CssBaseline />
+            {/* Pass pageContext to the _document though the renderPage enhancer
+                to render collected styles on server-side. */}
+            <Component pageContext={this.pageContext} {...pageProps} />
+          </ThemeProvider>
+        </StylesProvider>
+      </React.Fragment>
     );
   }
 }
+
+export default MyApp;

@@ -6,9 +6,10 @@ const expressValidator = require('express-validator');
 const http = require("http");
 const favicon = require('serve-favicon');
 const cors = require('cors');
-const socketModule = require('./sockets');
+const dotenv = require('dotenv');
+const {setupIo, setupTCP} = require('./sockets'); 
 
-
+dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
@@ -19,9 +20,9 @@ const SOCKET_PORT = 8081; //for c++ socket
 //Handle Database
 const database = require('./lib/db');
 
-//Handles both c++ and socketio sockets
-socketModule(server, HOST, SOCKET_PORT, database);
-
+//Handles both socketio and c++ sockets
+setupIo(server, HOST, SOCKET_PORT);
+setupTCP(HOST,SOCKET_PORT,database);
 
 const PORT = process.env.PORT || 8000;
 const dev = process.env.NODE_ENV !== 'production';
@@ -36,7 +37,7 @@ nextApp
   .prepare()
   .then(() => {
 
-    app.use(favicon(__dirname + '/static/favicon.ico'));
+    app.use(favicon(__dirname + '/public/static/favicon.ico'));
     app.use(expressValidator());
 
     //app.use('/api/machines', machines);

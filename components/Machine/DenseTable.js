@@ -8,6 +8,8 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
+
+
 import socketIOClient from 'socket.io-client'
 const util = require('../../util/util')
 
@@ -63,38 +65,15 @@ const DenseTableWithStyles = ({rows}) => {
   )
 }
 
+//we can make this a functional component now
 export default class DenseTable extends React.Component {
     
-    _isMounted = false;
-
     constructor(props){
         super(props);
-        this.state = {
-          rows: "",
-          endpoint: "10.0.0.109:8000"
-        };
-        
-    }
-
-    componentDidMount(){
-      //_isMounted checks if the component is mounted before calling api to prevent memory leak
-        this._isMounted = true;
-        const { endpoint } = this.state;
-        const socket = socketIOClient(endpoint);
-        socket.on("FromC", async data => {
-            if(this._isMounted) {
-              var json = await JSON.parse(data);
-              this.setState({ rows: json.machines });
-            }
-        }); 
-    }
-
-    componentWillUnmount(){
-        this._isMounted = false;
     }
 
     render() {
-      const  rows   = this.state.rows;
+      const  rows   = this.props.rows;
 
       return (
         <div>{rows  ?  <div><DenseTableWithStyles rows={rows}/></div> : <div><CircularProgress style={{marginLeft: "47%"}}/></div>} </div>

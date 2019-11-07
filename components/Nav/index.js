@@ -9,23 +9,16 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 
+import {withRouter} from "next/router";
+import NavButton from '../Nav/NavButton';
+
+
 /*`
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
   display: flex;
-  background: #414d5a;
-  a {
-    padding: 0 15px;
-    color: #FFF;
-    &:hover {
-      background: #414d5a;
-      color: #c8dee4;
-    }
-  }
-  
+  background: #414d5a;  
 `*/
 
-const Nav = () => {
+const Nav = (props) => {
 
   const useStyles = makeStyles(theme => ({
     root: {
@@ -33,16 +26,9 @@ const Nav = () => {
       background: '#414d5a',
 
     },
-    a:{
-      padding: '0 15px',
-      color: '#FFF',
-      '&$hover': {
-        background: '#414d5a',
-        color: '#c8dee4'
-      } 
-      
-    },
-    hover:{}
+    button: {
+      cursor: 'pointer',
+    }
     
    
   }));
@@ -53,12 +39,16 @@ const Nav = () => {
   return(
   <AppBar position="static" classes={{root: classes.root}}>
     <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+          <IconButton edge="start" color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton>
-          <Link href="/"><a className={classes.a} >DEV</a></Link>
-          <Link href='/'><a className={classes.a}>Home</a></Link> |
-          <Link href='/machineData' prefetch><a className={classes.a}>MachineData</a></Link>
+          {props.navButtons.map(button => (
+          <NavButton className={classes.button}
+            key={button.path}
+            path={button.path}
+            label={button.label}
+          />
+          ))}
         </Toolbar>    
   </AppBar>
   )
