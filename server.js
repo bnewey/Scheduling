@@ -44,6 +44,15 @@ nextApp
     
     app.use(cors({ origin: '*' }));
 
+    //This is how we can send variables like settings from mysql to nextjs
+    var settings = require('./settings.js');
+    app.get('/', (req, res) => {
+
+      settings.doGetAll(nextApp, database,req,res);
+      
+      //settings.handleRequest(nextApp, database, req, res);
+    });
+
     app.get('*', (req, res) => {
       return handle(req, res);
     });

@@ -14,12 +14,12 @@ import { Z_BLOCK } from 'zlib';
 import SplitButton from './Buttons/SplitButton';
 import { textAlign } from '@material-ui/system';
 
-import getConfig from 'next/config';
-const {publicRuntimeConfig} = getConfig();
-const {ENDPOINT_PORT} = publicRuntimeConfig;
-console.log(process.env.PORT);
+import { red } from '@material-ui/core/colors';
+import ReconnectSnack from '../UI/ReconnectSnack';
 
 const util = require('../../util/util');
+
+
 
 
 //Necessary to use this function to allow the useStyles hook to work
@@ -30,10 +30,9 @@ const UiTableWithStyles = ({rows , endpoint}) => {
       padding: '2% 3% 4% 3%',
       backgroundColor: '#ffffff',
       boxShadow: '-11px 12px 6px -5px rgba(0,0,0,0.2), 0px 0px 1px 0px rgba(0,0,0,0.14), 0px 0px 1px -1px rgba(0,0,0,0.12)',
-      
     },
     machine:{
-      boxShadow: '-1px 10px 24px -5px rgba(0,0,0,0.003), 0px 0px 1px 0px rgba(0,0,0,0.14), 0px 0px 1px -1px rgba(0,0,0,0.12)',
+      boxShadow: '0px 0px 15px 3px rgba(0,46,84,.13), 0px 0px 4px -2px rgba(0,0,0,0.14), 0px 0px 38px -18px rgba(0,0,0,0.12)',
       backgroundColor: '#fff',
       padding: '110px 15px 94px 15px',
       textAlign: 'center',
@@ -50,30 +49,9 @@ const UiTableWithStyles = ({rows , endpoint}) => {
       height: '288px',
       width: '144px'
     },
-    paper_machine_0: { 
-      backgroundImage : `url(/static/sm_grey_box.png)`,
-    },
-    paper_machine_1: {
-      backgroundImage : `url(/static/sm_light_blue.png)`      
-    },
-    paper_machine_2: {
-      backgroundImage : `url(/static/green_tank.png)`
-    },
-    paper_machine_3: {
-      backgroundImage : `url(/static/big_grey_tank.png)`
-    },
-    paper_machine_4: {
-      backgroundImage : `url(/static/big_grey_tank.png)`      
-    },
-    paper_machine_5: {
-      backgroundImage : `url(/static/big_grey_tank.png)`
-    },
-    paper_machine_6: {
-      backgroundImage : `url(/static/generator_grey.png)`
-    },
-    paper_machine_7: {
-      backgroundImage : `url(/static/sm_green_tank.png)`
-      
+    grid_container:{
+      backgroundColor: '#e5efe994',
+      borderRadius: '4px',
     },
     grid_machine_large: {
       margin: '1.5% .5% 1.5% .5%',
@@ -85,8 +63,15 @@ const UiTableWithStyles = ({rows , endpoint}) => {
       minWidth: '165px',
       textAlign: 'center'
     },
-    sm_box: {
-      fontSize: '24px'
+    sm_box_red: {
+      fontSize: '29px',
+      color: '#c11f1f',
+      fontWeight: 'bold'
+    },
+    sm_box_green: {
+      fontSize: '29px',
+      color: '#44b944',
+      fontWeight: 'bold'
     },
     SplitButtonWrapper: {
       fontSize: '14px'
@@ -97,119 +82,55 @@ const UiTableWithStyles = ({rows , endpoint}) => {
   //only works inside a functional component
   const classes = useStyles();
 
-  const machines = rows;
+  //Add in machine names and image url for css
+  const machines = [
+    "air_compressor", "air_dryer", "tank_1", "tank1_3", "tank2_3", "tank3_3", "generator", "nitrogen_tank"
+  ];
+  const images = [
+    "url(/static/sm_grey_box.png)", "url(/static/sm_light_blue.png)", "url(/static/green_tank.png)", "url(/static/big_grey_tank.png)",
+     "url(/static/big_grey_tank.png)", "url(/static/big_grey_tank.png)", "url(/static/generator_grey.png)", "url(/static/sm_green_tank.png)"
+  ]
+
+  const array = rows.map((item, i)=>{
+    return ({ id: item.id, name: item.name, pressure: item.pressure, temp: item.temp, machine: machines[i], imageURL: images[i]});
+  });
 
   return (
     <Paper classes={{root:classes.root}} className={classes.root}>
       
       <SplitButton endpoint={endpoint} name={"all_machines"} options={['Turn On All Machines', 'Turn Off All Machines', 'Restart All Machines']}/>
-      <br/><hr/>
-      <Grid container spacing={2}>
-  
-        <Grid item xs={1} className={classes.grid_machine_large}>          
-            <Paper classes={{root:classes.machine}} className={classes.paper_machine_0 + " " + classes.machine_type_1}><span className={classes.sm_box}>{rows[0].temp}&#176;</span>
-            <br/><span className={classes.sm_box}>{rows[0].pressure}</span></Paper> <br/><label className={classes.Label}>{rows[0].name}</label><hr/>
+      <br/>
+      <Grid justify="space-around" container spacing={2} className={classes.grid_container}>
+
+      { array.map((row, i) => (
+          <Grid item xs={1} className={ i == 0 || i==1 ||i==6 ? classes.grid_machine_large : classes.grid_machine_small }>          
+            <Paper classes={{root:classes.machine}} className={  i == 0 || i==1 ||i==6 ? classes.machine_type_1 : classes.machine_type_2} style={{backgroundImage: `${row.imageURL}`}}>
+            <span className={row.temp > 100 ? classes.sm_box_red : classes.sm_box_green}>{row.temp}&#176;</span>
+            <br/><span className={row.pressure > 100 ? classes.sm_box_red : classes.sm_box_green}>{row.pressure}</span></Paper> 
+            <br/><label className={classes.Label}>{row.name}</label><hr/>
             <div className={classes.SplitButtonWrapper}>
-             <SplitButton endpoint={endpoint} name={"air_compressor"} options={['Turn On', 'Turn Off', 'Restart']}/>
+            <SplitButton endpoint={endpoint} name={row.machine} options={['Turn On', 'Turn Off', 'Restart']}/>
             </div>
-        </Grid>
-        <Grid item xs={1} className={classes.grid_machine_large}>          
-            <Paper classes={{root:classes.machine}} className={classes.paper_machine_1+" "+classes.machine_type_1}><span className={classes.sm_box}>{rows[1].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[1].pressure}</span></Paper>
-            <br/><label className={classes.Label}>{rows[1].name}</label><hr/>
-            <div>
-             <SplitButton endpoint={endpoint} name={"air_dryer"} options={['Turn On', 'Turn Off', 'Restart']}/>
-            </div>
-        </Grid>
-        <Grid item xs={1} className={classes.grid_machine_small}>         
-          <Paper classes={{root:classes.machine}} className={classes.paper_machine_2+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[2].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[2].pressure}</span></Paper>
-          <br/> <label className={classes.Label}>{rows[2].name}</label><hr/>
-          <div>
-             <SplitButton endpoint={endpoint} name={"tank_1"} options={['Turn On', 'Turn Off', 'Restart']} />
-            </div>
-        </Grid>
-        <Grid item xs={1} className={classes.grid_machine_small}>          
-          <Paper classes={{root:classes.machine}} className={classes.paper_machine_3+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[3].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[3].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[3].name}</label><hr/>
-          <div>
-             <SplitButton endpoint={endpoint} name={"tank1_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
-            </div>
-        </Grid>
-        <Grid item xs={1} className={classes.grid_machine_small}>          
-          <Paper classes={{root:classes.machine}} className={classes.paper_machine_4+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[4].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[4].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[4].name}</label><hr/>
-          <div>
-             <SplitButton endpoint={endpoint} name={"tank2_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
-            </div>
-        </Grid>
-        <Grid item xs={1} className={classes.grid_machine_small}>          
-          <Paper classes={{root:classes.machine}} className={classes.paper_machine_5+" "+classes.machine_type_2}><span className={classes.sm_box}>{rows[5].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[5].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[5].name}</label><hr/>
-          <div>
-             <SplitButton endpoint={endpoint} name={"tank3_3"} options={['Turn On', 'Turn Off', 'Restart']}/>
-            </div>
-        </Grid>
-        <Grid item xs={1} className={classes.grid_machine_large}>
-          <Paper classes={{root:classes.machine}} className={classes.paper_machine_6+" "+classes.machine_type_1}><span className={classes.sm_box}>{rows[6].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[6].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[6].name}</label><hr/>
-          <div>
-             <SplitButton endpoint={endpoint} name={"generator"} options={['Turn On', 'Turn Off', 'Restart']}/>
-            </div>
-        </Grid>
-        <Grid item xs={1} className={classes.grid_machine_small}>
-          <Paper classes={{root:classes.machine}} className={classes.paper_machine_7+" "+ classes.machine_type_2}><span className={classes.sm_box}>{rows[7].temp}&#176;</span><br/><span className={classes.sm_box}>{rows[7].pressure}</span></Paper>
-          <br/><label className={classes.Label}>{rows[7].name}</label><hr/>
-          <div>
-             <SplitButton endpoint={endpoint} name={"nitrogen_tank"} options={['Turn On', 'Turn Off', 'Restart']} />
-            </div>
-        </Grid>
+          </Grid>
+      ))}
+        
       </Grid>
-
-
     </Paper>
   )
 }
 
-export default class Ui extends React.Component {
+class Ui extends React.Component {
     
-    _isMounted = false;
+  render() {
+    const  {rows, endpoint, socket} = this.props;
 
-    constructor(props){
-      super(props);
-
-      var endpoint = "10.0.0.109:" + ENDPOINT_PORT;
-
-      this.state = {
-        rows: "",
-        endpoint: endpoint,
-        socket: socketIOClient(endpoint)
-      };      
-    }
-
-    componentDidMount(){
-      //_isMounted checks if the component is mounted before calling api to prevent memory leak
-      this._isMounted = true;
-      const { endpoint,socket } = this.state;
-      socket.on("FromC", async data => {
-          if(this._isMounted) {
-            var json = await JSON.parse(data);
-            this.setState({ rows: json.machines });
-          }
-          
-      }); 
-    }
-
-    componentWillUnmount(){
-      this._isMounted = false;
-      const {socket } = this.state;
-      socket.disconnect();
-    }
-
-    render() {
-      const  rows   = this.state.rows;
-      const endpoint = this.state.endpoint;
-
-      return (
-        <div>{rows  ?  <div><UiTableWithStyles rows={rows} endpoint={endpoint}/></div> : <div ><CircularProgress style={{marginLeft: "47%"}}/></div>} </div>
-      );
-    }
+    return (
+      <div>{rows  ?  
+        <div><UiTableWithStyles rows={rows} endpoint={endpoint}/></div> 
+        : <div ><CircularProgress style={{marginLeft: "47%"}}/></div>
+      } <ReconnectSnack socket={socket}/></div>
+    );
+  }
 }
+
+export default Ui;

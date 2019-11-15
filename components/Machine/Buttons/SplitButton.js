@@ -21,16 +21,16 @@ export default function SplitButton({endpoint, name, options}) {
         
       },
       button:{
-        backgroundColor: '#932323',
+        backgroundColor: '#193f66',
         "&:hover, &:focus": {
-          backgroundColor: '#5e0606'
+          backgroundColor: '#193f6694'
         },
         borderColor: '#FFFFFF !important'
       },
       arrow:{
-        backgroundColor: '#932323',
+        backgroundColor: '#ff8200',
         "&:hover, &:focus": {
-          backgroundColor: '#5e0606'
+          backgroundColor: '#fe820099'
         }
         
       },
@@ -107,7 +107,6 @@ export default function SplitButton({endpoint, name, options}) {
                     {options.map((option, index) => (
                       <MenuItem
                         key={option}
-                        disabled=""
                         selected={index === selectedIndex}
                         onClick={event => handleMenuItemClick(event, index)}
                       >

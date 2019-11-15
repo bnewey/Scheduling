@@ -3,16 +3,6 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import Paper from '@material-ui/core/Paper';
 
-import Link from 'next/link';
-
-const PostLink = props => (
-  <li>
-      <Link href={`${props.id}`}>
-          <a>{props.title}</a>
-      </Link>
-  </li>
-);
-
 const IndexHead = ({children}) => {
   const useStyles = makeStyles(theme => ({
     root: {
@@ -35,8 +25,6 @@ const IndexHead = ({children}) => {
     image: {
       maxWidth: '75px'
     }
-    
-   
   }));
 
   //only works inside a functional component

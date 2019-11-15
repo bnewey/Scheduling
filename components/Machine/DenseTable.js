@@ -18,17 +18,18 @@ const DenseTableWithStyles = ({rows}) => {
   const useStyles = makeStyles(theme => ({
     root: {
       width: 'auto',
-      maxWidth: '70%',
       padding: '1% 3% 3% 3%'
     },
     paper: {
       marginTop: theme.spacing(3),
-      width: '70%',
+      width: 'auto',
       overflowX: 'auto',
       marginBottom: theme.spacing(2),
+      maxWidth: '50%',
     },
     table: {
-      minWidth: 650,
+      minWidth: 'auto',
+     
     },
   }));
 

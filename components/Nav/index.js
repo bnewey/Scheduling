@@ -28,6 +28,7 @@ const Nav = (props) => {
     },
     button: {
       cursor: 'pointer',
+      
     }
     
    

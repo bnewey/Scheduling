@@ -7,13 +7,16 @@ import { withRouter } from "next/router";
 const NavButton = props => {
 
   const useStyles = makeStyles(theme => ({
-    a:{
-      padding: '0 15px',
+    a:{  
+      cursor: 'pointer',    
+      display: 'block',
+      padding: '15px',
+      textDecoration: 'none',
       color: '#FFF',
-      '&$hover': {
-        background: '#6e90b154',
-        color: '#c8dee4'
-      } 
+      backgroundColor: '#414d5a',
+      "&:hover, &:focus": {
+        backgroundColor: 'rgba(0, 0, 0, .18)',
+      },
       
     },
     hover:{},

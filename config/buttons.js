@@ -2,10 +2,6 @@ import React from "react";
 
 const navButtons = [
     {
-        label: "Dev",
-        path: "/"
-    },
-    {
         label: "Home",
         path: "/"
     },

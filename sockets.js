@@ -47,7 +47,9 @@ const getSocket = function(socketId){
             console.log(`${name} | Restart `);
         });
 
-
+        socket.on("Test_Command", (string) => {
+            console.log(`${string} | test command`);
+        });
 
         socket.on("disconnect", () => {
             console.log(`Client disconnected Socket #${socket.id}`);
@@ -77,7 +79,9 @@ exports.setupTCP = function(HOST, SOCKET_PORT,database) {
     function makeConnection () {
         client.connect(SOCKET_PORT, HOST, function() {
             console.log('CONNECTED TO C++ Socket: ' + HOST + ':' + SOCKET_PORT);   
+            emitToFrontend('Reconnect', {retrying: false, data: false});
         });
+
     }
 
     function endEventHandler() {
@@ -94,6 +98,7 @@ exports.setupTCP = function(HOST, SOCKET_PORT,database) {
         client.destroy();
         if (!retrying) {
             retrying = true;
+            emitToFrontend('Reconnect', {retrying: true, data:false});
             console.log('Reconnecting...');
         }
         setTimeout(makeConnection, timeout);
@@ -108,10 +113,13 @@ exports.setupTCP = function(HOST, SOCKET_PORT,database) {
     var i = 0;
     // data is what the server sent to this socket
     client.on('data', function(data) {
-        
         let temp = data.toString();
+
         //Emit to nextjs components using SocketIO
         emitToFrontend('FromC', temp);
+
+        //Let nextjs know we are both connected to c++ and getting data from USB
+        emitToFrontend('Reconnect', {retrying: false, data:true});
         
         //write message to c++ so that it knows we are still connected
         client.write('00');
@@ -130,7 +138,7 @@ exports.setupTCP = function(HOST, SOCKET_PORT,database) {
     client.on('close', closeEventHandler);
 
     client.on('error', function(err){
-    console.log(err);  
+    console.log(err);
     });
 
     makeConnection();

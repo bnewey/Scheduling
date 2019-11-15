@@ -1,5 +1,6 @@
-import styled from 'styled-components'
+import { makeStyles } from '@material-ui/core/styles';
 
+/*
 const Wrapper = styled.div`
   border-bottom: 1px solid #ddd;
   background-color: #ececec;
@@ -29,6 +30,23 @@ const Wrapper = styled.div`
     font-family: "PT Serif", sans-serif;
     margin: 0;
   }
-`
+`*/
+
+const Wrapper = ({children}) => {
+
+
+  const useStyles = makeStyles(theme => ({
+    root:  {
+      borderBottom: '1px solid #ddd',
+      backgroundColor: '#ececec',
+      padding: '0% 0% 2% 0%',
+    },
+  }) );
+
+  const classes = useStyles();
+  return (
+      <div className={classes.root}>{children}</div>
+  );
+}
 
 export default Wrapper
