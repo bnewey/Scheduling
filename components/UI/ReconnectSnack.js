@@ -40,15 +40,24 @@ export default function ReconnectSnack({socket}) {
         }
     },[state.socket,state.open]);
 
+    const useStyles = makeStyles(theme => ({
+        root: {
+          width: '100%',
+        }
+      }));
+    
+    //only works inside a functional component
+    const classes = useStyles();
+
     return(
         <div>
             <Snackbar color="primary"
-                open={state.open}           
+                open={state.open} 
                 TransitionComponent = {Slide}
                 ContentProps={{
                     'aria-describedby': 'message-id'
                 }}
-                message={ <div style={{width:'100%'}}>
+                message={ <div >
                             <span id="message-id">{state.message}</span>
                             <LinearProgress />
                         </div>}

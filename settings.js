@@ -4,7 +4,7 @@ const util = require("util/util.js");
 async function doGetAll(nextApp,db, req, res){
     const sql = 'Select id,machine_table_name from machines';
 	try{
-		const results = await db.query(sql, []);	
+		const results = await db.query(sql, []);
 		nextApp.render(req, res, '/', {settings: {results}}); 
 	}
 	catch(error){

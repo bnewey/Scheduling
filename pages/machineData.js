@@ -11,7 +11,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import socketIOClient from 'socket.io-client';
 
 import getConfig from 'next/config';
-import withData from '../components/Machine/WithData';
+import WithData from '../components/Machine/WithData';
 const {publicRuntimeConfig} = getConfig();
 const {ENDPOINT_PORT} = publicRuntimeConfig;
 
@@ -23,8 +23,8 @@ class MachineData extends React.Component {
         const {rows, endpoint, socket} = this.props;
         return (
             <Layout>
-                <IndexHead>Machines List</IndexHead>
-                {rows ? <div><DenseTable rows={rows} /></div> : <div><CircularProgress style={{marginLeft: "47%"}} /></div> }
+                <IndexHead>Machine Data</IndexHead>
+                {rows ? <div><DenseTable rows={rows} /></div> : <div><CircularProgress style={{marginLeft: "47%"}} /></div>}
                 {rows  ? <div><MachineChart rows={rows}/></div> : <div><CircularProgress style={{marginLeft: "47%"}} /></div>}
                 <ReconnectSnack socket={socket}/>
             </Layout>
@@ -32,5 +32,4 @@ class MachineData extends React.Component {
     }
 }
 
-export default withData(MachineData);
-
+export default WithData(MachineData);

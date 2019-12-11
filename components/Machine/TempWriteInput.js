@@ -28,7 +28,6 @@ export default function TempWriteInput({socket}){
         if(inputText){
             socket.emit("Test_Command", inputText);
         }
-        console.log(inputText);
         return () => {
             if(inputText){
                 

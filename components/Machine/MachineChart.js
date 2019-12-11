@@ -13,27 +13,24 @@ export default class MachineChart extends Component {
             data: {
                 labels: ["1","2","3","4","5","6","7","8"],
                 datasets:[
-                {
-                    label: "temperature",
-                    backgroundColor: "rgba(255,0,255,0,0.75)",
-                    data: []
-                },
-                {
-                    label: "pressure",
-                    backgroundColor: "rgba(0,255,0,0.75)",
-                    data: []
-                }
+                    {
+                        label: "temperature",
+                        backgroundColor: "rgba(255,0,255,0,0.75)",
+                        data: []
+                    },
+                    {
+                        label: "pressure",
+                        backgroundColor: "rgba(0,255,0,0.75)",
+                        data: []
+                    }
                 ]
-
             }
         }
-
-
     }
 
     setGradientColor = (canvas, color) =>{
         const ctx = canvas.getContext("2d");
-        const gradient = ctx.createLinearGradient(300,100,300,550);//0,10,600,550);
+        const gradient = ctx.createLinearGradient(300,100,300,550);
         gradient.addColorStop(0, color);
         let adj_color = color.substring(4, color.length-1)
                             .replace(/ /g, '')

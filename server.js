@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const next = require('next');
+const logger = require('./logs');
 
 const expressValidator = require('express-validator');
 const http = require("http");
@@ -53,26 +54,39 @@ nextApp
       //settings.handleRequest(nextApp, database, req, res);
     });
 
+    app.get('/api/history', async (req,res) => {
+      const sql = 'Select * from air_dryer ORDER BY read_date DESC';
+      try{
+        const results = await database.query(sql, []);
+        logger.info("Got History");
+        res.json(results);
+      }
+      catch(error){
+        logger.error("History: " + err);
+        res.send("");
+      }
+    });
+
     app.get('*', (req, res) => {
       return handle(req, res);
     });
 
     server.listen(PORT, err => {
       if (err) throw err;
-      console.log(`> Ready on 10.0.0.109:${PORT}`);
+      logger.info(`> Ready on 10.0.0.109:${PORT}`);
     });
 
 
   })
   .catch(ex => {
-    console.error(ex.stack);
+    logger.error(ex.stack);
     process.exit(1);
   });
 
   if(dev) {
     process.once('uncaughtException', function(err) {
-      console.error('FATAL: Uncaught exception.');
-      console.error(err.stack||err);
+      logger.error('FATAL: Uncaught exception.');
+      logger.error(err.stack||err);
       setTimeout(function(){
         process.exit(1);
       }, 100);

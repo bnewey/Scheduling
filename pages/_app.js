@@ -4,11 +4,27 @@ import Head from "next/head";
 import { StylesProvider, ThemeProvider } from "@material-ui/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import getPageContext from "../src/getPageContext";
+import Router from 'next/router';
+import NProgress from 'nprogress';
+
+Router.onRouteChangeStart = () => NProgress.start();
+Router.onRouteChangeComplete = () => NProgress.done();
+Router.onRouteChangeError = () => NProgress.done();
 
 class MyApp extends App {
   constructor() {
     super();
     this.pageContext = getPageContext();
+  }
+
+  static async getInitialProps({ Component, router, ctx }) {
+    let pageProps = {}
+  
+    if (Component.getInitialProps) {
+      pageProps = await Component.getInitialProps(ctx)
+    }
+  
+    return { pageProps }
   }
 
   componentDidMount() {

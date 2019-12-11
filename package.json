@@ -26,13 +26,15 @@
     "mysql": "^2.17.1",
     "net": "^1.0.2",
     "next": "^9.1.2",
+    "nprogress": "^0.2.0",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "serve-favicon": "^2.5.0",
     "serverless-mysql": "^1.4.0",
     "socket.io": "^2.2.0",
     "sql-template-strings": "^2.2.2",
-    "styled-components": "^4.3.2"
+    "styled-components": "^4.3.2",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

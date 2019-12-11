@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import Paper from '@material-ui/core/Paper';
 
-const IndexHead = ({children}) => {
+const IndexHead = ({children, image}) => {
   const useStyles = makeStyles(theme => ({
     root: {
       display: 'flex',
@@ -32,8 +32,9 @@ const IndexHead = ({children}) => {
 
   return (
     <Paper className={classes.root}>
-                <div className={classes.imageWrapper}><img src={`static/sm_grey_box.png`} className={classes.image}/></div><h1 className={classes.h1}>{children}</h1>
-          </Paper>
+       <div className={classes.imageWrapper}><img src={image ? image : `static/sm_grey_box.png`} className={classes.image}/></div>
+       <h1 className={classes.h1}>{children}</h1>
+    </Paper>
   )
 }
 export default IndexHead;

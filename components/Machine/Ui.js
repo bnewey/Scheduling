@@ -1,5 +1,7 @@
 import React from 'react';
 
+import Router, {useRouter} from 'next/router';
+
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 
@@ -20,10 +22,10 @@ import ReconnectSnack from '../UI/ReconnectSnack';
 const util = require('../../util/util');
 
 
-
-
 //Necessary to use this function to allow the useStyles hook to work
 const UiTableWithStyles = ({rows , endpoint}) => {
+  const router = useRouter();
+
   const useStyles = makeStyles(theme => ({
     root: {
       width: 'auto',
@@ -47,7 +49,7 @@ const UiTableWithStyles = ({rows , endpoint}) => {
     },
     machine_type_2: {
       height: '288px',
-      width: '144px'
+      width: '148px'
     },
     grid_container:{
       backgroundColor: '#e5efe994',
@@ -75,6 +77,12 @@ const UiTableWithStyles = ({rows , endpoint}) => {
     },
     SplitButtonWrapper: {
       fontSize: '14px'
+    },
+    clickableDiv: {
+      cursor: 'pointer',
+      "&:hover, &:focus": {
+        boxShadow: '0px 4px 10px 7px rgba(30, 33, 29, 0.37)'
+      },
     }
   
   }));
@@ -82,14 +90,22 @@ const UiTableWithStyles = ({rows , endpoint}) => {
   //only works inside a functional component
   const classes = useStyles();
 
+
   //Add in machine names and image url for css
   const machines = [
     "air_compressor", "air_dryer", "tank_1", "tank1_3", "tank2_3", "tank3_3", "generator", "nitrogen_tank"
   ];
   const images = [
     "url(/static/sm_grey_box.png)", "url(/static/sm_light_blue.png)", "url(/static/green_tank.png)", "url(/static/big_grey_tank.png)",
-     "url(/static/big_grey_tank.png)", "url(/static/big_grey_tank.png)", "url(/static/generator_grey.png)", "url(/static/sm_green_tank.png)"
+      "url(/static/big_grey_tank.png)", "url(/static/big_grey_tank.png)", "url(/static/generator_grey.png)", "url(/static/sm_green_tank.png)"
   ]
+
+  //Onclick function for each machine to send to detail page
+  const machineClicked = function(name, i){
+    //router.push(`/machineData?name=${name}`);
+    var image = images[i].substring(4, images[i].length -1 );
+    router.push( `/m/${name}?image=${image}`);
+  }
 
   const array = rows.map((item, i)=>{
     return ({ id: item.id, name: item.name, pressure: item.pressure, temp: item.temp, machine: machines[i], imageURL: images[i]});
@@ -103,10 +119,13 @@ const UiTableWithStyles = ({rows , endpoint}) => {
       <Grid justify="space-around" container spacing={2} className={classes.grid_container}>
 
       { array.map((row, i) => (
-          <Grid item xs={1} className={ i == 0 || i==1 ||i==6 ? classes.grid_machine_large : classes.grid_machine_small }>          
-            <Paper classes={{root:classes.machine}} className={  i == 0 || i==1 ||i==6 ? classes.machine_type_1 : classes.machine_type_2} style={{backgroundImage: `${row.imageURL}`}}>
+          <Grid item xs={1} key={i} className={ i == 0 || i==1 ||i==6 ? classes.grid_machine_large : classes.grid_machine_small }>          
+            <div className={classes.clickableDiv} onClick={() => {machineClicked(row.name, i)}} > 
+            <Paper classes={{root:classes.machine}} className={  i == 0 || i==1 ||i==6 ? classes.machine_type_1 : classes.machine_type_2} style={{backgroundImage: `${row.imageURL}`}}> 
             <span className={row.temp > 100 ? classes.sm_box_red : classes.sm_box_green}>{row.temp}&#176;</span>
-            <br/><span className={row.pressure > 100 ? classes.sm_box_red : classes.sm_box_green}>{row.pressure}</span></Paper> 
+            <br/><span className={row.pressure > 100 ? classes.sm_box_red : classes.sm_box_green}>{row.pressure}</span>
+            </Paper> 
+            </div>
             <br/><label className={classes.Label}>{row.name}</label><hr/>
             <div className={classes.SplitButtonWrapper}>
             <SplitButton endpoint={endpoint} name={row.machine} options={['Turn On', 'Turn Off', 'Restart']}/>
@@ -119,18 +138,15 @@ const UiTableWithStyles = ({rows , endpoint}) => {
   )
 }
 
-class Ui extends React.Component {
-    
-  render() {
-    const  {rows, endpoint, socket} = this.props;
 
+const Ui = ({rows, endpoint, socket}) => {
+  
     return (
       <div>{rows  ?  
         <div><UiTableWithStyles rows={rows} endpoint={endpoint}/></div> 
         : <div ><CircularProgress style={{marginLeft: "47%"}}/></div>
       } <ReconnectSnack socket={socket}/></div>
     );
-  }
 }
 
 export default Ui;

@@ -41,7 +41,7 @@ export default function SplitButton({endpoint, name, options}) {
   );
 
   const classes = useStyles();
-  const classSelected = options[selectedIndex]; 
+  //const classSelected = options[selectedIndex]; 
   /////
 
   const [open, setOpen] = React.useState(false);
