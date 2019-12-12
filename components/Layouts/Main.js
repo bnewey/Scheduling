@@ -24,7 +24,7 @@ const StyledNav = styled(Nav)({
 
    render(){
       const {children} = this.props;
-      const title = "Nitrogen Display";
+      const title = "REI Scheduling";
 
       return (
         <Wrapper>

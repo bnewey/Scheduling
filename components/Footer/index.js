@@ -13,7 +13,7 @@ const StyledFooter = (props) => {
 
   const classes = useStyles();
 
-  return(<div className={classes.root}>Rainey Electronics - Nitrogen Display</div>);
+  return(<div className={classes.root}>Rainey Electronics - Scheduling</div>);
 
 }
 
