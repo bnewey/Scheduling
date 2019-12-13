@@ -6,8 +6,8 @@ const navButtons = [
         path: "/"
     },
     {
-        label: "MachineData",
-        path: "/machineData"
+        label: "Work Orders",
+        path: "/work_orders"
     }
 ];
 

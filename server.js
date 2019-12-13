@@ -38,16 +38,16 @@ nextApp
     app.use(cors({ origin: '*' }));
 
     //This is how we can send variables like settings from mysql to nextjs
-    var settings = require('./settings.js');
+    /*var settings = require('./settings.js');
     app.get('/', (req, res) => {
 
-      settings.doGetAll(nextApp, database,req,res);
+      //settings.doGetAll(nextApp, database,req,res);
       
       //settings.handleRequest(nextApp, database, req, res);
-    });
+    });*/
 
     app.get('/api/history', async (req,res) => {
-      const sql = 'Select * from air_dryer ORDER BY read_date DESC';
+      const sql = 'Select * from work_orders ORDER BY date DESC limit 100';
       try{
         const results = await database.query(sql, []);
         logger.info("Got History");

@@ -23,7 +23,7 @@ const Nav = (props) => {
   const useStyles = makeStyles(theme => ({
     root: {
       display: 'flex',
-      background: '#414d5a',
+      background: '#607d8b',
 
     },
     button: {

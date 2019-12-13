@@ -25,7 +25,7 @@ class MyDocument extends Document {
           />
           <link
             rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
+            href="https://fonts.googleapis.com/css?family=Helvetica:300,400,500"
           />
           <link rel="stylesheet" type="text/css" href="/static/nprogress.css" />
           {/* we could add global styles here */ }

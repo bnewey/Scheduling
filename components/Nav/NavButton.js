@@ -10,18 +10,29 @@ const NavButton = props => {
     a:{  
       cursor: 'pointer',    
       display: 'block',
-      padding: '15px',
+      fontSize: 'medium',
+      fontWeight: '600',
+      padding: '15px 10px 15px 10px',
+      margin: '0px 0px 0px 10px',
+      minWidth: '100px',
       textDecoration: 'none',
+      textAlign: 'center',
+      fontFamily: 'Helvetica',
       color: '#FFF',
-      backgroundColor: '#414d5a',
+      border: '1px solid #99aec5',
+      borderRadius: '2px',
+      backgroundColor: '#9e9e9e6b',
       "&:hover, &:focus": {
-        backgroundColor: 'rgba(0, 0, 0, .18)',
+        backgroundColor: '#9e9e9e',
+        border: '1px solid #bdf0ff',
       },
       
     },
     hover:{},
     active:{
-      backgroundColor: '#6e90b154'
+      border: '1px solid #bdf0ff',
+      backgroundColor: '#9e9e9e',
+      textDecoration: 'underline',
     }
   }));
 

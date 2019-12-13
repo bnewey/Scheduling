@@ -5,30 +5,28 @@ import MainLayout from '../components/Layouts/Main';
 
 import IndexHead from '../components/UI/IndexHead';
 
-import DenseHistoryTable from '../components/Scheduler/Table/DenseHistoryTable';
 
-
-const Index = function () {
+const WorkOrders = function () {
     
     return (
         <MainLayout>
-            <IndexHead image={`static/icons8-schedule-40.png`}>Schedule</IndexHead>
-            <DenseHistoryTable/>
+            <IndexHead image={`static/survey_40.png`}>Work Orders</IndexHead>
+            
         </MainLayout>
     );
 }
 
 //does work when were being passed props 
-Index.getInitialProps = async ({ query }) => ({ settings: query.settings });
+WorkOrders.getInitialProps = async ({ query }) => ({ settings: query.settings });
 
-Index.propTypes = {
+WorkOrders.propTypes = {
   settings: PropTypes.shape({
     results: PropTypes.array.isRequired,
   }),
 };
 
-Index.defaultProps = {
+WorkOrders.defaultProps = {
   settings: null,
 };
 
-export default Index;
+export default WorkOrders;

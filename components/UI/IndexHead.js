@@ -10,20 +10,28 @@ const IndexHead = ({children, image}) => {
       width: 'auto',
       padding: '.2% 0% .2% 3%',
       margin: '1% 0% 1% 0%',
-      backgroundColor: '#b2b2b2',
+      backgroundColor: '#ffedc4',
       boxShadow: "-10px 12px 10px -5px rgba(0,0,0,0.45), 0px 0px 1px 0px rgba(0,0,0,0.14), 0px 0px 1px -1px rgba(0,0,0,0.12)"
     },
     h1: {
-      fontSize: '35px',
-      padding: '10px 25px 5px 25px'
+      alignSelf: 'center',
+      marginLeft: '10px',
+      color: '#6c4100',
+      textTransform:'uppercase' ,
+      fontFamily: 'Helvetica'
 
     },
     imageWrapper: {
       width: 'auto',
+      padding: '5px 10px 5px 10px',
+      backgroundColor: '#dfdfdf',
+      borderRadius: '99px',
+      border: '3px solid #fff',
+      margin: '5px 0px 5px 0px',
       
     },
     image: {
-      maxWidth: '75px'
+      minWidth: '50px'
     }
   }));
 

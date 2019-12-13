@@ -4,7 +4,7 @@ const Wrapper = ({children}) => {
   const useStyles = makeStyles(theme => ({
     root:  {
       borderBottom: '1px solid #ddd',
-      backgroundColor: '#ececec',
+      backgroundColor: '#d7d7d7',
       padding: '0% 0% 2% 0%',
     },
   }) );

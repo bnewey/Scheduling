@@ -6,7 +6,7 @@ const StyledFooter = (props) => {
   const useStyles = makeStyles(theme => ({
     root: {
       padding: '15px',
-      background: '#414d5a',
+      background: '#5b7087',
       color: '#f5f5f5',
     },
   }));
