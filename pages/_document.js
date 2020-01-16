@@ -28,6 +28,9 @@ class MyDocument extends Document {
             href="https://fonts.googleapis.com/css?family=Helvetica:300,400,500"
           />
           <link rel="stylesheet" type="text/css" href="/static/nprogress.css" />
+          <link rel="stylesheet" type="text/css" href="/static/styles.css" />
+          <link rel="stylesheet" type="text/css" href="/static/react-confirm-alert.css" />
+
           {/* we could add global styles here */ }
         </Head>
         <body>

@@ -23,8 +23,10 @@ const Nav = (props) => {
   const useStyles = makeStyles(theme => ({
     root: {
       display: 'flex',
-      background: '#607d8b',
-
+      background: '#5b7087',
+    },
+    toolbar: {
+      minHeight: '48px',
     },
     button: {
       cursor: 'pointer',
@@ -39,7 +41,7 @@ const Nav = (props) => {
 
   return(
   <AppBar position="static" classes={{root: classes.root}}>
-    <Toolbar>
+    <Toolbar className={classes.toolbar}>
           <IconButton edge="start" color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton>

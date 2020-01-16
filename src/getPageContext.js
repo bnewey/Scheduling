@@ -18,6 +18,9 @@ const theme = createMuiTheme({
     },
     type: 'light',
   },
+  typography: {
+    fontSize: 11,
+  }
 });
 
 function createPageContext() {

@@ -10,9 +10,9 @@ const NavButton = props => {
     a:{  
       cursor: 'pointer',    
       display: 'block',
-      fontSize: 'medium',
+      fontSize: 'small',
       fontWeight: '600',
-      padding: '15px 10px 15px 10px',
+      padding: '10px 10px 10px 10px',
       margin: '0px 0px 0px 10px',
       minWidth: '100px',
       textDecoration: 'none',

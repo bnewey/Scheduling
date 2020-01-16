@@ -14,6 +14,7 @@ const useToolbarStyles = makeStyles(theme => ({
     root: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(1),
+      minHeight: '24px',
     },
     highlight:
       theme.palette.type === 'light'
@@ -27,6 +28,7 @@ const useToolbarStyles = makeStyles(theme => ({
           },
     title: {
       flex: '1 1 100%',
+      margin: '7px 0px 0px 0px',
     },
   }));
   
@@ -46,7 +48,7 @@ const useToolbarStyles = makeStyles(theme => ({
           </Typography>
         ) : (
           <Typography className={classes.title} variant="h6" id="tableTitle">
-            Nutrition
+            Scheduler
           </Typography>
         )}
   

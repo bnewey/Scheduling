@@ -13,9 +13,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import EnhancedTableHead from './EnhancedTableHead';
-import EnhancedTableToolbar from './EnhancedTableToolbar';
-import TaskModal from './TaskModal/TaskModal';
+import ItemizationTableHead from './ItemizationTableHead';
+
 
 
 
@@ -91,18 +90,16 @@ const useStyles = makeStyles(theme => ({
     return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
   }
   
-  function EnhancedTable(props) {
+  function ItemizationTable(props) {
     const classes = useStyles();
-    const {rows, mapRows, setMapRows,selectedIds,setSelectedIds,filterConfig,setFilterConfig} = props;
+    const {rows, filterConfig,setFilterConfig} = props;
     const [order, setOrder] = React.useState('desc');
-    const [orderBy, setOrderBy] = React.useState('date');
-    //const [selected, setSelected] = React.useState([]);
+    const [orderBy, setOrderBy] = React.useState('record_id');
+    const [selected, setSelected] = React.useState(null);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(true);
     const [rowsPerPage, setRowsPerPage] = React.useState(15);
     const [filteredRows, setFilteredRows] = React.useState(rows);
-    const [modalOpen, setModalOpen] = React.useState(false);  
-    const [modalTaskId, setModalTaskId] = React.useState();  
 
     const handleRequestSort = (event, property) => {
       const isDesc = orderBy === property && order === 'desc';
@@ -111,63 +108,35 @@ const useStyles = makeStyles(theme => ({
     };
 
   
-    const handleSelectAllClick = event => {
-      if (event.target.checked) {
-        const newSelecteds = filteredRows ? filteredRows.map(n=>n.t_id) : rows.map(n => n.t_id);
-        setSelectedIds(newSelecteds);
-        return;
+    // const handleSelectAllClick = event => {
+    //   if (event.target.checked) {
+    //     const newSelecteds = filteredRows ? filteredRows.map(n=>n.t_id) : rows.map(n => n.t_id);
+    //     setSelectedIds(newSelecteds);
+    //     return;
+    //   }
+    //   setSelectedIds([]);
+    // };
+
+    useEffect( () =>{ //useEffect for inputText
+      //Gets data only on initial component mount
+      if( rows) {
+
+        
       }
-      setSelectedIds([]);
-    };
+    
+      return () => { //clean up
+          if(rows){
+              
+          }
+      }
+    },[rows]);
 
 
   
-    const handleClick = (event, record_id) => {
-
-      //TODO If user changes filter to exclude some already selected items, this breaks.
-      const selectedIndex = selectedIds.indexOf(record_id);
-      let newSelected = [];
-      const row = filteredRows.filter((row, index)=> row.t_id == record_id);
-      if(row == []){
-        error.log("No row found in filteredRows");
-      }
-
-      if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selectedIds, record_id);
-        setMapRows(mapRows ? mapRows.concat(row) : [row]);
-      } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selectedIds.slice(1));
-        setMapRows(mapRows.slice(1));
-      } else if (selectedIndex === selectedIds.length - 1) {
-        newSelected = newSelected.concat(selectedIds.slice(0, -1));
-        setMapRows(mapRows.slice(0,-1));
-      } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(
-          selectedIds.slice(0, selectedIndex),
-          selectedIds.slice(selectedIndex + 1),
-        );
-        var tempArray = [];
-        setMapRows(
-          tempArray.concat(
-            mapRows.slice(0,selectedIndex),
-            mapRows.slice(selectedIndex + 1),
-          )
-        );
-      }
-    
-      setSelectedIds(newSelected);
+    const handleClick = (event, record_id) => {   
+      setSelected(record_id);
 
     };
-
-    //Modal
-    const handleRightClick = (event, id) => {
-      setModalTaskId(id);
-      setModalOpen(true);
-
-      //Disable Default context menu
-      event.preventDefault();
-    };
-    ////
   
     const handleChangePage = (event, newPage) => {
       setPage(newPage);
@@ -182,27 +151,23 @@ const useStyles = makeStyles(theme => ({
       setDense(event.target.checked);
     };
   
-    const isSelected = record_id => selectedIds.indexOf(record_id) !== -1;
+    const isSelected = record_id => selected === record_id;
   
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, (filteredRows ? filteredRows.length : rows.length  ) - page * rowsPerPage);
   
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selectedIds.length} />
-            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} modalTaskId={modalTaskId}/>
             <Table
               className={classes.table}
               aria-labelledby="tableTitle"
               size={dense ? 'small' : 'medium'}
               aria-label="enhanced table"
             >
-              <EnhancedTableHead
+              <ItemizationTableHead
                 classes={classes}
-                numSelected={selectedIds.length}
                 order={order}
                 orderBy={orderBy}
-                onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={ filteredRows ? filteredRows.length : rows.length}
                 rows={filteredRows ? filteredRows : rows}
@@ -214,36 +179,28 @@ const useStyles = makeStyles(theme => ({
                 {stableSort(filteredRows ? filteredRows : rows, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.t_id);
+                    const isItemSelected = isSelected(row.record_id);
                     const labelId = `enhanced-table-checkbox-${index}`;
   
                     return (
                       <TableRow
                         hover
-                        onMouseUp={event => handleClick(event, row.t_id)}
-                        onContextMenu={event => handleRightClick(event, row.t_id)}
+                        onMouseUp={event => handleClick(event, row.record_id)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.t_id}
+                        key={row.record_id}
                         className={isItemSelected ? classes.selectedRow : classes.nonSelectedRow}
                       >
                         
                         <TableCell component="th" id={labelId} scope="row" padding="none">
-                          {row.t_id /*if you change t_id, change it above */}
+                          {row.work_order /*if you change t_id, change it above */}
                         </TableCell>
-                        <TableCell align="right">{row.priority_order}</TableCell>
-                        <TableCell align="right">{row.t_name}</TableCell>
+                        <TableCell align="right">{row.date}</TableCell>
+                        <TableCell align="right">{row.quantity}</TableCell>
                         <TableCell align="right">{row.description}</TableCell>
-                        <TableCell align="right">{row.type}</TableCell>
-                        <TableCell align="right">{row.date_assigned}</TableCell>
-                        <TableCell align="right">{row.hours_estimate}</TableCell>
-                        <TableCell align="right">{row.users}</TableCell>
-                        <TableCell align="right">{row.date_desired}</TableCell>
-                        <TableCell align="right">{row.date_completed}</TableCell>
-                        <TableCell align="right">{row.drilling}</TableCell>
-                        <TableCell align="right">{row.sign}</TableCell>
-                        <TableCell align="right">{row.artwork}</TableCell>
+                        <TableCell align="right">{row.job_reference}</TableCell>
+                        <TableCell align="right">{row.e_name}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -273,4 +230,4 @@ const useStyles = makeStyles(theme => ({
     );
   }
 
-  export default EnhancedTable;
+  export default ItemizationTable;

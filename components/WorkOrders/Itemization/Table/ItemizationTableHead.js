@@ -6,7 +6,6 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 
 
 const TableFilter = dynamic(
@@ -18,25 +17,18 @@ const TableFilter = dynamic(
 
 
 const headCells = [
-    { id: 't_id', numeric: false, disablePadding: true, label: 'WO#' },
-    { id: 'priority_order', numeric: false, disablePadding: true, label: 'Priority' },
-    { id: 't_name', numeric: true, disablePadding: false, label: 'Name' },
-    { id: 'description', numeric: true, disablePadding: false, label: 'Desc' },
-    { id: 'type', numeric: true, disablePadding: false, label: 'Type' },
-    { id: 'date_assigned', numeric: false, disablePadding: true, label: 'Date Assigned' },
-    { id: 'hours_estimate', numeric: true, disablePadding: false, label: 'Hours' },
-    { id: 'users', numeric: true, disablePadding: false, label: 'Users' },
-    { id: 'date_desired', numeric: true, disablePadding: false, label: 'Desired' },
-    { id: 'date_completed', numeric: true, disablePadding: false, label: 'Completed' },
-    { id: 'drilling', numeric: true, disablePadding: false, label: 'Drilling' },
-    { id: 'sign', numeric: false, disablePadding: true, label: 'Sign' },
-    { id: 'artwork', numeric: true, disablePadding: false, label: 'Artwork' },
+    { id: 'work_order', numeric: false, disablePadding: true, label: 'WO#' },
+    { id: 'date', numeric: false, disablePadding: true, label: 'Date' },
+    { id: 'quantity', numeric: true, disablePadding: false, label: 'Quantity' },
+    { id: 'description', numeric: true, disablePadding: false, label: 'Description' },
+    { id: 'job_reference', numeric: true, disablePadding: false, label: 'Job Reference' },
+    { id: 'e_name', numeric: false, disablePadding: true, label: 'Product Goes To' }
   ];
 
 
-function EnhancedTableHead(props) {
+function ItemizationTableHead(props) {
     //PROPS
-    const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, rows, setFilteredRows,filterConfig, setFilterConfig } = props;
+    const { classes, order, orderBy, rowCount, onRequestSort, rows, setFilteredRows,filterConfig, setFilterConfig } = props;
     const createSortHandler = property => event => {
       onRequestSort(event, property);
     };
@@ -47,7 +39,6 @@ function EnhancedTableHead(props) {
 
     const filterUpdated = function(newData, filterConfiguration) {
       setFilteredData(newData);
-      console.log(filterConfiguration);
       setFilterConfig(filterConfiguration);
     } 
 
@@ -67,13 +58,6 @@ function EnhancedTableHead(props) {
   
     return (
       <TableHead>
-          <TableRow padding="checkbox">
-            <Checkbox
-              indeterminate={numSelected > 0 && numSelected < rowCount}
-              checked={numSelected === rowCount}
-              onChange={onSelectAllClick}
-              inputProps={{ 'aria-label': 'select all' }}/>
-          </TableRow>
           <TableFilter
             rows={rows}
             onFilterUpdate={filterUpdated}
@@ -107,14 +91,12 @@ function EnhancedTableHead(props) {
     );
   }
   
-  EnhancedTableHead.propTypes = {
+  ItemizationTableHead.propTypes = {
     classes: PropTypes.object.isRequired,
-    numSelected: PropTypes.number.isRequired,
     onRequestSort: PropTypes.func.isRequired,
-    onSelectAllClick: PropTypes.func.isRequired,
     order: PropTypes.oneOf(['asc', 'desc']).isRequired,
     orderBy: PropTypes.string.isRequired,
     rowCount: PropTypes.number.isRequired,
   };
 
-  export default EnhancedTableHead
+  export default ItemizationTableHead

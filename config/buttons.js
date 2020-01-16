@@ -8,6 +8,10 @@ const navButtons = [
     {
         label: "Work Orders",
         path: "/work_orders"
+    },
+    {
+        label: "Itemization",
+        path: "/itemization"
     }
 ];
 
