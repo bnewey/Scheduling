@@ -41,8 +41,8 @@ router.post('/getAllWorkOrderItems', async (req,res) => {
         }
         
     }
-    logger.info(table);
-    logger.info(search_query);
+    logger.verbose(table);
+    logger.verbose(search_query);
     
 
     const sql = 'SELECT woi.*, wo.job_reference, e.name as e_name, date_format(wo.date, \'%m-%d-%Y %H:%i:%S\') as date '  + 
@@ -56,7 +56,6 @@ router.post('/getAllWorkOrderItems', async (req,res) => {
     try{
         const results = await database.query(sql, [table, search_query]);
         logger.info("Got Work Order Items");
-        logger.info(JSON.stringify(results));
         res.json(results);
 
     }

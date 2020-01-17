@@ -190,7 +190,7 @@ const useStyles = makeStyles(theme => ({
       <div className={classes.root}>
         <Paper className={classes.paper}>
           <EnhancedTableToolbar numSelected={selectedIds.length} />
-            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} modalTaskId={modalTaskId}/>
+            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
             <Table
               className={classes.table}
               aria-labelledby="tableTitle"

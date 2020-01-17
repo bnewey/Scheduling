@@ -5,6 +5,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 
 import MapSidebar from './MapSidebar/MapSidebar';
+import TaskModal from '../Table/TaskModal/TaskModal';
 import { useState, useEffect } from 'react';
 
 const useStyles = makeStyles(theme => ({
@@ -27,12 +28,12 @@ const useStyles = makeStyles(theme => ({
 const MapContainer = (props) => {
     const classes = useStyles();
 
-    const {mapRows} = props;
+    const {mapRows, setMapRows, selectedIds, setSelectedIds} = props;
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
-    //AtiveMarkerId passed down to MapSidebarMarkedTasks
-    //const [activeMarkerId, setActiveMarkerId] = useState(activeMarker ? activeMarker.t_id : null );
     const [bounds, setBounds] = useState(null);
+    const [modalOpen, setModalOpen] = React.useState(false);  
+    const [modalTaskId, setModalTaskId] = React.useState();  
 
     useEffect( () =>{ //useEffect for inputText
       getBounds();
@@ -59,7 +60,10 @@ const MapContainer = (props) => {
         var task = mapRows.filter((row, i) => row.t_id === id)[0];
         setActiveMarker(task);
         setShowingInfoWindow(true);
-        //setActiveMarkerId(id);
+    }
+
+    const handleInfoWindowClose = () =>{
+      setShowingInfoWindow(false);
     }
 
 
@@ -77,6 +81,16 @@ const MapContainer = (props) => {
       return `static/default_marker.png`;
     }
 
+    //Modal
+    const handleRightClick = (event, id) => {
+      setModalTaskId(id);
+      setModalOpen(true);
+
+      //Disable Default context menu
+      event.preventDefault();
+    };
+    ////
+
     //console.log(props.google);
     //console.log(bounds);
     
@@ -84,6 +98,7 @@ const MapContainer = (props) => {
       <div>
           <Grid container spacing={3}>
             <Grid item xs={9}>
+            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
               <Map
                 google={props.google}
                 zoom={6}
@@ -106,17 +121,20 @@ const MapContainer = (props) => {
                   position = {activeMarker ? { lat: activeMarker.lat , lng: activeMarker.lng} : null}
                   visible = { showingInfoWindow }
                   style = {classes.infoWindow}
+                  onClose={handleInfoWindowClose}
                 >
                   <Paper>{activeMarker ? <React.Fragment> {activeMarker.t_id} | {activeMarker.t_name} | {activeMarker.priority_order} </React.Fragment> : <p>No Data</p>}</Paper>
                 </InfoWindow>
               </Map>
             </Grid>
             <Grid item xs={3}>
-              <MapSidebar mapRows={mapRows} 
+              <MapSidebar mapRows={mapRows} setMapRows={setMapRows}
+                          selectedIds={selectedIds} setSelectedIds={setSelectedIds}
                           noMarkerRows={noMarkerRows} 
                           markedRows={markedRows} 
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                           setShowingInfoWindow={setShowingInfoWindow}
+                          setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
                           />
             </Grid>
           </Grid>

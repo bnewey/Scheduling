@@ -10,8 +10,8 @@ const navButtons = [
         path: "/work_orders"
     },
     {
-        label: "Itemization",
-        path: "/itemization"
+        label: "Search Items",
+        path: "/search_items"
     }
 ];
 

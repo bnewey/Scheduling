@@ -8,7 +8,8 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@material-ui/icons/Clear';
+import EditIcon from '@material-ui/icons/Edit';
 
 import Tasks from '../../../../js/Tasks';
 
@@ -38,7 +39,8 @@ const MapSiderbarMarkedTasks = (props) =>{
 
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
-    const {activeMarker, setActiveMarker, setShowingInfoWindow, markedRows } = props;
+    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows , setModalOpen, setModalTaskId, 
+              selectedIds, setSelectedIds} = props;
     
     //CSS
     const classes = useStyles();
@@ -50,15 +52,58 @@ const MapSiderbarMarkedTasks = (props) =>{
     };
 
     //move this functionality to tasks instead of marker sidebar / replace with remove from selected
-    const handleDelete = id => () => {
-        Tasks.removeTask(id)
-        .then(alert(id + ': deleted'))
-        .catch( error => {
-          console.warn(JSON.stringify(error, null,2));
-        });
-    };
-    
 
+
+    const handleRemoveFromSelected = (event, record_id) => {
+
+      //TODO If user changes filter to exclude some already selected items, this breaks.
+      const selectedIndex = selectedIds.indexOf(record_id);
+      let newSelected = [];
+      const row = mapRows.filter((row, index)=> row.t_id == record_id);
+      if(row == []){
+        error.log("No row found in filteredRows");
+      }
+
+      if (selectedIndex === -1) {
+        newSelected = newSelected.concat(selectedIds, record_id);
+        setMapRows(mapRows ? mapRows.concat(row) : [row]);
+      } else if (selectedIndex === 0) {
+        newSelected = newSelected.concat(selectedIds.slice(1));
+        setMapRows(mapRows.slice(1));
+      } else if (selectedIndex === selectedIds.length - 1) {
+        newSelected = newSelected.concat(selectedIds.slice(0, -1));
+        setMapRows(mapRows.slice(0,-1));
+      } else if (selectedIndex > 0) {
+        newSelected = newSelected.concat(
+          selectedIds.slice(0, selectedIndex),
+          selectedIds.slice(selectedIndex + 1),
+        );
+        var tempArray = [];
+        setMapRows(
+          tempArray.concat(
+            mapRows.slice(0,selectedIndex),
+            mapRows.slice(selectedIndex + 1),
+          )
+        );
+      }
+    
+      setSelectedIds(newSelected);
+      setShowingInfoWindow(false);
+      setActiveMarker(null);
+
+    };
+
+
+    //Modal
+    const handleRightClick = (event, id) => {
+      setModalTaskId(id);
+      setModalOpen(true);
+
+      //Disable Default context menu
+      event.preventDefault();
+    };
+    ////
+    
 
     return(
         <List className={classes.root}>            
@@ -68,6 +113,7 @@ const MapSiderbarMarkedTasks = (props) =>{
                     <ListItem key={row.t_id} 
                                 role={undefined} dense button 
                                 onClick={handleToggle(row.t_id)}
+                                onContextMenu={event => handleRightClick(event, row.t_id)}
                                 selected={activeMarker && activeMarker.t_id === row.t_id}
                                 className={activeMarker ? (activeMarker.t_id === row.t_id ? classes.selectedRow : classes.nonSelectedRow) : classes.nonSelectedRow}>
                       <ListItemText id={labelId}>
@@ -75,9 +121,15 @@ const MapSiderbarMarkedTasks = (props) =>{
                       </ListItemText>
                       <ListItemSecondaryAction>
                         { activeMarker && activeMarker.t_id === row.t_id ? 
-                            <IconButton edge="end" aria-label="comments" onClick={handleDelete(activeMarker.t_id)}>
-                               <DeleteIcon />
-                            </IconButton> : <div></div>}
+                            <React.Fragment>
+                              <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
+                              <EditIcon />
+                              </IconButton>
+                              <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromSelected(event, activeMarker.t_id)}>
+                                <DeleteIcon />
+                              </IconButton> 
+                            </React.Fragment>
+                          : <div></div>}
                         &nbsp;&nbsp;&nbsp;
                       </ListItemSecondaryAction>
                     </ListItem>

@@ -30,9 +30,13 @@ router.post('/getTask', async (req,res) => {
         id = req.body.id;
     }
 
-    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS t_name, hours_estimate, date_format(date_desired, \'%m-%d-%Y %H:%i:%S\') as date_desired, date_format(date_assigned, \'%m-%d-%Y\') as date_assigned, ' + 
-    ' date_format(date_completed, \'%m-%d-%Y\') as date_completed, t.description, t.notes, t.priority_order, t.task_status, t.drilling, t.sign, t.artwork, t.table_id, date_format(t.order_date, \'%m-%d-%Y\') as order_date, t.first_game, t.work_type, t.install_location, ' +
-    't.delivery_crew, t.delivery_order, date_format(delivery_date, \'%m-%d-%Y %H:%i:%S\') as delivery_date,t.install_order, t.install_crew, date_format(install_date, \'%%m-%d-%Y %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded '  +
+    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS t_name, hours_estimate, date_format(date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
+    ' date_format(date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
+    ' t.description, t.notes, t.priority_order, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
+    ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, t.work_type, t.install_location, ' +
+    ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
+    ' t.install_crew, date_format(install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
+    ' ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     'FROM tasks t ' +
     'LEFT JOIN entities_addresses ea ON (t.account_id = ea.entities_id AND main = 1) WHERE t.id = ? ';
 
@@ -74,12 +78,13 @@ router.post('/updateTask', async (req,res) => {
     logger.info(JSON.stringify(task));
 
 
-    const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired= ? , date_assigned= ? , date_completed= ? , description= ? , notes= ? , priority_order= ? , ' +
+    const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
+    ' date_completed=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , description= ? , notes= ? , ' +
     ' task_status= ?, drilling= ? , sign= ? , artwork= ? , work_type= ?  , delivery_crew= ? , ' + 
-    ' delivery_order= ? , delivery_date= ?, install_crew= ? , install_date= ? , install_order= ? ' +
+    ' delivery_order= ? , delivery_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\'), install_crew= ? , install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , install_order= ? ' +
     ' WHERE id = ? ';
 
-    const params = [task.t_name, task.hours_estimate, task.date_desired, task.date_assigned, task.date_completed, task.description, task.notes, task.priority_order,
+    const params = [task.t_name, task.hours_estimate, task.date_desired, task.date_assigned, task.date_completed, task.description, task.notes, 
     task.task_status, task.drilling, task.sign, task.artwork, task.work_type, task.delivery_crew,
     task.delivery_order, task.delivery_date, task.install_crew, task.install_date, task.install_order , task.t_id ];
     //todo  table_id (address, in db), first_game(in db, add to form), install_location(in db), 

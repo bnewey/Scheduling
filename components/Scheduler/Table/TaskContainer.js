@@ -55,7 +55,11 @@ const TaskContainer = function() {
             <CircularProgress style={{marginLeft: "47%"}}/>
           </div>
           } 
-        <div style={{minHeight: '600px'}}><MapContainer mapRows={mapRows}/></div>
+        <div style={{minHeight: '600px'}}>
+          <MapContainer 
+              mapRows={mapRows} setMapRows={setMapRows} 
+              selectedIds={selectedIds} setSelectedIds={setSelectedIds}
+          /></div>
         </FullWidthTabs>
         </div>
         

@@ -53,7 +53,18 @@ const MapSidebar = (props) => {
     //STATE
     const [expanded, setExpanded] = React.useState(false);
     //PROPS
-    const {mapRows, noMarkerRows,markedRows, activeMarker, setActiveMarker, setShowingInfoWindow} = props;
+    const {mapRows, setMapRows, selectedIds, setSelectedIds, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
+            setShowingInfoWindow, setModalOpen, setModalTaskId} = props;
+
+    useEffect( () =>{ //useEffect for inputText
+        if(activeMarker && activeMarker.geocoded)
+            setExpanded('panel1');
+        return () => { //clean up
+            if(activeMarker){
+                
+            }
+        }
+    },[activeMarker]);
     
     //CSS
     const classes = useStyles();
@@ -77,9 +88,12 @@ const MapSidebar = (props) => {
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
-                        <MapSidebarMarkedTasks activeMarker={activeMarker} setActiveMarker={setActiveMarker}
+                        <MapSidebarMarkedTasks mapRows={mapRows} setMapRows={setMapRows}
+                                                selectedIds={selectedIds} setSelectedIds={setSelectedIds}
+                                                activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                                                 setShowingInfoWindow={setShowingInfoWindow} 
                                                 markedRows={markedRows} 
+                                                setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
                                                 />
                     </Scrollbars>
                 </ExpansionPanelDetails>
@@ -87,7 +101,6 @@ const MapSidebar = (props) => {
             <ExpansionPanel expanded={expanded === 'panel2'} onChange={handleChange('panel2')} className={classes.body } 
                 classes={noMarkerRows.length > 0 ? {root: classes.attention} : ""}>
                 <ExpansionPanelSummary
-                
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1bh-content"
                     id="panel1bh-header"
@@ -95,7 +108,10 @@ const MapSidebar = (props) => {
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.details} >
                     <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
-                        <MapSidebarMissingMarkers noMarkerRows={noMarkerRows} />
+                        <MapSidebarMissingMarkers mapRows={mapRows} setMapRows={setMapRows}
+                                                selectedIds={selectedIds} setSelectedIds={setSelectedIds}
+                                                noMarkerRows={noMarkerRows} 
+                                                setModalOpen={setModalOpen} setModalTaskId={setModalTaskId} />
                     </Scrollbars>
                 </ExpansionPanelDetails>
             </ExpansionPanel>

@@ -15,7 +15,7 @@ const Itemization = function () {
 
     return (
         <MainLayout>
-            <IndexHead image={`static/survey_40.png`}>Work Orders - Itemization</IndexHead>
+            <IndexHead image={`static/survey_40.png`}>Work Orders - Search Items</IndexHead>
             <ItemizationSearch inputText={searchText} setInputText={setSearchText} 
                                   searchTable={searchTable} setSearchTable={setSearchTable}
                                 shouldFetch={shouldFetch} setShouldFetch={setShouldFetch} />
