@@ -37,7 +37,7 @@ db.query = function(sql, params) {
             if(error){
                 console.log(error);
                 console.log(sql, params);
-                reject();
+                reject(error);
                 return;
             }     
 

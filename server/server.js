@@ -8,6 +8,7 @@ const http = require("http");
 const favicon = require('serve-favicon');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const bodyParser = require('body-parser')
 
 dotenv.config();
 const app = express();
@@ -24,6 +25,8 @@ const handle = nextApp.getRequestHandler();
 //var machines = require('./api/machines/machines');
 const tasks = require('./lib/tasks.js');
 const workOrders = require('./lib/work_orders.js');
+const taskLists = require('./lib/task_lists.js');
+const pdf = require('./lib/pdf.js');
 
 global.SERVER_APP_ROOT = __dirname;
 
@@ -33,7 +36,7 @@ nextApp
 
     app.use(favicon(__dirname + '/../public/static/favicon.ico'));
     app.use(expressValidator());
-    app.use(express.json());
+    app.use(bodyParser.json({limit: '50mb'}));
 
     //app.use('/api/machines', machines);
     
@@ -50,6 +53,8 @@ nextApp
 
     app.use('/tasks', tasks);
     app.use('/workOrders', workOrders);
+    app.use('/taskLists', taskLists);
+    app.use('/pdf', pdf);
 
     app.get('*', (req, res) => {
       return handle(req, res);

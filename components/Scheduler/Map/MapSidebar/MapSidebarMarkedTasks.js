@@ -89,7 +89,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     
       setSelectedIds(newSelected);
       setShowingInfoWindow(false);
-      setActiveMarker(null);
+      setResetBounds(true);
 
     };
 

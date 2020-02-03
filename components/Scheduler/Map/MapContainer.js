@@ -8,6 +8,9 @@ import MapSidebar from './MapSidebar/MapSidebar';
 import TaskModal from '../Table/TaskModal/TaskModal';
 import { useState, useEffect } from 'react';
 
+
+import { useSnackbar } from 'material-ui-snackbar-provider'
+
 const useStyles = makeStyles(theme => ({
     root: {
       width: '69% !important',
@@ -27,22 +30,38 @@ const useStyles = makeStyles(theme => ({
 
 const MapContainer = (props) => {
     const classes = useStyles();
+    const snackbar = useSnackbar();
 
-    const {mapRows, setMapRows, selectedIds, setSelectedIds} = props;
+    const {mapRows, setMapRows, selectedIds, setSelectedIds, taskLists, setTaskLists} = props;
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const [bounds, setBounds] = useState(null);
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState();  
+    const [resetBounds, setResetBounds] = React.useState(true);
 
     useEffect( () =>{ //useEffect for inputText
-      getBounds();
+      console.log("bounds");
+      if(resetBounds)
+        getBounds();
+        setResetBounds(false);
       return () => { //clean up
-          if(activeMarker){
+          if(resetBounds){
               
           }
       }
-    },[activeMarker]);
+    },[resetBounds]);
+
+
+
+    if(mapRows.length > 50){
+      setMapRows( mapRows.slice(0, 49));
+      
+      snackbar.showMessage(
+        'Too many tasks have been selected! Showing first 50 tasks...',
+        'OK', () => {console.log("Hey")}
+      )
+    }
 
     //Get mapRows that do not have lat, lng
     const noMarkerRows = mapRows.filter((row, index) => !row.geocoded);
@@ -70,7 +89,7 @@ const MapContainer = (props) => {
     const onMapClick = (props) => {
       if (showingInfoWindow) {
           setShowingInfoWindow(false);
-          setActiveMarker(false);
+          setResetBounds(true);
       }
     }
 
@@ -98,7 +117,9 @@ const MapContainer = (props) => {
       <div>
           <Grid container spacing={3}>
             <Grid item xs={9}>
-            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
+            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
+                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}
+                        taskLists={taskLists} setTaskLists={setTaskLists}/>
               <Map
                 google={props.google}
                 zoom={6}
@@ -135,6 +156,8 @@ const MapContainer = (props) => {
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                           setShowingInfoWindow={setShowingInfoWindow}
                           setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
+                          taskLists={taskLists} setTaskLists={setTaskLists}
+                          setResetBounds={setResetBounds}
                           />
             </Grid>
           </Grid>

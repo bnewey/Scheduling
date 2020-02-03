@@ -35,13 +35,13 @@ export default function TaskModal({onYes, onClose, customMessage}){
                 <p>{customMessage ? customMessage : ""}</p>
                 <Button onClick={() => {
                     onClose();
-                }} className={classes.noButton} variant="contained" color="#414d5a" href="#contained-buttons">
+                }} className={classes.noButton} variant="contained"  href="#contained-buttons">
                     No
                 </Button>
                 <Button onClick={() => {
                     onYes();
                     onClose();
-                }} className={classes.yesButton} variant="contained" color="#414d5a" href="#contained-buttons">
+                }} className={classes.yesButton} variant="contained"  href="#contained-buttons">
                     Yes
                 </Button>
         </Paper>    

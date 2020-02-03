@@ -69,9 +69,10 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function FullWidthTabs({children, value, setValue}) {
+export default function FullWidthTabs({children}) {
   const classes = useStyles();
   const theme = useTheme();
+  const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -93,9 +94,8 @@ export default function FullWidthTabs({children, value, setValue}) {
           aria-label="full width tabs example"
           
         >
-          <Tab className={value === 0 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><TaskIcon className={ classes.icon}/>&nbsp;Task Lists</span>} {...a11yProps(0)} />
-          <Tab className={value === 1 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><ViewListIcon className={classes.icon}/>&nbsp;Tasks</span>} {...a11yProps(1)} />
-          <Tab className={value === 2 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(2)} />
+          <Tab className={value === 0 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><TaskIcon className={ classes.icon}/>&nbsp;Work Orders</span>} {...a11yProps(0)} />
+          <Tab className={value === 1 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><ViewListIcon className={classes.icon}/>&nbsp;PDF List View</span>} {...a11yProps(1)} />
         </Tabs>
       </AppBar>
       <SwipeableViews

@@ -16,6 +16,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import EnhancedTableHead from './EnhancedTableHead';
 import EnhancedTableToolbar from './EnhancedTableToolbar';
 import TaskModal from './TaskModal/TaskModal';
+import Tooltip from '@material-ui/core/Tooltip';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 
@@ -52,11 +54,17 @@ const useStyles = makeStyles(theme => ({
       width: 1,
     },
     selectedRow:{
-      backgroundColor: '#abb7c9'
+      backgroundColor: '#abb7c9',
+      '&:hover':{
+        backgroundColor: 'rgb(142, 166, 201) !important'
+      }
       
     },
     nonSelectedRow:{
       backgroundColor: '#ffffff',
+      '&:hover':{
+        backgroundColor: 'rgba(0, 0, 0, 0.07) !important'
+      }
     },
     tableHead:{
       fontSize: 11,
@@ -64,7 +72,14 @@ const useStyles = makeStyles(theme => ({
     },
     tableFilter: {
       margin: '50px',
+    },
+    tooltip:{
+        fontSize: '18px',
+        padding: '4px 5px',
+        width: '100%',
+        backgroundColor: 'rgba(0,0,0,.50)'
     }
+    
   }));
 
   function desc(a, b, orderBy) {
@@ -93,7 +108,8 @@ const useStyles = makeStyles(theme => ({
   
   function EnhancedTable(props) {
     const classes = useStyles();
-    const {rows, mapRows, setMapRows,selectedIds,setSelectedIds,filterConfig,setFilterConfig} = props;
+    const {rows, setRows, taskLists, setTaskLists, mapRows, setMapRows,
+        selectedIds,setSelectedIds,filterConfig,setFilterConfig, tabValue, setTabValue} = props;
     const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('date');
     //const [selected, setSelected] = React.useState([]);
@@ -103,6 +119,10 @@ const useStyles = makeStyles(theme => ({
     const [filteredRows, setFilteredRows] = React.useState(rows);
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState();  
+
+
+
+   
 
     const handleRequestSort = (event, property) => {
       const isDesc = orderBy === property && order === 'desc';
@@ -115,8 +135,12 @@ const useStyles = makeStyles(theme => ({
       if (event.target.checked) {
         const newSelecteds = filteredRows ? filteredRows.map(n=>n.t_id) : rows.map(n => n.t_id);
         setSelectedIds(newSelecteds);
+        setMapRows(filteredRows);
+        console.log(newSelecteds);
         return;
       }
+      // if unchecked
+      setMapRows([]);
       setSelectedIds([]);
     };
 
@@ -189,8 +213,12 @@ const useStyles = makeStyles(theme => ({
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selectedIds.length} />
-            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
+          <EnhancedTableToolbar numSelected={selectedIds.length}   tabValue={tabValue} setTabValue={setTabValue} mapRowsLength={mapRows.length}/>
+            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
+                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}
+                        taskLists={taskLists} setTaskLists={setTaskLists}
+                        setRows={setRows}
+                      />
             <Table
               className={classes.table}
               aria-labelledby="tableTitle"
@@ -210,6 +238,10 @@ const useStyles = makeStyles(theme => ({
                 filterConfig={filterConfig}
                 setFilterConfig={setFilterConfig}
               />
+              <Tooltip title="Click to Select. You can select multiple items. Right Click to Edit"
+                            arrow={true} enterDelay={700} placement={'bottom'} disableHoverListener={selectedIds.length == 0 ? false : true}
+                            classes={{tooltip: classes.tooltip }}>
+              {rows ? 
               <TableBody>
                 {stableSort(filteredRows ? filteredRows : rows, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -247,12 +279,18 @@ const useStyles = makeStyles(theme => ({
                       </TableRow>
                     );
                   })}
-                {emptyRows > 0 && (
-                  <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                    <TableCell colSpan={6} />
-                  </TableRow>
-                )}
-              </TableBody>
+                    {emptyRows > 0 && (
+                      <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
+                        <TableCell colSpan={6} />
+                      </TableRow>
+                    )}
+                </TableBody>
+              :
+                <div>
+                  <CircularProgress/>
+                </div>
+              }
+              </Tooltip>
             </Table>
       
           <TablePagination

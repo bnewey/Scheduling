@@ -3,15 +3,14 @@ import PropTypes from 'prop-types';
 
 import MainLayout from '../components/Layouts/Main';
 
-import IndexHead from '../components/UI/IndexHead';
+import WorkOrderContainer from '../components/WorkOrders/WorkOrderIndex/WorkOrderContainer';
 
 
 const WorkOrders = function () {
     
     return (
         <MainLayout>
-            <IndexHead image={`static/survey_40.png`}>Work Orders</IndexHead>
-            
+            <WorkOrderContainer />
         </MainLayout>
     );
 }

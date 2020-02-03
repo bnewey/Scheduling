@@ -17,7 +17,9 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';
 import SaveIcon from '@material-ui/icons/Save';
 import TrashIcon from '@material-ui/icons/Delete';
+import AddIcon from '@material-ui/icons/Add';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Avatar from '@material-ui/core/Avatar';
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -29,24 +31,26 @@ import {
 
 import Util from '../../../../js/Util.js';
 import Tasks from '../../../../js/Tasks';
+import TaskLists from '../../../../js/TaskLists';
+
+import TaskModalTaskList from './TaskModalTaskList';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
 
 //ALERT ////
-// This component is in both TaskContainer and MapContainer -
+// This component is in TaskContainer, TaskList, and MapContainer -
 // Chang props to this component in both locations to prevent breaking 
 
-export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModalTaskId}){
+export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModalTaskId, taskLists, setTaskLists, setRows}){
     const classes = useStyles();
 
     const [modalTask, setModalTask] = React.useState(null); 
     const [shouldUpdate, setShouldUpdate] = React.useState(false);
+    const [shouldReFetch, setShouldReFetch] = React.useState(false);
     
-    const [formVariables, setFormVariables] = React.useState({});
 
-
-    const variables_to_update = ["t_name", "description", "notes", "work_type", "hours_estimate", "date_assigned", "date_desired", "date_completed", 
+    const variables_to_update = ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired", "date_completed", 
         "delivery_date", "delivery_crew", "delivery_order", "install_date", "install_crew", "install_order", "task_status", "drilling", "artwork", "sign"];
     const text_variables = ["t_name", "description", "notes",  "hours_estimate", "delivery_crew", "delivery_order" ,
       "install_crew", "install_order"];
@@ -59,12 +63,19 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
     
     useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
+        console.log("USE EFFECT");
         if(modalTaskId) {
+            console.log("Get task");
           Tasks.getTask(modalTaskId)
-          .then( (data) => setModalTask(data[0]))
+          .then( (data) => {
+              setModalTask(data[0]);
+              if(shouldReFetch){
+                setShouldReFetch(false);
+              }
+             })
           .catch( error => {
             console.warn(JSON.stringify(error, null,2));
-          })
+          });
         }
 
       
@@ -73,7 +84,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
             setModalTask(null);
             setShouldUpdate(false);
         }
-      },[ modalTaskId]);
+      },[ modalTaskId, shouldReFetch]);
 
     
     const handleOpenModal = () => {
@@ -85,6 +96,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
         setModalOpen(false);
         setModalTask(null);
         setModalTaskId(null);
+        console.log('?');
     };
 
     const handleDelete = id => () => {
@@ -171,7 +183,11 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
             console.log(updateModalTask);
  
             Tasks.updateTask(updateModalTask)
-            .then( (data) => console.log("Updated Successfully"))
+            .then( (data) => {
+                //Refetch our data on save
+                setRows(null);
+                setTaskLists(null);
+            })
             .catch( error => {
               console.warn(JSON.stringify(error, null,2));
             })
@@ -179,6 +195,8 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
         handleClose();
 
     };
+
+    
 
     return(
         <Modal
@@ -203,9 +221,9 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                 <hr className={classes.hr}/>
                 <p className={classes.taskTitle}>Task Information</p>
                     <FormControl fullWidth>
-                        <TextField className={classes.inputField} variant="outlined" id="standard-required" label="Name:" inputRef={ref_object.t_name}  defaultValue={modalTask.t_name} onChange={handleShouldUpdate(true)}/>
-                        <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="standard-required" label="Sign/Product Description:" inputRef={ref_object.description} defaultValue={modalTask.description} onChange={handleShouldUpdate(true)}/>
-                        <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="standard-required" label="Notes:" inputRef={ref_object.notes} defaultValue={modalTask.notes} onChange={handleShouldUpdate(true)}/>
+                        <TextField className={classes.inputField} variant="outlined" id="input-name" label="Name:" inputRef={ref_object.t_name}  defaultValue={modalTask.t_name} onChange={handleShouldUpdate(true)}/>
+                        <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="input-description" label="Sign/Product Description:" inputRef={ref_object.description} defaultValue={modalTask.description} onChange={handleShouldUpdate(true)}/>
+                        <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="input-notes" label="Notes:" inputRef={ref_object.notes} defaultValue={modalTask.notes} onChange={handleShouldUpdate(true)}/>
                     </FormControl>
                     <Grid container className={classes.lowerGrid}>
                         <Grid item xs={6} >
@@ -216,18 +234,21 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                             <Select
                             labelId="task-type-input-label"
                             id="task-type-input"
-                            defaultValue={modalTask.work_type}
-                            onChange={value => handleInputOnChange(value, true, "select", "work_type")}
+                            defaultValue={modalTask.type}
+                            onChange={value => handleInputOnChange(value, true, "select", "type")}
                             >
                             <MenuItem value={null}>N/A</MenuItem>
-                            <MenuItem value={'install'}>Install</MenuItem>
-                            <MenuItem value={'delivery'}>Delivery</MenuItem>
-                            <MenuItem value={'repair'}>Repair</MenuItem>
-                            <MenuItem value={'service call'}>Service Call</MenuItem>
-                            <MenuItem value={'parts'}>Parts</MenuItem>
+                            <MenuItem value={'Bench'}>Bench</MenuItem>
+                            <MenuItem value={'Delivery'}>Delivery</MenuItem>
+                            <MenuItem value={'Field'}>Field</MenuItem>
+                            <MenuItem value={'Install'}>Install</MenuItem>
+                            <MenuItem value={'Loaner'}>Loaner</MenuItem>
+                            <MenuItem value={'Parts'}>Parts</MenuItem>
+                            <MenuItem value={'Pickup'}>Pickup</MenuItem>
+                            <MenuItem value={'Shipment'}>Shipment</MenuItem>
                             </Select>
                         </FormControl></Grid>
-                        <Grid item xs={6} ><TextField className={classes.inputField} type="number" variant="outlined" id="standard-required" label="Hours" inputRef={ref_object.hours_estimate} defaultValue={modalTask.hours_estimate} onChange={handleShouldUpdate(true)} /></Grid>
+                        <Grid item xs={6} ><TextField className={classes.inputField} type="number" variant="outlined" id="input-hours" label="Hours" inputRef={ref_object.hours_estimate} defaultValue={modalTask.hours_estimate} onChange={handleShouldUpdate(true)} /></Grid>
                     </Grid>
                     <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Assigned Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.date_assigned} onChange={value => handleInputOnChange(value, true, "datetime", "date_assigned")} /></MuiPickersUtilsProvider>
                     <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Desired Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.date_desired} onChange={value => handleInputOnChange(value, true, "datetime", "date_desired")} /></MuiPickersUtilsProvider>
@@ -235,13 +256,13 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     <hr className={classes.hr}/>
                     <p className={classes.taskTitle}>Address Information</p>
                     <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="standard-required" label="Address Name:"  defaultValue={modalTask.address_name}/></FormControl></Grid>
-                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="standard-required" label="Address:"  defaultValue={modalTask.address}/></FormControl></Grid>
+                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="input-address-name" label="Address Name:"  defaultValue={modalTask.address_name}/></FormControl></Grid>
+                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="input-address" label="Address:"  defaultValue={modalTask.address}/></FormControl></Grid>
                     </Grid>
                     <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="standard-required" label="City:"  defaultValue={modalTask.city}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="standard-required" label="State:"  defaultValue={modalTask.state}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="standard-required" label="Zipcode:"  defaultValue={modalTask.zip}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-city" label="City:"  defaultValue={modalTask.city}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-state" label="State:"  defaultValue={modalTask.state}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-zip" label="Zipcode:"  defaultValue={modalTask.zip}/></Grid>
                     </Grid>
                     
                     <hr className={classes.hr}/>
@@ -251,37 +272,21 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                             
                             <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Delivery Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.delivery_date} onChange={value => handleInputOnChange(value, true, "datetime", "delivery_date")} /></MuiPickersUtilsProvider>
                             </Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="standard-required" label="Delivery Crew" inputRef={ref_object.delivery_crew} defaultValue={modalTask.delivery_crew} onChange={handleShouldUpdate(true)}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} type="number" variant="outlined" id="standard-required" label="Delivery Order" inputRef={ref_object.delivery_order} defaultValue={modalTask.delivery_order} onChange={handleShouldUpdate(true)}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-delivery-crew" label="Delivery Crew" inputRef={ref_object.delivery_crew} defaultValue={modalTask.delivery_crew} onChange={handleShouldUpdate(true)}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputField} type="number" variant="outlined" id="input-delivery-order" label="Delivery Order" inputRef={ref_object.delivery_order} defaultValue={modalTask.delivery_order} onChange={handleShouldUpdate(true)}/></Grid>
                     </Grid>
                     <Grid container className={classes.lowerGrid}>
                         <Grid item xs={4} ><MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Install Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="standard-required" label="Install Crew" inputRef={ref_object.install_crew} defaultValue={modalTask.install_crew} onChange={handleShouldUpdate(true)}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} type="number" variant="outlined" id="standard-required" label="Install Order" inputRef={ref_object.install_order} defaultValue={modalTask.install_order} onChange={handleShouldUpdate(true)}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-install-crew" label="Install Crew" inputRef={ref_object.install_crew} defaultValue={modalTask.install_crew} onChange={handleShouldUpdate(true)}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputField} type="number" variant="outlined" id="input-install-order" label="Install Order" inputRef={ref_object.install_order} defaultValue={modalTask.install_order} onChange={handleShouldUpdate(true)}/></Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={4} className={classes.paper}>
-                <TextField className={classes.inputField} variant="outlined" id="standard-required" label="Assigned Users" defaultValue={"TODO"}/>
+                
 
+                <div><Avatar src="/static/drilling-icon.png" className={classes.avatar}/>
                 <FormControl variant="outlined" className={classes.inputField}>
-                    <InputLabel id="status-input-label">
-                    Task Status
-                    </InputLabel>
-                    <Select
-                    labelId="status-input-label"
-                    id="status-input"
-                    defaultValue={modalTask.task_status}
-                    onChange={value => handleInputOnChange(value, true, "select", "task_status")}
-                    >
-                    <MenuItem value={null}>N/A</MenuItem>
-                    <MenuItem value={'Not Started'}>Not Started</MenuItem>
-                    <MenuItem value={'In Progress'}>In Progress</MenuItem>
-                    <MenuItem value={'Delivered'}>Delivered</MenuItem>
-                    <MenuItem value={'Installed'}>Installed</MenuItem>
-                    <MenuItem value={'Completed'}>Completed</MenuItem>  
-                    </Select>
-                </FormControl>
-                <FormControl variant="outlined" className={classes.inputField}>
+                    
                     <InputLabel id="drilling-input-label">
                     Drilling
                     </InputLabel>
@@ -299,6 +304,8 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     <MenuItem value={'Finished'}>Finished</MenuItem>  
                     </Select>
                 </FormControl>
+                </div>
+                <div><Avatar src="/static/sign-build-icon.png" className={classes.avatar}/>
                 <FormControl variant="outlined" className={classes.inputField}>
                     <InputLabel id="sign-input-label">
                     Sign
@@ -314,6 +321,8 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     <MenuItem value={'Finished'}>Finished</MenuItem>
                     </Select>
                 </FormControl>
+                </div>
+                <div><Avatar src="/static/art-icon.png" className={classes.avatar}/>
                 <FormControl variant="outlined" className={classes.inputField}>
                     <InputLabel id="artwork-input-label">
                     Artwork
@@ -329,6 +338,38 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     <MenuItem value={'Out for approval'}>Out for approval</MenuItem>
                     <MenuItem value={'Approved'}>Approved</MenuItem>
                     <MenuItem value={'Finished'}>Finished</MenuItem>
+                    </Select>
+                </FormControl>
+                </div>
+                <br/>
+                <TextField className={classes.inputField} variant="outlined" id="input-users" label="Assigned Users" defaultValue={"TODO"}/>
+                { taskLists ?
+                    <TaskModalTaskList taskLists={taskLists} setTaskLists={setTaskLists} 
+                                        modalTask={modalTask}
+                                        setShouldReFetch={setShouldReFetch}
+                                        modalOpen={modalOpen} setModalOpen={setModalOpen} 
+                                        setModalTaskId={setModalTaskId}/> 
+                    :
+                    <div>
+                        <CircularProgress />
+                    </div>
+                }
+                <FormControl variant="outlined" className={classes.inputField}>
+                    <InputLabel id="status-input-label">
+                    Task Status
+                    </InputLabel>
+                    <Select
+                    labelId="status-input-label"
+                    id="status-input"
+                    defaultValue={modalTask.task_status}
+                    onChange={value => handleInputOnChange(value, true, "select", "task_status")}
+                    >
+                    <MenuItem value={null}>N/A</MenuItem>
+                    <MenuItem value={'Not Started'}>Not Started</MenuItem>
+                    <MenuItem value={'In Progress'}>In Progress</MenuItem>
+                    <MenuItem value={'Delivered'}>Delivered</MenuItem>
+                    <MenuItem value={'Installed'}>Installed</MenuItem>
+                    <MenuItem value={'Completed'}>Completed</MenuItem>  
                     </Select>
                 </FormControl>
                 <ButtonGroup className={classes.buttonGroup}>
@@ -410,6 +451,7 @@ const useStyles = makeStyles(theme => ({
         },
         '&& .MuiSelect-select':{
             padding: '12px 40px 12px 15px',
+            minWidth: '120px',
         },
         '&& .MuiOutlinedInput-multiline': {
             padding: '8.5px 12px'
@@ -440,5 +482,13 @@ const useStyles = makeStyles(theme => ({
         '&& .MuiInputLabel-outlined': {
             transform: 'translate(14px, 12px) scale(1)',
         }
+    },
+    avatar:{
+        display: 'inline-block',
+        width: '35px',
+        height:'35px',
+        position: 'relative',
+        top: '11px',
+        right: '5px',
     }
   }));

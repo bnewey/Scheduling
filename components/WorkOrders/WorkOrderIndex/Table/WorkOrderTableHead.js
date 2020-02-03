@@ -6,6 +6,9 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
+import Tooltip from '@material-ui/core/Tooltip';
+
+import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 
 
@@ -18,42 +21,46 @@ const TableFilter = dynamic(
 
 
 const headCells = [
-    { id: 't_id', numeric: true, disablePadding: true, label: 'WO#' },
-    { id: 'priority_order', numeric: true, disablePadding: true, label: 'Priority' },
-    { id: 't_name', numeric: false, disablePadding: false, label: 'Name' },
-    { id: 'description', numeric: false, disablePadding: false, label: 'Desc' },
-    { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
-    { id: 'date_assigned', numeric: true, disablePadding: true, label: 'Date Assigned' },
-    { id: 'hours_estimate', numeric: true, disablePadding: false, label: 'Hours' },
-    { id: 'users', numeric: false, disablePadding: false, label: 'Users' },
-    { id: 'date_desired', numeric: true, disablePadding: false, label: 'Desired' },
-    { id: 'date_completed', numeric: true, disablePadding: false, label: 'Completed' },
-    { id: 'drilling', numeric: false, disablePadding: false, label: 'Drilling' },
-    { id: 'sign', numeric: false, disablePadding: true, label: 'Sign' },
-    { id: 'artwork', numeric: false, disablePadding: false, label: 'Artwork' },
+    { id: 'wo_record_id', numeric: true, disablePadding: true, label: 'WO#' },
+    { id: 'date', numeric: true, disablePadding: true, label: 'Date' },
+    { id: 'wo_type', numeric: false, disablePadding: false, label: 'Type' },
+    { id: 'a_name', numeric: false, disablePadding: false, label: 'Account' },
+    { id: 'description', numeric: false, disablePadding: false, label: 'Description' },
+    { id: 'completed', numeric: false, disablePadding: true, label: 'Completed' },
+    { id: 'invoiced', numeric: false, disablePadding: true, label: 'Invoiced' }
   ];
 
 
-function EnhancedTableHead(props) {
+function WorkOrderTableHead(props) {
     //PROPS
-    const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, rows, setFilteredRows,filterConfig, setFilterConfig } = props;
-    const createSortHandler = property => event => {
-      onRequestSort(event, property);
-    };
-
-
+    const { classes, order, orderBy, rowCount, onRequestSort, rows, setFilteredRows,numSelected,
+         onSelectAllClick, filterConfig, setFilterConfig, filterOutCompletedInvoiced, setFilterOutCompletedInvoiced } = props;
     //STATE
     const [filteredData, setFilteredData] = React.useState(rows);
+    
+        
+    
+    
+    const createSortHandler = property => event => {
+      onRequestSort(event, property);
+    };    
 
     const filterUpdated = function(newData, filterConfiguration) {
       setFilteredData(newData);
-      console.log(filterConfiguration);
       setFilterConfig(filterConfiguration);
     } 
 
+    const handleFilterOutCompletedInvoiced = (event) =>{
+        setFilterOutCompletedInvoiced(!filterOutCompletedInvoiced);
+    }
+
     useEffect(() =>{ //useEffect for inputText
       if(filteredData){
-        setFilteredRows(filteredData);
+        if(filterOutCompletedInvoiced)
+          setFilteredRows(filteredData.filter((row, i)=> !(row.completed === "Completed" && row.invoiced == "Invoiced")));
+        else{
+          setFilteredRows(filteredData);
+        }
       }
     
       return () => { //clean up
@@ -61,19 +68,41 @@ function EnhancedTableHead(props) {
               
           }
       }
-    },[filteredData]);
+    },[filteredData, filterOutCompletedInvoiced]);
+
 
 
   
     return (
       <TableHead>
-          <TableRow padding="checkbox">
+        <TableRow padding="checkbox">
+          <TableCell colspan="1">
             <Checkbox
-              color={"primary"}
               indeterminate={numSelected > 0 && numSelected < rowCount}
               checked={numSelected === rowCount}
               onChange={onSelectAllClick}
               inputProps={{ 'aria-label': 'select all' }}/>
+              <p style={{display: "inline"}}>Select All</p>
+          </TableCell>
+          <TableCell></TableCell>
+          <TableCell></TableCell>
+          <TableCell></TableCell>
+          <TableCell></TableCell>
+          <TableCell colspan="2">
+            <Tooltip title="Click to filter out work orders that are both completed and invoiced."
+                             arrow={true} enterDelay={400} placement={'top'}
+                              classes={{tooltip: classes.tooltip }}>
+              <Button
+                    onClick={event => handleFilterOutCompletedInvoiced(event)}
+                    variant="text"
+                    color="secondary"
+                    size="medium"
+                    className={filterOutCompletedInvoiced ? classes.filterButtonActive : classes.filterButton} >
+                    Filter Out Completed + Invoiced
+                </Button>
+              </Tooltip>
+          </TableCell>
+              
           </TableRow>
           <TableFilter
             rows={rows}
@@ -88,9 +117,7 @@ function EnhancedTableHead(props) {
               sortDirection={orderBy === headCell.id ? order : false}
               filterkey={headCell.id}
               className={classes.tableHead}
-
               alignleft="true"
-              
             >
               <TableSortLabel
                 active={orderBy === headCell.id}
@@ -99,9 +126,9 @@ function EnhancedTableHead(props) {
               >
                 {headCell.label}
                 {orderBy === headCell.id ? (
-                  <span className={classes.visuallyHidden}>
+                  <div className={classes.visuallyHidden}>
                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                  </span>
+                  </div>
                 ) : null}
               </TableSortLabel>
             </TableCell>
@@ -111,14 +138,12 @@ function EnhancedTableHead(props) {
     );
   }
   
-  EnhancedTableHead.propTypes = {
+  WorkOrderTableHead.propTypes = {
     classes: PropTypes.object.isRequired,
-    numSelected: PropTypes.number.isRequired,
     onRequestSort: PropTypes.func.isRequired,
-    onSelectAllClick: PropTypes.func.isRequired,
     order: PropTypes.oneOf(['asc', 'desc']).isRequired,
     orderBy: PropTypes.string.isRequired,
     rowCount: PropTypes.number.isRequired,
   };
 
-  export default EnhancedTableHead
+  export default WorkOrderTableHead

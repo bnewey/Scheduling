@@ -5,14 +5,25 @@ import Paper from '@material-ui/core/Paper';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ListIcon from '@material-ui/icons/List';
 import VisiblityOffIcon from '@material-ui/icons/VisibilityOff';
+import Button from '@material-ui/core/Button';
 import { Scrollbars} from 'react-custom-scrollbars';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
 import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
+import MapSidebarTaskList from './MapSidebarTaskList';
 
 
 const useStyles = makeStyles(theme => ({
@@ -28,6 +39,7 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#16233b',
         fontSize: '30px',
         fontWeight: '400',
+        display: 'flex',
     },
     body:{
         padding: '1% 1% 1% 1%',
@@ -46,7 +58,7 @@ const useStyles = makeStyles(theme => ({
     icon:{
         margin: '1px 12px 1px 1px',
         color: '#a0a0a0',
-    }
+    },
   }));
 
 const MapSidebar = (props) => {
@@ -54,7 +66,7 @@ const MapSidebar = (props) => {
     const [expanded, setExpanded] = React.useState(false);
     //PROPS
     const {mapRows, setMapRows, selectedIds, setSelectedIds, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
-            setShowingInfoWindow, setModalOpen, setModalTaskId} = props;
+            setShowingInfoWindow, setModalOpen, setModalTaskId, taskLists, setTaskLists, setResetBounds} = props;
 
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded)
@@ -77,7 +89,12 @@ const MapSidebar = (props) => {
     return(
         <Paper className={classes.root}>
             <Paper className={classes.head}>
-                <span>Sidebar</span>
+                <MapSidebarTaskList mapRows={mapRows} setMapRows={setMapRows} 
+                                    taskLists={taskLists} setTaskLists={setTaskLists}
+                                    setActiveMarker={setActiveMarker}
+                                    setResetBounds={setResetBounds}
+                                    setSelectedIds={setSelectedIds}/>
+                
             </Paper>
             <ExpansionPanel expanded={expanded === 'panel1'} onChange={handleChange('panel1')} className={classes.body } >
                 <ExpansionPanelSummary
@@ -94,6 +111,7 @@ const MapSidebar = (props) => {
                                                 setShowingInfoWindow={setShowingInfoWindow} 
                                                 markedRows={markedRows} 
                                                 setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
+                                                setResetBounds={setResetBounds}
                                                 />
                     </Scrollbars>
                 </ExpansionPanelDetails>
@@ -111,7 +129,7 @@ const MapSidebar = (props) => {
                         <MapSidebarMissingMarkers mapRows={mapRows} setMapRows={setMapRows}
                                                 selectedIds={selectedIds} setSelectedIds={setSelectedIds}
                                                 noMarkerRows={noMarkerRows} 
-                                                setModalOpen={setModalOpen} setModalTaskId={setModalTaskId} />
+                                                setModalOpen={setModalOpen} setModalTaskId={setModalTaskId} setResetBounds={setResetBounds}/>
                     </Scrollbars>
                 </ExpansionPanelDetails>
             </ExpansionPanel>

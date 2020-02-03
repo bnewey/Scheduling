@@ -3,7 +3,9 @@ import Wrapper from '../Scheduler/Wrapper'
 import Nav from '../Nav';
 import StyledFooter from '../Footer'
 import navButtons from "../../config/buttons";
-import { Component } from 'react';
+import { SnackbarProvider } from 'material-ui-snackbar-provider'
+
+import {makeStyles } from '@material-ui/core/styles';
 
 import {styled} from '@material-ui/core/styles';
 
@@ -15,17 +17,12 @@ const StyledNav = styled(Nav)({
 
 
 
- export default class Layout extends React.Component {
-    constructor(props){
-      super(props);
-    }
+const Layout = (props) => {
 
-
-
-   render(){
-      const {children} = this.props;
+      const {children} = props;
       const title = "REI Scheduling";
-
+      //CSS
+      const classes = useStyles();
       return (
         <Wrapper>
           <Head>
@@ -36,18 +33,33 @@ const StyledNav = styled(Nav)({
             
             <StyledNav navButtons={navButtons} />
           </header>
-          
+          <SnackbarProvider  SnackbarProps={{ autoHideDuration: 5000, className: classes.snackbar } }>
           <main className='main-wrapper'>
             { children }
             <style jsx>{`
                 margin: 0% 5% 2% 5%
             `}</style>
           </main>
-      
+          </SnackbarProvider>
           <StyledFooter />
           
         </Wrapper>
     );
   }
-}
 
+  export default Layout;
+
+
+const useStyles = makeStyles(theme => ({
+  snackbar: {
+    '&& .MuiSnackbarContent-root':{
+      padding: '0px 25px',
+      minHeight: '50px',
+      backgroundColor: '#4d5762',
+      color: '#fff',
+      border: '2px solid #bdf0ff',
+      fontSize: '17px',
+      fontWeight: 500,
+     }
+  },
+}));
