@@ -55,7 +55,7 @@ function getSorting(order, orderBy) {
 function WorkOrderTable(props) {
     const classes = useStyles();
     const {rows, setRows, pdfRows, setPdfRows, filterConfig,setFilterConfig, selectedIds,setSelectedIds,
-             filterOutCompletedInvoiced, setFilterOutCompletedInvoiced} = props;
+             filterOutCompletedInvoiced, setFilterOutCompletedInvoiced, tabValue, setTabValue, rowDateRange, changeDateRange} = props;
     const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('wo_record_id');
     const [page, setPage] = React.useState(0);
@@ -72,9 +72,7 @@ function WorkOrderTable(props) {
 
     useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
-        console.log("useEffect");
         if( filteredRows && selectedIds.length == 0) {
-            console.log("setPdf to filtered rows")
             setPdfRows(filteredRows);
         }
 
@@ -167,7 +165,7 @@ function WorkOrderTable(props) {
     return (
         <div className={classes.root}>
         <Paper className={classes.paper}>
-            <WorkOrderTableToolbar numSelected={selectedIds.length} />
+            <WorkOrderTableToolbar numSelected={selectedIds.length}  tabValue={tabValue} setTabValue={setTabValue} numPdfRows={pdfRows.length} />
             <Table
                 className={classes.table}
                 aria-labelledby="tableTitle"
@@ -187,6 +185,7 @@ function WorkOrderTable(props) {
                 filterConfig={filterConfig}
                 setFilterConfig={setFilterConfig}
                 filterOutCompletedInvoiced={filterOutCompletedInvoiced} setFilterOutCompletedInvoiced={setFilterOutCompletedInvoiced}
+                rowDateRange={rowDateRange} changeDateRange={changeDateRange}
                 />
                 <Tooltip title="Click to Select. You can select multiple items."
                             arrow={true} enterDelay={700} placement={'bottom'} disableHoverListener={selectedIds.length == 0 ? false : true}
@@ -322,4 +321,22 @@ const useStyles = makeStyles(theme => ({
             color: '#000',
         }
     },
+    inlineErrorText:{
+        color: '#cc1111',
+        display: 'inline-block',
+        fontWeight: '500',
+        fontSize: '10px'
+    },
+    inlineHeadText:{
+        color: '#444',
+        display: 'inline-block',
+        fontWeight: '600',
+        fontSize: '13px'
+    },
+    inputField:{
+        margin: '-4px 5px', 
+        backgroundColor: '#fff',
+        borderRadius: '2px',
+        border: '1px solid #e88408'
+    }
 }));

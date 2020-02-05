@@ -41,7 +41,6 @@ const MapContainer = (props) => {
     const [resetBounds, setResetBounds] = React.useState(true);
 
     useEffect( () =>{ //useEffect for inputText
-      console.log("bounds");
       if(resetBounds)
         getBounds();
         setResetBounds(false);
@@ -109,9 +108,6 @@ const MapContainer = (props) => {
       event.preventDefault();
     };
     ////
-
-    //console.log(props.google);
-    //console.log(bounds);
     
     return (
       <div>

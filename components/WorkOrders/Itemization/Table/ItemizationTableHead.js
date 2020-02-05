@@ -79,9 +79,9 @@ function ItemizationTableHead(props) {
               >
                 {headCell.label}
                 {orderBy === headCell.id ? (
-                  <span className={classes.visuallyHidden}>
+                  <div className={classes.visuallyHidden}>
                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                  </span>
+                  </div>
                 ) : null}
               </TableSortLabel>
             </TableCell>

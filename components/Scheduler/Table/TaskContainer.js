@@ -11,12 +11,17 @@ import FullWidthTabs from '../Tabs/FullWidthTabs';
 import Tasks from '../../../js/Tasks';
 import TaskLists from '../../../js/TaskLists';
 
+import Util from  '../../../js/Util';
 
-
+var today =  new Date();
 
 //we can make this a functional component now
 const TaskContainer = function() {
       const [rows, setRows] = useState();
+      const [rowDateRange, setDateRowRange] = useState({
+              from: Util.convertISODateToMySqlDate(today),
+              to: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()-90)))
+            });
       const [taskLists, setTaskLists] = useState();
       const [mapRows, setMapRows] = useState([]); //setMapRows gets called in children components
       const [selectedIds, setSelectedIds] = useState([]);
@@ -28,6 +33,7 @@ const TaskContainer = function() {
       useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
         if(!rows || rows == []) {
+          console.log(rowDateRange);
           Tasks.getAllTasks()
           .then( (data) => setRows(data))
           .catch( error => {

@@ -133,14 +133,16 @@ const TaskListMain = (props) => {
                     color="secondary"
                     size="large"
                     className={classes.darkButton}
-                    startIcon={<AddIcon/>}
-                />
+                ><AddIcon/></Button>
                 </div>
             </Paper>
             { taskLists ? 
             <React.Fragment>
             {taskLists.map((list, i)=> { return(
-            <ExpansionPanel expanded={expanded === ('panel' + i)} onChange={handleChange(list, 'panel' + i)} className={classes.body } >
+            <ExpansionPanel expanded={expanded === ('panel' + i)} 
+                            onChange={handleChange(list, 'panel' + i)} 
+                            className={classes.body } 
+                            key={"tasklist"+i}>
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1bh-content"
@@ -164,8 +166,7 @@ const TaskListMain = (props) => {
                                     color="primary"
                                     size="large"
                                     className={classes.lightButton}
-                                    startIcon={<TrashIcon/>}
-                                />
+                                ><TrashIcon/></Button>
                             </ButtonGroup>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.details}>

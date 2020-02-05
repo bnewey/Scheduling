@@ -48,23 +48,6 @@ const WorkOrderPdf = function(props) {
 
     const classes = useStyles();
       
-    //   useEffect( () =>{ //useEffect for inputText
-    //     //Gets data only on initial component mount
-    //     if(!rows || rows == []) {
-    //       WorkOrders.getAllWorkOrders()
-    //       .then( (data) => setRows(data))
-    //       .catch( error => {
-    //         console.warn(error);
-    //       })
-          
-    //     }
-      
-    //     return () => { //clean up
-    //         if(rows){
-                
-    //         }
-    //     }
-    //   },[rows]);
 
 
     const onDocumentLoadSuccess = ({numPages}) => {
@@ -104,7 +87,7 @@ const WorkOrderPdf = function(props) {
               default:
                 temp.sort((a,b) => a[orderBy]-b[orderBy]);
             }
-            console.log(temp);
+
             Pdf.createPdf(temp)
             .then( (data) => {
                 setLoaded(true);

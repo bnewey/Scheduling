@@ -68,12 +68,14 @@ function EnhancedTableHead(props) {
     return (
       <TableHead>
           <TableRow padding="checkbox">
-            <Checkbox
-              color={"primary"}
-              indeterminate={numSelected > 0 && numSelected < rowCount}
-              checked={numSelected === rowCount}
-              onChange={onSelectAllClick}
-              inputProps={{ 'aria-label': 'select all' }}/>
+            <TableCell>
+              <Checkbox
+                color={"primary"}
+                indeterminate={numSelected > 0 && numSelected < rowCount}
+                checked={numSelected === rowCount}
+                onChange={onSelectAllClick}
+                inputProps={{ 'aria-label': 'select all' }}/>
+            </TableCell>
           </TableRow>
           <TableFilter
             rows={rows}
@@ -99,10 +101,10 @@ function EnhancedTableHead(props) {
               >
                 {headCell.label}
                 {orderBy === headCell.id ? (
-                  <span className={classes.visuallyHidden}>
+                  <div className={classes.visuallyHidden}>
                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                  </span>
-                ) : null}
+                  </div>
+                ) : <></>}
               </TableSortLabel>
             </TableCell>
           ))}

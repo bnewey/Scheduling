@@ -63,9 +63,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
     
     useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
-        console.log("USE EFFECT");
         if(modalTaskId) {
-            console.log("Get task");
           Tasks.getTask(modalTaskId)
           .then( (data) => {
               setModalTask(data[0]);
@@ -96,7 +94,6 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
         setModalOpen(false);
         setModalTask(null);
         setModalTaskId(null);
-        console.log('?');
     };
 
     const handleDelete = id => () => {
@@ -135,11 +132,9 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
 
         }
         if(type === "select"){
-            console.log("select");
             tmpModalTask[key] = value.target.value;
         }
 
-        console.log(tmpModalTask);
         setModalTask(tmpModalTask);
         setShouldUpdate(param);
         
@@ -179,8 +174,6 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
 
             //Add Id to this new object
             updateModalTask["t_id"] = task.t_id;
-
-            console.log(updateModalTask);
  
             Tasks.updateTask(updateModalTask)
             .then( (data) => {
@@ -379,8 +372,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                         color="secondary"
                         size="large"
                         className={classes.deleteButton}
-                        startIcon={<TrashIcon />}
-                    >
+                    ><TrashIcon />
                     </Button>
                     <Button
                         onClick={handleSave(modalTask)}
@@ -388,9 +380,8 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                         color="primary"
                         size="large"
                         className={classes.saveButton}
-                        startIcon={<SaveIcon />}
                     >
-                        Save
+                        <SaveIcon />Save
                     </Button>
                 </ButtonGroup>
                 </Grid>

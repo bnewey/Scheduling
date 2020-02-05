@@ -23,6 +23,9 @@ const Layout = (props) => {
       const title = "REI Scheduling";
       //CSS
       const classes = useStyles();
+
+      const rand = () => Math.random();
+
       return (
         <Wrapper>
           <Head>
@@ -33,7 +36,7 @@ const Layout = (props) => {
             
             <StyledNav navButtons={navButtons} />
           </header>
-          <SnackbarProvider  SnackbarProps={{ autoHideDuration: 5000, className: classes.snackbar } }>
+          <SnackbarProvider  SnackbarProps={{ autoHideDuration: 5000, className: classes.snackbar, key: `Snackbar-${rand()}` } }>
           <main className='main-wrapper'>
             { children }
             <style jsx>{`

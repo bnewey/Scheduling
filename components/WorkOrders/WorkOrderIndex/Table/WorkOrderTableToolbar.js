@@ -4,15 +4,19 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
+import Button from '@material-ui/core/Button';
 
 
 
   
   const WorkOrderTableToolbar = props => {
     const classes = useToolbarStyles();
-    const { numSelected } = props;
+    const { numSelected, tabValue, setTabValue, numPdfRows } = props;
 
-    
+    //METHODS
+    const handleTabChange = (event, value) => { 
+        setTabValue(value);
+    }
   
     return (
       <Toolbar
@@ -22,14 +26,22 @@ import Toolbar from '@material-ui/core/Toolbar';
       >
         {numSelected > 0 ? (
           <Typography className={classes.title} color="inherit" variant="subtitle1">
-            {numSelected} selected
+            {numPdfRows} Selected
           </Typography>
         ) : (
           <Typography className={classes.title} variant="h6" id="tableTitle">
-            Work Orders
+            Work Orders - {numPdfRows} Selected
           </Typography>
         )}
-               
+               <Button
+            onClick={event => handleTabChange(event, 1)}             
+            variant="text"
+            color="secondary"
+            size="medium"
+            className={`${classes.darkButton} ${classes.borderButton}`}
+            
+        > Create a PDF
+        </Button>
       </Toolbar>
     );
   };
@@ -64,4 +76,20 @@ import Toolbar from '@material-ui/core/Toolbar';
 
       fontSize: '30px !important',
     },
+    darkButton:{
+        backgroundColor: '#fca437',
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: '20px',
+        minWidth: '10%',
+        padding: '1px 3px',
+    },
+    borderButton:{
+      border: '1px solid rgb(255, 237, 196)',
+      '&:hover':{
+        border: '',
+        backgroundColor: '#ffedc4',
+        color: '#d87b04'
+      }
+    }
   }));

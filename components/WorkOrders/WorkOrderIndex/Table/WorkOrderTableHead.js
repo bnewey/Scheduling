@@ -7,6 +7,16 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Tooltip from '@material-ui/core/Tooltip';
+import DateFnsUtils from '@date-io/date-fns';
+import Typography from '@material-ui/core/Typography'
+import {
+    DatePicker,
+    TimePicker,
+    DateTimePicker,
+    MuiPickersUtilsProvider,
+  } from '@material-ui/pickers';
+
+import { useSnackbar } from 'material-ui-snackbar-provider'
 
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -34,10 +44,12 @@ const headCells = [
 function WorkOrderTableHead(props) {
     //PROPS
     const { classes, order, orderBy, rowCount, onRequestSort, rows, setFilteredRows,numSelected,
-         onSelectAllClick, filterConfig, setFilterConfig, filterOutCompletedInvoiced, setFilterOutCompletedInvoiced } = props;
+         onSelectAllClick, filterConfig, setFilterConfig, filterOutCompletedInvoiced, setFilterOutCompletedInvoiced, 
+         rowDateRange, changeDateRange} = props;
     //STATE
     const [filteredData, setFilteredData] = React.useState(rows);
     
+    const snackbar = useSnackbar();
         
     
     
@@ -51,7 +63,12 @@ function WorkOrderTableHead(props) {
     } 
 
     const handleFilterOutCompletedInvoiced = (event) =>{
-        setFilterOutCompletedInvoiced(!filterOutCompletedInvoiced);
+      // TODO replace thiis snackbar library with something more dynamic
+      snackbar.showMessage(
+        !filterOutCompletedInvoiced ? 'Filtering out completed and invoiced work orders!' : 'Disabled filtering of completed and invoiced work orders!',
+        'OK', () => {console.log("Hey")}
+      )
+      setFilterOutCompletedInvoiced(!filterOutCompletedInvoiced);
     }
 
     useEffect(() =>{ //useEffect for inputText
@@ -75,8 +92,28 @@ function WorkOrderTableHead(props) {
   
     return (
       <TableHead>
+        <TableRow style={{backgroundColor: '#d7d7d7'}}>
+          <TableCell colSpan={7}>
+          <Typography className={classes.inlineHeadText}>Displaying Work Orders from &nbsp;</Typography>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <DatePicker    format="MM/dd/yyyy"
+                                variant="inline"
+                                className={classes.inputField}
+                                value={rowDateRange.from} 
+                                onChange={value => changeDateRange(null, value)} />
+            </MuiPickersUtilsProvider> 
+            <Typography className={classes.inlineHeadText}>&nbsp;to&nbsp; </Typography>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <DatePicker    format="MM/dd/yyyy"
+                                variant="inline"
+                                className={classes.inputField}
+                                value={rowDateRange.to} 
+                                onChange={value => changeDateRange(value, null)} />
+            </MuiPickersUtilsProvider> {rows.length >= 5000 ? <Typography className={classes.inlineErrorText}>The data has been limited to 5000 items, please select a smaller date range</Typography> : <></>}
+          </TableCell>
+        </TableRow>
         <TableRow padding="checkbox">
-          <TableCell colspan="1">
+          <TableCell colSpan={2}>
             <Checkbox
               indeterminate={numSelected > 0 && numSelected < rowCount}
               checked={numSelected === rowCount}
@@ -84,11 +121,11 @@ function WorkOrderTableHead(props) {
               inputProps={{ 'aria-label': 'select all' }}/>
               <p style={{display: "inline"}}>Select All</p>
           </TableCell>
+      
           <TableCell></TableCell>
           <TableCell></TableCell>
           <TableCell></TableCell>
-          <TableCell></TableCell>
-          <TableCell colspan="2">
+          <TableCell colSpan={2}>
             <Tooltip title="Click to filter out work orders that are both completed and invoiced."
                              arrow={true} enterDelay={400} placement={'top'}
                               classes={{tooltip: classes.tooltip }}>

@@ -140,8 +140,6 @@ const TaskListTasks = (props) =>{
         result.destination.index
       );
       
-      console.log(items);
-      
       var temp = items.map((item, i)=> item.t_id);
       TaskLists.reorderTaskList(temp,activeTaskList.id)
         .then( (ok) => {

@@ -39,7 +39,7 @@ const MapSiderbarMarkedTasks = (props) =>{
 
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
-    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows , setModalOpen, setModalTaskId, 
+    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows , setModalOpen, setModalTaskId, setResetBounds,
               selectedIds, setSelectedIds} = props;
     
     //CSS

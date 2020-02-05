@@ -10,12 +10,22 @@ import FullWidthTabs from './Tabs/FullWidthTabs';
 import WorkOrders from '../../../js/Work_Orders';
 
 
+import Util from  '../../../js/Util';
+
+const today = new Date();
+
 //we can make this a functional component now
 const WorkOrderContainer = function() {
       const [rows, setRows] = useState();
+      const [rowDateRange, setDateRowRange] = useState({
+        to: today,
+        from: new Date(new Date().setDate(today.getDate()-180))
+      });
       const [pdfRows, setPdfRows] = useState([]); //setMapRows gets called in children components
       const [filterConfig, setFilterConfig] = useState();
       const [selectedIds, setSelectedIds] = useState([]);
+
+      const [tabValue, setTabValue] = React.useState(0);
 
       const [filterOutCompletedInvoiced, setFilterOutCompletedInvoiced] = useState(false);
       
@@ -24,8 +34,9 @@ const WorkOrderContainer = function() {
       
       useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
-        if(!rows || rows == []) {
-          WorkOrders.getAllWorkOrders()
+        if(!rows || rows == [] && rowDateRange) {
+          console.log("refetch");
+          WorkOrders.getAllWorkOrders(rowDateRange)
           .then( (data) => setRows(data))
           .catch( error => {
             console.warn(error);
@@ -40,11 +51,26 @@ const WorkOrderContainer = function() {
         }
       },[rows]);
 
+      const changeDateRange = (to, from) =>{
+        console.log("to");
+        console.log(to);
+        console.log(Util.convertISODateToMySqlDate(new Date(to)));
+        console.log("from");
+        console.log(from);
+        console.log(Util.convertISODateToMySqlDate(new Date(from)));
+
+        setDateRowRange({
+          to: to ? new Date(to) : rowDateRange.to,
+          from: from ? new Date(from) : rowDateRange.from
+        })
+        setRows(null);
+      }
+
       
 
       return (
         <div className={classes.root}>
-          <FullWidthTabs >
+          <FullWidthTabs value={tabValue} setValue={setTabValue} >
           {rows  ?  
           <div>
             <WorkOrderTable 
@@ -52,7 +78,10 @@ const WorkOrderContainer = function() {
               pdfRows={pdfRows}  setPdfRows={setPdfRows} 
               filterConfig={filterConfig} setFilterConfig={setFilterConfig}
               selectedIds={selectedIds} setSelectedIds={setSelectedIds}
-              filterOutCompletedInvoiced={filterOutCompletedInvoiced} setFilterOutCompletedInvoiced={setFilterOutCompletedInvoiced}/>
+              filterOutCompletedInvoiced={filterOutCompletedInvoiced} setFilterOutCompletedInvoiced={setFilterOutCompletedInvoiced}
+              tabValue={tabValue} setTabValue={setTabValue}
+              rowDateRange={rowDateRange} changeDateRange={changeDateRange}
+              />
           </div> 
           : 
           <div>

@@ -15,7 +15,7 @@ const ItemizationContainer = function({searchText, searchTable,shouldFetch, setS
       useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
         if(shouldFetch || !rows || rows == []) {
-          setRows();
+          //setRows();
             console.log("useEffect");
           Work_Orders.getAllWorkOrderItems(searchTable, searchText) 
           .then( (data) => {setRows(data); setShouldFetch(false);})

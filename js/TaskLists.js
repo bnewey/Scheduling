@@ -143,8 +143,6 @@ async function reorderTaskList(task_ids, taskList_id){
                 },
                 body: JSON.stringify({ids: task_ids, tl_id: taskList_id})
             });
-            console.log("Response");
-        console.log(response);
         return response.ok;
     }catch(error){
         console.log(error);

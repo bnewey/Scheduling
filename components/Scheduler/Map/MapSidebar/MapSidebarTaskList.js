@@ -33,6 +33,9 @@ const MapSidebarTaskList = (props) => {
     //FUNCTIONS
     const handleChangeTaskListToMap = (event) => {
         var id = event.target.value;
+        if(id === ''){
+            return;
+        }
         var task = taskLists.filter((list, i)=> list.id === id)[0];
         setTaskListToMap(task);
     };
@@ -73,12 +76,12 @@ const MapSidebarTaskList = (props) => {
                 <Select
                 labelId="task-list-select-label"
                 id="task-list-select"
-                value={taskListToMap ? taskListToMap.id : null}
+                value={taskListToMap ? taskListToMap.id : ''}
                 onChange={handleChangeTaskListToMap}
                 >
-                    <MenuItem value={null}></MenuItem>
+                    <MenuItem value={''}>Choose a Task List..</MenuItem>
                 {taskLists.map((list,i)=> (
-                    <MenuItem value={list.id}>{list.list_name}</MenuItem>))                    
+                    <MenuItem value={list.id} key={"task-list-"+i}>{list.list_name}</MenuItem>))                    
                 }
                 </Select>
             </FormControl>

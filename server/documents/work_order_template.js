@@ -3,7 +3,6 @@ module.exports = (wo_data) => {
 
     var rows = "";
     wo_data.forEach((item, i)=> {
-      console.log(item);
       if(i != 0 && i%35 === 0){
         rows += `<tr></tr>
         </tbody>

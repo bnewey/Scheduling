@@ -116,8 +116,8 @@ const MapSidebar = (props) => {
                     </Scrollbars>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-            <ExpansionPanel expanded={expanded === 'panel2'} onChange={handleChange('panel2')} className={classes.body } 
-                classes={noMarkerRows.length > 0 ? {root: classes.attention} : ""}>
+            <ExpansionPanel expanded={expanded === 'panel2'} onChange={handleChange('panel2')} className={classes.body} 
+                classes={noMarkerRows.length > 0 ? {root: classes.attention} : {}}>
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1bh-content"

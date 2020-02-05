@@ -18,6 +18,9 @@ export default function TaskModalTaskList(props){
     const [taskListToAdd, setTaskListToAdd] = useState(null);
     
     const handleTaskListInputChange = event => {
+        if(event.target.value === ''){
+            return;
+        }
         setTaskListToAdd(event.target.value);
       };
 
@@ -102,9 +105,11 @@ export default function TaskModalTaskList(props){
                     labelId="task-list-label"
                     id="task-list-input"
                     onChange={handleTaskListInputChange}
+                    defaultValue={''}
                     >
+                    <MenuItem value={''}>Choose a Task List..</MenuItem>
                     {taskLists.map((list,i)=> (
-                        <MenuItem value={list.id}>{list.list_name}</MenuItem>))                    
+                        <MenuItem value={list.id} key={"task-List-"+i}>{list.list_name}</MenuItem>))                    
                     }   
                     </Select>
                 </FormControl>
@@ -115,9 +120,8 @@ export default function TaskModalTaskList(props){
                         color="secondary"
                         size="medium"
                         className={classes.saveButton}
-                        startIcon={<AddIcon />}
                     >
-                        Add To TaskList
+                       <AddIcon />Add To TaskList
                         </Button>
                    :<div><p style={{color: 'rgba(0, 0, 0, 0.52)'}}>Select a Task List</p></div> }   
                 </FormControl> 

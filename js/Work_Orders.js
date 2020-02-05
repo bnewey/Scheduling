@@ -1,10 +1,20 @@
 
 import 'isomorphic-unfetch';
 
-async function getAllWorkOrders(){
+async function getAllWorkOrders(dateRange){
+    if(!dateRange){
+        throw new Error("Undefined Date Range for getAllWorkOrders");
+    }
     const route = '/workOrders/getAllWorkOrders';
     try{
-        var data = await fetch(route);
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({dateRange: dateRange})
+            });
         var list = await data.json();
         return(list);
     }catch(error){
