@@ -39,8 +39,8 @@ const MapSiderbarMarkedTasks = (props) =>{
 
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
-    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows , setModalOpen, setModalTaskId, setResetBounds,
-              selectedIds, setSelectedIds} = props;
+    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , setModalOpen, setModalTaskId, setResetBounds,
+              selectedIds, setSelectedIds,taskListToMap, setTaskListToMap, setSnackBarStatus} = props;
     
     //CSS
     const classes = useStyles();
@@ -55,6 +55,11 @@ const MapSiderbarMarkedTasks = (props) =>{
 
 
     const handleRemoveFromSelected = (event, record_id) => {
+      //if TaskList is active
+      if(taskListToMap){
+        setTaskListToMap(null);
+        setSnackBarStatus(`Task List: ${taskListToMap.list_name} has been unmapped. You are now working with an unsaved tasks`, null, 3000, true);
+      }
 
       //TODO If user changes filter to exclude some already selected items, this breaks.
       const selectedIndex = selectedIds.indexOf(record_id);
@@ -125,9 +130,11 @@ const MapSiderbarMarkedTasks = (props) =>{
                               <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
                               <EditIcon />
                               </IconButton>
+                              
                               <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromSelected(event, activeMarker.t_id)}>
                                 <DeleteIcon />
                               </IconButton> 
+                             
                             </React.Fragment>
                           : <div></div>}
                         &nbsp;&nbsp;&nbsp;

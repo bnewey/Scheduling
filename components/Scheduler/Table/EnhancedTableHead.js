@@ -8,6 +8,8 @@ import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
+import EnhancedTableAddCreateTL from './EnhancedTableAddCreateTL';
+
 
 const TableFilter = dynamic(
     () => import('react-table-filter'),
@@ -36,7 +38,8 @@ const headCells = [
 
 function EnhancedTableHead(props) {
     //PROPS
-    const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, rows, setFilteredRows,filterConfig, setFilterConfig } = props;
+    const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, rows, 
+            setFilteredRows,filterConfig, setFilterConfig } = props;
     const createSortHandler = property => event => {
       onRequestSort(event, property);
     };
@@ -47,7 +50,6 @@ function EnhancedTableHead(props) {
 
     const filterUpdated = function(newData, filterConfiguration) {
       setFilteredData(newData);
-      console.log(filterConfiguration);
       setFilterConfig(filterConfiguration);
     } 
 
@@ -64,18 +66,27 @@ function EnhancedTableHead(props) {
     },[filteredData]);
 
 
+
+
   
     return (
       <TableHead>
           <TableRow padding="checkbox">
-            <TableCell>
+            <TableCell colSpan={2}>
               <Checkbox
                 color={"primary"}
                 indeterminate={numSelected > 0 && numSelected < rowCount}
                 checked={numSelected === rowCount}
                 onChange={onSelectAllClick}
                 inputProps={{ 'aria-label': 'select all' }}/>
+                <p style={{display: "inline"}}>Select All</p>
             </TableCell>
+            <TableCell colSpan={11}>
+              { numSelected > 0 ?
+                <EnhancedTableAddCreateTL props={{...props}}/>
+                : <></>
+              }
+              </TableCell>
           </TableRow>
           <TableFilter
             rows={rows}

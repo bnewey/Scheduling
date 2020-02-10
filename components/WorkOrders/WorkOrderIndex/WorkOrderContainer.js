@@ -35,7 +35,6 @@ const WorkOrderContainer = function() {
       useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
         if(!rows || rows == [] && rowDateRange) {
-          console.log("refetch");
           WorkOrders.getAllWorkOrders(rowDateRange)
           .then( (data) => setRows(data))
           .catch( error => {
@@ -52,13 +51,6 @@ const WorkOrderContainer = function() {
       },[rows]);
 
       const changeDateRange = (to, from) =>{
-        console.log("to");
-        console.log(to);
-        console.log(Util.convertISODateToMySqlDate(new Date(to)));
-        console.log("from");
-        console.log(from);
-        console.log(Util.convertISODateToMySqlDate(new Date(from)));
-
         setDateRowRange({
           to: to ? new Date(to) : rowDateRange.to,
           from: from ? new Date(from) : rowDateRange.from

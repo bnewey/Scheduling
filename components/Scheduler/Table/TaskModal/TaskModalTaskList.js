@@ -70,7 +70,6 @@ export default function TaskModalTaskList(props){
             }
             setTaskLists(null);
             setShouldReFetch(true);
-            console.log('from handleremove');
             
         })
         .catch(error =>{
@@ -85,7 +84,7 @@ export default function TaskModalTaskList(props){
             { modalTask.task_list_id && modalTask.priority_order
             ? //ADDED TO TASK LIST ALREADY
                 <div>
-                    <p>{getTaskListName(modalTask.task_list_id)} | Priority Order: {modalTask.priority_order}</p>
+                    <p className={classes.p_task_name}>{getTaskListName(modalTask.task_list_id)} | Priority Order: {modalTask.priority_order}</p>
                     <Button
                         onClick={event => handleRemoveTaskFromList(event, modalTask.t_id, modalTask.task_list_id)}
                         variant="contained"
@@ -150,6 +149,7 @@ const useStyles = makeStyles(theme => ({
     inputField: {
         margin: '10px 17px 7px 17px',
         padding: '0px',
+        display: 'flex',
         '&& input':{
             padding: '12px 0px 12px 15px',
         },
@@ -169,5 +169,9 @@ const useStyles = makeStyles(theme => ({
         margin: '16px 5px',
         padding: '8px 4px',
         boxShadow: 'inset 0px 2px 1px -1px rgba(0,0,0,0.2), inset 0px 1px 1px 0px rgba(0,0,0,0.14), inset 0px 1px 3px 0px rgba(0,0,0,0.12)'
+    },
+    p_task_name:{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
     }
   }));

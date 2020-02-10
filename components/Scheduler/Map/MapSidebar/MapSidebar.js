@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#16233b',
         fontSize: '30px',
         fontWeight: '400',
-        display: 'flex',
+        display: 'block',
     },
     body:{
         padding: '1% 1% 1% 1%',
@@ -66,7 +66,8 @@ const MapSidebar = (props) => {
     const [expanded, setExpanded] = React.useState(false);
     //PROPS
     const {mapRows, setMapRows, selectedIds, setSelectedIds, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
-            setShowingInfoWindow, setModalOpen, setModalTaskId, taskLists, setTaskLists, setResetBounds} = props;
+            setShowingInfoWindow, setModalOpen, setModalTaskId, taskLists, setTaskLists, setResetBounds,
+            taskListToMap, setTaskListToMap} = props;
 
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded)
@@ -89,11 +90,7 @@ const MapSidebar = (props) => {
     return(
         <Paper className={classes.root}>
             <Paper className={classes.head}>
-                <MapSidebarTaskList mapRows={mapRows} setMapRows={setMapRows} 
-                                    taskLists={taskLists} setTaskLists={setTaskLists}
-                                    setActiveMarker={setActiveMarker}
-                                    setResetBounds={setResetBounds}
-                                    setSelectedIds={setSelectedIds}/>
+                <MapSidebarTaskList {...props} />
                 
             </Paper>
             <ExpansionPanel expanded={expanded === 'panel1'} onChange={handleChange('panel1')} className={classes.body } >
@@ -105,13 +102,7 @@ const MapSidebar = (props) => {
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
-                        <MapSidebarMarkedTasks mapRows={mapRows} setMapRows={setMapRows}
-                                                selectedIds={selectedIds} setSelectedIds={setSelectedIds}
-                                                activeMarker={activeMarker} setActiveMarker={setActiveMarker}
-                                                setShowingInfoWindow={setShowingInfoWindow} 
-                                                markedRows={markedRows} 
-                                                setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
-                                                setResetBounds={setResetBounds}
+                        <MapSidebarMarkedTasks {...props}
                                                 />
                     </Scrollbars>
                 </ExpansionPanelDetails>
@@ -126,10 +117,7 @@ const MapSidebar = (props) => {
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.details} >
                     <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
-                        <MapSidebarMissingMarkers mapRows={mapRows} setMapRows={setMapRows}
-                                                selectedIds={selectedIds} setSelectedIds={setSelectedIds}
-                                                noMarkerRows={noMarkerRows} 
-                                                setModalOpen={setModalOpen} setModalTaskId={setModalTaskId} setResetBounds={setResetBounds}/>
+                        <MapSidebarMissingMarkers {...props}/>
                     </Scrollbars>
                 </ExpansionPanelDetails>
             </ExpansionPanel>

@@ -58,9 +58,9 @@ const useStyles = makeStyles(theme => ({
     '&& .MuiSnackbarContent-root':{
       padding: '0px 25px',
       minHeight: '50px',
-      backgroundColor: '#4d5762',
+      backgroundColor: '#df5520',
       color: '#fff',
-      border: '2px solid #bdf0ff',
+      border: '2px solid #4e2d20',
       fontSize: '17px',
       fontWeight: 500,
      }

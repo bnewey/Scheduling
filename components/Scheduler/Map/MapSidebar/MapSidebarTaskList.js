@@ -21,12 +21,39 @@ import TaskLists from '../../../../js/TaskLists';
 
 const MapSidebarTaskList = (props) => {
     //STATE
-    const [taskListToMap, setTaskListToMap] = useState(null);
+    
     const [open, setOpen] = React.useState(false);
+    const [tempTaskListToMap, setTempTaskListToMap] = useState(null);
     //PROPS
-    const {mapRows, setMapRows, taskLists, setTaskLists, setActiveMarker, setResetBounds, setSelectedIds} = props;
+    const {mapRows, setMapRows, taskLists, setTaskLists, setActiveMarker, setResetBounds, selectedIds, setSelectedIds,
+        taskListToMap, setTaskListToMap} = props;
 
-
+        useEffect( () =>{ //useEffect for inputText
+            //Gets and sets tasks from Task List when theres a tasklistToMap and no selected from EnhancedTable
+            if(taskListToMap) {
+                TaskLists.getTaskList(taskListToMap.id)
+                .then( (data) => {
+                    //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
+                    var newSelectedIds = data.map((item, i )=> item.t_id );
+                    setSelectedIds(newSelectedIds);
+                    
+                    setMapRows(data);
+                    //Zoom out to focus on new task list
+                    setResetBounds(true);
+                })
+                .catch( error => {
+                    console.error(error);
+                })        
+              
+            }
+    
+            return () => { //clean up
+                if(taskListToMap){
+                    
+                }
+            }
+          },[taskListToMap]);
+    
     //CSS
     const classes = useStyles();
 
@@ -37,22 +64,15 @@ const MapSidebarTaskList = (props) => {
             return;
         }
         var task = taskLists.filter((list, i)=> list.id === id)[0];
-        setTaskListToMap(task);
+        setTempTaskListToMap(task);
     };
     const handleMapTaskList = (event) => {
         //fetch TaskListTasks
-        TaskLists.getTaskList(taskListToMap.id)
-            .then( (data) => {
-                //Reset selected ids to prevent confusing on Tasks Table
-                setSelectedIds([]);
-                setMapRows(data);
-                //Zoom out to focus on new task list
-                setResetBounds(true);
-                handleClose();
-            })
-            .catch( error => {
-            console.error(error);
-        })        
+        setActiveMarker(null);
+        //Remove any rows that are user selected in enhanced table
+        setSelectedIds([]);
+        setTaskListToMap(tempTaskListToMap);
+        handleClose();
     };
 
     const handleClickOpen = () => {
@@ -60,6 +80,7 @@ const MapSidebarTaskList = (props) => {
     };
 
     const handleClose = () => {
+        
         setOpen(false);
     };
      
@@ -76,7 +97,7 @@ const MapSidebarTaskList = (props) => {
                 <Select
                 labelId="task-list-select-label"
                 id="task-list-select"
-                value={taskListToMap ? taskListToMap.id : ''}
+                value={tempTaskListToMap ? tempTaskListToMap.id : ''}
                 onChange={handleChangeTaskListToMap}
                 >
                     <MenuItem value={''}>Choose a Task List..</MenuItem>
@@ -89,7 +110,7 @@ const MapSidebarTaskList = (props) => {
                 <Button onClick={handleClose} color="primary">
                     Cancel
                 </Button>
-                {taskListToMap ? <Button
+                {tempTaskListToMap ? <Button
                     onClick={event => handleMapTaskList(event)}
                     variant="contained"
                     color="secondary"
@@ -102,6 +123,7 @@ const MapSidebarTaskList = (props) => {
             </DialogContent>
             </Dialog>
             :<></>}
+            { taskListToMap ? <p class={classes.p_activeTask}>Active Task List: {taskListToMap.list_name}</p> : <></>}
         </React.Fragment>
       
     );
@@ -151,6 +173,7 @@ const useStyles = makeStyles(theme => ({
         padding: '9px 5px',
         backgroundColor: '#f3f4f6',
         borderRadius: '3px',
+        display: 'flex',
         '&& input':{
             color: '#16233b',
         },
@@ -168,4 +191,15 @@ const useStyles = makeStyles(theme => ({
             fontSize: '14px'
         }
     },
+    p_activeTask:{
+        fontSize: '13px',
+        margin: '5px 17px',
+        backgroundColor: '#2e92da',
+        padding: '3px 25px',
+        borderRadius: '4px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        boxShadow: 'inset 0px 2px 1px -1px rgba(0,0,0,0.2), inset 0px 1px 1px 0px rgba(0,0,0,0.14), inset 0px 1px 3px 0px rgba(0,0,0,0.12)'
+    }
   }));

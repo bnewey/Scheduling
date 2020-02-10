@@ -49,8 +49,11 @@ async function addTaskList(name){
                 },
                 body: JSON.stringify({list_name: name})   
             });
-        
-        return response.ok;
+        if(!response.ok){
+            throw new Error("AddTaskList bad response or query")
+        }
+        var id = await response.json();
+        return(id[0].last_id);
     }catch(error){
         throw error;
     }
@@ -77,7 +80,7 @@ async function removeTaskList(id){
 async function updateTaskList(taskList){
     const route = '/taskLists/updateTaskList';
     try{
-        var reponse = await fetch(route,
+        var response = await fetch(route,
             {
                 method: 'POST',
                 headers: {
@@ -103,6 +106,25 @@ async function addTaskToList(task_id, taskList_id){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({id: task_id, tl_id: taskList_id})
+            });
+            return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+
+}
+
+async function addMultipleTasksToList(task_ids, taskList_id){
+    const route = '/taskLists/addMultipleTasksToList';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ids: task_ids, tl_id: taskList_id})
             });
             return response.ok;
     }catch(error){
@@ -157,6 +179,7 @@ module.exports = {
     getAllTaskLists: getAllTaskLists,
     getTaskList: getTaskList,
     addTaskList: addTaskList,
+    addMultipleTasksToList: addMultipleTasksToList,
     removeTaskList: removeTaskList,
     updateTaskList: updateTaskList,
     addTaskToList: addTaskToList,

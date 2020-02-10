@@ -1,3 +1,4 @@
+
 import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -32,13 +33,14 @@ const MapContainer = (props) => {
     const classes = useStyles();
     const snackbar = useSnackbar();
 
-    const {mapRows, setMapRows, selectedIds, setSelectedIds, taskLists, setTaskLists} = props;
+    const {mapRows, setMapRows, selectedIds, setSelectedIds, taskLists, setTaskLists, taskListToMap, setTaskListToMap, setSnackBarStatus} = props;
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const [bounds, setBounds] = useState(null);
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState();  
     const [resetBounds, setResetBounds] = React.useState(true);
+    const [markedRows, setMarkedRows] = useState([]);
 
     useEffect( () =>{ //useEffect for inputText
       if(resetBounds)
@@ -51,7 +53,13 @@ const MapContainer = (props) => {
       }
     },[resetBounds]);
 
-
+    useEffect( () =>{ //useEffect for inputText
+      if(mapRows)
+        setMarkedRows(mapRows.filter((row, index) => row.geocoded)  );
+      return () => { //clean up
+      }
+    },[mapRows]);
+    
 
     if(mapRows.length > 50){
       setMapRows( mapRows.slice(0, 49));
@@ -64,7 +72,8 @@ const MapContainer = (props) => {
 
     //Get mapRows that do not have lat, lng
     const noMarkerRows = mapRows.filter((row, index) => !row.geocoded);
-    const markedRows = mapRows.filter((row, index) => row.geocoded);
+    
+
 
     //Get Bounds 
     const getBounds = () => {
@@ -148,12 +157,14 @@ const MapContainer = (props) => {
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows}
                           selectedIds={selectedIds} setSelectedIds={setSelectedIds}
                           noMarkerRows={noMarkerRows} 
-                          markedRows={markedRows} 
+                          markedRows={markedRows} setMarkedRows={setMarkedRows}
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                           setShowingInfoWindow={setShowingInfoWindow}
                           setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
                           taskLists={taskLists} setTaskLists={setTaskLists}
                           setResetBounds={setResetBounds}
+                          taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
+                          setSnackBarStatus={setSnackBarStatus}
                           />
             </Grid>
           </Grid>

@@ -28,59 +28,6 @@ const TableFilter = dynamic(
     }
 )
 
-const useStyles = makeStyles(theme => ({
-    root: {
-      width: '100%',
-    },
-    paper: {
-      width: '100%',
-      marginBottom: theme.spacing(2),
-    },
-    table: {
-      minWidth: 750,
-      '&& .MuiTableCell-paddingNone': {
-        padding: '6px 24px 6px 16px',
-      }
-    },
-    visuallyHidden: {
-      border: 0,
-      clip: 'rect(0 0 0 0)',
-      height: 1,
-      margin: -1,
-      overflow: 'hidden',
-      padding: 0,
-      position: 'absolute',
-      top: 20,
-      width: 1,
-    },
-    selectedRow:{
-      backgroundColor: '#abb7c9',
-      '&:hover':{
-        backgroundColor: 'rgb(142, 166, 201) !important'
-      }
-      
-    },
-    nonSelectedRow:{
-      backgroundColor: '#ffffff',
-      '&:hover':{
-        backgroundColor: 'rgba(0, 0, 0, 0.07) !important'
-      }
-    },
-    tableHead:{
-      fontSize: 11,
-      fontWeight: 600,
-    },
-    tableFilter: {
-      margin: '50px',
-    },
-    tooltip:{
-        fontSize: '18px',
-        padding: '4px 5px',
-        width: '100%',
-        backgroundColor: 'rgba(0,0,0,.50)'
-    }
-    
-  }));
 
   function desc(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -109,7 +56,8 @@ const useStyles = makeStyles(theme => ({
   function EnhancedTable(props) {
     const classes = useStyles();
     const {rows, setRows, taskLists, setTaskLists, mapRows, setMapRows,
-        selectedIds,setSelectedIds,filterConfig,setFilterConfig, tabValue, setTabValue} = props;
+        selectedIds,setSelectedIds,filterConfig,setFilterConfig, tabValue, 
+        setTabValue, taskListToMap, setTaskListToMap, snackBarStatus, setSnackBarStatus} = props;
     const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('date');
     //const [selected, setSelected] = React.useState([]);
@@ -120,9 +68,6 @@ const useStyles = makeStyles(theme => ({
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState();  
 
-
-
-   
 
     const handleRequestSort = (event, property) => {
       const isDesc = orderBy === property && order === 'desc';
@@ -136,7 +81,6 @@ const useStyles = makeStyles(theme => ({
         const newSelecteds = filteredRows ? filteredRows.map(n=>n.t_id) : rows.map(n => n.t_id);
         setSelectedIds(newSelecteds);
         setMapRows(filteredRows);
-        console.log(newSelecteds);
         return;
       }
       // if unchecked
@@ -147,8 +91,13 @@ const useStyles = makeStyles(theme => ({
 
   
     const handleClick = (event, record_id) => {
+      //Unset tasklist since were adding/removing from task list
+      if(taskListToMap){
+        setTaskListToMap(null);
+        setSnackBarStatus(`Task List: ${taskListToMap.list_name} has been unmapped`, null, 3000, true);
+      }
 
-      //TODO If user changes filter to exclude some already selected items, this breaks.
+      //TODO If user changes filter to exclude some already selected items, this breaks?
       const selectedIndex = selectedIds.indexOf(record_id);
       let newSelected = [];
       const row = filteredRows.filter((row, index)=> row.t_id == record_id);
@@ -208,7 +157,7 @@ const useStyles = makeStyles(theme => ({
   
     const isSelected = record_id => selectedIds.indexOf(record_id) !== -1;
   
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, (filteredRows ? filteredRows.length : rows.length  ) - page * rowsPerPage);
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, (filteredRows ? filteredRows.length : rows ? rows.length : 0  ) - page * rowsPerPage);
   
     return (
       <div className={classes.root}>
@@ -232,11 +181,15 @@ const useStyles = makeStyles(theme => ({
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
-                rowCount={ filteredRows ? filteredRows.length : rows.length}
+                rowCount={ filteredRows ? filteredRows.length : rows ? rows.length : 0}
                 rows={filteredRows ? filteredRows : rows}
                 setFilteredRows={setFilteredRows}
                 filterConfig={filterConfig}
                 setFilterConfig={setFilterConfig}
+                selectedIds={selectedIds}
+                taskLists={taskLists}
+                setTaskLists={setTaskLists}
+                snackBarStatus={snackBarStatus} setSnackBarStatus={setSnackBarStatus}
               />
               <Tooltip title="Click to Select. You can select multiple items. Right Click to Edit"
                             arrow={true} enterDelay={700} placement={'bottom'} disableHoverListener={selectedIds.length == 0 ? false : true}
@@ -296,7 +249,7 @@ const useStyles = makeStyles(theme => ({
           <TablePagination
             rowsPerPageOptions={[15, 30, 50]}
             component="div"
-            count={ filteredRows ? filteredRows.length : rows.length}
+            count={ filteredRows ? filteredRows.length : rows ? rows.length : 0}
             rowsPerPage={rowsPerPage}
             page={page}
             onChangePage={handleChangePage}
@@ -312,3 +265,65 @@ const useStyles = makeStyles(theme => ({
   }
 
   export default EnhancedTable;
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      width: '100%',
+    },
+    paper: {
+      width: '100%',
+      marginBottom: theme.spacing(2),
+    },
+    table: {
+      minWidth: 750,
+      '&& .MuiTableCell-paddingNone': {
+        padding: '6px 24px 6px 16px',
+      }
+    },
+    visuallyHidden: {
+      border: 0,
+      clip: 'rect(0 0 0 0)',
+      height: 1,
+      margin: -1,
+      overflow: 'hidden',
+      padding: 0,
+      position: 'absolute',
+      top: 20,
+      width: 1,
+    },
+    selectedRow:{
+      backgroundColor: '#abb7c9',
+      '&:hover':{
+        backgroundColor: 'rgb(142, 166, 201) !important'
+      }
+      
+    },
+    nonSelectedRow:{
+      backgroundColor: '#ffffff',
+      '&:hover':{
+        backgroundColor: 'rgba(0, 0, 0, 0.07) !important'
+      }
+    },
+    tableHead:{
+      fontSize: 11,
+      fontWeight: 600,
+    },
+    tableFilter: {
+      margin: '50px',
+    },
+    tooltip:{
+        fontSize: '18px',
+        padding: '4px 5px',
+        width: '100%',
+        backgroundColor: 'rgba(0,0,0,.50)'
+    },
+    borderButton:{
+      border: '1px solid rgb(255, 237, 196)',
+      '&:hover':{
+        border: '',
+        backgroundColor: '#ffedc4',
+        color: '#d87b04'
+      }
+    }
+    
+  }));

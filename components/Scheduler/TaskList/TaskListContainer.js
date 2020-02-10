@@ -15,7 +15,8 @@ const TaskListContainer = function(props) {
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState(); 
 
-    const {taskLists, setTaskLists, mapRows, setMapRows, selectedIds, setSelectedIds} = props;
+    const {taskLists, setTaskLists, mapRows, setMapRows, selectedIds, setSelectedIds, tabValue, setTabValue,
+        taskListToMap, setTaskListToMap} = props;
     
      
 
@@ -26,7 +27,9 @@ const TaskListContainer = function(props) {
                     selectedIds={selectedIds} setSelectedIds={setSelectedIds}
                     modalOpen={modalOpen} setModalOpen={setModalOpen} 
                     setModalTaskId={setModalTaskId}
-                    activeTaskList={activeTaskList} setActiveTaskList={setActiveTaskList}/>
+                    activeTaskList={activeTaskList} setActiveTaskList={setActiveTaskList}
+                    tabValue={tabValue} setTabValue={setTabValue}
+                    taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}/>
         <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
                     modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}
                     taskLists={taskLists} setTaskLists={setTaskLists}/>

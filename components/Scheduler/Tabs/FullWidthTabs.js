@@ -66,10 +66,23 @@ const useStyles = makeStyles(theme => ({
   },
   tab:{
     backgroundColor: '#e7eff2',
+  },
+  p_selected:{
+    margin: '0px 0px',
+    padding: '0px 0px',
+    position: 'absolute',
+    bottom: '.75em',
+    color: 'rgb(255, 237, 196)',
+    fontSize: '12px',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    width: '50%',
+    backgroundColor: '#fca437'
   }
 }));
 
-export default function FullWidthTabs({children, value, setValue}) {
+export default function FullWidthTabs({children, value, setValue, numSelected, activeTaskName}) {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -93,8 +106,27 @@ export default function FullWidthTabs({children, value, setValue}) {
           aria-label="full width tabs example"
           
         >
-          <Tab className={value === 0 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><TaskIcon className={ classes.icon}/>&nbsp;Task Lists</span>} {...a11yProps(0)} />
-          <Tab className={value === 1 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><ViewListIcon className={classes.icon}/>&nbsp;Tasks</span>} {...a11yProps(1)} />
+          <Tab className={value === 0 ? classes.selectedTab : classes.nonSelectedTab} 
+              label={ 
+                <React.Fragment>
+                  <span className={classes.tabSpan}>
+                    <TaskIcon className={ classes.icon}/>&nbsp;Task Lists
+                  </span>
+                  {activeTaskName ? 
+                    <p className={classes.p_selected}>
+                        Active: {activeTaskName}
+                    </p> : <></>
+                  }
+              </React.Fragment>} {...a11yProps(0)} />
+          <Tab className={value === 1 ? classes.selectedTab : classes.nonSelectedTab} 
+              label={ <React.Fragment>
+                          <span className={classes.tabSpan}> 
+                            <ViewListIcon className={classes.icon}/>&nbsp;Tasks
+                          </span>
+                          {numSelected ? <p className={classes.p_selected}>
+                            {numSelected} Selected {activeTaskName ? "" : "(UNSAVED)"}
+                          </p> : <></>}
+                          </React.Fragment>} {...a11yProps(1)} />
           <Tab className={value === 2 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(2)} />
         </Tabs>
       </AppBar>

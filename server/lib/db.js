@@ -4,7 +4,8 @@ const pool=mysql.createPool({
     host: process.env.host,
     database: process.env.database,
     user: process.env.user,
-    password: process.env.password
+    password: process.env.password,
+    multipleStatements: true
 });
 
 
@@ -66,29 +67,7 @@ db.sendReadToSQL = function(data) {
         console.log(e);
         return;
     }
-    /*
-    //Check if array is undefined or empty
-    if( !(Array.isArray(db.machine_array) && db.machine_array.length)){
-        console.log("Call to mysql failed or problem with list of machines from mysql");
-        return;
-    }
 
-    let machines = json;
-    machines.forEach((item, index) =>{
-        let post = {
-            temp: item.temp,
-            pressure: item.pressure,
-            machine_id: item.id, 
-            read_date: new Date() // NOW(), but on the server-side
-        };
-
-        //Send data to the correct mysql db table for logging purposes
-        pool.query('INSERT INTO ' + db.machine_array[index] + ' SET ?',post, function (error) {
-            if(error){
-                console.log(error);
-            }             
-        });
-    });*/
     
 };
 module.exports = db;

@@ -14,9 +14,11 @@ import Button from '@material-ui/core/Button';
 import { Scrollbars} from 'react-custom-scrollbars';
 import TrashIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import TaskListTasks from './TaskListTasks';
+import TaskListTasksEdit from './TaskListTasksEdit';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
@@ -27,13 +29,17 @@ const TaskListMain = (props) => {
     //STATE
     const [expanded, setExpanded] = React.useState(false);
     const [taskListTasks, setTaskListTasks] = React.useState(null);
+    const [editOpen, setEditOpen] = React.useState(false);
+    const [editList, setEditList] = React.useState(null);
     //PROPS
     const {taskLists, setTaskLists, 
             mapRows, setMapRows, 
             selectedIds, setSelectedIds, 
             setModalTaskId, 
             modalOpen, setModalOpen, 
-            activeTaskList, setActiveTaskList} = props;
+            activeTaskList, setActiveTaskList,
+            tabValue, setTabValue,
+            taskListToMap, setTaskListToMap} = props;
 
 
     useEffect( () =>{ //useEffect for inputText
@@ -60,6 +66,10 @@ const TaskListMain = (props) => {
 
     //FUNCTIONS
     const handleChange = (list, panel ) => (event, isExpanded) => {
+        //Annoying bug with expansion and dialogs, return if dialog is open
+        if(editOpen){
+            return;
+        }
         //Dont want to nullify tasks when we expand list
         if(isExpanded != false){
             setTaskListTasks(null);
@@ -103,12 +113,20 @@ const TaskListMain = (props) => {
     
     };
 
+    const handleMapTaskList = (event, list) => {
+        if(!list){
+            return;
+        }
+        setTaskListToMap(list);
+        setTabValue(2);
+    };
+
     const handleAddNew = (event) =>{
 
         TaskLists.addTaskList("New List")
-                .then((ok) => {
-                    if(!ok){
-                        throw new Error("Failed to remove Task List");
+                .then((id) => {
+                    if(!id){
+                        console.warn("Bad id returned from addNewTaskList");
                     }
                     //refetch tasklists
                     setExpanded(false);
@@ -118,6 +136,16 @@ const TaskListMain = (props) => {
                 .catch( error => {
                     console.error(error);
             });
+    };
+
+    const handleEditClickOpen = (event, list) => {
+        setEditList(list);
+        setEditOpen(true);   
+    };
+
+    const handleEditClose = () => {
+        setEditList(null);
+        setEditOpen(false);
     };
 
 
@@ -137,7 +165,9 @@ const TaskListMain = (props) => {
                 </div>
             </Paper>
             { taskLists ? 
+            
             <React.Fragment>
+            <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>
             {taskLists.map((list, i)=> { return(
             <ExpansionPanel expanded={expanded === ('panel' + i)} 
                             onChange={handleChange(list, 'panel' + i)} 
@@ -148,11 +178,14 @@ const TaskListMain = (props) => {
                     aria-controls="panel1bh-content"
                     id="panel1bh-header"
                 >
-                        <ListIcon className={classes.icon}/><span>{list.list_name}:&nbsp;&nbsp;</span>
+                        <ListIcon className={classes.icon}/>
+                        <span>{list.list_name} 
+                        {taskListToMap===list ? <p className={classes.p_active}>ACTIVE IN MAP</p>: <></>} :&nbsp;&nbsp;
+                        </span>
                         <ButtonGroup className={classes.buttonGroup}>
                                 
                                 <Button
-                                    
+                                    onMouseDown={event => handleMapTaskList(event, list)}
                                     variant="text"
                                     color="secondary"
                                     size="large"
@@ -160,6 +193,13 @@ const TaskListMain = (props) => {
                                     
                                 > Map Task List
                                 </Button>
+                                <Button
+                                    onMouseDown={event => handleEditClickOpen(event, list)}
+                                    variant="text"
+                                    color="primary"
+                                    size="large"
+                                    className={classes.lightButton}
+                                    ><EditIcon/></Button>
                                 <Button
                                     onMouseDown={event => handleDelete(event,list.id)}
                                     variant="text"
@@ -263,5 +303,15 @@ const useStyles = makeStyles(theme => ({
             margin: '0px 5px',
         }
 
+    },
+    p_active:{
+        color:'#fff',
+        fontWeight: '200',
+        display:'inline',
+        backgroundColor: '#2e92da',
+        padding: '3px 9px',
+        margin: '0px 10px',
+        borderRadius: '4px',
+        boxShadow: 'inset 0px 2px 1px -1px rgba(0,0,0,0.2), inset 0px 1px 1px 0px rgba(0,0,0,0.14), inset 0px 1px 3px 0px rgba(0,0,0,0.12)'
     }
   }));

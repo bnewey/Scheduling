@@ -74,16 +74,19 @@ router.post('/removeTaskList', async (req,res) => {
 });
 
 router.post('/addTaskList', async (req,res) => {
-    const sql = 'INSERT INTO task_list (list_name) VALUES (?) ';
+    const sql = 'INSERT INTO task_list (list_name) VALUES (?) ; SELECT LAST_INSERT_ID() as last_id ;';
     var list_name;
     if(req.body){
         list_name = req.body.list_name;
+        if(!list_name){
+            list_name = "New List";
+        }
     }
     
     try{
-        const results = await database.query(sql, list_name);
+        const last_id_results = await database.query(sql, list_name);
         logger.info("Added TaskList " + list_name);
-        res.sendStatus(200);
+        res.json(last_id_results[1]);
     }
     catch(error){
         logger.error("TasksList (addTaskList): " + error);
@@ -92,7 +95,7 @@ router.post('/addTaskList', async (req,res) => {
 });
 
 router.post('/updateTaskList', async (req,res) => {
-    var id;
+    var taskList;
     if(req.body){
     taskList = req.body.taskList;
     }
@@ -103,11 +106,11 @@ router.post('/updateTaskList', async (req,res) => {
     const sql = ' UPDATE task_list SET list_name = ? ' +
     ' WHERE id = ? ';
 
-    const params = [taskList.tl_name, taskList.tl_id ];
+    const params = [taskList.list_name, taskList.id ];
 
     try{
     const results = await database.query(sql, params);
-    logger.info("Update TaskList " + taskList.tl_id );
+    logger.info("Update TaskList " + taskList.id );
     res.sendStatus(200);
     }
     catch(error){
@@ -139,6 +142,48 @@ router.post('/addTasktoList', async (req,res) => {
     logger.error("TasksList (addTaskToList): " + error);
     res.sendStatus(400);
     }
+});
+
+router.post('/addMultipleTaskstoList', async (req,res) => {
+    var taskList_id, task_ids;
+    if(req.body){
+        taskList_id = req.body.tl_id;
+        task_ids = req.body.ids;
+    }
+
+    const sql_select = ' select max(priority_order) AS max_priority from tasks where task_list_id = ? ' ; 
+
+    //Update tasks normally except if task is already in TaskList
+    const sql = ' UPDATE tasks SET task_list_id = ?, priority_order = ? ' +
+    ' WHERE id = ? AND  (task_list_id is NULL OR task_list_id <> ? ) ';
+
+    var select_results;
+    try{
+        select_results = await database.query(sql_select, taskList_id);
+    }catch(error){
+        throw error;
+    }
+
+    async.forEachOf(task_ids, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const priority = select_results[0]["max_priority"] ? select_results[0]["max_priority"] + 1 + i  :   i+1;
+            const results = await database.query(sql, [taskList_id, priority, id, taskList_id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("TasksList (addMultipleTaskList): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Add Tasks: " + JSON.stringify(task_ids) + "to Task List: " + taskList_id);
+            res.sendStatus(200);
+        }
+    })
 });
 
 router.post('/removeTaskFromList', async (req,res) => {
