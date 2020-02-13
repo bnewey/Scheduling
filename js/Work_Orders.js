@@ -5,7 +5,7 @@ async function getAllWorkOrders(dateRange){
     if(!dateRange){
         throw new Error("Undefined Date Range for getAllWorkOrders");
     }
-    const route = '/workOrders/getAllWorkOrders';
+    const route = '/scheduling/workOrders/getAllWorkOrders';
     try{
         var data = await fetch(route,
             {
@@ -24,7 +24,7 @@ async function getAllWorkOrders(dateRange){
 }
 
 async function getAllWorkOrderItems(table, query){
-    const route = '/workOrders/getAllWorkOrderItems';
+    const route = '/scheduling/workOrders/getAllWorkOrderItems';
     try{
         var data = await fetch(route,
             {

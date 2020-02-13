@@ -64,10 +64,11 @@ const useStyles = makeStyles(theme => ({
 const MapSidebar = (props) => {
     //STATE
     const [expanded, setExpanded] = React.useState(false);
+
     //PROPS
     const {mapRows, setMapRows, selectedIds, setSelectedIds, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
             setShowingInfoWindow, setModalOpen, setModalTaskId, taskLists, setTaskLists, setResetBounds,
-            taskListToMap, setTaskListToMap} = props;
+            taskListToMap, setTaskListToMap, reFetchTaskList, setReFetchTaskList} = props;
 
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded)

@@ -11,7 +11,11 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 
+
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+
 import Tasks from '../../../../js/Tasks';
+import TaskLists from '../../../../js/TaskLists';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -29,7 +33,23 @@ const useStyles = makeStyles(theme => ({
     nonSelectedRow:{
       backgroundColor: '#ffffff !important',
       boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-    }
+    },
+    MarkerInfo:{
+      display: 'block',
+      fontSize: '12px',
+      fontWeight: '600',
+      color: '#16233b',
+      backgroundColor: '#abb7c93d',
+      padding: '2px',
+
+    },
+    MarkerSubInfo:{
+        marginLeft:'5%',
+        display:'block',
+        fontSize: '11px',
+        fontWeight: '400',
+        color: '#666464',
+    },
   }));
 
 const MapSiderbarMarkedTasks = (props) =>{
@@ -39,8 +59,9 @@ const MapSiderbarMarkedTasks = (props) =>{
 
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
-    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , setModalOpen, setModalTaskId, setResetBounds,
-              selectedIds, setSelectedIds,taskListToMap, setTaskListToMap, setSnackBarStatus} = props;
+    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
+          setModalOpen, setModalTaskId, setResetBounds, selectedIds, setSelectedIds,taskListToMap, setTaskListToMap, 
+          setSnackBarStatus, infoWeather, setInfoWeather, reFetchTaskList, setReFetchTaskList} = props;
     
     //CSS
     const classes = useStyles();
@@ -93,6 +114,7 @@ const MapSiderbarMarkedTasks = (props) =>{
       }
     
       setSelectedIds(newSelected);
+      setInfoWeather(null);
       setShowingInfoWindow(false);
       setResetBounds(true);
 
@@ -108,21 +130,125 @@ const MapSiderbarMarkedTasks = (props) =>{
       event.preventDefault();
     };
     ////
+
+    //// DRAG N DROP
+
+    // a little function to help us with reordering the result
+    const reorder = (list, startIndex, endIndex) => {
+      if(!taskListToMap){
+        return;
+      }
+      const result = Array.from(list);
+      const [removed] = result.splice(startIndex, 1);
+      result.splice(endIndex, 0, removed);
+
+      return result;
+    };
+
+    const grid = 8;
+
+    const getItemStyle = (isDragging, draggableStyle) => {
+      
+      return({
+      // some basic styles to make the items look a bit nicer
+      userSelect: "none",
+      padding: grid * 1,
+      margin: `0 0 ${grid}px 0`,
+
+      // change background colour if dragging
+      background: isDragging ? "lightgreen" : "grey",
+      // styles we need to apply on draggables
+      ...draggableStyle,
+      top: isDragging ? draggableStyle["top"] - (draggableStyle["top"] * .25) : '',
+      left: isDragging ? '1800px' : '',
+    })};
+
+    const getListStyle = isDraggingOver => ({
+      background: isDraggingOver ? "lightblue" : "lightgrey",
+      padding: grid,
+      width: 'auto'
+    });
+
+    const onDragEnd = (result) => {
+      if(!taskListToMap){
+        return;
+      }
+      // dropped outside the list
+      if (!result.destination) {
+        return;
+      }
+  
+      const items = reorder(
+        markedRows,
+        result.source.index,
+        result.destination.index
+      );
+      
+      var temp = items.map((item, i)=> item.t_id);
+      TaskLists.reorderTaskList(temp,taskListToMap.id)
+        .then( (ok) => {
+                if(!ok){
+                  console.warn("Could not reorder tasklist" + taskListToMap.id);
+                }
+                //refresh tasklist
+                setReFetchTaskList(true);
+            })
+        .catch( error => {
+            console.error(error);
+          });
+          
+    }
+    // END DND
+
     
 
     return(
-        <List className={classes.root}>            
-            {markedRows.map((row) => {
+        <List className={classes.root}> 
+        <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="droppable"
+            renderClone={(provided, snapshot, rubric) => (
+              <div
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                ref={provided.innerRef}
+              >
+                <ListItem key={markedRows[rubric.source.index].t_id} 
+                                role={undefined} dense button 
+                                className={classes.nonSelectedRow}
+                                >
+                      <ListItemText>
+                            {markedRows[rubric.source.index].t_id} | {markedRows[rubric.source.index].t_name} 
+                      </ListItemText>
+                    </ListItem>
+              </div>
+            )}>
+            {(provided, snapshot) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                style={getListStyle(snapshot.isDraggingOver)}
+              >                 
+            {markedRows.map((row, index) => {
                 const labelId = `checkbox-list-label-${row.t_id}`;
                 return (
+                  <Draggable key={row.t_id} draggableId={row.t_id.toString()} index={index} isDragDisabled={taskListToMap ? false : true}>
+                  {(provided, snapshot) => (
                     <ListItem key={row.t_id} 
                                 role={undefined} dense button 
                                 onClick={handleToggle(row.t_id)}
                                 onContextMenu={event => handleRightClick(event, row.t_id)}
                                 selected={activeMarker && activeMarker.t_id === row.t_id}
-                                className={activeMarker ? (activeMarker.t_id === row.t_id ? classes.selectedRow : classes.nonSelectedRow) : classes.nonSelectedRow}>
+                                className={activeMarker ? (activeMarker.t_id === row.t_id ? classes.selectedRow : classes.nonSelectedRow) : classes.nonSelectedRow}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                style={taskListToMap ? getItemStyle(
+                                  snapshot.isDragging,
+                                  provided.draggableProps.style
+                                ) : {}}>
                       <ListItemText id={labelId}>
-                            {row.t_id} | {row.t_name} | {row.priority_order}
+                            <><div className={classes.MarkerInfo}>{row.t_name}</div>
+                            <div className={classes.MarkerSubInfo}>  ID:&nbsp;{row.t_id}&nbsp;&nbsp;Priority:&nbsp;{row.priority_order} </div></>
                       </ListItemText>
                       <ListItemSecondaryAction>
                         { activeMarker && activeMarker.t_id === row.t_id ? 
@@ -140,8 +266,15 @@ const MapSiderbarMarkedTasks = (props) =>{
                         &nbsp;&nbsp;&nbsp;
                       </ListItemSecondaryAction>
                     </ListItem>
+                    )}
+                    </Draggable>
                   );
             })}
+            {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
         </List>
     );
 

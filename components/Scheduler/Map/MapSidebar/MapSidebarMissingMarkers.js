@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
 
 const MapSiderbarMissingMakers = (props) =>{
     const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, noMarkerRows , setModalOpen, setModalTaskId, setResetBounds,
-        selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = props;
+        selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, infoWeather, setInfoWeather} = props;
 
     //CSS
     const classes = useStyles();
@@ -78,6 +78,7 @@ const MapSiderbarMissingMakers = (props) =>{
         }
 
         setSelectedIds(newSelected);
+        setInfoWeather(null);
         setShowingInfoWindow(false);
         setResetBounds(true);
   

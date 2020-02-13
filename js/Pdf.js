@@ -3,7 +3,7 @@ import 'isomorphic-unfetch';
 
 
 async function createPdf(pdf_data){
-    const route = '/pdf/createPdf';
+    const route = '/scheduling/pdf/createPdf';
     try{
         var response = await fetch(route,
             {
@@ -25,7 +25,7 @@ async function createPdf(pdf_data){
 
 
 async function fetchPdf(){
-    const route = '/pdf/fetchPdf';
+    const route = '/scheduling/pdf/fetchPdf';
     try{
         var data = await fetch(route,
             {

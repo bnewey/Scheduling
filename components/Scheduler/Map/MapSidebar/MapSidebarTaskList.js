@@ -23,10 +23,11 @@ const MapSidebarTaskList = (props) => {
     //STATE
     
     const [open, setOpen] = React.useState(false);
+   
     const [tempTaskListToMap, setTempTaskListToMap] = useState(null);
     //PROPS
     const {mapRows, setMapRows, taskLists, setTaskLists, setActiveMarker, setResetBounds, selectedIds, setSelectedIds,
-        taskListToMap, setTaskListToMap} = props;
+        taskListToMap, setTaskListToMap, reFetchTaskList, setReFetchTaskList} = props;
 
         useEffect( () =>{ //useEffect for inputText
             //Gets and sets tasks from Task List when theres a tasklistToMap and no selected from EnhancedTable
@@ -53,12 +54,38 @@ const MapSidebarTaskList = (props) => {
                 }
             }
           },[taskListToMap]);
+
+          useEffect( () =>{ //useEffect for inputText
+            //Gets and sets tasks from Task List when theres a tasklistToMap and a refetch is needed. 
+            //ex when user selected same task list as taskListToMap or when we reorder
+            console.log("Refetch use effect");
+            if(reFetchTaskList && taskListToMap) {
+                console.log("Refetching...");
+                TaskLists.getTaskList(taskListToMap.id)
+                .then( (data) => {
+                    //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
+                    var newSelectedIds = data.map((item, i )=> item.t_id );
+                    setSelectedIds(newSelectedIds);
+                    
+                    setMapRows(data);
+                    //Zoom out to focus on new task list
+                    setResetBounds(true);
+                    setReFetchTaskList(false);
+                })
+                .catch( error => {
+                    console.error(error);
+                })        
+              
+            }
+          },[reFetchTaskList]);
     
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
     const handleChangeTaskListToMap = (event) => {
+        //Handles select value in our select task list modal 
+        //This function does not fetch any data just yet
         var id = event.target.value;
         if(id === ''){
             return;
@@ -67,10 +94,17 @@ const MapSidebarTaskList = (props) => {
         setTempTaskListToMap(task);
     };
     const handleMapTaskList = (event) => {
-        //fetch TaskListTasks
+        //Actually fetches data after clicking ok on modal
         setActiveMarker(null);
         //Remove any rows that are user selected in enhanced table
         setSelectedIds([]);
+        //Fetch task list tasks
+        if(taskListToMap === tempTaskListToMap){
+            //Special case where we need to refetch that wont work in regular fetching workflow
+            setReFetchTaskList(true);
+            handleClose();
+            return;
+        }
         setTaskListToMap(tempTaskListToMap);
         handleClose();
     };
@@ -123,7 +157,8 @@ const MapSidebarTaskList = (props) => {
             </DialogContent>
             </Dialog>
             :<></>}
-            { taskListToMap ? <p class={classes.p_activeTask}>Active Task List: {taskListToMap.list_name}</p> : <></>}
+            { taskListToMap ? <p className={classes.p_activeTask}>Active Task List: {taskListToMap.list_name}</p> 
+                        : <><p className={classes.p_noActiveTask}>No Active Task List!</p></>}
         </React.Fragment>
       
     );
@@ -193,8 +228,21 @@ const useStyles = makeStyles(theme => ({
     },
     p_activeTask:{
         fontSize: '13px',
+        fontWeight: '600',
         margin: '5px 17px',
         backgroundColor: '#2e92da',
+        padding: '3px 25px',
+        borderRadius: '4px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        boxShadow: 'inset 0px 2px 1px -1px rgba(0,0,0,0.2), inset 0px 1px 1px 0px rgba(0,0,0,0.14), inset 0px 1px 3px 0px rgba(0,0,0,0.12)'
+    },
+    p_noActiveTask:{
+        fontSize: '13px',
+        fontWeight: '600',
+        margin: '5px 17px',
+        backgroundColor: '#7d7d7d',
         padding: '3px 25px',
         borderRadius: '4px',
         overflow: 'hidden',

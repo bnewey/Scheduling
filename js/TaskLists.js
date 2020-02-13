@@ -2,7 +2,7 @@
 import 'isomorphic-unfetch';
 
 async function getAllTaskLists(){
-    const route = '/taskLists/getAllTaskLists';
+    const route = '/scheduling/taskLists/getAllTaskLists';
     try{
         var data = await fetch(route);
         if(!data.ok){
@@ -17,7 +17,7 @@ async function getAllTaskLists(){
 }
 
 async function getTaskList(id){
-    const route = '/taskLists/getTaskList';
+    const route = '/scheduling/taskLists/getTaskList';
     try{
         var data = await fetch(route,
             {
@@ -39,7 +39,7 @@ async function getTaskList(id){
 }
 
 async function addTaskList(name){
-    const route = '/taskLists/addTaskList';
+    const route = '/scheduling/taskLists/addTaskList';
     try{
         var response = await fetch(route, 
             {
@@ -60,7 +60,7 @@ async function addTaskList(name){
 }
 
 async function removeTaskList(id){
-    const route = '/taskLists/removeTaskList';
+    const route = '/scheduling/taskLists/removeTaskList';
     try{
         var response = await fetch(route, 
             {
@@ -78,7 +78,7 @@ async function removeTaskList(id){
 }
 
 async function updateTaskList(taskList){
-    const route = '/taskLists/updateTaskList';
+    const route = '/scheduling/taskLists/updateTaskList';
     try{
         var response = await fetch(route,
             {
@@ -97,7 +97,7 @@ async function updateTaskList(taskList){
 }
 
 async function addTaskToList(task_id, taskList_id){
-    const route = '/taskLists/addTaskToList';
+    const route = '/scheduling/taskLists/addTaskToList';
     try{
         var response = await fetch(route,
             {
@@ -116,7 +116,7 @@ async function addTaskToList(task_id, taskList_id){
 }
 
 async function addMultipleTasksToList(task_ids, taskList_id){
-    const route = '/taskLists/addMultipleTasksToList';
+    const route = '/scheduling/taskLists/addMultipleTasksToList';
     try{
         var response = await fetch(route,
             {
@@ -135,7 +135,7 @@ async function addMultipleTasksToList(task_ids, taskList_id){
 }
 
 async function removeTaskFromList(taskList_id){
-    const route = '/taskLists/removeTaskFromList';
+    const route = '/scheduling/taskLists/removeTaskFromList';
     try{
         var response = await fetch(route,
             {
@@ -155,7 +155,7 @@ async function removeTaskFromList(taskList_id){
 
 //Maybe move call this in AddTaskToTaskList instead of calling in frontend
 async function reorderTaskList(task_ids, taskList_id){
-    const route = '/taskLists/reorderTaskList';
+    const route = '/scheduling/taskLists/reorderTaskList';
     try{
         var response = await fetch(route,
             {

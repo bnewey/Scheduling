@@ -3,15 +3,15 @@ import React from "react";
 const navButtons = [
     {
         label: "Home",
-        path: "/"
+        path: "/scheduling/"
     },
     {
         label: "Work Orders",
-        path: "/work_orders"
+        path: "/scheduling/work_orders"
     },
     {
         label: "Search Items",
-        path: "/search_items"
+        path: "/scheduling/search_items"
     }
 ];
 

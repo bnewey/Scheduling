@@ -4,6 +4,7 @@ import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 
 import MapSidebar from './MapSidebar/MapSidebar';
 import TaskModal from '../Table/TaskModal/TaskModal';
@@ -11,6 +12,13 @@ import { useState, useEffect } from 'react';
 
 
 import { useSnackbar } from 'material-ui-snackbar-provider'
+
+import MapMarkerInfoWindow from './MapMarkerInfoWindow';
+
+import Tasks from '../../../js/Tasks';
+import Util from '../../../js/Util';
+
+
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -41,6 +49,8 @@ const MapContainer = (props) => {
     const [modalTaskId, setModalTaskId] = React.useState();  
     const [resetBounds, setResetBounds] = React.useState(true);
     const [markedRows, setMarkedRows] = useState([]);
+    const [infoWeather, setInfoWeather] = useState(null);
+    const [reFetchTaskList, setReFetchTaskList] = React.useState(false);
 
     useEffect( () =>{ //useEffect for inputText
       if(resetBounds)
@@ -56,6 +66,54 @@ const MapContainer = (props) => {
     useEffect( () =>{ //useEffect for inputText
       if(mapRows)
         setMarkedRows(mapRows.filter((row, index) => row.geocoded)  );
+
+      //Find and set geolocation of unset rows
+      if(noMarkerRows){
+        var tmpMapRows = [...mapRows];
+        noMarkerRows.forEach((row, i)=> {
+          if(!row.address){
+            return;
+          }
+            
+          Tasks.getCoordinates(row.address, row.city, row.state, row.zip)
+          .then((data)=>{
+            if(!data){
+              throw new Error("Bad return from getCoordinates from GoogleAPI");
+            }
+            //Update MapRows with lat, lng, geocoded instead of refreshing
+            var mapRowIndex = mapRows.indexOf(row)
+            var tmpRow = {...row};
+            
+            tmpRow["lat"] = data.lat;
+            tmpRow["lng"] = data.lng;
+            tmpRow["geocoded"] = 1;
+            tmpMapRows[mapRowIndex] = tmpRow;
+            setMapRows(tmpMapRows);
+            
+            //Save lat, lng, geocoded to db
+            Tasks.saveCoordinates(row.t_id, data)
+            .then((ok)=>{
+              if(!ok){
+                console.warn("Did not save coordinates.");
+              }
+              if(i == noMarkerRows.length){
+
+              }
+              snackbar.showMessage(
+                'Unmapped Markers have been added to map',
+                'OK', () => {console.log("Hey")}
+              )
+            })
+            .catch((error)=> {
+              console.error(error);
+            })
+          })
+          .catch((error)=> {
+            console.error(error);
+          })
+        })
+        
+      }
       return () => { //clean up
       }
     },[mapRows]);
@@ -89,13 +147,12 @@ const MapContainer = (props) => {
         setShowingInfoWindow(true);
     }
 
-    const handleInfoWindowClose = () =>{
-      setShowingInfoWindow(false);
-    }
+    
 
 
     const onMapClick = (props) => {
       if (showingInfoWindow) {
+        setInfoWeather(null);
           setShowingInfoWindow(false);
           setResetBounds(true);
       }
@@ -107,6 +164,8 @@ const MapContainer = (props) => {
       }
       return `static/default_marker.png`;
     }
+
+
 
     //Modal
     const handleRightClick = (event, id) => {
@@ -136,6 +195,7 @@ const MapContainer = (props) => {
                 <Marker key={marker.t_id} 
                         position={{ lat: marker.lat, lng: marker.lng}}
                         onClick = { updateActiveMarker(marker.t_id) }
+                        
                         id={marker.t_id}
                         title={marker.t_name} 
                         name={marker.t_name}
@@ -143,14 +203,10 @@ const MapContainer = (props) => {
                           url: handleMarkerURL(marker.t_id)
                         }}/>
                 ))}
-                <InfoWindow
-                  position = {activeMarker ? { lat: activeMarker.lat , lng: activeMarker.lng} : null}
-                  visible = { showingInfoWindow }
-                  style = {classes.infoWindow}
-                  onClose={handleInfoWindowClose}
-                >
-                  <Paper>{activeMarker ? <React.Fragment> {activeMarker.t_id} | {activeMarker.t_name} | {activeMarker.priority_order} </React.Fragment> : <p>No Data</p>}</Paper>
-                </InfoWindow>
+                { <MapMarkerInfoWindow {...props} 
+                                    activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                                    infoWeather={infoWeather} setInfoWeather={setInfoWeather}
+                                    showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/>}
               </Map>
             </Grid>
             <Grid item xs={3}>
@@ -165,6 +221,8 @@ const MapContainer = (props) => {
                           setResetBounds={setResetBounds}
                           taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
                           setSnackBarStatus={setSnackBarStatus}
+                          infoWeather={infoWeather} setInfoWeather={setInfoWeather}
+                          reFetchTaskList={reFetchTaskList} setReFetchTaskList={setReFetchTaskList}
                           />
             </Grid>
           </Grid>

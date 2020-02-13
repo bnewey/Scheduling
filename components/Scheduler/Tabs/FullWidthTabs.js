@@ -69,7 +69,7 @@ const useStyles = makeStyles(theme => ({
   },
   p_selected:{
     margin: '0px 0px',
-    padding: '0px 0px',
+    padding: '0px 10px',
     position: 'absolute',
     bottom: '.75em',
     color: 'rgb(255, 237, 196)',
@@ -77,7 +77,7 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-    width: '50%',
+    width: '75%',
     backgroundColor: '#fca437'
   }
 }));

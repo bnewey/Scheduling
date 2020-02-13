@@ -10,8 +10,8 @@ router.get('/getAllTasks', async (req,res) => {
     ' date_format(date_completed, \'%Y-%m-%d\') as date_completed, t.description, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id, date_format(t.order_date, \'%Y-%m-%d\') as order_date, t.first_game, wo.type, t.install_location, ' +
     ' t.delivery_crew, t.delivery_order,t.install_order, t.install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     ' FROM tasks t ' +
-    ' LEFT JOIN entities_addresses ea ON (t.account_id = ea.entities_id AND main = 1)' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id ' +
+    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1)' +
     ' ORDER BY t_id DESC ' + 
     ' limit 1000';
    try{
@@ -40,7 +40,7 @@ router.post('/getTask', async (req,res) => {
     ' ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id '  +
-    ' LEFT JOIN entities_addresses ea ON (t.account_id = ea.entities_id AND main = 1) WHERE t.id = ? ';
+    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1) WHERE t.id = ? ';
 
     try{
         const results = await database.query(sql, id);
@@ -99,6 +99,33 @@ router.post('/updateTask', async (req,res) => {
     }
     catch(error){
     logger.error("Tasks (updateTask): " + error);
+    res.sendStatus(400);
+    }
+});
+
+router.post('/saveCoordinates', async (req,res) => {
+    var t_id, coordinates;
+    if(req.body){
+        t_id = req.body.t_id;
+        coordinates = req.body.coordinates;
+    }
+ 
+
+    const sql = ' UPDATE entities_addresses ea ' + 
+    ' INNER JOIN work_orders wo ON wo.account_id = ea.entities_id ' +
+    ' INNER JOIN tasks t ON t.table_id = wo.record_id ' +
+    ' SET ea.geocoded = 1, ea.lat = ?, ea.lng = ? ' +
+    ' WHERE t.id = ? AND ea.geocoded = 0';
+
+    const params = [coordinates.lat, coordinates.lng, t_id ];
+
+    try{
+    const results = await database.query(sql, params);
+    logger.verbose("Saved Entity Address Coord from task" + t_id );
+    res.sendStatus(200);
+    }
+    catch(error){
+    logger.error("Saved Entity Address (saveCoord): " + error);
     res.sendStatus(400);
     }
 });

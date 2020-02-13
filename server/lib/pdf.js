@@ -17,7 +17,10 @@ router.post('/createPdf', async (req,res) => {
         orientation: 'landscape'
     };
 
-    pdf.create(pdfTemplate(data), options).toFile(`/home/bbnewey/node-workspace/Scheduling-REPO/Scheduling/public/static/work_orders.pdf`, (err)=> {
+    
+
+    pdf.create(pdfTemplate(data), options).toFile(`${process.env.PWD}/public/static/work_orders.pdf`, (err)=> {
+        logger.info(process.env.PWD);
         if(err){
             res.sendStatus(400);
             return Promise.reject();
