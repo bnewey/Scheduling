@@ -1,14 +1,9 @@
 import React, {useRef, useState, useEffect} from 'react';
 import dynamic from 'next/dynamic';
 import { lighten, makeStyles } from '@material-ui/core/styles';
+import {TableCell, TableRow, TableHead, TableSortLabel, Tooltip, Typography, Button, Checkbox}  from '@material-ui/core';
 import PropTypes from 'prop-types';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Tooltip from '@material-ui/core/Tooltip';
 import DateFnsUtils from '@date-io/date-fns';
-import Typography from '@material-ui/core/Typography'
 import {
     DatePicker,
     TimePicker,
@@ -16,11 +11,7 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
-import { useSnackbar } from 'material-ui-snackbar-provider'
-
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-
+import cogoToast from 'cogo-toast';
 
 const TableFilter = dynamic(
     () => import('react-table-filter'),
@@ -49,7 +40,6 @@ function WorkOrderTableHead(props) {
     //STATE
     const [filteredData, setFilteredData] = React.useState(rows);
     
-    const snackbar = useSnackbar();
         
     
     
@@ -63,11 +53,7 @@ function WorkOrderTableHead(props) {
     } 
 
     const handleFilterOutCompletedInvoiced = (event) =>{
-      // TODO replace thiis snackbar library with something more dynamic
-      snackbar.showMessage(
-        !filterOutCompletedInvoiced ? 'Filtering out completed and invoiced work orders!' : 'Disabled filtering of completed and invoiced work orders!',
-        'OK', () => {console.log("Hey")}
-      )
+      cogoToast.info( !filterOutCompletedInvoiced ? "Filtered Out Completed & Invoiced Work Orders" : "Removed Filter - Completed & Invoiced Work Orders");
       setFilterOutCompletedInvoiced(!filterOutCompletedInvoiced);
     }
 

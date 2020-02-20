@@ -1,24 +1,15 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import dynamic from 'next/dynamic';
 import { lighten, makeStyles } from '@material-ui/core/styles';
+import {Paper, Switch, Table, TableBody, TableRow,TableCell, Checkbox, TableHead, TablePagination, 
+        FormControlLabel, CircularProgress, Tooltip} from '@material-ui/core';
 import PropTypes from 'prop-types';
-import Paper from '@material-ui/core/Paper';
-import Switch from '@material-ui/core/Switch';
 
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
-import Checkbox from '@material-ui/core/Checkbox';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import EnhancedTableHead from './EnhancedTableHead';
 import EnhancedTableToolbar from './EnhancedTableToolbar';
 import TaskModal from './TaskModal/TaskModal';
-import Tooltip from '@material-ui/core/Tooltip';
-import CircularProgress from '@material-ui/core/CircularProgress';
-
+import cogoToast from 'cogo-toast';
+import { TaskContext } from './TaskContainer';
 
 
 const TableFilter = dynamic(
@@ -55,9 +46,10 @@ const TableFilter = dynamic(
   
   function EnhancedTable(props) {
     const classes = useStyles();
-    const {rows, setRows, taskLists, setTaskLists, mapRows, setMapRows,
-        selectedIds,setSelectedIds,filterConfig,setFilterConfig, tabValue, 
-        setTabValue, taskListToMap, setTaskListToMap, snackBarStatus, setSnackBarStatus} = props;
+
+    const {rows,filterConfig,setFilterConfig} = props;
+    const { mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
+
     const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('date');
     //const [selected, setSelected] = React.useState([]);
@@ -68,6 +60,19 @@ const TableFilter = dynamic(
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState();  
 
+
+    useEffect( () =>{ //useEffect for inputText
+      //Need to reset filteredRows if rows are refetched
+      if(filteredRows) {
+        setFilteredRows(rows);
+      }
+    
+      return () => { //clean up
+          if(filteredRows){
+              
+          }
+      }
+    },[ rows]);
 
     const handleRequestSort = (event, property) => {
       const isDesc = orderBy === property && order === 'desc';
@@ -94,7 +99,7 @@ const TableFilter = dynamic(
       //Unset tasklist since were adding/removing from task list
       if(taskListToMap){
         setTaskListToMap(null);
-        setSnackBarStatus(`Task List: ${taskListToMap.list_name} has been unmapped`, null, 3000, true);
+        cogoToast.info(`Task List: ${taskListToMap.list_name} has been unmapped`)
       }
 
       //TODO If user changes filter to exclude some already selected items, this breaks?
@@ -161,13 +166,11 @@ const TableFilter = dynamic(
   
     return (
       <div className={classes.root}>
+         
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selectedIds.length}   tabValue={tabValue} setTabValue={setTabValue} mapRowsLength={mapRows.length}/>
+          <EnhancedTableToolbar numSelected={selectedIds.length} mapRowsLength={mapRows.length}/>
             <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}
-                        taskLists={taskLists} setTaskLists={setTaskLists}
-                        setRows={setRows}
-                      />
+                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId} />
             <Table
               className={classes.table}
               aria-labelledby="tableTitle"
@@ -186,16 +189,13 @@ const TableFilter = dynamic(
                 setFilteredRows={setFilteredRows}
                 filterConfig={filterConfig}
                 setFilterConfig={setFilterConfig}
-                selectedIds={selectedIds}
-                taskLists={taskLists}
-                setTaskLists={setTaskLists}
-                snackBarStatus={snackBarStatus} setSnackBarStatus={setSnackBarStatus}
               />
               <Tooltip title="Click to Select. You can select multiple items. Right Click to Edit"
                             arrow={true} enterDelay={700} placement={'bottom'} disableHoverListener={selectedIds.length == 0 ? false : true}
                             classes={{tooltip: classes.tooltip }}>
-              {rows ? 
+            
               <TableBody>
+              {rows ? <>
                 {stableSort(filteredRows ? filteredRows : rows, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
@@ -237,12 +237,13 @@ const TableFilter = dynamic(
                         <TableCell colSpan={6} />
                       </TableRow>
                     )}
+                    </>:
+              <div>
+                <CircularProgress/>
+              </div>
+            }
                 </TableBody>
-              :
-                <div>
-                  <CircularProgress/>
-                </div>
-              }
+                
               </Tooltip>
             </Table>
       
@@ -256,6 +257,7 @@ const TableFilter = dynamic(
             onChangeRowsPerPage={handleChangeRowsPerPage}
           />
         </Paper>
+        
         <FormControlLabel
           control={<Switch checked={dense} onChange={handleChangeDense} />}
           label="Dense padding"

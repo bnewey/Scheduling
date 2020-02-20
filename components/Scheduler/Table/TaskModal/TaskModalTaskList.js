@@ -1,13 +1,9 @@
 import React, {useRef, useState, useEffect} from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Select from '@material-ui/core/Select';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
+
+import {makeStyles, Select, ButtonGroup, Button, FormControl, MenuItem, InputLabel, Paper} from '@material-ui/core';
+
 import AddIcon from '@material-ui/icons/Add';
-import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
-import Paper from '@material-ui/core/Paper';
+import cogoToast from 'cogo-toast';
 
 import TaskLists from '../../../../js/TaskLists';
 
@@ -45,16 +41,18 @@ export default function TaskModalTaskList(props){
         .then( (ok) => {      
             if(!ok)
                 console.warn("Failed to Reorder before Adding to TaskList");
-            
+                
             TaskLists.addTaskToList(id, taskListToAdd)
                 .then( (ok) => {
                     //we need to refetch modalTask
                     if(!ok)
                         throw new Error("Failed to add Task to TaskList");
+                    cogoToast.success(`Task ${id} added to Task List ${taskListToAdd} `);
                     setShouldReFetch(true);
                 })
                 .catch(error => {
                     console.error(error);
+                    cogoToast.error(`Error adding to task list.`);
                 }) 
         })
         .catch(error => {
@@ -68,12 +66,14 @@ export default function TaskModalTaskList(props){
             if(!ok){
                 throw new Error("Failed to remove Task: " + id + " from Task List :" + tl_id);
             }
+            cogoToast.success(`Removed task ${id} from task list ${tl_id}`);
             setTaskLists(null);
             setShouldReFetch(true);
             
         })
         .catch(error =>{
             console.error(error);
+            cogoToast.error("Error removing task from task list");
         })
     }
 
@@ -104,7 +104,7 @@ export default function TaskModalTaskList(props){
                     labelId="task-list-label"
                     id="task-list-input"
                     onChange={handleTaskListInputChange}
-                    defaultValue={''}
+                    value={taskListToAdd}
                     >
                     <MenuItem value={''}>Choose a Task List..</MenuItem>
                     {taskLists.map((list,i)=> (

@@ -1,25 +1,21 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import Typography from '@material-ui/core/Typography';
-import Toolbar from '@material-ui/core/Toolbar';
-import Button from '@material-ui/core/Button';
-import Popper from '@material-ui/core/Popper';
-import Fade from '@material-ui/core/Fade';
-import Paper from '@material-ui/core/Paper';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import { useSnackbar } from 'material-ui-snackbar-provider'
 
+import {Typography, Toolbar, Button, Popper, Fade, Paper, ClickAwayListener} from '@material-ui/core';
+import cogoToast from 'cogo-toast';
+
+import {TaskContext} from './TaskContainer';
 
 
   
   const EnhancedTableToolbar = props => {
-    const snackbar = useSnackbar();
     //CSS
     const classes = useToolbarStyles();
     //PROPS
-    const { numSelected, tabValue, setTabValue ,mapRowsLength} = props;
+    const { numSelected, mapRowsLength} = props;
+    const { tabValue, setTabValue} = useContext(TaskContext);
     //STATE
     const [anchorEl, setAnchorEl] = React.useState(null);
     
@@ -28,11 +24,7 @@ import { useSnackbar } from 'material-ui-snackbar-provider'
       if(mapRowsLength > 0){
         setTabValue(value);
       }else{
-        //setAnchorEl( event.currentTarget);
-        snackbar.showMessage(
-          'Select a Task or Task List to view on the Map!',
-          'OK', () => {console.log("Hey")}
-        )
+        cogoToast.info( 'Select a Task or Task List to view on the Map!');
       }
 
     }

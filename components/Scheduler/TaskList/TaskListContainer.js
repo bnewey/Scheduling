@@ -1,11 +1,7 @@
-import React, {useRef, useState, useEffect} from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-
-import CircularProgress from '@material-ui/core/CircularProgress';
+import React, { useState} from 'react';
 
 import TaskListMain from '../TaskList/TaskListMain';
 
-import TaskLists from '../../../js/TaskLists';
 import TaskModal from '../Table/TaskModal/TaskModal';
 
 
@@ -15,27 +11,15 @@ const TaskListContainer = function(props) {
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState(); 
 
-    const {taskLists, setTaskLists, mapRows, setMapRows, selectedIds, setSelectedIds, tabValue, setTabValue,
-        taskListToMap, setTaskListToMap} = props;
-    
-     
-
     return (
     <div>
-        <TaskListMain taskLists={taskLists} setTaskLists={setTaskLists} 
-                    mapRows={mapRows} setMapRows={setMapRows} 
-                    selectedIds={selectedIds} setSelectedIds={setSelectedIds}
-                    modalOpen={modalOpen} setModalOpen={setModalOpen} 
+        <TaskListMain modalOpen={modalOpen} setModalOpen={setModalOpen} 
                     setModalTaskId={setModalTaskId}
-                    activeTaskList={activeTaskList} setActiveTaskList={setActiveTaskList}
-                    tabValue={tabValue} setTabValue={setTabValue}
-                    taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}/>
+                    activeTaskList={activeTaskList} setActiveTaskList={setActiveTaskList}/>
         <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                    modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}
-                    taskLists={taskLists} setTaskLists={setTaskLists}/>
+                    modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
     </div>
     );
-    
 }
 
 export default TaskListContainer

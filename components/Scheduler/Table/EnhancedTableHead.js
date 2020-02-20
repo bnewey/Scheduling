@@ -2,11 +2,7 @@ import React, {useRef, useState, useEffect} from 'react';
 import dynamic from 'next/dynamic';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import {TableCell, TableHead, TableRow, TableSortLabel, Checkbox} from '@material-ui/core';
 
 import EnhancedTableAddCreateTL from './EnhancedTableAddCreateTL';
 
@@ -83,7 +79,7 @@ function EnhancedTableHead(props) {
             </TableCell>
             <TableCell colSpan={11}>
               { numSelected > 0 ?
-                <EnhancedTableAddCreateTL props={{...props}}/>
+                <EnhancedTableAddCreateTL {...props}/>
                 : <></>
               }
               </TableCell>

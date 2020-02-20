@@ -8,7 +8,7 @@ import WorkOrderPdf from '../WorkOrderIndex/Pdf/WorkOrderPdf';
 
 import FullWidthTabs from './Tabs/FullWidthTabs';
 import WorkOrders from '../../../js/Work_Orders';
-
+import cogoToast from 'cogo-toast';
 
 import Util from  '../../../js/Util';
 

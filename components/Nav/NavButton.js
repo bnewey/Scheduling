@@ -39,7 +39,7 @@ const NavButton = props => {
   const classes = useStyles();
 
   return (
-      <Link href={props.path}><div className={`NavButton ${
+      <Link href={props.path} as={`/scheduling/${props.path}`}><div className={`NavButton ${
         props.router.pathname === props.path ? "active" : ""
       }`}>
           <a className={classes.a + " " + (props.router.pathname === props.path ? classes.active : "") } >{props.label} </a></div>

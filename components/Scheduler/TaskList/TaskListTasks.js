@@ -1,23 +1,15 @@
 import React, {useRef, useState, useEffect} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
+import {makeStyles, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Checkbox, IconButton, CircularProgress} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import TaskLists from '../../../js/TaskLists';
-
+import cogoToast from 'cogo-toast';
 
 
 const useStyles = makeStyles(theme => ({
@@ -45,8 +37,7 @@ const TaskListTasks = (props) =>{
     //STATE
 
     //PROPS
-    const {taskLists, taskListTasks, setTaskListTasks, mapRows, setMapRows, activeTaskList, setActiveTaskList , setModalOpen, setModalTaskId, 
-              selectedIds, setSelectedIds} = props;
+    const { taskListTasks, setTaskListTasks, activeTaskList, setActiveTaskList , setModalOpen, setModalTaskId} = props;
     
     //CSS
     const classes = useStyles();
@@ -70,9 +61,11 @@ const TaskListTasks = (props) =>{
             .then( (data) => {
                     var temp = taskListTasks.filter((task, i)=>task.t_id != id);
                     setTaskListTasks(temp);
+                    cogoToast.success(`Removed task ${id} from Task List`);
                 })
             .catch( error => {
             console.warn(JSON.stringify(error, null,2));
+            cogoToast.error(`Error removing Task from Task List`);
              });
       }
       confirmAlert({
@@ -144,11 +137,13 @@ const TaskListTasks = (props) =>{
       TaskLists.reorderTaskList(temp,activeTaskList.id)
         .then( (ok) => {
                 if(!ok){
-                  console.warn("Could not reorder tasklist" + activeTaskList.id);
+                  throw new Error("Could not reorder tasklist" + activeTaskList.id);
                 }
+                cogoToast.success(`Reordered Task List`);
                 setTaskListTasks(null);
             })
         .catch( error => {
+          cogoToast.error(`Error reordering task list`);
             console.error(error);
           });
           

@@ -1,22 +1,18 @@
 
 import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import {makeStyles, Paper, Grid, Button} from '@material-ui/core';
 
 import MapSidebar from './MapSidebar/MapSidebar';
 import TaskModal from '../Table/TaskModal/TaskModal';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 
-
-import { useSnackbar } from 'material-ui-snackbar-provider'
-
+import cogoToast from 'cogo-toast';
 import MapMarkerInfoWindow from './MapMarkerInfoWindow';
 
 import Tasks from '../../../js/Tasks';
 import Util from '../../../js/Util';
+import { TaskContext } from '../Table/TaskContainer';
 
 
 
@@ -39,9 +35,8 @@ const useStyles = makeStyles(theme => ({
 
 const MapContainer = (props) => {
     const classes = useStyles();
-    const snackbar = useSnackbar();
 
-    const {mapRows, setMapRows, selectedIds, setSelectedIds, taskLists, setTaskLists, taskListToMap, setTaskListToMap, setSnackBarStatus} = props;
+    const {mapRows, setMapRows} = useContext(TaskContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const [bounds, setBounds] = useState(null);
@@ -71,8 +66,13 @@ const MapContainer = (props) => {
       if(noMarkerRows){
         var tmpMapRows = [...mapRows];
         noMarkerRows.forEach((row, i)=> {
+          if(i > 50){
+            cogoToast.warn('Too many markers selected to correct all addresses...');
+            return;
+          }
           if(!row.address){
             return;
+            
           }
             
           Tasks.getCoordinates(row.address, row.city, row.state, row.zip)
@@ -89,7 +89,7 @@ const MapContainer = (props) => {
             tmpRow["geocoded"] = 1;
             tmpMapRows[mapRowIndex] = tmpRow;
             setMapRows(tmpMapRows);
-            
+
             //Save lat, lng, geocoded to db
             Tasks.saveCoordinates(row.t_id, data)
             .then((ok)=>{
@@ -99,17 +99,17 @@ const MapContainer = (props) => {
               if(i == noMarkerRows.length){
 
               }
-              snackbar.showMessage(
-                'Unmapped Markers have been added to map',
-                'OK', () => {console.log("Hey")}
-              )
+
+              cogoToast.info('Unmapped Markers have been added to map');
             })
             .catch((error)=> {
               console.error(error);
+              cogoToast.error(`Error Saving Coordinates`);
             })
           })
           .catch((error)=> {
             console.error(error);
+            cogoToast.error(`Error getting coordinates`);
           })
         })
         
@@ -121,25 +121,23 @@ const MapContainer = (props) => {
 
     if(mapRows.length > 50){
       setMapRows( mapRows.slice(0, 49));
-      
-      snackbar.showMessage(
-        'Too many tasks have been selected! Showing first 50 tasks...',
-        'OK', () => {console.log("Hey")}
-      )
+
+      cogoToast.warn('Too many tasks have been selected! Showing first 50 tasks...');
     }
 
     //Get mapRows that do not have lat, lng
-    const noMarkerRows = mapRows.filter((row, index) => !row.geocoded);
+    const noMarkerRows = useMemo(() => mapRows.filter((row, index) => !row.geocoded) , [mapRows]);
     
 
 
     //Get Bounds 
-    const getBounds = () => {
+    //useCallback saves dep on mapRows, improves performance
+    const getBounds = useCallback( () => {
       const points = mapRows.filter((v, i)=> v.geocoded).map((item, index)=> ({ lat: item.lat, lng: item.lng}));
       var tempBounds = new props.google.maps.LatLngBounds();
       for (var i = 0; i < points.length; i++) {    tempBounds.extend(points[i]);    }
       setBounds(tempBounds);
-    }
+    },[ mapRows ] );
 
     const updateActiveMarker = id => (props, marker, e) => {
         var task = mapRows.filter((row, i) => row.t_id === id)[0];
@@ -182,8 +180,7 @@ const MapContainer = (props) => {
           <Grid container spacing={3}>
             <Grid item xs={9}>
             <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}
-                        taskLists={taskLists} setTaskLists={setTaskLists}/>
+                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
               <Map
                 google={props.google}
                 zoom={6}
@@ -199,28 +196,27 @@ const MapContainer = (props) => {
                         id={marker.t_id}
                         title={marker.t_name} 
                         name={marker.t_name}
+                        drilling={marker.drilling}
+                        artwork={marker.artwork}
+                        sign={marker.sign}
+
                         icon={{
                           url: handleMarkerURL(marker.t_id)
                         }}/>
                 ))}
                 { <MapMarkerInfoWindow {...props} 
-                                    activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
-                                    infoWeather={infoWeather} setInfoWeather={setInfoWeather}
-                                    showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/>}
+                          activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                          infoWeather={infoWeather} setInfoWeather={setInfoWeather}
+                          showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/>}
               </Map>
             </Grid>
             <Grid item xs={3}>
-              <MapSidebar mapRows={mapRows} setMapRows={setMapRows}
-                          selectedIds={selectedIds} setSelectedIds={setSelectedIds}
-                          noMarkerRows={noMarkerRows} 
+              <MapSidebar noMarkerRows={noMarkerRows} 
                           markedRows={markedRows} setMarkedRows={setMarkedRows}
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                           setShowingInfoWindow={setShowingInfoWindow}
                           setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
-                          taskLists={taskLists} setTaskLists={setTaskLists}
                           setResetBounds={setResetBounds}
-                          taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
-                          setSnackBarStatus={setSnackBarStatus}
                           infoWeather={infoWeather} setInfoWeather={setInfoWeather}
                           reFetchTaskList={reFetchTaskList} setReFetchTaskList={setReFetchTaskList}
                           />

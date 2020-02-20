@@ -1,16 +1,9 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import Typography from '@material-ui/core/Typography';
+import {makeStyles, Paper, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Typography, ButtonGroup, Button } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ListIcon from '@material-ui/icons/List';
 import VisiblityOffIcon from '@material-ui/icons/VisibilityOff';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Button from '@material-ui/core/Button';
 import { Scrollbars} from 'react-custom-scrollbars';
 import TrashIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
@@ -23,7 +16,9 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import TaskLists from '../../../js/TaskLists';
+import cogoToast from 'cogo-toast';
 
+import {TaskContext} from '../Table/TaskContainer';
 
 const TaskListMain = (props) => {
     //STATE
@@ -32,14 +27,12 @@ const TaskListMain = (props) => {
     const [editOpen, setEditOpen] = React.useState(false);
     const [editList, setEditList] = React.useState(null);
     //PROPS
-    const {taskLists, setTaskLists, 
-            mapRows, setMapRows, 
-            selectedIds, setSelectedIds, 
-            setModalTaskId, 
+    const { setModalTaskId, 
             modalOpen, setModalOpen, 
-            activeTaskList, setActiveTaskList,
-            tabValue, setTabValue,
-            taskListToMap, setTaskListToMap} = props;
+            activeTaskList, setActiveTaskList} = props;
+
+    const {taskLists, setTaskLists, tabValue, setTabValue,
+        taskListToMap, setTaskListToMap} = useContext(TaskContext);
 
 
     useEffect( () =>{ //useEffect for inputText
@@ -49,9 +42,12 @@ const TaskListMain = (props) => {
         }
         if(taskLists && activeTaskList && activeTaskList.id && taskListTasks == null ) { 
             TaskLists.getTaskList(activeTaskList.id)
-            .then( (data) => {setTaskListTasks(data)})
+            .then( (data) => {
+                setTaskListTasks(data)
+            })
             .catch( error => {
-            console.warn(JSON.stringify(error, null,2));
+                cogoToast.error(`Error getting Task List`);
+                console.warn(JSON.stringify(error, null,2));
             })
         }
     return () => { //clean up
@@ -98,9 +94,11 @@ const TaskListMain = (props) => {
                     setExpanded(false);
                     setActiveTaskList(null);
                     setTaskLists(null);
+                    cogoToast.success(`Removed Task List ${id}`);
                 })
                 .catch( error => {
                     console.error(error);
+                    cogoToast.error(`Error removing Task List`);
             });
         }
         confirmAlert({
@@ -132,8 +130,10 @@ const TaskListMain = (props) => {
                     setExpanded(false);
                     setActiveTaskList(null); 
                     setTaskLists(null);
+                    cogoToast.success(`Added new Task List`);
                 })
                 .catch( error => {
+                    cogoToast.error(`Error adding new task list`);
                     console.error(error);
             });
     };
@@ -213,12 +213,10 @@ const TaskListMain = (props) => {
                     <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
                         {taskListTasks ? 
                             <TaskListTasks 
-                                taskLists={taskLists}
                                 taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
-                                mapRows={mapRows} setMapRows={setMapRows}
-                                selectedIds={selectedIds} setSelectedIds={setSelectedIds}
                                 activeTaskList={activeTaskList} setActiveTaskList={setActiveTaskList}
-                                setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
+                                setModalOpen={setModalOpen} 
+                                setModalTaskId={setModalTaskId}
                         />
                         : 
                         <div>

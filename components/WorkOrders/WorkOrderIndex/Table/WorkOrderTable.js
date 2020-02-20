@@ -1,25 +1,11 @@
 import React, {useRef, useState, useEffect} from 'react';
 import dynamic from 'next/dynamic';
 import { lighten, makeStyles } from '@material-ui/core/styles';
+import {Paper, Switch, Table, TableBody, TableCell, TableRow, Checkbox, TableHead, TablePagination, FormControlLabel, Tooltip} from '@material-ui/core';
 import PropTypes from 'prop-types';
-import Paper from '@material-ui/core/Paper';
-import Switch from '@material-ui/core/Switch';
 
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
-import Checkbox from '@material-ui/core/Checkbox';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import WorkOrderTableHead from './WorkOrderTableHead';
-
 import WorkOrderTableToolbar from './WorkOrderTableToolbar';
-import Tooltip from '@material-ui/core/Tooltip';
-
-
-
 
 const TableFilter = dynamic(
     () => import('react-table-filter'),

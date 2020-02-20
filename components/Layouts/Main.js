@@ -3,7 +3,6 @@ import Wrapper from '../Scheduler/Wrapper'
 import Nav from '../Nav';
 import StyledFooter from '../Footer'
 import navButtons from "../../config/buttons";
-import { SnackbarProvider } from 'material-ui-snackbar-provider'
 
 import {makeStyles } from '@material-ui/core/styles';
 
@@ -24,8 +23,6 @@ const Layout = (props) => {
       //CSS
       const classes = useStyles();
 
-      const rand = () => Math.random();
-
       return (
         <Wrapper>
           <Head>
@@ -36,14 +33,12 @@ const Layout = (props) => {
             
             <StyledNav navButtons={navButtons} />
           </header>
-          <SnackbarProvider  SnackbarProps={{ autoHideDuration: 5000, className: classes.snackbar, key: `Snackbar-${rand()}` } }>
           <main className='main-wrapper'>
             { children }
             <style jsx>{`
                 margin: 0% 5% 2% 5%
             `}</style>
           </main>
-          </SnackbarProvider>
           <StyledFooter />
           
         </Wrapper>
@@ -54,15 +49,7 @@ const Layout = (props) => {
 
 
 const useStyles = makeStyles(theme => ({
-  snackbar: {
-    '&& .MuiSnackbarContent-root':{
-      padding: '0px 25px',
-      minHeight: '50px',
-      backgroundColor: '#df5520',
-      color: '#fff',
-      border: '2px solid #4e2d20',
-      fontSize: '17px',
-      fontWeight: 500,
-     }
-  },
+  root:{
+
+  }
 }));

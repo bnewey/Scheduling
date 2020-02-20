@@ -1,13 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
-
-import InputBase from '@material-ui/core/InputBase';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
-
+import { makeStyles, InputBase, Select, MenuItem, Paper, Button } from '@material-ui/core';
 
 export default function ItemizationSearch({inputText, setInputText, searchTable, setSearchTable, shouldFetch, setShouldFetch}){
     const formInputText = useRef();

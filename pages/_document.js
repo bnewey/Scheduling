@@ -24,8 +24,8 @@ class MyDocument extends Document {
             }
           />
           <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Helvetica:300,400,500"
+            rel="stylesheet" type='text/css'
+            href="/static/fonts.css"
           />
           <link rel="stylesheet" type="text/css" href="/static/nprogress.css" />
           <link rel="stylesheet" type="text/css" href="/static/styles.css" />

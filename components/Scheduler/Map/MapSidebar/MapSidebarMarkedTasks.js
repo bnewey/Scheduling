@@ -1,56 +1,18 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
+
+import {makeStyles, List, ListItem, ListItemSecondaryAction, ListItemText,IconButton} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import cogoToast from 'cogo-toast';
 
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Tasks from '../../../../js/Tasks';
 import TaskLists from '../../../../js/TaskLists';
+import {TaskContext} from '../../Table/TaskContainer';
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        margin: '10px 0px 10px 0px',
-        color: '#535353',
-        width: '100%',
-    },
-    items:{
-        color: '#fcfcfc'
-    },
-    selectedRow:{
-      backgroundColor: '#abb7c9 !important',
-      boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-    },
-    nonSelectedRow:{
-      backgroundColor: '#ffffff !important',
-      boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-    },
-    MarkerInfo:{
-      display: 'block',
-      fontSize: '12px',
-      fontWeight: '600',
-      color: '#16233b',
-      backgroundColor: '#abb7c93d',
-      padding: '2px',
-
-    },
-    MarkerSubInfo:{
-        marginLeft:'5%',
-        display:'block',
-        fontSize: '11px',
-        fontWeight: '400',
-        color: '#666464',
-    },
-  }));
 
 const MapSiderbarMarkedTasks = (props) =>{
 
@@ -59,10 +21,10 @@ const MapSiderbarMarkedTasks = (props) =>{
 
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
-    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
-          setModalOpen, setModalTaskId, setResetBounds, selectedIds, setSelectedIds,taskListToMap, setTaskListToMap, 
-          setSnackBarStatus, infoWeather, setInfoWeather, reFetchTaskList, setReFetchTaskList} = props;
+    const { activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
+          setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, reFetchTaskList, setReFetchTaskList} = props;
     
+    const {mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
     //CSS
     const classes = useStyles();
     //FUNCTIONS
@@ -79,7 +41,7 @@ const MapSiderbarMarkedTasks = (props) =>{
       //if TaskList is active
       if(taskListToMap){
         setTaskListToMap(null);
-        setSnackBarStatus(`Task List: ${taskListToMap.list_name} has been unmapped. You are now working with an unsaved tasks`, null, 3000, true);
+        cogoToast.info(`Task List: ${taskListToMap.list_name} has been unmapped. You are now working with an unsaved tasks`);
       }
 
       //TODO If user changes filter to exclude some already selected items, this breaks.
@@ -136,6 +98,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     // a little function to help us with reordering the result
     const reorder = (list, startIndex, endIndex) => {
       if(!taskListToMap){
+        cogoToast.info(`No active Task List to reorder`);
         return;
       }
       const result = Array.from(list);
@@ -188,13 +151,15 @@ const MapSiderbarMarkedTasks = (props) =>{
       TaskLists.reorderTaskList(temp,taskListToMap.id)
         .then( (ok) => {
                 if(!ok){
-                  console.warn("Could not reorder tasklist" + taskListToMap.id);
+                  throw new Error("Could not reorder tasklist" + taskListToMap.id);
                 }
+                cogoToast.success(`Reordered Task List`);
                 //refresh tasklist
                 setReFetchTaskList(true);
             })
         .catch( error => {
             console.error(error);
+            cogoToast.warn(`Could not reorder task list`);
           });
           
     }
@@ -280,3 +245,39 @@ const MapSiderbarMarkedTasks = (props) =>{
 
 }
 export default MapSiderbarMarkedTasks;
+
+
+const useStyles = makeStyles(theme => ({
+  root: {
+      margin: '10px 0px 10px 0px',
+      color: '#535353',
+      width: '100%',
+  },
+  items:{
+      color: '#fcfcfc'
+  },
+  selectedRow:{
+    backgroundColor: '#abb7c9 !important',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+  },
+  nonSelectedRow:{
+    backgroundColor: '#ffffff !important',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+  },
+  MarkerInfo:{
+    display: 'block',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#16233b',
+    backgroundColor: '#abb7c93d',
+    padding: '2px',
+
+  },
+  MarkerSubInfo:{
+      marginLeft:'5%',
+      display:'block',
+      fontSize: '11px',
+      fontWeight: '400',
+      color: '#666464',
+  },
+}));

@@ -1,25 +1,20 @@
 
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import dynamic from 'next/dynamic';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 
-import Tooltip from '@material-ui/core/Tooltip';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
+import {Tooltip, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select, MenuItem} from '@material-ui/core';
+
+import cogoToast from 'cogo-toast';
 
 import TaskLists from '../../../js/TaskLists';
 
-function EnhancedTableAddCreateTL({props}) {
-    //PROPS
-    const { numSelected, onRequestSort, rows, selectedIds, taskLists, setTaskLists, snackBarStatus, setSnackBarStatus } = props;
+import {TaskContext} from './TaskContainer';
 
+function EnhancedTableAddCreateTL(props) {
+    //PROPS
+    const { numSelected, onRequestSort, rows } = props;
+    const { selectedIds, taskLists, setTaskLists} = useContext(TaskContext);
     //STATE
     const [open, setOpen] = React.useState(false);
     const [taskListToAdd, setTaskListToAdd] = React.useState(null);
@@ -37,7 +32,7 @@ function EnhancedTableAddCreateTL({props}) {
 
     const handleOpenAddCreateTL = () => {
         if(selectedIds.length > 50) {
-            setSnackBarStatus(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks. `, null, 3000, true);
+            cogoToast.warn(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks. `)
             return;
         }
         setOpen(true);
@@ -58,7 +53,7 @@ function EnhancedTableAddCreateTL({props}) {
 
     const handleAddToTaskList = (event, tl_id) => {
         if(selectedIds.length > 50) {
-            setSnackBarStatus(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks. `, null, 3000, true);
+            cogoToast.warn(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks`);
             handleClose();
             return;
         }
@@ -68,7 +63,7 @@ function EnhancedTableAddCreateTL({props}) {
             if(!response){
                 throw new Error("Bad response from addMultipleTasksToList call");
             }
-            setSnackBarStatus(`${selectedIds.length} tasks added to Task List`, null, 3000, true);
+            cogoToast.success(`${selectedIds.length} tasks added to Task List`);
         })
         .catch(error => {
             console.warn(error);

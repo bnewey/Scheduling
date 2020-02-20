@@ -1,38 +1,17 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
+import {makeStyles, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton} from '@material-ui/core';
+
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import { TaskContext } from '../../Table/TaskContainer';
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        margin: '10px 0px 10px 0px',
-        color: '#535353',
-        width: '100%',
-    },
-    items:{
-        color: '#fcfcfc'
-    },
-    selectedRow:{
-      backgroundColor: '#abb7c9 !important',
-      boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-    },
-    nonSelectedRow:{
-      backgroundColor: '#ffffff !important',
-      boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-    }
-  }));
 
 const MapSiderbarMissingMakers = (props) =>{
-    const {mapRows, setMapRows, activeMarker, setActiveMarker, setShowingInfoWindow, noMarkerRows , setModalOpen, setModalTaskId, setResetBounds,
-        selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, infoWeather, setInfoWeather} = props;
+    const {activeMarker, setActiveMarker, setShowingInfoWindow, noMarkerRows , setModalOpen, setModalTaskId, setResetBounds,
+          infoWeather, setInfoWeather} = props;
+
+    const {mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
 
     //CSS
     const classes = useStyles();
@@ -130,3 +109,23 @@ const MapSiderbarMissingMakers = (props) =>{
 
 }
 export default MapSiderbarMissingMakers;
+
+
+const useStyles = makeStyles(theme => ({
+  root: {
+      margin: '10px 0px 10px 0px',
+      color: '#535353',
+      width: '100%',
+  },
+  items:{
+      color: '#fcfcfc'
+  },
+  selectedRow:{
+    backgroundColor: '#abb7c9 !important',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+  },
+  nonSelectedRow:{
+    backgroundColor: '#ffffff !important',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+  }
+}));

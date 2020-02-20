@@ -1,26 +1,17 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
-import EditIcon from '@material-ui/icons/Edit';
+import {makeStyles, FormControl, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@material-ui/core';
 
 import TaskLists from '../../../js/TaskLists';
+import { TaskContext } from '../Table/TaskContainer';
 
 
 
 const TaskListTasksEdit = ({props}) => {
  
     //PROPS
-    const {taskLists, setTaskLists, activeTaskList, list, open, handleClose} = props;
+    const { activeTaskList, list, open, handleClose} = props;
+    const {taskLists, setTaskLists } = useContext(TaskContext);
 
     //STATE
     

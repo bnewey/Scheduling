@@ -1,86 +1,76 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Button from '@material-ui/core/Button';
-import { Scrollbars} from 'react-custom-scrollbars';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-
+import {makeStyles, Paper, MenuItem, InputLabel, FormHelperText, FormControl, Select, Button, Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
 
 import TaskLists from '../../../../js/TaskLists';
-
+import cogoToast from 'cogo-toast';
+import { TaskContext } from '../../Table/TaskContainer';
 
 
 const MapSidebarTaskList = (props) => {
-    //STATE
-    
-    const [open, setOpen] = React.useState(false);
-   
-    const [tempTaskListToMap, setTempTaskListToMap] = useState(null);
     //PROPS
-    const {mapRows, setMapRows, taskLists, setTaskLists, setActiveMarker, setResetBounds, selectedIds, setSelectedIds,
-        taskListToMap, setTaskListToMap, reFetchTaskList, setReFetchTaskList} = props;
-
-        useEffect( () =>{ //useEffect for inputText
-            //Gets and sets tasks from Task List when theres a tasklistToMap and no selected from EnhancedTable
-            if(taskListToMap) {
-                TaskLists.getTaskList(taskListToMap.id)
-                .then( (data) => {
-                    //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
-                    var newSelectedIds = data.map((item, i )=> item.t_id );
-                    setSelectedIds(newSelectedIds);
-                    
-                    setMapRows(data);
-                    //Zoom out to focus on new task list
-                    setResetBounds(true);
-                })
-                .catch( error => {
-                    console.error(error);
-                })        
-              
-            }
-    
-            return () => { //clean up
-                if(taskListToMap){
-                    
-                }
-            }
-          },[taskListToMap]);
-
-          useEffect( () =>{ //useEffect for inputText
-            //Gets and sets tasks from Task List when theres a tasklistToMap and a refetch is needed. 
-            //ex when user selected same task list as taskListToMap or when we reorder
-            console.log("Refetch use effect");
-            if(reFetchTaskList && taskListToMap) {
-                console.log("Refetching...");
-                TaskLists.getTaskList(taskListToMap.id)
-                .then( (data) => {
-                    //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
-                    var newSelectedIds = data.map((item, i )=> item.t_id );
-                    setSelectedIds(newSelectedIds);
-                    
-                    setMapRows(data);
-                    //Zoom out to focus on new task list
-                    setResetBounds(true);
-                    setReFetchTaskList(false);
-                })
-                .catch( error => {
-                    console.error(error);
-                })        
-              
-            }
-          },[reFetchTaskList]);
-    
+    const { setActiveMarker, setResetBounds, reFetchTaskList, setReFetchTaskList} = props;
+    const {mapRows, setMapRows, taskLists, setTaskLists, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
+    //STATE  
+    const [open, setOpen] = React.useState(false);
+    const [tempTaskListToMap, setTempTaskListToMap] = useState(null);
     //CSS
     const classes = useStyles();
+
+    useEffect( () =>{ //useEffect for inputText
+        //Gets and sets tasks from Task List when theres a tasklistToMap and no selected from EnhancedTable
+        if(taskListToMap) {
+            TaskLists.getTaskList(taskListToMap.id)
+            .then( (data) => {
+
+                //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
+                var newSelectedIds = data.map((item, i )=> item.t_id );
+                setSelectedIds(newSelectedIds);
+                
+                setMapRows(data);
+                //Zoom out to focus on new task list
+                setResetBounds(true);
+                cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`);
+            })
+            .catch( error => {
+                console.error(error);
+                cogoToast.error(`Error getting task list`);
+            })        
+            
+        }
+
+        return () => { //clean up
+            if(taskListToMap){
+                
+            }
+        }
+        },[taskListToMap]);
+
+    useEffect( () =>{ //useEffect for inputText
+    //Gets and sets tasks from Task List when theres a tasklistToMap and a refetch is needed. 
+    //ex when user selected same task list as taskListToMap or when we reorder
+    console.log("Refetch use effect");
+    if(reFetchTaskList && taskListToMap) {
+        TaskLists.getTaskList(taskListToMap.id)
+        .then( (data) => {
+            //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
+            var newSelectedIds = data.map((item, i )=> item.t_id );
+            setSelectedIds(newSelectedIds);
+            
+            setMapRows(data);
+            //Zoom out to focus on new task list
+            setResetBounds(true);
+            setReFetchTaskList(false);
+            cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`);
+        })
+        .catch( error => {
+            console.error(error);
+            cogoToast.error(`Error getting task list`);
+        })        
+        
+    }
+    },[reFetchTaskList]);    
+
 
     //FUNCTIONS
     const handleChangeTaskListToMap = (event) => {

@@ -2,24 +2,16 @@
 //Methods: Update field, delete task, 
 //https://material-ui.com/components/modal/
 
-import React, {useRef, useState, useEffect, createRef} from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
-import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Button from '@material-ui/core/Button';
+import React, {useRef, useState, useEffect, useContext} from 'react';
+
+import {makeStyles, Modal, Backdrop, Fade, Grid, TextField, FormControl, InputLabel, MenuItem, Select, 
+    ButtonGroup, Button, CircularProgress, Avatar} from '@material-ui/core';
+
 import SaveIcon from '@material-ui/icons/Save';
 import TrashIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Avatar from '@material-ui/core/Avatar';
+
+import cogoToast from 'cogo-toast';
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -37,12 +29,17 @@ import TaskModalTaskList from './TaskModalTaskList';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
+import { TaskContext } from '../TaskContainer.js';
 
 //ALERT ////
 // This component is in TaskContainer, TaskList, and MapContainer -
 // Chang props to this component in both locations to prevent breaking 
 
-export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModalTaskId, taskLists, setTaskLists, setRows}){
+export default function TaskModal(props){
+
+    const {modalOpen, setModalOpen, modalTaskId, setModalTaskId} = props;
+    const {taskLists, setTaskLists, setRows} = useContext(TaskContext);
+
     const classes = useStyles();
 
     const [modalTask, setModalTask] = React.useState(null); 
@@ -73,6 +70,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
              })
           .catch( error => {
             console.warn(JSON.stringify(error, null,2));
+            cogoToast.error(`Error Getting task. ` + error);
           });
         }
 
@@ -100,9 +98,12 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
 
         const remove = () => {
             Tasks.removeTask(id)
-                .then(handleClose())
+                .then((ok)=>{
+                    cogoToast.success(`Task ${id} has been deleted`)
+                    handleClose();})
                 .catch( error => {
-                    console.warn(JSON.stringify(error, null,2));
+                    console.warn(error);
+                    cogoToast.error(`Error deleting task. ` + error);
             });
         }
         confirmAlert({
@@ -169,6 +170,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                 }
                 if(index === null){
                     console.error("index === null in handleSave");
+                    cogoToast.error(`Internal Error`);
                 }
             }
 
@@ -178,11 +180,14 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
             Tasks.updateTask(updateModalTask)
             .then( (data) => {
                 //Refetch our data on save
+                cogoToast.success(`Task ${task.t_name} has been updated!`);
                 setRows(null);
+                console.log('setRows null');
                 setTaskLists(null);
             })
             .catch( error => {
-              console.warn(JSON.stringify(error, null,2));
+              console.warn(error);
+              cogoToast.error(`Error updating task. ` + error);
             })
         }
         handleClose();
@@ -227,7 +232,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                             <Select
                             labelId="task-type-input-label"
                             id="task-type-input"
-                            defaultValue={modalTask.type}
+                            value={modalTask.type}
                             onChange={value => handleInputOnChange(value, true, "select", "type")}
                             >
                             <MenuItem value={null}>N/A</MenuItem>
@@ -287,7 +292,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     labelId="drilling-input-label"
                     id="drilling-input"
                     className={classes.selectBox}
-                    defaultValue={modalTask.drilling}
+                    value={modalTask.drilling}
                     onChange={value => handleInputOnChange(value, true, "select", "drilling")}
                     >
                     <MenuItem value={null}>N/A</MenuItem>
@@ -306,7 +311,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     <Select
                     labelId="sign-input-label"
                     id="sign-input"
-                    defaultValue={modalTask.sign}
+                    value={modalTask.sign}
                     onChange={value => handleInputOnChange(value, true, "select", "sign")}
                     >
                     <MenuItem value={null}>N/A</MenuItem>
@@ -323,7 +328,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     <Select
                     labelId="artwork-input-label"
                     id="artwork-input"
-                    defaultValue={modalTask.artwork}
+                    value={modalTask.artwork}
                     onChange={value => handleInputOnChange(value, true, "select", "artwork")}
                     >
                     <MenuItem value={null}>N/A</MenuItem>
@@ -354,7 +359,7 @@ export default function TaskModal({modalOpen, setModalOpen, modalTaskId, setModa
                     <Select
                     labelId="status-input-label"
                     id="status-input"
-                    defaultValue={modalTask.task_status}
+                    value={modalTask.task_status}
                     onChange={value => handleInputOnChange(value, true, "select", "task_status")}
                     >
                     <MenuItem value={null}>N/A</MenuItem>

@@ -1,22 +1,10 @@
 import React, {useRef, useState, useEffect} from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Button from '@material-ui/core/Button';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
+import { makeStyles, CircularProgress, Button, FormHelperText, FormControl, InputLabel, Select, MenuItem, Paper } from '@material-ui/core';
 
 import { Document, Page, pdfjs} from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = '../../../../static/pdf.worker.js';
 
 import Pdf from '../../../../js/Pdf';
-
-
-
 
 //we can make this a functional component now
 const WorkOrderPdf = function(props) {
