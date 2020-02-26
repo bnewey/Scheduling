@@ -32,32 +32,45 @@ export default function TaskModalTaskList(props){
     }
 
    const handleAddToTaskList = (event, id, tl_id) => {
-       if(!taskListToAdd){
+       if(tl_id == undefined){
            return;
        }
-        var task_ids = taskLists.map((task, i)=> task["t_id"]);
-
-        TaskLists.reorderTaskList(task_ids, tl_id)
-        .then( (ok) => {      
-            if(!ok)
-                console.warn("Failed to Reorder before Adding to TaskList");
-                
-            TaskLists.addTaskToList(id, taskListToAdd)
-                .then( (ok) => {
-                    //we need to refetch modalTask
-                    if(!ok)
-                        throw new Error("Failed to add Task to TaskList");
-                    cogoToast.success(`Task ${id} added to Task List ${taskListToAdd} `);
-                    setShouldReFetch(true);
-                })
-                .catch(error => {
-                    console.error(error);
-                    cogoToast.error(`Error adding to task list.`);
-                }) 
+        
+         // set to null on purpose
+        TaskLists.getTaskList(tl_id)
+        .then( (data)=>{
+            if(!data){
+                throw new Error("Bad data from getTaskList before Reorder");
+            }
+            var task_ids = data.map((item, i)=> item.t_id);
+            TaskLists.reorderTaskList(task_ids, tl_id)
+            .then( (ok) => {      
+                if(!ok)
+                    console.warn("Failed to Reorder before Adding to TaskList");
+                    
+                TaskLists.addTaskToList(id, taskListToAdd)
+                    .then( (ok) => {
+                        //we need to refetch modalTask
+                        if(!ok)
+                            throw new Error("Failed to add Task to TaskList");
+                        cogoToast.success(`Task ${id} added to Task List ${taskListToAdd} `, {hideAfter: 4});
+                        setShouldReFetch(true);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        cogoToast.error(`Error adding to task list.`, {hideAfter: 4});
+                    }) 
+            })
+            .catch(error => {
+                console.error(error);
+            })   
         })
-        .catch(error => {
+        .catch((error)=>{
             console.error(error);
-        })   
+            cogoToast.error("Failed to fetch taskList before Reordering", {hideAfter: 4})
+        })
+
+        
     }
 
     const handleRemoveTaskFromList = (event, id, tl_id) => {
@@ -66,14 +79,31 @@ export default function TaskModalTaskList(props){
             if(!ok){
                 throw new Error("Failed to remove Task: " + id + " from Task List :" + tl_id);
             }
-            cogoToast.success(`Removed task ${id} from task list ${tl_id}`);
-            setTaskLists(null);
-            setShouldReFetch(true);
-            
+            cogoToast.success(`Removed task ${id} from task list ${tl_id}`, {hideAfter: 4});
+
+            TaskLists.getTaskList(tl_id)
+            .then( (data)=>{
+                if(!data){
+                    setTaskLists(null);
+                    setShouldReFetch(true);
+                    throw new Error("Bad data from getTaskList before Reorder");
+                }
+                var task_ids = data.map((item, i)=> item.t_id);
+                TaskLists.reorderTaskList(task_ids, tl_id)
+                .then( (ok) => {      
+                    if(!ok)
+                        console.warn("Failed to Reorder before Adding to TaskList");
+                    setTaskLists(null);
+                    setShouldReFetch(true);
+                })
+                .catch((error)=>{
+                    console.error(error);
+                })
+            })
         })
         .catch(error =>{
             console.error(error);
-            cogoToast.error("Error removing task from task list");
+            cogoToast.error("Error removing task from task list", {hideAfter: 4});
         })
     }
 
@@ -114,7 +144,7 @@ export default function TaskModalTaskList(props){
                 </FormControl>
                 <FormControl style={{display: 'block'}}>
                     {taskListToAdd ? <Button
-                        onClick={event => handleAddToTaskList(event, modalTask.t_id, 1)}
+                        onClick={event => handleAddToTaskList(event, modalTask.t_id, taskListToAdd)}
                         variant="contained"
                         color="secondary"
                         size="medium"

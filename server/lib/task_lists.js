@@ -41,7 +41,8 @@ router.post('/getTaskList', async (req,res) => {
         ' ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     ' FROM tasks t  ' +
     ' LEFT JOIN task_list tl ON tl.id = t.task_list_id ' + 
-    ' LEFT JOIN entities_addresses ea ON (t.account_id = ea.entities_id AND main = 1) ' +
+    ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 
+    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1) ' +
     ' WHERE t.task_list_id = ? ORDER BY t.priority_order ASC' ;
 
     try{

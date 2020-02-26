@@ -24,7 +24,7 @@ import {TaskContext} from './TaskContainer';
       if(mapRowsLength > 0){
         setTabValue(value);
       }else{
-        cogoToast.info( 'Select a Task or Task List to view on the Map!');
+        cogoToast.info( 'Select a Task or Task List to view on the Map!', {hideAfter: 4});
       }
 
     }

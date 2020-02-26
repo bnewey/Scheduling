@@ -90,8 +90,8 @@
   box-shadow: inset 0 4px gray;
   padding: 2px; }
   .table-filter-icon.selected {
-    border-top-color: black;
-    box-shadow: inset 0 4px black; }
+    border-top-color: #f20000;
+    box-shadow: inset 0 4px #f20000; }
 
 .ripple {
   position: relative;

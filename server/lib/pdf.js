@@ -29,8 +29,6 @@ router.post('/createPdf', async (req,res) => {
         return Promise.resolve();
     })
 
-
-    
 });
 
 router.post('/fetchPdf', async (req,res) => {

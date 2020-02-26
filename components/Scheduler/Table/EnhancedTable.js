@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect, useContext, useCallback} from 'react';
 import dynamic from 'next/dynamic';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import {Paper, Switch, Table, TableBody, TableRow,TableCell, Checkbox, TableHead, TablePagination, 
@@ -47,8 +47,9 @@ const TableFilter = dynamic(
   function EnhancedTable(props) {
     const classes = useStyles();
 
-    const {rows,filterConfig,setFilterConfig} = props;
-    const { mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
+    const {rows, setRows, filterConfig,setFilterConfig} = props;
+    const { mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, tabValue,
+       filterSelectedOnly, setFilterSelectedOnly} = useContext(TaskContext);
 
     const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('date');
@@ -59,30 +60,73 @@ const TableFilter = dynamic(
     const [filteredRows, setFilteredRows] = React.useState(rows);
     const [modalOpen, setModalOpen] = React.useState(false);  
     const [modalTaskId, setModalTaskId] = React.useState();  
+   
+       //STATE
+    const [filteredData, setFilteredData] = React.useState(filteredRows ? filteredRows :  rows);
 
+    
+    useEffect(() =>{ //useEffect for filterSelectedOnly
+      console.log("head use effect")
+      if(filteredData){
+        if(filterSelectedOnly) {
+          var tmp = filteredData.filter((row, i)=>{
+            if(selectedIds.indexOf(row.t_id) !== -1){
+              return true;
+            }
+            return false;
+          });
+          setFilteredRows(tmp);
 
-    useEffect( () =>{ //useEffect for inputText
-      //Need to reset filteredRows if rows are refetched
-      if(filteredRows) {
-        setFilteredRows(rows);
+        }
+        else{
+          setFilteredRows(filteredData);
+        }
       }
     
       return () => { //clean up
-          if(filteredRows){
+          if(filteredData){
               
           }
       }
-    },[ rows]);
+    },[filteredData, filterSelectedOnly]);
+
+    //useEffect updates our table when filterSelectedOnly is true and selectedIds are changed
+    // this is necessary to split dependencies of other useEffects
+    useEffect(()=>{
+      if(filteredData){
+        if(filterSelectedOnly) {
+          var tmp = filteredData.filter((row, i)=>{
+            if(selectedIds.indexOf(row.t_id) !== -1){
+              return true;
+            }
+            return false;
+          });
+          setFilteredRows(tmp);
+        }
+      }
+    },[selectedIds])
+
+    //useEffect updates our table rows when rows is refetched
+    useEffect(()=>{
+      setFilteredData(rows);
+    },[rows])
+
+    useEffect( ()=>{
+      //if changed to tasks tab and theres no selected ids, turn off unselected filter
+      if(filterSelectedOnly && selectedIds.length == 0){
+        setFilterSelectedOnly(false);
+      }
+    }, [tabValue]);
+
 
     const handleRequestSort = (event, property) => {
       const isDesc = orderBy === property && order === 'desc';
       setOrder(isDesc ? 'asc' : 'desc');
       setOrderBy(property);
     };
-
   
     const handleSelectAllClick = event => {
-      if (event.target.checked) {
+      if (selectedIds.length <= 0) {
         const newSelecteds = filteredRows ? filteredRows.map(n=>n.t_id) : rows.map(n => n.t_id);
         setSelectedIds(newSelecteds);
         setMapRows(filteredRows);
@@ -91,6 +135,11 @@ const TableFilter = dynamic(
       // if unchecked
       setMapRows([]);
       setSelectedIds([]);
+      setFilterSelectedOnly(false);
+      if(taskListToMap){
+        setTaskListToMap(null);
+        cogoToast.info("All Tasks deselected and Task List unmapped ", {hideAfter: 5});
+      }
     };
 
 
@@ -99,7 +148,7 @@ const TableFilter = dynamic(
       //Unset tasklist since were adding/removing from task list
       if(taskListToMap){
         setTaskListToMap(null);
-        cogoToast.info(`Task List: ${taskListToMap.list_name} has been unmapped`)
+        cogoToast.info(`Task List: ${taskListToMap.list_name} has been unmapped`, {hideAfter: 4})
       }
 
       //TODO If user changes filter to exclude some already selected items, this breaks?
@@ -136,6 +185,8 @@ const TableFilter = dynamic(
       setSelectedIds(newSelected);
 
     };
+
+
 
     //Modal
     const handleRightClick = (event, id) => {
@@ -179,16 +230,20 @@ const TableFilter = dynamic(
             >
               <EnhancedTableHead
                 classes={classes}
+                disabled={filterSelectedOnly}
                 numSelected={selectedIds.length}
                 order={order}
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={ filteredRows ? filteredRows.length : rows ? rows.length : 0}
-                rows={filteredRows ? filteredRows : rows}
+                filteredRows={filteredRows ? filteredRows : rows}
                 setFilteredRows={setFilteredRows}
                 filterConfig={filterConfig}
                 setFilterConfig={setFilterConfig}
+                selectedIds={selectedIds}
+                taskListToMap={taskListToMap}
+                filterSelectedOnly={filterSelectedOnly} setFilterSelectedOnly={setFilterSelectedOnly}
               />
               <Tooltip title="Click to Select. You can select multiple items. Right Click to Edit"
                             arrow={true} enterDelay={700} placement={'bottom'} disableHoverListener={selectedIds.length == 0 ? false : true}
@@ -217,13 +272,12 @@ const TableFilter = dynamic(
                         <TableCell component="th" id={labelId} scope="row" padding="none">
                           {row.t_id /*if you change t_id, change it above */}
                         </TableCell>
-                        <TableCell align="right">{row.priority_order}</TableCell>
+                        <TableCell align="right">{row.table_id}</TableCell>
+                        <TableCell align="right">{row.wo_date}</TableCell>
                         <TableCell align="right">{row.t_name}</TableCell>
                         <TableCell align="right">{row.description}</TableCell>
                         <TableCell align="right">{row.type}</TableCell>
-                        <TableCell align="right">{row.date_assigned}</TableCell>
                         <TableCell align="right">{row.hours_estimate}</TableCell>
-                        <TableCell align="right">{row.users}</TableCell>
                         <TableCell align="right">{row.date_desired}</TableCell>
                         <TableCell align="right">{row.date_completed}</TableCell>
                         <TableCell align="right">{row.drilling}</TableCell>
@@ -326,6 +380,25 @@ const TableFilter = dynamic(
         backgroundColor: '#ffedc4',
         color: '#d87b04'
       }
-    }
+    },
+    filterButton:{
+      margin: '0px 10px',
+      backgroundColor: 'rgba(0,0,0,.30)',
+      color: '#fff',
+      '&&:hover':{
+          backgroundColor: 'rgba(0,0,0,.40)',
+          color: '#000',
+      }
+    },
+    filterButtonActive:{
+        margin: '0px 10px',
+        backgroundColor: '#bdf0ff',
+        color: '#000',
+        border: '1px solid #173b7e',
+        '&&:hover':{
+            backgroundColor: '#97bec9',
+            color: '#000',
+        }
+    },
     
   }));

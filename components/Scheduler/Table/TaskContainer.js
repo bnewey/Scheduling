@@ -31,6 +31,7 @@ const TaskContainer = function() {
   const [filterConfig, setFilterConfig] = useState();
   const [tabValue, setTabValue] = React.useState(0);
   const [taskListToMap, setTaskListToMap] = useState(null);
+  const [filterSelectedOnly, setFilterSelectedOnly] = React.useState(false);
   
   const classes = useStyles();
   
@@ -43,7 +44,7 @@ const TaskContainer = function() {
       })
       .catch( error => {
         console.warn(error);
-        cogoToast.error(`Error getting tasks`);
+        cogoToast.error(`Error getting tasks`, {hideAfter: 4});
       })
     }
 
@@ -75,7 +76,7 @@ const TaskContainer = function() {
       .then( (data) => setTaskLists(data))
       .catch( error => {
         console.warn(error);
-        cogoToast.error(`Error getting tasklists`);
+        cogoToast.error(`Error getting tasklists`, {hideAfter: 4});
       })
     }
   
@@ -91,7 +92,7 @@ const TaskContainer = function() {
   return (
     <div className={classes.root}>
       <TaskContext.Provider value={{taskLists,setTaskLists, mapRows, setMapRows, selectedIds, setSelectedIds, 
-                            tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows}} >
+                            tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly}} >
         <FullWidthTabs value={tabValue} setValue={setTabValue} 
                       numSelected={selectedIds.length} activeTaskName={taskListToMap ? taskListToMap.list_name : null}>
         
@@ -100,7 +101,7 @@ const TaskContainer = function() {
           </div>
           
           <div>
-            <EnhancedTable rows={rows} filterConfig={filterConfig} setFilterConfig={setFilterConfig}/>
+            <EnhancedTable rows={rows} setRows={setRows} filterConfig={filterConfig} setFilterConfig={setFilterConfig}/>
           </div> 
         
           <div style={{minHeight: '600px'}}>

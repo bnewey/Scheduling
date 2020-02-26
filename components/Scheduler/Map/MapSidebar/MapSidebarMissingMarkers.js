@@ -30,7 +30,7 @@ const MapSiderbarMissingMakers = (props) =>{
         let newSelected = [];
         const row = mapRows.filter((row, index)=> row.t_id == record_id);
         if(row == []){
-        error.log("No row found in filteredRows");
+        error.log("No row found in mapRows");
         }
 
         if (selectedIndex === -1) {

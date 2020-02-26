@@ -41,7 +41,7 @@ const MapSiderbarMarkedTasks = (props) =>{
       //if TaskList is active
       if(taskListToMap){
         setTaskListToMap(null);
-        cogoToast.info(`Task List: ${taskListToMap.list_name} has been unmapped. You are now working with an unsaved tasks`);
+        cogoToast.info(`Task List: ${taskListToMap.list_name} has been unmapped. You are now working with an unsaved tasks`, {hideAfter: 4});
       }
 
       //TODO If user changes filter to exclude some already selected items, this breaks.
@@ -49,7 +49,7 @@ const MapSiderbarMarkedTasks = (props) =>{
       let newSelected = [];
       const row = mapRows.filter((row, index)=> row.t_id == record_id);
       if(row == []){
-        error.log("No row found in filteredRows");
+        error.log("No row found in mapRows");
       }
 
       if (selectedIndex === -1) {
@@ -98,7 +98,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     // a little function to help us with reordering the result
     const reorder = (list, startIndex, endIndex) => {
       if(!taskListToMap){
-        cogoToast.info(`No active Task List to reorder`);
+        cogoToast.info(`No active Task List to reorder`, {hideAfter: 4});
         return;
       }
       const result = Array.from(list);
@@ -153,13 +153,13 @@ const MapSiderbarMarkedTasks = (props) =>{
                 if(!ok){
                   throw new Error("Could not reorder tasklist" + taskListToMap.id);
                 }
-                cogoToast.success(`Reordered Task List`);
+                cogoToast.success(`Reordered Task List`, {hideAfter: 4});
                 //refresh tasklist
                 setReFetchTaskList(true);
             })
         .catch( error => {
             console.error(error);
-            cogoToast.warn(`Could not reorder task list`);
+            cogoToast.warn(`Could not reorder task list`, {hideAfter: 4});
           });
           
     }

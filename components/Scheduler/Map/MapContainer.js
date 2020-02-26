@@ -67,7 +67,7 @@ const MapContainer = (props) => {
         var tmpMapRows = [...mapRows];
         noMarkerRows.forEach((row, i)=> {
           if(i > 50){
-            cogoToast.warn('Too many markers selected to correct all addresses...');
+            cogoToast.warn('Too many markers selected to correct all addresses...', {hideAfter: 4});
             return;
           }
           if(!row.address){
@@ -97,19 +97,19 @@ const MapContainer = (props) => {
                 console.warn("Did not save coordinates.");
               }
               if(i == noMarkerRows.length){
-
+                cogoToast.info('Unmapped Markers have been added to map', {hideAfter: 4});
               }
 
-              cogoToast.info('Unmapped Markers have been added to map');
+              
             })
             .catch((error)=> {
               console.error(error);
-              cogoToast.error(`Error Saving Coordinates`);
+              cogoToast.error(`Error Saving Coordinates`, {hideAfter: 4});
             })
           })
           .catch((error)=> {
             console.error(error);
-            cogoToast.error(`Error getting coordinates`);
+            cogoToast.error(`Error getting coordinates`, {hideAfter: 4});
           })
         })
         
@@ -122,7 +122,7 @@ const MapContainer = (props) => {
     if(mapRows.length > 50){
       setMapRows( mapRows.slice(0, 49));
 
-      cogoToast.warn('Too many tasks have been selected! Showing first 50 tasks...');
+      cogoToast.warn('Too many tasks have been selected! Showing first 50 tasks...', {hideAfter: 4});
     }
 
     //Get mapRows that do not have lat, lng

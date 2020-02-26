@@ -61,11 +61,11 @@ const TaskListTasks = (props) =>{
             .then( (data) => {
                     var temp = taskListTasks.filter((task, i)=>task.t_id != id);
                     setTaskListTasks(temp);
-                    cogoToast.success(`Removed task ${id} from Task List`);
+                    cogoToast.success(`Removed task ${id} from Task List`, {hideAfter: 4});
                 })
             .catch( error => {
             console.warn(JSON.stringify(error, null,2));
-            cogoToast.error(`Error removing Task from Task List`);
+            cogoToast.error(`Error removing Task from Task List`, {hideAfter: 4});
              });
       }
       confirmAlert({
@@ -139,11 +139,11 @@ const TaskListTasks = (props) =>{
                 if(!ok){
                   throw new Error("Could not reorder tasklist" + activeTaskList.id);
                 }
-                cogoToast.success(`Reordered Task List`);
+                cogoToast.success(`Reordered Task List`, {hideAfter: 4});
                 setTaskListTasks(null);
             })
         .catch( error => {
-          cogoToast.error(`Error reordering task list`);
+          cogoToast.error(`Error reordering task list`, {hideAfter: 4});
             console.error(error);
           });
           

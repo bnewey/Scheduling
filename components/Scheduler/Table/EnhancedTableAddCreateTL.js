@@ -13,7 +13,7 @@ import {TaskContext} from './TaskContainer';
 
 function EnhancedTableAddCreateTL(props) {
     //PROPS
-    const { numSelected, onRequestSort, rows } = props;
+    //const { numSelected, onRequestSort, rows } = props;
     const { selectedIds, taskLists, setTaskLists} = useContext(TaskContext);
     //STATE
     const [open, setOpen] = React.useState(false);
@@ -32,7 +32,7 @@ function EnhancedTableAddCreateTL(props) {
 
     const handleOpenAddCreateTL = () => {
         if(selectedIds.length > 50) {
-            cogoToast.warn(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks. `)
+            cogoToast.warn(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks. `, {hideAfter: 4})
             return;
         }
         setOpen(true);
@@ -52,8 +52,13 @@ function EnhancedTableAddCreateTL(props) {
     };
 
     const handleAddToTaskList = (event, tl_id) => {
+        if(!tl_id){
+            cogoToast.error("No task list selected. Could not add");
+            handleClose();
+            return;
+        }
         if(selectedIds.length > 50) {
-            cogoToast.warn(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks`);
+            cogoToast.warn(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks`, {hideAfter: 4});
             handleClose();
             return;
         }
@@ -63,7 +68,7 @@ function EnhancedTableAddCreateTL(props) {
             if(!response){
                 throw new Error("Bad response from addMultipleTasksToList call");
             }
-            cogoToast.success(`${selectedIds.length} tasks added to Task List`);
+            cogoToast.success(`${selectedIds.length} tasks added to Task List`, {hideAfter: 4});
         })
         .catch(error => {
             console.warn(error);
@@ -131,7 +136,7 @@ function EnhancedTableAddCreateTL(props) {
                 Cancel
             </Button>
             <Button
-                onClick={event => handleAddToTaskList(event, taskListToAdd.id)}
+                onClick={event => handleAddToTaskList(event, taskListToAdd?.id ?? null)}
                 variant="contained"
                 color="secondary"
                 size="medium"
@@ -179,16 +184,16 @@ function EnhancedTableAddCreateTL(props) {
         color: '#fff'
     },
     openButton:{
-        backgroundColor: '#fca437',
+        backgroundColor: '#558fbc',
         color: '#fff',
         margin: '0px 30px',
         fontWeight: '700',
         fontSize: '13px',
-        padding: '3px 16px',
+        padding: '0px 16px',
         '&:hover':{
             border: '',
-            backgroundColor: '#ffedc4',
-            color: '#d87b04'
+            backgroundColor: '#03a9f4',
+            color: '#ececec'
         }
     },
     inputField: {

@@ -5,6 +5,7 @@ import {makeStyles, Paper, MenuItem, InputLabel, FormHelperText, FormControl, Se
 import TaskLists from '../../../../js/TaskLists';
 import cogoToast from 'cogo-toast';
 import { TaskContext } from '../../Table/TaskContainer';
+import EnhancedTableAddCreateTL from "../../Table/EnhancedTableAddCreateTL";
 
 
 const MapSidebarTaskList = (props) => {
@@ -22,7 +23,6 @@ const MapSidebarTaskList = (props) => {
         if(taskListToMap) {
             TaskLists.getTaskList(taskListToMap.id)
             .then( (data) => {
-
                 //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
                 var newSelectedIds = data.map((item, i )=> item.t_id );
                 setSelectedIds(newSelectedIds);
@@ -30,11 +30,11 @@ const MapSidebarTaskList = (props) => {
                 setMapRows(data);
                 //Zoom out to focus on new task list
                 setResetBounds(true);
-                cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`);
+                cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`, {hideAfter: 4});
             })
             .catch( error => {
                 console.error(error);
-                cogoToast.error(`Error getting task list`);
+                cogoToast.error(`Error getting task list`, {hideAfter: 4});
             })        
             
         }
@@ -49,7 +49,6 @@ const MapSidebarTaskList = (props) => {
     useEffect( () =>{ //useEffect for inputText
     //Gets and sets tasks from Task List when theres a tasklistToMap and a refetch is needed. 
     //ex when user selected same task list as taskListToMap or when we reorder
-    console.log("Refetch use effect");
     if(reFetchTaskList && taskListToMap) {
         TaskLists.getTaskList(taskListToMap.id)
         .then( (data) => {
@@ -61,11 +60,11 @@ const MapSidebarTaskList = (props) => {
             //Zoom out to focus on new task list
             setResetBounds(true);
             setReFetchTaskList(false);
-            cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`);
+            cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`, {hideAfter: 4});
         })
         .catch( error => {
             console.error(error);
-            cogoToast.error(`Error getting task list`);
+            cogoToast.error(`Error getting task list`, {hideAfter: 4});
         })        
         
     }
@@ -110,8 +109,8 @@ const MapSidebarTaskList = (props) => {
      
     return(
         <React.Fragment>
-            <span>Sidebar</span> 
-            <Button className={classes.openButton} onClick={handleClickOpen}>Map a Task List</Button>
+            
+            
             { open && taskLists ? 
             <Dialog PaperProps={{className: classes.dialog}} open={open} onClose={handleClose}>
                 <DialogTitle className={classes.title}>Select a Task List to Map</DialogTitle>
@@ -149,6 +148,8 @@ const MapSidebarTaskList = (props) => {
             :<></>}
             { taskListToMap ? <p className={classes.p_activeTask}>Active Task List: {taskListToMap.list_name}</p> 
                         : <><p className={classes.p_noActiveTask}>No Active Task List!</p></>}
+            <Button className={classes.openButton} onClick={handleClickOpen}>Map a Task List</Button>
+            {taskListToMap ? <></> : <EnhancedTableAddCreateTL />}
         </React.Fragment>
       
     );

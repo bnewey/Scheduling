@@ -46,7 +46,7 @@ const TaskListMain = (props) => {
                 setTaskListTasks(data)
             })
             .catch( error => {
-                cogoToast.error(`Error getting Task List`);
+                cogoToast.error(`Error getting Task List`, {hideAfter: 4});
                 console.warn(JSON.stringify(error, null,2));
             })
         }
@@ -94,11 +94,11 @@ const TaskListMain = (props) => {
                     setExpanded(false);
                     setActiveTaskList(null);
                     setTaskLists(null);
-                    cogoToast.success(`Removed Task List ${id}`);
+                    cogoToast.success(`Removed Task List ${id}`, {hideAfter: 4});
                 })
                 .catch( error => {
                     console.error(error);
-                    cogoToast.error(`Error removing Task List`);
+                    cogoToast.error(`Error removing Task List`, {hideAfter: 4});
             });
         }
         confirmAlert({
@@ -130,10 +130,10 @@ const TaskListMain = (props) => {
                     setExpanded(false);
                     setActiveTaskList(null); 
                     setTaskLists(null);
-                    cogoToast.success(`Added new Task List`);
+                    cogoToast.success(`Added new Task List`, {hideAfter: 4});
                 })
                 .catch( error => {
-                    cogoToast.error(`Error adding new task list`);
+                    cogoToast.error(`Error adding new task list`, {hideAfter: 4});
                     console.error(error);
             });
     };

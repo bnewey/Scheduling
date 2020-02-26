@@ -70,7 +70,7 @@ export default function TaskModal(props){
              })
           .catch( error => {
             console.warn(JSON.stringify(error, null,2));
-            cogoToast.error(`Error Getting task. ` + error);
+            cogoToast.error(`Error Getting task. ` + error, {hideAfter: 4});
           });
         }
 
@@ -99,11 +99,11 @@ export default function TaskModal(props){
         const remove = () => {
             Tasks.removeTask(id)
                 .then((ok)=>{
-                    cogoToast.success(`Task ${id} has been deleted`)
+                    cogoToast.success(`Task ${id} has been deleted`, {hideAfter: 4})
                     handleClose();})
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error deleting task. ` + error);
+                    cogoToast.error(`Error deleting task. ` + error, {hideAfter: 4});
             });
         }
         confirmAlert({
@@ -170,7 +170,7 @@ export default function TaskModal(props){
                 }
                 if(index === null){
                     console.error("index === null in handleSave");
-                    cogoToast.error(`Internal Error`);
+                    cogoToast.error(`Internal Error`, {hideAfter: 4});
                 }
             }
 
@@ -180,14 +180,13 @@ export default function TaskModal(props){
             Tasks.updateTask(updateModalTask)
             .then( (data) => {
                 //Refetch our data on save
-                cogoToast.success(`Task ${task.t_name} has been updated!`);
+                cogoToast.success(`Task ${task.t_name} has been updated!`, {hideAfter: 4});
                 setRows(null);
-                console.log('setRows null');
                 setTaskLists(null);
             })
             .catch( error => {
               console.warn(error);
-              cogoToast.error(`Error updating task. ` + error);
+              cogoToast.error(`Error updating task. ` + error, {hideAfter: 4});
             })
         }
         handleClose();
@@ -212,7 +211,7 @@ export default function TaskModal(props){
         <Fade in={modalOpen}>
             { modalTask ? /* If modalTask is not loaded, load the circularprogrss instead */
             <div className={classes.container}>
-            <div className={classes.modalTitleDiv}><span id="transition-modal-title" className={classes.modalTitle}>Edit Task Id: {modalTask.t_id}</span></div>
+<div className={classes.modalTitleDiv}><span id="transition-modal-title" className={classes.modalTitle}>Edit Task Id: {modalTask.t_id}&nbsp;&nbsp;&nbsp;Date Ordered: {modalTask.wo_date}</span></div>
             <Grid container >
                 
                 <Grid item xs={8} className={classes.paper}>

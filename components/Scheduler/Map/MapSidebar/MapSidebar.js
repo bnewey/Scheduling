@@ -18,7 +18,6 @@ const MapSidebar = (props) => {
             setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds,
             reFetchTaskList, setReFetchTaskList} = props;
 
-
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded)
             setExpanded('panel1');

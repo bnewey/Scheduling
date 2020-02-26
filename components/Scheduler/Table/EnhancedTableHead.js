@@ -2,7 +2,8 @@ import React, {useRef, useState, useEffect} from 'react';
 import dynamic from 'next/dynamic';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import {TableCell, TableHead, TableRow, TableSortLabel, Checkbox} from '@material-ui/core';
+import {TableCell, TableHead, TableRow, TableSortLabel, Checkbox, Tooltip, Button} from '@material-ui/core';
+import cogoToast from 'cogo-toast';
 
 import EnhancedTableAddCreateTL from './EnhancedTableAddCreateTL';
 
@@ -16,14 +17,13 @@ const TableFilter = dynamic(
 
 
 const headCells = [
-    { id: 't_id', numeric: true, disablePadding: true, label: 'WO#' },
-    { id: 'priority_order', numeric: true, disablePadding: true, label: 'Priority' },
+    { id: 't_id', numeric: true, disablePadding: true, label: 'Task#' },
+    { id: 'table_id', numeric: true, disablePadding: true, label: 'WO#' },
+    { id: 'wo_date', numeric: true, disablePadding: true, label: 'Order Date' },
     { id: 't_name', numeric: false, disablePadding: false, label: 'Name' },
     { id: 'description', numeric: false, disablePadding: false, label: 'Desc' },
     { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
-    { id: 'date_assigned', numeric: true, disablePadding: true, label: 'Date Assigned' },
     { id: 'hours_estimate', numeric: true, disablePadding: false, label: 'Hours' },
-    { id: 'users', numeric: false, disablePadding: false, label: 'Users' },
     { id: 'date_desired', numeric: true, disablePadding: false, label: 'Desired' },
     { id: 'date_completed', numeric: true, disablePadding: false, label: 'Completed' },
     { id: 'drilling', numeric: false, disablePadding: false, label: 'Drilling' },
@@ -34,35 +34,21 @@ const headCells = [
 
 function EnhancedTableHead(props) {
     //PROPS
-    const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, rows, 
-            setFilteredRows,filterConfig, setFilterConfig } = props;
+    const { classes, disabled, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, filteredRows, 
+            setFilteredRows,filterConfig, setFilterConfig, selectedIds, taskListToMap, filterSelectedOnly, setFilterSelectedOnly} = props;
     const createSortHandler = property => event => {
       onRequestSort(event, property);
     };
 
-
-    //STATE
-    const [filteredData, setFilteredData] = React.useState(rows);
-
     const filterUpdated = function(newData, filterConfiguration) {
-      setFilteredData(newData);
+      setFilteredRows(newData);
       setFilterConfig(filterConfiguration);
     } 
 
-    useEffect(() =>{ //useEffect for inputText
-      if(filteredData){
-        setFilteredRows(filteredData);
-      }
-    
-      return () => { //clean up
-          if(filteredData){
-              
-          }
-      }
-    },[filteredData]);
-
-
-
+    const handleFilterSelectedOnly = (event)=>{
+      cogoToast.info( !filterSelectedOnly ? "Filtered Out Unselected Tasks" : "Removed Filter - Unselected Tasks", {hideAfter: 4});
+      setFilterSelectedOnly(!filterSelectedOnly);
+    }
 
   
     return (
@@ -75,21 +61,36 @@ function EnhancedTableHead(props) {
                 checked={numSelected === rowCount}
                 onChange={onSelectAllClick}
                 inputProps={{ 'aria-label': 'select all' }}/>
-                <p style={{display: "inline"}}>Select All</p>
+                <p style={{display: "inline"}}>{selectedIds.length == 0 ? 'Select All' : 'Deselect All'}</p>
             </TableCell>
-            <TableCell colSpan={11}>
+            <TableCell colSpan={7}>
               { numSelected > 0 ?
                 <EnhancedTableAddCreateTL {...props}/>
                 : <></>
               }
               </TableCell>
+              <TableCell colSpan={4}>
+              <Tooltip title="Click to show only selected tasks."
+                             arrow={true} enterDelay={400} placement={'top'}
+                              classes={{tooltip: classes.tooltip }}>
+              <Button
+                    onClick={event => handleFilterSelectedOnly(event)}
+                    variant="text"
+                    color="secondary"
+                    size="medium"
+                    className={filterSelectedOnly ? classes.filterButtonActive : classes.filterButton} >
+                    Filter Selected Tasks
+                </Button>
+              </Tooltip>
+              </TableCell>
           </TableRow>
           <TableFilter
-            rows={rows}
+            rows={filteredRows}
             onFilterUpdate={filterUpdated}
             initialFilters={filterConfig ? filterConfig : null}
-            className={classes.tableFilter}>
-          {headCells.map(headCell => (
+            className={classes.tableFilter}
+            >
+          {headCells.map((headCell, i) => (
             <TableCell
               key={headCell.id}
               align={ 'center'}
@@ -98,7 +99,7 @@ function EnhancedTableHead(props) {
               filterkey={headCell.id}
               className={classes.tableHead}
 
-              alignleft="true"
+              alignleft={i != 0 ? "true" : "false"}
               
             >
               <TableSortLabel

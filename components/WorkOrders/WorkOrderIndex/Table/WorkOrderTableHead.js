@@ -53,7 +53,7 @@ function WorkOrderTableHead(props) {
     } 
 
     const handleFilterOutCompletedInvoiced = (event) =>{
-      cogoToast.info( !filterOutCompletedInvoiced ? "Filtered Out Completed & Invoiced Work Orders" : "Removed Filter - Completed & Invoiced Work Orders");
+      cogoToast.info( !filterOutCompletedInvoiced ? "Filtered Out Completed & Invoiced Work Orders" : "Removed Filter - Completed & Invoiced Work Orders", {hideAfter: 4});
       setFilterOutCompletedInvoiced(!filterOutCompletedInvoiced);
     }
 
