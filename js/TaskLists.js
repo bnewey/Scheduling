@@ -38,6 +38,29 @@ async function getTaskList(id){
 
 }
 
+async function getAllTaskListPerTask(t_id){
+    const route = '/scheduling/taskLists/getAllTaskListPerTask';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id: t_id})
+            });
+        if(!data.ok){
+            throw new Error("getAllTaskListPerTask returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
 async function addTaskList(name){
     const route = '/scheduling/taskLists/addTaskList';
     try{
@@ -134,7 +157,7 @@ async function addMultipleTasksToList(task_ids, taskList_id){
 
 }
 
-async function removeTaskFromList(taskList_id){
+async function removeTaskFromList(task_id, taskList_id){
     const route = '/scheduling/taskLists/removeTaskFromList';
     try{
         var response = await fetch(route,
@@ -143,7 +166,7 @@ async function removeTaskFromList(taskList_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id: taskList_id})
+                body: JSON.stringify({id: task_id, tl_id: taskList_id})
             });
         return response.ok;
     }catch(error){
@@ -173,11 +196,30 @@ async function reorderTaskList(task_ids, taskList_id){
 
 }
 
+async function setPriorityTaskList(task_list_id, task_list_name){
+    const route = '/scheduling/taskLists/setPriorityTaskList';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({task_list_id: task_list_id, task_list_name: task_list_name})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
 
 
 module.exports = {
     getAllTaskLists: getAllTaskLists,
     getTaskList: getTaskList,
+    getAllTaskListPerTask: getAllTaskListPerTask,
     addTaskList: addTaskList,
     addMultipleTasksToList: addMultipleTasksToList,
     removeTaskList: removeTaskList,
@@ -185,4 +227,5 @@ module.exports = {
     addTaskToList: addTaskToList,
     removeTaskFromList: removeTaskFromList,
     reorderTaskList: reorderTaskList,
+    setPriorityTaskList: setPriorityTaskList,
 };

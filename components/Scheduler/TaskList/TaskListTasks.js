@@ -12,24 +12,7 @@ import TaskLists from '../../../js/TaskLists';
 import cogoToast from 'cogo-toast';
 
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        margin: '10px 0px 10px 0px',
-        color: '#535353',
-        width: '100%',
-    },
-    items:{
-        color: '#fcfcfc'
-    },
-    selectedRow:{
-      backgroundColor: '#abb7c9 !important',
-      boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-    },
-    nonSelectedRow:{
-      backgroundColor: '#f0fbff !important',
-      boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-    }
-  }));
+
 
 const TaskListTasks = (props) =>{
 
@@ -37,7 +20,7 @@ const TaskListTasks = (props) =>{
     //STATE
 
     //PROPS
-    const { taskListTasks, setTaskListTasks, activeTaskList, setActiveTaskList , setModalOpen, setModalTaskId} = props;
+    const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList , setModalOpen, setModalTaskId, table_info} = props;
     
     //CSS
     const classes = useStyles();
@@ -47,7 +30,7 @@ const TaskListTasks = (props) =>{
     useEffect( () =>{ //useEffect for inputText
         return () => { //clean up
             
-            if(activeTaskList){
+            if(openTaskList){
                 //setTaskListTasks(null);
                 //doesnt run currently
             }
@@ -55,9 +38,9 @@ const TaskListTasks = (props) =>{
       },[taskListTasks]);
 
 
-    const handleRemoveFromTaskList = (event, id, name) => {
+    const handleRemoveFromTaskList = (event, id, tl_id, name) => {
       const remove = () => {
-        TaskLists.removeTaskFromList(id)
+        TaskLists.removeTaskFromList(id, tl_id)
             .then( (data) => {
                     var temp = taskListTasks.filter((task, i)=>task.t_id != id);
                     setTaskListTasks(temp);
@@ -104,8 +87,8 @@ const TaskListTasks = (props) =>{
       return({
       // some basic styles to make the items look a bit nicer
       userSelect: "none",
-      padding: grid * 1,
-      margin: `0 0 ${grid}px 0`,
+      padding: '2px',
+      margin: `0 0 1px 0`,
 
       // change background colour if dragging
       background: isDragging ? "lightgreen" : "grey",
@@ -116,7 +99,7 @@ const TaskListTasks = (props) =>{
     })};
 
     const getListStyle = isDraggingOver => ({
-      background: isDraggingOver ? "lightblue" : "lightgrey",
+      background: isDraggingOver ? "lightblue" : "rgba(0,0,0,0)",
       padding: grid,
       width: 'auto'
     });
@@ -134,10 +117,10 @@ const TaskListTasks = (props) =>{
       );
       
       var temp = items.map((item, i)=> item.t_id);
-      TaskLists.reorderTaskList(temp,activeTaskList.id)
+      TaskLists.reorderTaskList(temp,openTaskList.id)
         .then( (ok) => {
                 if(!ok){
-                  throw new Error("Could not reorder tasklist" + activeTaskList.id);
+                  throw new Error("Could not reorder tasklist" + openTaskList.id);
                 }
                 cogoToast.success(`Reordered Task List`, {hideAfter: 4});
                 setTaskListTasks(null);
@@ -166,7 +149,7 @@ const TaskListTasks = (props) =>{
                                 role={undefined} dense button 
                                 className={classes.nonSelectedRow}
                                 >
-                      <ListItemText>
+                      <ListItemText className={classes.draggingListItemTextStyle}>
                             {taskListTasks[rubric.source.index].t_id} | {taskListTasks[rubric.source.index].t_name} 
                       </ListItemText>
                     </ListItem>
@@ -178,46 +161,70 @@ const TaskListTasks = (props) =>{
                 ref={provided.innerRef}
                 style={getListStyle(snapshot.isDraggingOver)}
               >          
-            {taskListTasks.map((row, index) => {
-                const labelId = `checkbox-list-label-${row.t_id}`;
-                return (
-                  <Draggable key={row.t_id} draggableId={row.t_id.toString()} index={index}>
-                  {(provided, snapshot) => (
-                    <ListItem key={row.t_id} 
-                                role={undefined} dense button 
-                                onContextMenu={event => handleRightClick(event, row.t_id)}
-                                className={classes.nonSelectedRow}
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={getItemStyle(
-                                  snapshot.isDragging,
-                                  provided.draggableProps.style
-                                )}>
-                      <ListItemText id={labelId}>
-                            {row.t_id} | {row.t_name} | {row.priority_order}
-                      </ListItemText>
-                      <ListItemSecondaryAction>            
-                            <React.Fragment>
-                              <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
-                              <EditIcon />
-                              </IconButton>
-                              <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.t_name)}>
-                                <DeleteIcon />
-                              </IconButton> 
-                            </React.Fragment>
-                        &nbsp;&nbsp;&nbsp;
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    )}
-                    </Draggable>
-                  );
-                  
-            })}
+              {taskListTasks && taskListTasks.length > 0 ? 
+                <> { taskListTasks.map((row, index) => {
+                  const labelId = `checkbox-list-label-${row.t_id}`;
+                  return (
+                    <Draggable key={row.t_id + 321321} 
+                                draggableId={row.t_id.toString()} 
+                                index={index} 
+                                isDragDisabled={ openTaskList && openTaskList.is_priority ? true : false}
+                    >
+                    {(provided, snapshot) => (
+                      <ListItem key={row.t_id + 321321} 
+                                  role={undefined} dense button 
+                                  onContextMenu={event => handleRightClick(event, row.t_id)}
+                                  className={ index % 2 == 0 ? 
+                                            ( openTaskList && openTaskList.is_priority ? classes.nonSelectedRowPriority : classes.nonSelectedRow )
+                                            : 
+                                            (openTaskList && openTaskList.is_priority ? classes.nonSelectedRowOffsetPriority : classes.nonSelectedRowOffset)}
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  style={getItemStyle(
+                                    snapshot.isDragging,
+                                    provided.draggableProps.style
+                                  )}>
+                        {table_info.map((item, i)=>(
+                          <ListItemText id={labelId} 
+                                        className={classes.listItemTextStyle} 
+                                        style={{flex: `0 0 ${item.width}`}}
+                                        classes={item.style ?  {primary: classes[item.style]} : {}}>
+                                    {row[item.field]}
+                          </ListItemText>
+                        ))}
+                        { openTaskList && !openTaskList.is_priority 
+                        ? 
+                        <ListItemSecondaryAction>            
+                              <React.Fragment>
+                                <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
+                                <EditIcon />
+                                </IconButton>
+                                <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.tl_id, row.t_name)}>
+                                  <DeleteIcon />
+                                </IconButton> 
+                              </React.Fragment>
+                          &nbsp;&nbsp;&nbsp;
+                        </ListItemSecondaryAction>
+                        : <></>}
+                      </ListItem>
+                      )}
+                      </Draggable>
+                    );
+                    
+                 })} </> : 
+                 //taskListTasks.length < 0
+                 <>
+                  <div className={classes.no_tasks_info_div}>
+                    <span className={classes.no_tasks_info_text}>
+                      No Tasks added to this Task List yet! Click the TASKS tab to add some tasks!
+                    </span>
+                  </div>
+                  </>}
             
             {provided.placeholder}
             </div>
-          )}
+          )} 
         </Droppable>
       </DragDropContext>
         </List>
@@ -230,3 +237,96 @@ const TaskListTasks = (props) =>{
 
 }
 export default TaskListTasks;
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    
+      margin: '0px 0px 0px 0px',
+      padding:'0px',
+      color: '#535353',
+      width: '100%',
+  },
+  items:{
+      color: '#fcfcfc',
+      
+  },
+  selectedRow:{
+    backgroundColor: '#abb7c9 !important',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+  },
+  nonSelectedRow:{
+    backgroundColor: '#dcf6ff !important',
+    '&:hover':{
+      backgroundColor: '#fff !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+    
+  },
+  nonSelectedRowOffset:{
+    backgroundColor: '#c5e2f3  !important',
+    '&:hover':{
+      backgroundColor: '#fff !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+  },
+  nonSelectedRowPriority:{
+    backgroundColor: '#fffbf1 !important',
+    '&:hover':{
+      backgroundColor: '#fbdfa8 !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+    cursor: 'default',
+    
+  },
+  nonSelectedRowOffsetPriority:{
+    backgroundColor: '#fdf6e8  !important',
+    '&:hover':{
+      backgroundColor: '#fbdfa8 !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+    cursor: 'default',
+  },
+  listItemTextStyle:{
+    flex: '0 0 11%',
+    textAlign: 'center',
+  },
+  draggingListItemTextStyle:{
+    flex: '0 0 51%',
+    textAlign: 'center',
+  },
+  boldListItemText:{
+    fontWeight: 600,
+    color: '#303d4b',
+    fontSize: 'small',
+  },
+  smallListItemText: {
+    fontSize: 'xx-small',
+  },
+  no_tasks_info_div:{
+    padding: '2%',
+    backgroundColor: '#ffc7c7b8',
+  },
+  no_tasks_info_text:{
+    fontSize:' 25px',
+  }
+}));

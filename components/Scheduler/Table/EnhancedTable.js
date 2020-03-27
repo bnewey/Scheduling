@@ -7,9 +7,9 @@ import PropTypes from 'prop-types';
 
 import EnhancedTableHead from './EnhancedTableHead';
 import EnhancedTableToolbar from './EnhancedTableToolbar';
-import TaskModal from './TaskModal/TaskModal';
+import TaskModal from '../TaskModal/TaskModal';
 import cogoToast from 'cogo-toast';
-import { TaskContext } from './TaskContainer';
+import { TaskContext } from '../TaskContainer';
 
 
 const TableFilter = dynamic(
@@ -49,7 +49,7 @@ const TableFilter = dynamic(
 
     const {rows, setRows, filterConfig,setFilterConfig} = props;
     const { mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, tabValue,
-       filterSelectedOnly, setFilterSelectedOnly} = useContext(TaskContext);
+       filterSelectedOnly, setFilterSelectedOnly, modalOpen, setModalOpen, setModalTaskId} = useContext(TaskContext);
 
     const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('date');
@@ -58,15 +58,12 @@ const TableFilter = dynamic(
     const [dense, setDense] = React.useState(true);
     const [rowsPerPage, setRowsPerPage] = React.useState(15);
     const [filteredRows, setFilteredRows] = React.useState(rows);
-    const [modalOpen, setModalOpen] = React.useState(false);  
-    const [modalTaskId, setModalTaskId] = React.useState();  
    
        //STATE
     const [filteredData, setFilteredData] = React.useState(filteredRows ? filteredRows :  rows);
 
     
     useEffect(() =>{ //useEffect for filterSelectedOnly
-      console.log("head use effect")
       if(filteredData){
         if(filterSelectedOnly) {
           var tmp = filteredData.filter((row, i)=>{
@@ -220,8 +217,6 @@ const TableFilter = dynamic(
          
         <Paper className={classes.paper}>
           <EnhancedTableToolbar numSelected={selectedIds.length} mapRowsLength={mapRows.length}/>
-            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId} />
             <Table
               className={classes.table}
               aria-labelledby="tableTitle"
@@ -244,6 +239,7 @@ const TableFilter = dynamic(
                 selectedIds={selectedIds}
                 taskListToMap={taskListToMap}
                 filterSelectedOnly={filterSelectedOnly} setFilterSelectedOnly={setFilterSelectedOnly}
+                tabValue={tabValue}
               />
               <Tooltip title="Click to Select. You can select multiple items. Right Click to Edit"
                             arrow={true} enterDelay={700} placement={'bottom'} disableHoverListener={selectedIds.length == 0 ? false : true}
@@ -277,12 +273,8 @@ const TableFilter = dynamic(
                         <TableCell align="right">{row.t_name}</TableCell>
                         <TableCell align="right">{row.description}</TableCell>
                         <TableCell align="right">{row.type}</TableCell>
-                        <TableCell align="right">{row.hours_estimate}</TableCell>
                         <TableCell align="right">{row.date_desired}</TableCell>
                         <TableCell align="right">{row.date_completed}</TableCell>
-                        <TableCell align="right">{row.drilling}</TableCell>
-                        <TableCell align="right">{row.sign}</TableCell>
-                        <TableCell align="right">{row.artwork}</TableCell>
                       </TableRow>
                     );
                   })}

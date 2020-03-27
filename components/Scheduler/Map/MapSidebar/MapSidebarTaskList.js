@@ -3,8 +3,9 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, Paper, MenuItem, InputLabel, FormHelperText, FormControl, Select, Button, Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
 
 import TaskLists from '../../../../js/TaskLists';
+import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
-import { TaskContext } from '../../Table/TaskContainer';
+import { TaskContext } from '../../TaskContainer';
 import EnhancedTableAddCreateTL from "../../Table/EnhancedTableAddCreateTL";
 
 
@@ -18,33 +19,12 @@ const MapSidebarTaskList = (props) => {
     //CSS
     const classes = useStyles();
 
-    useEffect( () =>{ //useEffect for inputText
-        //Gets and sets tasks from Task List when theres a tasklistToMap and no selected from EnhancedTable
+    useEffect( () =>{ //useEffect for TaskListToMap, specifics for mapsidebar.
+        //reset map bounds
         if(taskListToMap) {
-            TaskLists.getTaskList(taskListToMap.id)
-            .then( (data) => {
-                //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
-                var newSelectedIds = data.map((item, i )=> item.t_id );
-                setSelectedIds(newSelectedIds);
-                
-                setMapRows(data);
-                //Zoom out to focus on new task list
-                setResetBounds(true);
-                cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`, {hideAfter: 4});
-            })
-            .catch( error => {
-                console.error(error);
-                cogoToast.error(`Error getting task list`, {hideAfter: 4});
-            })        
-            
+            setResetBounds(true);
         }
-
-        return () => { //clean up
-            if(taskListToMap){
-                
-            }
-        }
-        },[taskListToMap]);
+    },[taskListToMap]);
 
     useEffect( () =>{ //useEffect for inputText
     //Gets and sets tasks from Task List when theres a tasklistToMap and a refetch is needed. 
@@ -125,7 +105,17 @@ const MapSidebarTaskList = (props) => {
                 >
                     <MenuItem value={''}>Choose a Task List..</MenuItem>
                 {taskLists.map((list,i)=> (
-                    <MenuItem value={list.id} key={"task-list-"+i}>{list.list_name}</MenuItem>))                    
+                    <MenuItem value={list.id} key={"task-list-"+i}>
+                        <div className={classes.menu_item_div}>
+                            <span className={classes.menu_item_name}>
+                                {list.list_name} {list.is_priority ? "(PRIORITY LIST)" : "" }
+                            </span>
+                            <span className={classes.menu_item_date}>
+                               Last Updated: {Util.convertISODateTimeToMySqlDateTime(list.date_entered)}
+                            </span>
+                        </div>
+                    </MenuItem>
+                    ))                    
                 }
                 </Select>
             </FormControl>
@@ -146,9 +136,9 @@ const MapSidebarTaskList = (props) => {
             </DialogContent>
             </Dialog>
             :<></>}
-            { taskListToMap ? <p className={classes.p_activeTask}>Active Task List: {taskListToMap.list_name}</p> 
+{ taskListToMap ? <p className={classes.p_activeTask}>Active Task List: {taskListToMap.list_name} {taskListToMap.is_priority ? "(PRIORITY LIST)" : "" }</p> 
                         : <><p className={classes.p_noActiveTask}>No Active Task List!</p></>}
-            <Button className={classes.openButton} onClick={handleClickOpen}>Map a Task List</Button>
+            <Button className={classes.openButton} onClick={handleClickOpen}>Change Task List</Button>
             {taskListToMap ? <></> : <EnhancedTableAddCreateTL />}
         </React.Fragment>
       
@@ -240,5 +230,18 @@ const useStyles = makeStyles(theme => ({
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
         boxShadow: 'inset 0px 2px 1px -1px rgba(0,0,0,0.2), inset 0px 1px 1px 0px rgba(0,0,0,0.14), inset 0px 1px 3px 0px rgba(0,0,0,0.12)'
-    }
+    },
+    menu_item_div:{
+        display: 'flex',
+        flexWrap: 'nowrap',
+
+    },
+    menu_item_name:{
+
+    },
+    menu_item_date:{
+        color: "#999797",
+        fontSize: '.8em',
+        margin: '1%'
+    },
   }));

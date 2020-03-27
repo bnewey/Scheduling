@@ -11,7 +11,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Tasks from '../../../../js/Tasks';
 import TaskLists from '../../../../js/TaskLists';
-import {TaskContext} from '../../Table/TaskContainer';
+import {TaskContext} from '../../TaskContainer';
 
 
 const MapSiderbarMarkedTasks = (props) =>{
@@ -115,8 +115,8 @@ const MapSiderbarMarkedTasks = (props) =>{
       return({
       // some basic styles to make the items look a bit nicer
       userSelect: "none",
-      padding: grid * 1,
-      margin: `0 0 ${grid}px 0`,
+      padding: '3px',
+      margin: `0 0 4px 0`,
 
       // change background colour if dragging
       background: isDragging ? "lightgreen" : "grey",
@@ -196,9 +196,9 @@ const MapSiderbarMarkedTasks = (props) =>{
             {markedRows.map((row, index) => {
                 const labelId = `checkbox-list-label-${row.t_id}`;
                 return (
-                  <Draggable key={row.t_id} draggableId={row.t_id.toString()} index={index} isDragDisabled={taskListToMap ? false : true}>
+                  <Draggable key={row.t_id + 123123} draggableId={row.t_id.toString()} index={index} isDragDisabled={taskListToMap && taskListToMap.is_priority ==0 ? false : true}>
                   {(provided, snapshot) => (
-                    <ListItem key={row.t_id} 
+                    <ListItem key={row.t_id + 123123} 
                                 role={undefined} dense button 
                                 onClick={handleToggle(row.t_id)}
                                 onContextMenu={event => handleRightClick(event, row.t_id)}

@@ -21,14 +21,17 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
-import Util from '../../../../js/Util.js';
-import Tasks from '../../../../js/Tasks';
-import TaskLists from '../../../../js/TaskLists';
+import Util from '../../../js/Util.js';
+import Tasks from '../../../js/Tasks';
+import TaskList from '../../../js/TaskLists';
 
-import TaskModalTaskList from './TaskModalTaskList';
+import TaskModalTaskInfo from './TaskModalSections/TaskModalTaskInfo';
+import TaskModalAddressInfo from './TaskModalSections/TaskModalAddressInfo';
+import TaskModalTaskList from './TaskModalSections/TaskModalTaskList';
+import TaskModalWOSignArtItems from './TaskModalSections/TaskModalWOSignArtItems';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
-import ConfirmYesNo from '../../../UI/ConfirmYesNo';
+import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import { TaskContext } from '../TaskContainer.js';
 
 //ALERT ////
@@ -45,10 +48,18 @@ export default function TaskModal(props){
     const [modalTask, setModalTask] = React.useState(null); 
     const [shouldUpdate, setShouldUpdate] = React.useState(false);
     const [shouldReFetch, setShouldReFetch] = React.useState(false);
+
+    const [editTaskInfo, setEditTaskInfo] = React.useState(false);
+    const [editAddressInfo, setEditAddressInfo] = React.useState(false);
+    
     
 
-    const variables_to_update = ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired", "date_completed", 
-        "delivery_date", "delivery_crew", "delivery_order", "install_date", "install_crew", "install_order", "task_status", "drilling", "artwork", "sign"];
+    const variables_to_update = {
+        task_info: ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired", "date_completed"],
+        delivery_install: ["delivery_date", "delivery_crew", "delivery_order", "install_date", "install_crew", "install_order"],
+        task:["task_status", "drilling", "artwork", "sign"]
+    };
+    
     const text_variables = ["t_name", "description", "notes",  "hours_estimate", "delivery_crew", "delivery_order" ,
       "install_crew", "install_order"];
     
@@ -79,6 +90,8 @@ export default function TaskModal(props){
             //Reset modalTask so that it properly updates the modal form with the correct modalTask
             setModalTask(null);
             setShouldUpdate(false);
+            setEditTaskInfo(false);
+            setEditAddressInfo(false);
         }
       },[ modalTaskId, shouldReFetch]);
 
@@ -150,30 +163,34 @@ export default function TaskModal(props){
         //TODO validate form
  
         if(shouldUpdate){
-            var updateModalTask = {};
+            var updateModalTask = {...task};
 
             //Create Object with our text input values using ref_object
             const objectMap = (obj, fn) =>
                 Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
+            var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
 
-            var textValueObject = objectMap(ref_object, v => v.current.value ? v.current.value : null );
+            //Adjusted Variables to Update, so that we can both: update one section at a time and/or update multiple
+            var adj_variables_to_update = [ ...variables_to_update.task ];
+            if(editTaskInfo) adj_variables_to_update = [...adj_variables_to_update, ...variables_to_update.task_info ];
+            /*if(editDeliveryInstallInfo)*/ adj_variables_to_update = [...adj_variables_to_update, ...variables_to_update.delivery_install ];
+
             
             //Get only values we need to updateTask()
-            for(var i =0 ; i< variables_to_update.length; i++){
-                const index = text_variables.indexOf(variables_to_update[i]);
+            for(var i =0 ; i< adj_variables_to_update.length; i++){
+                const index = text_variables.indexOf(adj_variables_to_update[i]);
                 //if key is not in text_variables, ie is a date or select input
                 if(index === -1)
-                    updateModalTask[variables_to_update[i]] = modalTask[variables_to_update[i]];
+                    updateModalTask[adj_variables_to_update[i]] = task[adj_variables_to_update[i]];
                 //if key is in text_variables, ie is a text input
                 if(index >= 0){
-                    updateModalTask[variables_to_update[i]] = textValueObject[variables_to_update[i]];
+                    updateModalTask[adj_variables_to_update[i]] = textValueObject[adj_variables_to_update[i]];
                 }
                 if(index === null){
                     console.error("index === null in handleSave");
                     cogoToast.error(`Internal Error`, {hideAfter: 4});
                 }
             }
-
             //Add Id to this new object
             updateModalTask["t_id"] = task.t_id;
  
@@ -189,8 +206,7 @@ export default function TaskModal(props){
               cogoToast.error(`Error updating task. ` + error, {hideAfter: 4});
             })
         }
-        handleClose();
-
+        //handleClose();
     };
 
     
@@ -211,79 +227,48 @@ export default function TaskModal(props){
         <Fade in={modalOpen}>
             { modalTask ? /* If modalTask is not loaded, load the circularprogrss instead */
             <div className={classes.container}>
-<div className={classes.modalTitleDiv}><span id="transition-modal-title" className={classes.modalTitle}>Edit Task Id: {modalTask.t_id}&nbsp;&nbsp;&nbsp;Date Ordered: {modalTask.wo_date}</span></div>
-            <Grid container >
-                
-                <Grid item xs={8} className={classes.paper}>
+            <div className={classes.modalTitleDiv}>
+                <span id="transition-modal-title" className={classes.modalTitle}>
+                    Edit Task Id: {modalTask.t_id}&nbsp;&nbsp;&nbsp;Date Ordered: {modalTask.wo_date}
+                </span>
+            </div>
+            <Grid container >  
+                <Grid item xs={8} className={classes.paperScroll}>
                 <hr className={classes.hr}/>
-                <p className={classes.taskTitle}>Task Information</p>
-                    <FormControl fullWidth>
-                        <TextField className={classes.inputField} variant="outlined" id="input-name" label="Name:" inputRef={ref_object.t_name}  defaultValue={modalTask.t_name} onChange={handleShouldUpdate(true)}/>
-                        <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="input-description" label="Sign/Product Description:" inputRef={ref_object.description} defaultValue={modalTask.description} onChange={handleShouldUpdate(true)}/>
-                        <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="input-notes" label="Notes:" inputRef={ref_object.notes} defaultValue={modalTask.notes} onChange={handleShouldUpdate(true)}/>
-                    </FormControl>
-                    <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={6} >
-                        <FormControl variant="outlined" className={classes.inputField}>
-                            <InputLabel id="status-input-label">
-                            Work Type
-                            </InputLabel>
-                            <Select
-                            labelId="task-type-input-label"
-                            id="task-type-input"
-                            value={modalTask.type}
-                            onChange={value => handleInputOnChange(value, true, "select", "type")}
-                            >
-                            <MenuItem value={null}>N/A</MenuItem>
-                            <MenuItem value={'Bench'}>Bench</MenuItem>
-                            <MenuItem value={'Delivery'}>Delivery</MenuItem>
-                            <MenuItem value={'Field'}>Field</MenuItem>
-                            <MenuItem value={'Install'}>Install</MenuItem>
-                            <MenuItem value={'Loaner'}>Loaner</MenuItem>
-                            <MenuItem value={'Parts'}>Parts</MenuItem>
-                            <MenuItem value={'Pickup'}>Pickup</MenuItem>
-                            <MenuItem value={'Shipment'}>Shipment</MenuItem>
-                            </Select>
-                        </FormControl></Grid>
-                        <Grid item xs={6} ><TextField className={classes.inputField} type="number" variant="outlined" id="input-hours" label="Hours" inputRef={ref_object.hours_estimate} defaultValue={modalTask.hours_estimate} onChange={handleShouldUpdate(true)} /></Grid>
-                    </Grid>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Assigned Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.date_assigned} onChange={value => handleInputOnChange(value, true, "datetime", "date_assigned")} /></MuiPickersUtilsProvider>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Desired Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.date_desired} onChange={value => handleInputOnChange(value, true, "datetime", "date_desired")} /></MuiPickersUtilsProvider>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Completed Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.date_completed} onChange={value => handleInputOnChange(value, true, "datetime", "date_completed")} /></MuiPickersUtilsProvider>
-                    <hr className={classes.hr}/>
-                    <p className={classes.taskTitle}>Address Information</p>
-                    <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="input-address-name" label="Address Name:"  defaultValue={modalTask.address_name}/></FormControl></Grid>
-                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="input-address" label="Address:"  defaultValue={modalTask.address}/></FormControl></Grid>
-                    </Grid>
-                    <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-city" label="City:"  defaultValue={modalTask.city}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-state" label="State:"  defaultValue={modalTask.state}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-zip" label="Zipcode:"  defaultValue={modalTask.zip}/></Grid>
-                    </Grid>
+                
+                <TaskModalTaskInfo  classes={classes} 
+                                    modalTask={modalTask} 
+                                    handleInputOnChange={handleInputOnChange} 
+                                    handleShouldUpdate={handleShouldUpdate}
+                                    handleSave={handleSave}
+                                    ref_object={ref_object}
+                                    editTaskInfo={editTaskInfo} setEditTaskInfo={setEditTaskInfo}/>
+
+                <hr className={classes.hr}/>
+                
+                    
+                <TaskModalAddressInfo  classes={classes} 
+                                    modalTask={modalTask} 
+                                    handleInputOnChange={handleInputOnChange} 
+                                    handleShouldUpdate={handleShouldUpdate}
+                                    handleSave={handleSave}
+                                    ref_object={ref_object}
+                                    editAddressInfo={editAddressInfo} setEditAddressInfo={setEditAddressInfo}/>
                     
                     <hr className={classes.hr}/>
-                    <p className={classes.taskTitle}>Delivery/Install</p>
-                    <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={4} >
-                            
-                            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Delivery Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.delivery_date} onChange={value => handleInputOnChange(value, true, "datetime", "delivery_date")} /></MuiPickersUtilsProvider>
-                            </Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-delivery-crew" label="Delivery Crew" inputRef={ref_object.delivery_crew} defaultValue={modalTask.delivery_crew} onChange={handleShouldUpdate(true)}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} type="number" variant="outlined" id="input-delivery-order" label="Delivery Order" inputRef={ref_object.delivery_order} defaultValue={modalTask.delivery_order} onChange={handleShouldUpdate(true)}/></Grid>
-                    </Grid>
-                    <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={4} ><MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Install Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-install-crew" label="Install Crew" inputRef={ref_object.install_crew} defaultValue={modalTask.install_crew} onChange={handleShouldUpdate(true)}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} type="number" variant="outlined" id="input-install-order" label="Install Order" inputRef={ref_object.install_order} defaultValue={modalTask.install_order} onChange={handleShouldUpdate(true)}/></Grid>
-                    </Grid>
+                
+                    
+                <TaskModalWOSignArtItems taskId={modalTask.table_id}/>
+                        
                 </Grid>
                 <Grid item xs={4} className={classes.paper}>
-                
-
-                <div><Avatar src="/static/drilling-icon.png" className={classes.avatar}/>
-                <FormControl variant="outlined" className={classes.inputField}>
                     
+                
+                <p className={classes.taskTitle}>Drill / Sign / Artwork</p>
+                <div>
+                
+                <Avatar src="/static/drilling-icon.png" className={classes.avatar}/>
+                <FormControl variant="outlined" className={classes.inputField}>       
                     <InputLabel id="drilling-input-label">
                     Drilling
                     </InputLabel>
@@ -339,7 +324,15 @@ export default function TaskModal(props){
                 </FormControl>
                 </div>
                 <br/>
-                <TextField className={classes.inputField} variant="outlined" id="input-users" label="Assigned Users" defaultValue={"TODO"}/>
+                <p className={classes.taskTitle}>Delivery/Install</p>
+                <div>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Install Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider>
+                </div>
+                <div>
+                     <TextField className={classes.inputField} variant="outlined" id="input-install-crew" label="Install Crew" inputRef={ref_object.install_crew} defaultValue={modalTask.install_crew} onChange={handleShouldUpdate(true)}/>
+                </div>
+
+                
                 { taskLists ?
                     <TaskModalTaskList taskLists={taskLists} setTaskLists={setTaskLists} 
                                         modalTask={modalTask}
@@ -351,43 +344,50 @@ export default function TaskModal(props){
                         <CircularProgress />
                     </div>
                 }
-                <FormControl variant="outlined" className={classes.inputField}>
-                    <InputLabel id="status-input-label">
-                    Task Status
-                    </InputLabel>
-                    <Select
-                    labelId="status-input-label"
-                    id="status-input"
-                    value={modalTask.task_status}
-                    onChange={value => handleInputOnChange(value, true, "select", "task_status")}
-                    >
-                    <MenuItem value={null}>N/A</MenuItem>
-                    <MenuItem value={'Not Started'}>Not Started</MenuItem>
-                    <MenuItem value={'In Progress'}>In Progress</MenuItem>
-                    <MenuItem value={'Delivered'}>Delivered</MenuItem>
-                    <MenuItem value={'Installed'}>Installed</MenuItem>
-                    <MenuItem value={'Completed'}>Completed</MenuItem>  
-                    </Select>
-                </FormControl>
-                <ButtonGroup className={classes.buttonGroup}>
-                    <Button
-                        onClick={handleDelete(modalTask.t_id)}
-                        variant="contained"
-                        color="secondary"
-                        size="large"
-                        className={classes.deleteButton}
-                    ><TrashIcon />
-                    </Button>
-                    <Button
-                        onClick={handleSave(modalTask)}
-                        variant="contained"
-                        color="primary"
-                        size="large"
-                        className={classes.saveButton}
-                    >
-                        <SaveIcon />Save
-                    </Button>
-                </ButtonGroup>
+                </Grid>
+            </Grid>
+
+            <Grid container >
+                <Grid item xs={12} className={classes.paper_footer}>
+                    <div className={classes.footerInputField}>
+                        <FormControl variant="outlined" className={classes.inputField}>
+                            <InputLabel id="status-input-label">
+                            Task Status
+                            </InputLabel>
+                            <Select
+                            labelId="status-input-label"
+                            id="status-input"
+                            value={modalTask.task_status}
+                            onChange={value => handleInputOnChange(value, true, "select", "task_status")}
+                            >
+                            <MenuItem value={null}>N/A</MenuItem>
+                            <MenuItem value={'Not Started'}>Not Started</MenuItem>
+                            <MenuItem value={'In Progress'}>In Progress</MenuItem>
+                            <MenuItem value={'Delivered'}>Delivered</MenuItem>
+                            <MenuItem value={'Installed'}>Installed</MenuItem>
+                            <MenuItem value={'Completed'}>Completed</MenuItem>  
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <ButtonGroup className={classes.buttonGroup}>
+                        <Button
+                            onClick={handleDelete(modalTask.t_id)}
+                            variant="contained"
+                            color="secondary"
+                            size="large"
+                            className={classes.deleteButton}
+                        ><TrashIcon />
+                        </Button>
+                        <Button
+                            onClick={handleSave(modalTask)}
+                            variant="contained"
+                            color="primary"
+                            size="large"
+                            className={classes.saveButton}
+                        >
+                            <SaveIcon />Save
+                        </Button>
+                    </ButtonGroup>
                 </Grid>
             </Grid>
             </div>
@@ -415,7 +415,28 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: theme.palette.background.paper,
       boxShadow: theme.shadows[5],
       padding: '3% !important',
-      position: 'relative'
+      position: 'relative',
+      maxHeight: '600px'
+    },
+    paperScroll: {
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.shadows[5],
+        padding: '3% !important',
+        position: 'relative',
+        overflowY: 'auto',
+        maxHeight: '600px',
+
+        background: 'linear-gradient(white 30%, rgba(255, 255, 255, 0)), linear-gradient(rgba(255, 255, 255, 0), white 70%) 0 100%, radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)), radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, .52), rgba(0, 0, 0, 0)) 0 100%',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '100% 40px, 100% 40px, 100% 14px, 100% 14px',
+        /* Opera doesn't support this in the shorthand */
+        backgroundAttachment: 'local, local, scroll, scroll',
+      },
+    paper_footer: {
+        backgroundColor: '#ececec',
+        padding: '1% !important',
+        display: 'flex',
+        justifyContent:'flex-end',
     },
     container: {
         width: '60%',
@@ -455,12 +476,41 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: '#fff',
         }
     },
+    footerInputField: {
+
+    },
     hr: {
         margin: '10px 0px 10px 0px',
         border: '2px solid #e1c179',
     },
+    subsectionContainer:{
+        padding: '2px 0px 2px 0px',
+    },
+    subsectionContainer_date:{
+        backgroundColor: '#ebe63e4d',
+    },
     lowerGrid: {
         textAlign: 'center',
+    },
+    lowerGridHead:{
+
+    },
+    text_head:{
+        fontWeight: '600',
+        fontVariant: 'small-caps',
+        color: '#474747',
+    },
+    text_info:{
+        fontWeight: '600',
+        color: '#0083bf',
+        fontSize: '12px',
+    },
+    text_info_grid:{
+        padding: '4px 0px',
+    },
+    editFormButton: {
+        padding: '0px 0px',
+        marginLeft: '10px',
     },
     saveButton:{
         backgroundColor: '#414d5a'
@@ -469,9 +519,7 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#b7c3cd'
     },
     buttonGroup: {
-        position: 'absolute',
-        bottom: '15px',
-        right: '106px',
+        
     },
     selectBox: {
         '&& .MuiInputLabel-outlined': {

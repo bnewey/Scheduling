@@ -50,7 +50,7 @@ const MapSidebar = (props) => {
                 ><ListIcon className={classes.icon}/><span>Mapped Markers:&nbsp;&nbsp;{markedRows.length} Items</span>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.details}>
-                    <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
+                    <Scrollbars universal autoHeight autoHeightMax={400}>
                         <MapSidebarMarkedTasks {...props}
                                                 />
                     </Scrollbars>
@@ -82,7 +82,8 @@ const useStyles = makeStyles(theme => ({
     root: {
         padding: '1% 2% 2% 2%',
         margin: '0px 0px 0px -90px',
-        backgroundColor: '#adb0b0',
+        background: 'linear-gradient( #dadada, #a2a2a2)',
+        boxShadow: '0px 1px 8px 0px rgba(0,0,0,0.52)',
         minHeight: '400px',
     },
     head: {

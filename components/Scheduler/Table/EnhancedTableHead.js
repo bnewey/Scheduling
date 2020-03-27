@@ -23,19 +23,15 @@ const headCells = [
     { id: 't_name', numeric: false, disablePadding: false, label: 'Name' },
     { id: 'description', numeric: false, disablePadding: false, label: 'Desc' },
     { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
-    { id: 'hours_estimate', numeric: true, disablePadding: false, label: 'Hours' },
     { id: 'date_desired', numeric: true, disablePadding: false, label: 'Desired' },
     { id: 'date_completed', numeric: true, disablePadding: false, label: 'Completed' },
-    { id: 'drilling', numeric: false, disablePadding: false, label: 'Drilling' },
-    { id: 'sign', numeric: false, disablePadding: true, label: 'Sign' },
-    { id: 'artwork', numeric: false, disablePadding: false, label: 'Artwork' },
   ];
 
 
 function EnhancedTableHead(props) {
     //PROPS
     const { classes, disabled, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, filteredRows, 
-            setFilteredRows,filterConfig, setFilterConfig, selectedIds, taskListToMap, filterSelectedOnly, setFilterSelectedOnly} = props;
+            setFilteredRows,filterConfig, setFilterConfig, selectedIds, taskListToMap, filterSelectedOnly, setFilterSelectedOnly, tabValue} = props;
     const createSortHandler = property => event => {
       onRequestSort(event, property);
     };
@@ -63,13 +59,13 @@ function EnhancedTableHead(props) {
                 inputProps={{ 'aria-label': 'select all' }}/>
                 <p style={{display: "inline"}}>{selectedIds.length == 0 ? 'Select All' : 'Deselect All'}</p>
             </TableCell>
-            <TableCell colSpan={7}>
+            <TableCell colSpan={3}>
               { numSelected > 0 ?
                 <EnhancedTableAddCreateTL {...props}/>
                 : <></>
               }
               </TableCell>
-              <TableCell colSpan={4}>
+              <TableCell colSpan={3}>
               <Tooltip title="Click to show only selected tasks."
                              arrow={true} enterDelay={400} placement={'top'}
                               classes={{tooltip: classes.tooltip }}>
@@ -84,6 +80,7 @@ function EnhancedTableHead(props) {
               </Tooltip>
               </TableCell>
           </TableRow>
+          { tabValue == 1 ?
           <TableFilter
             rows={filteredRows}
             onFilterUpdate={filterUpdated}
@@ -117,6 +114,8 @@ function EnhancedTableHead(props) {
             </TableCell>
           ))}
           </TableFilter>
+          : <></>}
+        }
       </TableHead>
     );
   }

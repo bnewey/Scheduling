@@ -62,10 +62,7 @@ router.post('/getAllWorkOrderItems', async (req,res) => {
             return;
         }
         
-    }
-    logger.verbose(table);
-    logger.verbose(search_query);
-    
+    }    
 
     const sql = 'SELECT woi.*, wo.job_reference, e.name as e_name, date_format(wo.date, \'%m-%d-%Y %H:%i:%S\') as date '  + 
         ' FROM work_orders_items woi ' +
@@ -83,6 +80,35 @@ router.post('/getAllWorkOrderItems', async (req,res) => {
     }
     catch(error){
         logger.error("Work Order Items: " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
+
+    var wo_id;
+    if(req.body){
+        if(req.body.wo_id != null){
+            wo_id = req.body.wo_id;
+        }  
+    }
+    logger.verbose(wo_id);
+    
+
+    const sql = 'SELECT * '  + 
+        ' FROM work_orders_items woi ' +
+        ' WHERE woi.work_order =  ? AND woi.scoreboard_or_sign > 0' +
+        ' ORDER BY woi.ordernum ASC ' + 
+        ' LIMIT 100';
+
+    try{
+        const results = await database.query(sql, [wo_id]);
+        logger.info("Got Work Order Sign Art Items");
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Work Order Sign Art  Items: " + error);
         res.sendStatus(400);
     }
 });

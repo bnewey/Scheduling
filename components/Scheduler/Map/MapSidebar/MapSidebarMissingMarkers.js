@@ -4,7 +4,7 @@ import {makeStyles, List, ListItem, ListItemSecondaryAction, ListItemText, IconB
 
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
-import { TaskContext } from '../../Table/TaskContainer';
+import { TaskContext } from '../../TaskContainer';
 
 
 const MapSiderbarMissingMakers = (props) =>{

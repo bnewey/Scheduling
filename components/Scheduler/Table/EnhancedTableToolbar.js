@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import {Typography, Toolbar, Button, Popper, Fade, Paper, ClickAwayListener} from '@material-ui/core';
 import cogoToast from 'cogo-toast';
 
-import {TaskContext} from './TaskContainer';
+import {TaskContext} from '../TaskContainer';
 
 
   
@@ -79,7 +79,6 @@ import {TaskContext} from './TaskContainer';
     numSelected: PropTypes.number.isRequired,
   };
 
-
   export default EnhancedTableToolbar;
 
   const useToolbarStyles = makeStyles(theme => ({
@@ -92,8 +91,8 @@ import {TaskContext} from './TaskContainer';
     highlight:
       theme.palette.type === 'light'
         ? {
-            color: theme.palette.secondary.main,
-            backgroundColor: lighten(theme.palette.secondary.light, 0.85),
+            color: '#fe0',
+            backgroundColor: '#6486ac',
           }
         : {
             color: theme.palette.text.primary,

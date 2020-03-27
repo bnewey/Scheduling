@@ -41,7 +41,7 @@ function a11yProps(index) {
 
 
 
-export default function FullWidthTabs({children, value, setValue, numSelected, activeTaskName}) {
+export default function FullWidthTabs({children, value, setValue, numSelected, activeTask}) {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -71,9 +71,9 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
                   <span className={classes.tabSpan}>
                     <TaskIcon className={ classes.icon}/>&nbsp;Task Lists
                   </span>
-                  {activeTaskName ? 
+                  {activeTask ? 
                     <p className={classes.p_selected}>
-                        Active: {activeTaskName}
+                        Active: {activeTask.list_name} {activeTask.is_priority ? "(PRIORITY)" : ""}
                     </p> : <></>
                   }
               </React.Fragment>} {...a11yProps(0)} />
@@ -83,7 +83,7 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
                             <ViewListIcon className={classes.icon}/>&nbsp;Tasks
                           </span>
                           {numSelected ? <p className={classes.p_selected}>
-                            {numSelected} Selected {activeTaskName ? "" : "(UNSAVED)"}
+                            {numSelected} Selected {activeTask ? "" : "(UNSAVED)"}
                           </p> : <></>}
                           </React.Fragment>} {...a11yProps(1)} />
           <Tab className={value === 2 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(2)} />
@@ -126,10 +126,17 @@ const useStyles = makeStyles(theme => ({
     padding: '25px'
   },
   nonSelectedTab: {
-    
+    '&:hover':{
+      backgroundColor: '#fff',
+      borderTop: '2px solid #a2ceff',
+      borderBottom: '2px solid #a2ceff',
+      color: '#d87904',
+    },
   },
   tab:{
-    backgroundColor: '#e7eff2',
+    backgroundColor: '#5b6164',
+    
+    border: '1px solid #7f7f7f',
   },
   p_selected:{
     margin: '0px 0px',
@@ -142,6 +149,8 @@ const useStyles = makeStyles(theme => ({
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     width: '75%',
-    backgroundColor: '#fca437'
+    backgroundColor: '#fca437',
+    borderRadius: '2px',
+    boxShadow: 'inset 0px 1px 5px 0px rgba(0,0,0,0.2)',
   }
 }));

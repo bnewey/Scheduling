@@ -9,7 +9,7 @@ import cogoToast from 'cogo-toast';
 
 import TaskLists from '../../../js/TaskLists';
 
-import {TaskContext} from './TaskContainer';
+import {TaskContext} from '../TaskContainer';
 
 function EnhancedTableAddCreateTL(props) {
     //PROPS
@@ -123,7 +123,7 @@ function EnhancedTableAddCreateTL(props) {
             >
                 <MenuItem value={''}>Choose a Task List..</MenuItem>
             
-             {taskLists.map((list,i)=> (
+             {taskLists.filter((i)=> i.is_priority != 1).map((list,i)=> (
                 <MenuItem value={list.id} key={"task-list-"+i}>{list.list_name}</MenuItem>))
              }                   
             

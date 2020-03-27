@@ -4,7 +4,6 @@ import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 import {makeStyles, Paper, Grid, Button} from '@material-ui/core';
 
 import MapSidebar from './MapSidebar/MapSidebar';
-import TaskModal from '../Table/TaskModal/TaskModal';
 import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 
 import cogoToast from 'cogo-toast';
@@ -12,7 +11,7 @@ import MapMarkerInfoWindow from './MapMarkerInfoWindow';
 
 import Tasks from '../../../js/Tasks';
 import Util from '../../../js/Util';
-import { TaskContext } from '../Table/TaskContainer';
+import { TaskContext } from '../TaskContainer';
 
 
 
@@ -36,12 +35,11 @@ const useStyles = makeStyles(theme => ({
 const MapContainer = (props) => {
     const classes = useStyles();
 
-    const {mapRows, setMapRows} = useContext(TaskContext);
+    const {mapRows, setMapRows, modalOpen, setModalOpen, setModalTaskId} = useContext(TaskContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const [bounds, setBounds] = useState(null);
-    const [modalOpen, setModalOpen] = React.useState(false);  
-    const [modalTaskId, setModalTaskId] = React.useState();  
+    
     const [resetBounds, setResetBounds] = React.useState(true);
     const [markedRows, setMarkedRows] = useState([]);
     const [infoWeather, setInfoWeather] = useState(null);
@@ -59,8 +57,15 @@ const MapContainer = (props) => {
     },[resetBounds]);
 
     useEffect( () =>{ //useEffect for inputText
-      if(mapRows)
-        setMarkedRows(mapRows.filter((row, index) => row.geocoded)  );
+      if(mapRows){
+        //filter geocoded, then sort by priority_order
+        var tmp = mapRows.filter((row, index) => row.geocoded).sort((a,b)=>{
+          if(a.priority_order > b.priority_order) return 1;
+          if(b.priority_order > a.priority_order) return -1;
+          return 0; 
+        });
+        setMarkedRows(tmp);
+      }
 
       //Find and set geolocation of unset rows
       if(noMarkerRows){
@@ -179,8 +184,7 @@ const MapContainer = (props) => {
       <div>
           <Grid container spacing={3}>
             <Grid item xs={9}>
-            <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
+            
               <Map
                 google={props.google}
                 zoom={6}

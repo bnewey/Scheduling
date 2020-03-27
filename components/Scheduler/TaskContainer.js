@@ -1,17 +1,19 @@
 import React, {useRef, useState, useEffect, createContext} from 'react';
 import {makeStyles, CircularProgress} from '@material-ui/core';
 
-import EnhancedTable from './EnhancedTable';
-import TaskListContainer from '../TaskList/TaskListContainer.js';
-import MapContainer from '../Map/MapContainer';
+import EnhancedTable from './Table/EnhancedTable';
+import TaskListContainer from './TaskList/TaskListContainer.js';
+import MapContainer from './Map/MapContainer';
 
-import FullWidthTabs from '../Tabs/FullWidthTabs';
-import Tasks from '../../../js/Tasks';
-import TaskLists from '../../../js/TaskLists';
+import FullWidthTabs from './Tabs/FullWidthTabs';
+import Tasks from '../../js/Tasks';
+import TaskLists from '../../js/TaskLists';
+import TaskModal from './TaskModal/TaskModal';
 
 import cogoToast from 'cogo-toast';
 
-import Util from  '../../../js/Util';
+import Util from  '../../js/Util';
+import HelpModal from './HelpModal/HelpModal';
 
 var today =  new Date();
 
@@ -32,16 +34,18 @@ const TaskContainer = function() {
   const [tabValue, setTabValue] = React.useState(0);
   const [taskListToMap, setTaskListToMap] = useState(null);
   const [filterSelectedOnly, setFilterSelectedOnly] = React.useState(false);
+  //Modal Props
+  const [modalOpen, setModalOpen] = React.useState(false);  
+  const [modalTaskId, setModalTaskId] = React.useState();  
   
   const classes = useStyles();
-  
-  useEffect( () =>{ //useEffect for inputText
+
+  //Tasks/MapRows
+  useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
     if(!rows || rows == []) {
       Tasks.getAllTasks()
-      .then( (data) => {
-        setRows(data);
-      })
+      .then( data => { setRows(data); })
       .catch( error => {
         console.warn(error);
         cogoToast.error(`Error getting tasks`, {hideAfter: 4});
@@ -53,48 +57,62 @@ const TaskContainer = function() {
     if(rows){
       if(mapRows || mapRows != []){
         var tmpMapRows = rows.filter((row, i)=>{
-          if(selectedIds.indexOf(row.t_id) != -1){
+          if(selectedIds.indexOf(row.t_id) != -1) 
             return true;
-          }
           return false;
         })
         setMapRows(tmpMapRows);
       }
     }
-  
-    return () => { //clean up
-        if(rows){
-            
-        }
-    }
   },[rows]);
 
-  useEffect( () =>{ //useEffect for inputText
+  //TaskLists
+  useEffect( () =>{ 
     //Gets data only on initial component mount
     if(!taskLists || taskLists == []) {
       TaskLists.getAllTaskLists()
-      .then( (data) => setTaskLists(data))
+      .then( (data) => {
+        setTaskLists(data)
+      })
       .catch( error => {
         console.warn(error);
         cogoToast.error(`Error getting tasklists`, {hideAfter: 4});
       })
     }
-  
-    return () => { //clean up
-        if(taskLists){
-            
-        }
-    }
   },[ taskLists]);
+
+  //TaskListToMap
+  useEffect( () =>{ 
+    //Gets and sets tasks from Task List when theres a tasklistToMap and no selected from EnhancedTable
+    if(taskListToMap) {
+        TaskLists.getTaskList(taskListToMap.id)
+        .then( (data) => {
+            //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
+            var newSelectedIds = data.map((item, i )=> item.t_id );
+            setSelectedIds(newSelectedIds);
+            
+            setMapRows(data);
+            cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`, {hideAfter: 4});
+        })
+        .catch( error => {
+            console.error(error);
+            cogoToast.error(`Error getting task list`, {hideAfter: 4});
+        })        
+    }
+    },[taskListToMap]);
+
+
+
 
   
 
   return (
     <div className={classes.root}>
       <TaskContext.Provider value={{taskLists,setTaskLists, mapRows, setMapRows, selectedIds, setSelectedIds, 
-                            tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly}} >
+                            tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
+                            modalOpen, setModalOpen, modalTaskId, setModalTaskId} } >
         <FullWidthTabs value={tabValue} setValue={setTabValue} 
-                      numSelected={selectedIds.length} activeTaskName={taskListToMap ? taskListToMap.list_name : null}>
+                      numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
         
           <div>
             <TaskListContainer />
@@ -109,6 +127,11 @@ const TaskContainer = function() {
           </div>
 
         </FullWidthTabs>
+        <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
+                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
+        
+        <HelpModal initialPage={"tasks"} initialTab={tabValue} />
+
       </TaskContext.Provider>
     </div>
   );

@@ -1,69 +1,74 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, FormControl, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 
 import TaskLists from '../../../js/TaskLists';
 import { TaskContext } from '../TaskContainer';
+import cogoToast from 'cogo-toast';
 
 
-
-const TaskListTasksEdit = ({props}) => {
+const TaskListActionAdd = (props) => {
  
     //PROPS
-    const { openTaskList, list, open, handleClose} = props;
+    const { setIdToActivateOnRefreshTL } = props;
     const {taskLists, setTaskLists } = useContext(TaskContext);
 
     //STATE
-    
-    const [newListName, setNewListName] = React.useState(null);
+    const [addOpen, setAddOpen] = React.useState(false);
+    const [newListName, setNewListName] = React.useState("New TaskList");
 
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
 
-    useEffect(() =>{ //useEffect for inputText
-        if(list){
-          setNewListName(list.list_name);
-        }
-      
-        return () => { //clean up
-     
-        }
-      },[list]);
+    const handleAddClickOpen = (event) => {
+        setAddOpen(true);   
+    };
+
+    const handleAddClose = () => {
+        setNewListName(null);
+        setAddOpen(false);
+    };
   
 
-    const handleEditTaskList = (event) => {
-        const name = newListName;
-        if(!name || name === list.list_name){
-            handleClose();
-            return;
-        }
-        const updatedList = {...list};
-        updatedList["list_name"] = name;
+      const handleAddNew = (event, name) =>{
+          if(!name){
+              return;
+          }
+        TaskLists.addTaskList(name)
+                .then((id) => {
+                    if(!id){
+                        console.warn("Bad id returned from addNewTaskList");
+                    }
+                    //refetch tasklists
+                    setTaskLists(null);
+                    setIdToActivateOnRefreshTL(id);
+                    handleAddClose();
+                    cogoToast.success(`Added new Task List`, {hideAfter: 4});
+                })
+                .catch( error => {
+                    cogoToast.error(`Error adding new task list`, {hideAfter: 4});
+                    console.error(error);
+            });
+    };
 
-        TaskLists.updateTaskList(updatedList)
-        .then((ok)=>{
-            if(ok){
-                handleClose();
-                setTaskLists(null);
-            }
-        })
-        .catch((error)=> {
-            console.log(error);
-        });
-    }
-
-
-     
+    
     return(
         <React.Fragment>
-
+            <Button         
+                    onClick={event => handleAddClickOpen(event)}    
+                    variant="text"
+                    color="secondary"
+                    size="large"
+                    className={classes.darkButton}
+            ><AddIcon className={classes.icon_small} fontSize="small"/><span>New TaskList</span></Button>
             
-            { list && open && taskLists ? 
-            //TODO stupid expanded thing clicks through this dialog box
-            <Dialog PaperProps={{className: classes.dialog}} open={open} onClose={handleClose}>
-            <DialogTitle className={classes.title}>Edit Name of {list.list_name}</DialogTitle>
+            { addOpen && taskLists ? 
+            
+            <Dialog PaperProps={{className: classes.dialog}} open={handleAddClickOpen} onClose={handleAddClose}>
+            <DialogTitle className={classes.title}>Name of New TaskList</DialogTitle>
                 <DialogContent className={classes.content}>
             <FormControl className={classes.inputField}>
                 <TextField id="task-list-edit-name" 
@@ -73,16 +78,16 @@ const TaskListTasksEdit = ({props}) => {
                             onChange={event => setNewListName(event.target.value)}/>
             </FormControl>
             <DialogActions>
-                <Button onMouseDown={handleClose} color="primary">
+                <Button onMouseDown={handleAddClose} color="primary">
                     Cancel
                 </Button>
                  <Button
-                    onMouseDown={event => handleEditTaskList(event)}
+                    onMouseDown={event => handleAddNew(event, newListName)}
                     variant="contained"
                     color="secondary"
                     size="medium"
                     className={classes.saveButton} >
-                    Save
+                    Add
                     </Button>
                     
              </DialogActions> 
@@ -95,7 +100,7 @@ const TaskListTasksEdit = ({props}) => {
 
 } 
 
-export default TaskListTasksEdit;
+export default TaskListActionAdd;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -163,5 +168,21 @@ const useStyles = makeStyles(theme => ({
     textField:{
         display: 'block',
         minWidth: '220px',
-    }
+    },
+    darkButton:{
+        backgroundColor: '#fca437',
+        color: '#fff',
+        fontWeight: '600',
+        border: '1px solid rgb(255, 237, 196)',
+        fontSize: '9px',
+        padding:'1%',
+      '&:hover':{
+        border: '',
+        backgroundColor: '#ffedc4',
+        color: '#d87b04'
+      },
+    },
+    icon_small:{
+        verticalAlign: 'text-bottom'
+    },
   }));

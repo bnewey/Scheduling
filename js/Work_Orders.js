@@ -42,7 +42,28 @@ async function getAllWorkOrderItems(table, query){
 
 }
 
+async function getAllWorkOrderSignArtItems(id){
+    const route = '/scheduling/workOrders/getAllWorkOrderSignArtItems';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({wo_id: id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
 module.exports = {
     getAllWorkOrders: getAllWorkOrders,
     getAllWorkOrderItems: getAllWorkOrderItems,
+    getAllWorkOrderSignArtItems: getAllWorkOrderSignArtItems,
 };

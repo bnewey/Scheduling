@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import MainLayout from '../components/Layouts/Main';
 
 
-import TaskContainer from '../components/Scheduler/Table/TaskContainer';
+import TaskContainer from '../components/Scheduler/TaskContainer';
 
 const Index = function () {
     
