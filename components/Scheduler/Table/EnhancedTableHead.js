@@ -31,7 +31,8 @@ const headCells = [
 function EnhancedTableHead(props) {
     //PROPS
     const { classes, disabled, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, filteredRows, 
-            setFilteredRows,filterConfig, setFilterConfig, selectedIds, taskListToMap, filterSelectedOnly, setFilterSelectedOnly, tabValue} = props;
+            setFilteredRows,filterConfig, setFilterConfig, selectedIds, taskListToMap, filterSelectedOnly, setFilterSelectedOnly, 
+            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly, tabValue} = props;
     const createSortHandler = property => event => {
       onRequestSort(event, property);
     };
@@ -44,6 +45,11 @@ function EnhancedTableHead(props) {
     const handleFilterSelectedOnly = (event)=>{
       cogoToast.info( !filterSelectedOnly ? "Filtered Out Unselected Tasks" : "Removed Filter - Unselected Tasks", {hideAfter: 4});
       setFilterSelectedOnly(!filterSelectedOnly);
+    }
+
+    const handleFilterScoreboardsAndSignsOnly = (event) =>{
+      cogoToast.info( !filterScoreboardsAndSignsOnly ? "Filtering to Scoreboards and Signs Only" : "Removed Filter - Scoreboards and Signs", {hideAfter: 4});
+      setFilterScoreboardsAndSignsOnly(!filterScoreboardsAndSignsOnly);
     }
 
   
@@ -59,13 +65,13 @@ function EnhancedTableHead(props) {
                 inputProps={{ 'aria-label': 'select all' }}/>
                 <p style={{display: "inline"}}>{selectedIds.length == 0 ? 'Select All' : 'Deselect All'}</p>
             </TableCell>
-            <TableCell colSpan={3}>
+            <TableCell colSpan={2}>
               { numSelected > 0 ?
                 <EnhancedTableAddCreateTL {...props}/>
                 : <></>
               }
               </TableCell>
-              <TableCell colSpan={3}>
+              <TableCell colSpan={2}>
               <Tooltip title="Click to show only selected tasks."
                              arrow={true} enterDelay={400} placement={'top'}
                               classes={{tooltip: classes.tooltip }}>
@@ -79,6 +85,22 @@ function EnhancedTableHead(props) {
                 </Button>
               </Tooltip>
               </TableCell>
+
+              <TableCell colSpan={2}>
+              <Tooltip title="Click to show only scoreboard and sign tasks."
+                             arrow={true} enterDelay={400} placement={'top'}
+                              classes={{tooltip: classes.tooltip }}>
+              <Button
+                    onClick={event => handleFilterScoreboardsAndSignsOnly(event)}
+                    variant="text"
+                    color="secondary"
+                    size="medium"
+                    className={filterScoreboardsAndSignsOnly ? classes.filterButtonActive : classes.filterButton} >
+                    Scoreboards/Signs Only
+                </Button>
+              </Tooltip>
+              </TableCell>
+
           </TableRow>
           { tabValue == 1 ?
           <TableFilter
@@ -115,7 +137,7 @@ function EnhancedTableHead(props) {
           ))}
           </TableFilter>
           : <></>}
-        }
+        
       </TableHead>
     );
   }
