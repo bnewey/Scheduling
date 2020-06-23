@@ -231,7 +231,7 @@ const TaskListToolbar = (props) => {
                             <>
                                 <div className={classes.taskListLabelDiv}>
                                     <span className={classes.taskListLabelText}>{openTaskList ? openTaskList.list_name : ""} </span>
-                                    <span className={classes.taskListLabelPriorityIndicator}>(PRIORITY LIST)</span>
+                                    <span className={classes.taskListLabelPriorityIndicator}>PRIORITY LIST</span>
                                 </div>     
                             </>
                         }
@@ -407,10 +407,14 @@ const useStyles = makeStyles(theme => ({
     taskListLabelDiv:{
         borderRadius: '5px',
         padding: '0px 13px',
-        backgroundColor: '#3d87c1',
+        backgroundColor: '#ff4810',
         border: '1px solid #ececec',
         boxShadow: 'inset 0 0 4px 0px black',
         margin: '0px 33px 0px 5px',
+        display: 'flex',
+        alignItems: "baseline",
+        minWidth:'500px',
+        justifyContent: 'space-between',
     },
     taskListLabelText:{
         color: '#fff',     
@@ -424,7 +428,7 @@ const useStyles = makeStyles(theme => ({
         verticalAlign: 'bottom',
     },
     taskListLabelPriorityIndicator:{
-        color: '#ffec27',
+        color: '#fbff00',
         fontWeight: '400',
         fontSize: '20px',
         display: 'inline-block',

@@ -99,17 +99,18 @@ const TaskListSidebar = (props) => {
         <>
         <Paper className={classes.root}>
             <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>
-            <div className={classes.head_div}>
-                <span>TaskLists</span>
+            <div className={classes.priority_head_div}>
+                <span>Priority List</span>
             </div>
-           
+
             <Paper className={classes.list_div}>
+                
                 <List component="nav" aria-label="main mailbox folders">
-                    {taskLists && taskLists.map((list)=>(
+                {priorityList ? 
                         <ListItem
                         button
-                        selected={openTaskList && openTaskList.id === list.id}
-                        onClick={event => handleSelectTaskList(event, list)}
+                        selected={openTaskList && openTaskList.id === priorityList.id}
+                        onClick={event => handleSelectTaskList(event, priorityList)}
                         className={classes.list_item}
                         >
                             <ListItemIcon className={classes.list_item_icon}>
@@ -117,23 +118,15 @@ const TaskListSidebar = (props) => {
                             </ListItemIcon>
                             <ListItemText className={classes.list_item_text}>
                                 <div class="list_">
-                                    <span class="list_name">{list.list_name}</span> 
-                                    <span class={priorityList && priorityList.id == list.id 
-                                            ? "list_item_priority" 
-                                            : priorityList && priorityList.linked_tl == list.id 
-                                                ? "list_item_linked" 
-                                                : ""}>
-                                        {priorityList && priorityList.id == list.id 
-                                            ? "PRIORITY LIST" 
-                                            : priorityList && priorityList.linked_tl == list.id 
-                                                ? "PRIORITY LINKED" 
-                                                : ""}
+                                    <span class="list_name">{priorityList.list_name}</span> 
+                                    <span class={ "list_item_priority" }>
+                                        {"PRIORITY LIST"}
                                     </span>
                                 </div>
                                 <div>
-                                    <span class="list_item_date">Updated: {Util.convertISODateTimeToMySqlDateTime(list.date_entered)}</span>
+                                    <span class="list_item_date">Updated: {Util.convertISODateTimeToMySqlDateTime(priorityList.date_entered)}</span>
                                 </div>
-                                {openTaskList && openTaskList.id === list.id 
+                                {openTaskList && openTaskList.id === priorityList.id 
                                 ? 
                                     <div>
                                         <span
@@ -141,12 +134,6 @@ const TaskListSidebar = (props) => {
                                             onClick={event => handleEditClickOpen(event, openTaskList)}>
                                             Rename
                                         </span>
-                                        <span
-                                            class="list_item_text_button" 
-                                            onClick={event => handleDelete(event, list.id)}>
-                                            Delete
-                                        </span>
-                                        
                                     </div>
                                 :   <></> 
                                 }
@@ -154,7 +141,73 @@ const TaskListSidebar = (props) => {
                                 
                             </ListItemText>
                         </ListItem>
-                    ))}     
+                        :<></>}
+                </List>
+            </Paper>
+
+
+            <div className={classes.head_div}>
+                <span>Task Lists</span>
+            </div>
+           
+            <Paper className={classes.list_div}>
+                <List component="nav" aria-label="main mailbox folders">
+                    {taskLists && taskLists.map((list)=> { 
+                        if(priorityList && (list.id != priorityList.id)){
+                            return(
+                            <ListItem
+                            button
+                            selected={openTaskList && openTaskList.id === list.id}
+                            onClick={event => handleSelectTaskList(event, list)}
+                            className={classes.list_item}
+                            >
+                                <ListItemIcon className={classes.list_item_icon}>
+                                    <ListIcon />
+                                </ListItemIcon>
+                                <ListItemText className={classes.list_item_text}>
+                                    <div class="list_">
+                                        <span class="list_name">{list.list_name}</span> 
+                                        <span class={priorityList && priorityList.id == list.id 
+                                                ? "list_item_priority" 
+                                                : priorityList && priorityList.linked_tl == list.id 
+                                                    ? "list_item_linked" 
+                                                    : ""}>
+                                            {priorityList && priorityList.id == list.id 
+                                                ? "PRIORITY LIST" 
+                                                : priorityList && priorityList.linked_tl == list.id 
+                                                    ? "PRIORITY LINKED" 
+                                                    : ""}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="list_item_date">Updated: {Util.convertISODateTimeToMySqlDateTime(list.date_entered)}</span>
+                                    </div>
+                                    {openTaskList && openTaskList.id === list.id 
+                                    ? 
+                                        <div>
+                                            <span
+                                                class="list_item_text_button" 
+                                                onClick={event => handleEditClickOpen(event, openTaskList)}>
+                                                Rename
+                                            </span>
+                                            <span
+                                                class="list_item_text_button" 
+                                                onClick={event => handleDelete(event, list.id)}>
+                                                Delete
+                                            </span>
+                                            
+                                        </div>
+                                    :   <></> 
+                                    }
+                                    
+                                    
+                                </ListItemText>
+                            </ListItem>
+                            );
+                    }else{
+                        return (<></>);
+                    }
+                })}     
                 </List>
             </Paper>
             <div className={classes.button_div}>
@@ -177,7 +230,19 @@ const useStyles = makeStyles(theme => ({
     head_div:{
         backgroundColor: '#fca437',
         padding: '1% 3%',
-        margin: '3% 1%',
+        margin: '3% 1% 0% 1%',
+        borderRadius: '3px',
+        textAlign: 'center',
+        '& span':{
+            color: '#fff',
+            fontSize: '13px',
+            fontWeight: '600',
+        },
+    },
+    priority_head_div:{
+        backgroundColor: '#ff4810',
+        padding: '1% 3%',
+        margin: '3% 1% 0% 1%',
         borderRadius: '3px',
         textAlign: 'center',
         '& span':{
@@ -203,7 +268,7 @@ const useStyles = makeStyles(theme => ({
       },
     },
     list_div:{
-        margin: '2% 3%',
+        margin: '0% 3% 10% 3%',
         '& .MuiListItem-root.Mui-selected':{
             backgroundColor: '#46aeff54',
         }

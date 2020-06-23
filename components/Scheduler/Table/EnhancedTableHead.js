@@ -32,7 +32,7 @@ function EnhancedTableHead(props) {
     //PROPS
     const { classes, disabled, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, filteredRows, 
             setFilteredRows,filterConfig, setFilterConfig, selectedIds, taskListToMap, filterSelectedOnly, setFilterSelectedOnly, 
-            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly, tabValue} = props;
+            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly, tabValue, setPage} = props;
     const createSortHandler = property => event => {
       onRequestSort(event, property);
     };
@@ -45,11 +45,24 @@ function EnhancedTableHead(props) {
     const handleFilterSelectedOnly = (event)=>{
       cogoToast.info( !filterSelectedOnly ? "Filtered Out Unselected Tasks" : "Removed Filter - Unselected Tasks", {hideAfter: 4});
       setFilterSelectedOnly(!filterSelectedOnly);
+      
+      if(filterScoreboardsAndSignsOnly){
+        //Should turn off filter for S&S only because i dont think it makes sense to have both
+        setFilterScoreboardsAndSignsOnly(!filterScoreboardsAndSignsOnly);
+        setPage(0);
+      }
+      
     }
 
     const handleFilterScoreboardsAndSignsOnly = (event) =>{
       cogoToast.info( !filterScoreboardsAndSignsOnly ? "Filtering to Scoreboards and Signs Only" : "Removed Filter - Scoreboards and Signs", {hideAfter: 4});
       setFilterScoreboardsAndSignsOnly(!filterScoreboardsAndSignsOnly);
+
+      if(filterSelectedOnly){
+        //Should turn off filter for selected only because i dont think it makes sense to have both
+        setFilterSelectedOnly(!filterSelectedOnly);
+      }
+      setPage(0);
     }
 
   
@@ -65,13 +78,13 @@ function EnhancedTableHead(props) {
                 inputProps={{ 'aria-label': 'select all' }}/>
                 <p style={{display: "inline"}}>{selectedIds.length == 0 ? 'Select All' : 'Deselect All'}</p>
             </TableCell>
-            <TableCell colSpan={2}>
+            <TableCell colSpan={3}>
               { numSelected > 0 ?
                 <EnhancedTableAddCreateTL {...props}/>
                 : <></>
               }
               </TableCell>
-              <TableCell colSpan={2}>
+              <TableCell colSpan={1}>
               <Tooltip title="Click to show only selected tasks."
                              arrow={true} enterDelay={400} placement={'top'}
                               classes={{tooltip: classes.tooltip }}>
@@ -86,7 +99,7 @@ function EnhancedTableHead(props) {
               </Tooltip>
               </TableCell>
 
-              <TableCell colSpan={2}>
+              <TableCell colSpan={1}>
               <Tooltip title="Click to show only scoreboard and sign tasks."
                              arrow={true} enterDelay={400} placement={'top'}
                               classes={{tooltip: classes.tooltip }}>

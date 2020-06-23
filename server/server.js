@@ -51,10 +51,10 @@ nextApp
       //settings.handleRequest(nextApp, database, req, res);
     });*/
 
-    app.use('/tasks', tasks);
-    app.use('/workOrders', workOrders);
-    app.use('/taskLists', taskLists);
-    app.use('/pdf', pdf);
+    app.use('/scheduling/tasks', tasks);
+    app.use('/scheduling/workOrders', workOrders);
+    app.use('/scheduling/taskLists', taskLists);
+    app.use('/scheduling/pdf', pdf);
 
     app.get('*', (req, res) => {
       return handle(req, res);

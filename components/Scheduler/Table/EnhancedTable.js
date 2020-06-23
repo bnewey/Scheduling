@@ -49,7 +49,8 @@ const TableFilter = dynamic(
 
     const {rows, setRows, filterConfig,setFilterConfig} = props;
     const { mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, tabValue,
-       filterSelectedOnly, setFilterSelectedOnly, modalOpen, setModalOpen, setModalTaskId} = useContext(TaskContext);
+       filterSelectedOnly, setFilterSelectedOnly, filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
+        modalOpen, setModalOpen, setModalTaskId} = useContext(TaskContext);
 
     const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('date');
@@ -62,8 +63,8 @@ const TableFilter = dynamic(
        //STATE
     const [filteredData, setFilteredData] = React.useState(filteredRows ? filteredRows :  rows);
 
-    
-    useEffect(() =>{ //useEffect for filterSelectedOnly
+    //useEffect for filterSelectedOnly
+    useEffect(() =>{ 
       if(filteredData){
         if(filterSelectedOnly) {
           var tmp = filteredData.filter((row, i)=>{
@@ -75,7 +76,7 @@ const TableFilter = dynamic(
           setFilteredRows(tmp);
 
         }
-        else{
+        else if(!filterScoreboardsAndSignsOnly /* or any other setting that changes filteredData */){
           setFilteredRows(filteredData);
         }
       }
@@ -93,15 +94,33 @@ const TableFilter = dynamic(
       if(filteredData){
         if(filterSelectedOnly) {
           var tmp = filteredData.filter((row, i)=>{
-            if(selectedIds.indexOf(row.t_id) !== -1){
-              return true;
-            }
+            if(selectedIds.indexOf(row.t_id) !== -1){     return true;   }
             return false;
           });
           setFilteredRows(tmp);
         }
       }
     },[selectedIds])
+
+    //useEffect for filterScoreboardsAndSignsOnly
+    useEffect(() =>{ 
+      if(filteredData){
+        if(filterScoreboardsAndSignsOnly) {
+          var tmp = filteredData.filter((row, i)=>(  row.type == "Shipment" || row.type=="Install" || row.type=="Delivery" ));
+          setFilteredRows(tmp);
+        }
+        else if(!filterSelectedOnly /* or anyother setting that interferes*/ ){
+          setFilteredRows(filteredData);
+        }
+      }
+    
+      return () => { //clean up
+          if(filteredData){
+              
+          }
+      }
+    },[filteredData, filterScoreboardsAndSignsOnly]);
+
 
     //useEffect updates our table rows when rows is refetched
     useEffect(()=>{
@@ -239,7 +258,9 @@ const TableFilter = dynamic(
                 selectedIds={selectedIds}
                 taskListToMap={taskListToMap}
                 filterSelectedOnly={filterSelectedOnly} setFilterSelectedOnly={setFilterSelectedOnly}
+                filterScoreboardsAndSignsOnly={filterScoreboardsAndSignsOnly} setFilterScoreboardsAndSignsOnly={setFilterScoreboardsAndSignsOnly}
                 tabValue={tabValue}
+                setPage={setPage}
               />
               <Tooltip title="Click to Select. You can select multiple items. Right Click to Edit"
                             arrow={true} enterDelay={700} placement={'bottom'} disableHoverListener={selectedIds.length == 0 ? false : true}

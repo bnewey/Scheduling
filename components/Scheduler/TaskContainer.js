@@ -34,6 +34,7 @@ const TaskContainer = function() {
   const [tabValue, setTabValue] = React.useState(0);
   const [taskListToMap, setTaskListToMap] = useState(null);
   const [filterSelectedOnly, setFilterSelectedOnly] = React.useState(false);
+  const [filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly] = React.useState(false);
   //Modal Props
   const [modalOpen, setModalOpen] = React.useState(false);  
   const [modalTaskId, setModalTaskId] = React.useState();  
@@ -110,6 +111,7 @@ const TaskContainer = function() {
     <div className={classes.root}>
       <TaskContext.Provider value={{taskLists,setTaskLists, mapRows, setMapRows, selectedIds, setSelectedIds, 
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
+                            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId} } >
         <FullWidthTabs value={tabValue} setValue={setTabValue} 
                       numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
