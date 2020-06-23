@@ -416,7 +416,8 @@ const useStyles = makeStyles(theme => ({
       boxShadow: theme.shadows[5],
       padding: '3% !important',
       position: 'relative',
-      maxHeight: '600px'
+      maxHeight: '600px',
+      overflowY: 'auto',
     },
     paperScroll: {
         backgroundColor: theme.palette.background.paper,
