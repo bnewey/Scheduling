@@ -175,14 +175,30 @@ router.post('/addMultipleTaskstoList', async (req,res) => {
         task_ids = req.body.ids;
     }
 
-    const sql_select = ' select max(priority_order) AS max_priority from task_list_items where task_list_id = ? ' ; 
+    //Filter our ids that already exists
+    const sql_select = ' SELECT task_id, task_list_id FROM task_list_items WHERE task_list_id = ? ';
+    var select_results;
+    try{
+        select_results = await database.query(sql_select, taskList_id);
+        if(select_results.length > 0 && task_ids.length > 0){
+            task_ids = task_ids.filter((id, i )=>{
+                var flag = true;
+                select_results.forEach((item, item_i)=>{ if(item.task_id == id){  flag = false;    } })
+                return flag;
+            })
+        }
+    }catch(error){
+        throw error;
+    }
+
+    const sql_select_max = ' select max(priority_order) AS max_priority from task_list_items where task_list_id = ? ' ; 
 
     //Update tasks normally except if task is already in TaskList
     const sql = ' INSERT INTO task_list_items (task_list_id, priority_order, task_id ) VALUES ( ? , ? , ? ) ' ;
 
-    var select_results;
+    var select_max_results;
     try{
-        select_results = await database.query(sql_select, taskList_id);
+        select_max_results = await database.query(sql_select_max, taskList_id);
     }catch(error){
         throw error;
     }
@@ -190,7 +206,7 @@ router.post('/addMultipleTaskstoList', async (req,res) => {
     async.forEachOf(task_ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            const priority = select_results[0]["max_priority"] ? select_results[0]["max_priority"] + 1 + i  :   i+1;
+            const priority = select_max_results[0]["max_priority"] ? select_max_results[0]["max_priority"] + 1 + i  :   i+1;
             const results = await database.query(sql, [taskList_id, priority, id]);
             return;
         }

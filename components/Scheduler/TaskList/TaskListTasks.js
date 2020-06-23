@@ -168,16 +168,16 @@ const TaskListTasks = (props) =>{
                     <Draggable key={row.t_id + 321321} 
                                 draggableId={row.t_id.toString()} 
                                 index={index} 
-                                isDragDisabled={ openTaskList && openTaskList.is_priority ? true : false}
+                                isDragDisabled={ false}
                     >
                     {(provided, snapshot) => (
                       <ListItem key={row.t_id + 321321} 
                                   role={undefined} dense button 
                                   onContextMenu={event => handleRightClick(event, row.t_id)}
                                   className={ index % 2 == 0 ? 
-                                            ( openTaskList && openTaskList.is_priority ? classes.nonSelectedRowPriority : classes.nonSelectedRow )
+                                            ( classes.nonSelectedRow )
                                             : 
-                                            (openTaskList && openTaskList.is_priority ? classes.nonSelectedRowOffsetPriority : classes.nonSelectedRowOffset)}
+                                            ( classes.nonSelectedRowOffset)}
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
@@ -193,7 +193,7 @@ const TaskListTasks = (props) =>{
                                     {row[item.field]}
                           </ListItemText>
                         ))}
-                        { openTaskList && !openTaskList.is_priority 
+                        { openTaskList 
                         ? 
                         <ListItemSecondaryAction>            
                               <React.Fragment>
