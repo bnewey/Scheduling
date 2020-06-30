@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import {TableCell, TableHead, TableRow, TableSortLabel, Checkbox, Tooltip, Button} from '@material-ui/core';
 import cogoToast from 'cogo-toast';
 
-import EnhancedTableAddCreateTL from './EnhancedTableAddCreateTL';
+import EnhancedTableAddTL from './EnhancedTableAddTL';
 
 
 const TableFilter = dynamic(
@@ -78,40 +78,53 @@ function EnhancedTableHead(props) {
                 inputProps={{ 'aria-label': 'select all' }}/>
                 <p style={{display: "inline"}}>{selectedIds.length == 0 ? 'Select All' : 'Deselect All'}</p>
             </TableCell>
-            <TableCell colSpan={3}>
+            <TableCell colSpan={2} className={classes.actions_column}>
+              <div  className={classes.actions_div}>
+              <div className={classes.actions_head_div}><span>ACTIONS</span></div>
               { numSelected > 0 ?
-                <EnhancedTableAddCreateTL {...props}/>
+                <div className={classes.actions_button_div}>
+                  <EnhancedTableAddTL {...props}/>
+                </div>
                 : <></>
               }
+              </div>
               </TableCell>
-              <TableCell colSpan={1}>
-              <Tooltip title="Click to show only selected tasks."
-                             arrow={true} enterDelay={400} placement={'top'}
-                              classes={{tooltip: classes.tooltip }}>
-              <Button
-                    onClick={event => handleFilterSelectedOnly(event)}
-                    variant="text"
-                    color="secondary"
-                    size="medium"
-                    className={filterSelectedOnly ? classes.filterButtonActive : classes.filterButton} >
-                    Filter Selected Tasks
-                </Button>
-              </Tooltip>
-              </TableCell>
+              <TableCell colSpan={1} className={classes.filter_column}>
+                <div  className={classes.filter_div}>
+                <div className={classes.filter_head_div}><span>FILTERS</span></div>
+                <div className={classes.filter_button_div}>
+                      <Tooltip title="Click to show only selected tasks."
+                                    arrow={true} enterDelay={400} placement={'top'}
+                                      classes={{tooltip: classes.tooltip }}>
+                      <Button
+                            onClick={event => handleFilterSelectedOnly(event)}
+                            variant="text"
+                            color="secondary"
+                            size="medium"
+                            className={filterSelectedOnly ? classes.filterButtonActive : classes.filterButton} >
+                            Filter Selected Tasks
+                        </Button>
+                      </Tooltip>
+              </div>
 
-              <TableCell colSpan={1}>
-              <Tooltip title="Click to show only scoreboard and sign tasks."
-                             arrow={true} enterDelay={400} placement={'top'}
-                              classes={{tooltip: classes.tooltip }}>
-              <Button
-                    onClick={event => handleFilterScoreboardsAndSignsOnly(event)}
-                    variant="text"
-                    color="secondary"
-                    size="medium"
-                    className={filterScoreboardsAndSignsOnly ? classes.filterButtonActive : classes.filterButton} >
-                    Scoreboards/Signs Only
-                </Button>
-              </Tooltip>
+              <div className={classes.filter_button_div}>
+                    <Tooltip title="Click to show only scoreboard and sign tasks."
+                                  arrow={true} enterDelay={400} placement={'top'}
+                                    classes={{tooltip: classes.tooltip }}>
+                    <Button
+                          onClick={event => handleFilterScoreboardsAndSignsOnly(event)}
+                          variant="text"
+                          color="secondary"
+                          size="medium"
+                          className={filterScoreboardsAndSignsOnly ? classes.filterButtonActive : classes.filterButton} >
+                          Scoreboards/Signs Only
+                      </Button>
+                    </Tooltip>
+              </div>
+              </div>
+              </TableCell>
+              <TableCell colSpan={3}>
+
               </TableCell>
 
           </TableRow>

@@ -11,10 +11,10 @@ import TaskLists from '../../../js/TaskLists';
 
 import {TaskContext} from '../TaskContainer';
 
-function EnhancedTableAddCreateTL(props) {
+function EnhancedTableAddTL(props) {
     //PROPS
     //const { numSelected, onRequestSort, rows } = props;
-    const { selectedIds, taskLists, setTaskLists} = useContext(TaskContext);
+    const { selectedIds, taskLists, setTaskLists, priorityList, setTaskListToMap} = useContext(TaskContext);
     //STATE
     const [open, setOpen] = React.useState(false);
     const [taskListToAdd, setTaskListToAdd] = React.useState(null);
@@ -22,15 +22,15 @@ function EnhancedTableAddCreateTL(props) {
     //CSS
     const classes = useStyles();
 
+    useEffect(()=>{
+        if(taskLists && priorityList){
+            setTaskListToAdd(priorityList);
+        }
+    },[taskLists]);
 
-    // useEffect(() =>{ //useEffect for inputText
-    
-    //   return () => { //clean up
-         
-    //   }
-    // },[]);
 
-    const handleOpenAddCreateTL = () => {
+
+    const handleOpenAddTL = () => {
         if(selectedIds.length > 50) {
             cogoToast.warn(`Cannot add ${selectedIds.length} tasks. Try adding 50 or less tasks. `, {hideAfter: 4})
             return;
@@ -42,14 +42,6 @@ function EnhancedTableAddCreateTL(props) {
         setOpen(false);
     };
 
-    const handleChangeTaskListToAdd = (event) => {
-        var id = event.target.value;
-        if(id === ''){
-            return;
-        }
-        var task = taskLists.filter((list, i)=> list.id === id)[0];
-        setTaskListToAdd(task);
-    };
 
     const handleAddToTaskList = (event, tl_id) => {
         if(!tl_id){
@@ -68,6 +60,8 @@ function EnhancedTableAddCreateTL(props) {
             if(!response){
                 throw new Error("Bad response from addMultipleTasksToList call");
             }
+            //Default to priority list after save
+            setTaskListToMap(priorityList);
             cogoToast.success(`${selectedIds.length} tasks added to Task List`, {hideAfter: 4});
         })
         .catch(error => {
@@ -75,62 +69,28 @@ function EnhancedTableAddCreateTL(props) {
         })
         handleClose();
     };
-
-    const handleCreateTaskList = (event) => {
-        //create a task list .then handleAddToTaskList(new id)
-        TaskLists.addTaskList("New List")
-                .then((id) => {
-                    if(!id){
-                        throw new Error("Bad id from addNewTaskList, Failed to add selected tasks to new task list");
-                    }
-                    //Add Selected ids to new list
-                    handleAddToTaskList(event, id);
-                    setTaskLists(null);
-                })
-                .catch( error => {
-                    console.error(error);
-            });
-    };
   
     return (
         <React.Fragment>
-        <Tooltip title="Add selected tasks to or create a new task list."
+        <Tooltip title="Add selected tasks to task list."
                         arrow={true} enterDelay={400} placement={'top'}
                         classes={{tooltip: classes.tooltip }}>
         <Button
-            onClick={event => handleOpenAddCreateTL(event)}
+            onClick={event => handleOpenAddTL(event)}
             variant="text"
             color="secondary"
             size="medium"
             className={classes.openButton} >
-            Add To/Create Task List
+            Add To TaskList
         </Button>
         </Tooltip>
          
         <Dialog  PaperProps={{className: classes.dialog}} open={open} onClose={handleClose}>
-            <DialogTitle className={classes.title}>Add To/Create New Task List</DialogTitle>
+            <DialogTitle className={classes.title}>Confirm Add</DialogTitle>
             <DialogContent className={classes.content}>
-            <p>Choose Add or Create New to add selected tasks to existing task list or create a new task list respectively. Duplicates will be ignored.</p>
-            {taskLists ? 
-            <FormControl className={classes.inputField}>
+            <p>Choose Add add selected tasks to task list. Duplicates will be ignored.</p>
             
-            <InputLabel id="task-list-select-label">Select A Task List</InputLabel>
-            <Select
-            labelId="task-list-select-label"
-            id="task-list-select"
-            value={taskListToAdd ? taskListToAdd.id : ''}
-            onChange={handleChangeTaskListToAdd}
-            >
-                <MenuItem value={''}>Choose a Task List..</MenuItem>
             
-             {taskLists.filter((i)=> i.is_priority != 1).map((list,i)=> (
-                <MenuItem value={list.id} key={"task-list-"+i}>{list.list_name}</MenuItem>))
-             }                   
-            
-            </Select> 
-            
-        </FormControl>
-        : <p>No task lists found, please create new.</p>}
         <DialogActions>
             <Button onClick={handleClose} color="primary">
                 Cancel
@@ -143,14 +103,14 @@ function EnhancedTableAddCreateTL(props) {
                 className={classes.saveButton} >
                 Add
             </Button>  
-            <Button
+            {/* <Button
                 onClick={event => handleCreateTaskList(event)}
                 variant="contained"
                 color="secondary"
                 size="medium"
                 className={classes.saveButton} >
                 Create New
-            </Button> 
+            </Button>  */}
         </DialogActions> 
         </DialogContent>
         </Dialog>
@@ -158,7 +118,7 @@ function EnhancedTableAddCreateTL(props) {
     );
  }
 
- export default EnhancedTableAddCreateTL;
+ export default EnhancedTableAddTL;
 
  const useStyles = makeStyles(theme => ({
     root: {

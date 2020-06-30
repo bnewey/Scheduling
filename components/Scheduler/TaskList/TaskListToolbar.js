@@ -15,6 +15,7 @@ import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import TaskLists from '../../../js/TaskLists';
 import TaskListActionAdd from './TaskListActionAdd';
 import Util from '../../../js/Util';
+import CustomEmail from '../../../js/Email';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
@@ -25,7 +26,8 @@ const TaskListToolbar = (props) => {
     const [editList, setEditList] = React.useState(null);
     const [idToActivateOnRefreshTL, setIdToActivateOnRefreshTL] = React.useState(null);
     //PROPS
-    const {openTaskList, setOpenTaskList, taskListTasks, setTaskListTasks, isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList} = props;
+    const {openTaskList, setOpenTaskList, taskListTasks, setTaskListTasks, isPriorityOpen, setIsPriorityOpen,
+                 priorityList, setPriorityList} = props;
 
     const {taskLists, setTaskLists, setTabValue,
         taskListToMap, setTaskListToMap} = useContext(TaskContext);
@@ -54,7 +56,6 @@ const TaskListToolbar = (props) => {
                 setOpenTaskList(tmpTl);
                 setIdToActivateOnRefreshTL(null);
             }
-            
         }
     },[taskLists])
 
@@ -114,14 +115,6 @@ const TaskListToolbar = (props) => {
             setIsPriorityOpen(!priorityOpen);
         }
 
-        //change to related task list here
-        if(priorityOpen){
-            let linked_tl = taskLists.filter((list)=> list.id == openTaskList.linked_tl)[0];
-            setOpenTaskList(linked_tl);
-            setTaskListToMap(linked_tl);
-            setTaskListTasks(null);
-        }
-
         //change to Priority List regardless of current OpenTaskList
         if(!priorityOpen){
             let priority_list = taskLists.filter((list)=> list.is_priority)[0];
@@ -172,6 +165,17 @@ const TaskListToolbar = (props) => {
         setEditOpen(false);
     };
 
+    const handleEmailUpdate = (event) =>{
+        CustomEmail.sendEmail("bnewey@raineyelectronics.com", "Schedule has been updated.")
+        .then((response)=>{
+            cogoToast.success("Successfully sent Update Email!", {hideAfter: 4});
+        })
+        .catch((err)=>{
+            cogoToast.error("Failed to send Email!", {hideAfter: 4});
+            console.error(err);
+        })
+    }
+
     const handleSetPriority = (event, tl_id, tl_name) => {
         if(!openTaskList){
             return;
@@ -212,21 +216,7 @@ const TaskListToolbar = (props) => {
                 <>
                     <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>
                     <div className={classes.leftButtonGroup}>
-                        {!isPriorityOpen ? <>
-                            <Select
-                                labelId="helper-label"
-                                id="select-helper"
-                                value={openTaskList}
-                                onChange={handleChange}
-                                className={classes.select}
-                                native={false}
-                            >
-                            
-                            {taskLists.filter((i)=> i.is_priority != 1).map((list)=>(
-                                <MenuItem value={list} >{ priorityList && priorityList.linked_tl == list.id ? list.list_name+" *Linked to Priority*" : list.list_name}</MenuItem>
-                            ) )}
-                            </Select>
-                        </>
+                        {!isPriorityOpen ? <></>
                         :
                             <>
                                 <div className={classes.taskListLabelDiv}>
@@ -236,16 +226,7 @@ const TaskListToolbar = (props) => {
                             </>
                         }
                     {openTaskList ? 
-                        <ButtonGroup className={classes.buttonGroup}> 
-                            <Button
-                                onMouseDown={event => handleEditModeTaskList(event, isPriorityOpen )}
-                                variant="text"
-                                color="secondary"
-                                size="large"
-                                className={classes.darkPriorityButton}
-                                
-                            > {isPriorityOpen ? <div> <LinkIcon className={classes.icon_small} fontSize="small" /> Edit Linked TL </div> : <div>View Priority List</div>}
-                            </Button>   
+                        <ButtonGroup disableElevation variant="text" className={classes.buttonGroup}> 
                             <Button
                                 onMouseDown={event => handleGoToAddTasks(event)}
                                 variant="text"
@@ -264,6 +245,15 @@ const TaskListToolbar = (props) => {
                                 
                             > Map TaskList
                             </Button>
+                            <Button
+                                onMouseDown={event => handleEmailUpdate(event)}
+                                variant="text"
+                                color="secondary"
+                                size="large"
+                                className={classes.darkButton}
+                                
+                            > Email Update
+                            </Button>
                         </ButtonGroup>
                     : <>
                         <TaskListActionAdd  setIdToActivateOnRefreshTL={setIdToActivateOnRefreshTL}/>
@@ -273,24 +263,7 @@ const TaskListToolbar = (props) => {
 
                     { openTaskList ?  
                     <>
-                        <div className={classes.priority_div}>
-                                { !isPriorityOpen ? 
-                                <Button         
-                                    onClick={event => handleSetPriority(event, openTaskList.id, openTaskList.list_name)}    
-                                    variant="text"
-                                    color="secondary"
-                                    size="large"
-                                    className={classes.darkPriorityButton}
-                                >Set Priority</Button>
-                                : <></> }
-                            
-                                <>  <div>
-                                        <div className={classes.priority_text_div}><span className={classes.priority_text_label}>Current PriorityList: </span><span className={classes.priority_text}>{priorityList ? priorityList.list_name : "No PriorityList Set"} </span></div>
-                                        {priorityList ? <div className={classes.priority_text_div}><span className={classes.priority_text_label}>Last Set: </span><span className={classes.priority_text_grey}>{Util.convertISODateTimeToMySqlDateTime(priorityList.date_entered)}</span></div> : <></>}
-                                    </div>
-                                </> 
-              
-                        </div>
+                        
                     </> : <></> }
                 </> : <></>}
 
@@ -320,7 +293,7 @@ const useStyles = makeStyles(theme => ({
         color: '#a0a0a0',
     },
     buttonGroup: {
- 
+        maxHeight: '1em'
     },
     select: {
         backgroundColor: '#3d87c1',
@@ -335,7 +308,6 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#fca437',
         color: '#fff',
         fontWeight: '600',
-        border: '1px solid rgb(255, 237, 196)',
       '&:hover':{
         border: '',
         backgroundColor: '#ffedc4',
@@ -407,7 +379,7 @@ const useStyles = makeStyles(theme => ({
     taskListLabelDiv:{
         borderRadius: '5px',
         padding: '0px 13px',
-        backgroundColor: '#ff4810',
+        backgroundColor: '#65aea4',
         border: '1px solid #ececec',
         boxShadow: 'inset 0 0 4px 0px black',
         margin: '0px 33px 0px 5px',

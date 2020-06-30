@@ -155,16 +155,15 @@ router.post('/addTasktoList', async (req,res) => {
     const sql = ' INSERT into task_list_items (task_list_id, priority_order, task_id) VALUES (?, ?, ?) ';
 
     try{
-    const select_results = await database.query(sql_select, taskList_id);
-    const max_priority = select_results[0]["max_priority"] + 1;
-    const results = await database.query(sql, [taskList_id, max_priority, task_id]);
-    logger.info("Add Task: " + task_id +" to TaskList with priority: " + max_priority);
-    res.sendStatus(200);
+        const select_results = await database.query(sql_select, taskList_id);
+        const max_priority = select_results[0]["max_priority"] + 1;
+        const results = await database.query(sql, [taskList_id, max_priority, task_id]);
+        logger.info("Add Task: " + task_id +" to TaskList with priority: " + max_priority);
+        res.sendStatus(200);
     }
-    catch(error){
-    logger.error("TasksList (addTaskToList): " + error);
-    res.sendStatus(400);
-
+        catch(error){
+        logger.error("TasksList (addTaskToList): " + error);
+        res.sendStatus(400);
     }
 });
 
@@ -247,6 +246,37 @@ router.post('/removeTaskFromList', async (req,res) => {
     }
 });
 
+router.post('/removeMultipleFromList', async (req,res) => {
+    var taskList_id, task_ids;
+    if(req.body){
+    task_ids = req.body.ids;
+    taskList_id = req.body.tl_id;
+    }
+
+    const sql = ' DELETE from task_list_items ' +
+    ' WHERE task_list_id = ? AND task_id = ? ORDER BY priority_order DESC LIMIT 1 ';
+
+    async.forEachOf(task_ids, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [taskList_id, id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("TasksList (removeMultipleFromList): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Remove Tasks: " + task_ids +" from TaskList ");
+            res.sendStatus(200);
+        }
+    })
+});
+
 router.post('/reorderTaskList', async (req,res) => {
     var taskList_id, task_ids;
     if(req.body){
@@ -254,7 +284,7 @@ router.post('/reorderTaskList', async (req,res) => {
         task_ids = req.body.ids;
     }
     
-    const sql = ' UPDATE task_list_items SET priority_order = ? ' +
+    const sql = ' UPDATE task_list_items SET priority_order = ?, date_updated = now() ' +
     ' WHERE task_id = ? AND task_list_id = ?';
 
     async.forEachOf(task_ids, async (id, i, callback) => {

@@ -8,7 +8,7 @@ const http = require("http");
 const favicon = require('serve-favicon');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 
 dotenv.config();
 const app = express();
@@ -27,6 +27,8 @@ const tasks = require('./lib/tasks.js');
 const workOrders = require('./lib/work_orders.js');
 const taskLists = require('./lib/task_lists.js');
 const pdf = require('./lib/pdf.js');
+const crew = require('./lib/crew.js');
+const {emailRouter} = require('./lib/email');
 
 global.SERVER_APP_ROOT = __dirname;
 
@@ -55,6 +57,8 @@ nextApp
     app.use('/scheduling/workOrders', workOrders);
     app.use('/scheduling/taskLists', taskLists);
     app.use('/scheduling/pdf', pdf);
+    app.use('/scheduling/email', emailRouter);
+    app.use('/scheduling/crew', crew);
 
     app.get('*', (req, res) => {
       return handle(req, res);

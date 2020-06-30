@@ -196,7 +196,7 @@ const MapSiderbarMarkedTasks = (props) =>{
             {markedRows.map((row, index) => {
                 const labelId = `checkbox-list-label-${row.t_id}`;
                 return (
-                  <Draggable key={row.t_id + 123123} draggableId={row.t_id.toString()} index={index} isDragDisabled={taskListToMap && taskListToMap.is_priority ==0 ? false : true}>
+                  <Draggable key={row.t_id + 123123} draggableId={row.t_id.toString()} index={index} isDragDisabled={false}>
                   {(provided, snapshot) => (
                     <ListItem key={row.t_id + 123123} 
                                 role={undefined} dense button 

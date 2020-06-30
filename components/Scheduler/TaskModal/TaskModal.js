@@ -29,6 +29,7 @@ import TaskModalTaskInfo from './TaskModalSections/TaskModalTaskInfo';
 import TaskModalAddressInfo from './TaskModalSections/TaskModalAddressInfo';
 import TaskModalTaskList from './TaskModalSections/TaskModalTaskList';
 import TaskModalWOSignArtItems from './TaskModalSections/TaskModalWOSignArtItems';
+import TaskModalCrew from './TaskModalSections/TaskModalCrew';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
@@ -56,12 +57,11 @@ export default function TaskModal(props){
 
     const variables_to_update = {
         task_info: ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired", "date_completed"],
-        delivery_install: ["delivery_date", "delivery_crew", "delivery_order", "install_date", "install_crew", "install_order"],
+        delivery_install: ["delivery_date", "delivery_crew", "delivery_order", "install_date", "install_order"],
         task:["task_status", "drilling", "artwork", "sign"]
     };
     
-    const text_variables = ["t_name", "description", "notes",  "hours_estimate", "delivery_crew", "delivery_order" ,
-      "install_crew", "install_order"];
+    const text_variables = ["t_name", "description", "notes",  "hours_estimate", "delivery_crew", "delivery_order" , "install_order"];
     
     //Building an object of refs to update text input values instead of having them tied to state and updating every character
     const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
@@ -205,8 +205,10 @@ export default function TaskModal(props){
               console.warn(error);
               cogoToast.error(`Error updating task. ` + error, {hideAfter: 4});
             })
+        }else{
+            cogoToast.info("No Changes made");
         }
-        //handleClose();
+        handleClose();
     };
 
     
@@ -264,73 +266,87 @@ export default function TaskModal(props){
                 <Grid item xs={4} className={classes.paper}>
                     
                 
-                <p className={classes.taskTitle}>Drill / Sign / Artwork</p>
-                <div>
+                <div className={classes.drill_sign_art_div}>
                 
-                <Avatar src="/static/drilling-icon.png" className={classes.avatar}/>
-                <FormControl variant="outlined" className={classes.inputField}>       
-                    <InputLabel id="drilling-input-label">
-                    Drilling
-                    </InputLabel>
-                    <Select
-                    labelId="drilling-input-label"
-                    id="drilling-input"
-                    className={classes.selectBox}
-                    value={modalTask.drilling}
-                    onChange={value => handleInputOnChange(value, true, "select", "drilling")}
-                    >
-                    <MenuItem value={null}>N/A</MenuItem>
-                    <MenuItem value={'Drill'}>Drill</MenuItem>
-                    <MenuItem value={'Need Locate'}>Need Locate</MenuItem>
-                    <MenuItem value={'Located'}>Located</MenuItem>
-                    <MenuItem value={'Finished'}>Finished</MenuItem>  
-                    </Select>
-                </FormControl>
-                </div>
-                <div><Avatar src="/static/sign-build-icon.png" className={classes.avatar}/>
-                <FormControl variant="outlined" className={classes.inputField}>
-                    <InputLabel id="sign-input-label">
-                    Sign
-                    </InputLabel>
-                    <Select
-                    labelId="sign-input-label"
-                    id="sign-input"
-                    value={modalTask.sign}
-                    onChange={value => handleInputOnChange(value, true, "select", "sign")}
-                    >
-                    <MenuItem value={null}>N/A</MenuItem>
-                    <MenuItem value={'Build'}>Build</MenuItem>
-                    <MenuItem value={'Finished'}>Finished</MenuItem>
-                    </Select>
-                </FormControl>
-                </div>
-                <div><Avatar src="/static/art-icon.png" className={classes.avatar}/>
-                <FormControl variant="outlined" className={classes.inputField}>
-                    <InputLabel id="artwork-input-label">
-                    Artwork
-                    </InputLabel>
-                    <Select
-                    labelId="artwork-input-label"
-                    id="artwork-input"
-                    value={modalTask.artwork}
-                    onChange={value => handleInputOnChange(value, true, "select", "artwork")}
-                    >
-                    <MenuItem value={null}>N/A</MenuItem>
-                    <MenuItem value={'Need Art'}>Need Art</MenuItem>
-                    <MenuItem value={'Out for approval'}>Out for approval</MenuItem>
-                    <MenuItem value={'Approved'}>Approved</MenuItem>
-                    <MenuItem value={'Finished'}>Finished</MenuItem>
-                    </Select>
-                </FormControl>
+                    <div>
+                    <FormControl variant="outlined" className={classes.inputField}>       
+                        <div className={classes.avatar_and_label_div}>
+                            <Avatar src="/static/drilling-icon.png" className={classes.avatar}/>
+                            <span id="drilling-input-label">
+                            Drilling
+                            </span>
+                        </div>
+                        <div>
+                            <select
+                            labelId="drilling-input-label"
+                            id="drilling-input"
+                            className={classes.selectBox}
+                            value={modalTask.drilling}
+                            onChange={value => handleInputOnChange(value, true, "select", "drilling")}
+                            >
+                            <option value={null}>N/A</option>
+                            <option value={'Drill'}>Drill</option>
+                            <option value={'Need Locate'}>Need Locate</option>
+                            <option value={'Located'}>Located</option>
+                            <option value={'Finished'}>Finished</option>  
+                            </select>
+                        </div>
+                    </FormControl>
+                    </div>
+                    <div>
+                    <FormControl variant="outlined" className={classes.inputField}>
+                        <div className={classes.avatar_and_label_div}>  
+                            <Avatar src="/static/sign-build-icon.png" className={classes.avatar}/>
+                            <span id="sign-input-label">
+                            Sign
+                            </span>
+                        </div>
+                        <div>
+                            <select
+                            labelId="sign-input-label"
+                            id="sign-input"
+                            value={modalTask.sign}
+                            onChange={value => handleInputOnChange(value, true, "select", "sign")}
+                            >
+                            <option value={null}>N/A</option>
+                            <option value={'Build'}>Build</option>
+                            <option value={'Finished'}>Finished</option>
+                            </select>
+                        </div>
+                    </FormControl>
+                    </div>
+                    <div>
+                    <FormControl variant="outlined" className={classes.inputField}>
+                        <div className={classes.avatar_and_label_div}>
+                            <Avatar src="/static/art-icon.png" className={classes.avatar}/>
+                            <span id="artwork-input-label">
+                            Artwork
+                            </span>
+                        </div>
+                        <div>
+                            <select
+                            labelId="artwork-input-label"
+                            id="artwork-input"
+                            value={modalTask.artwork}
+                            onChange={value => handleInputOnChange(value, true, "select", "artwork")}
+                            >
+                            <option value={null}>N/A</option>
+                            <option value={'Need Art'}>Need Art</option>
+                            <option value={'Out for approval'}>Out for approval</option>
+                            <option value={'Approved'}>Approved</option>
+                            <option value={'Finished'}>Finished</option>
+                            </select>
+                        </div>
+                    </FormControl>
+                    </div>
                 </div>
                 <br/>
                 <p className={classes.taskTitle}>Delivery/Install</p>
                 <div>
                     <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Install Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider>
                 </div>
-                <div>
-                     <TextField className={classes.inputField} variant="outlined" id="input-install-crew" label="Install Crew" inputRef={ref_object.install_crew} defaultValue={modalTask.install_crew} onChange={handleShouldUpdate(true)}/>
-                </div>
+                
+                <TaskModalCrew />
 
                 
                 { taskLists ?
@@ -370,14 +386,14 @@ export default function TaskModal(props){
                         </FormControl>
                     </div>
                     <ButtonGroup className={classes.buttonGroup}>
-                        <Button
+                        {/* <Button
                             onClick={handleDelete(modalTask.t_id)}
                             variant="contained"
                             color="secondary"
                             size="large"
                             className={classes.deleteButton}
                         ><TrashIcon />
-                        </Button>
+                        </Button> */}
                         <Button
                             onClick={handleSave(modalTask)}
                             variant="contained"
@@ -461,14 +477,17 @@ const useStyles = makeStyles(theme => ({
         display: 'inline',
     },
     inputField: {
-        margin: '10px 17px 7px 17px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         padding: '0px',
         '&& input':{
             padding: '12px 0px 12px 15px',
         },
         '&& .MuiSelect-select':{
             padding: '12px 40px 12px 15px',
-            minWidth: '120px',
+            minWidth: '100px',
         },
         '&& .MuiOutlinedInput-multiline': {
             padding: '8.5px 12px'
@@ -476,6 +495,10 @@ const useStyles = makeStyles(theme => ({
         '&& label':{
             backgroundColor: '#fff',
         }
+    },
+    avatar_and_label_div:{
+        display: 'flex',
+        flexDirection: 'column',
     },
     footerInputField: {
 
@@ -520,7 +543,9 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#b7c3cd'
     },
     buttonGroup: {
-        
+        '& .MuiButton-label':{
+            color: '#fff',
+        }
     },
     selectBox: {
         '&& .MuiInputLabel-outlined': {
@@ -529,10 +554,33 @@ const useStyles = makeStyles(theme => ({
     },
     avatar:{
         display: 'inline-block',
-        width: '35px',
-        height:'35px',
-        position: 'relative',
-        top: '11px',
-        right: '5px',
-    }
+        width: '25px',
+        height:'25px',
+        alignSelf:'center',
+        backgroundColor: '#cbe8e4',
+    },
+    drill_sign_art_div:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        margin: '0% 0% 2% 0%',
+    },
+
+    inputFieldMatUi: {
+        margin: '10px 17px 7px 17px',
+        padding: '0px',
+        '&& input':{
+            padding: '12px 0px 12px 15px',
+        },
+        '&& .MuiSelect-select':{
+            padding: '12px 40px 12px 15px',
+            minWidth: '120px',
+        },
+        '&& .MuiOutlinedInput-multiline': {
+            padding: '8.5px 12px'
+        },
+        '&& label':{
+            backgroundColor: '#fff',
+        }
+    },
   }));

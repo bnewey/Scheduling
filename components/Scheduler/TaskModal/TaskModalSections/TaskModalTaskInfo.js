@@ -106,10 +106,10 @@ const TaskModalTaskInfo = (props) => {
         :
         <> {/* EDIT MODE */}
             <FormControl fullWidth>
-                <TextField className={classes.inputField} variant="outlined" id="input-name" label="Name:" inputRef={ref_object.t_name}  defaultValue={modalTask.t_name} onChange={handleShouldUpdate(true)}/>
+                <TextField className={classes.inputFieldMatUi} variant="outlined" id="input-name" label="Name:" inputRef={ref_object.t_name}  defaultValue={modalTask.t_name} onChange={handleShouldUpdate(true)}/>
                 <Grid container className={classes.lowerGrid}>
                 <Grid item xs={6} >
-                <FormControl variant="outlined" className={classes.inputField}>
+                <FormControl variant="outlined" className={classes.inputFieldMatUi}>
                     <InputLabel id="status-input-label">
                     Work Type
                     </InputLabel>
@@ -130,15 +130,15 @@ const TaskModalTaskInfo = (props) => {
                     <MenuItem value={'Shipment'}>Shipment</MenuItem>
                     </Select>
                 </FormControl></Grid>
-                <Grid item xs={6} ><TextField className={classes.inputField} type="number" variant="outlined" id="input-hours" label="Hours" inputRef={ref_object.hours_estimate} defaultValue={modalTask.hours_estimate} onChange={handleShouldUpdate(true)} /></Grid>
+                <Grid item xs={6} ><TextField className={classes.inputFieldMatUi} type="number" variant="outlined" id="input-hours" label="Hours" inputRef={ref_object.hours_estimate} defaultValue={modalTask.hours_estimate} onChange={handleShouldUpdate(true)} /></Grid>
             </Grid>
-                <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="input-description" label="Sign/Product Description:" inputRef={ref_object.description} defaultValue={modalTask.description} onChange={handleShouldUpdate(true)}/>
-                <TextField className={classes.inputField} multiline rows="2" variant="outlined" id="input-notes" label="Notes:" inputRef={ref_object.notes} defaultValue={modalTask.notes} onChange={handleShouldUpdate(true)}/>
+                <TextField className={classes.inputFieldMatUi} multiline rows="2" variant="outlined" id="input-description" label="Sign/Product Description:" inputRef={ref_object.description} defaultValue={modalTask.description} onChange={handleShouldUpdate(true)}/>
+                <TextField className={classes.inputFieldMatUi} multiline rows="2" variant="outlined" id="input-notes" label="Notes:" inputRef={ref_object.notes} defaultValue={modalTask.notes} onChange={handleShouldUpdate(true)}/>
             </FormControl>
             
-            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Assigned Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.wo_date} onChange={value => handleInputOnChange(value, true, "datetime", "date_assigned")} /></MuiPickersUtilsProvider>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Desired Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.date_desired} onChange={value => handleInputOnChange(value, true, "datetime", "date_desired")} /></MuiPickersUtilsProvider>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Completed Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.date_completed} onChange={value => handleInputOnChange(value, true, "datetime", "date_completed")} /></MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Assigned Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.wo_date} onChange={value => handleInputOnChange(value, true, "datetime", "date_assigned")} /></MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Desired Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.date_desired} onChange={value => handleInputOnChange(value, true, "datetime", "date_desired")} /></MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Completed Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.date_completed} onChange={value => handleInputOnChange(value, true, "datetime", "date_completed")} /></MuiPickersUtilsProvider>
         </>}
         </>
     );

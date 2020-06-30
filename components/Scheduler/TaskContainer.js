@@ -4,6 +4,7 @@ import {makeStyles, CircularProgress} from '@material-ui/core';
 import EnhancedTable from './Table/EnhancedTable';
 import TaskListContainer from './TaskList/TaskListContainer.js';
 import MapContainer from './Map/MapContainer';
+import CrewContainer from './Crew/CrewContainer';
 
 import FullWidthTabs from './Tabs/FullWidthTabs';
 import Tasks from '../../js/Tasks';
@@ -28,6 +29,7 @@ const TaskContainer = function() {
           to: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()-90)))
         });
   const [taskLists, setTaskLists] = useState();
+  const [priorityList, setPriorityList] = useState(null);
   const [mapRows, setMapRows] = useState([]); //setMapRows gets called in children components
   const [selectedIds, setSelectedIds] = useState([]);
   const [filterConfig, setFilterConfig] = useState();
@@ -73,7 +75,9 @@ const TaskContainer = function() {
     if(!taskLists || taskLists == []) {
       TaskLists.getAllTaskLists()
       .then( (data) => {
-        setTaskLists(data)
+        setTaskLists(data);
+        //set priorityList
+        setPriorityList(data.filter((list, i)=> list.is_priority == true)[0]);
       })
       .catch( error => {
         console.warn(error);
@@ -109,7 +113,7 @@ const TaskContainer = function() {
 
   return (
     <div className={classes.root}>
-      <TaskContext.Provider value={{taskLists,setTaskLists, mapRows, setMapRows, selectedIds, setSelectedIds, 
+      <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, mapRows, setMapRows, selectedIds, setSelectedIds, 
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId} } >
@@ -117,7 +121,9 @@ const TaskContainer = function() {
                       numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
         
           <div>
-            <TaskListContainer />
+            <CrewContainer>
+              <TaskListContainer />
+            </CrewContainer>
           </div>
           
           <div>
@@ -129,8 +135,11 @@ const TaskContainer = function() {
           </div>
 
         </FullWidthTabs>
-        <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
+        
+        <CrewContainer>
+              <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
                         modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
+        </CrewContainer>
         
         <HelpModal initialPage={"tasks"} initialTab={tabValue} />
 

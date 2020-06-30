@@ -10,6 +10,8 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import TaskLists from '../../../js/TaskLists';
+import {createSorter} from '../../../js/Sort';
+import {createFilter} from '../../../js/Filter';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
@@ -17,15 +19,19 @@ import {TaskContext} from '../TaskContainer';
 const TaskListMain = (props) => {
     //STATE
     const [taskListTasks, setTaskListTasks] = React.useState(null);
-    const [dense, setDense] = React.useState(false);
+    const [selectedTasks, setSelectedTasks] = useState([]);
+    const [filters, setFilters] = useState([]);
+    const [sorters, setSorters] = useState([]);
     
     //PROPS
-    const { openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList} = props;
+    const { openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen} = props;
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen} = useContext(TaskContext);
+        modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, setMapRows} = useContext(TaskContext);
 
+    //CSS
+    const classes = useStyles();
 
     useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
@@ -42,46 +48,68 @@ const TaskListMain = (props) => {
                 console.warn(JSON.stringify(error, null,2));
             })
         }
-
     return () => { //clean up
         if(taskLists){
-             
         }
     }
     },[openTaskList,taskListTasks, taskLists]);
 
-    //CSS
-    const classes = useStyles();
-
-    const handleChangeDense = event => {
-        setDense(event.target.checked);
-      };
+    useEffect(()=>{
+        if (Array.isArray(sorters) && sorters.length) {
+            if (taskListTasks && taskListTasks.length) {
+                var tmpData = taskListTasks.sort(createSorter(...sorters))
+                console.log(tmpData);
+                var copyObject = [...tmpData];
+                setTaskListTasks(copyObject);
+                cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
+            }
+        }
+    },[sorters])
+    
 
 
     const table_info = [
-        {text: "WO #", field: "table_id", width: '7%'},
-        {text: "Desired Date", field: "date_desired", width: '10%', style: 'boldListItemText'},
-        {text: "1st Game", field: "first_game", width: '10%'},
-        {text: "install_date", field: "install_date", width: '10%'},
-        {text: "Name", field: "t_name", width: '20%', style: 'boldListItemText'},
-        {text: "Type", field: "type", width: '8%'},
-        {text: "Description", field: "description", width: '19%', style: 'smallListItemText'},
-        {text: "Drill Status", field: "drilling", width: '8%'},
-        {text: "Task Status", field: "task_status", width: '8%'}
+        {text: "WO #", field: "table_id", width: '7%', type: 'number'},
+        {text: "Desired Date", field: "date_desired", width: '10%', style: 'boldListItemText', type: 'date'},
+        {text: "1st Game", field: "first_game", width: '10%', type: 'date'},
+        {text: "install_date", field: "install_date", width: '10%', type: 'date'},
+        {text: "Name", field: "t_name", width: '20%', style: 'boldListItemText', type: 'text'},
+        {text: "Type", field: "type", width: '8%', type: 'text'},
+        {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
+        {text: "Drill Status", field: "drilling", width: '8%', type: 'text'},
+        {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
     ];
+
+    const handleListSort = (event, item) =>{
+        if(!item){
+            cogoToast.error("Bad field while trying to sort");
+            return;
+        }
+        //sort taskListItems according to item
+        //this sort can take multiple sorters but i dont think its necessary
+           // if it is, you will have to change the [0] to a dynamic index!
+        if(item.type == 'date' || item.type == 'number' || item.type == 'text'){
+            setSorters([{
+                property: item.field, 
+                direction: sorters[0] && sorters[0].direction == "ASC" ? "DESC" : "ASC",
+            }])
+        }
+    }
+
      
     return(
         <>
             <TaskListToolbar openTaskList={openTaskList} setOpenTaskList={setOpenTaskList} 
                             taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} 
                             isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
-                            priorityList={priorityList} setPriorityList={setPriorityList}/>
+                            priorityList={priorityList} setPriorityList={setPriorityList} setSelectedIds={setSelectedIds}/>
             <Grid container >  
                 <Grid item xs={2} >
                     <TaskListSidebar taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
                                  openTaskList={openTaskList} setOpenTaskList={setOpenTaskList} 
                                  isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
-                                  priorityList={priorityList} setPriorityList={setPriorityList} />
+                                  priorityList={priorityList} setPriorityList={setPriorityList}
+                                  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setSelectedIds={setSelectedIds} />
                 </Grid>
                 <Grid item xs={10} >
                     <Paper className={classes.root}>
@@ -89,7 +117,14 @@ const TaskListMain = (props) => {
                         <>
                             <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
                                 {table_info.map((item, i)=>(
-                                    <ListItemText id={"Head-ListItem"+i} className={classes.listItemText} style={{flex: `0 0 ${item.width}`}} classes={{primary: classes.listItemTextPrimary}}>{item.text}</ListItemText>
+                                    <ListItemText id={"Head-ListItem"+i} 
+                                                    className={classes.listItemText} 
+                                                    style={{flex: `0 0 ${item.width}`}} 
+                                                    classes={{primary: classes.listItemTextPrimary}}
+                                                    onClick={event=>handleListSort(event, item)}
+                                                    >
+                                                    {item.text}
+                                    </ListItemText>
                                 ))}
                                 <ListItemSecondaryAction>            
                                         <React.Fragment>
@@ -104,11 +139,14 @@ const TaskListMain = (props) => {
                                 </ListItemSecondaryAction>
                             </ListItem>
                             <TaskListTasks 
-                            taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
-                            openTaskList={openTaskList} setOpenTaskList={setOpenTaskList}
-                            setModalOpen={setModalOpen} 
-                            setModalTaskId={setModalTaskId}
-                            table_info={table_info}/>
+                                selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
+                                taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
+                                openTaskList={openTaskList} setOpenTaskList={setOpenTaskList}
+                                setModalOpen={setModalOpen} 
+                                setModalTaskId={setModalTaskId}
+                                table_info={table_info}
+                                priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
+                                setMapRows={setMapRows}/>
                         </>
                         : <>
                         <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
@@ -118,10 +156,7 @@ const TaskListMain = (props) => {
                             </ListItem>
                         </>}
 
-                        <FormControlLabel
-                            control={<Switch checked={dense} onChange={handleChangeDense} />}
-                            label="Dense padding"
-                        />
+                        
                     </Paper>
                 </Grid>
             </Grid>

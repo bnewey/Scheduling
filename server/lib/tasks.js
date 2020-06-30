@@ -10,8 +10,9 @@ router.get('/getAllTasks', async (req,res) => {
     ' date_format(date_assigned, \'%Y-%m-%d\') as date_assigned, ' + 
     ' date_format(date_completed, \'%Y-%m-%d\') as date_completed, t.description, t.priority_order, t.task_list_id, ' + 
     ' t.task_status, t.drilling, t.sign, t.artwork, t.table_id, date_format(t.order_date, \'%Y-%m-%d\') as order_date, ' + 
-    ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, t.delivery_crew, t.delivery_order,t.install_order, ' + 
-    't.install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded '  +
+    ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, t.drill_crew, ' +
+    ' t.delivery_crew, t.delivery_order,t.install_order, ' + 
+    ' t.sch_install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id ' +
     ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1)' +
@@ -39,7 +40,8 @@ router.post('/getTask', async (req,res) => {
     ' t.description, t.notes, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
     ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, ' +
     ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
-    ' t.install_crew, date_format(install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
+    ' t.drill_crew, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
+    ' t.sch_install_crew as install_crew, date_format(sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
     ' ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id '  +
@@ -86,12 +88,13 @@ router.post('/updateTask', async (req,res) => {
     const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
     ' date_completed=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , description= ? , notes= ? , ' +
     ' task_status= ?, drilling= ? , sign= ? , artwork= ?  , delivery_crew= ? , ' + 
-    ' delivery_order= ? , delivery_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\'), install_crew= ? , install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , install_order= ? ' +
+    ' delivery_order= ? , delivery_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\'), sch_install_crew= ? , sch_install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , install_order= ? ' +
+    ' sch_install_crew= ? , sch_install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\') ' + 
     ' WHERE id = ? ';
 
     const params = [task.t_name, task.hours_estimate, task.date_desired, task.date_assigned, task.date_completed, task.description, task.notes, 
     task.task_status, task.drilling, task.sign, task.artwork, task.delivery_crew,
-    task.delivery_order, task.delivery_date, task.install_crew, task.install_date, task.install_order , task.t_id ];
+    task.delivery_order, task.delivery_date, task.sch_install_crew, task.sch_install_date, task.drill_crew, task.drill_date,  task.install_order , task.t_id ];
     //todo  table_id (address, in db), first_game(in db, add to form), install_location(in db), 
     //       assigned users(not in db),  maybe missing something...
 

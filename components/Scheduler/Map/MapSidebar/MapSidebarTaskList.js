@@ -6,13 +6,13 @@ import TaskLists from '../../../../js/TaskLists';
 import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
 import { TaskContext } from '../../TaskContainer';
-import EnhancedTableAddCreateTL from "../../Table/EnhancedTableAddCreateTL";
+import EnhancedTableAddTL from "../../Table/EnhancedTableAddTL";
 
 
 const MapSidebarTaskList = (props) => {
     //PROPS
     const { setActiveMarker, setResetBounds, reFetchTaskList, setReFetchTaskList} = props;
-    const {mapRows, setMapRows, taskLists, setTaskLists, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
+    const {mapRows, setMapRows, taskLists, setTaskLists, priorityList, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
     //STATE  
     const [open, setOpen] = React.useState(false);
     const [tempTaskListToMap, setTempTaskListToMap] = useState(null);
@@ -68,78 +68,22 @@ const MapSidebarTaskList = (props) => {
         //Remove any rows that are user selected in enhanced table
         setSelectedIds([]);
         //Fetch task list tasks
-        if(taskListToMap === tempTaskListToMap){
+        if(taskListToMap === priorityList){
             //Special case where we need to refetch that wont work in regular fetching workflow
             setReFetchTaskList(true);
-            handleClose();
             return;
         }
-        setTaskListToMap(tempTaskListToMap);
-        handleClose();
-    };
+        setTaskListToMap(priorityList);
+    }; 
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        
-        setOpen(false);
-    };
      
     return(
         <React.Fragment>
             
-            
-            { open && taskLists ? 
-            <Dialog PaperProps={{className: classes.dialog}} open={open} onClose={handleClose}>
-                <DialogTitle className={classes.title}>Select a Task List to Map</DialogTitle>
-                <DialogContent className={classes.content}>
-            <FormControl className={classes.inputField}>
-                <InputLabel id="task-list-select-label">Select A Task List</InputLabel>
-                <Select
-                labelId="task-list-select-label"
-                id="task-list-select"
-                value={tempTaskListToMap ? tempTaskListToMap.id : ''}
-                onChange={handleChangeTaskListToMap}
-                >
-                    <MenuItem value={''}>Choose a Task List..</MenuItem>
-                {taskLists.map((list,i)=> (
-                    <MenuItem value={list.id} key={"task-list-"+i}>
-                        <div className={classes.menu_item_div}>
-                            <span className={classes.menu_item_name}>
-                                {list.list_name} {list.is_priority ? "(PRIORITY LIST)" : "" }
-                            </span>
-                            <span className={classes.menu_item_date}>
-                               Last Updated: {Util.convertISODateTimeToMySqlDateTime(list.date_entered)}
-                            </span>
-                        </div>
-                    </MenuItem>
-                    ))                    
-                }
-                </Select>
-            </FormControl>
-            <DialogActions>
-                <Button onClick={handleClose} color="primary">
-                    Cancel
-                </Button>
-                {tempTaskListToMap ? <Button
-                    onClick={event => handleMapTaskList(event)}
-                    variant="contained"
-                    color="secondary"
-                    size="medium"
-                    className={classes.saveButton} >
-                    Map TaskList
-                    </Button>
-                :<></> }   
-             </DialogActions> 
-            </DialogContent>
-            </Dialog>
-            :<></>}
 { taskListToMap ? <p className={classes.p_activeTask}>Active Task List: {taskListToMap.list_name} {taskListToMap.is_priority ? "(PRIORITY LIST)" : "" }</p> 
                         : <><p className={classes.p_noActiveTask}>No Active Task List!</p></>}
-            <Button className={classes.openButton} onClick={handleClickOpen}>Change Task List</Button>
-            {taskListToMap ? <></> : <EnhancedTableAddCreateTL />}
+            <Button className={classes.openButton} onClick={handleMapTaskList}>Map PriorityList</Button>
+            {taskListToMap ? <></> : <EnhancedTableAddTL />}
         </React.Fragment>
       
     );
@@ -211,7 +155,7 @@ const useStyles = makeStyles(theme => ({
         fontSize: '13px',
         fontWeight: '600',
         margin: '5px 17px',
-        backgroundColor: '#2e92da',
+        backgroundColor: '#65aea4',
         padding: '3px 25px',
         borderRadius: '4px',
         overflow: 'hidden',

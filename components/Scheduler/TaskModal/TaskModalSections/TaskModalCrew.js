@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Select, IconButton, ButtonGroup, Button, FormControl, MenuItem, InputLabel, Paper,
     Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
@@ -7,30 +7,31 @@ import AddIcon from '@material-ui/icons/Add';
 import XIcon from '@material-ui/icons/Remove';
 import cogoToast from 'cogo-toast';
 import { Scrollbars} from 'react-custom-scrollbars';
+import {CrewContext} from '../../Crew/CrewContainer';
 
-import TaskLists from '../../../../js/TaskLists';
+import Crew from '../../../../js/Crew';
 
 export default function TaskModalTaskList(props){
     const classes = useStyles();
 
     const {taskLists, setTaskLists, modalTask, setShouldReFetch, modalOpen, setModalOpen, setModalTaskId} = props;
-    const [taskListToAdd, setTaskListToAdd] = useState(null);
-    const [relatedTaskLists, setRelatedTaskLists] = useState(null);
-    const [open, setOpen] = React.useState(false);
+    const {crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, setAllCrewJobs} = useContext(CrewContext);
+
+    const [modalCrewJobs, setModalCrewJobs] = useState(null);
 
     useEffect(()=>{
-        if(relatedTaskLists == null && modalOpen){
-            TaskLists.getAllTaskListPerTask(modalTask.t_id)
+        if(modalCrewJobs == null && modalTask){
+            Crew.getCrewJobsByTask(modalTask.t_id)
             .then((data)=>{
-                if(data.length > 0){
-                    setRelatedTaskLists(data);
+                if(data){
+                    setModalCrewJobs(data);
                 }
-                console.log("TaskList to ", data);
+                console.log("ModalCrewJob to ", data);
             })
             .catch((error)=>{
                 if(error){
                     console.error(error);
-                    cogoToast.error("Could not get all related task lists")
+                    cogoToast.error("Could not get ModalCrewJobs")
                 }
             })
         }
@@ -132,19 +133,18 @@ export default function TaskModalTaskList(props){
 
     return(
         
-        <Paper className={classes.paper} style={ relatedTaskLists ? relatedTaskLists.length > 0 ? {backgroundColor: '#ececec'} : {backgroundColor: 'rgb(252, 239, 237)'} : {backgroundColor: 'rgb(252, 239, 237)'} }>
-            <p className={classes.headingText}>Task List</p>
-            { relatedTaskLists
+        <Paper className={classes.paper} style={ modalCrewJobs ? modalCrewJobs.length > 0 ? {backgroundColor: '#ececec'} : {backgroundColor: 'rgb(252, 239, 237)'} : {backgroundColor: 'rgb(252, 239, 237)'} }>
+            <p className={classes.headingText}>Crew</p>
+            { modalCrewJobs
             ? //ADDED TO TASK LIST ALREADY
                 <>
                  <Scrollbars universal autoHeight autoHeightMax={100}>
-                {relatedTaskLists.map((tl) => ( 
-                    <div className={classes.task_list_div}>{console.log(tl)}
-                        <span className={classes.p_task_name}>{tl.tl_name}</span>
-                        <span className={classes.p_task_priority}>{ tl.tl_is_priority ? "Priority List" : ""}</span>
+                {modalCrewJobs.map((job) => ( 
+                    <div className={classes.task_list_div}>{console.log(job)}
+                        <span className={classes.p_task_name}>{job.member_name}</span>
                         <a  className={classes.remove_link}
-                            onClick={event => handleRemoveTaskFromList(event, modalTask.t_id, tl.tl_id)}>
-                            Remove
+                            // onClick={event => handleRemoveTaskFromList(event, modalTask.t_id, job.m_id)}>
+                            >Remove
                         </a>    
                     </div>
                 ))}
@@ -153,49 +153,7 @@ export default function TaskModalTaskList(props){
                 </>
             : <></>
             } 
-                { !relatedTaskLists ? <div className={classes.add_link_div}>
-                    <a className={classes.remove_link} onClick={event => /*handleOpenAddToTaskListDialog(event)*/ handleAddToTaskList(event, modalTask.t_id , taskLists[0].id)}> Add to Task List </a>
-                </div> : <></>}
-                <div>
-                    { open 
-                    ? 
-                        <Dialog PaperProps={{className: classes.dialog}} open={open} onClose={handleCloseAddToTaskListDialog}>
-                            <DialogTitle className={classes.title}>Select a Task List to Map</DialogTitle>
-                            <DialogContent className={classes.content}>
-                                <FormControl variant="outlined" className={classes.inputField}>
-                                <InputLabel id="task-list-label">
-                                Add to Task List
-                                </InputLabel>
-                                <Select
-                                labelId="task-list-label"
-                                id="task-list-input"
-                                onChange={handleTaskListInputChange}
-                                value={taskListToAdd}
-                                >
-                                <MenuItem value={''}>Choose a Task List..</MenuItem>
-                                {taskLists.map((list,i)=> (
-                                    <MenuItem value={list.id} key={"task-List-"+i}>{list.list_name}</MenuItem>))                    
-                                }   
-                                </Select>
-                            </FormControl>
-                            <FormControl style={{display: 'block'}}>
-                                {taskListToAdd ? <Button
-                                    onClick={event => handleAddToTaskList(event, modalTask.t_id, taskListToAdd)}
-                                    variant="contained"
-                                    color="secondary"
-                                    size="medium"
-                                    className={classes.saveButton}
-                                >
-                                    <AddIcon />Add To TaskList
-                                        </Button>
-                                : <div><p style={{color: 'rgba(0, 0, 0, 0.52)'}}>Select a Task List</p></div> 
-                                }   
-                            </FormControl> 
-                            </DialogContent>
-                        </Dialog> 
-                    : <></>
-                    }
-                </div>
+               
         </Paper>
 
     );

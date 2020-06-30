@@ -149,7 +149,7 @@ const useStyles = makeStyles(theme => ({
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     width: '75%',
-    backgroundColor: '#fca437',
+    backgroundColor: '#65aea4',
     borderRadius: '2px',
     boxShadow: 'inset 0px 1px 5px 0px rgba(0,0,0,0.2)',
   }

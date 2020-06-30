@@ -27,6 +27,10 @@ function convertISODateTimeToMySqlDateTime(param) {
 }
 
 function convertISODateToMySqlDate(param) {
+    if(!param){
+        return "";
+    }
+
     date = new Date(param);
     year = date.getFullYear();
     month = date.getMonth()+1;

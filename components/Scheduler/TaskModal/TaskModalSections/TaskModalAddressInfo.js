@@ -50,13 +50,13 @@ const TaskModalAddressInfo = (props) => {
         
             <p className={classes.taskTitle}>Address Information</p>
                     <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="input-address-name" label="Address Name:"  defaultValue={modalTask.address_name}/></FormControl></Grid>
-                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputField} variant="outlined" id="input-address" label="Address:"  defaultValue={modalTask.address}/></FormControl></Grid>
+                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputFieldMatUi} variant="outlined" id="input-address-name" label="Address Name:"  defaultValue={modalTask.address_name}/></FormControl></Grid>
+                        <Grid item xs={6} ><FormControl fullWidth><TextField className={classes.inputFieldMatUi} variant="outlined" id="input-address" label="Address:"  defaultValue={modalTask.address}/></FormControl></Grid>
                     </Grid>
                     <Grid container className={classes.lowerGrid}>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-city" label="City:"  defaultValue={modalTask.city}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-state" label="State:"  defaultValue={modalTask.state}/></Grid>
-                        <Grid item xs={4} ><TextField className={classes.inputField} variant="outlined" id="input-zip" label="Zipcode:"  defaultValue={modalTask.zip}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputFieldMatUi} variant="outlined" id="input-city" label="City:"  defaultValue={modalTask.city}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputFieldMatUi} variant="outlined" id="input-state" label="State:"  defaultValue={modalTask.state}/></Grid>
+                        <Grid item xs={4} ><TextField className={classes.inputFieldMatUi} variant="outlined" id="input-zip" label="Zipcode:"  defaultValue={modalTask.zip}/></Grid>
                     </Grid>
         </>}
         </>

@@ -15,73 +15,27 @@ import Util from '../../../js/Util';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
+import {CrewContext} from '../Crew/CrewContainer';
 
 const TaskListSidebar = (props) => {
 
     //STATE
     const [editOpen, setEditOpen] = React.useState(false);
     const [editList, setEditList] = React.useState(null);
-    const [idToActivateOnRefreshTL, setIdToActivateOnRefreshTL] = React.useState(null);
 
     //PROPS
-    const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList} = props;
+    const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
+        selectedTasks, setSelectedTasks, setSelectedIds} = props;
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen} = useContext(TaskContext);
+        modalOpen, setModalOpen, setMapRows} = useContext(TaskContext);
+
+    const {setCrewModalOpen} = useContext(CrewContext);
 
     //CSS
     const classes = useStyles();
 
-    useEffect(()=>{
-
-        //change openTaskList and taskListToMap to newly created 
-        //also exists in TaskListToolbar
-        if(taskLists && idToActivateOnRefreshTL){
-            let tmpTl = taskLists.filter((i)=>i.id == idToActivateOnRefreshTL)[0];
-            if(tmpTl){
-                setTaskListToMap(tmpTl);
-                setOpenTaskList(tmpTl);
-                setIdToActivateOnRefreshTL(null);
-            }
-            
-        }
-    },[taskLists])
-
-
-    const handleSelectTaskList = (event, list) => {
-        setTaskListToMap(list);
-        setOpenTaskList(list)
-        setTaskListTasks(null);
-    };
-
-    const handleDelete = (event, id) => {
-        
-        const remove = () => {
-            TaskLists.removeTaskList(id)
-                .then((ok) => {
-                    if(!ok){
-                        throw new Error("Failed to remove Task List");
-                    }
-                    //refetch tasklists
-                    setOpenTaskList(null);
-                    setTaskLists(null);
-                    cogoToast.success(`Removed Task List ${id}`, {hideAfter: 4});
-                })
-                .catch( error => {
-                    console.error(error);
-                    cogoToast.error(`Error removing Task List`, {hideAfter: 4});
-            });
-        }
-        confirmAlert({
-            customUI: ({onClose}) => {
-                return(
-                    <ConfirmYesNo onYes={remove} onClose={onClose} customMessage="Delete this task list permanently?"/>
-                );
-            }
-        })
-    
-    };
 
     const handleEditClickOpen = (event, list) => {
         setEditList(list);
@@ -93,130 +47,87 @@ const TaskListSidebar = (props) => {
         setEditOpen(false);
     };
 
+    const handleRemoveMultipleTasks = (event, selectedTasks, task_list) =>{
+        const remove = () => {
+            TaskLists.removeMultipleFromList(selectedTasks, task_list.id)
+            .then((response)=>{
+                const filtered_rows = taskListTasks.filter((task, i)=> (    !(selectedTasks.includes(task.t_id))   ));
+                //Set Tasks to all but ones weve deleted
+                setTaskListTasks(filtered_rows);
+                setTaskListToMap(priorityList);
+                //Set selected ids in table view to all but ones weve deleted
+                setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
+                setMapRows(filtered_rows);
+                cogoToast.success(`Removed tasks from Task List`, {hideAfter: 4});
+            })
+            .catch((error)=>{
+                console.error("Error removing multiple",error);
+                cogoToast.error("Error removing multiple items", {hideAfter: 4});
+            });
+        }
 
+        confirmAlert({
+            customUI: ({onClose}) => {
+                return(
+                    <ConfirmYesNo onYes={remove} onClose={onClose} customMessage={"Remove tasks from TaskList?"}/>
+                );
+            }
+        })
+    }
+
+    const handleOpenCrewModal=()=>{
+        setCrewModalOpen(true);
+    }
 
     return(
-        <>
         <Paper className={classes.root}>
             <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>
-            <div className={classes.priority_head_div}>
-                <span>Priority List</span>
-            </div>
-
-            <Paper className={classes.list_div}>
-                
-                <List component="nav" aria-label="main mailbox folders">
-                {priorityList ? 
-                        <ListItem
-                        button
-                        selected={openTaskList && openTaskList.id === priorityList.id}
-                        onClick={event => handleSelectTaskList(event, priorityList)}
-                        className={classes.list_item}
-                        >
-                            <ListItemIcon className={classes.list_item_icon}>
-                                <ListIcon />
-                            </ListItemIcon>
-                            <ListItemText className={classes.list_item_text}>
-                                <div class="list_">
-                                    <span class="list_name">{priorityList.list_name}</span> 
-                                    <span class={ "list_item_priority" }>
-                                        {"PRIORITY LIST"}
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="list_item_date">Updated: {Util.convertISODateTimeToMySqlDateTime(priorityList.date_entered)}</span>
-                                </div>
-                                {openTaskList && openTaskList.id === priorityList.id 
-                                ? 
-                                    <div>
-                                        <span
-                                            class="list_item_text_button" 
-                                            onClick={event => handleEditClickOpen(event, openTaskList)}>
-                                            Rename
-                                        </span>
-                                    </div>
-                                :   <></> 
-                                }
-                                
-                                
-                            </ListItemText>
-                        </ListItem>
-                        :<></>}
-                </List>
-            </Paper>
-
-
-            <div className={classes.head_div}>
-                <span>Task Lists</span>
-            </div>
-           
-            <Paper className={classes.list_div}>
-                <List component="nav" aria-label="main mailbox folders">
-                    {taskLists && taskLists.map((list)=> { 
-                        if(priorityList && (list.id != priorityList.id)){
-                            return(
-                            <ListItem
-                            button
-                            selected={openTaskList && openTaskList.id === list.id}
-                            onClick={event => handleSelectTaskList(event, list)}
-                            className={classes.list_item}
-                            >
-                                <ListItemIcon className={classes.list_item_icon}>
-                                    <ListIcon />
-                                </ListItemIcon>
-                                <ListItemText className={classes.list_item_text}>
-                                    <div class="list_">
-                                        <span class="list_name">{list.list_name}</span> 
-                                        <span class={priorityList && priorityList.id == list.id 
-                                                ? "list_item_priority" 
-                                                : priorityList && priorityList.linked_tl == list.id 
-                                                    ? "list_item_linked" 
-                                                    : ""}>
-                                            {priorityList && priorityList.id == list.id 
-                                                ? "PRIORITY LIST" 
-                                                : priorityList && priorityList.linked_tl == list.id 
-                                                    ? "PRIORITY LINKED" 
-                                                    : ""}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span class="list_item_date">Updated: {Util.convertISODateTimeToMySqlDateTime(list.date_entered)}</span>
-                                    </div>
-                                    {openTaskList && openTaskList.id === list.id 
-                                    ? 
-                                        <div>
-                                            <span
-                                                class="list_item_text_button" 
-                                                onClick={event => handleEditClickOpen(event, openTaskList)}>
-                                                Rename
-                                            </span>
-                                            <span
-                                                class="list_item_text_button" 
-                                                onClick={event => handleDelete(event, list.id)}>
-                                                Delete
-                                            </span>
-                                            
-                                        </div>
-                                    :   <></> 
-                                    }
-                                    
-                                    
-                                </ListItemText>
-                            </ListItem>
-                            );
-                    }else{
-                        return (<></>);
-                    }
-                })}     
-                </List>
-            </Paper>
-            <div className={classes.button_div}>
-                <TaskListActionAdd  setIdToActivateOnRefreshTL={setIdToActivateOnRefreshTL}/>
+            <div className={classes.priority_info_div}>   
+                <div className={classes.priority_info_heading}>
+                    <span>List Info</span>
+                </div>
+                 <div>
+                    {priorityList ? <div className={classes.priority_text_div}><span className={classes.priority_text_label}>Last Updated: </span><span className={classes.priority_text_grey}>{Util.convertISODateTimeToMySqlDateTime(priorityList.date_entered)}</span></div> : <></>}
+                </div>
+                <div className={classes.priority_info_heading}>
+                    <span>Actions</span>
+                </div>
+                {openTaskList ? 
+                <>
+                    { selectedTasks && selectedTasks.length > 0 ?
+                         <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
+                                onClick={event => handleRemoveMultipleTasks(event, selectedTasks, openTaskList)}>
+                                Remove Multiple From TaskList
+                            </span>
+                         </div>
+                         :<></>}
+                    <div className={classes.singleLineDiv}>
+                    <span
+                        className={classes.text_button} 
+                        onClick={event => handleEditClickOpen(event, openTaskList)}>
+                        Rename
+                    </span>
+                    </div>
+                </>
+                :   <></> 
+                }
+                <div className={classes.priority_info_heading}>
+                    <span>Crew</span>
+                </div>
+                <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
+                                onClick={event => handleOpenCrewModal(event)}>
+                                Open Crew Menu
+                            </span>
+                </div>
             </div>
         </Paper>
-        </>
     );
 }
+
 
 export default TaskListSidebar;
 
@@ -226,6 +137,9 @@ const useStyles = makeStyles(theme => ({
         margin: '0px 0px 5px 5px',
         background: 'linear-gradient( #dadada, #a2a2a2)',
         height: '100%',
+    },
+    singleLineDiv:{
+        display: 'block',
     },
     head_div:{
         backgroundColor: '#fca437',
@@ -283,35 +197,40 @@ const useStyles = makeStyles(theme => ({
         minWidth: '15%',
         color: '#767676',
     },
-    list_item_text:{
-        fontSize: '14px',
-        '& .list_name':{
-            fontWeight: '600',
-            margin: '0% 3% 0% 0%',
-        },
-        '& .list_item_priority':{
-            fontSize: '12px',
-            color: '#3d87c1',
-            fontWeight: '600',
-        },
-        '& .list_item_linked':{
-            fontSize: '12px',
-            color: '#3a9fc4'
-        },
-        '& .list_item_date':{
-            fontSize: '11px',
-            color: '#767676'
-        },
-        '& span .list_item_text_button':{
-            cursor: 'pointer',
-            fontSize: '12px',
-            color: '#677fb3',
-            margin: '0% 3% 0% 0%',
-            '&:hover':{
-                color: '#697fb1',
-                textDecoration: 'underline',
-            }
-
+    text_button:{
+        cursor: 'pointer',
+        fontSize: '12px',
+        color: '#677fb3',
+        margin: '0% 3% 0% 0%',
+        '&:hover':{
+            color: '#697fb1',
+            textDecoration: 'underline',
         }
+    },
+    priority_info_div:{
+        display: 'flex',
+        flexWrap: 'nowrap',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#ececec',
+        padding: '7px 12px',
+        border: '2px solid #adb0b0',
+        borderRadius: '3px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+    },
+    priority_info_heading:{
+        '& span':{
+            fontSize: '14px',
+        },
+        marginTop: '4%',
+        display: 'block',
+        width: '100%',
+        textAlign: 'center',
+        backgroundColor: '#66afa5a6',
+        color: '#fff',
+        borderRadius: '8px',
     }
   }));

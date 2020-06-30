@@ -10,6 +10,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import TaskLists from '../../../js/TaskLists';
 import cogoToast from 'cogo-toast';
+import Util from '../../../js/Util';
 
 
 
@@ -18,9 +19,9 @@ const TaskListTasks = (props) =>{
 
 
     //STATE
-
     //PROPS
-    const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList , setModalOpen, setModalTaskId, table_info} = props;
+    const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList , setModalOpen, setModalTaskId, table_info,
+              priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, setMapRows} = props;
     
     //CSS
     const classes = useStyles();
@@ -28,7 +29,8 @@ const TaskListTasks = (props) =>{
 
 
     useEffect( () =>{ //useEffect for inputText
-        return () => { //clean up
+      console.log("Changed");  
+      return () => { //clean up
             
             if(openTaskList){
                 //setTaskListTasks(null);
@@ -42,12 +44,15 @@ const TaskListTasks = (props) =>{
       const remove = () => {
         TaskLists.removeTaskFromList(id, tl_id)
             .then( (data) => {
-                    var temp = taskListTasks.filter((task, i)=>task.t_id != id);
-                    setTaskListTasks(temp);
+                    const filtered_rows = taskListTasks.filter((task, i)=>task.t_id != id);
+                    setTaskListTasks(filtered_rows);
+                    setTaskListToMap(priorityList);
+                    setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
+                    setMapRows(filtered_rows);
                     cogoToast.success(`Removed task ${id} from Task List`, {hideAfter: 4});
                 })
             .catch( error => {
-            console.warn(JSON.stringify(error, null,2));
+            console.warn("Error removing task",error);
             cogoToast.error(`Error removing Task from Task List`, {hideAfter: 4});
              });
       }
@@ -133,6 +138,38 @@ const TaskListTasks = (props) =>{
     }
     // END DND
 
+    const handleClick = (event, record_id) => {
+      
+      //TODO If user changes filter to exclude some already selected items, this breaks?
+      const selectedIndex = selectedTasks.indexOf(record_id);
+      let newSelected = [];
+      const row = taskListTasks.filter((row, index)=> row.t_id == record_id);
+      if(row == []){
+        error.log("No row found in filteredRows");
+      }
+
+      if (selectedIndex === -1) {
+        newSelected = newSelected.concat(selectedTasks, record_id);
+        
+      } else if (selectedIndex === 0) {
+        newSelected = newSelected.concat(selectedTasks.slice(1));
+        
+      } else if (selectedIndex === selectedTasks.length - 1) {
+        newSelected = newSelected.concat(selectedTasks.slice(0, -1));
+      } else if (selectedIndex > 0) {
+        newSelected = newSelected.concat(
+          selectedTasks.slice(0, selectedIndex),
+          selectedTasks.slice(selectedIndex + 1),
+        );
+        var tempArray = [];
+      }
+    
+      setSelectedTasks(newSelected);
+
+    };
+
+    const isSelected = record_id => selectedTasks.indexOf(record_id) !== -1;
+
     return(
         <React.Fragment>
         { taskListTasks ? 
@@ -163,7 +200,12 @@ const TaskListTasks = (props) =>{
               >          
               {taskListTasks && taskListTasks.length > 0 ? 
                 <> { taskListTasks.map((row, index) => {
+                  if(row['filter']){
+                    return (<></>);
+                  }
+                  const isItemSelected = isSelected(row.t_id);
                   const labelId = `checkbox-list-label-${row.t_id}`;
+                  
                   return (
                     <Draggable key={row.t_id + 321321} 
                                 draggableId={row.t_id.toString()} 
@@ -171,13 +213,14 @@ const TaskListTasks = (props) =>{
                                 isDragDisabled={ false}
                     >
                     {(provided, snapshot) => (
-                      <ListItem key={row.t_id + 321321} 
+                      <ListItem key={taskListTasks[index].t_id + 321321} 
                                   role={undefined} dense button 
                                   onContextMenu={event => handleRightClick(event, row.t_id)}
+                                  onMouseUp={event => handleClick(event, row.t_id)}
                                   className={ index % 2 == 0 ? 
-                                            ( classes.nonSelectedRow )
+                                            ( isItemSelected ? classes.selectedRow : classes.nonSelectedRow )
                                             : 
-                                            ( classes.nonSelectedRowOffset)}
+                                            ( isItemSelected ? classes.selectedRowOffset : classes.nonSelectedRowOffset)}
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
@@ -185,14 +228,26 @@ const TaskListTasks = (props) =>{
                                     snapshot.isDragging,
                                     provided.draggableProps.style
                                   )}>
-                        {table_info.map((item, i)=>(
+                        { openTaskList 
+                        ? <>
+                            <Checkbox checked={isItemSelected} className={classes.tli_checkbox}/>
+                          </> 
+                        : <></>}
+                        {table_info.map((item, i)=>{
+                          var value;
+                          if(item.type == 'date' ){
+                            value = Util.convertISODateToMySqlDate(row[item.field]);
+                          }else{
+                            value = row[item.field];
+                          }
+                          return(
                           <ListItemText id={labelId} 
                                         className={classes.listItemTextStyle} 
                                         style={{flex: `0 0 ${item.width}`}}
                                         classes={item.style ?  {primary: classes[item.style]} : {}}>
-                                    {row[item.field]}
+                                   { value} 
                           </ListItemText>
-                        ))}
+                        )})}
                         { openTaskList 
                         ? 
                         <ListItemSecondaryAction>            
@@ -267,10 +322,35 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-around',
     
   },
+  selectedRow:{
+    backgroundColor: '#efe0ab !important',
+    '&:hover':{
+      backgroundColor: '#d0bc77 !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+    
+  },
   nonSelectedRowOffset:{
     backgroundColor: '#c5e2f3  !important',
     '&:hover':{
       backgroundColor: '#fff !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+  },
+  selectedRowOffset:{
+    backgroundColor: '#efe0ab  !important',
+    '&:hover':{
+      backgroundColor: '#d0bc77 !important',
     },
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
@@ -328,5 +408,16 @@ const useStyles = makeStyles(theme => ({
   },
   no_tasks_info_text:{
     fontSize:' 25px',
+  },
+  tli_checkbox:{
+    position: 'absolute',
+    padding: '0px',
+    left: '0px',
+    '& span':{
+      color: '#444',
+      '&:hover':{
+        color: '#000',
+      }
+    }
   }
 }));

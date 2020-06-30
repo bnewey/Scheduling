@@ -405,13 +405,48 @@ const TableFilter = dynamic(
     },
     filterButtonActive:{
         margin: '0px 10px',
-        backgroundColor: '#bdf0ff',
-        color: '#000',
+        backgroundColor: '#fdfdfd',
+        color: '#0067d2',
+        fontWeight: '500',
         border: '1px solid #173b7e',
         '&&:hover':{
             backgroundColor: '#97bec9',
             color: '#000',
         }
     },
+    filter_column:{
+      background: '#02eabf38'
+    },
+    filter_div:{
+      display: 'flex',
+      flexDirection: 'row',
+    },
+    filter_head_div:{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      borderRight: '1px solid #a0a0a0',
+      padding: '0% 2%',
+      fontWeight: '500',
+      fontSize: '12px',
+      color: '#37655c',
+    },
+    actions_column:{
+      background: '#fca43752'
+    },
+    actions_div:{
+      display: 'flex',
+      flexDirection: 'row',
+    },
+    actions_head_div:{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      borderRight: '1px solid #a0a0a0',
+      padding: '0% 2%',
+      fontWeight: '500',
+      fontSize: '12px',
+      color: '#6d4617',
+    }
     
   }));

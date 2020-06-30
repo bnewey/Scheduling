@@ -13,7 +13,6 @@ async function getAllTaskLists(){
     }catch(error){
         throw error;
     }
-
 }
 
 async function getTaskList(id){
@@ -35,7 +34,6 @@ async function getTaskList(id){
     }catch(error){
         throw error;
     }
-
 }
 
 async function getAllTaskListPerTask(t_id){
@@ -57,7 +55,6 @@ async function getAllTaskListPerTask(t_id){
     }catch(error){
         throw error;
     }
-
 }
 
 
@@ -116,7 +113,6 @@ async function updateTaskList(taskList){
         console.log(error);
         throw error;
     }
-
 }
 
 async function addTaskToList(task_id, taskList_id){
@@ -135,7 +131,6 @@ async function addTaskToList(task_id, taskList_id){
         console.log(error);
         throw error;
     }
-
 }
 
 async function addMultipleTasksToList(task_ids, taskList_id){
@@ -167,6 +162,25 @@ async function removeTaskFromList(task_id, taskList_id){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({id: task_id, tl_id: taskList_id})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+
+}
+
+async function removeMultipleFromList(task_ids, taskList_id){
+    const route = '/scheduling/taskLists/removeMultipleFromList';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ids: task_ids, tl_id: taskList_id})
             });
         return response.ok;
     }catch(error){
@@ -226,6 +240,7 @@ module.exports = {
     updateTaskList: updateTaskList,
     addTaskToList: addTaskToList,
     removeTaskFromList: removeTaskFromList,
+    removeMultipleFromList:removeMultipleFromList,
     reorderTaskList: reorderTaskList,
     setPriorityTaskList: setPriorityTaskList,
 };
