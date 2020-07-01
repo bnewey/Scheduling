@@ -18,7 +18,9 @@ async function sendEmail(email, text){
         }
         return(response.ok);
     }catch(error){
+        console.log("Email error", error);
         throw error;
+
     }
 
 }

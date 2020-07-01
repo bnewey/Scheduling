@@ -62,6 +62,7 @@ router.post('/email', async (req,res) => {
 
   try{
     sendMail(email, text);
+    res.sendStatus(200);
   }
   catch(error){
       logger.error("SendMail (/email): " + error);

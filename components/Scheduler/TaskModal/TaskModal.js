@@ -545,6 +545,12 @@ const useStyles = makeStyles(theme => ({
     buttonGroup: {
         '& .MuiButton-label':{
             color: '#fff',
+        },
+        '&:hover':{
+            '& .MuiButton-label':{
+                color: '#333333',
+                
+            },
         }
     },
     selectBox: {

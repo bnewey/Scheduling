@@ -125,9 +125,6 @@ const TaskListToolbar = (props) => {
 
     };
 
-    const handleGoToAddTasks = (event) => {
-        setTabValue(1);
-    };
 
     const handleMapTaskList = (event, list) => {
         if(!list){
@@ -137,28 +134,28 @@ const TaskListToolbar = (props) => {
         setTabValue(2);
     };
 
-    const handleAddNew = (event) =>{
-        TaskLists.addTaskList("New List")
-                .then((id) => {
-                    if(!id){
-                        console.warn("Bad id returned from addNewTaskList");
-                    }
-                    //refetch tasklists
-                    setTaskLists(null);
-                    setIdToActivateOnRefreshTL(id);
-                    cogoToast.success(`Added new Task List`, {hideAfter: 4});
-                })
-                .catch( error => {
-                    cogoToast.error(`Error adding new task list`, {hideAfter: 4});
-                    console.error(error);
-            });
-    };
+    // const handleAddNew = (event) =>{
+    //     TaskLists.addTaskList("New List")
+    //             .then((id) => {
+    //                 if(!id){
+    //                     console.warn("Bad id returned from addNewTaskList");
+    //                 }
+    //                 //refetch tasklists
+    //                 setTaskLists(null);
+    //                 setIdToActivateOnRefreshTL(id);
+    //                 cogoToast.success(`Added new Task List`, {hideAfter: 4});
+    //             })
+    //             .catch( error => {
+    //                 cogoToast.error(`Error adding new task list`, {hideAfter: 4});
+    //                 console.error(error);
+    //         });
+    // };
 
     
-    const handleEditClickOpen = (event, list) => {
-        setEditList(list);
-        setEditOpen(true);   
-    };
+    // const handleEditClickOpen = (event, list) => {
+    //     setEditList(list);
+    //     setEditOpen(true);   
+    // };
 
     const handleEditClose = () => {
         setEditList(null);
@@ -176,36 +173,36 @@ const TaskListToolbar = (props) => {
         })
     }
 
-    const handleSetPriority = (event, tl_id, tl_name) => {
-        if(!openTaskList){
-            return;
-        }
-        console.log("ID ", tl_id);
+    // const handleSetPriority = (event, tl_id, tl_name) => {
+    //     if(!openTaskList){
+    //         return;
+    //     }
+    //     console.log("ID ", tl_id);
 
-        const setPriority = () =>{
-            TaskLists.setPriorityTaskList(tl_id, tl_name)
-            .then((data)=>{
-                console.log("reponse", data);
-                cogoToast.success("Setting Priority");
-                setTaskLists(null);
-                setOpenTaskList(null);
-            })
-            .catch((error)=>{
-                console.error(error);
-                cogoToast.error("Failed to set priority");
-            })
+    //     const setPriority = () =>{
+    //         TaskLists.setPriorityTaskList(tl_id, tl_name)
+    //         .then((data)=>{
+    //             console.log("reponse", data);
+    //             cogoToast.success("Setting Priority");
+    //             setTaskLists(null);
+    //             setOpenTaskList(null);
+    //         })
+    //         .catch((error)=>{
+    //             console.error(error);
+    //             cogoToast.error("Failed to set priority");
+    //         })
             
-        }
+    //     }
 
-        confirmAlert({
-            customUI: ({onClose}) => {
-                return(
-                    <ConfirmYesNo onYes={setPriority} onClose={onClose} customMessage="Use the active task list to set priority?"/>
-                );
-            }
-        })
+    //     confirmAlert({
+    //         customUI: ({onClose}) => {
+    //             return(
+    //                 <ConfirmYesNo onYes={setPriority} onClose={onClose} customMessage="Use the active task list to set priority?"/>
+    //             );
+    //         }
+    //     })
         
-    }
+    // }
 
     return(
         <>
@@ -227,15 +224,7 @@ const TaskListToolbar = (props) => {
                         }
                     {openTaskList ? 
                         <ButtonGroup disableElevation variant="text" className={classes.buttonGroup}> 
-                            <Button
-                                onMouseDown={event => handleGoToAddTasks(event)}
-                                variant="text"
-                                color="secondary"
-                                size="large"
-                                className={classes.darkButton}
-                                
-                            > Add Tasks
-                            </Button>         
+                                   
                             <Button
                                 onMouseDown={event => handleMapTaskList(event, openTaskList)}
                                 variant="text"

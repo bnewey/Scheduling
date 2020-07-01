@@ -69,7 +69,7 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
               label={ 
                 <React.Fragment>
                   <span className={classes.tabSpan}>
-                    <TaskIcon className={ classes.icon}/>&nbsp;Task Lists
+                    <TaskIcon className={ classes.icon}/>&nbsp;Scheduler
                   </span>
                   {activeTask ? 
                     <p className={classes.p_selected}>
@@ -80,7 +80,7 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
           <Tab className={value === 1 ? classes.selectedTab : classes.nonSelectedTab} 
               label={ <React.Fragment>
                           <span className={classes.tabSpan}> 
-                            <ViewListIcon className={classes.icon}/>&nbsp;Tasks
+                            <ViewListIcon className={classes.icon}/>&nbsp;All Tasks
                           </span>
                           {numSelected ? <p className={classes.p_selected}>
                             {numSelected} Selected {activeTask ? "" : "(UNSAVED)"}

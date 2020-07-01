@@ -1,6 +1,8 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText, FormControlLabel, Switch,Grid, List } from '@material-ui/core';
 
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import TaskListTasks from './TaskListTasks';
@@ -15,6 +17,7 @@ import {createFilter} from '../../../js/Filter';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
+import TaskListFilter from './TaskListFilter';
 
 const TaskListMain = (props) => {
     //STATE
@@ -22,6 +25,8 @@ const TaskListMain = (props) => {
     const [selectedTasks, setSelectedTasks] = useState([]);
     const [filters, setFilters] = useState([]);
     const [sorters, setSorters] = useState([]);
+    const [sorterState, setSorterState] = useState(0);
+
     
     //PROPS
     const { openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen} = props;
@@ -30,8 +35,9 @@ const TaskListMain = (props) => {
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, setMapRows} = useContext(TaskContext);
 
+
     //CSS
-    const classes = useStyles();
+    const classes = useStyles({sorterState, sorters});
 
     useEffect( () =>{ //useEffect for inputText
         //Gets data only on initial component mount
@@ -54,6 +60,7 @@ const TaskListMain = (props) => {
     }
     },[openTaskList,taskListTasks, taskLists]);
 
+    //Sort
     useEffect(()=>{
         if (Array.isArray(sorters) && sorters.length) {
             if (taskListTasks && taskListTasks.length) {
@@ -89,12 +96,32 @@ const TaskListMain = (props) => {
         //this sort can take multiple sorters but i dont think its necessary
            // if it is, you will have to change the [0] to a dynamic index!
         if(item.type == 'date' || item.type == 'number' || item.type == 'text'){
+            switch(sorterState){
+                case 0:
+                    setSorterState(1);
+                    break;
+                case 1:
+                    if(sorters[0].property == item.field){
+                        setSorterState(2)
+                    }else{
+                        setSorterState(1);
+                    }
+                    break;
+                case 2:
+                    setSorterState(1);
+                    break;
+                default: 
+            }
             setSorters([{
                 property: item.field, 
-                direction: sorters[0] && sorters[0].direction == "ASC" ? "DESC" : "ASC",
-            }])
+                direction: sorters && sorters[0] && sorters[0].property == item.field ? 
+                        ( sorterState === 0 ? "ASC" : sorterState === 1 ? "DESC" : "ASC" ) : "ASC"
+            }]);
+            
         }
     }
+
+
 
      
     return(
@@ -112,20 +139,32 @@ const TaskListMain = (props) => {
                                   selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setSelectedIds={setSelectedIds} />
                 </Grid>
                 <Grid item xs={10} >
+                   
                     <Paper className={classes.root}>
+                        <TaskListFilter taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} filters={filters} setFilters={setFilters} openTaskList={openTaskList} table_info={table_info}/>
                         {taskListTasks ? 
                         <>
                             <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
-                                {table_info.map((item, i)=>(
+                                {table_info.map((item, i)=>{
+                                    const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
+                                    const isASC = sorterState === 1;
+                                    return(
                                     <ListItemText id={"Head-ListItem"+i} 
                                                     className={classes.listItemText} 
                                                     style={{flex: `0 0 ${item.width}`}} 
                                                     classes={{primary: classes.listItemTextPrimary}}
                                                     onClick={event=>handleListSort(event, item)}
                                                     >
+                                                        <span>
                                                     {item.text}
+                                                    {isSorted ?
+                                                         <div>
+                                                             {isASC ? <ArrowDropDownIcon/> : <ArrowDropUpIcon/>}
+                                                         </div> 
+                                                         : <></>}
+                                                         </span>
                                     </ListItemText>
-                                ))}
+                                )})}
                                 <ListItemSecondaryAction>            
                                         <React.Fragment>
                                         <IconButton edge="end" aria-label="edit">
@@ -187,12 +226,28 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'space-around',
         padding: '3px',
         paddingRight: '6%',
+        
     },
     liContainer: {
         listStyle: 'none',
         margin: '23px 8px 0px 8px',
      },
     listItemTextPrimary:{
+        '& span':{
+            display: 'inline-flex',
+            justifyContent: 'center',
+            '&:hover':{
+                textDecoration: 'underline',
+                color: '#ececec',
+                cursor: 'pointer',
+            },
+            '& .MuiSvgIcon-root':{
+                position: 'absolute',
+                marginLeft: '1px',
+                top: '20%',
+                fontSize: '1.5em',
+            }
+        },
         fontWeight: '600',
         color: '#ffffff',
      },
