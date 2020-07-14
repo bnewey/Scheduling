@@ -127,11 +127,11 @@ const TaskListDateDialog = (props) => {
                     </Grid>
 
                     <DialogActions>
-                        <Button onMouseDown={handleDateDialogClose} color="primary">
+                        <Button onMouseUp={handleDateDialogClose} color="primary">
                             Cancel
                         </Button>
                         <Button
-                            onMouseDown={event => handleUpdateDate(event, selectedDate, dateType)}
+                            onMouseUp={event => handleUpdateDate(event, selectedDate, dateType)}
                             variant="contained"
                             color="secondary"
                             size="medium"
