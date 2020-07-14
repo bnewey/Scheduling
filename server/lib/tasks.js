@@ -1,4 +1,5 @@
 const express = require('express');
+var async = require("async");
 const router = express.Router();
 
 const logger = require('../../logs');
@@ -87,14 +88,13 @@ router.post('/updateTask', async (req,res) => {
 
     const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
     ' date_completed=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , description= ? , notes= ? , ' +
-    ' task_status= ?, drilling= ? , sign= ? , artwork= ?  , delivery_crew= ? , ' + 
-    ' delivery_order= ? , delivery_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\'), sch_install_crew= ? , sch_install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , install_order= ? ' +
-    ' sch_install_crew= ? , sch_install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\') ' + 
+    ' task_status= ?, drilling= ? , sign= ? , artwork= ?   , ' + 
+    ' sch_install_crew= ? , sch_install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\'),  ' +
+    ' drill_crew= ? , drill_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\')  ' + 
     ' WHERE id = ? ';
 
     const params = [task.t_name, task.hours_estimate, task.date_desired, task.date_assigned, task.date_completed, task.description, task.notes, 
-    task.task_status, task.drilling, task.sign, task.artwork, task.delivery_crew,
-    task.delivery_order, task.delivery_date, task.sch_install_crew, task.sch_install_date, task.drill_crew, task.drill_date,  task.install_order , task.t_id ];
+    task.task_status, task.drilling, task.sign, task.artwork, task.install_crew, task.install_date, task.drill_crew, task.drill_date , task.t_id ];
     //todo  table_id (address, in db), first_game(in db, add to form), install_location(in db), 
     //       assigned users(not in db),  maybe missing something...
 
@@ -107,6 +107,46 @@ router.post('/updateTask', async (req,res) => {
     logger.error("Tasks (updateTask): " + error);
     res.sendStatus(400);
     }
+});
+
+router.post('/updateMultipleTaskDates', async (req,res) => {
+    var ids, date, date_type;
+    if(req.body){
+        ids = req.body.ids;
+        date = req.body.date;
+        date_type = req.body.date_type;
+    }
+
+    const sql = ' UPDATE tasks SET  ??=date_format( ? , \'%Y-%m-%d %H:%i:%S\') ' + 
+    ' WHERE id = ? ';
+
+    //sch_install_date, delivery_date,  date_desired
+
+
+    async.forEachOf(ids, async (id, i, callback) => {
+        logger.info(id + " " + date);
+
+        const params = [date_type,date, id ];
+            //todo  table_id (address, in db), first_game(in db, add to form), install_location(in db), 
+             //       assigned users(not in db),  maybe missing something...
+
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, params);
+            return;
+        }
+        catch(error){
+            throw error;  
+        }
+    }, err=> {
+        if(err){
+            logger.error("Tasks (updateMultipleTaskDates): " + error);
+    res.sendStatus(400);
+        }else{
+            logger.info("Update MultipleTaskDates " + [ids] );
+            res.sendStatus(200);
+        }
+    })
 });
 
 router.post('/saveCoordinates', async (req,res) => {

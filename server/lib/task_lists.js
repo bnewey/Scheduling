@@ -37,7 +37,8 @@ router.post('/getTaskList', async (req,res) => {
         ' t.description, t.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
         ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, wo.type, t.install_location, ' +
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
-        ' t.install_crew, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
+        ' t.drill_crew, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
+        ' t.install_crew, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     ' FROM task_list_items tli  ' +
     
@@ -285,12 +286,14 @@ router.post('/reorderTaskList', async (req,res) => {
     }
     
     const sql = ' UPDATE task_list_items SET priority_order = ?, date_updated = now() ' +
-    ' WHERE task_id = ? AND task_list_id = ?';
+    ' WHERE task_id = ? AND task_list_id = ?; ' +
+    ' UPDATE task_list SET date_entered = now() WHERE id = ? ';
+
 
     async.forEachOf(task_ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            const results = await database.query(sql, [i+1, id, taskList_id]);
+            const results = await database.query(sql, [i+1, id, taskList_id, taskList_id]);
             return;
         }
         catch(error){     

@@ -131,7 +131,7 @@ const TaskListToolbar = (props) => {
             return;
         }
         setTaskListToMap(list);
-        setTabValue(2);
+        setTabValue(1);
     };
 
     // const handleAddNew = (event) =>{
@@ -208,22 +208,13 @@ const TaskListToolbar = (props) => {
         <>
         
         <Paper className={classes.head}>
-            <span>{isPriorityOpen ? "Priority View" : "Edit Task List View" }</span>
+            <span className={classes.tasklistHeadSpan}>TaskList View</span>
                 {taskLists ? 
                 <>
                     <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>
                     <div className={classes.leftButtonGroup}>
-                        {!isPriorityOpen ? <></>
-                        :
-                            <>
-                                <div className={classes.taskListLabelDiv}>
-                                    <span className={classes.taskListLabelText}>{openTaskList ? openTaskList.list_name : ""} </span>
-                                    <span className={classes.taskListLabelPriorityIndicator}>PRIORITY LIST</span>
-                                </div>     
-                            </>
-                        }
                     {openTaskList ? 
-                        <ButtonGroup disableElevation variant="text" className={classes.buttonGroup}> 
+                        <ButtonGroup  className={classes.buttonGroup}> 
                                    
                             <Button
                                 onMouseDown={event => handleMapTaskList(event, openTaskList)}
@@ -270,12 +261,17 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         flexWrap: 'nowrap',
         alignItems: 'center',
-        padding: '.2% 2% .2% 2%',
+        padding: '.1% ',
         color: '#293a5a',
         background: 'linear-gradient( #dadada, #a2a2a2)',
-        fontSize: '30px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: '6px',
+        fontSize: '20px',
+    },
+    tasklistHeadSpan:{
+        fontSize: '20px ',
         fontWeight: '400',
-        marginBottom: '6px'
     },
     icon:{
         margin: '1px 12px 1px 1px',

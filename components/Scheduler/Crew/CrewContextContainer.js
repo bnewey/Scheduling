@@ -7,7 +7,6 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../../js/Util';
 
-import CrewModal from './CrewModal/CrewModal';
 
 export const CrewContext = createContext(null);
 
@@ -16,6 +15,8 @@ export const CrewContext = createContext(null);
 const CrewContainer = function({children}) {
     const [crewMembers, setCrewMembers] = useState(null);
     const [allCrewJobs, setAllCrewJobs] = useState(null);
+    const [memberJobs, setMemberJobs] = useState(null);
+    const [shouldResetCrewState, setShouldResetCrewState] = useState(false);
     //Modal Props
     const [crewModalOpen, setCrewModalOpen] = React.useState(false);
 
@@ -25,7 +26,7 @@ const CrewContainer = function({children}) {
     //GetCrewMembers
     useEffect( () =>{ 
     //Gets data only on initial component mount
-    if(!crewMembers || crewMembers == []) {
+    if(!crewMembers || crewMembers == null) {
         Crew.getCrewMembers()
         .then( (data) => {
         setCrewMembers(data);
@@ -41,7 +42,7 @@ const CrewContainer = function({children}) {
     //GetAllCrewJobs
     useEffect( () =>{ 
         //Gets data only on initial component mount
-        if(!allCrewJobs || allCrewJobs == []) {
+        if(!allCrewJobs || allCrewJobs == null) {
             Crew.getAllCrewJobs()
             .then( (data) => {
             setAllCrewJobs(data);
@@ -54,15 +55,21 @@ const CrewContainer = function({children}) {
     }
     },[ allCrewJobs]);
 
+    //Reset state effect
+    useEffect(()=>{
+        if(shouldResetCrewState){
+            setAllCrewJobs(null);
+            setMemberJobs(null);
+            setCrewMembers(null);
+            setShouldResetCrewState(false);
+        }
+    },[shouldResetCrewState])
 
     return (
     <div className={classes.root}>
-        <CrewContext.Provider value={{crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, setAllCrewJobs} } >
+        <CrewContext.Provider value={{setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, setAllCrewJobs, memberJobs,setMemberJobs} } >
                     <> <>{children} </>
-                        <>
-                            <CrewModal crewMembers={crewMembers} setCrewMembers={setCrewMembers} crewModalOpen={crewModalOpen} 
-                                    setCrewModalOpen={setCrewModalOpen} allCrewJobs={allCrewJobs} setAllCrewJobs={setAllCrewJobs}/>
-                        </> 
+   
                     </>
         </CrewContext.Provider>
     </div>
@@ -73,6 +80,6 @@ export default CrewContainer
 
 const useStyles = makeStyles(theme => ({
   root:{
-    margin: '25px 0px 0px 0px',
+    margin: '0px 0px 0px 0px',
   },
 }));

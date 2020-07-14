@@ -1,7 +1,10 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText, FormControlLabel, Switch,Grid, List, FilledInput } from '@material-ui/core';
+import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,
+     Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControlLabel, Switch,Grid, List, FilledInput } from '@material-ui/core';
 
-
+     import FilterIcon from '@material-ui/icons/ShortText';
+     import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+     import Filter from '@material-ui/icons/Sort';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 
@@ -16,32 +19,30 @@ import {TaskContext} from '../TaskContainer';
 
 const TaskListFilter = (props) => {
    
-
-    
     //PROPS
-    const { taskListTasks, setTaskListTasks, filters, setFilters, openTaskList, table_info} = props;
+    const { taskListTasks, setTaskListTasks, filters, setFilters, filterInOrOut, setFilterInOrOut, openTaskList, table_info} = props;
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, setMapRows} = useContext(TaskContext);
+        modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds,
+         setMapRows, taskListTasksSaved, setTaskListTasksSaved} = useContext(TaskContext);
 
     //STATE
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedField, setSelectedField] = useState(null);
-    const [taskListTasksSaved, setTaskListTasksSaved] = useState(taskListTasks ? taskListTasks : []);
+    
 
     //CSS
-    const classes = useStyles();
+    const classes = useStyles({filters});
 
     //Filter
     useEffect(()=>{
         if (Array.isArray(filters) && filters.length) {
-            if (taskListTasks && taskListTasks.length) {
-                var tmpData = taskListTasks.filter(createFilter(...filters))
+            if (taskListTasksSaved && taskListTasksSaved.length) {
+                var tmpData = taskListTasksSaved.filter(createFilter([...filters], filterInOrOut))
                 console.log(tmpData);
                 var copyObject = [...tmpData];
                 setTaskListTasks(copyObject);
-                cogoToast.success(`Filtering by ${filters.map((v, i)=> v.property + ", ")}`);
             }
         }
         if(Array.isArray(filters) && !filters.length){
@@ -50,8 +51,11 @@ const TaskListFilter = (props) => {
     },[filters]);
 
     useEffect(()=>{
+        if(taskListTasks == null){
+            //setTaskListTasksSaved([]);
+        }
         if(taskListTasksSaved.length == 0 && taskListTasks){
-            setTaskListTasksSaved(taskListTasks);
+            //setTaskListTasksSaved(taskListTasks);
         }
     },[taskListTasks]);
     
@@ -64,47 +68,53 @@ const TaskListFilter = (props) => {
     };
 
     const handleListFilter = (event, field, fieldItem) =>{
-        if(!field || !fieldItem){
+        if(field == null || fieldItem == null){
             cogoToast.error("Bad field or item");
+            console.log("FIeldItem", fieldItem);
             return;
+            
         }
         if(!table_info){
             cogoToast.error("Bad field while trying to sort");
             return;
         }
-
-        //fix strings , parenthesis dont work for some reason
-        var fixedFieldItem = fieldItem.replace('(', '\\(').replace(')','\\)')
-
         //no filters yet
         if(!filters || filters.length <= 0){
             setFilters([{
                 property: field, 
-                value: fixedFieldItem
+                value: fieldItem.toString(),
             }]);
+            cogoToast.success(`Filtering by ${filters.map((v, i)=> v.property + ", ")}`);
         }
         //existing filters
         if(filters && filters.length > 0){
             //check for filter 
-            var tmpString = fixedFieldItem.toString();
+            var tmpString = fieldItem.toString();
             var tmpNewFilter = {
                 property: field, 
                 value: tmpString,
             };
-            console.log("String", tmpString);
-            console.log("Object", tmpNewFilter);
-            console.log("filters", filters);
-
-            //not in filters yet
-            var test = filters.filter((v , i)=> { console.log("v",v); return v.property == tmpNewFilter.property && v.value == tmpNewFilter.value});
-            console.log("TEST",test);
-            if(test && test.length == 0){
+           
+            var filtersMatching = filters.filter((v , i)=> ( v.property == tmpNewFilter.property && v.value === tmpNewFilter.value));
+             //not in filters yet
+            if(filtersMatching && filtersMatching.length == 0){
                 setFilters([...filters, tmpNewFilter]);
+                cogoToast.success(`Filtering by ${filters.map((v, i)=> v.property + ", ")}`);
             }else{
-                //skip
-                return;
+                //Remove from Filters
+                handleRemoveFromFilters(tmpNewFilter);
+                
             }
         }
+    }
+
+    const handleRemoveFromFilters = (filterToRemove) => {
+        if(!filterToRemove || !filterToRemove.property || !filterToRemove.value){
+            cogoToast.error("Bad filter");
+            return;
+        }
+        setFilters([...filters.filter((v , i)=> !( v.property == filterToRemove.property && v.value === filterToRemove.value))])
+        cogoToast.success(`Removed Filter by ${filterToRemove.value}`);
     }
 
     const handleClearFilters = (event)=>{
@@ -117,14 +127,59 @@ const TaskListFilter = (props) => {
         }
         setSelectedField(item);
     }
+
+    const handleChangeFilterType = (event) =>{
+        setTaskListTasks(null);
+        if(filterInOrOut == "out"){
+            setFilterInOrOut("in");
+        }
+        if(filterInOrOut == "in"){
+            setFilterInOrOut("out");
+        }
+    }
      
     return(
         <>
         {openTaskList ? 
         <>
-            <div>
-                <span onClick={event=> handleModalOpen()}>FILTER</span>
-                <span onClick={event=> handleClearFilters(event)}>Clear Filters</span>
+            <div className={classes.filterDiv}>
+                <Button className={classes.filterButton}
+                    onClick={event=> handleModalOpen()}
+                    variant="text"
+                    color="secondary"
+                    size="medium"
+                >   <Filter/>
+                        &nbsp;FILTER
+                </Button>
+                {filters && filters.length > 0 ? <>
+                    <Button className={classes.clearFilterButton}
+                        onClick={event=> handleClearFilters(event)}
+                        variant="text"
+                        color="secondary"
+                        size="medium"
+                    >
+                        <DeleteForeverIcon/>
+                        &nbsp;Clear Filters
+                    </Button>
+                    <div className={classes.chipDiv}>
+                    {filters && filters.map((filter,i)=>{
+                        return(<>
+                                <Chip
+                                    icon={<FilterIcon/>}
+                                    size={'small'}
+                                    label={ filter && filter.value && filter.property ? filter.property + ' ' +filter.value : "UnidentifiedChip" + i}
+                                    onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
+                                    className={classes.chip}
+                                />
+                            </>);
+                    })}
+                    </div>
+                    
+                </>
+                :
+                <>
+                    
+                </>}
             </div> 
             <Modal aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"
@@ -144,8 +199,8 @@ const TaskListFilter = (props) => {
                                 Task Filters
                             </span>
                         </div>
-                        <Grid item xs={3} className={classes.paper}>
-                            <List>
+                        <Grid item xs={4} className={classes.paper}>
+                            <List className={classes.fieldList}>
                             {table_info ? 
                                 <>
                                     {table_info.map((item,i)=>{
@@ -165,23 +220,48 @@ const TaskListFilter = (props) => {
                             :<></> }
                             </List>
                         </Grid>
-                        <Grid item xs={9} className={classes.paper}>
-                        <List>
+                        <Grid item xs={8} className={classes.paper}>
+                        <List className={classes.filterList}>
+                            
                             {selectedField && taskListTasksSaved ? 
                                 <>
+                                    <FormControlLabel
+                                        control={
+                                        <Switch
+                                            checked={filterInOrOut == "in"}
+                                            onChange={(event)=> handleChangeFilterType(event)}
+                                            name="Filter In or Out"
+                                            color="primary"
+                                        />
+                                         }
+                                    label={filterInOrOut  == "in" ? "Filter TO Selected" : "Filter OUT Selected"}
+                                    />
                                     {taskListTasksSaved.map((task)=> task[selectedField.field]).filter((v, i, array)=> array.indexOf(v)===i ).map((item,i)=>{
-                                        return(
+                                        const isFiltered =  (filters.filter((filter, i)=> 
+                                        {
+                                            if(item != null){
+                                                return (filter.property == selectedField.field && item && filter.value == item.toString());
+                                            }else{
+                                                return (filter.property == selectedField.field && filter.value == "nonassignedValue");
+                                            }
+                                        }).length > 0);
+                                        
+                                        return( <div className={classes.listItemDiv}>
+                                            
                                             <ListItem key={selectedField.field + i} dense button
-                                               onClick={event=> handleListFilter(event, selectedField.field, item)}
+                                                className={!isFiltered ? classes.filterListItem : classes.filterListItemFiltered}
+                                               onClick={event=> handleListFilter(event, selectedField.field, item ? item : "nonassignedValue")}
+
                                             >
-                                                <ListItemText>
-                                                    {item}
+                                                <ListItemText className={classes.filterListItemText}>
+                                                    <Checkbox checked={isFiltered} className={classes.li_checkbox}/>
+                                                    {item != null ? item : '*N/A*'}
                                                 </ListItemText>
                                             </ListItem>
-                                            );
+                                            </div>);
                                     })}
                                 </>
-                            :<></> }
+                            :<>Select a field to the left to FILTER by.</> }
                             </List>
                         </Grid>
                     </Grid>
@@ -214,6 +294,53 @@ const TaskListFilter = (props) => {
 export default TaskListFilter;
 
 const useStyles = makeStyles(theme => ({
+    filterDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        padding: '5px',
+        backgroundColor: '#d0cde0',
+    },
+    filterButton:{
+        margin: '0px 10px',
+        backgroundColor: '#fdfdfd',
+        color: '#0067d2',
+        fontWeight: '500',
+        border: '1px solid #173b7e',
+        '&&:hover':{
+            backgroundColor: '#97bec9',
+            color: '#000',
+        }
+    },
+    clearFilterButton:{
+        margin: '0px 10px',
+        backgroundColor:  '#fef8cc' ,
+        color: '#613703',
+        fontWeight: '500',
+        border: '1px solid #a17000',
+        '&&:hover':{
+            backgroundColor: '#97bec9',
+            color: '#000',
+        }
+    },
+    chipDiv:{
+        backgroundColor: '#d3d2d6',
+        padding: '5px',
+        borderRadius: '3px',
+    },
+    chip:{
+        backgroundColor: '#fff',
+        '&:hover':{
+            backgroundColor: '#c5e2f3',
+        },
+        '& span':{
+            maxWidth: '111px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+        }
+    },
     root: {
         padding: '.62% .3% .3% .3%',
         margin: '0px 0px 5px 5px',
@@ -246,8 +373,8 @@ const useStyles = makeStyles(theme => ({
         },
     },
     container: {
-        width: '60%',
-        maxWidth: '70%',
+        width: '40%',
+        maxWidth: '50%',
         textAlign: 'center',
         minHeight: '600px'
     },
@@ -282,6 +409,11 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#414d5a',
         
     },
+    fieldList:{
+        backgroundColor: '#ececec',
+        padding: '2%',
+        boxShadow: '0px 2px 3px 0px #00000073',
+    },
     fieldListItem:{
         backgroundColor: "#c6ccd3",
         color: '#2d343b',
@@ -289,6 +421,7 @@ const useStyles = makeStyles(theme => ({
         
     },
     fieldListItemSelected:{
+        boxShadow: 'inset 0 0 5px 0px #44585896',
         backgroundColor: "#c8ffff",
         color: '#0f447a',
         border: '1px solid #c8ffff',
@@ -300,7 +433,51 @@ const useStyles = makeStyles(theme => ({
         '& span':{
             fontWeight: '600'
         }
-    }
+    },
+    filterList:{
+        backgroundColor: '#ececec',
+        padding: '2%',
+        boxShadow: '0px 2px 3px 0px #00000073',
+        width: 'fit-content',
+        minWidth: '50%',
+    },
+    listItemDiv:{
+        
+        marginBottom: '2px'
+    },
+    filterListItem:{
+        backgroundColor: "#bdbdbd",
+        color: '#2d343b',
+        border: '1px solid #ececec',
+        margin: '0px 0px 0px 0px',
+    },
+    filterListItemFiltered:{
+        boxShadow: '0 0 5px 0px #44585896',
+        backgroundColor: "#fff",
+        color: '#0f447a',
+        border: '1px solid #fff',
+        '&:hover':{
+            border: '1px solid #d88f08'
+        }
+    },
+    filterListItemText:{
+        display: 'flex',
+        flexDirection: 'row',
+        '& span':{
+            fontWeight: '600'
+        }
+    },
+    li_checkbox:{
+        
+        padding: '0px 15px 0px 0px',
+        left: '0px',
+        '& span':{
+          color: '#444',
+          '&:hover':{
+            color: '#000',
+          }
+        }
+      }
 
       
   }));

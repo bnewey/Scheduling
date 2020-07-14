@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react';
 
-import {makeStyles, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Checkbox, IconButton, CircularProgress} from '@material-ui/core';
+import {makeStyles, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Checkbox, IconButton, CircularProgress, Tooltip} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import { confirmAlert } from 'react-confirm-alert'; // Import
@@ -86,13 +86,30 @@ const TaskListTasks = (props) =>{
       return result;
     };
 
+    const reorderMultiple = (list, ids, endIndex) =>{
+      var result = Array.from(list);
+      const removedArray = [];
+      result = result.filter((task, i)=>{
+        //check if in our selectedids and remove if so
+        if(ids.filter((id, p)=> ( task.t_id == id) ).length){
+          removedArray.push(result[i]);
+          return false;
+        }
+        return true;
+      })
+      //Add tasks back in, in the appro spot
+      result.splice(endIndex, 0, ...removedArray);
+
+      return result;
+    }
+
     const grid = 8;
 
     const getItemStyle = (isDragging, draggableStyle) => {
       return({
       // some basic styles to make the items look a bit nicer
       userSelect: "none",
-      padding: '2px',
+      padding: '0px',
       margin: `0 0 1px 0`,
 
       // change background colour if dragging
@@ -114,15 +131,23 @@ const TaskListTasks = (props) =>{
       if (!result.destination) {
         return;
       }
-  
-      const items = reorder(
-        taskListTasks,
-        result.source.index,
-        result.destination.index
-      );
       
-      var temp = items.map((item, i)=> item.t_id);
-      TaskLists.reorderTaskList(temp,openTaskList.id)
+      var items;
+      if(selectedTasks && selectedTasks.length > 0){
+        items = reorderMultiple(taskListTasks, selectedTasks, result.destination.index);
+        console.log("MULTUPLE: ", items);
+      }else{
+        items = reorder(
+          taskListTasks,
+          result.source.index,
+          result.destination.index
+        );
+        console.log("SINGLE: ", items);
+      }
+      
+      var newTaskIds = items.map((item, i)=> item.t_id);
+      console.log("TMP", newTaskIds);
+      TaskLists.reorderTaskList(newTaskIds,openTaskList.id)
         .then( (ok) => {
                 if(!ok){
                   throw new Error("Could not reorder tasklist" + openTaskList.id);
@@ -168,6 +193,7 @@ const TaskListTasks = (props) =>{
 
     };
 
+
     const isSelected = record_id => selectedTasks.indexOf(record_id) !== -1;
 
     return(
@@ -210,7 +236,7 @@ const TaskListTasks = (props) =>{
                     <Draggable key={row.t_id + 321321} 
                                 draggableId={row.t_id.toString()} 
                                 index={index} 
-                                isDragDisabled={ false}
+                                isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }
                     >
                     {(provided, snapshot) => (
                       <ListItem key={taskListTasks[index].t_id + 321321} 
@@ -240,13 +266,15 @@ const TaskListTasks = (props) =>{
                           }else{
                             value = row[item.field];
                           }
-                          return(
-                          <ListItemText id={labelId} 
+                          return( <Tooltip title={value} enterDelay={800}>
+                          <ListItemText id={labelId}
+                                        key={item.field + i}
                                         className={classes.listItemTextStyle} 
                                         style={{flex: `0 0 ${item.width}`}}
                                         classes={item.style ?  {primary: classes[item.style]} : {}}>
                                    { value} 
                           </ListItemText>
+                          </Tooltip>
                         )})}
                         { openTaskList 
                         ? 
@@ -389,10 +417,18 @@ const useStyles = makeStyles(theme => ({
   listItemTextStyle:{
     flex: '0 0 11%',
     textAlign: 'center',
+
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   draggingListItemTextStyle:{
     flex: '0 0 51%',
     textAlign: 'center',
+
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   boldListItemText:{
     fontWeight: 600,

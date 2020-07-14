@@ -7,15 +7,16 @@ import AddIcon from '@material-ui/icons/Add';
 import XIcon from '@material-ui/icons/Remove';
 import cogoToast from 'cogo-toast';
 import { Scrollbars} from 'react-custom-scrollbars';
-import {CrewContext} from '../../Crew/CrewContainer';
+import {CrewContext} from '../../Crew/CrewContextContainer';
 
 import Crew from '../../../../js/Crew';
 
-export default function TaskModalTaskList(props){
+export default function TaskModalCrew(props){
     const classes = useStyles();
 
-    const {taskLists, setTaskLists, modalTask, setShouldReFetch, modalOpen, setModalOpen, setModalTaskId} = props;
-    const {crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, setAllCrewJobs} = useContext(CrewContext);
+    const { modalTask,  modalOpen, setModalOpen} = props;
+    const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs, 
+        setShouldResetCrewState, setMemberJobs} = useContext(CrewContext);
 
     const [modalCrewJobs, setModalCrewJobs] = useState(null);
 
@@ -35,7 +36,7 @@ export default function TaskModalTaskList(props){
                 }
             })
         }
-    },[modalOpen]);
+    },[modalOpen, modalCrewJobs]);
     
     const handleTaskListInputChange = event => {
         if(event.target.value === ''){
@@ -53,83 +54,25 @@ export default function TaskModalTaskList(props){
         setOpen(false);
     };
 
-
-   const handleAddToTaskList = (event, id, tl_id) => {
-       if(tl_id == undefined){
-           return;
-       }
-        
-         // set to null on purpose
-        TaskLists.getTaskList(tl_id)
-        .then( (data)=>{
-            if(!data){
-                throw new Error("Bad data from getTaskList before Reorder");
-            }
-            var task_ids = data.map((item, i)=> item.t_id);
-            TaskLists.reorderTaskList(task_ids, tl_id)
-            .then( (ok) => {      
-                if(!ok)
-                    console.warn("Failed to Reorder before Adding to TaskList");
-                    
-                TaskLists.addTaskToList(id, tl_id)
-                    .then( (ok) => {
-                        //we need to refetch modalTask
-                        if(!ok)
-                            throw new Error("Failed to add Task to TaskList");
-                        cogoToast.success(`Task ${id} added to Task List ${tl_id} `, {hideAfter: 4});
-                        handleCloseAddToTaskListDialog();
-                        setShouldReFetch(true);
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        cogoToast.error(`Error adding to task list.`, {hideAfter: 4});
-                    }) 
-            })
-            .catch(error => {
-                console.error(error);
-            })   
+    const handleRemoveCrewMemberFromTask = (event, task_id, j_id) =>{
+        if(task_id == null || j_id == null){
+            cogoToast.error("Couldn't remove");
+            console.error("Taskid or j_id is null in remove crew member")
+        }
+        Crew.deleteCrewJob(j_id)
+        .then((response)=>{
+            setShouldResetCrewState(true);
+            setModalCrewJobs(null);
+            cogoToast.success("Removed member with id", j_id);
         })
         .catch((error)=>{
-            console.error(error);
-            cogoToast.error("Failed to fetch taskList before Reordering", {hideAfter: 4})
+            console.error("Failed to remove member", error);
+            cogoToast.error("failed to remove member");
         })
 
-        
     }
 
-    const handleRemoveTaskFromList = (event, id, tl_id) => {
-        TaskLists.removeTaskFromList(id, tl_id)
-        .then( (ok)=> {
-            if(!ok){
-                throw new Error("Failed to remove Task: " + id + " from Task List :" + tl_id);
-            }
-            cogoToast.success(`Removed task ${id} from task list ${tl_id}`, {hideAfter: 4});
 
-            TaskLists.getTaskList(tl_id)
-            .then( (data)=>{
-                if(!data){
-                    setTaskLists(null);
-                    setShouldReFetch(true);
-                    throw new Error("Bad data from getTaskList before Reorder");
-                }
-                var task_ids = data.map((item, i)=> item.t_id);
-                TaskLists.reorderTaskList(task_ids, tl_id)
-                .then( (ok) => {      
-                    if(!ok)
-                        console.warn("Failed to Reorder before Adding to TaskList");
-                    setTaskLists(null);
-                    setShouldReFetch(true);
-                })
-                .catch((error)=>{
-                    console.error(error);
-                })
-            })
-        })
-        .catch(error =>{
-            console.error(error);
-            cogoToast.error("Error removing task from task list", {hideAfter: 4});
-        })
-    }
 
     return(
         
@@ -140,20 +83,19 @@ export default function TaskModalTaskList(props){
                 <>
                  <Scrollbars universal autoHeight autoHeightMax={100}>
                 {modalCrewJobs.map((job) => ( 
-                    <div className={classes.task_list_div}>{console.log(job)}
-                        <span className={classes.p_task_name}>{job.member_name}</span>
+                    <div className={classes.task_list_div}>
+                        <span className={classes.p_task_name}>{job.member_name} - ({job.job_type})</span>
                         <a  className={classes.remove_link}
-                            // onClick={event => handleRemoveTaskFromList(event, modalTask.t_id, job.m_id)}>
-                            >Remove
-                        </a>    
+                            onClick={event => handleRemoveCrewMemberFromTask(event, modalTask.t_id, job.id)}>
+                            Remove
+                        </a> 
                     </div>
+
                 ))}
                 </Scrollbars>
-                
                 </>
             : <></>
             } 
-               
         </Paper>
 
     );

@@ -23,8 +23,8 @@ const TaskListMain = (props) => {
     //STATE
     const [taskListTasks, setTaskListTasks] = React.useState(null);
     const [selectedTasks, setSelectedTasks] = useState([]);
-    const [filters, setFilters] = useState([]);
-    const [sorters, setSorters] = useState([]);
+    const [table_info ,setTableInfo] = useState(null);
+    
     const [sorterState, setSorterState] = useState(0);
 
     
@@ -33,7 +33,9 @@ const TaskListMain = (props) => {
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, setMapRows} = useContext(TaskContext);
+        modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
+        setMapRows,filters, setFilters,filterInOrOut, setFilterInOrOut,
+         sorters, setSorters, setTaskListTasksSaved} = useContext(TaskContext);
 
 
     //CSS
@@ -47,7 +49,35 @@ const TaskListMain = (props) => {
         if(taskLists && openTaskList && openTaskList.id && taskListTasks == null ) { 
             TaskLists.getTaskList(openTaskList.id)
             .then( (data) => {
-                setTaskListTasks(data)
+                if(!Array.isArray(data)){
+                    console.error("Bad tasklist data",data);
+                    return;
+                }
+                var tmpData = [...data];
+                
+                //filter on data
+                if(filters && filters.length > 0){
+                    tmpData = tmpData.filter(createFilter([...filters], filterInOrOut))
+                    //Set saved for filter list 
+                    setTaskListTasksSaved(data);
+                }
+                //sort
+                if(sorters && sorters.length > 0){
+                    tmpData = tmpData.sort(createSorter(...sorters))
+                    //Set saved for filter list 
+                    setTaskListTasksSaved(data);
+                }
+                //No filters or sorters
+                if(filters && !filters.length && sorters && !sorters.length){
+                    //no change to tmpData
+                    setTaskListTasksSaved(data);
+                }
+
+                //Set TaskListTasks
+                if(Array.isArray(tmpData)){
+                    setTaskListTasks(tmpData);
+                }
+                
             })
             .catch( error => {
                 cogoToast.error(`Error getting Task List`, {hideAfter: 4});
@@ -59,6 +89,7 @@ const TaskListMain = (props) => {
         }
     }
     },[openTaskList,taskListTasks, taskLists]);
+
 
     //Sort
     useEffect(()=>{
@@ -73,19 +104,81 @@ const TaskListMain = (props) => {
         }
     },[sorters])
     
+    //table_info ie head items
+    useEffect(()=>{
+        if(table_info == null){
+            setTableInfo([
+                {text: "WO #", field: "table_id", width: '7%', type: 'number'},
+                {text: "Desired Date", field: "date_desired", width: '10%', style: 'boldListItemText', type: 'date'},
+                {text: "1st Game", field: "first_game", width: '10%', type: 'date'},
+                {text: "install_date", field: "install_date", width: '10%', type: 'date'},
+                {text: "Name", field: "t_name", width: '20%', style: 'boldListItemText', type: 'text'},
+                {text: "Type", field: "type", width: '8%', type: 'text'},
+                {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
+                {text: "Drill Status", field: "drilling", width: '8%', type: 'text'},
+                {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
+            ])
+        }
+    },[table_info])
+
+    const handleChangeTaskView = (view)=>{
+        if(!view){
+            setTableInfo(null);
+        }
+        var viewArray =[];
+        switch(view){
+            case "date":
+                viewArray = [
+                    {text: "Desired Date", field: "date_desired", width: '9%', style: 'boldListItemText', type: 'date'},
+                    {text: "1st Game", field: "first_game", width: '9%', type: 'date'},
+                    {text: "install_date", field: "install_date", width: '9%', type: 'date'},
+                    {text: "drill_date", field: "drill_date", width: '9%', type: 'date'},
+                    {text: "Name", field: "t_name", width: '48%', style: 'boldListItemText', type: 'text'},
+                    {text: "Type", field: "type", width: '8%', type: 'text'},
+                    {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
+                ];
+                break;
+            case "compact":
+                viewArray = [
+                    {text: "Order", field: "priority_order", width: '4%',style: 'smallListItemText', type: 'number'},
+                    {text: "WO #", field: "table_id", width: '4%',style: 'smallListItemText', type: 'number'},
+                    {text: "Desired Date", field: "date_desired", width: '7%', style: 'smallListItemText', type: 'date'},
+                    {text: "Date Entered", field: "tl_date_entered", width: '6%', style: 'smallListItemText', type: 'date'},
+                    {text: "1st Game", field: "first_game", width: '6%', type: 'date'},
+                    {text: "Name", field: "t_name", width: '12%', style: 'boldListItemText', type: 'text'},
+                    {text: "State", field: "state", width: '4%', style: 'smallListItemText', type: 'text'},
+                    {text: "Type", field: "type", width: '5%',style: 'smallListItemText', type: 'text'},
+                    {text: "Description", field: "description", width: '10%', style: 'smallListItemText', type: 'text'},
+                    {text: "d_date", field: "drill_date", width: '6%',  type: 'date'},
+                    {text: "d_crew", field: "drill_crew", width: '6%',  type: 'text'}, 
+                    {text: "Art", field: "artwork", width: '6%', style: 'smallListItemText', type: 'text'},
+                    {text: "Signs", field: "sign", width: '6%', style: 'smallListItemText', type: 'text'},
+                    {text: "i_date", field: "install_date", width: '6%', type: 'date'},
+                    {text: "i_crew", field: "install_crew", width: '6%',  type: 'text'}, 
+                    {text: "Task Status", field: "task_status", width: '6%', type: 'text'}
+                ];
+                break;
+            case 'default':
+            default:
+                viewArray =[
+                    {text: "WO #", field: "table_id", width: '7%', type: 'number'},
+                    {text: "Desired Date", field: "date_desired", width: '10%', style: 'boldListItemText', type: 'date'},
+                    {text: "1st Game", field: "first_game", width: '10%', type: 'date'},
+                    {text: "install_date", field: "install_date", width: '10%', type: 'date'},
+                    {text: "Name", field: "t_name", width: '20%', style: 'boldListItemText', type: 'text'},
+                    {text: "Type", field: "type", width: '8%', type: 'text'},
+                    {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
+                    {text: "Drill Status", field: "drilling", width: '8%', type: 'text'},
+                    {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
+                ]
+                break;
+        }
 
 
-    const table_info = [
-        {text: "WO #", field: "table_id", width: '7%', type: 'number'},
-        {text: "Desired Date", field: "date_desired", width: '10%', style: 'boldListItemText', type: 'date'},
-        {text: "1st Game", field: "first_game", width: '10%', type: 'date'},
-        {text: "install_date", field: "install_date", width: '10%', type: 'date'},
-        {text: "Name", field: "t_name", width: '20%', style: 'boldListItemText', type: 'text'},
-        {text: "Type", field: "type", width: '8%', type: 'text'},
-        {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
-        {text: "Drill Status", field: "drilling", width: '8%', type: 'text'},
-        {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
-    ];
+        setTableInfo(viewArray)
+    }
+
+    
 
     const handleListSort = (event, item) =>{
         if(!item){
@@ -136,13 +229,15 @@ const TaskListMain = (props) => {
                                  openTaskList={openTaskList} setOpenTaskList={setOpenTaskList} 
                                  isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
                                   priorityList={priorityList} setPriorityList={setPriorityList}
-                                  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setSelectedIds={setSelectedIds} />
+                                  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setSelectedIds={setSelectedIds}
+                                  handleChangeTaskView={handleChangeTaskView}  setTableInfo={setTableInfo}/>
                 </Grid>
                 <Grid item xs={10} >
                    
                     <Paper className={classes.root}>
-                        <TaskListFilter taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} filters={filters} setFilters={setFilters} openTaskList={openTaskList} table_info={table_info}/>
-                        {taskListTasks ? 
+                        <TaskListFilter taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} filters={filters} setFilters={setFilters} filterInOrOut={filterInOrOut}
+                                             setFilterInOrOut={setFilterInOrOut} openTaskList={openTaskList} table_info={table_info}/>
+                        {taskListTasks && table_info ? 
                         <>
                             <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
                                 {table_info.map((item, i)=>{
@@ -150,6 +245,7 @@ const TaskListMain = (props) => {
                                     const isASC = sorterState === 1;
                                     return(
                                     <ListItemText id={"Head-ListItem"+i} 
+                                                    key={item.field + i +'_head'}
                                                     className={classes.listItemText} 
                                                     style={{flex: `0 0 ${item.width}`}} 
                                                     classes={{primary: classes.listItemTextPrimary}}
@@ -230,7 +326,7 @@ const useStyles = makeStyles(theme => ({
     },
     liContainer: {
         listStyle: 'none',
-        margin: '23px 8px 0px 8px',
+        margin: '5px 8px 0px 8px',
      },
     listItemTextPrimary:{
         '& span':{

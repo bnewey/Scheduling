@@ -87,10 +87,36 @@ async function getWeather(lat, lng){
 
 }
 
+function numberToColorHsl(i, min, max) {
+    var ratio = i;
+    if (min> 0 || max < 1) {
+        if (i < min) {
+            ratio = 0;
+        } else if (i > max) {
+            ratio = 1;
+        } else {
+            var range = max - min;
+            ratio = (i-min) / range;
+        }
+    }
+
+    // as the function expects a value between 0 and 1, and red = 0° and green = 120°
+    // we convert the input to the appropriate hue value
+    var hue = ratio * 1.2 / 3.60;
+    //if (minMaxFactor!=1) hue /= minMaxFactor;
+    //console.log(hue);
+
+    // we convert hsl to rgb (saturation 100%, lightness 50%)
+    var rgb = hslToRgb(hue, 1, .5);
+    // we format to css value and return
+    return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'; 
+}
+
 
 
 module.exports = { 
     convertISODateTimeToMySqlDateTime: convertISODateTimeToMySqlDateTime,
     convertISODateToMySqlDate: convertISODateToMySqlDate,
     getWeather: getWeather,
+    numberToColorHsl,
 }

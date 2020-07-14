@@ -137,6 +137,27 @@ async function getCrewJobsByTask(id){
     }
 }
 
+async function getCrewJobsByTaskIds(ids){
+    const route = '/scheduling/crew/getCrewJobsByTaskIds';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ids})
+            });
+        if(!data.ok){
+            throw new Error("getCrewJobsByTaskIds returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function getAllCrewJobs(){
     const route = '/scheduling/crew/getAllCrewJobs';
     try{
@@ -200,6 +221,7 @@ module.exports = {
     getCrewMembers,
     getCrewJobsByMember,
     getCrewJobsByTask,
+    getCrewJobsByTaskIds,
     getCrewMembersByTask,
     getAllCrewJobs,
     deleteCrewJob,

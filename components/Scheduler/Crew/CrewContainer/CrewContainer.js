@@ -8,12 +8,13 @@ import CrewMembers from './CrewMembers';
 import CrewCrews from './CrewCrews';
 
 import { TaskContext } from '../../TaskContainer';
+import { CrewContext } from '../CrewContextContainer';
 
 
-const CrewModal = (props) => {
+const CrewContainer = (props) => {
 
-    const {crewMembers, setCrewMembers, crewModalOpen ,setCrewModalOpen, allCrewJobs, setAllCrewJobs} = props;
-    //const {} = useContext(TaskContext);
+    //const {} = props;
+    const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs, memberJobs,setMemberJobs, setShouldResetCrewState} = useContext(CrewContext);
     const classes = useStyles();
 
     const [crewMemberOpen, setcrewMemberOpen] = useState(true);
@@ -25,13 +26,6 @@ const CrewModal = (props) => {
 
 
 
-    const handleHelpModalOpen = (event) => {
-        setCrewModalOpen(!crewModalOpen);
-    };
-
-    const handleHelpModalClose = () => {
-        setCrewModalOpen(false);
-    };
 
     const handleListClick = (event, page) => {
         switch(page){
@@ -54,25 +48,15 @@ const CrewModal = (props) => {
         setSelectedPage(page);
     }
 
+    const pageNames = ["Crew Members", "Crews"];
+
     return(
         <>
-
-        <Modal aria-labelledby="transition-modal-title"
-            aria-describedby="transition-modal-description"
-            className={classes.modal}
-            open={crewModalOpen}
-            onClose={handleHelpModalClose}
-            closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{
-                timeout: 500,
-             }}>
-            <Fade in={crewModalOpen}>
                 <div className={classes.container}>
                 <Grid container >  
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            Crew
+                            {selectedPage ? pageNames[selectedPage-1] : "Crew"}
                         </span>
                     </div>
                     <Grid item xs={3} classes={{root: classes.grid_x3}} className={classes.paperList}>
@@ -111,21 +95,16 @@ const CrewModal = (props) => {
                         </List>
                     </Grid>
                     <Grid item xs={9} classes={{root: classes.grid_x9}} className={classes.paper}>
-                         { selectedPage == 1 ? <CrewMembers crewMembers={crewMembers} setCrewMembers={setCrewMembers} allCrewJobs={allCrewJobs}
-                                    setAllCrewJobs={setAllCrewJobs}/>: <></>}
-                        { selectedPage == 2 ? <CrewCrews crewMembers={crewMembers} setCrewMembers={setCrewMembers} allCrewJobs={allCrewJobs}
-                        setAllCrewJobs={setAllCrewJobs}/>: <></>}
+                         { selectedPage == 1 ? <CrewMembers />: <></>}
+                        { selectedPage == 2 ? <CrewCrews />: <></>}
                     </Grid>
                 </Grid>
                 </div>
-            </Fade>
-        </Modal>
-
         </>
     );
 };
 
-export default CrewModal;
+export default CrewContainer;
 
 
 const useStyles = makeStyles(theme => ({
@@ -162,13 +141,13 @@ const useStyles = makeStyles(theme => ({
         width: '100%'
     },
     container: {
-        width: '70%',
-        maxWidth: '70%',
+        width: '100%',
+        maxWidth: '100%',
         textAlign: 'center',
         minHeight: '700px'
     },
     modalTitleDiv:{
-        backgroundColor: '#5b7087',
+        backgroundColor: '#293a5a',
         padding: '5px 0px 5px 0px',
         width: '100%',
     },

@@ -8,6 +8,7 @@ import {AppBar, Tabs, Tab, Typography, Box} from '@material-ui/core';
 import TaskIcon from '@material-ui/icons/Assignment';
 import MapIcon from '@material-ui/icons/Map';
 import ViewListIcon from '@material-ui/icons/ViewList';
+import CrewIcon from '@material-ui/icons/Group';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -63,7 +64,7 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
           textColor="primary"
           variant="fullWidth"
           aria-label="full width tabs example"
-          
+          className={classes.tabRoot}
         >
           <Tab className={value === 0 ? classes.selectedTab : classes.nonSelectedTab} 
               label={ 
@@ -71,28 +72,31 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
                   <span className={classes.tabSpan}>
                     <TaskIcon className={ classes.icon}/>&nbsp;Scheduler
                   </span>
-                  {activeTask ? 
+                  {/* {activeTask ? 
                     <p className={classes.p_selected}>
                         Active: {activeTask.list_name} {activeTask.is_priority ? "(PRIORITY)" : ""}
                     </p> : <></>
-                  }
+                  } */}
               </React.Fragment>} {...a11yProps(0)} />
-          <Tab className={value === 1 ? classes.selectedTab : classes.nonSelectedTab} 
+          <Tab className={value === 1 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(1)} />
+          <Tab className={value === 2 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><CrewIcon className={classes.icon}/>&nbsp;Crew</span>} {...a11yProps(2)} />
+          
+          <Tab className={value === 3 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
               label={ <React.Fragment>
                           <span className={classes.tabSpan}> 
                             <ViewListIcon className={classes.icon}/>&nbsp;All Tasks
                           </span>
-                          {numSelected ? <p className={classes.p_selected}>
+                          {/* {numSelected ? <p className={classes.p_selected}>
                             {numSelected} Selected {activeTask ? "" : "(UNSAVED)"}
-                          </p> : <></>}
-                          </React.Fragment>} {...a11yProps(1)} />
-          <Tab className={value === 2 ? classes.selectedTab : classes.nonSelectedTab} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(2)} />
+                          </p> : <></>} */}
+                          </React.Fragment>} {...a11yProps(3)} />
         </Tabs>
       </AppBar>
       <SwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
         index={value}
         onChangeIndex={handleChangeIndex}
+        className={classes.tabRoot}
       >
      
          {children.map((child, index) => (   <TabPanel className={classes.tab} key={index} value={value} index={index} dir={theme.direction}>
@@ -108,8 +112,10 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
 
 const useStyles = makeStyles(theme => ({
   root: {
-    backgroundColor: theme.palette.background.paper,
     width: '100%',
+    '& header':{
+      marginBottom: '20px',
+    },
   },
   icon:{
       margin: '2px 6px -3px 6px',
@@ -117,15 +123,36 @@ const useStyles = makeStyles(theme => ({
   },
   tabSpan: {
     fontSize: '19px',
-    fontWeight: '500'
+    fontWeight: '500',
   },
   selectedTab: {
-    boxShadow: 'inset 0 1px #414d5a',
+    flexGrow : '2',
+    boxShadow: 'inset 1px 2px 6px 0px #414d5a',
     color: '#d87904 !important',
     backgroundColor: '#ffedc4',
-    padding: '25px'
+    padding: '10px'
   },
   nonSelectedTab: {
+    flexGrow : '2',
+    boxShadow:' -1px 1px 2px 0px #414d5a',
+    
+    '&:hover':{
+      backgroundColor: '#fff',
+      borderTop: '2px solid #a2ceff',
+      borderBottom: '2px solid #a2ceff',
+      color: '#d87904',
+    },
+  },
+  selectedTabSmall: {
+    flexGrow : '1',
+    boxShadow: 'inset 1px 2px 6px 0px #414d5a',
+    color: '#d87904 !important',
+    backgroundColor: '#ffedc4',
+    padding: '10px'
+  },
+  nonSelectedTabSmall: {
+    boxShadow:' -1px 1px 2px 0px #414d5a',
+    flexGrow : '1',
     '&:hover':{
       backgroundColor: '#fff',
       borderTop: '2px solid #a2ceff',
@@ -135,8 +162,12 @@ const useStyles = makeStyles(theme => ({
   },
   tab:{
     backgroundColor: '#5b6164',
-    
+    boxShadow: 'inset 0 0 4px 4px #0000006b',
     border: '1px solid #7f7f7f',
+    
+  },
+  tabRoot:{
+
   },
   p_selected:{
     margin: '0px 0px',

@@ -4,7 +4,7 @@ import {makeStyles, FormControl, Button, Dialog, DialogActions, DialogContent, D
 import AddIcon from '@material-ui/icons/Add';
 
 import Crew from '../../../../js/Crew';
-import { CrewContext } from '../CrewContainer';
+import { CrewContext } from '../CrewContextContainer';
 import cogoToast from 'cogo-toast';
 
 

@@ -146,6 +146,46 @@ router.post('/getCrewJobsByTask', async (req,res) => {
     }
 });
 
+router.post('/getCrewJobsByTaskIds', async (req,res) => {
+    var ids;
+    if(req.body){
+        ids = req.body.ids;
+    }
+    if(!ids){
+        logger.error("Id is not valid in getCrewJobsByTaskIds");
+        res.sendStatus(400);
+    }
+
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
+            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
+            ' FROM crew_jobs j ' +
+            ' LEFT JOIN tasks t ON j.task_id = t.id' + 
+            ' LEFT JOIN crew_members m ON j.crew_members_id = m.id ' +
+            ' WHERE j.task_id = ? ' ;
+    
+    var all_results = [];
+
+    async.forEachOf(ids, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [id]);
+            all_results = [...all_results, ...results];
+            return;
+        }
+        catch(error){
+            throw error;  
+        }
+    }, err=> {
+        if(err){
+            logger.error("Crews (getCrewJobsByTaskIds): "+ ids+ "  , " + error);
+            res.sendStatus(400);
+        }else{
+            logger.info("Got crew jobs by task ids" + ids);
+            res.json(all_results);
+        }
+    })
+});
+
 router.post('/getCrewMembers', async (req,res) => {
     const sql = ' SELECT * FROM crew_members ' ;
     

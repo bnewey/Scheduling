@@ -128,7 +128,7 @@ function EnhancedTableHead(props) {
               </TableCell>
 
           </TableRow>
-          { tabValue == 1 ?
+          { tabValue == 3 ?
           <TableFilter
             rows={filteredRows}
             onFilterUpdate={filterUpdated}

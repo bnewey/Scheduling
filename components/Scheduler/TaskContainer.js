@@ -4,8 +4,8 @@ import {makeStyles, CircularProgress} from '@material-ui/core';
 import EnhancedTable from './Table/EnhancedTable';
 import TaskListContainer from './TaskList/TaskListContainer.js';
 import MapContainer from './Map/MapContainer';
-import CrewContainer from './Crew/CrewContainer';
-
+import CrewContextContainer from './Crew/CrewContextContainer';
+import CrewContainer from './Crew/CrewContainer/CrewContainer';
 import FullWidthTabs from './Tabs/FullWidthTabs';
 import Tasks from '../../js/Tasks';
 import TaskLists from '../../js/TaskLists';
@@ -28,15 +28,23 @@ const TaskContainer = function() {
           from: Util.convertISODateToMySqlDate(today),
           to: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()-90)))
         });
-  const [taskLists, setTaskLists] = useState();
-  const [priorityList, setPriorityList] = useState(null);
-  const [mapRows, setMapRows] = useState([]); //setMapRows gets called in children components
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [filterConfig, setFilterConfig] = useState();
   const [tabValue, setTabValue] = React.useState(0);
-  const [taskListToMap, setTaskListToMap] = useState(null);
-  const [filterSelectedOnly, setFilterSelectedOnly] = React.useState(false);
-  const [filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly] = React.useState(false);
+  //TaskList/Scheduler Props
+    const [taskListTasksSaved, setTaskListTasksSaved] = useState([]);
+    const [taskLists, setTaskLists] = useState();
+    const [priorityList, setPriorityList] = useState(null);
+    const [filters, setFilters] = useState([]);
+    const [filterInOrOut, setFilterInOrOut] = useState("out");
+    const [sorters, setSorters] = useState([]);
+
+  //Map Props
+    const [taskListToMap, setTaskListToMap] = useState(null);
+    const [mapRows, setMapRows] = useState([]); //setMapRows gets called in children components
+  //Table Props
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [filterConfig, setFilterConfig] = useState();
+    const [filterSelectedOnly, setFilterSelectedOnly] = React.useState(false);
+    const [filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly] = React.useState(false);
   //Modal Props
   const [modalOpen, setModalOpen] = React.useState(false);  
   const [modalTaskId, setModalTaskId] = React.useState();  
@@ -116,33 +124,39 @@ const TaskContainer = function() {
       <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, mapRows, setMapRows, selectedIds, setSelectedIds, 
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
-                            modalOpen, setModalOpen, modalTaskId, setModalTaskId} } >
-        <FullWidthTabs value={tabValue} setValue={setTabValue} 
-                      numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
-        
-          <div>
-            <CrewContainer>
-              <TaskListContainer />
-            </CrewContainer>
-          </div>
+                            modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut,
+                             sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved} } >
+      <CrewContextContainer /* includes crew context */>
+          <FullWidthTabs value={tabValue} setValue={setTabValue} 
+                        numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
           
-          <div>
-            <EnhancedTable rows={rows} setRows={setRows} filterConfig={filterConfig} setFilterConfig={setFilterConfig}/>
-          </div> 
-        
-          <div style={{minHeight: '600px'}}>
-            <MapContainer />
-          </div>
+            <div>
+              
+                <TaskListContainer />
+              
+            </div>
+            <div style={{minHeight: '600px'}}>
+              <MapContainer />
+            </div>
+            <div>
+              <CrewContainer />
+            </div>
+            <div>
+              <EnhancedTable rows={rows} setRows={setRows} filterConfig={filterConfig} setFilterConfig={setFilterConfig}/>
+            </div> 
+          
+          
 
-        </FullWidthTabs>
+          </FullWidthTabs>
         
-        <CrewContainer>
-              <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                        modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
-        </CrewContainer>
         
-        <HelpModal initialPage={"tasks"} initialTab={tabValue} />
+        <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
+                  modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
+      
+      
+        {/* HelpModal initialPage={"tasks"} initialTab={tabValue} />*/}
 
+        </CrewContextContainer>
       </TaskContext.Provider>
     </div>
   );

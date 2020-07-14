@@ -57,7 +57,7 @@ export default function TaskModal(props){
 
     const variables_to_update = {
         task_info: ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired", "date_completed"],
-        delivery_install: ["delivery_date", "delivery_crew", "delivery_order", "install_date", "install_order"],
+        delivery_install: ["delivery_date", "delivery_crew", "delivery_order", "install_date","drill_date", "install_order"],
         task:["task_status", "drilling", "artwork", "sign"]
     };
     
@@ -193,7 +193,8 @@ export default function TaskModal(props){
             }
             //Add Id to this new object
             updateModalTask["t_id"] = task.t_id;
- 
+            
+            console.log("UPDATE", updateModalTask);
             Tasks.updateTask(updateModalTask)
             .then( (data) => {
                 //Refetch our data on save
@@ -341,12 +342,16 @@ export default function TaskModal(props){
                     </div>
                 </div>
                 <br/>
-                <p className={classes.taskTitle}>Delivery/Install</p>
+                <p className={classes.taskTitle}>Drill Date</p>
                 <div>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Install Date" className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker className={classes.inputField} inputVariant="outlined"  value={modalTask.drill_date} onChange={value => handleInputOnChange(value, true, "datetime", "drill_date")} /></MuiPickersUtilsProvider>
+                </div>
+                <p className={classes.taskTitle}>Install Date</p>
+                <div>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider>
                 </div>
                 
-                <TaskModalCrew />
+                <TaskModalCrew modalTask={modalTask} modalOpen={modalOpen} setModalOpen={setModalOpen} />
 
                 
                 { taskLists ?

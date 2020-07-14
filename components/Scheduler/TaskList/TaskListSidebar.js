@@ -11,11 +11,13 @@ import AddIcon from '@material-ui/icons/Add';
 import TaskLists from '../../../js/TaskLists';
 import TaskListTasksEdit from './TaskListTasksEdit';
 import TaskListActionAdd from './TaskListActionAdd';
+import TaskListDateDialog from './TaskListDateDialog';
+import {createSorter} from '../../../js/Sort';
 import Util from '../../../js/Util';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
-import {CrewContext} from '../Crew/CrewContainer';
+import {CrewContext} from '../Crew/CrewContextContainer';
 
 const TaskListSidebar = (props) => {
 
@@ -25,13 +27,13 @@ const TaskListSidebar = (props) => {
 
     //PROPS
     const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
-        selectedTasks, setSelectedTasks, setSelectedIds} = props;
+        selectedTasks, setSelectedTasks, setSelectedIds, setTableInfo, handleChangeTaskView} = props;
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, setMapRows} = useContext(TaskContext);
 
-    const {setCrewModalOpen} = useContext(CrewContext);
+    const {} = useContext(CrewContext);
 
     //CSS
     const classes = useStyles();
@@ -75,13 +77,53 @@ const TaskListSidebar = (props) => {
         })
     }
 
-    const handleOpenCrewModal=()=>{
-        setCrewModalOpen(true);
+    const handlePrioritizeByInstallDate = (event, taskList) => {
+        if(taskListTasks == null || taskListTasks.length <= 0){
+            console.error("Bad tasklisttasks on reprioritize by install date");
+            return;
+        }
+        if(!taskList.id){
+            console.error("Bad taskListId in handlePrioritizeByInstallDate");
+            return;
+        }
+
+        var newTaskIds = taskListTasks.sort(createSorter({property: 'install_date', 
+            direction: "DESC"})).map((task,i)=> task.t_id);
+        
+        console.log(newTaskIds);
+
+        const reorder = () => {
+            TaskLists.reorderTaskList(newTaskIds,taskList.id)
+            .then( (ok) => {
+                    if(!ok){
+                    throw new Error("Could not reorder tasklist" + openTaskList.id);
+                    }
+                    cogoToast.success(`Reordered Task List by Install Date`, {hideAfter: 4});
+                    setTaskListTasks(null);
+                })
+            .catch( error => {
+            cogoToast.error(`Error reordering task list`, {hideAfter: 4});
+                console.error(error);
+            });
+        }
+        
+        confirmAlert({
+            customUI: ({onClose}) => {
+                return(
+                    <ConfirmYesNo onYes={reorder} onClose={onClose} customMessage={"Reprioritize by Install Date? This cannot be undone."}/>
+                );
+            }
+        })
     }
+
+
 
     return(
         <Paper className={classes.root}>
             <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>
+            <div className={classes.sidebarHead}>
+                <span>SIDEBAR</span>
+            </div>
             <div className={classes.priority_info_div}>   
                 <div className={classes.priority_info_heading}>
                     <span>List Info</span>
@@ -94,7 +136,15 @@ const TaskListSidebar = (props) => {
                 </div>
                 {openTaskList ? 
                 <>
-                    { selectedTasks && selectedTasks.length > 0 ?
+                    <TaskListDateDialog  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
+                    <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
+                                onClick={event => handlePrioritizeByInstallDate(event, openTaskList)}>
+                                RePrioritize by Install Date
+                            </span>
+                    </div>
+                    { selectedTasks && selectedTasks.length > 0 ? <>
                          <div className={classes.singleLineDiv}>
                             <span
                                 className={classes.text_button} 
@@ -102,26 +152,54 @@ const TaskListSidebar = (props) => {
                                 Remove Multiple From TaskList
                             </span>
                          </div>
+                         <div className={classes.singleLineDiv}>
+                         <span
+                             className={classes.text_button} 
+                             onClick={event => setSelectedTasks([])}>
+                             Clear Selected
+                         </span>
+                      </div></>
                          :<></>}
-                    <div className={classes.singleLineDiv}>
+
+                    {/* <div className={classes.singleLineDiv}>
                     <span
                         className={classes.text_button} 
                         onClick={event => handleEditClickOpen(event, openTaskList)}>
                         Rename
                     </span>
-                    </div>
+                    </div> */}
                 </>
                 :   <></> 
                 }
                 <div className={classes.priority_info_heading}>
+                    <span>TaskViews</span>
+                </div>
+                    <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
+                                onClick={event => setTableInfo(null)}>
+                                Default
+                            </span>
+                    </div>
+                    <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
+                                onClick={event =>  handleChangeTaskView("date")}>
+                                Dates
+                            </span>
+                    </div>
+                    <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
+                                onClick={event =>  handleChangeTaskView("compact")}>
+                                Compact
+                            </span>
+                    </div>
+                <div className={classes.priority_info_heading}>
                     <span>Crew</span>
                 </div>
                 <div className={classes.singleLineDiv}>
-                            <span
-                                className={classes.text_button} 
-                                onClick={event => handleOpenCrewModal(event)}>
-                                Open Crew Menu
-                            </span>
+
                 </div>
             </div>
         </Paper>
@@ -137,6 +215,20 @@ const useStyles = makeStyles(theme => ({
         margin: '0px 0px 5px 5px',
         background: 'linear-gradient( #dadada, #a2a2a2)',
         height: '100%',
+    },
+    sidebarHead:{
+        padding:'2px',
+        backgroundColor: '#5b7087',
+        margin: '1%',
+        borderRadius: '3px',
+        boxShadow: '1px 1px 1px 0px #2f2b2b',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems:'center',
+        '& span':{
+            color: '#fff',
+            fontWeight:'400',
+        }
     },
     singleLineDiv:{
         display: 'block',
@@ -215,11 +307,13 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'center',
         backgroundColor: '#ececec',
         padding: '7px 12px',
+        margin: '0px 5px',
         border: '2px solid #adb0b0',
         borderRadius: '3px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
+        boxShadow: 'inset 0px 0px 2px 1px #00000099',
     },
     priority_info_heading:{
         '& span':{

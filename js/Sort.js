@@ -6,13 +6,22 @@ const dirMap = {
 };
 
 const doSort = (A, B, property, direction = 'ASC') => {
-    const a = A[ property ];
-    const b = B[ property ];
+    var a = A[ property ];
+    var b = B[ property ];
 
-    if (a < b) {
+    //Fix for if value is null
+    if(a == null){
+        a = "";
+    }
+    if(b == null){
+        b = "";
+    }
+
+    //Compare a to b
+    if ( (isNaN(a) ? a.toLowerCase() : a ) <  (isNaN(b) ? b.toLowerCase() : b )) {
         return dirMap.lt[ direction.toLowerCase() ];
     }
-    if (a > b) {
+    if ( (isNaN(a) ? a.toLowerCase() : a ) >  (isNaN(b) ? b.toLowerCase() : b )) {
         return dirMap.gt[ direction.toLowerCase() ];
     }
     return 0;

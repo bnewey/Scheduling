@@ -53,7 +53,7 @@ import {TaskContext} from '../TaskContainer';
           
         )}
         <Button
-            onClick={event => handleTabChange(event, 2)}             
+            onClick={event => handleTabChange(event, 1)}             
             variant="text"
             color="secondary"
             size="medium"

@@ -76,6 +76,24 @@ async function updateTask(task){
 
 }
 
+async function updateMultipleTaskDates(ids, date, date_type){
+    const route = '/scheduling/tasks/updateMultipleTaskDates';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ids,date, date_type})
+            });
+            return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
+
 async function getCoordinates(address, city, state, zip){
     var s_address = `${ (address ? address : "" + "+") + (city ? city : "" + "+") + (state ? state : "" + "+") + (zip ? zip : "")}`.replace(" ", "+");
     var return_value;
@@ -132,6 +150,7 @@ module.exports = {
     getTask: getTask,
     removeTask: removeTask,
     updateTask: updateTask,
+    updateMultipleTaskDates: updateMultipleTaskDates,
     getCoordinates: getCoordinates,
     saveCoordinates: saveCoordinates,
 };

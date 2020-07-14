@@ -1,13 +1,13 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover } from '@material-ui/core';
+import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import SwapIcon from '@material-ui/icons/SwapHoriz';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
 
-import { TaskContext } from '../../TaskContainer';
+import { CrewContext } from '../../Crew/CrewContextContainer';
 import cogoToast from 'cogo-toast';
 
 import Crew from '../../../../js/Crew';
@@ -16,44 +16,132 @@ import CrewMemberActionEdit from './CrewMemberActionEdit';
 
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { check } from 'express-validator/check';
+
+function arraysEqual(_arr1, _arr2) {
+    if (!Array.isArray(_arr1) || ! Array.isArray(_arr2) || _arr1.length !== _arr2.length)
+      return false;
+
+    var arr1 = _arr1.concat().sort();
+    var arr2 = _arr2.concat().sort();
+
+    for (var i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i])
+            return false;
+    }
+    return true;
+}
 
 
-const CrewMembers = (props) => {
+const CrewCrews = (props) => {
 
-    const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs} = props;
-    const {setModalTaskId, setModalOpen} = useContext(TaskContext);
+    const {} = props;
+    const { crewMembers,setCrewMembers, allCrewJobs,
+    setAllCrewJobs,setModalTaskId, setModalOpen} = useContext(CrewContext);
     const classes = useStyles();
 
-    const [selectedMember, setSelectedMember] = useState(null);
-    const [memberJobs, setMemberJobs] = useState(null);
+    const [crews, setCrews] = useState(null);
+    const [selectedCrew, setSelectedCrew] = useState(null);
+    const [crewJobs, setCrewJobs] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
     //Popover
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [swapJobId, setSwapJobId] = useState(null); 
 
+    //Crews
     useEffect(()=>{
-        if(selectedMember && memberJobs == null ){
-            Crew.getCrewJobsByMember(selectedMember.id)
+        if(crews == null && allCrewJobs){
+            //First get crews by checking against task_id
+            var alreadyProcessedJobs = [];
+            var tmpCrews = allCrewJobs.map((job,i)=>{
+                //Check for already processed tasks with specific job type to be able to skip
+                var similarJobs = alreadyProcessedJobs.filter((item, i )=>(    _.isEqual(_.pick(job, ['task_id','job_type']), item)    ))
+                if(similarJobs && similarJobs.length > 0){
+                    return {ids: []};
+                }
+
+                var tmpObject = {names: [], job_count: 0, ids: [], task_id: null, job_type: null};
+                
+                allCrewJobs.forEach((checkJob, cI)=>{
+                    
+
+                    //Check for already processed tasks with specific job type
+                    var results = alreadyProcessedJobs.filter((item, i )=>{    var tmp = _.isEqual(_.pick(checkJob, ['task_id','job_type']), item);  return tmp;   })
+                    if(results && results.length > 0){
+                        return;
+                    }
+                    //Check Matching jobs for multiple names
+                    if(_.isEqual(_.pick(checkJob, ['task_id','job_type']), _.pick(job, ['task_id','job_type']))){
+                        tmpObject['names'].push( checkJob.member_name );
+                        tmpObject['ids'].push(checkJob.m_id);
+                    }else{
+                        return;
+                    }
+                })
+                alreadyProcessedJobs.push({task_id: job.task_id, job_type: job.job_type});
+                tmpObject['task_id'] = job.task_id;
+                tmpObject['job_type'] = job.job_type;
+                return tmpObject;
+            });
+            console.log("tmpCrews", tmpCrews);
+            //Filter out empty arrays
+            tmpCrews = tmpCrews.filter((crew)=>crew['ids'].length > 0);
+
+            //Filter out duplicates and add to their count
+            var alreadyCheckedDups = [];
+            var newTmpCrews = tmpCrews.filter((v,i)=>{
+                //check already checked dups
+                var alreadyChecked = alreadyCheckedDups.filter((item, i )=>(    _.isEqual(_.pick(v, ['ids','job_type']), item)    ))
+                if(alreadyChecked && alreadyChecked.length > 0){
+                    return false;
+                }
+                //Check dup
+                var anotherTmpVar = tmpCrews.filter((m, iM)=>{
+                    if(_.isEqual(_.pick(v, ['ids','job_type']), _.pick(m, ['ids','job_type']),)){
+                        v['task_extra_ids'] = v['task_extra_ids'] ? [...v['task_extra_ids'], m.task_id] : [m.task_id];
+                        return true;
+                    }
+                })
+                alreadyCheckedDups.push({ids: v.ids, job_type: v.job_type})
+
+                //Return with job count
+                if(anotherTmpVar && anotherTmpVar.length > 0){
+                    v.job_count = anotherTmpVar.length;
+                    return true;
+                }
+                
+            });
+
+            console.log("newtmpcrews",newTmpCrews);
+            setCrews(newTmpCrews);
+        }
+    },[crews])
+    
+    //Crew Jobs
+    // runs when a crew is selected to get its jobs
+    useEffect(()=>{
+        if(selectedCrew && selectedCrew.task_extra_ids && selectedCrew.task_extra_ids.length > 0 && crewJobs == null ){
+            Crew.getCrewJobsByTaskIds(selectedCrew.task_extra_ids)
             .then((data)=>{
                 if(data){
-                    setMemberJobs(data);
+                    setCrewJobs(data);
                     cogoToast.success("Got member jobs", {hideAfter:2});
                 }
             })
             .catch((error)=>{
-                console.error("Bad reponse from server on getCrewJobsByMember", error);
-                cogoToast.error("Bad reponse from server on getCrewJobsByMember", {hideAfter: 4})
+                console.error("Bad reponse from server on getCrewJobsByTaskIds", error);
+                cogoToast.error("Bad reponse from server on getCrewJobsByTaskIds", {hideAfter: 4})
             })
         }
-    },[selectedMember, memberJobs])
+    },[selectedCrew, crewJobs])
 
-    const handleSelectMember =(event,member)=>{
-        if(!member){
-            console.error("Couldn't Select member");
-            cogoToast.error("Error selecting member", {hideAfter: 4})
+    const handleSelectCrew =(event,crew)=>{
+        if(!crew){
+            console.error("Couldn't Select crew");
+            cogoToast.error("Error selecting crew", {hideAfter: 4})
         }
-        setMemberJobs(null);
-        setSelectedMember(member);
+        setCrewJobs(null);
+        setSelectedCrew(crew);
     }
 
     const handleSelectJob =(event,job)=>{
@@ -109,7 +197,7 @@ const CrewMembers = (props) => {
         const deleteMember = () => {
             Crew.deleteCrewJob(id)
                 .then( (data) => {
-                        setMemberJobs(null);
+                        setCrewJobs(null);
                         cogoToast.success(`Removed job ${id} from crew jobs`, {hideAfter: 4});
                     })
                 .catch( error => {
@@ -147,7 +235,7 @@ const CrewMembers = (props) => {
         }
         Crew.updateCrewJob(member.id, swapJobId)
         .then((data)=>{
-            setMemberJobs(null);
+            setCrewJobs(null);
             
         })
         .catch((error)=>{
@@ -165,7 +253,7 @@ const CrewMembers = (props) => {
 
             // a little function to help us with reordering the result
             const reorder = (list, startIndex, endIndex) => {
-                if(!selectedMember){
+                if(!selectedCrew){
                 cogoToast.info(`No member to reorder`, {hideAfter: 4});
                 return;
                 }
@@ -240,29 +328,29 @@ const CrewMembers = (props) => {
         <>
         <Grid container>
             <Grid item xs={3} >
-            <DragDropContext onDragEnd={onDragEnd}>
                 <List 
                     className={classes.memberList}
                     subheader={
                         <ListSubheader className={classes.list_head} component="div" id="nested-list-subheader">
-                            Members
+                            Crews
                         </ListSubheader>
                     }>
-                    {crewMembers && crewMembers.map((member, i)=>{
-                        const job_numbers = allCrewJobs ? (allCrewJobs.filter((item)=>(item.crew_members_id == member.id))).length : 0;
+                    {crews && crews.map((crew, i)=>{
                         return(
-                        <ListItem className={selectedMember == member ? classes.member_select_list_item : classes.member_list_item} 
-                                    key={`crew_members+${i}`} button
-                                    onMouseUp={(event)=>handleSelectMember(event, member)}>
+                        <ListItem className={selectedCrew == crew ? classes.member_select_list_item : classes.member_list_item} 
+                                    key={`crews+${i}`} button
+                                    onMouseUp={(event)=>handleSelectCrew(event, crew)}>
                             <ListItemText>
-                                {member.member_name} ({job_numbers})
+                            
+                        {crew.names.map((name,i)=> ( <span key={name + i}>{name}{ (crew.names.length != i+1) ? <>,&nbsp;</> : <></> }</span>))}
+                        <span>&nbsp;({crew.job_count})</span> <span className={classes.job_type_span}>{crew.job_type}</span>
                             </ListItemText>
                             <ListItemSecondaryAction>            
                               <React.Fragment>
-                                <CrewMemberActionEdit initialMember={member}/>
-                                <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleDeleteMember(event, member.id)}>
+                                {/* <CrewMemberActionEdit initialMember={crew}/> */}
+                                {/* <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleDeleteMember(event, member.id)}>
                                   <DeleteIcon />
-                                </IconButton> 
+                                </IconButton>  */}
                               </React.Fragment>
                                 &nbsp;&nbsp;&nbsp;
                             </ListItemSecondaryAction>
@@ -270,18 +358,18 @@ const CrewMembers = (props) => {
                     )})}
                     <ListItem className={classes.text_button_li}>
                         <div className={classes.singleLineDiv}>
-                            <CrewMemberActionAdd />
+                            {/* <CrewMemberActionAdd /> */}
                          </div>
                     </ListItem>
                 </List>
-                </DragDropContext>
+                
             </Grid>
 
             <Grid item xs={7} className={classes.job_root}>
                 <div className={classes.job_list_head}>
-                    <span>Job List - {selectedMember ? selectedMember.member_name : ""}</span>
+                    <span>Job List - </span>
                 </div>
-                {selectedMember ? <>
+                {selectedCrew ? <>
                 <List > 
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable"
@@ -291,12 +379,12 @@ const CrewMembers = (props) => {
                                 {...provided.dragHandleProps}
                                 ref={provided.innerRef}
                             >
-                                <ListItem key={memberJobs[rubric.source.index].id} 
+                                <ListItem key={crewJobs[rubric.source.index].id} 
                                                 role={undefined} dense button 
                                                 className={classes.nonSelectedRow}
                                                 >
                                     <ListItemText>
-                                            {memberJobs[rubric.source.index].id} | {memberJobs[rubric.source.index].t_name} 
+                                            {crewJobs[rubric.source.index].id} | {crewJobs[rubric.source.index].t_name} 
                                     </ListItemText>
                                     </ListItem>
                             </div>
@@ -307,7 +395,7 @@ const CrewMembers = (props) => {
                                 ref={provided.innerRef}
                                 style={getListStyle(snapshot.isDraggingOver)}
                             >                 
-                            {memberJobs && memberJobs.map((row, index) => {
+                            {crewJobs && crewJobs.map((row, index) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
                                 return (
                                 <Draggable key={row.id + index+ 'draggable'} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
@@ -321,7 +409,7 @@ const CrewMembers = (props) => {
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                style={selectedMember ? getItemStyle(
+                                                style={selectedCrew ? getItemStyle(
                                                 snapshot.isDragging,
                                                 provided.draggableProps.style
                                                 ) : {}}>
@@ -380,7 +468,7 @@ const CrewMembers = (props) => {
                 classes={{paper: classes.swapPopoverPaper}}
             >
                 <List >
-                    {selectedMember && crewMembers && crewMembers.filter((fil_mem, i)=>{return(fil_mem.id != selectedMember.id)}).map((member, i)=>(
+                    {selectedCrew && crewMembers && crewMembers.filter((fil_mem, i)=>{return(fil_mem.id != selectedCrew.id)}).map((member, i)=>(
                             <ListItem className={classes.member_list_item} 
                                         key={`crew_members+${i}`} button
                                         onMouseUp={(event)=>handleSwapJob(event, member)}>
@@ -391,13 +479,14 @@ const CrewMembers = (props) => {
             </Popover>
             </Grid>
 
+
         </Grid>
 
         </>
     );
 };
 
-export default CrewMembers;
+export default CrewCrews;
 
 
 const useStyles = makeStyles(theme => ({
@@ -510,6 +599,12 @@ const useStyles = makeStyles(theme => ({
         '& span':{
             fontWeight: '500',
         }
+    },
+    job_type_span:{
+        textTransform: 'uppercase',
+        fontSize: '.7em',
+        color: '#002362',
+        fontWeight: '600',
     }
     
   }));
