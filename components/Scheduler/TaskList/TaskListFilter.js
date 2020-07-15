@@ -20,7 +20,8 @@ import {TaskContext} from '../TaskContainer';
 const TaskListFilter = (props) => {
    
     //PROPS
-    const { taskListTasks, setTaskListTasks, filters, setFilters, filterInOrOut, setFilterInOrOut, openTaskList, table_info} = props;
+    const { taskListTasks, setTaskListTasks, filters, setFilters, filterInOrOut, setFilterInOrOut, openTaskList, table_info,
+        selectedTasks,setSelectedTasks} = props;
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
@@ -43,6 +44,7 @@ const TaskListFilter = (props) => {
                 console.log(tmpData);
                 var copyObject = [...tmpData];
                 setTaskListTasks(copyObject);
+                setSelectedTasks([]);
             }
         }
         if(Array.isArray(filters) && !filters.length){

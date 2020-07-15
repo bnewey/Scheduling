@@ -352,8 +352,6 @@ export default function TaskModal(props){
                 </div>
                 
                 <TaskModalCrew modalTask={modalTask} modalOpen={modalOpen} setModalOpen={setModalOpen} />
-
-                
                 { taskLists ?
                     <TaskModalTaskList taskLists={taskLists} setTaskLists={setTaskLists} 
                                         modalTask={modalTask}

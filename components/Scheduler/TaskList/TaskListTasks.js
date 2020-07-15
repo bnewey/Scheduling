@@ -21,7 +21,7 @@ const TaskListTasks = (props) =>{
     //STATE
     //PROPS
     const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList , setModalOpen, setModalTaskId, table_info,
-              priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, setMapRows} = props;
+              priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, setMapRows, taskListTasksSaved} = props;
     
     //CSS
     const classes = useStyles();
@@ -127,23 +127,27 @@ const TaskListTasks = (props) =>{
     });
 
     const onDragEnd = (result) => {
+      console.log(result);
       // dropped outside the list
       if (!result.destination) {
         return;
       }
       
       var items;
-      if(selectedTasks && selectedTasks.length > 0){
-        items = reorderMultiple(taskListTasks, selectedTasks, result.destination.index);
+      //if(selectedTasks && selectedTasks.length > 0){
+        items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [result.draggableId], result.destination.index);
         console.log("MULTUPLE: ", items);
-      }else{
-        items = reorder(
-          taskListTasks,
-          result.source.index,
-          result.destination.index
-        );
+      // }else{
+      //   items = reorder(
+      //     taskListTasksSaved,
+      //     result.source.index,
+      //     result.destination.index
+      //   );
         console.log("SINGLE: ", items);
-      }
+        
+      //}
+      console.log("source",result.source.index);
+      console.log("dest", result.destination.index)
       
       var newTaskIds = items.map((item, i)=> item.t_id);
       console.log("TMP", newTaskIds);
@@ -196,24 +200,31 @@ const TaskListTasks = (props) =>{
 
     const isSelected = record_id => selectedTasks.indexOf(record_id) !== -1;
 
+    const taskFromPriorityOrder = priority => {
+      var ind = taskListTasksSaved.map((task,i)=>task.priority_order).indexOf(priority);
+      //console.log("PRI"+ priority, ind);
+
+      return ind;
+    }
+
     return(
         <React.Fragment>
-        { taskListTasks ? 
+        { taskListTasks && taskListTasksSaved ? 
         <List className={classes.root}>  
             <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="droppable"
+            <Droppable droppableId="droppable" 
             renderClone={(provided, snapshot, rubric) => (
               <div
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 ref={provided.innerRef}
               >
-                <ListItem key={taskListTasks[rubric.source.index].t_id} 
+                <ListItem key={taskListTasksSaved[taskFromPriorityOrder(rubric.source.index+1)].t_id} 
                                 role={undefined} dense button 
                                 className={classes.nonSelectedRow}
                                 >
                       <ListItemText className={classes.draggingListItemTextStyle}>
-                            {taskListTasks[rubric.source.index].t_id} | {taskListTasks[rubric.source.index].t_name} 
+                            {taskListTasksSaved[taskFromPriorityOrder(rubric.source.index +1)].t_id} | {taskListTasksSaved[taskFromPriorityOrder(rubric.source.index +1)].t_name} 
                       </ListItemText>
                     </ListItem>
               </div>
@@ -231,11 +242,12 @@ const TaskListTasks = (props) =>{
                   }
                   const isItemSelected = isSelected(row.t_id);
                   const labelId = `checkbox-list-label-${row.t_id}`;
-                  
+                  //console.log("index",index);
+                  //console.log("row.pri",row.priority_order-1);
                   return (
                     <Draggable key={row.t_id + 321321} 
                                 draggableId={row.t_id.toString()} 
-                                index={index} 
+                                index={row.priority_order - 1} 
                                 isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }
                     >
                     {(provided, snapshot) => (

@@ -35,7 +35,8 @@ const TaskListMain = (props) => {
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         setMapRows,filters, setFilters,filterInOrOut, setFilterInOrOut,
-         sorters, setSorters, setTaskListTasksSaved} = useContext(TaskContext);
+         sorters, setSorters,
+         taskListTasksSaved, setTaskListTasksSaved} = useContext(TaskContext);
 
 
     //CSS
@@ -236,7 +237,7 @@ const TaskListMain = (props) => {
                    
                     <Paper className={classes.root}>
                         <TaskListFilter taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} filters={filters} setFilters={setFilters} filterInOrOut={filterInOrOut}
-                                             setFilterInOrOut={setFilterInOrOut} openTaskList={openTaskList} table_info={table_info}/>
+                                             setFilterInOrOut={setFilterInOrOut} openTaskList={openTaskList} table_info={table_info} selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
                         {taskListTasks && table_info ? 
                         <>
                             <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
@@ -281,7 +282,7 @@ const TaskListMain = (props) => {
                                 setModalTaskId={setModalTaskId}
                                 table_info={table_info}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
-                                setMapRows={setMapRows}/>
+                                setMapRows={setMapRows} taskListTasksSaved={taskListTasksSaved}/>
                         </>
                         : <>
                         <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
