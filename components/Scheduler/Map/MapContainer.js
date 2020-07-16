@@ -72,8 +72,8 @@ const MapContainer = (props) => {
         var tmpMapRows = [...mapRows];
         noMarkerRows.forEach((row, i)=> {
           if(i > 50){
-            cogoToast.warn('Too many markers selected to correct all addresses...', {hideAfter: 4});
-            return;
+            //cogoToast.warn('Too many markers selected to correct all addresses...', {hideAfter: 4});
+            //return;
           }
           if(!row.address){
             return;
@@ -124,11 +124,11 @@ const MapContainer = (props) => {
     },[mapRows]);
     
 
-    if(mapRows.length > 50){
-      setMapRows( mapRows.slice(0, 49));
+    // if(mapRows.length > 50){
+    //   setMapRows( mapRows.slice(0, 49));
 
-      cogoToast.warn('Too many tasks have been selected! Showing first 50 tasks...', {hideAfter: 4});
-    }
+    //   cogoToast.warn('Too many tasks have been selected! Showing first 50 tasks...', {hideAfter: 4});
+    // }
 
     //Get mapRows that do not have lat, lng
     const noMarkerRows = useMemo(() => mapRows.filter((row, index) => !row.geocoded) , [mapRows]);

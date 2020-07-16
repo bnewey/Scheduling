@@ -285,7 +285,7 @@ const CrewCrews = (props) => {
                 top: isDragging ? draggableStyle["top"] - (draggableStyle["top"] * .25) : '',
                 left: isDragging ? '1800px' : '',
             })};
-        
+                        
             const getListStyle = isDraggingOver => ({
                 background: isDraggingOver ? "lightblue" : "lightgrey",
                 padding: grid,

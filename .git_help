@@ -39,3 +39,6 @@ git mergetool
 /////////////////////
 // To reset if you mess up
 git reset <commit hash #>   //git log will give hash#'s
+
+// How to remove files from remote but keep locally
+ex: git rm --cached .env
