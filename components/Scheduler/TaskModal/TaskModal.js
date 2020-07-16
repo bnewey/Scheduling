@@ -368,7 +368,7 @@ export default function TaskModal(props){
 
             <Grid container >
                 <Grid item xs={12} className={classes.paper_footer}>
-                    <div className={classes.footerInputField}>
+                    {/* <div className={classes.footerInputField}>
                         <FormControl variant="outlined" className={classes.inputField}>
                             <InputLabel id="status-input-label">
                             Task Status
@@ -387,7 +387,7 @@ export default function TaskModal(props){
                             <MenuItem value={'Completed'}>Completed</MenuItem>  
                             </Select>
                         </FormControl>
-                    </div>
+                    </div> */}
                     <ButtonGroup className={classes.buttonGroup}>
                         {/* <Button
                             onClick={handleDelete(modalTask.t_id)}

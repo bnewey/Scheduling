@@ -137,7 +137,7 @@ async function getCrewJobsByTask(id){
     }
 }
 
-async function getCrewJobsByTaskIds(ids){
+async function getCrewJobsByTaskIds(ids, job_type){
     const route = '/scheduling/crew/getCrewJobsByTaskIds';
     try{
         var data = await fetch(route,
@@ -146,7 +146,7 @@ async function getCrewJobsByTaskIds(ids){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ ids})
+                body: JSON.stringify({ ids, job_type})
             });
         if(!data.ok){
             throw new Error("getCrewJobsByTaskIds returned empty list or bad query")

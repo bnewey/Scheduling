@@ -43,7 +43,9 @@ function convertISODateToMySqlDate(param) {
     month = '0' + month;
     }
 
-
+    if(isNaN(year) || isNaN(month) || isNaN(dt) ){
+        return null;
+    }
     return (year + '-' + month + '-' + dt);
 }
 

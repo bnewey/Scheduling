@@ -289,13 +289,13 @@ const TableFilter = dynamic(
                         <TableCell component="th" id={labelId} scope="row" padding="none">
                           {row.t_id /*if you change t_id, change it above */}
                         </TableCell>
-                        <TableCell align="right">{row.table_id}</TableCell>
-                        <TableCell align="right">{row.wo_date}</TableCell>
-                        <TableCell align="right">{row.t_name}</TableCell>
-                        <TableCell align="right">{row.description}</TableCell>
-                        <TableCell align="right">{row.type}</TableCell>
-                        <TableCell align="right">{row.date_desired}</TableCell>
-                        <TableCell align="right">{row.date_completed}</TableCell>
+                        <TableCell align="center">{row.table_id}</TableCell>
+                        <TableCell align="center">{row.wo_date}</TableCell>
+                        <TableCell align="left">{row.t_name}</TableCell>
+                        <TableCell align="left">{row.description}</TableCell>
+                        <TableCell align="center">{row.type}</TableCell>
+                        <TableCell align="center">{row.date_desired}</TableCell>
+                        <TableCell align="center">{row.completed_wo == 0 ? 'NC' : 'COMP'}</TableCell>
                       </TableRow>
                     );
                   })}

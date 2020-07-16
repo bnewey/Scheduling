@@ -147,11 +147,12 @@ router.post('/getCrewJobsByTask', async (req,res) => {
 });
 
 router.post('/getCrewJobsByTaskIds', async (req,res) => {
-    var ids;
+    var ids, job_type;
     if(req.body){
         ids = req.body.ids;
+        job_type = req.body.job_type;
     }
-    if(!ids){
+    if(!ids || !job_type){
         logger.error("Id is not valid in getCrewJobsByTaskIds");
         res.sendStatus(400);
     }
@@ -161,14 +162,14 @@ router.post('/getCrewJobsByTaskIds', async (req,res) => {
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id' + 
             ' LEFT JOIN crew_members m ON j.crew_members_id = m.id ' +
-            ' WHERE j.task_id = ? ' ;
+            ' WHERE j.task_id = ? AND j.job_type = ? ' ;
     
     var all_results = [];
 
     async.forEachOf(ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            const results = await database.query(sql, [id]);
+            const results = await database.query(sql, [id, job_type]);
             all_results = [...all_results, ...results];
             return;
         }
@@ -177,10 +178,10 @@ router.post('/getCrewJobsByTaskIds', async (req,res) => {
         }
     }, err=> {
         if(err){
-            logger.error("Crews (getCrewJobsByTaskIds): "+ ids+ "  , " + error);
+            logger.error("Crews (getCrewJobsByTaskIds): "+ ids+ " "+ job_type +"  , " + error);
             res.sendStatus(400);
         }else{
-            logger.info("Got crew jobs by task ids" + ids);
+            logger.info("Got crew jobs by task ids" + ids + job_type);
             res.json(all_results);
         }
     })

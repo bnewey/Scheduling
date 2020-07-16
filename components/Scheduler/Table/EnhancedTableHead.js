@@ -24,7 +24,7 @@ const headCells = [
     { id: 'description', numeric: false, disablePadding: false, label: 'Desc' },
     { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
     { id: 'date_desired', numeric: true, disablePadding: false, label: 'Desired' },
-    { id: 'date_completed', numeric: true, disablePadding: false, label: 'Completed' },
+    { id: 'completed_wo', numeric: false, disablePadding: false, label: 'Completed' },
   ];
 
 

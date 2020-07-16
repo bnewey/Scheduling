@@ -10,6 +10,8 @@ import TaskListToolbar from './TaskListToolbar';
 import TaskListSidebar from './TaskListSidebar';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
+import NoSsr from '../../UI/NoSsr';
+import dynamic from 'next/dynamic'
 
 import TaskLists from '../../../js/TaskLists';
 import {createSorter} from '../../../js/Sort';
@@ -18,6 +20,10 @@ import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
 import TaskListFilter from './TaskListFilter';
+
+const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
+    ssr: false
+  });
 
 const TaskListMain = (props) => {
     //STATE
@@ -117,7 +123,7 @@ const TaskListMain = (props) => {
                 {text: "Type", field: "type", width: '8%', type: 'text'},
                 {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
                 {text: "Drill Status", field: "drilling", width: '8%', type: 'text'},
-                {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
+                {text: "Task Status", field: "completed_wo", width: '8%', type: 'number'}
             ])
         }
     },[table_info])
@@ -136,7 +142,7 @@ const TaskListMain = (props) => {
                     {text: "drill_date", field: "drill_date", width: '9%', type: 'date'},
                     {text: "Name", field: "t_name", width: '48%', style: 'boldListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '8%', type: 'text'},
-                    {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
+                    {text: "Task Status", field: "completed_wo", width: '8%', type: 'number'}
                 ];
                 break;
             case "compact":
@@ -156,7 +162,7 @@ const TaskListMain = (props) => {
                     {text: "Signs", field: "sign", width: '6%', style: 'smallListItemText', type: 'text'},
                     {text: "i_date", field: "install_date", width: '6%', type: 'date'},
                     {text: "i_crew", field: "install_crew", width: '6%',  type: 'text'}, 
-                    {text: "Task Status", field: "task_status", width: '6%', type: 'text'}
+                    {text: "Task Status", field: "completed_wo", width: '6%', type: 'number'}
                 ];
                 break;
             case 'default':
@@ -170,7 +176,7 @@ const TaskListMain = (props) => {
                     {text: "Type", field: "type", width: '8%', type: 'text'},
                     {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
                     {text: "Drill Status", field: "drilling", width: '8%', type: 'text'},
-                    {text: "Task Status", field: "task_status", width: '8%', type: 'text'}
+                    {text: "Task Status", field: "completed_wo", width: '8%', type: 'number'}
                 ]
                 break;
         }
@@ -215,11 +221,20 @@ const TaskListMain = (props) => {
         }
     }
 
-
+    const handleClearSelectedTasksOnEsc = (keyCode) =>{
+        if(isNaN(keyCode)){
+            console.error("Bad keycode on handleClearSelectedTasksOnEsc");
+            return;
+        }
+        if(keyCode === 27){
+            setSelectedTasks([]);
+        }
+    }
 
      
     return(
         <>
+            <KeyBinding onKey={ (e) => handleClearSelectedTasksOnEsc(e.keyCode) } />
             <TaskListToolbar openTaskList={openTaskList} setOpenTaskList={setOpenTaskList} 
                             taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} 
                             isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}

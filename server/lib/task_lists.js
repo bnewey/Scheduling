@@ -36,6 +36,7 @@ router.post('/getTaskList', async (req,res) => {
         ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
         ' t.description, t.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
         ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, wo.type, t.install_location, ' +
+        ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
         ' t.drill_crew, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
         ' t.install_crew, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 

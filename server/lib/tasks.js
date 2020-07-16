@@ -12,6 +12,7 @@ router.get('/getAllTasks', async (req,res) => {
     ' date_format(date_completed, \'%Y-%m-%d\') as date_completed, t.description, t.priority_order, t.task_list_id, ' + 
     ' t.task_status, t.drilling, t.sign, t.artwork, t.table_id, date_format(t.order_date, \'%Y-%m-%d\') as order_date, ' + 
     ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, t.drill_crew, ' +
+    ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
     ' t.delivery_crew, t.delivery_order,t.install_order, ' + 
     ' t.sch_install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded '  +
     ' FROM tasks t ' +
@@ -40,6 +41,7 @@ router.post('/getTask', async (req,res) => {
     ' date_format(date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
     ' t.description, t.notes, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
     ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, ' +
+    ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
     ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
     ' t.drill_crew, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
     ' t.sch_install_crew as install_crew, date_format(sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 

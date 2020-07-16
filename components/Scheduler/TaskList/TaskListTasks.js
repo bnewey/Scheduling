@@ -11,6 +11,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import TaskLists from '../../../js/TaskLists';
 import cogoToast from 'cogo-toast';
 import Util from '../../../js/Util';
+import { select } from 'async';
 
 
 
@@ -99,7 +100,7 @@ const TaskListTasks = (props) =>{
       })
       //Add tasks back in, in the appro spot
       result.splice(endIndex, 0, ...removedArray);
-
+      
       return result;
     }
 
@@ -127,30 +128,14 @@ const TaskListTasks = (props) =>{
     });
 
     const onDragEnd = (result) => {
-      console.log(result);
+      //console.log(result);
       // dropped outside the list
       if (!result.destination) {
         return;
       }
       
-      var items;
-      //if(selectedTasks && selectedTasks.length > 0){
-        items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [result.draggableId], result.destination.index);
-        console.log("MULTUPLE: ", items);
-      // }else{
-      //   items = reorder(
-      //     taskListTasksSaved,
-      //     result.source.index,
-      //     result.destination.index
-      //   );
-        console.log("SINGLE: ", items);
-        
-      //}
-      console.log("source",result.source.index);
-      console.log("dest", result.destination.index)
-      
+      var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [result.draggableId], result.destination.index);     
       var newTaskIds = items.map((item, i)=> item.t_id);
-      console.log("TMP", newTaskIds);
       TaskLists.reorderTaskList(newTaskIds,openTaskList.id)
         .then( (ok) => {
                 if(!ok){
@@ -200,9 +185,8 @@ const TaskListTasks = (props) =>{
 
     const isSelected = record_id => selectedTasks.indexOf(record_id) !== -1;
 
-    const taskFromPriorityOrder = priority => {
+    const indexFromPriorityOrder = priority => {
       var ind = taskListTasksSaved.map((task,i)=>task.priority_order).indexOf(priority);
-      //console.log("PRI"+ priority, ind);
 
       return ind;
     }
@@ -219,12 +203,12 @@ const TaskListTasks = (props) =>{
                 {...provided.dragHandleProps}
                 ref={provided.innerRef}
               >
-                <ListItem key={taskListTasksSaved[taskFromPriorityOrder(rubric.source.index+1)].t_id} 
+                <ListItem key={taskListTasksSaved[indexFromPriorityOrder(rubric.source.index+1)].t_id} 
                                 role={undefined} dense button 
                                 className={classes.nonSelectedRow}
                                 >
                       <ListItemText className={classes.draggingListItemTextStyle}>
-                            {taskListTasksSaved[taskFromPriorityOrder(rubric.source.index +1)].t_id} | {taskListTasksSaved[taskFromPriorityOrder(rubric.source.index +1)].t_name} 
+                            {taskListTasksSaved[indexFromPriorityOrder(rubric.source.index +1)].t_id} | {taskListTasksSaved[indexFromPriorityOrder(rubric.source.index +1)].t_name} 
                       </ListItemText>
                     </ListItem>
               </div>
@@ -242,8 +226,7 @@ const TaskListTasks = (props) =>{
                   }
                   const isItemSelected = isSelected(row.t_id);
                   const labelId = `checkbox-list-label-${row.t_id}`;
-                  //console.log("index",index);
-                  //console.log("row.pri",row.priority_order-1);
+                  const isItemCompleted = row.completed_wo == 1;
                   return (
                     <Draggable key={row.t_id + 321321} 
                                 draggableId={row.t_id.toString()} 
@@ -256,9 +239,9 @@ const TaskListTasks = (props) =>{
                                   onContextMenu={event => handleRightClick(event, row.t_id)}
                                   onMouseUp={event => handleClick(event, row.t_id)}
                                   className={ index % 2 == 0 ? 
-                                            ( isItemSelected ? classes.selectedRow : classes.nonSelectedRow )
+                                            (isItemCompleted ? ( isItemSelected ? classes.selectedRowComp : classes.nonSelectedRowComp ):( isItemSelected ? classes.selectedRow : classes.nonSelectedRow ) )
                                             : 
-                                            ( isItemSelected ? classes.selectedRowOffset : classes.nonSelectedRowOffset)}
+                                            (isItemCompleted ? ( isItemSelected ? classes.selectedRowOffsetComp : classes.nonSelectedRowOffsetComp) : ( isItemSelected ? classes.selectedRowOffset : classes.nonSelectedRowOffset))}
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
@@ -284,7 +267,7 @@ const TaskListTasks = (props) =>{
                                         className={classes.listItemTextStyle} 
                                         style={{flex: `0 0 ${item.width}`}}
                                         classes={item.style ?  {primary: classes[item.style]} : {}}>
-                                   { value} 
+                                   { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') } 
                           </ListItemText>
                           </Tooltip>
                         )})}
@@ -345,10 +328,6 @@ const useStyles = makeStyles(theme => ({
       color: '#fcfcfc',
       
   },
-  selectedRow:{
-    backgroundColor: '#abb7c9 !important',
-    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-  },
   nonSelectedRow:{
     backgroundColor: '#dcf6ff !important',
     '&:hover':{
@@ -391,6 +370,56 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#efe0ab  !important',
     '&:hover':{
       backgroundColor: '#d0bc77 !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+  },
+  nonSelectedRowComp:{
+    backgroundColor: '#989898b8 !important',
+    '&:hover':{
+      backgroundColor: '#c1c1c1 !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+    
+  },
+  selectedRowComp:{
+    backgroundColor: '#989898b8 !important',
+    '&:hover':{
+      backgroundColor: '#c1c1c1 !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+    
+  },
+  nonSelectedRowOffsetComp:{
+    backgroundColor: '#989898b8  !important',
+    '&:hover':{
+      backgroundColor: '#c1c1c1 !important',
+    },
+    border: '1px solid #7c8080',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    display:'flex',
+    flexWrap: 'nowrap',
+    paddingRight: '6% !important',
+    justifyContent: 'space-around',
+  },
+  selectedRowOffsetComp:{
+    backgroundColor: '#989898b8  !important',
+    '&:hover':{
+      backgroundColor: '#c1c1c1 !important',
     },
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',

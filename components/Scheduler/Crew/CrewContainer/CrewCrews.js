@@ -8,6 +8,7 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
 
 import { CrewContext } from '../../Crew/CrewContextContainer';
+import { TaskContext } from '../../TaskContainer';
 import cogoToast from 'cogo-toast';
 
 import Crew from '../../../../js/Crew';
@@ -17,6 +18,7 @@ import CrewMemberActionEdit from './CrewMemberActionEdit';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { check } from 'express-validator/check';
+
 
 function arraysEqual(_arr1, _arr2) {
     if (!Array.isArray(_arr1) || ! Array.isArray(_arr2) || _arr1.length !== _arr2.length)
@@ -36,8 +38,9 @@ function arraysEqual(_arr1, _arr2) {
 const CrewCrews = (props) => {
 
     const {} = props;
+    const {setModalTaskId, setModalOpen} = useContext(TaskContext);
     const { crewMembers,setCrewMembers, allCrewJobs,
-    setAllCrewJobs,setModalTaskId, setModalOpen} = useContext(CrewContext);
+    setAllCrewJobs} = useContext(CrewContext);
     const classes = useStyles();
 
     const [crews, setCrews] = useState(null);
@@ -121,9 +124,10 @@ const CrewCrews = (props) => {
     // runs when a crew is selected to get its jobs
     useEffect(()=>{
         if(selectedCrew && selectedCrew.task_extra_ids && selectedCrew.task_extra_ids.length > 0 && crewJobs == null ){
-            Crew.getCrewJobsByTaskIds(selectedCrew.task_extra_ids)
+            Crew.getCrewJobsByTaskIds(selectedCrew.task_extra_ids, selectedCrew.job_type)
             .then((data)=>{
                 if(data){
+                    //remove multiples
                     setCrewJobs(data);
                     cogoToast.success("Got member jobs", {hideAfter:2});
                 }
@@ -182,7 +186,7 @@ const CrewCrews = (props) => {
     const handleRightClick = (event, id) => {
         setModalTaskId(id);
         setModalOpen(true);
-  
+
         //Disable Default context menu
         event.preventDefault();
     };
@@ -394,7 +398,7 @@ const CrewCrews = (props) => {
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
                                 style={getListStyle(snapshot.isDraggingOver)}
-                            >                 
+                            >
                             {crewJobs && crewJobs.map((row, index) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
                                 return (
