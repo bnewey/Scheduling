@@ -39,8 +39,9 @@ const CrewCrews = (props) => {
 
     const {} = props;
     const {setModalTaskId, setModalOpen} = useContext(TaskContext);
-    const { crewMembers,setCrewMembers, allCrewJobs,
-    setAllCrewJobs} = useContext(CrewContext);
+
+    const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
+        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers} = useContext(CrewContext);
     const classes = useStyles();
 
     const [crews, setCrews] = useState(null);
@@ -50,99 +51,29 @@ const CrewCrews = (props) => {
     //Popover
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [swapJobId, setSwapJobId] = useState(null); 
-
-    //Crews
-    useEffect(()=>{
-        if(crews == null && allCrewJobs){
-            //First get crews by checking against task_id
-            var alreadyProcessedJobs = [];
-            var tmpCrews = allCrewJobs.map((job,i)=>{
-                //Check for already processed tasks with specific job type to be able to skip
-                var similarJobs = alreadyProcessedJobs.filter((item, i )=>(    _.isEqual(_.pick(job, ['task_id','job_type']), item)    ))
-                if(similarJobs && similarJobs.length > 0){
-                    return {ids: []};
-                }
-
-                var tmpObject = {names: [], job_count: 0, ids: [], task_id: null, job_type: null};
-                
-                allCrewJobs.forEach((checkJob, cI)=>{
-                    
-
-                    //Check for already processed tasks with specific job type
-                    var results = alreadyProcessedJobs.filter((item, i )=>{    var tmp = _.isEqual(_.pick(checkJob, ['task_id','job_type']), item);  return tmp;   })
-                    if(results && results.length > 0){
-                        return;
-                    }
-                    //Check Matching jobs for multiple names
-                    if(_.isEqual(_.pick(checkJob, ['task_id','job_type']), _.pick(job, ['task_id','job_type']))){
-                        tmpObject['names'].push( checkJob.member_name );
-                        tmpObject['ids'].push(checkJob.m_id);
-                    }else{
-                        return;
-                    }
-                })
-                alreadyProcessedJobs.push({task_id: job.task_id, job_type: job.job_type});
-                tmpObject['task_id'] = job.task_id;
-                tmpObject['job_type'] = job.job_type;
-                return tmpObject;
-            });
-            console.log("tmpCrews", tmpCrews);
-            //Filter out empty arrays
-            tmpCrews = tmpCrews.filter((crew)=>crew['ids'].length > 0);
-
-            //Filter out duplicates and add to their count
-            var alreadyCheckedDups = [];
-            var newTmpCrews = tmpCrews.filter((v,i)=>{
-                //check already checked dups
-                var alreadyChecked = alreadyCheckedDups.filter((item, i )=>(    _.isEqual(_.pick(v, ['ids','job_type']), item)    ))
-                if(alreadyChecked && alreadyChecked.length > 0){
-                    return false;
-                }
-                //Check dup
-                var anotherTmpVar = tmpCrews.filter((m, iM)=>{
-                    if(_.isEqual(_.pick(v, ['ids','job_type']), _.pick(m, ['ids','job_type']),)){
-                        v['task_extra_ids'] = v['task_extra_ids'] ? [...v['task_extra_ids'], m.task_id] : [m.task_id];
-                        return true;
-                    }
-                })
-                alreadyCheckedDups.push({ids: v.ids, job_type: v.job_type})
-
-                //Return with job count
-                if(anotherTmpVar && anotherTmpVar.length > 0){
-                    v.job_count = anotherTmpVar.length;
-                    return true;
-                }
-                
-            });
-
-            console.log("newtmpcrews",newTmpCrews);
-            setCrews(newTmpCrews);
-        }
-    },[crews])
     
-    //Crew Jobs
-    // runs when a crew is selected to get its jobs
     useEffect(()=>{
-        if(selectedCrew && selectedCrew.task_extra_ids && selectedCrew.task_extra_ids.length > 0 && crewJobs == null ){
-            Crew.getCrewJobsByTaskIds(selectedCrew.task_extra_ids, selectedCrew.job_type)
+        if(selectedCrew && crewJobs == null){
+            Crew.getCrewJobsByCrew(selectedCrew.id)
             .then((data)=>{
                 if(data){
-                    //remove multiples
                     setCrewJobs(data);
-                    cogoToast.success("Got member jobs", {hideAfter:2});
                 }
             })
             .catch((error)=>{
-                console.error("Bad reponse from server on getCrewJobsByTaskIds", error);
-                cogoToast.error("Bad reponse from server on getCrewJobsByTaskIds", {hideAfter: 4})
+                console.error("Error getting crewJobs", error);
+                cogoToast.error("Failed to get crew jobs");
             })
         }
-    },[selectedCrew, crewJobs])
+    },[selectedCrew])
 
     const handleSelectCrew =(event,crew)=>{
         if(!crew){
             console.error("Couldn't Select crew");
             cogoToast.error("Error selecting crew", {hideAfter: 4})
+        }
+        if(selectedCrew  && crew.id == selectedCrew.id){
+            return;
         }
         setCrewJobs(null);
         setSelectedCrew(crew);
@@ -331,7 +262,7 @@ const CrewCrews = (props) => {
     return(
         <>
         <Grid container>
-            <Grid item xs={3} >
+            <Grid item xs={4} >
                 <List 
                     className={classes.memberList}
                     subheader={
@@ -339,15 +270,19 @@ const CrewCrews = (props) => {
                             Crews
                         </ListSubheader>
                     }>
-                    {crews && crews.map((crew, i)=>{
+                    {allCrews && allCrews.map((crew, i)=>{
                         return(
                         <ListItem className={selectedCrew == crew ? classes.member_select_list_item : classes.member_list_item} 
                                     key={`crews+${i}`} button
                                     onMouseUp={(event)=>handleSelectCrew(event, crew)}>
-                            <ListItemText>
+                            <ListItemText disableTypography className={classes.crew_text}>
                             
-                        {crew.names.map((name,i)=> ( <span key={name + i}>{name}{ (crew.names.length != i+1) ? <>,&nbsp;</> : <></> }</span>))}
-                        <span>&nbsp;({crew.job_count})</span> <span className={classes.job_type_span}>{crew.job_type}</span>
+                        <span className={classes.leaderSpan}>{crew && crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' +crew.id}</span>
+                        <span className={classes.otherMemberSpan}>{ allCrewJobMembers ? allCrewJobMembers
+                                        .filter((mj,i)=> mj.crew_id == crew.id)
+                                        .map((job)=> job.member_name == crew.crew_leader_name ? false : job.member_name + ", ") : "No Other Members"}
+                        </span>
+                        <span className={classes.jobCountSpan}>({ allCrewJobs ? allCrewJobs.filter((item, i) => item.crew_id == crew.id).length : 0})</span>
                             </ListItemText>
                             <ListItemSecondaryAction>            
                               <React.Fragment>
@@ -369,7 +304,7 @@ const CrewCrews = (props) => {
                 
             </Grid>
 
-            <Grid item xs={7} className={classes.job_root}>
+            <Grid item xs={6} className={classes.job_root}>
                 <div className={classes.job_list_head}>
                     <span>Job List - </span>
                 </div>
@@ -609,7 +544,30 @@ const useStyles = makeStyles(theme => ({
         fontSize: '.7em',
         color: '#002362',
         fontWeight: '600',
-    }
+    },
+    crew_text:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    leaderSpan:{
+        fontWeight: '700',
+        color: '#333',
+        fontSize: '1em',
+
+    },
+    otherMemberSpan:{
+        fontWeight: '500',
+        fontSize: '.8em',
+        color: '#555',
+    },
+    jobCountSpan:{
+        fontSize: '1em',
+        color: '#004464',
+        fontWeight: '700',
+
+    },
     
   }));
 

@@ -158,6 +158,27 @@ async function getCrewJobsByTaskIds(ids, job_type){
     }
 }
 
+
+async function getAllCrewJobMembers(){
+    const route = '/scheduling/crew/getAllCrewJobMembers';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        if(!data.ok){
+            throw new Error("getAllCrewJobMembers returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function getAllCrewJobs(){
     const route = '/scheduling/crew/getAllCrewJobs';
     try{
@@ -196,7 +217,7 @@ async function deleteCrewJob(id){
     }
 }
 
-async function updateCrewJob(member_id,job_id){
+async function updateCrewJob(member_id, crew_id,job_id){
     const route = '/scheduling/crew/updateCrewJob';
     try{
         var response = await fetch(route,
@@ -205,13 +226,72 @@ async function updateCrewJob(member_id,job_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({member_id, job_id})
+                body: JSON.stringify({member_id, crew_id, job_id})
             });
         return response.ok;
     }catch(error){
         throw error;
     }
 }
+
+async function updateCrewJobMember(crew_id, member_id, is_leader, job_id){
+    const route = '/scheduling/crew/updateCrewJobMember';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ crew_id, member_id, is_leader, job_id})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function getAllCrews(){
+    const route = '/scheduling/crew/getAllCrews';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        if(!data.ok){
+            throw new Error("getAllCrews returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function getCrewJobsByCrew(id){
+    const route = '/scheduling/crew/getCrewJobsByCrew';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ crew_id: id})
+            });
+        if(!data.ok){
+            throw new Error("getCrewJobsByCrew returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 
 
 module.exports = {
@@ -223,8 +303,13 @@ module.exports = {
     getCrewJobsByTask,
     getCrewJobsByTaskIds,
     getCrewMembersByTask,
+    getAllCrewJobMembers,
     getAllCrewJobs,
     deleteCrewJob,
-    updateCrewJob
+    updateCrewJob,
+    updateCrewJobMember,
+    getAllCrews,
+    getCrewJobsByCrew,
+
 
 };

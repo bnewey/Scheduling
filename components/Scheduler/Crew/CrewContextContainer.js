@@ -14,7 +14,9 @@ export const CrewContext = createContext(null);
 //Contains all important props that all tabs use
 const CrewContainer = function({children}) {
     const [crewMembers, setCrewMembers] = useState(null);
+    const [allCrewJobMembers, setAllCrewJobMembers] = useState(null);
     const [allCrewJobs, setAllCrewJobs] = useState(null);
+    const [allCrews, setAllCrews] = useState(null);
     const [memberJobs, setMemberJobs] = useState(null);
     const [shouldResetCrewState, setShouldResetCrewState] = useState(false);
     //Modal Props
@@ -30,7 +32,7 @@ const CrewContainer = function({children}) {
         Crew.getCrewMembers()
         .then( (data) => {
         setCrewMembers(data);
-        console.log("crew",data);
+        console.log("crew members available ",data);
         })
         .catch( error => {
         console.warn(error);
@@ -39,7 +41,23 @@ const CrewContainer = function({children}) {
     }
     },[ crewMembers]);
 
-    //GetAllCrewJobs
+    //GetAllCrewJobMembers - this is for # of jobs before click and also an ez to check against other members items
+    useEffect( () =>{ 
+        //Gets data only on initial component mount
+        if(!allCrewJobMembers || allCrewJobMembers == null) {
+            Crew.getAllCrewJobMembers()
+            .then( (data) => {
+            setAllCrewJobMembers(data);
+            console.log("crew job members",data);
+            })
+            .catch( error => {
+            console.warn(error);
+            cogoToast.error(`Error getting getAllCrewJobMembers`, {hideAfter: 4});
+            })
+    }
+    },[ allCrewJobMembers]);
+
+    //GetAllCrewJobs - install or drill for each task
     useEffect( () =>{ 
         //Gets data only on initial component mount
         if(!allCrewJobs || allCrewJobs == null) {
@@ -55,19 +73,37 @@ const CrewContainer = function({children}) {
     }
     },[ allCrewJobs]);
 
+    //GetAllCrews - 
+    useEffect( () =>{ 
+        //Gets data only on initial component mount
+        if(!allCrews || allCrews == null) {
+            Crew.getAllCrews()
+            .then( (data) => {
+                setAllCrews(data);
+                console.log("crews ",data);
+            })
+            .catch( error => {
+                console.warn(error);
+                cogoToast.error(`Error getting getAllCrews`, {hideAfter: 4});
+            })
+    }
+    },[ allCrews]);
+
     //Reset state effect
     useEffect(()=>{
         if(shouldResetCrewState){
             setAllCrewJobs(null);
             setMemberJobs(null);
             setCrewMembers(null);
+            setAllCrewJobMembers(null);
             setShouldResetCrewState(false);
         }
     },[shouldResetCrewState])
 
     return (
     <div className={classes.root}>
-        <CrewContext.Provider value={{setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, setAllCrewJobs, memberJobs,setMemberJobs} } >
+        <CrewContext.Provider value={{setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
+                allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} } >
                     <> <>{children} </>
    
                     </>

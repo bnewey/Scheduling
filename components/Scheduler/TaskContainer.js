@@ -28,14 +28,14 @@ const TaskContainer = function() {
           from: Util.convertISODateToMySqlDate(today),
           to: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()-90)))
         });
-  const [tabValue, setTabValue] = React.useState(0);
+  const [tabValue, setTabValue] = React.useState(null);
   //TaskList/Scheduler Props
     const [taskListTasksSaved, setTaskListTasksSaved] = useState([]);
     const [taskLists, setTaskLists] = useState();
     const [priorityList, setPriorityList] = useState(null);
-    const [filters, setFilters] = useState([]);
+    const [filters, setFilters] = useState(null);
     const [filterInOrOut, setFilterInOrOut] = useState("out");
-    const [sorters, setSorters] = useState([]);
+    const [sorters, setSorters] = useState(null);
 
   //Map Props
     const [taskListToMap, setTaskListToMap] = useState(null);
@@ -50,6 +50,8 @@ const TaskContainer = function() {
   const [modalTaskId, setModalTaskId] = React.useState();  
   
   const classes = useStyles();
+  
+
 
   //Tasks/MapRows
   useEffect( () =>{
@@ -116,7 +118,65 @@ const TaskContainer = function() {
 
 
 
+    //Save and/or Fetch filters to local storage
+    useEffect(() => {
+      if(filters == null){
+        var tmp = window.localStorage.getItem('filters');
+        var tmpParsed;
+        if(tmp){
+          tmpParsed = JSON.parse(tmp);
+        }
+        if(Array.isArray(tmpParsed)){
+          setFilters(tmpParsed);
+        }else{
+          setFilters([]);
+        }
+      }
+      if(Array.isArray(filters)){
+        window.localStorage.setItem('filters', JSON.stringify(filters));
+      }
+      
+    }, [filters]);
 
+    //Save and/or Fetch sorters to local storage
+    useEffect(() => {
+      if(sorters == null){
+        var tmp = window.localStorage.getItem('sorters');
+        var tmpParsed;
+        if(tmp){
+          tmpParsed = JSON.parse(tmp);
+        }
+        if(Array.isArray(tmpParsed)){
+          setSorters(tmpParsed);
+        }else{
+          setSorters([]);
+        }
+      }
+      if(Array.isArray(sorters)){
+        window.localStorage.setItem('sorters', JSON.stringify(sorters));
+      }
+      
+    }, [sorters]);
+
+    //Save and/or Fetch tabValue to local storage
+    useEffect(() => {
+      if(tabValue == null){
+        var tmp = window.localStorage.getItem('tabValue');
+        var tmpParsed;
+        if(tmp){
+          tmpParsed = JSON.parse(tmp);
+        }
+        if(!isNaN(tmpParsed)){
+          setTabValue(tmpParsed);
+        }else{
+          setTabValue(0);
+        }
+      }
+      if(!isNaN(tabValue)){
+        window.localStorage.setItem('tabValue', JSON.stringify(tabValue));
+      }
+      
+    }, [tabValue]);
   
 
   return (

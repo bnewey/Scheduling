@@ -145,13 +145,13 @@ const TaskListSidebar = (props) => {
                             </span>
                     </div>
                     { selectedTasks && selectedTasks.length > 0 ? <>
-                         <div className={classes.singleLineDiv}>
+                         {/* <div className={classes.singleLineDiv}>
                             <span
                                 className={classes.text_button} 
                                 onClick={event => handleRemoveMultipleTasks(event, selectedTasks, openTaskList)}>
                                 Remove Multiple From TaskList
                             </span>
-                         </div>
+                         </div> */}
                          <div className={classes.singleLineDiv}>
                          <span
                              className={classes.text_button} 

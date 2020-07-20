@@ -24,16 +24,13 @@ const CrewContainer = (props) => {
     const [selectedPage, setSelectedPage] = React.useState(1);
 
 
-
-
-
     const handleListClick = (event, page) => {
         switch(page){
-            case 1:
+            case 2:
                 setcrewMemberOpen(!crewMemberOpen);
                 setcrewCrewOpen(false);
                 break;
-            case 2:
+            case 1:
             setcrewCrewOpen(!crewCrewOpen);
             setcrewMemberOpen(false);
             break;
@@ -71,7 +68,7 @@ const CrewContainer = (props) => {
                         className={classes.pageList}
                         >
                                     <ListItem 
-                                        key="crew_members"
+                                        key="crew_crews"
                                         button 
                                         onClick={event => handlePageContentClick(event, 1)}  
                                         className={selectedPage == 1 ?  classes.selectedSubList  :  classes.listNested}
@@ -79,10 +76,10 @@ const CrewContainer = (props) => {
                                         <ListItemIcon>
                                             <HelpIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary="Crew Members" />
+                                        <ListItemText primary="Crews" />
                                     </ListItem>
                                     <ListItem 
-                                        key="crew_crews"
+                                        key="crew_members"
                                         button 
                                         onClick={event => handlePageContentClick(event, 2)}  
                                         className={selectedPage == 2 ?  classes.selectedSubList  :  classes.listNested}
@@ -90,13 +87,14 @@ const CrewContainer = (props) => {
                                         <ListItemIcon>
                                             <HelpIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary="Crews" />
+                                        <ListItemText primary="Crew Members" />
                                     </ListItem>
+                                    
                         </List>
                     </Grid>
                     <Grid item xs={9} classes={{root: classes.grid_x9}} className={classes.paper}>
-                         { selectedPage == 1 ? <CrewMembers />: <></>}
-                        { selectedPage == 2 ? <CrewCrews />: <></>}
+                         { selectedPage == 2 ? <CrewMembers />: <></>}
+                        { selectedPage == 1 ? <CrewCrews />: <></>}
                     </Grid>
                 </Grid>
                 </div>

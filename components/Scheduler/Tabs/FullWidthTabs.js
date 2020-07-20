@@ -54,6 +54,10 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
     setValue(index);
   };
 
+  if(value == null){
+    return(<></>);
+  }
+
   return (
     <div className={classes.root}>
       <AppBar position="static" color="default">

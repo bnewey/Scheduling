@@ -278,9 +278,9 @@ const TaskListTasks = (props) =>{
                                 <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
                                 <EditIcon />
                                 </IconButton>
-                                <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.tl_id, row.t_name)}>
+                                {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.tl_id, row.t_name)}>
                                   <DeleteIcon />
-                                </IconButton> 
+                                </IconButton>  */}
                               </React.Fragment>
                           &nbsp;&nbsp;&nbsp;
                         </ListItemSecondaryAction>

@@ -9,7 +9,7 @@ const pool=mysql.createPool({
 });
 
 
-var db  = {pool: pool, machine_array: []};
+var db  = {pool: pool};
 
 //Not a function, but called when db.js is required
 pool.getConnection((err, connection) => {
@@ -53,21 +53,4 @@ db.query = function(sql, params) {
 }
 
 
-
-//Log some of our reads into database for record keeping
-//TODO: make async?
-db.sendReadToSQL = function(data) {
-    if(!data){
-        return;
-    }
-
-    try {
-        var json = JSON.parse(data);
-    } catch (e){
-        console.log(e);
-        return;
-    }
-
-    
-};
 module.exports = db;

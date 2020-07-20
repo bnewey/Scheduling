@@ -1,6 +1,7 @@
 import React from "react";
 import App, { Container } from "next/app";
 import Head from "next/head";
+import Header from '../components/UI/Header';
 import { StylesProvider, ThemeProvider } from "@material-ui/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import getPageContext from "../src/getPageContext";
@@ -17,14 +18,24 @@ class MyApp extends App {
     this.pageContext = getPageContext();
   }
 
-  static async getInitialProps({ Component, router, ctx }) {
-    let pageProps = {}
+  // static async getInitialProps({ Component, router, ctx }) {
+  //   let pageProps = {}
   
+  //   if (Component.getInitialProps) {
+  //     pageProps = await Component.getInitialProps(ctx)
+  //   }
+  
+  //   return { pageProps }
+  // }
+
+  static async getInitialProps({ Component, ctx }) {
+    const pageProps = {};
     if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps(ctx)
+      let  tmp = await Component.getInitialProps(ctx);
+      Object.assign(pageProps,tmp);
     }
   
-    return { pageProps }
+    return { pageProps };
   }
 
   componentDidMount() {
@@ -55,6 +66,7 @@ class MyApp extends App {
             <CssBaseline />
             {/* Pass pageContext to the _document though the renderPage enhancer
                 to render collected styles on server-side. */}
+            <Header {...pageProps}/>
             <Component pageContext={this.pageContext} {...pageProps} />
           </ThemeProvider>
         </StylesProvider>

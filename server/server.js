@@ -10,12 +10,16 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
+const auth = require('./google');
+
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-
-
+//Handle Database
+const database = require('./lib/db');
 
 const PORT = process.env.PORT || 8000;
 const dev = process.env.NODE_ENV !== 'production';
@@ -40,18 +44,19 @@ nextApp
     app.use(expressValidator());
     app.use(bodyParser.json({limit: '50mb'}));
 
-    //app.use('/api/machines', machines);
+    // The next two gets allow normal handle of regular static/next assets
+    //   that do not need google auth. This needs to be before passport.session
+    app.get('/_next*', (req, res) => {
+      handle(req, res);
+    });
+
+    app.get('/static/*', (req, res) => {
+      handle(req, res);
+    });
+    ////////////////
     
+    // Custom Routes
     app.use(cors({ origin: '*' }));
-
-    //This is how we can send variables like settings from mysql to nextjs
-    /*var settings = require('./settings.js');
-    app.get('/', (req, res) => {
-
-      //settings.doGetAll(nextApp, database,req,res);
-      
-      //settings.handleRequest(nextApp, database, req, res);
-    });*/
 
     app.use('/scheduling/tasks', tasks);
     app.use('/scheduling/workOrders', workOrders);
@@ -59,6 +64,38 @@ nextApp
     app.use('/scheduling/pdf', pdf);
     app.use('/scheduling/email', emailRouter);
     app.use('/scheduling/crew', crew);
+    //
+
+    //Session   ////
+    var options = {
+      host: process.env.host,
+      port: 3306,
+      user: process.env.user,
+      password: process.env.password,
+      database: process.env.database,
+      expiration: (14 * 24 * 60 * 60)
+    };
+   
+    var sessionStore = new MySQLStore(options);
+    //Could use existing connection like this 
+    //var sessionStore = new MySQLStore({}/* session store options */, connection);
+    
+    app.use(session({
+        name: 'scheduling.sid',
+        secret: 'HD2w.)q*VqRT4/#NK2M/,E^B)}FED5fWU!dKe[wk',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+          httpOnly: true,
+          maxAge: 14 * 24 * 60 * 60 * 1000,
+        }, 
+        key: 'session_cookie_name',
+        store: sessionStore,
+    }));
+    /////////////////
+
+    // Authenticate User
+    auth({ ROOT_URL: process.env.NODE_ENV == 'production' ? "http://icontrol.raineyelectronics.com" : "http://scheduling.com:8000", app ,database})
 
     app.get('*', (req, res) => {
       return handle(req, res);

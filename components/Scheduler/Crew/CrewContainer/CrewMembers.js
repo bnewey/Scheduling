@@ -24,7 +24,7 @@ const CrewMembers = (props) => {
     //const {} = props;
     const {setModalTaskId, setModalOpen} = useContext(TaskContext);
     const {crewMembers, setCrewMembers, allCrewJobs, 
-                setAllCrewJobs, memberJobs,setMemberJobs, setShouldResetCrewState} = useContext(CrewContext); 
+                setAllCrewJobs, memberJobs,setMemberJobs, setShouldResetCrewState, allCrewJobMembers, setAllCrewJobMembers} = useContext(CrewContext); 
 
     const classes = useStyles();
 
@@ -33,7 +33,7 @@ const CrewMembers = (props) => {
     const [selectedJob, setSelectedJob] = useState(null);
     //Popover
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const [swapJobId, setSwapJobId] = useState(null); 
+    const [swapJob, setSwapJob] = useState(null); 
 
     useEffect(()=>{
         if(selectedMember && memberJobs == null ){
@@ -134,34 +134,64 @@ const CrewMembers = (props) => {
     //Swap Popover
     const handleOpenSwapPopover = (event, job) =>{
         setAnchorEl(event.currentTarget);
-        setSwapJobId(job.id);
+        setSwapJob(job);
     }
     const handlePopoverClose = () => {
         setAnchorEl(null);
-        setSwapJobId(null);
+        setSwapJob(null);
     };
 
     const popoverOpen = Boolean(anchorEl);
     const popoverId = open ? 'swap-popover' : undefined;
 
     const handleSwapJob = (event, member) => {
-        if(!member.id || !swapJobId){
+        if(!member.id || !swapJob ){
             cogoToast.error("Could not swap.");
-            console.error("Bad member or swapJobId for swap.");
+            console.error("Bad member or swapJob for swap.");
             return;
         }
-        Crew.updateCrewJob(member.id, swapJobId)
+
+        //Check if job already exists for member we're swapping to
+        Crew.getCrewJobsByMember(member.id)
         .then((data)=>{
-            setShouldResetCrewState(true);
-            
+            if(data){
+                // if already exists
+                if(!(data.every((item)=> !(item.id == swapJob.id)))) {
+                    cogoToast.warn("This job already exists for selected member");
+                }else{ // if not
+                    Crew.updateCrewJobMember( swapJob.crew_id, member.id, swapJob.is_leader,  swapJob.cm_id )
+                    .then((data)=>{
+                        setShouldResetCrewState(true);
+                        
+                    })
+                    .catch((error)=>{
+                        console.error(error);
+                        cogoToast.error("Failed to swap jobs");
+                    });
+                    
+                }
+                if(popoverOpen){
+                    handlePopoverClose();
+                }
+            }
         })
         .catch((error)=>{
-            console.error(error);
-            cogoToast.error("Failed to swap jobs");
-        });
-        if(popoverOpen){
-            handlePopoverClose();
-        }
+            console.warn("Failed on check job exist for member", error)
+            cogoToast.warn("Failed check if job already exists for member");
+            // run anyway
+            Crew.updateCrewJobMember( swapJob.crew_id, member.id, swapJob.is_leader,  swapJob.cm_id )
+            .then((data)=>{
+                setShouldResetCrewState(true);
+                
+            })
+            .catch((error)=>{
+                console.error(error);
+                cogoToast.error("Failed to swap jobs");
+            });
+        })
+        
+        //crew_id, member_id, is_leader, job_id
+        
     }
 
     //end of swap popover
@@ -260,7 +290,7 @@ const CrewMembers = (props) => {
                                     key={`crew_members+${i}`} button
                                     onMouseUp={(event)=>handleSelectMember(event, member)}>
                             <ListItemText className={classes.listItemText}>
-                                {member.member_name} ({allCrewJobs ? (allCrewJobs.filter((item)=>(item.crew_members_id == member.id))).length : 0})
+                                {member.member_name} ({ allCrewJobMembers ? allCrewJobMembers.filter((item, i) => item.ma_id == member.id).length : 0})
                             </ListItemText>
                             <ListItemSecondaryAction>            
                               <React.Fragment>

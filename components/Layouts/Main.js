@@ -29,10 +29,6 @@ const Layout = (props) => {
             <title>{title}</title>
             
           </Head>
-          <header>
-            
-            <StyledNav navButtons={navButtons} />
-          </header>
           <main className='main-wrapper'>
             { children }
             <style jsx>{`
