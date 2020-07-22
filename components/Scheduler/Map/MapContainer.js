@@ -72,18 +72,21 @@ const MapContainer = (props) => {
                     return;
                 }
                 var tmpData = [...data];
-                //If more than one property is set, we need to filter seperately
-                let properties = new Set([...filters].map((v,i)=>v.property));
-                
-                //in works different than out, this seperates properties seperate instead of all together
-                if( properties.size > 1 && filterInOrOut == "in"){
-                    properties.forEach((index,property)=>{
-                        let tmpFilter = filters.filter((v,i)=> v.property == property);
-                        tmpData = [...tmpData].filter(createFilter([...tmpFilter], filterInOrOut));
-                    })
-                }else{
-                    //Just one property or any filterInOrOut == out case
-                    tmpData = data.filter(createFilter([...filters], filterInOrOut));
+
+                if(filters && filters.length > 0 && filterInOrOut != null){
+                  //If more than one property is set, we need to filter seperately
+                  let properties = new Set([...filters].map((v,i)=>v.property));
+                  
+                  //in works different than out, this seperates properties seperate instead of all together
+                  if( properties.size > 1 && filterInOrOut == "in"){
+                      properties.forEach((index,property)=>{
+                          let tmpFilter = filters.filter((v,i)=> v.property == property);
+                          tmpData = [...tmpData].filter(createFilter([...tmpFilter], filterInOrOut));
+                      })
+                  }else{
+                      //Just one property or any filterInOrOut == out case
+                      tmpData = data.filter(createFilter([...filters], filterInOrOut));
+                  }
                 }
                 
                 setTaskListTasksSaved(data);
