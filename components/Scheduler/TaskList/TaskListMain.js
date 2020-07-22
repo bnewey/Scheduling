@@ -14,12 +14,13 @@ import NoSsr from '../../UI/NoSsr';
 import dynamic from 'next/dynamic'
 
 import TaskLists from '../../../js/TaskLists';
-import {createSorter} from '../../../js/Sort';
-import {createFilter} from '../../../js/Filter';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
 import TaskListFilter from './TaskListFilter';
+
+import {createSorter} from '../../../js/Sort';
+import {createFilter} from '../../../js/Filter';
 
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
     ssr: false
@@ -35,12 +36,12 @@ const TaskListMain = (props) => {
 
     
     //PROPS
-    const { openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen} = props;
+    const { isPriorityOpen, setIsPriorityOpen} = props;
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
-        setMapRows,filters, setFilters,filterInOrOut, setFilterInOrOut,
+        filters, setFilters,filterInOrOut, setFilterInOrOut,
          sorters, setSorters,
          taskListTasksSaved, setTaskListTasksSaved} = useContext(TaskContext);
 
@@ -48,37 +49,53 @@ const TaskListMain = (props) => {
     //CSS
     const classes = useStyles({sorterState, sorters});
 
-    useEffect( () =>{ //useEffect for inputText
+    //TaskListTasks
+    useEffect( () =>{ 
         //Gets data only on initial component mount
         if(taskLists == null){
             setTaskListTasks(null);
         }
-        if(taskLists && openTaskList && openTaskList.id && taskListTasks == null ) { 
-            TaskLists.getTaskList(openTaskList.id)
+        if(taskLists && taskListToMap && taskListToMap.id && taskListTasks == null && filterInOrOut != null ) { 
+            TaskLists.getTaskList(taskListToMap.id)
             .then( (data) => {
                 if(!Array.isArray(data)){
                     console.error("Bad tasklist data",data);
                     return;
                 }
+
                 var tmpData = [...data];
+
+                //FILTER -------------------------------------------------------------------------------------
+                //If more than one property is set, we need to filter seperately
+                let properties = new Set([...filters].map((v,i)=>v.property));
                 
-                //filter on data
-                if(filters && filters.length > 0){
-                    tmpData = tmpData.filter(createFilter([...filters], filterInOrOut))
-                    //Set saved for filter list 
-                    setTaskListTasksSaved(data);
+                //in works different than out, this seperates properties seperate instead of all together
+                if( properties.size > 1 && filterInOrOut == "in"){
+                    properties.forEach((index,property)=>{
+                        let tmpFilter = filters.filter((v,i)=> v.property == property);
+                        tmpData = [...tmpData].filter(createFilter([...tmpFilter], filterInOrOut));
+                    })
+                }else{
+                    //Just one property or any filterInOrOut == out case
+                    tmpData = data.filter(createFilter([...filters], filterInOrOut));
                 }
-                //sort
+                // -------------------------------------------------------------------------------------------
+                  
+                //SORT after filters -------------------------------------------------------------------------
                 if(sorters && sorters.length > 0){
                     tmpData = tmpData.sort(createSorter(...sorters))
                     //Set saved for filter list 
-                    setTaskListTasksSaved(data);
+                    //setTaskListTasksSaved(data);
                 }
+                //--------------------------------------------------------------------------------------------
+
                 //No filters or sorters
                 if(filters && !filters.length && sorters && !sorters.length){
                     //no change to tmpData
-                    setTaskListTasksSaved(data);
                 }
+
+                //Save all originally fetched data
+                setTaskListTasksSaved(data);
 
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
@@ -88,15 +105,34 @@ const TaskListMain = (props) => {
             })
             .catch( error => {
                 cogoToast.error(`Error getting Task List`, {hideAfter: 4});
-                console.warn(JSON.stringify(error, null,2));
+                console.error("Error getting tasklist", error);
             })
         }
-    return () => { //clean up
-        if(taskLists){
+        return () => { //clean up
+            if(taskLists){
+            }
         }
-    }
-    },[openTaskList,taskListTasks, taskLists]);
+    },[taskListToMap,taskListTasks, taskLists, filterInOrOut]);
 
+    //Save and/or Fetch sorters to local storage
+    useEffect(() => {
+        if(sorters == null){
+        var tmp = window.localStorage.getItem('sorters');
+        var tmpParsed;
+        if(tmp){
+            tmpParsed = JSON.parse(tmp);
+        }
+        if(Array.isArray(tmpParsed)){
+            setSorters(tmpParsed);
+        }else{
+            setSorters([]);
+        }
+        }
+        if(Array.isArray(sorters)){
+        window.localStorage.setItem('sorters', JSON.stringify(sorters));
+        }
+        
+    }, [sorters]);
 
     //Sort
     useEffect(()=>{
@@ -237,14 +273,14 @@ const TaskListMain = (props) => {
     return(
         <>
             <KeyBinding onKey={ (e) => handleClearSelectedTasksOnEsc(e.keyCode) } />
-            <TaskListToolbar openTaskList={openTaskList} setOpenTaskList={setOpenTaskList} 
+            <TaskListToolbar taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap} 
                             taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} 
                             isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
                             priorityList={priorityList} setPriorityList={setPriorityList} setSelectedIds={setSelectedIds}/>
             <Grid container >  
                 <Grid item xs={2} >
                     <TaskListSidebar taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
-                                 openTaskList={openTaskList} setOpenTaskList={setOpenTaskList} 
+                                 taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap} 
                                  isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
                                   priorityList={priorityList} setPriorityList={setPriorityList}
                                   selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setSelectedIds={setSelectedIds}
@@ -253,8 +289,7 @@ const TaskListMain = (props) => {
                 <Grid item xs={10} >
                    
                     <Paper className={classes.root}>
-                        <TaskListFilter taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} filters={filters} setFilters={setFilters} filterInOrOut={filterInOrOut}
-                                             setFilterInOrOut={setFilterInOrOut} openTaskList={openTaskList} table_info={table_info} selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
+                        <TaskListFilter  setFilteredItems={setTaskListTasks} />
                         {taskListTasks && table_info ? 
                         <>
                             <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
@@ -294,12 +329,12 @@ const TaskListMain = (props) => {
                             <TaskListTasks 
                                 selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
                                 taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
-                                openTaskList={openTaskList} setOpenTaskList={setOpenTaskList}
+                                taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
                                 setModalOpen={setModalOpen} 
                                 setModalTaskId={setModalTaskId}
                                 table_info={table_info}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
-                                setMapRows={setMapRows} taskListTasksSaved={taskListTasksSaved}/>
+                                taskListTasksSaved={taskListTasksSaved}/>
                         </>
                         : <>
                         <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>

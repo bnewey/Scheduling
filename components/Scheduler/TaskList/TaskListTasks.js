@@ -21,8 +21,8 @@ const TaskListTasks = (props) =>{
 
     //STATE
     //PROPS
-    const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList , setModalOpen, setModalTaskId, table_info,
-              priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, setMapRows, taskListTasksSaved} = props;
+    const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, table_info,
+              priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved} = props;
     
     //CSS
     const classes = useStyles();
@@ -33,7 +33,7 @@ const TaskListTasks = (props) =>{
       console.log("Changed");  
       return () => { //clean up
             
-            if(openTaskList){
+            if(taskListToMap){
                 //setTaskListTasks(null);
                 //doesnt run currently
             }
@@ -41,30 +41,30 @@ const TaskListTasks = (props) =>{
       },[taskListTasks]);
 
 
-    const handleRemoveFromTaskList = (event, id, tl_id, name) => {
-      const remove = () => {
-        TaskLists.removeTaskFromList(id, tl_id)
-            .then( (data) => {
-                    const filtered_rows = taskListTasks.filter((task, i)=>task.t_id != id);
-                    setTaskListTasks(filtered_rows);
-                    setTaskListToMap(priorityList);
-                    setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
-                    setMapRows(filtered_rows);
-                    cogoToast.success(`Removed task ${id} from Task List`, {hideAfter: 4});
-                })
-            .catch( error => {
-            console.warn("Error removing task",error);
-            cogoToast.error(`Error removing Task from Task List`, {hideAfter: 4});
-             });
-      }
-      confirmAlert({
-          customUI: ({onClose}) => {
-              return(
-                  <ConfirmYesNo onYes={remove} onClose={onClose} customMessage={"Remove task: \"" + name + "\" from TaskList?"}/>
-              );
-          }
-      })
-    }
+    // const handleRemoveFromTaskList = (event, id, tl_id, name) => {
+    //   const remove = () => {
+    //     TaskLists.removeTaskFromList(id, tl_id)
+    //         .then( (data) => {
+    //                 const filtered_rows = taskListTasks.filter((task, i)=>task.t_id != id);
+    //                 setTaskListTasks(filtered_rows);
+    //                 setTaskListToMap(priorityList);
+    //                 setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
+                    
+    //                 cogoToast.success(`Removed task ${id} from Task List`, {hideAfter: 4});
+    //             })
+    //         .catch( error => {
+    //         console.warn("Error removing task",error);
+    //         cogoToast.error(`Error removing Task from Task List`, {hideAfter: 4});
+    //          });
+    //   }
+    //   confirmAlert({
+    //       customUI: ({onClose}) => {
+    //           return(
+    //               <ConfirmYesNo onYes={remove} onClose={onClose} customMessage={"Remove task: \"" + name + "\" from TaskList?"}/>
+    //           );
+    //       }
+    //   })
+    // }
 
     //Modal
     const handleRightClick = (event, id) => {
@@ -88,7 +88,7 @@ const TaskListTasks = (props) =>{
     // };
 
     const reorderMultiple = (list, ids, endIndex) =>{
-      var result = Array.from(list);
+      var result = Array.from(list); 
       const removedArray = [];
       result = result.filter((task, i)=>{
         //check if in our selectedids and remove if so
@@ -99,7 +99,7 @@ const TaskListTasks = (props) =>{
         return true;
       })
       //Add tasks back in, in the appro spot
-      result.splice(endIndex, 0, ...removedArray);
+      result.splice(endIndex , 0, ...removedArray);
       
       return result;
     }
@@ -134,12 +134,13 @@ const TaskListTasks = (props) =>{
         return;
       }
       
-      var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [result.draggableId], result.destination.index);     
+      
+      var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [taskListTasks[result.source.index].t_id], taskListTasks[result.destination.index].priority_order-1);     
       var newTaskIds = items.map((item, i)=> item.t_id);
-      TaskLists.reorderTaskList(newTaskIds,openTaskList.id)
+      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id)
         .then( (ok) => {
                 if(!ok){
-                  throw new Error("Could not reorder tasklist" + openTaskList.id);
+                  throw new Error("Could not reorder tasklist" + taskListToMap.id);
                 }
                 cogoToast.success(`Reordered Task List`, {hideAfter: 4});
                 setTaskListTasks(null);
@@ -191,6 +192,23 @@ const TaskListTasks = (props) =>{
       return ind;
     }
 
+    const indexFromDnDList = dndIndex =>{
+      if(!taskListTasks || isNaN(dndIndex)){
+        console.error("Error in indexFromDnDList")
+        return -1;
+      }
+      console.log("dndindex", dndIndex);
+      console.log("tasklisttasks, could be diff order", taskListTasks);
+      console.log("task from indexfromdndlist", taskListTasks[dndIndex])
+      let dndTask = taskListTasks[dndIndex].priority_order;
+      if(isNaN(dndTask)){
+        console.error("Error in indexFromDnDList")
+        return -1;
+      }
+
+      return dndTask;
+    }
+
     return(
         <React.Fragment>
         { taskListTasks && taskListTasksSaved ? 
@@ -203,12 +221,12 @@ const TaskListTasks = (props) =>{
                 {...provided.dragHandleProps}
                 ref={provided.innerRef}
               >
-                <ListItem key={taskListTasksSaved[indexFromPriorityOrder(rubric.source.index+1)].t_id} 
+                <ListItem key={rubric.source.index} 
                                 role={undefined} dense button 
                                 className={classes.nonSelectedRow}
                                 >
                       <ListItemText className={classes.draggingListItemTextStyle}>
-                            {taskListTasksSaved[indexFromPriorityOrder(rubric.source.index +1)].t_id} | {taskListTasksSaved[indexFromPriorityOrder(rubric.source.index +1)].t_name} 
+                            {taskListTasks[rubric.source.index].t_id} | {taskListTasks[rubric.source.index].t_name} 
                       </ListItemText>
                     </ListItem>
               </div>
@@ -229,12 +247,12 @@ const TaskListTasks = (props) =>{
                   const isItemCompleted = row.completed_wo == 1;
                   return (
                     <Draggable key={row.t_id + 321321} 
-                                draggableId={row.t_id.toString()} 
-                                index={row.priority_order - 1} 
+                                draggableId={(row.priority_order-1).toString()} 
+                                index={index} 
                                 isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }
                     >
                     {(provided, snapshot) => (
-                      <ListItem key={taskListTasks[index].t_id + 321321} 
+                      <ListItem key={taskListTasksSaved[index].t_id + 321321} 
                                   role={undefined} dense button 
                                   onContextMenu={event => handleRightClick(event, row.t_id)}
                                   onMouseUp={event => handleClick(event, row.t_id)}
@@ -249,7 +267,7 @@ const TaskListTasks = (props) =>{
                                     snapshot.isDragging,
                                     provided.draggableProps.style
                                   )}>
-                        { openTaskList 
+                        { taskListToMap 
                         ? <>
                             <Checkbox checked={isItemSelected} className={classes.tli_checkbox}/>
                           </> 
@@ -271,7 +289,7 @@ const TaskListTasks = (props) =>{
                           </ListItemText>
                           </Tooltip>
                         )})}
-                        { openTaskList 
+                        { taskListToMap 
                         ? 
                         <ListItemSecondaryAction>            
                               <React.Fragment>

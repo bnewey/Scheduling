@@ -142,10 +142,10 @@ export default function TaskModalTaskList(props){
                     <div className={classes.task_list_div}>{console.log(tl)}
                         <span className={classes.p_task_name}>{tl.tl_name}</span>
                         <span className={classes.p_task_priority}>{ tl.tl_is_priority ? "Priority List" : ""}</span>
-                        <a  className={classes.remove_link}
+                        {/* <a  className={classes.remove_link}
                             onClick={event => handleRemoveTaskFromList(event, modalTask.t_id, tl.tl_id)}>
                             Remove
-                        </a>    
+                        </a>     */}
                     </div>
                 ))}
                 </Scrollbars>

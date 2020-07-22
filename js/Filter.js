@@ -54,24 +54,5 @@ const doFilter = (item, filter, outOrIn) => {
   
 // END OF FILTER CODE
 
-//FILTER server fetching
-async function updateCrewJob(member_id,job_id){
-  const route = '/scheduling/crew/updateCrewJob';
-  try{
-      var response = await fetch(route,
-          {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({member_id, job_id})
-          });
-      return response.ok;
-  }catch(error){
-      throw error;
-  }
-}
-
-//END OF FILTER server fetching
 
   module.exports =  { createFilter };

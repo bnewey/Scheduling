@@ -11,8 +11,8 @@ import EnhancedTableAddTL from "../../Table/EnhancedTableAddTL";
 
 const MapSidebarTaskList = (props) => {
     //PROPS
-    const { setActiveMarker, setResetBounds, reFetchTaskList, setReFetchTaskList} = props;
-    const {mapRows, setMapRows, taskLists, setTaskLists, priorityList, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
+    const { mapRows, setMapRows,setActiveMarker, setResetBounds} = props;
+    const { taskLists, setTaskLists, priorityList, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
     //STATE  
     const [open, setOpen] = React.useState(false);
     const [tempTaskListToMap, setTempTaskListToMap] = useState(null);
@@ -25,30 +25,7 @@ const MapSidebarTaskList = (props) => {
             setResetBounds(true);
         }
     },[taskListToMap]);
-
-    useEffect( () =>{ //useEffect for inputText
-    //Gets and sets tasks from Task List when theres a tasklistToMap and a refetch is needed. 
-    //ex when user selected same task list as taskListToMap or when we reorder
-    if(reFetchTaskList && taskListToMap) {
-        TaskLists.getTaskList(taskListToMap.id)
-        .then( (data) => {
-            //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
-            var newSelectedIds = data.map((item, i )=> item.t_id );
-            setSelectedIds(newSelectedIds);
-            
-            setMapRows(data);
-            //Zoom out to focus on new task list
-            setResetBounds(true);
-            setReFetchTaskList(false);
-            cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`, {hideAfter: 4});
-        })
-        .catch( error => {
-            console.error(error);
-            cogoToast.error(`Error getting task list`, {hideAfter: 4});
-        })        
-        
-    }
-    },[reFetchTaskList]);    
+  
 
 
     //FUNCTIONS
@@ -70,7 +47,7 @@ const MapSidebarTaskList = (props) => {
         //Fetch task list tasks
         if(taskListToMap === priorityList){
             //Special case where we need to refetch that wont work in regular fetching workflow
-            setReFetchTaskList(true);
+            setMapRows(null);
             return;
         }
         setTaskListToMap(priorityList);

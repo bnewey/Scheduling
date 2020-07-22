@@ -14,18 +14,14 @@ import {TaskContext} from '../TaskContainer';
     //CSS
     const classes = useToolbarStyles();
     //PROPS
-    const { numSelected, mapRowsLength} = props;
+    const { numSelected} = props;
     const { tabValue, setTabValue} = useContext(TaskContext);
     //STATE
     const [anchorEl, setAnchorEl] = React.useState(null);
     
     //METHODS
     const handleTabChange = (event, value) => {
-      if(mapRowsLength > 0){
         setTabValue(value);
-      }else{
-        cogoToast.info( 'Select a Task or Task List to view on the Map!', {hideAfter: 4});
-      }
 
     }
 

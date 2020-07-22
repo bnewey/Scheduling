@@ -26,12 +26,12 @@ const TaskListSidebar = (props) => {
     const [editList, setEditList] = React.useState(null);
 
     //PROPS
-    const { taskListTasks, setTaskListTasks, openTaskList, setOpenTaskList,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
+    const { isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
         selectedTasks, setSelectedTasks, setSelectedIds, setTableInfo, handleChangeTaskView} = props;
 
-    const {taskLists, setTaskLists, tabValue, setTabValue,
+    const {taskListTasks, setTaskListTasks, taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen, setMapRows} = useContext(TaskContext);
+        modalOpen, setModalOpen} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
@@ -59,7 +59,6 @@ const TaskListSidebar = (props) => {
                 setTaskListToMap(priorityList);
                 //Set selected ids in table view to all but ones weve deleted
                 setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
-                setMapRows(filtered_rows);
                 cogoToast.success(`Removed tasks from Task List`, {hideAfter: 4});
             })
             .catch((error)=>{
@@ -96,7 +95,7 @@ const TaskListSidebar = (props) => {
             TaskLists.reorderTaskList(newTaskIds,taskList.id)
             .then( (ok) => {
                     if(!ok){
-                    throw new Error("Could not reorder tasklist" + openTaskList.id);
+                    throw new Error("Could not reorder tasklist" + taskListToMap.id);
                     }
                     cogoToast.success(`Reordered Task List by Install Date`, {hideAfter: 4});
                     setTaskListTasks(null);
@@ -134,13 +133,13 @@ const TaskListSidebar = (props) => {
                 <div className={classes.priority_info_heading}>
                     <span>Actions</span>
                 </div>
-                {openTaskList ? 
+                {taskListToMap ? 
                 <>
                     <TaskListDateDialog  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
                     <div className={classes.singleLineDiv}>
                             <span
                                 className={classes.text_button} 
-                                onClick={event => handlePrioritizeByInstallDate(event, openTaskList)}>
+                                onClick={event => handlePrioritizeByInstallDate(event, taskListToMap)}>
                                 RePrioritize by Install Date
                             </span>
                     </div>
@@ -148,7 +147,7 @@ const TaskListSidebar = (props) => {
                          {/* <div className={classes.singleLineDiv}>
                             <span
                                 className={classes.text_button} 
-                                onClick={event => handleRemoveMultipleTasks(event, selectedTasks, openTaskList)}>
+                                onClick={event => handleRemoveMultipleTasks(event, selectedTasks, taskListToMap)}>
                                 Remove Multiple From TaskList
                             </span>
                          </div> */}
@@ -164,7 +163,7 @@ const TaskListSidebar = (props) => {
                     {/* <div className={classes.singleLineDiv}>
                     <span
                         className={classes.text_button} 
-                        onClick={event => handleEditClickOpen(event, openTaskList)}>
+                        onClick={event => handleEditClickOpen(event, taskListToMap)}>
                         Rename
                     </span>
                     </div> */}

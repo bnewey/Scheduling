@@ -8,10 +8,10 @@ import { TaskContext } from '../../TaskContainer';
 
 
 const MapSiderbarMissingMakers = (props) =>{
-    const {activeMarker, setActiveMarker, setShowingInfoWindow, noMarkerRows , setModalOpen, setModalTaskId, setResetBounds,
+    const {mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, noMarkerRows , setModalOpen, setModalTaskId, setResetBounds,
           infoWeather, setInfoWeather} = props;
 
-    const {mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
+    const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
 
     //CSS
     const classes = useStyles();

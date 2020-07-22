@@ -6,6 +6,7 @@ import withAuth from '../server/lib/withAuth';
 
 import TaskContainer from '../components/Scheduler/TaskContainer';
 
+
 const Index = function (props) {
     
     const {user} = props;

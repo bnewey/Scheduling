@@ -9,16 +9,16 @@ const logger = require('../../logs');
 
 const _ = require('lodash');
 
-    function publicFields() {
-      return [
-        'id',
-        'displayName',
-        'email',
-        'avatarUrl',
-        'slug',
-        'isAdmin',
-      ];
-    }
+function publicFields() {
+  return [
+    'id',
+    'displayName',
+    'email',
+    'avatarUrl',
+    'slug',
+    'isAdmin',
+  ];
+}
   
 async function signInOrSignUp({ database, googleId, email, googleToken, displayName, avatarUrl,  }) {
 
@@ -59,9 +59,9 @@ async function signInOrSignUp({ database, googleId, email, googleToken, displayN
     slug,
     isAdmin: true,
   });
-
   if(newUser){
-    return _.pick(await getUser( database, slug), UserClass.publicFields());
+    var tmpUser = await getUser( database, slug);
+    return _.pick(tmpUser, publicFields());
   }else{
     console.error("Failed to create User");
     return {};
@@ -135,13 +135,14 @@ async function createUser ({database, createdAt, googleId,email,googleToken,disp
   const sql = 'INSERT INTO google_token (accessToken, refreshToken, tokenType, expiryDate) VALUES (?, ? , ? , ?) ;' + 
   ' INSERT INTO google_users (googleId, googleTokenId, slug, createdAt, email, isAdmin, displayName, avatarUrl) VALUES (?, LAST_INSERT_ID(), ?, ?, ?, ?, ?,?) ;';
   
-  console.log("Creaate User", JSON.stringify(googleToken));
+  logger.verbose("Creaate User", JSON.stringify(googleToken));
   try{
       const results = await database.query(sql, [googleToken.accessToken, googleToken.refreshToken, googleToken.tokenType, googleToken.expiryDate,
                                           googleId, slug, createdAt, email, isAdmin, displayName, avatarUrl ]);
-      logger.info("Created User");
+      
       var response = await json(results);
-      return (response.ok );
+      logger.verbose("Created User", response);
+      return (response.insertId );
   }
   catch(error){
       logger.error("User (createUser): " + error);

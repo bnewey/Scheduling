@@ -48,7 +48,7 @@ const TableFilter = dynamic(
     const classes = useStyles();
 
     const {rows, setRows, filterConfig,setFilterConfig} = props;
-    const { mapRows, setMapRows, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, tabValue,
+    const {  selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, tabValue,
        filterSelectedOnly, setFilterSelectedOnly, filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
         modalOpen, setModalOpen, setModalTaskId} = useContext(TaskContext);
 
@@ -145,61 +145,11 @@ const TableFilter = dynamic(
       if (selectedIds.length <= 0) {
         const newSelecteds = filteredRows ? filteredRows.map(n=>n.t_id) : rows.map(n => n.t_id);
         setSelectedIds(newSelecteds);
-        setMapRows(filteredRows);
         return;
       }
       // if unchecked
-      setMapRows([]);
       setSelectedIds([]);
       setFilterSelectedOnly(false);
-      if(taskListToMap){
-        setTaskListToMap(null);
-        cogoToast.info("All Tasks deselected and Task List unmapped ", {hideAfter: 5});
-      }
-    };
-
-
-  
-    const handleClick = (event, record_id) => {
-      //Unset tasklist since were adding/removing from task list
-      if(taskListToMap){
-        setTaskListToMap(null);
-        cogoToast.info(`Task List: ${taskListToMap.list_name} has been unmapped`, {hideAfter: 4})
-      }
-
-      //TODO If user changes filter to exclude some already selected items, this breaks?
-      const selectedIndex = selectedIds.indexOf(record_id);
-      let newSelected = [];
-      const row = filteredRows.filter((row, index)=> row.t_id == record_id);
-      if(row == []){
-        error.log("No row found in filteredRows");
-      }
-
-      if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selectedIds, record_id);
-        setMapRows(mapRows ? mapRows.concat(row) : [row]);
-      } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selectedIds.slice(1));
-        setMapRows(mapRows.slice(1));
-      } else if (selectedIndex === selectedIds.length - 1) {
-        newSelected = newSelected.concat(selectedIds.slice(0, -1));
-        setMapRows(mapRows.slice(0,-1));
-      } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(
-          selectedIds.slice(0, selectedIndex),
-          selectedIds.slice(selectedIndex + 1),
-        );
-        var tempArray = [];
-        setMapRows(
-          tempArray.concat(
-            mapRows.slice(0,selectedIndex),
-            mapRows.slice(selectedIndex + 1),
-          )
-        );
-      }
-    
-      setSelectedIds(newSelected);
-
     };
 
 
@@ -235,7 +185,7 @@ const TableFilter = dynamic(
       <div className={classes.root}>
          
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selectedIds.length} mapRowsLength={mapRows.length}/>
+          <EnhancedTableToolbar numSelected={selectedIds.length}/>
             <Table
               className={classes.table}
               aria-labelledby="tableTitle"

@@ -26,16 +26,16 @@ const TaskListToolbar = (props) => {
     const [editList, setEditList] = React.useState(null);
     const [idToActivateOnRefreshTL, setIdToActivateOnRefreshTL] = React.useState(null);
     //PROPS
-    const {openTaskList, setOpenTaskList, taskListTasks, setTaskListTasks, isPriorityOpen, setIsPriorityOpen,
+    const { isPriorityOpen, setIsPriorityOpen,
                  priorityList, setPriorityList} = props;
 
-    const {taskLists, setTaskLists, setTabValue,
+    const {taskListTasks,setTaskListTasks, taskLists, setTaskLists, setTabValue,
         taskListToMap, setTaskListToMap} = useContext(TaskContext);
 
 
     useEffect(()=>{
         //set priority list ON START if exists
-        if(taskLists && taskListTasks == null && openTaskList == null){
+        if(taskLists && taskListTasks == null && taskListToMap == null){
             // POTENTIAL BUG
             setIsPriorityOpen(false);
             var priority_list = taskLists.filter((list)=> {
@@ -43,31 +43,29 @@ const TaskListToolbar = (props) => {
             })[0];
             if(priority_list){
                 setIsPriorityOpen(true);
-                setOpenTaskList(priority_list);
                 setTaskListToMap(priority_list);
             }
         }   
 
-        //change openTaskList and taskListToMap to newly created 
+        //change taskListToMap and taskListToMap to newly created 
         if(taskLists && idToActivateOnRefreshTL){
             let tmpTl = taskLists.filter((i)=>i.id == idToActivateOnRefreshTL)[0];
             if(tmpTl){
                 setTaskListToMap(tmpTl);
-                setOpenTaskList(tmpTl);
                 setIdToActivateOnRefreshTL(null);
             }
         }
     },[taskLists])
 
     
-    useEffect(()=>{ //Handle Priority on openTaskList change
-        if(openTaskList){
-            if(openTaskList.is_priority != null){
-                setIsPriorityOpen(openTaskList.is_priority);
+    useEffect(()=>{ //Handle Priority on taskListToMap change
+        if(taskListToMap){
+            if(taskListToMap.is_priority != null){
+                setIsPriorityOpen(taskListToMap.is_priority);
             }
         }
         console.log("useeffect open task list");
-    },[openTaskList])
+    },[taskListToMap])
 
     //CSS
     const classes = useStyles();
@@ -77,7 +75,6 @@ const TaskListToolbar = (props) => {
         if(!event.target.value){
             return;
         }
-        setOpenTaskList(event.target.value);
         setTaskListToMap(event.target.value);
         setTaskListTasks(null);
     };
@@ -91,7 +88,7 @@ const TaskListToolbar = (props) => {
                         throw new Error("Failed to remove Task List");
                     }
                     //refetch tasklists
-                    setOpenTaskList(null);
+                    setTaskListToMap(null);
                     setTaskLists(null);
                     cogoToast.success(`Removed Task List ${id}`, {hideAfter: 4});
                 })
@@ -115,10 +112,9 @@ const TaskListToolbar = (props) => {
             setIsPriorityOpen(!priorityOpen);
         }
 
-        //change to Priority List regardless of current OpenTaskList
+        //change to Priority List regardless of current TaskListToMap
         if(!priorityOpen){
             let priority_list = taskLists.filter((list)=> list.is_priority)[0];
-            setOpenTaskList(priority_list);
             setTaskListToMap(priority_list);
             setTaskListTasks(null);
         }
@@ -174,7 +170,7 @@ const TaskListToolbar = (props) => {
     }
 
     // const handleSetPriority = (event, tl_id, tl_name) => {
-    //     if(!openTaskList){
+    //     if(!taskListToMap){
     //         return;
     //     }
     //     console.log("ID ", tl_id);
@@ -185,7 +181,7 @@ const TaskListToolbar = (props) => {
     //             console.log("reponse", data);
     //             cogoToast.success("Setting Priority");
     //             setTaskLists(null);
-    //             setOpenTaskList(null);
+    //             setTaskListToMap(null);
     //         })
     //         .catch((error)=>{
     //             console.error(error);
@@ -213,11 +209,11 @@ const TaskListToolbar = (props) => {
                 <>
                     <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>
                     <div className={classes.leftButtonGroup}>
-                    {openTaskList ? 
+                    {taskListToMap ? 
                         <ButtonGroup  className={classes.buttonGroup}> 
                                    
                             <Button
-                                onMouseDown={event => handleMapTaskList(event, openTaskList)}
+                                onMouseDown={event => handleMapTaskList(event, taskListToMap)}
                                 variant="text"
                                 color="secondary"
                                 size="large"
@@ -241,7 +237,7 @@ const TaskListToolbar = (props) => {
                         
                     </div>
 
-                    { openTaskList ?  
+                    { taskListToMap ?  
                     <>
                         
                     </> : <></> }

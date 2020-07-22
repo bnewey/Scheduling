@@ -10,7 +10,7 @@ import { TaskContext } from '../TaskContainer';
 const TaskListTasksEdit = ({props}) => {
  
     //PROPS
-    const { openTaskList, list, open, handleClose} = props;
+    const { taskListToMap, list, open, handleClose} = props;
     const {taskLists, setTaskLists } = useContext(TaskContext);
 
     //STATE

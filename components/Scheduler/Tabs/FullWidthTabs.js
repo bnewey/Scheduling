@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef, useState, useEffect, createContext} from 'react';
 import PropTypes from 'prop-types';
 import SwipeableViews from 'react-swipeable-views';
 
@@ -11,18 +11,18 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 import CrewIcon from '@material-ui/icons/Group';
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, tabValue, index, ...other } = props;
 
   return (
     <Typography
       component="div"
       role="tabpanel"
-      hidden={value !== index}
+      hidden={tabValue !== index}
       id={`full-width-tabpanel-${index}`}
       aria-labelledby={`full-width-tab-${index}`}
       {...other}
     >
-      {value === index && <Box p={2}>{children}</Box>}
+      {tabValue === index && <Box p={2}>{children}</Box>}
     </Typography>
   );
 }
@@ -30,7 +30,7 @@ function TabPanel(props) {
 TabPanel.propTypes = {
   children: PropTypes.node,
   index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+  tabValue: PropTypes.any.isRequired,
 };
 
 function a11yProps(index) {
@@ -42,19 +42,39 @@ function a11yProps(index) {
 
 
 
-export default function FullWidthTabs({children, value, setValue, numSelected, activeTask}) {
+export default function FullWidthTabs({children, tabValue, setTabValue, numSelected, activeTask}) {
   const classes = useStyles();
   const theme = useTheme();
 
+  //Save and/or Fetch tabValue to local storage
+  useEffect(() => {
+    if(tabValue == null){
+      var tmp = window.localStorage.getItem('tabValue');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(!isNaN(tmpParsed)){
+        setTabValue(tmpParsed);
+      }else{
+        setTabValue(0);
+      }
+    }
+    if(!isNaN(tabValue)){
+      window.localStorage.setItem('tabValue', JSON.stringify(tabValue));
+    }
+    
+  }, [tabValue]);
+
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    setTabValue(newValue);
   };
 
   const handleChangeIndex = index => {
-    setValue(index);
+    setTabValue(index);
   };
 
-  if(value == null){
+  if(tabValue == null){
     return(<></>);
   }
 
@@ -62,7 +82,7 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
     <div className={classes.root}>
       <AppBar position="static" color="default">
         <Tabs
-          value={value}
+          tabValue={tabValue}
           onChange={handleChange}
           indicatorColor="primary"
           textColor="primary"
@@ -70,7 +90,7 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
           aria-label="full width tabs example"
           className={classes.tabRoot}
         >
-          <Tab className={value === 0 ? classes.selectedTab : classes.nonSelectedTab} 
+          <Tab className={tabValue === 0 ? classes.selectedTab : classes.nonSelectedTab} 
               label={ 
                 <React.Fragment>
                   <span className={classes.tabSpan}>
@@ -82,10 +102,10 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
                     </p> : <></>
                   } */}
               </React.Fragment>} {...a11yProps(0)} />
-          <Tab className={value === 1 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(1)} />
-          <Tab className={value === 2 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><CrewIcon className={classes.icon}/>&nbsp;Crew</span>} {...a11yProps(2)} />
+          <Tab className={tabValue === 1 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(1)} />
+          <Tab className={tabValue === 2 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><CrewIcon className={classes.icon}/>&nbsp;Crew</span>} {...a11yProps(2)} />
           
-          <Tab className={value === 3 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
+          <Tab className={tabValue === 3 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
               label={ <React.Fragment>
                           <span className={classes.tabSpan}> 
                             <ViewListIcon className={classes.icon}/>&nbsp;All Tasks
@@ -98,12 +118,12 @@ export default function FullWidthTabs({children, value, setValue, numSelected, a
       </AppBar>
       <SwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-        index={value}
+        index={tabValue}
         onChangeIndex={handleChangeIndex}
         className={classes.tabRoot}
       >
      
-         {children.map((child, index) => (   <TabPanel className={classes.tab} key={index} value={value} index={index} dir={theme.direction}>
+         {children.map((child, index) => (   <TabPanel className={classes.tab} key={index} tabValue={tabValue} index={index} dir={theme.direction}>
             {child}
           </TabPanel>
          ))}

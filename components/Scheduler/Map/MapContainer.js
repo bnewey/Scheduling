@@ -10,9 +10,12 @@ import cogoToast from 'cogo-toast';
 import MapMarkerInfoWindow from './MapMarkerInfoWindow';
 
 import Tasks from '../../../js/Tasks';
+import TaskLists from '../../../js/TaskLists';
 import Util from '../../../js/Util';
+import TaskListFilter from '../TaskList/TaskListFilter';
 import { TaskContext } from '../TaskContainer';
 
+import {createFilter} from '../../../js/Filter';
 
 
 const useStyles = makeStyles(theme => ({
@@ -35,28 +38,68 @@ const useStyles = makeStyles(theme => ({
 const MapContainer = (props) => {
     const classes = useStyles();
 
-    const {mapRows, setMapRows, modalOpen, setModalOpen, setModalTaskId} = useContext(TaskContext);
+    const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap,
+          filters, setFilter, filterInOrOut, setTaskListTasksSaved} = useContext(TaskContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const [bounds, setBounds] = useState(null);
     
+    const [mapRows, setMapRows] = useState(null); 
     const [resetBounds, setResetBounds] = React.useState(true);
     const [markedRows, setMarkedRows] = useState([]);
+    const [noMarkerRows, setNoMarkerRows] = useState(null);
     const [infoWeather, setInfoWeather] = useState(null);
-    const [reFetchTaskList, setReFetchTaskList] = React.useState(false);
 
     useEffect( () =>{ //useEffect for inputText
-      if(resetBounds)
+      if(mapRows != null)
         getBounds();
-        setResetBounds(false);
+        //setResetBounds(false);
       return () => { //clean up
           if(resetBounds){
               
           }
       }
-    },[resetBounds]);
+    },[resetBounds, mapRows]);
+
 
     useEffect( () =>{ //useEffect for inputText
+      if(mapRows == null){
+          if(taskLists && taskListToMap && taskListToMap.id ) { 
+            TaskLists.getTaskList(taskListToMap.id)
+            .then( (data) => {
+                if(!Array.isArray(data)){
+                    console.error("Bad tasklist data",data);
+                    return;
+                }
+                var tmpData = [...data];
+                //If more than one property is set, we need to filter seperately
+                let properties = new Set([...filters].map((v,i)=>v.property));
+                
+                //in works different than out, this seperates properties seperate instead of all together
+                if( properties.size > 1 && filterInOrOut == "in"){
+                    properties.forEach((index,property)=>{
+                        let tmpFilter = filters.filter((v,i)=> v.property == property);
+                        tmpData = [...tmpData].filter(createFilter([...tmpFilter], filterInOrOut));
+                    })
+                }else{
+                    //Just one property or any filterInOrOut == out case
+                    tmpData = data.filter(createFilter([...filters], filterInOrOut));
+                }
+                
+                setTaskListTasksSaved(data);
+
+                //Set TaskListTasks
+                if(Array.isArray(tmpData)){
+                    setMapRows(tmpData);
+                }
+                
+            })
+            .catch( error => {
+                cogoToast.error(`Error getting Task List`, {hideAfter: 4});
+                console.error("Error getting tasklist", error);
+            })
+        }
+      }
       if(mapRows){
         //filter geocoded, then sort by priority_order
         var tmp = mapRows.filter((row, index) => row.geocoded).sort((a,b)=>{
@@ -67,72 +110,68 @@ const MapContainer = (props) => {
         setMarkedRows(tmp);
       }
 
-      //Find and set geolocation of unset rows
-      if(noMarkerRows){
-        var tmpMapRows = [...mapRows];
-        noMarkerRows.forEach((row, i)=> {
-          if(i > 50){
-            //cogoToast.warn('Too many markers selected to correct all addresses...', {hideAfter: 4});
-            //return;
-          }
-          if(!row.address){
-            return;
-            
-          }
-            
-          Tasks.getCoordinates(row.address, row.city, row.state, row.zip)
-          .then((data)=>{
-            if(!data){
-              throw new Error("Bad return from getCoordinates from GoogleAPI");
-            }
-            //Update MapRows with lat, lng, geocoded instead of refreshing
-            var mapRowIndex = mapRows.indexOf(row)
-            var tmpRow = {...row};
-            
-            tmpRow["lat"] = data.lat;
-            tmpRow["lng"] = data.lng;
-            tmpRow["geocoded"] = 1;
-            tmpMapRows[mapRowIndex] = tmpRow;
-            setMapRows(tmpMapRows);
+      
+      return () => { //clean up
+      }
+    },[mapRows,filterInOrOut]);
 
-            //Save lat, lng, geocoded to db
-            Tasks.saveCoordinates(row.t_id, data)
-            .then((ok)=>{
-              if(!ok){
-                console.warn("Did not save coordinates.");
-              }
-              if(i == noMarkerRows.length){
-                cogoToast.info('Unmapped Markers have been added to map', {hideAfter: 4});
-              }
-
+    useEffect(()=>{
+        if(noMarkerRows == null && mapRows){
+           setNoMarkerRows(mapRows.filter((row, index) => !row.geocoded));
+        }
+        console.log("noMarkerRows", mapRows);
+        //Find and set geolocation of unset rows
+        if(noMarkerRows && noMarkerRows.length > 0 && mapRows){
+          console.log("noMarkerRows in if");
+          var tmpMapRows = [...mapRows];
+          noMarkerRows.forEach((row, i)=> {
+            if(!row.address){
+              return;
               
+            }
+              
+            Tasks.getCoordinates(row.address, row.city, row.state, row.zip)
+            .then((data)=>{
+              if(!data){
+                throw new Error("Bad return from getCoordinates from GoogleAPI");
+              }
+              //Update MapRows with lat, lng, geocoded instead of refreshing
+              var mapRowIndex = mapRows.indexOf(row)
+              var tmpRow = {...row};
+              
+              tmpRow["lat"] = data.lat;
+              tmpRow["lng"] = data.lng;
+              tmpRow["geocoded"] = 1;
+              tmpMapRows[mapRowIndex] = tmpRow;
+              setMapRows(tmpMapRows);
+              setNoMarkerRows(tmpMapRows.filter((row, index) => !row.geocoded));
+              //Save lat, lng, geocoded to db
+              Tasks.saveCoordinates(row.t_id, data)
+              .then((ok)=>{
+                if(!ok){
+                  console.warn("Did not save coordinates.");
+                }
+                if(i == noMarkerRows.length){
+                  cogoToast.info('Unmapped Markers have been added to map', {hideAfter: 4});
+                }
+
+                
+              })
+              .catch((error)=> {
+                console.error(error);
+                cogoToast.error(`Error Saving Coordinates`, {hideAfter: 4});
+                setNoMarkerRows([]);
+              })
             })
             .catch((error)=> {
               console.error(error);
-              cogoToast.error(`Error Saving Coordinates`, {hideAfter: 4});
+              cogoToast.error(`Error getting coordinates`, {hideAfter: 4});
+              setNoMarkerRows([]);
             })
           })
-          .catch((error)=> {
-            console.error(error);
-            cogoToast.error(`Error getting coordinates`, {hideAfter: 4});
-          })
-        })
-        
-      }
-      return () => { //clean up
-      }
-    },[mapRows]);
-    
-
-    // if(mapRows.length > 50){
-    //   setMapRows( mapRows.slice(0, 49));
-
-    //   cogoToast.warn('Too many tasks have been selected! Showing first 50 tasks...', {hideAfter: 4});
-    // }
-
-    //Get mapRows that do not have lat, lng
-    const noMarkerRows = useMemo(() => mapRows.filter((row, index) => !row.geocoded) , [mapRows]);
-    
+          
+        }
+    }, [noMarkerRows, mapRows])
 
 
     //Get Bounds 
@@ -182,7 +221,13 @@ const MapContainer = (props) => {
     
     return (
       <div>
+        <Grid container spacing={1}>
+          <Grid item xs={12}>
+          <TaskListFilter setFilteredItems={setMapRows}/>
+          </Grid>
+        </Grid>
           <Grid container spacing={3}>
+            
             <Grid item xs={9}>
             
               <Map
@@ -215,14 +260,13 @@ const MapContainer = (props) => {
               </Map>
             </Grid>
             <Grid item xs={3}>
-              <MapSidebar noMarkerRows={noMarkerRows} 
+              <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
                           markedRows={markedRows} setMarkedRows={setMarkedRows}
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                           setShowingInfoWindow={setShowingInfoWindow}
                           setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
                           setResetBounds={setResetBounds}
                           infoWeather={infoWeather} setInfoWeather={setInfoWeather}
-                          reFetchTaskList={reFetchTaskList} setReFetchTaskList={setReFetchTaskList}
                           />
             </Grid>
           </Grid>

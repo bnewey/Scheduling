@@ -13,10 +13,11 @@ const MapSidebar = (props) => {
     //STATE
     const [expanded, setExpanded] = React.useState(false);
 
+    const panelRef = useRef(null);
+
     //PROPS
-    const {noMarkerRows,markedRows, activeMarker, setActiveMarker, 
-            setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds,
-            reFetchTaskList, setReFetchTaskList} = props;
+    const {mapRows, setMapRows, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
+            setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds} = props;
 
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded)
@@ -49,15 +50,16 @@ const MapSidebar = (props) => {
                     id="panel1bh-header"
                 ><ListIcon className={classes.icon}/><span>Mapped Markers:&nbsp;&nbsp;{markedRows.length} Items</span>
                 </ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.details}>
+                <ExpansionPanelDetails ref={panelRef} className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400}>
-                        <MapSidebarMarkedTasks {...props}
+                        <MapSidebarMarkedTasks {...props} panelRef={panelRef}
                                                 />
                     </Scrollbars>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
+            { noMarkerRows && noMarkerRows.length >0  ? 
             <ExpansionPanel expanded={expanded === 'panel2'} onChange={handleChange('panel2')} className={classes.body} 
-                classes={noMarkerRows.length > 0 ? {root: classes.attention} : {}}>
+                classes={noMarkerRows && noMarkerRows.length > 0 ? {root: classes.attention} : {}}>
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1bh-content"
@@ -70,6 +72,7 @@ const MapSidebar = (props) => {
                     </Scrollbars>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
+            :<></>}
 
         </Paper>
     );

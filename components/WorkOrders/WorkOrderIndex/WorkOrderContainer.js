@@ -21,7 +21,7 @@ const WorkOrderContainer = function() {
         to: today,
         from: new Date(new Date().setDate(today.getDate()-180))
       });
-      const [pdfRows, setPdfRows] = useState([]); //setMapRows gets called in children components
+      const [pdfRows, setPdfRows] = useState([]); 
       const [filterConfig, setFilterConfig] = useState();
       const [selectedIds, setSelectedIds] = useState([]);
 

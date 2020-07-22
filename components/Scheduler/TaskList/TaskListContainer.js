@@ -8,9 +8,8 @@ import { TaskContext } from '../TaskContainer';
 
 //we can make this a functional component now
 const TaskListContainer = function(props) {
-    const {taskListToMap, modalOpen, setModalOpen, setModalTaskId, taskLists} = useContext(TaskContext);
+    const {taskListToMap, setTaskListToMap,  modalOpen, setModalOpen, setModalTaskId, taskLists} = useContext(TaskContext);
     
-    const [openTaskList, setOpenTaskList] = useState(taskListToMap ? taskListToMap : null);
     const [isPriorityOpen, setIsPriorityOpen] = useState(false);
     const [priorityList, setPriorityList] = useState(null);
 
@@ -25,7 +24,7 @@ const TaskListContainer = function(props) {
     <div>
         <TaskListMain modalOpen={modalOpen} setModalOpen={setModalOpen} 
                     setModalTaskId={setModalTaskId}
-                    openTaskList={openTaskList} setOpenTaskList={setOpenTaskList}
+                    taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
                     isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
                     priorityList={priorityList} setPriorityList={setPriorityList}/>
     </div>

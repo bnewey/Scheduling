@@ -16,6 +16,7 @@ import cogoToast from 'cogo-toast';
 import Util from  '../../js/Util';
 import HelpModal from './HelpModal/HelpModal';
 
+
 var today =  new Date();
 
 export const TaskContext = createContext(null);
@@ -29,17 +30,19 @@ const TaskContainer = function() {
           to: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()-90)))
         });
   const [tabValue, setTabValue] = React.useState(null);
+
   //TaskList/Scheduler Props
+    //TaskListTasks is in TaskListMain
     const [taskListTasksSaved, setTaskListTasksSaved] = useState([]);
     const [taskLists, setTaskLists] = useState();
     const [priorityList, setPriorityList] = useState(null);
     const [filters, setFilters] = useState(null);
-    const [filterInOrOut, setFilterInOrOut] = useState("out");
+    const [filterInOrOut, setFilterInOrOut] = useState(null);
     const [sorters, setSorters] = useState(null);
 
   //Map Props
     const [taskListToMap, setTaskListToMap] = useState(null);
-    const [mapRows, setMapRows] = useState([]); //setMapRows gets called in children components
+    //map rows is in MapContainer
   //Table Props
     const [selectedIds, setSelectedIds] = useState([]);
     const [filterConfig, setFilterConfig] = useState();
@@ -65,18 +68,6 @@ const TaskContainer = function() {
       })
     }
 
-    //This runs if rows is refetched...
-    //check if mapRows already exists, if so we need to update that with new rows
-    if(rows){
-      if(mapRows || mapRows != []){
-        var tmpMapRows = rows.filter((row, i)=>{
-          if(selectedIds.indexOf(row.t_id) != -1) 
-            return true;
-          return false;
-        })
-        setMapRows(tmpMapRows);
-      }
-    }
   },[rows]);
 
   //TaskLists
@@ -96,98 +87,52 @@ const TaskContainer = function() {
     }
   },[ taskLists]);
 
+
   //TaskListToMap
   useEffect( () =>{ 
-    //Gets and sets tasks from Task List when theres a tasklistToMap and no selected from EnhancedTable
-    if(taskListToMap) {
-        TaskLists.getTaskList(taskListToMap.id)
-        .then( (data) => {
-            //Set selected ids to Task List Tasks to prevent confusing on Tasks Table
-            var newSelectedIds = data.map((item, i )=> item.t_id );
-            setSelectedIds(newSelectedIds);
-            
-            setMapRows(data);
-            cogoToast.success(`Active Task List: ${taskListToMap.list_name}.`, {hideAfter: 4});
-        })
-        .catch( error => {
-            console.error(error);
-            cogoToast.error(`Error getting task list`, {hideAfter: 4});
-        })        
+    if(taskListToMap == null && taskLists && taskLists.length > 0){
+      //Hard coded in our tasklist
+      setTaskListToMap(taskLists.filter((tl,i)=>tl.id == 135 )[0]);
     }
-    },[taskListToMap]);
+  },[taskListToMap, taskLists]);
 
 
+  //Save and/or Fetch filters to local storage
+  useEffect(() => {
+    if(filters == null){
+      var tmp = window.localStorage.getItem('filters');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(Array.isArray(tmpParsed)){
+        setFilters(tmpParsed);
+      }else{
+        setFilters([]);
+      }
+    }
+    if(Array.isArray(filters)){
+      window.localStorage.setItem('filters', JSON.stringify(filters));
+    }
+    
+  }, [filters]);
 
-    //Save and/or Fetch filters to local storage
-    useEffect(() => {
-      if(filters == null){
-        var tmp = window.localStorage.getItem('filters');
-        var tmpParsed;
-        if(tmp){
-          tmpParsed = JSON.parse(tmp);
-        }
-        if(Array.isArray(tmpParsed)){
-          setFilters(tmpParsed);
-        }else{
-          setFilters([]);
-        }
-      }
-      if(Array.isArray(filters)){
-        window.localStorage.setItem('filters', JSON.stringify(filters));
-      }
-      
-    }, [filters]);
+  
 
-    //Save and/or Fetch sorters to local storage
-    useEffect(() => {
-      if(sorters == null){
-        var tmp = window.localStorage.getItem('sorters');
-        var tmpParsed;
-        if(tmp){
-          tmpParsed = JSON.parse(tmp);
-        }
-        if(Array.isArray(tmpParsed)){
-          setSorters(tmpParsed);
-        }else{
-          setSorters([]);
-        }
-      }
-      if(Array.isArray(sorters)){
-        window.localStorage.setItem('sorters', JSON.stringify(sorters));
-      }
-      
-    }, [sorters]);
+  
 
-    //Save and/or Fetch tabValue to local storage
-    useEffect(() => {
-      if(tabValue == null){
-        var tmp = window.localStorage.getItem('tabValue');
-        var tmpParsed;
-        if(tmp){
-          tmpParsed = JSON.parse(tmp);
-        }
-        if(!isNaN(tmpParsed)){
-          setTabValue(tmpParsed);
-        }else{
-          setTabValue(0);
-        }
-      }
-      if(!isNaN(tabValue)){
-        window.localStorage.setItem('tabValue', JSON.stringify(tabValue));
-      }
-      
-    }, [tabValue]);
+  
   
 
   return (
     <div className={classes.root}>
-      <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, mapRows, setMapRows, selectedIds, setSelectedIds, 
+      <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, selectedIds, setSelectedIds, 
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut,
                              sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved} } >
       <CrewContextContainer /* includes crew context */>
-          <FullWidthTabs value={tabValue} setValue={setTabValue} 
+          <FullWidthTabs tabValue={tabValue} setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
           
             <div>

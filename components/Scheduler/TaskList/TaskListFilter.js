@@ -20,17 +20,54 @@ import {TaskContext} from '../TaskContainer';
 const TaskListFilter = (props) => {
    
     //PROPS
-    const { taskListTasks, setTaskListTasks, filters, setFilters, filterInOrOut, setFilterInOrOut, openTaskList, table_info,
-        selectedTasks,setSelectedTasks} = props;
+    const { setFilteredItems } = props;
 
-    const {taskLists, setTaskLists, tabValue, setTabValue,
-        taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds,
-         setMapRows, taskListTasksSaved, setTaskListTasksSaved} = useContext(TaskContext);
+    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut, filters, setFilters} = useContext(TaskContext);
 
     //STATE
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedField, setSelectedField] = useState(null);
+    const [tableConfig, setTableInfo] = useState([
+        {text: "Type", field: "type", type: 'text'},
+        {text: "Completed", field: "completed_wo",  type: 'number'}, 
+        {text: "i_crew", field: "install_crew",  type: 'text'},
+        {text: "d_crew", field: "drill_crew",  type: 'text'},
+        {text: "Drilling", field: "drilling", type: 'text'},
+        {text: "Art", field: "artwork", type: 'text'},
+        {text: "Signs", field: "sign",  type: 'text'},
+        {text: "State", field: "state", type: 'text'},
+        {text: "City", field: "city", type: 'text'},
+        {text: "d_date", field: "drill_date",  type: 'date'},  
+        {text: "i_date", field: "install_date", type: 'date'},
+        {text: "Desired Date", field: "date_desired", type: 'date'},
+        {text: "Date Entered", field: "tl_date_entered", type: 'date'},
+        {text: "1st Game", field: "first_game", type: 'date'},
+        {text: "Name", field: "t_name", type: 'text'},
+        {text: "WO #", field: "table_id", type: 'number'},
+        {text: "Description", field: "description",  type: 'text'}, 
+        {text: "Order", field: "priority_order", type: 'number'}
+    ]);
+    
+    //Save and/or Fetch filterInOrOut to local storage
+    useEffect(() => {
+        if(filterInOrOut == null){
+            var tmp = window.localStorage.getItem('filterInOrOut');
+            var tmpParsed;
+            console.log(tmp);
+            if(tmp && tmp != undefined){
+                tmpParsed = JSON.parse(tmp);
+            }
+            if(tmpParsed){
+                setFilterInOrOut(tmpParsed);
+            }else{
+                setFilterInOrOut("out");
+            }
+        }
+        if((filterInOrOut)){
+            window.localStorage.setItem('filterInOrOut', JSON.stringify(filterInOrOut));
+        }
+        
+    }, [filterInOrOut]);
     
 
     //CSS
@@ -38,28 +75,35 @@ const TaskListFilter = (props) => {
 
     //Filter
     useEffect(()=>{
-        if (Array.isArray(filters) && filters.length) {
+        if (Array.isArray(filters) && filters.length && filterInOrOut != null) {
             if (taskListTasksSaved && taskListTasksSaved.length) {
-                var tmpData = taskListTasksSaved.filter(createFilter([...filters], filterInOrOut))
-                console.log(tmpData);
+
+                var tmpData = [...taskListTasksSaved];
+
+                //If more than one property is set, we need to filter seperately
+                let properties = new Set([...filters].map((v,i)=>v.property));
+                
+                //in works different than out
+                if( properties.size > 1 && filterInOrOut == "in"){
+                    
+                    properties.forEach((index,property)=>{
+                        let tmpFilter = filters.filter((v,i)=> v.property == property);
+                        tmpData = [...tmpData].filter(createFilter([...tmpFilter], filterInOrOut));
+                    })
+                }else{
+                    //Just one property or any filterInOrOut == out case
+                    tmpData = taskListTasksSaved.filter(createFilter([...filters], filterInOrOut));
+                }
+                
                 var copyObject = [...tmpData];
-                setTaskListTasks(copyObject);
-                setSelectedTasks([]);
+                setFilteredItems(copyObject);
             }
         }
         if(Array.isArray(filters) && !filters.length){
-            setTaskListTasks(null);
+            setFilteredItems(null);
         }
-    },[filters]);
+    },[filters, filterInOrOut]);
 
-    useEffect(()=>{
-        if(taskListTasks == null){
-            //setTaskListTasksSaved([]);
-        }
-        if(taskListTasksSaved.length == 0 && taskListTasks){
-            //setTaskListTasksSaved(taskListTasks);
-        }
-    },[taskListTasks]);
     
     const handleModalOpen = () => {
         setFilterModalOpen(true);
@@ -75,10 +119,6 @@ const TaskListFilter = (props) => {
             console.log("FIeldItem", fieldItem);
             return;
             
-        }
-        if(!table_info){
-            cogoToast.error("Bad field while trying to sort");
-            return;
         }
         //no filters yet
         if(!filters || filters.length <= 0){
@@ -131,7 +171,7 @@ const TaskListFilter = (props) => {
     }
 
     const handleChangeFilterType = (event) =>{
-        setTaskListTasks(null);
+        setFilteredItems(null);
         if(filterInOrOut == "out"){
             setFilterInOrOut("in");
         }
@@ -142,7 +182,7 @@ const TaskListFilter = (props) => {
      
     return(
         <>
-        {openTaskList ? 
+        {taskListToMap ? 
         <>
             <div className={classes.filterDiv}>
                 <Button className={classes.filterButton}
@@ -203,9 +243,9 @@ const TaskListFilter = (props) => {
                         </div>
                         <Grid item xs={4} className={classes.paper}>
                             <List className={classes.fieldList}>
-                            {table_info ? 
+                            {tableConfig ? 
                                 <>
-                                    {table_info.map((item,i)=>{
+                                    {tableConfig.map((item,i)=>{
                                         const isSelected = selectedField === item; 
                                         return(
                                             <ListItem key={item.field + i} dense button
@@ -230,13 +270,13 @@ const TaskListFilter = (props) => {
                                     <FormControlLabel
                                         control={
                                         <Switch
-                                            checked={filterInOrOut == "in"}
+                                            checked={filterInOrOut  && filterInOrOut == "in"}
                                             onChange={(event)=> handleChangeFilterType(event)}
                                             name="Filter In or Out"
                                             color="primary"
                                         />
                                          }
-                                    label={filterInOrOut  == "in" ? "Filter TO Selected" : "Filter OUT Selected"}
+                                    label={filterInOrOut && filterInOrOut  == "in" ? "Filter TO Selected" : "Filter OUT Selected"}
                                     />
                                     {taskListTasksSaved.map((task)=> task[selectedField.field]).filter((v, i, array)=> array.indexOf(v)===i ).map((item,i)=>{
                                         const isFiltered =  (filters.filter((filter, i)=> 
