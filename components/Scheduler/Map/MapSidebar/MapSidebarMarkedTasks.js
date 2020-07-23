@@ -12,6 +12,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Tasks from '../../../../js/Tasks';
 import TaskLists from '../../../../js/TaskLists';
 import {TaskContext} from '../../TaskContainer';
+import Util from '../../../../js/Util';
 
 
 const MapSiderbarMarkedTasks = (props) =>{
@@ -48,7 +49,7 @@ const MapSiderbarMarkedTasks = (props) =>{
       if(activeMarker){
         var el = panelRef.current.querySelector("#mapMarkedListItem"+activeMarker.t_id);
         if(!isInViewport(el, panelRef.current)){
-          el.scrollIntoView();
+          el.scrollIntoView({behavior: "smooth",inline: "nearest"});
         }
         
       }
@@ -253,7 +254,9 @@ const MapSiderbarMarkedTasks = (props) =>{
                                 ) : {}}>
                       <ListItemText id={labelId}>
                             <><div className={classes.MarkerInfo}>{row.t_name}</div>
-                            <div className={classes.MarkerSubInfo}>  ID:&nbsp;{row.t_id}&nbsp;&nbsp;Priority:&nbsp;{row.priority_order} </div></>
+                            <div className={classes.MarkerSubInfo}>  Priority:&nbsp;{row.priority_order}
+                                &nbsp;&nbsp;{row.install_date ? <>I-date:&nbsp;{Util.convertISODateToMySqlDate(row.install_date)}&nbsp;</>: ""}
+                                {row.drill_date ? <>D-date:&nbsp;{Util.convertISODateToMySqlDate(row.drill_date)}</> :""} </div></>
                       </ListItemText>
                       <ListItemSecondaryAction>
                         { activeMarker && activeMarker.t_id === row.t_id ? 

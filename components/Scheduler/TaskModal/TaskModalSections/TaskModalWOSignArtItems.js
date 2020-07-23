@@ -69,7 +69,7 @@ const TaskModalWOSignArtItems = (props) =>{
                                 </ListItemIcon>
                                 <ListItemText>
                                     <>
-                                    <div className={classes.item_head}>{item.description}</div>
+                                    <div className={classes.item_head}>{item.description}&nbsp;-&nbsp;{item.vendor}</div>
                                     <div className={classes.item_info}>
                                         <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}>Sign Built</div> 
                                         <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>Copy Received</div>

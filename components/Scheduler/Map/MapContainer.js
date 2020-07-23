@@ -63,7 +63,7 @@ const MapContainer = (props) => {
 
 
     useEffect( () =>{ //useEffect for inputText
-      if(mapRows == null){
+      if(mapRows == null && filterInOrOut != null){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
             TaskLists.getTaskList(taskListToMap.id)
             .then( (data) => {
@@ -86,10 +86,18 @@ const MapContainer = (props) => {
                   }else{
                       //Just one property or any filterInOrOut == out case
                       tmpData = data.filter(createFilter([...filters], filterInOrOut));
+                      console.log( "single filter tmpdata",tmpData);
+                      console.log("filters in single",filters);
+                      console.log("inORout",filterInOrOut);
                   }
                 }
                 
                 setTaskListTasksSaved(data);
+
+                console.log("tmpData final",tmpData);
+                console.log("filters final",filters);
+                      console.log("inORout final",filterInOrOut);
+                
 
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
@@ -122,7 +130,6 @@ const MapContainer = (props) => {
         if(noMarkerRows == null && mapRows){
            setNoMarkerRows(mapRows.filter((row, index) => !row.geocoded));
         }
-        console.log("noMarkerRows", mapRows);
         //Find and set geolocation of unset rows
         if(noMarkerRows && noMarkerRows.length > 0 && mapRows){
           console.log("noMarkerRows in if");

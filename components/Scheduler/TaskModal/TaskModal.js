@@ -232,7 +232,7 @@ export default function TaskModal(props){
             <div className={classes.container}>
             <div className={classes.modalTitleDiv}>
                 <span id="transition-modal-title" className={classes.modalTitle}>
-                    Edit Task Id: {modalTask.t_id}&nbsp;&nbsp;&nbsp;Date Ordered: {modalTask.wo_date}
+                    Edit Task Id: {modalTask.t_id}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WO#: {modalTask.table_id}
                 </span>
             </div>
             <Grid container >  
