@@ -7,3 +7,6 @@
 # Ignore folder named `node_modules`
 node_modules/
 .env
+
+package.json
+package-lock.json
