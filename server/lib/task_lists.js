@@ -38,9 +38,9 @@ router.post('/getTaskList', async (req,res) => {
         ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, wo.type, t.install_location, ' +
         ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
-        ' cjd.crew_id AS drill_crew, mai.member_name AS install_crew_leader, '  +
+        ' cjd.crew_id AS drill_crew, mad.member_name AS drill_crew_leader , '  +
         ' date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
-        ' cji.crew_id AS install_crew, mad.member_name AS drill_crew_leader, ' + 
+        ' cji.crew_id AS install_crew, mai.member_name AS install_crew_leader, ' + 
         ' date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded ' +
         ' FROM task_list_items tli ' +
@@ -51,9 +51,9 @@ router.post('/getTaskList', async (req,res) => {
     ' LEFT JOIN crew_jobs cji ON cji.job_type = \'install\' AND cji.task_id = t.id  ' + 
     ' LEFT JOIN crew_jobs cjd ON cjd.job_type = \'drill\' AND cjd.task_id = t.id  ' + 
     ' LEFT JOIN crew_members cmi ON cmi.crew_id = cji.crew_id AND cmi.is_leader = 1  ' + 
-    ' LEFT JOIN crew_members cmd ON cmd.crew_id = cji.crew_id AND cmd.is_leader = 1  ' + 
+    ' LEFT JOIN crew_members cmd ON cmd.crew_id = cjd.crew_id AND cmd.is_leader = 1  ' + 
     ' LEFT JOIN crew_members_available mai ON mai.id = cmi.member_id  ' + 
-    ' LEFT JOIN crew_members_available mad ON mad.id = cmi.member_id  ' + 
+    ' LEFT JOIN crew_members_available mad ON mad.id = cmd.member_id  ' + 
     ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1) ' +
     ' WHERE tli.task_list_id = ? ORDER BY tli.priority_order ASC' ;
 
