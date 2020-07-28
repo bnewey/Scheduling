@@ -209,6 +209,52 @@ const TaskListTasks = (props) =>{
       return dndTask;
     }
 
+    const handleSpecialTableValues = (fieldId, value, type, task) =>{
+      if(fieldId == null || task == null){
+        console.error("Bad fieldId or task in handleSpecialTableValues");
+        return;
+      }
+      if(type == null){
+        console.error("Bad type in handleSpecialTableValues");
+        return;
+      }
+
+      if(value == null){
+        return <>&nbsp;</>;
+      }
+
+      var return_value = value;
+
+      //Handle date types first
+      if(type=="date"){
+        return_value = Util.convertISODateToMySqlDate(return_value);
+      }
+
+      switch(fieldId){
+        case 'install_crew':{
+          
+          if(task.install_crew_leader != null){
+            return_value = task.install_crew_leader;
+          }else{
+            return_value = 'Crew ' + value.toString();
+          }
+          break;
+        }
+        case 'drill_crew':{
+          if(task.drill_crew_leader != null){
+            return_value = task.drill_crew_leader;
+          }else{
+            return_value = 'Crew ' + value.toString();
+          }
+          break;
+        }
+        default:{
+          
+        }
+      }
+      return return_value
+    }
+
     return(
         <React.Fragment>
         { taskListTasks && taskListTasksSaved ? 
@@ -273,19 +319,16 @@ const TaskListTasks = (props) =>{
                           </> 
                         : <></>}
                         {table_info.map((item, i)=>{
-                          var value;
-                          if(item.type == 'date' ){
-                            value = Util.convertISODateToMySqlDate(row[item.field]);
-                          }else{
-                            value = row[item.field];
-                          }
+                          var value = row[item.field];
+                          
                           return( <Tooltip title={value} enterDelay={800}>
                           <ListItemText id={labelId}
                                         key={item.field + i}
-                                        className={classes.listItemTextStyle} 
+                                        className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
                                         style={{flex: `0 0 ${item.width}`}}
                                         classes={item.style ?  {primary: classes[item.style]} : {}}>
-                                   { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') } 
+                                          { handleSpecialTableValues(item.field, value, item.type,row)}
+                                   {/* { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') }  */}
                           </ListItemText>
                           </Tooltip>
                         )})}
@@ -490,12 +533,60 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
   },
   boldListItemText:{
-    fontWeight: 600,
-    color: '#303d4b',
-    fontSize: 'small',
+    flex: '0 0 11%',
+    textAlign: 'center',
+
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    '& span':{
+      fontWeight: 600,
+      color: '#303d4b',
+      fontSize: 'small',
+    }
   },
   smallListItemText: {
-    fontSize: 'xx-small',
+    flex: '0 0 11%',
+    textAlign: 'center',
+
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    '& span':{
+      fontSize: 'xx-small',
+    },
+  },
+  drillSmallListItemText: {
+    flex: '0 0 11%',
+    textAlign: 'center',
+    margin: '0px',
+    padding: '4px 0 4px 0',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+
+    backgroundColor: '#ffeacb7a',
+    '& span':{
+      fontSize: 'x-small',
+      backgroundColor: '#ffffff00',
+      color: '#222'
+    },
+    
+  },
+  installSmallListItemText: {
+    flex: '0 0 11%',
+    textAlign: 'center',
+    margin: '0px',
+    padding: '4px 0 4px 0',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    backgroundColor: '#ffb87b73',
+    '& span':{
+      fontSize: 'x-small',
+      backgroundColor: '#ffffff00',
+      color: '#222'
+    },
   },
   no_tasks_info_div:{
     padding: '2%',

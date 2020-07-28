@@ -95,6 +95,27 @@ async function getCrewMembersByTask(id){
     }
 }
 
+async function getCrewMembersByCrew(crew_id){
+    const route = '/scheduling/crew/getCrewMembersByCrew';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({crew_id})
+            });
+        if(!data.ok){
+            throw new Error("getCrewMembersByCrew returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function getCrewJobsByMember(id){
     const route = '/scheduling/crew/getCrewJobsByMember';
     try{
@@ -179,6 +200,42 @@ async function getAllCrewJobMembers(){
     }
 }
 
+async function addNewCrewJobMember(member_id, crew_id, is_leader){
+    const route = '/scheduling/crew/addNewCrewJobMember';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({member_id, crew_id, is_leader})
+            });
+        return await response.json();
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+async function deleteCrewJobMember(m_id, crew_id){
+    const route = '/scheduling/crew/deleteCrewJobMember';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({m_id, crew_id})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
 async function getAllCrewJobs(){
     const route = '/scheduling/crew/getAllCrewJobs';
     try{
@@ -195,6 +252,24 @@ async function getAllCrewJobs(){
         var list = await data.json();
         return(list);
     }catch(error){
+        throw error;
+    }
+}
+
+async function addCrewJobs(ids, job_type, crew_id){
+    const route = '/scheduling/crew/addCrewJobs';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ids, job_type, crew_id})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
         throw error;
     }
 }
@@ -217,7 +292,7 @@ async function deleteCrewJob(id){
     }
 }
 
-async function updateCrewJob(member_id, crew_id,job_id){
+async function updateCrewJob(  crew_id,job_id){
     const route = '/scheduling/crew/updateCrewJob';
     try{
         var response = await fetch(route,
@@ -226,7 +301,7 @@ async function updateCrewJob(member_id, crew_id,job_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({member_id, crew_id, job_id})
+                body: JSON.stringify({job_id,  crew_id})
             });
         return response.ok;
     }catch(error){
@@ -247,6 +322,41 @@ async function updateCrewJobMember(crew_id, member_id, is_leader, job_id){
             });
         return response.ok;
     }catch(error){
+        throw error;
+    }
+}
+
+async function addNewCrew(){
+    const route = '/scheduling/crew/addNewCrew';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        return await response.json();
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+async function deleteCrew(crew_id){
+    const route = '/scheduling/crew/deleteCrew';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({crew_id})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
         throw error;
     }
 }
@@ -303,11 +413,17 @@ module.exports = {
     getCrewJobsByTask,
     getCrewJobsByTaskIds,
     getCrewMembersByTask,
+    getCrewMembersByCrew,
     getAllCrewJobMembers,
+    addNewCrewJobMember,
+    deleteCrewJobMember,
     getAllCrewJobs,
+    addCrewJobs,
     deleteCrewJob,
     updateCrewJob,
     updateCrewJobMember,
+    addNewCrew,
+    deleteCrew,
     getAllCrews,
     getCrewJobsByCrew,
 

@@ -12,7 +12,10 @@ export const CrewContext = createContext(null);
 
 //This is the highest component for the Task Page
 //Contains all important props that all tabs use
-const CrewContainer = function({children}) {
+const CrewContainer = function(props) {
+
+    const {tabValue, children} = props;
+
     const [crewMembers, setCrewMembers] = useState(null);
     const [allCrewJobMembers, setAllCrewJobMembers] = useState(null);
     const [allCrewJobs, setAllCrewJobs] = useState(null);
@@ -24,6 +27,12 @@ const CrewContainer = function({children}) {
 
     const classes = useStyles();
 
+    useEffect( ()=>{
+        if(tabValue == 2) {//crew page
+            setShouldResetCrewState(true);
+            console.log("Resetting state on tab")
+        }
+    }, [tabValue])
 
     //GetCrewMembers
     useEffect( () =>{ 
@@ -93,6 +102,7 @@ const CrewContainer = function({children}) {
     useEffect(()=>{
         if(shouldResetCrewState){
             setAllCrewJobs(null);
+            setAllCrews(null);
             setMemberJobs(null);
             setCrewMembers(null);
             setAllCrewJobMembers(null);

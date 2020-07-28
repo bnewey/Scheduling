@@ -17,7 +17,7 @@ router.post('/addCrewMember', async (req,res) => {
     const sql = ' INSERT INTO crew_members_available (member_name) VALUES (?)';
 
     try{
-        const reponse = await database.query(sql, name);
+        const response = await database.query(sql, name);
         logger.info("Added Crew member: " + name );
         res.sendStatus(200);
     }
@@ -56,7 +56,7 @@ router.post('/updateCrewMember', async (req,res) => {
     ' WHERE id = ? ';
     
     try{
-        const reponse = await database.query(sql, [name, id]);
+        const response = await database.query(sql, [name, id]);
         logger.info("Updated crew member to" + name);
         res.sendStatus(200);
     }
@@ -88,6 +88,29 @@ router.post('/getCrewMembersByTask', async (req,res) => {
     }
     catch(error){
         logger.error("Crews (getCrewMembersByTask): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getCrewMembersByCrew', async (req,res) => {
+    var crew_id;
+    if(req.body){
+        crew_id = req.body.crew_id;
+    }
+
+    const sql = ' SELECT  cm.id as id, ma.member_name, cm.is_leader, cm.crew_id, cc.id as crew_id ' + 
+        ' FROM crew_members cm ' + 
+        ' LEFT JOIN crew_members_available ma ON cm.member_id = ma.id ' + 
+        ' LEFT JOIN crew_crews cc ON cc.id = cm.crew_id ' + 
+        ' WHERE cm.crew_id = ? ';
+
+    try{
+        const results = await database.query(sql, [crew_id]);
+        logger.info("Got crew members by Crew", crew_id);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("Crews (getCrewMembersByCrew): " + error);
         res.sendStatus(400);
     }
 });
@@ -132,12 +155,14 @@ router.post('/getCrewJobsByTask', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ' + 
-            ' cc.crew_leader_id,  ' +
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ma.member_name, ' + 
+            ' cm.id as crew_leader_id,  ' +
             ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
             ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
+            ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' +
+            ' LEFT JOIN crew_members_available ma ON cm.member_id = ma.id ' +
             ' WHERE t.id = ? ' ;
     
     try{
@@ -207,12 +232,9 @@ router.post('/getCrewMembers', async (req,res) => {
 });
 
 router.post('/getAllCrewJobMembers', async (req,res) => {
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ' + 
-    ' cm.is_leader, ma.id as ma_id, ma.member_name,  ' +
-    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
-    ' FROM crew_jobs j ' +
-    ' LEFT JOIN tasks t ON j.task_id = t.id ' +
-    ' LEFT JOIN crew_members cm ON cm.crew_id = j.crew_id ' +
+    const sql = ' SELECT ' + 
+    ' cm.id, cm.is_leader, ma.id as ma_id, ma.member_name, cm.crew_id ' +
+    ' FROM crew_members cm ' +
     ' LEFT JOIN crew_members_available ma ON ma.id = cm.member_id ';
     
     try{
@@ -222,6 +244,53 @@ router.post('/getAllCrewJobMembers', async (req,res) => {
     }
     catch(error){
         logger.error("Crews (getAllCrewJobs): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/addNewCrewJobMember', async (req,res) => {
+    var member_id, crew_id,is_leader;
+    if(req.body){
+        member_id = req.body.member_id || null;
+        crew_id = req.body.crew_id || null;
+        is_leader = req.body.is_leader || 0; 
+    }
+
+    if(member_id == null || crew_id == null){
+        logger.error("Bad params for  addNewCrewJobMember");
+        res.sendStatus(400);
+    }
+
+    var sql = ' INSERT INTO crew_members (member_id, crew_id, is_leader) VALUES (?, ? ,?)';
+    
+
+    try{
+        const response = await database.query(sql, [member_id, crew_id, is_leader]);
+        logger.info("Added Crew Job Member: " + member_id +"| into crew: " + crew_id + "| IsLeader: " + is_leader);
+        res.json(response.insertId);        
+    }
+    catch(error){
+        logger.error("Crew (addNewCrewJobMember): " + error);
+        res.sendStatus(400);
+    }
+});
+
+
+router.post('/deleteCrewJobMember', async (req,res) => {
+    const sql = 'DELETE FROM crew_members WHERE id = ? AND crew_id = ? LIMIT 1';
+    var m_id, crew_id;
+    if(req.body){
+        m_id = req.body.m_id;
+        crew_id = req.body.crew_id;
+    }
+    
+    try{
+        const results = await database.query(sql, [m_id, crew_id]);
+        logger.info("Deleted crew job member " + m_id);
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crew (deleteCrewJobMember): " + error);
         res.sendStatus(400);
     }
 });
@@ -241,6 +310,43 @@ router.post('/getAllCrewJobs', async (req,res) => {
         logger.error("Crews (getAllCrewJobs): " + error);
         res.sendStatus(400);
     }
+});
+
+router.post('/addCrewJobs', async (req,res) => {
+    var ids, job_type, crew_id;
+    if(req.body){
+        ids = req.body.ids;
+        job_type = req.body.job_type;
+        crew_id = req.body.crew_id;
+    }
+    if(!ids || !job_type || !crew_id){
+        logger.error("Id, jobtype, or crew is not valid in addCrewJobs");
+        res.sendStatus(400);
+    }
+
+    const sql = ' INSERT INTO crew_jobs (task_id, job_type, crew_id) VALUES (? , ? , ?)  ' + 
+            ' ON DUPLICATE KEY UPDATE crew_id = VALUES(crew_id) '  ;
+    
+    var all_results = [];
+
+    async.forEachOf(ids, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            all_results.push(await database.query(sql, [id, job_type, crew_id]));
+            return;
+        }
+        catch(error){
+            throw error;  
+        }
+    }, err=> {
+        if(err){
+            logger.error("Crews (addCrewJobs): "+ ids+ " "+ job_type +"  , " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Added by task ids: " + ids + " , job_type: " + job_type + " , crew_id:" + crew_id );
+            res.json(all_results);
+        }
+    })
 });
 
 router.post('/deleteCrewJob', async (req,res) => {
@@ -272,8 +378,8 @@ router.post('/updateCrewJob', async (req,res) => {
     ' WHERE id = ? ';
     
     try{
-        const reponse = await database.query(sql, [crew_id, job_id]);
-        logger.info("Updated crew job " + job_id);
+        const response = await database.query(sql, [crew_id, job_id]);
+        logger.info("Updated crew job " + job_id + " to crew: " + crew_id);
         res.sendStatus(200);
     }
     catch(error){
@@ -295,7 +401,7 @@ router.post('/updateCrewJobMember', async (req,res) => {
     ' WHERE id = ? ';
     
     try{
-        const reponse = await database.query(sql, [crew_id, member_id, is_leader, job_id]);
+        const response = await database.query(sql, [crew_id, member_id, is_leader, job_id]);
         logger.info("Updated crew job Member " + crew_id + " " + member_id + " " + is_leader +" "+job_id);
         res.sendStatus(200);
     }
@@ -305,11 +411,45 @@ router.post('/updateCrewJobMember', async (req,res) => {
     }
 });
 
+router.post('/addNewCrew', async (req,res) => {
+
+    var sql = ' INSERT INTO crew_crews () VALUES ()';
+
+    try{
+        const response = await database.query(sql);
+        logger.info("Added Crew " );
+        res.json(response.insertId);
+    }
+    catch(error){
+        logger.error("Crew (addNewCrew): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/deleteCrew', async (req,res) => {
+    const sql = 'DELETE FROM crew_crews WHERE id = ? LIMIT 1';
+    var crew_id;
+    if(req.body){
+        crew_id = req.body.crew_id;
+    }
+    
+    try{
+        const results = await database.query(sql, crew_id);
+        logger.info("Deleted crew " + crew_id);
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crew (deleteCrew): " + error);
+        res.sendStatus(400);
+    }
+});
+
 
 router.post('/getAllCrews', async (req,res) => {
-    const sql = ' SELECT cc.id , cc.crew_leader_id, ma.member_name AS crew_leader_name  ' + 
+    const sql = ' SELECT cc.id , ma.member_name AS crew_leader_name  ' + 
             ' FROM crew_crews cc ' +
-            ' LEFT JOIN crew_members_available ma ON ma.id = cc.crew_leader_id ' ;
+            ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' + 
+            ' LEFT JOIN crew_members_available ma ON ma.id = cm.member_id ' ;
     
     try{
         const results = await database.query(sql, []);
@@ -329,11 +469,12 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
     }
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ' + 
-    ' cc.crew_leader_id,  ' +
+    ' cm.id as crew_leader_id,  ' +
     ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' +
     ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
+    ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' +
     ' WHERE cc.id = ?  ';
     
     try{

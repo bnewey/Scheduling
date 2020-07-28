@@ -166,27 +166,7 @@ const TaskListMain = (props) => {
                     {text: "Type", field: "type", width: '16%', type: 'text'}
                 ];
                 break;
-            case "compact":
-                viewArray = [
-                    {text: "Order", field: "priority_order", width: '4%',style: 'smallListItemText', type: 'number'},
-                    {text: "WO #", field: "table_id", width: '4%',style: 'smallListItemText', type: 'number'},
-                    {text: "Desired Date", field: "date_desired", width: '7%', style: 'smallListItemText', type: 'date'},
-                    {text: "Date Entered", field: "tl_date_entered", width: '6%', style: 'smallListItemText', type: 'date'},
-                    {text: "1st Game", field: "first_game", width: '6%', type: 'date'},
-                    {text: "Name", field: "t_name", width: '12%', style: 'boldListItemText', type: 'text'},
-                    {text: "State", field: "state", width: '4%', style: 'smallListItemText', type: 'text'},
-                    {text: "Type", field: "type", width: '7%',style: 'smallListItemText', type: 'text'},
-                    {text: "Description", field: "description", width: '10%', style: 'smallListItemText', type: 'text'},
-                    {text: "d_date", field: "drill_date", width: '6%',  type: 'date'},
-                    {text: "d_crew", field: "drill_crew", width: '6%',  type: 'text'}, 
-                    {text: "Art", field: "artwork", width: '8%', style: 'smallListItemText', type: 'text'},
-                    {text: "Signs", field: "sign", width: '8%', style: 'smallListItemText', type: 'text'},
-                    {text: "i_date", field: "install_date", width: '6%', type: 'date'},
-                    {text: "i_crew", field: "install_crew", width: '6%',  type: 'text'}
-                ];
-                break;
             case 'default':
-            default:
                 viewArray =[
                     {text: "Order", field: "priority_order", width: '8%',style: 'smallListItemText', type: 'number'},
                     {text: "WO #", field: "table_id", width: '7%', type: 'number'},
@@ -199,8 +179,31 @@ const TaskListMain = (props) => {
                     {text: "Drill Status", field: "drilling", width: '8%', type: 'text'}
                 ]
                 break;
+            case "compact":
+            default:
+                viewArray = [
+                    {text: "Order", field: "priority_order", width: '4%',style: 'smallListItemText', type: 'number'},
+                    {text: "WO #", field: "table_id", width: '4%',style: 'smallListItemText', type: 'number'},
+                    {text: "Desired Date", field: "date_desired", width: '7%', style: 'smallListItemText', type: 'date'},
+                    {text: "Date Entered", field: "tl_date_entered", width: '6%', style: 'smallListItemText', type: 'date'},
+                    {text: "1st Game", field: "first_game", width: '6%', type: 'date'},
+                    {text: "Name", field: "t_name", width: '12%', style: 'boldListItemText', type: 'text'},
+                    {text: "State", field: "state", width: '4%', style: 'smallListItemText', type: 'text'},
+                    {text: "Type", field: "type", width: '7%',style: 'smallListItemText', type: 'text'},
+                    {text: "Description", field: "description", width: '10%', style: 'smallListItemText', type: 'text'},
+                    {text: "Art", field: "artwork", width: '6%', style: 'smallListItemText', type: 'text'},
+                    {text: "Signs", field: "sign", width: '6%', style: 'smallListItemText', type: 'text'},
+                    {text: "Drill", field: "drilling", width: '6%', style: 'smallListItemText', type: 'text'},
+                    {text: "d_date", field: "drill_date", width: '6%', style: 'drillSmallListItemText', type: 'date'},
+                    {text: "d_crew", field: "drill_crew", width: '6%', style: 'drillSmallListItemText', type: 'text'}, 
+                    {text: "i_date", field: "install_date", width: '5%',style: 'installSmallListItemText', type: 'date'},
+                    {text: "i_crew", field: "install_crew", width: '5%',style: 'installSmallListItemText',  type: 'text'}
+                    
+                ];
+                break;
         }
-
+        console.log("viewarray",viewArray)
+        console.log("view", view)
 
         setTableInfo(viewArray)
     }

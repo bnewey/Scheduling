@@ -18,6 +18,7 @@ import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
 import {CrewContext} from '../Crew/CrewContextContainer';
+import TaskListAddCrewDialog from './TaskListAddCrewDialog';
 
 const TaskListSidebar = (props) => {
 
@@ -26,10 +27,10 @@ const TaskListSidebar = (props) => {
     const [editList, setEditList] = React.useState(null);
 
     //PROPS
-    const { isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
+    const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
         selectedTasks, setSelectedTasks, setSelectedIds, setTableInfo, handleChangeTaskView} = props;
 
-    const {taskListTasks, setTaskListTasks, taskLists, setTaskLists, tabValue, setTabValue,
+    const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen} = useContext(TaskContext);
 
@@ -170,14 +171,22 @@ const TaskListSidebar = (props) => {
                 </>
                 :   <></> 
                 }
+
+
+                <div className={classes.priority_info_heading}>
+                    <span>Crew</span>
+                </div>
+                <TaskListAddCrewDialog taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
+
+
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>
                     <div className={classes.singleLineDiv}>
                             <span
                                 className={classes.text_button} 
-                                onClick={event => setTableInfo(null)}>
-                                Default
+                                onClick={event => handleChangeTaskView("compact")}>
+                                Compact
                             </span>
                     </div>
                     <div className={classes.singleLineDiv}>
@@ -190,13 +199,11 @@ const TaskListSidebar = (props) => {
                     <div className={classes.singleLineDiv}>
                             <span
                                 className={classes.text_button} 
-                                onClick={event =>  handleChangeTaskView("compact")}>
-                                Compact
+                                onClick={event =>  handleChangeTaskView("default")}>
+                                Simple
                             </span>
                     </div>
-                <div className={classes.priority_info_heading}>
-                    <span>Crew</span>
-                </div>
+                
                 <div className={classes.singleLineDiv}>
 
                 </div>

@@ -92,7 +92,7 @@ const TaskContainer = function() {
   useEffect( () =>{ 
     if(taskListToMap == null && taskLists && taskLists.length > 0){
       //Hard coded in our tasklist
-      setTaskListToMap(taskLists.filter((tl,i)=>tl.id == 135 )[0]);
+      setTaskListToMap(taskLists.filter((tl,i)=> tl.is_priority == 1 )[0]);
     }
   },[taskListToMap, taskLists]);
 
@@ -131,7 +131,7 @@ const TaskContainer = function() {
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut,
                              sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved} } >
-      <CrewContextContainer /* includes crew context */>
+      <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue} setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
           

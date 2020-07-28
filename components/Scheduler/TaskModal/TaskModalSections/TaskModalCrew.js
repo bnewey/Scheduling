@@ -84,7 +84,7 @@ export default function TaskModalCrew(props){
                  <Scrollbars universal autoHeight autoHeightMax={100}>
                 {modalCrewJobs.map((job) => ( 
                     <div className={classes.task_list_div}>
-                        <span className={classes.p_task_name}>{job.member_name} - ({job.job_type})</span>
+                        <span className={classes.p_task_name}>{job.member_name ? job.member_name : `Crew ${job.crew_id}`} - ({job.job_type})</span>
                         <a  className={classes.remove_link}
                             onClick={event => handleRemoveCrewMemberFromTask(event, modalTask.t_id, job.id)}>
                             Remove

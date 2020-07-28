@@ -55,6 +55,9 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
         tmpParsed = JSON.parse(tmp);
       }
       if(!isNaN(tmpParsed)){
+        if(tmpParsed > 3 || tmpParsed < 0){
+          console.error("Bad tabValue in localstorage");
+        }
         setTabValue(tmpParsed);
       }else{
         setTabValue(0);

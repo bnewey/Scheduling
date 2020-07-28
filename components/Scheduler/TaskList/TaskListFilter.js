@@ -243,23 +243,22 @@ const TaskListFilter = (props) => {
                         </div>
                         <Grid item xs={4} className={classes.paper}>
                             <List className={classes.fieldList}>
-                            {tableConfig ? 
-                                <>
-                                    {tableConfig.map((item,i)=>{
-                                        const isSelected = selectedField === item; 
-                                        return(
-                                            <ListItem key={item.field + i} dense button
-                                                onMouseUp={event => handleSelectField(event, item)}
-                                                className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
-                                            >
-                                                <ListItemText className={classes.fieldListItemText}>
-                                                    {item.text}
-                                                </ListItemText>
-                                            </ListItem>
-                                            );
-                                    })}
-                                </>
-                            :<></> }
+                            
+                                
+                                {tableConfig && tableConfig.map((item,i)=>{
+                                    const isSelected = selectedField === item; 
+                                    return(
+                                        <ListItem key={item.field + i} dense button
+                                            onMouseUp={event => handleSelectField(event, item)}
+                                            className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
+                                        >
+                                            <ListItemText key={"tableConfigText"+i} className={classes.fieldListItemText}>
+                                                {item.text}
+                                            </ListItemText>
+                                        </ListItem>
+                                        );
+                                })}
+                                
                             </List>
                         </Grid>
                         <Grid item xs={8} className={classes.paper}>
@@ -268,8 +267,10 @@ const TaskListFilter = (props) => {
                             {selectedField && taskListTasksSaved ? 
                                 <>
                                     <FormControlLabel
+                                        key={"formControl"}
                                         control={
                                         <Switch
+                                            key={'switchFilterList'}
                                             checked={filterInOrOut  && filterInOrOut == "in"}
                                             onChange={(event)=> handleChangeFilterType(event)}
                                             name="Filter In or Out"
@@ -288,15 +289,15 @@ const TaskListFilter = (props) => {
                                             }
                                         }).length > 0);
                                         
-                                        return( <div className={classes.listItemDiv}>
+                                        return( <div key={'liDiv'+ i} className={classes.listItemDiv}>
                                             
                                             <ListItem key={selectedField.field + i} dense button
                                                 className={!isFiltered ? classes.filterListItem : classes.filterListItemFiltered}
                                                onClick={event=> handleListFilter(event, selectedField.field, item ? item : "nonassignedValue")}
 
                                             >
-                                                <ListItemText className={classes.filterListItemText}>
-                                                    <Checkbox checked={isFiltered} className={classes.li_checkbox}/>
+                                                <ListItemText key={'fieldListItemText'+i}className={classes.filterListItemText}>
+                                                    <Checkbox key={'checkboxFieldLI'+i} checked={isFiltered} className={classes.li_checkbox}/>
                                                     {item != null ? item : '*N/A*'}
                                                 </ListItemText>
                                             </ListItem>

@@ -5,7 +5,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import HelpIcon from '@material-ui/icons/Help';
 import CrewMembers from './CrewMembers';
-import CrewCrews from './CrewCrews';
+import CrewCrews from './CrewCrews/CrewCrews';
 
 import { TaskContext } from '../../TaskContainer';
 import { CrewContext } from '../CrewContextContainer';
@@ -14,7 +14,7 @@ import { CrewContext } from '../CrewContextContainer';
 const CrewContainer = (props) => {
 
     //const {} = props;
-    const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs, memberJobs,setMemberJobs, setShouldResetCrewState} = useContext(CrewContext);
+    const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs, memberJobs,setMemberJobs, shouldResetCrewState, setShouldResetCrewState} = useContext(CrewContext);
     const classes = useStyles();
 
     const [crewMemberOpen, setcrewMemberOpen] = useState(true);
@@ -56,7 +56,7 @@ const CrewContainer = (props) => {
                             {selectedPage ? pageNames[selectedPage-1] : "Crew"}
                         </span>
                     </div>
-                    <Grid item xs={3} classes={{root: classes.grid_x3}} className={classes.paperList}>
+                    <Grid item xs={2}  className={classes.paperList}>
                     <List
                         component="nav"
                         aria-labelledby="nested-list-subheader"
@@ -92,10 +92,12 @@ const CrewContainer = (props) => {
                                     
                         </List>
                     </Grid>
-                    <Grid item xs={9} classes={{root: classes.grid_x9}} className={classes.paper}>
+                    {!shouldResetCrewState ?
+                    <Grid item xs={10}  className={classes.paper}>
                          { selectedPage == 2 ? <CrewMembers />: <></>}
                         { selectedPage == 1 ? <CrewCrews />: <></>}
                     </Grid>
+                    : <></>}
                 </Grid>
                 </div>
         </>
@@ -145,7 +147,7 @@ const useStyles = makeStyles(theme => ({
         minHeight: '700px'
     },
     modalTitleDiv:{
-        backgroundColor: '#293a5a',
+        backgroundColor: '#61a4a1',
         padding: '5px 0px 5px 0px',
         width: '100%',
     },
@@ -202,14 +204,6 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#7b9aca80',
         paddingLeft: '4em',
         border: '1px solid #ff9000',
-    },
-    grid_x3:{
-        maxWidth: '23%',
-        flexBasis: '23%',
-    },
-    grid_x9:{
-        maxWidth: '77%',
-        flexBasis: '77%',
     },
 
     
