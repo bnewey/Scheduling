@@ -8,22 +8,22 @@ const doFilter = (item, filter, outOrIn) => {
     if (!(tmpValue instanceof RegExp)) {
       tmpValue = new RegExp(tmpValue.toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_'), 'i');
     }
-    var tmpp = !(tmpValue.test( (item[ filter.property ] != null ? (item[ filter.property ]).toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') :  "nonassignedValue")));
+    var tmpp = tmpValue.test( (item[ filter.property ] != null ? (item[ filter.property ]).toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') :  "nonassignedValue"));
 
     if(outOrIn == "in"){
-      return(!tmpp);
+      return(!!tmpp);
     }
     if(outOrIn == "out"){
-      return(tmpp);
+      return(!tmpp);
     }
     
     console.error("outOrIn variable not set correctly", outOrIn);
     return false;
   }
   
-  const createFilter = ([...filters], outOrIn) => {
-    if (!outOrIn){
-      console.error("Needs inOrOutBool")
+  const createFilter = ([...filters], outOrIn, andOr) => {
+    if (!outOrIn || !andOr){
+      console.error("Needs inOrOutBool or andOr")
       return ()=> {};
     }
     if (typeof filters[0] === 'string') {
@@ -34,20 +34,23 @@ const doFilter = (item, filter, outOrIn) => {
         }
       ];
     }
-  
     return (item) => {
-      if(outOrIn == "out"){
-        //function works for filtering out but not in
+      if( andOr == "and" ){
+        //compare to every filter with same type
+        //item must match every filter
         return (filters.every(filter => doFilter(item, filter, outOrIn)));
       }
-      if(outOrIn == "in"){
+      if( andOr == "or" ){
         var flag = false;
+        //compare to get all items ie: A union B
+        //item must match one or more filters
         filters.forEach((filter)=> {
             if(doFilter(item, filter, outOrIn)){
               flag = true;
             }
+            //filter to using and not working
         })
-        return flag;
+        return ( flag);
       }
     };
   };

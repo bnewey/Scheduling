@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox,
+import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox, Button,
     Collapse } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
@@ -39,7 +39,7 @@ function arraysEqual(_arr1, _arr2) {
 const CrewCrews = (props) => {
 
     const {} = props;
-    const {setModalTaskId, setModalOpen} = useContext(TaskContext);
+    const {setModalTaskId, setModalOpen, setTabValue, filters, setFilters, setFilterInOrOut, setFilterAndOr} = useContext(TaskContext);
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
         setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState} = useContext(CrewContext);
@@ -268,6 +268,46 @@ const CrewCrews = (props) => {
     }
     // END DND
 
+    const handleMapCrewJobs = (event, crew, jobs) => {
+        if(!crew){
+            cogoToast.error("Failed to Map crew jobs");
+            console.log("Bad crew in handleMapCrewJobs");
+            return;
+        }
+        if(!filters){
+            console.error("Filters is null");
+            return;
+        }
+
+        //Check jobs for install and/or drill
+        let properties = new Set([...jobs].map((v,i)=>{
+            if(v.job_type == "drill"){
+                return "drill_crew"
+            }
+            if(v.job_type == "install"){
+                return "install_crew"
+            }
+            console.log("Bad properttties man");
+            return "";
+        }));
+        console.log("Properties", properties);
+        console.log("crew", crew);
+
+        //1 = map
+        setTabValue(1);
+        let newFilters = [];
+
+        properties.forEach((item,i)=>{
+            newFilters.push({
+                property: item, 
+                value: crew.toString(),
+            })
+        })
+        
+        setFilters(newFilters);
+        setFilterInOrOut("in");
+        setFilterAndOr("or");
+    }
 
 
     return(
@@ -362,7 +402,10 @@ const CrewCrews = (props) => {
                         )}
                         </Droppable>
                     </DragDropContext>
-                        </List> </> : <>Select a crew member to view jobs</> }
+                        </List> 
+                        <Button className={classes.openButton} onClick={event => handleMapCrewJobs(event, selectedCrew.id, crewJobs)}>Map Crew Jobs</Button>
+                        
+                        </> : <>Select a crew member to view jobs</> }
             <Popover
                 id={jobPopoverId}
                 open={jobPopoverOpen}
@@ -514,6 +557,19 @@ const useStyles = makeStyles(theme => ({
     job_list_task_info:{
         '& span':{
             fontWeight: '500',
+        }
+    },
+    openButton:{
+        backgroundColor: '#fca437',
+        color: '#fff',
+        margin: '0px 30px',
+        fontWeight: '700',
+        fontSize: '13px',
+        padding: '0px 16px',
+        '&:hover':{
+            border: '',
+            backgroundColor: '#ffedc4',
+            color: '#d87b04'
         }
     },
     

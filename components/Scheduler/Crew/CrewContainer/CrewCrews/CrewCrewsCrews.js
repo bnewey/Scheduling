@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox,
+import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox, Button,
     Collapse } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
@@ -149,6 +149,18 @@ const CrewCrewsCrews = (props) => {
 
     }
 
+    const handleAddCrew = () => {
+        Crew.addNewCrew()
+        .then((data)=>{
+            if(!isNaN(data)){
+                setShouldResetCrewState(true);
+            }
+        })
+        .catch((error)=>{
+            console.error("handleAddOrCreateCrew", error);
+            cogoToast.error("Failed to Create and Add to Crew");
+        })
+    }
 
     return(
         <>
@@ -210,11 +222,7 @@ const CrewCrewsCrews = (props) => {
                         </Collapse>
                         </div>
                     )})}
-                    <ListItem className={classes.text_button_li}>
-                        <div className={classes.singleLineDiv}>
-                            {/* <CrewMemberActionAdd /> */}
-                         </div>
-                    </ListItem>
+                    <Button className={classes.openButton} onClick={event => handleAddCrew()}>Add New Crew</Button>
                 </List>
                 
              <Popover
@@ -402,6 +410,19 @@ const useStyles = makeStyles(theme => ({
         color: '#004464',
         fontWeight: '700',
         flexBasis: '7%'
+    },
+    openButton:{
+        backgroundColor: '#fca437',
+        color: '#fff',
+        margin: '10px 30px',
+        fontWeight: '700',
+        fontSize: '13px',
+        padding: '0px 16px',
+        '&:hover':{
+            border: '',
+            backgroundColor: '#ffedc4',
+            color: '#d87b04'
+        }
     },
     
   }));

@@ -39,7 +39,7 @@ const MapContainer = (props) => {
     const classes = useStyles();
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap,
-          filters, setFilter, filterInOrOut, setTaskListTasksSaved} = useContext(TaskContext);
+          filters, setFilter, filterInOrOut, filterAndOr, setTaskListTasksSaved} = useContext(TaskContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const [bounds, setBounds] = useState(null);
@@ -63,7 +63,7 @@ const MapContainer = (props) => {
 
 
     useEffect( () =>{ //useEffect for inputText
-      if(mapRows == null && filterInOrOut != null){
+      if(mapRows == null && filterInOrOut != null && filterAndOr != null){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
             TaskLists.getTaskList(taskListToMap.id)
             .then( (data) => {
@@ -71,38 +71,68 @@ const MapContainer = (props) => {
                     console.error("Bad tasklist data",data);
                     return;
                 }
-                var tmpData = [...data];
+                var tmpData = [];
 
-                if(filters && filters.length > 0 && filterInOrOut != null){
+                if(filters && filters.length > 0){
                   //If more than one property is set, we need to filter seperately
                   let properties = new Set([...filters].map((v,i)=>v.property));
                   
-                  //in works different than out, this seperates properties seperate instead of all together
-                  if( properties.size > 1 && filterInOrOut == "in"){
-                      properties.forEach((index,property)=>{
-                          let tmpFilter = filters.filter((v,i)=> v.property == property);
-                          tmpData = [...tmpData].filter(createFilter([...tmpFilter], filterInOrOut));
-                      })
-                  }else{
-                      //Just one property or any filterInOrOut == out case
-                      tmpData = data.filter(createFilter([...filters], filterInOrOut));
-                      console.log( "single filter tmpdata",tmpData);
-                      console.log("filters in single",filters);
-                      console.log("inORout",filterInOrOut);
-                  }
-                }
+                  properties.forEach((index,property)=>{
+                    
+                    let tmpFilter = filters.filter((v,i)=> v.property == property);
+                    let tmpTmpData;
+
+                    //On or use taskListTasksSaved to filter from to add to 
+                    if((filterAndOr == "or" && filterInOrOut == "in") || (filterAndOr == "and" && filterInOrOut == "out") ){
+                        if(tmpFilter.length > 1){
+                            //Always use 'or' on same property
+                            tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                        }
+                        if(tmpFilter.length <= 1){
+                            tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                            console.log("MapContainer tmpData in loop", tmpData);
+                        }
+                        //Add to our big array
+                        tmpData.splice(tmpData.length, 0, ...tmpTmpData);
+                        //Remove duplicates
+                        tmpData.splice(0, tmpData.length, ...(new Set(tmpData)));
+                    }
+
+                    //On and use tmpData to filter from
+                    if((filterAndOr == "and" && filterInOrOut == "in") || (filterAndOr == "or" && filterInOrOut == "out")){
+                        if(tmpData.length <= 0){
+                          tmpData = [...data];
+                        }  
+                        if(tmpFilter.length > 1){
+                            //Always use 'or' on same property
+                            tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                        }
+                        if(tmpFilter.length <= 1){
+                            tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                            console.log("MapContainer tmpData in loop", tmpData);
+                        }
+                    }
+                    
+                    console.log("TaskListFilter each loop, ",tmpData);
+                  })              
+                }  
                 
                 setTaskListTasksSaved(data);
-
-                console.log("tmpData final",tmpData);
-                console.log("filters final",filters);
-                      console.log("inORout final",filterInOrOut);
+                console.log("MapContainer tmpData final",tmpData);
+                console.log("MapContainer filters final",filters);
+                      console.log("MapContainer inORout final",filterInOrOut);
                 
-
+                //No filters 
+                if(filters && !filters.length){
+                  //no change to tmpData
+                  tmpData = [...data];
+                }
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
                     setMapRows(tmpData);
                 }
+
+                
                 
             })
             .catch( error => {
@@ -124,7 +154,7 @@ const MapContainer = (props) => {
       
       return () => { //clean up
       }
-    },[mapRows,filterInOrOut]);
+    },[mapRows,filterInOrOut, filterAndOr]);
 
     useEffect(()=>{
         if(noMarkerRows == null && mapRows){

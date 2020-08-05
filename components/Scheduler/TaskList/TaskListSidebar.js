@@ -32,7 +32,7 @@ const TaskListSidebar = (props) => {
 
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen} = useContext(TaskContext);
+        modalOpen, setModalOpen, setSorters} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
@@ -100,6 +100,9 @@ const TaskListSidebar = (props) => {
                     }
                     cogoToast.success(`Reordered Task List by Install Date`, {hideAfter: 4});
                     setTaskListTasks(null);
+                    //Set sorters back to priority
+                    setSorters([{property: 'priority_order', 
+                        direction: "ASC"}]);
                 })
             .catch( error => {
             cogoToast.error(`Error reordering task list`, {hideAfter: 4});

@@ -28,7 +28,7 @@ function convertISODateTimeToMySqlDateTime(param) {
 
 function convertISODateToMySqlDate(param) {
     if(!param){
-        return "";
+        return null;
     }
 
     date = new Date(param);

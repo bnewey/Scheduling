@@ -38,6 +38,7 @@ const TaskContainer = function() {
     const [priorityList, setPriorityList] = useState(null);
     const [filters, setFilters] = useState(null);
     const [filterInOrOut, setFilterInOrOut] = useState(null);
+    const [filterAndOr, setFilterAndOr] = useState(null);
     const [sorters, setSorters] = useState(null);
 
   //Map Props
@@ -129,7 +130,7 @@ const TaskContainer = function() {
       <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, selectedIds, setSelectedIds, 
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
-                            modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut,
+                            modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
                              sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue} setTabValue={setTabValue} 

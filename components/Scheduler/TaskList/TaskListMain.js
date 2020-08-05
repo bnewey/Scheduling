@@ -41,7 +41,7 @@ const TaskListMain = (props) => {
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
-        filters, setFilters,filterInOrOut, setFilterInOrOut,
+        filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,
          taskListTasksSaved, setTaskListTasksSaved} = useContext(TaskContext);
 
@@ -55,7 +55,7 @@ const TaskListMain = (props) => {
         if(taskLists == null){
             setTaskListTasks(null);
         }
-        if(taskLists && taskListToMap && taskListToMap.id && taskListTasks == null && filterInOrOut != null ) { 
+        if(taskLists && taskListToMap && taskListToMap.id && taskListTasks == null && filterInOrOut != null && filterAndOr != null  ) { 
             TaskLists.getTaskList(taskListToMap.id)
             .then( (data) => {
                 if(!Array.isArray(data)){
@@ -63,24 +63,59 @@ const TaskListMain = (props) => {
                     return;
                 }
 
-                var tmpData = [...data];
+                var tmpData = [];
 
                 //FILTER -------------------------------------------------------------------------------------
                 if(filters && filters.length > 0 && filterInOrOut != null){
                     //If more than one property is set, we need to filter seperately
                     let properties = new Set([...filters].map((v,i)=>v.property));
                     
-                    //in works different than out, this seperates properties seperate instead of all together
-                    if( properties.size > 1 && filterInOrOut == "in"){
-                        properties.forEach((index,property)=>{
-                            let tmpFilter = filters.filter((v,i)=> v.property == property);
-                            tmpData = [...tmpData].filter(createFilter([...tmpFilter], filterInOrOut));
-                        })
-                    }else{
-                        //Just one property or any filterInOrOut == out case
-                        tmpData = data.filter(createFilter([...filters], filterInOrOut));
-                    }
+                    properties.forEach((index,property)=>{
+                    
+                        let tmpFilter = filters.filter((v,i)=> v.property == property);
+                        let tmpTmpData;
+    
+                        //On or use taskListTasksSaved to filter from to add to 
+                        if((filterAndOr == "or" && filterInOrOut == "in") || (filterAndOr == "and" && filterInOrOut == "out")){
+                            if(tmpFilter.length > 1){
+                                //Always use 'or' on same property
+                                tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                            }
+                            if(tmpFilter.length <= 1){
+                                tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                                console.log("MapContainer tmpData in loop", tmpData);
+                            }
+                            //Add to our big array
+                            tmpData.splice(tmpData.length, 0, ...tmpTmpData);
+                            //Remove duplicates
+                            tmpData.splice(0, tmpData.length, ...(new Set(tmpData)));
+                        }
+    
+                        //On and use tmpData to filter from
+                        if((filterAndOr == "and" && filterInOrOut == "in") || (filterAndOr == "or" && filterInOrOut == "out")){
+                            if(tmpData.length <= 0){
+                              tmpData = [...data];
+                            }  
+                            if(tmpFilter.length > 1){
+                                //Always use 'or' on same property
+                                tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                            }
+                            if(tmpFilter.length <= 1){
+                                tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                                console.log("MapContainer tmpData in loop", tmpData);
+                            }
+                        }
+                        
+                        console.log("TaskListFilter each loop, ",tmpData);
+                    })   
                 }
+
+                //No filters or sorters
+                if(filters && !filters.length){
+                    //no change to tmpData
+                    tmpData = [...data];
+                }
+
                 // -------------------------------------------------------------------------------------------
                   
                 //SORT after filters -------------------------------------------------------------------------
@@ -90,11 +125,7 @@ const TaskListMain = (props) => {
                     //setTaskListTasksSaved(data);
                 }
                 //--------------------------------------------------------------------------------------------
-
-                //No filters or sorters
-                if(filters && !filters.length && sorters && !sorters.length){
-                    //no change to tmpData
-                }
+               
 
                 //Save all originally fetched data
                 setTaskListTasksSaved(data);
@@ -114,7 +145,7 @@ const TaskListMain = (props) => {
             if(taskLists){
             }
         }
-    },[taskListToMap,taskListTasks, taskLists, filterInOrOut]);
+    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr]);
 
     //Save and/or Fetch sorters to local storage
     useEffect(() => {
@@ -131,9 +162,9 @@ const TaskListMain = (props) => {
         }
         }
         if(Array.isArray(sorters)){
-        window.localStorage.setItem('sorters', JSON.stringify(sorters));
+            window.localStorage.setItem('sorters', JSON.stringify(sorters));
         }
-        
+
     }, [sorters]);
 
     //Sort
@@ -147,8 +178,8 @@ const TaskListMain = (props) => {
                 cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
             }
         }
-    },[sorters])
-    
+    },[sorters]);
+
 
     const handleChangeTaskView = (view)=>{
         if(!view){
@@ -191,9 +222,9 @@ const TaskListMain = (props) => {
                     {text: "State", field: "state", width: '4%', style: 'smallListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '7%',style: 'smallListItemText', type: 'text'},
                     {text: "Description", field: "description", width: '10%', style: 'smallListItemText', type: 'text'},
-                    {text: "Art", field: "artwork", width: '6%', style: 'smallListItemText', type: 'text'},
-                    {text: "Signs", field: "sign", width: '6%', style: 'smallListItemText', type: 'text'},
-                    {text: "Drill", field: "drilling", width: '6%', style: 'smallListItemText', type: 'text'},
+                    {text: "Art", field: "artwork", width: '6%', style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "Signs", field: "sign", width: '6%', style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "Drill", field: "drilling", width: '6%', style: 'artSignDrillSmallListItemText', type: 'text'},
                     {text: "d_date", field: "drill_date", width: '6%', style: 'drillSmallListItemText', type: 'date'},
                     {text: "d_crew", field: "drill_crew", width: '6%', style: 'drillSmallListItemText', type: 'text'}, 
                     {text: "i_date", field: "install_date", width: '5%',style: 'installSmallListItemText', type: 'date'},
@@ -202,8 +233,6 @@ const TaskListMain = (props) => {
                 ];
                 break;
         }
-        console.log("viewarray",viewArray)
-        console.log("view", view)
 
         setTableInfo(viewArray)
     }
@@ -339,7 +368,7 @@ const TaskListMain = (props) => {
                                 setModalTaskId={setModalTaskId}
                                 table_info={table_info}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
-                                taskListTasksSaved={taskListTasksSaved}/>
+                                taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}/>
                         </>
                         : <>
                         <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>

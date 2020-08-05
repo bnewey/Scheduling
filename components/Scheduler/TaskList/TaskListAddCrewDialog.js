@@ -137,6 +137,10 @@ const TaskListAddCrewDialog = (props) => {
                         .then((response)=>{
                             if(response){
                                 cogoToast.success("Set leader of new crew");
+                                handleCrewDialogClose();
+                                setTaskListTasks(null);
+                                setShouldResetCrewState(true);
+                                return;
                             }
                         })
                         .catch((err)=>{
@@ -149,27 +153,27 @@ const TaskListAddCrewDialog = (props) => {
                 console.error("handleAddOrCreateCrew", error);
                 cogoToast.error("Failed to Create and Add to Crew");
             })
-            
-            handleCrewDialogClose();
-            setTaskListTasks(null);
-            setShouldResetCrewState(true);
-            return;
+        }else{
+            //Just Add
+            Crew.addCrewJobs(selectedTasks, type, crew_id)
+            .then((response)=>{
+                if(response){
+                    cogoToast.success("Created and added to crew");
+                    handleCrewDialogClose();
+                    setShouldResetCrewState(true);
+                    setTaskListTasks(null);
+                }
+            })
+            .catch((err)=>{
+                console.error("Failed to add to creww", err);
+            })
         }
 
-        //Just Add
-        Crew.addCrewJobs(selectedTasks, type, crew_id)
-        .then((response)=>{
-            if(response){
-                cogoToast.success("Created and added to crew");
-            }
-        })
-        .catch((err)=>{
-            console.error("Failed to add to creww", err);
-        })
+        
 
-        handleCrewDialogClose();
-        setShouldResetCrewState(true);
-        setTaskListTasks(null);
+        
+
+        
 
     };
 
