@@ -74,8 +74,8 @@ const MapContainer = (props) => {
                                                       vin: item.vin }))
           locations.splice(locations.length, 0, ...tmpData);
           let tmpData2 =[];
-          if(values[1]["error"]){
-            console.error("Custom Error from bouncie", values[1]["error"]);
+          if(values[1]["error"] || !Array.isArray(values[1])){
+            console.error("Custom Error from bouncie", values[1]);
             setBouncieAuthNeeded(true);
           }else{
             tmpData2 =  values[1].map((item,i )=> ({latitude: item['stats']['location'].lat, 

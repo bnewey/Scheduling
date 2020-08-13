@@ -17,11 +17,13 @@ function checkBouncieToken(token, expires, authCode) {
     if(expires){
         if(new Date() > new Date(expires)){
             //refetch token
+            logger.info("Token expired");
             return false;
         }
     }
     //Refetch token    
     if(!token && authCode){
+        logger.info("No token");
         return false;
     }   
     //Dont refetch token
