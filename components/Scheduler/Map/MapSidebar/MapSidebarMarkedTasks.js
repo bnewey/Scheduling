@@ -23,7 +23,8 @@ const MapSiderbarMarkedTasks = (props) =>{
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
     const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
-          setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef} = props;
+          setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, expanded, setExpanded, setActiveVehicle,
+          expandedAnimDone} = props;
     
     const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
     //CSS
@@ -33,6 +34,7 @@ const MapSiderbarMarkedTasks = (props) =>{
         var task = markedRows.filter((row, i) => row.t_id === id)[0];
         setActiveMarker(task);
         setShowingInfoWindow(true);
+        setActiveVehicle(null);
     };
 
     //scroll into view 
@@ -46,14 +48,19 @@ const MapSiderbarMarkedTasks = (props) =>{
     }
 
     useEffect(()=>{
-      if(activeMarker){
+      if(activeMarker && expandedAnimDone == true){
         var el = panelRef.current.querySelector("#mapMarkedListItem"+activeMarker.t_id);
+        if(!el){
+          console.error("No element for isInViewPort", el);
+          console.log(activeMarker);
+          return;
+        }
         if(!isInViewport(el, panelRef.current)){
           el.scrollIntoView({behavior: "smooth",inline: "nearest"});
         }
         
       }
-    },[activeMarker])
+    },[activeMarker, expanded, expandedAnimDone])
 
     
 

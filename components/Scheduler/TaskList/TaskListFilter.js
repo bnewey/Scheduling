@@ -54,7 +54,6 @@ const TaskListFilter = (props) => {
         if(filterInOrOut == null){
             var tmp = window.localStorage.getItem('filterInOrOut');
             var tmpParsed;
-            console.log(tmp);
             if(tmp && tmp != undefined){
                 tmpParsed = JSON.parse(tmp);
             }
@@ -102,7 +101,7 @@ const TaskListFilter = (props) => {
 
                 //If more than one property is set, we need to filter seperately
                 let properties = new Set([...filters].map((v,i)=>v.property));
-                console.log("TaskListFilter running");
+                
                 //in works different than out
                 properties.forEach((index,property)=>{
                     
@@ -117,7 +116,7 @@ const TaskListFilter = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpTmpData = taskListTasksSaved.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            console.log("MapContainer tmpData in loop", tmpData);
+                            //console.log("MapContainer tmpData in loop", tmpData);
                         }
                         //Add to our big array
                         tmpData.splice(tmpData.length, 0, ...tmpTmpData);
@@ -136,11 +135,11 @@ const TaskListFilter = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            console.log("MapContainer tmpData in loop", tmpData);
+                            //console.log("MapContainer tmpData in loop", tmpData);
                         }
                     }
                     
-                    console.log("TaskListFilter each loop, ",tmpData);
+                    //console.log("TaskListFilter each loop, ",tmpData);
                 })        
                 
                 //No filters 

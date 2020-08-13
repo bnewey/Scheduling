@@ -151,6 +151,24 @@ async function createUser ({database, createdAt, googleId,email,googleToken,disp
 };  
 
 
+
+async function updateUserBouncie(database, authCode ,accessToken, expires_in, id) {
+  const sql = 'UPDATE google_users set bouncieAuthCode= ?, bouncieToken =?, bouncieExpiresAt = (timestamp(DATE_ADD(NOW(), INTERVAL ? SECOND))) ' + 
+  ' WHERE id = ?  ';
+
+  try{
+      const results = await database.query(sql, [ authCode,accessToken,expires_in, id]);
+      logger.info("Update updateUserBouncieAuthCode");
+      var response = await json(results);
+      return (response);
+  }
+  catch(error){
+      logger.error("User (updateUserBouncieAuthCode): " + error);
+      return 0;
+  }
+};
+
+
 const json = function(object) {
     return new Promise( (resolve,reject) => { 
         
@@ -199,5 +217,7 @@ module.exports = {
   getUserByGoogleId:getUserByGoogleId,
   getUserById:getUserById,
   updateUserGoogleToken: updateUserGoogleToken,
+  updateUserBouncie: updateUserBouncie,
   createUser: createUser,
+  
 };

@@ -23,7 +23,9 @@ export const TaskContext = createContext(null);
 
 //This is the highest component for the Task Page
 //Contains all important props that all tabs use
-const TaskContainer = function() {
+const TaskContainer = function(props) {
+  const {user} = props;
+
   const [rows, setRows] = useState();
   const [rowDateRange, setDateRowRange] = useState({
           from: Util.convertISODateToMySqlDate(today),
@@ -142,7 +144,7 @@ const TaskContainer = function() {
               
             </div>
             <div style={{minHeight: '600px'}}>
-              <MapContainer />
+              <MapContainer user={user}/>
             </div>
             <div>
               <CrewContainer />

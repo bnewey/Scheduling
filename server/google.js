@@ -6,6 +6,7 @@ function auth({ ROOT_URL, app, database }) {
   const verify = async (accessToken, refreshToken, profile, verified) => {
     let email;
     let avatarUrl;
+    console.log("profuke", profile);
 
     if (profile.emails) {
       email = profile.emails[0].value;

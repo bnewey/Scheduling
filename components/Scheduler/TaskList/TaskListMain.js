@@ -83,7 +83,7 @@ const TaskListMain = (props) => {
                             }
                             if(tmpFilter.length <= 1){
                                 tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                                console.log("MapContainer tmpData in loop", tmpData);
+                                //console.log("MapContainer tmpData in loop", tmpData);
                             }
                             //Add to our big array
                             tmpData.splice(tmpData.length, 0, ...tmpTmpData);
@@ -102,11 +102,11 @@ const TaskListMain = (props) => {
                             }
                             if(tmpFilter.length <= 1){
                                 tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                                console.log("MapContainer tmpData in loop", tmpData);
+                                //console.log("MapContainer tmpData in loop", tmpData);
                             }
                         }
                         
-                        console.log("TaskListFilter each loop, ",tmpData);
+                        //console.log("TaskListFilter each loop, ",tmpData);
                     })   
                 }
 

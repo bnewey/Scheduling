@@ -13,6 +13,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const auth = require('./google');
+const {bouncie} = require('./lib/bouncie');
 
 dotenv.config();
 const app = express();
@@ -32,10 +33,12 @@ const workOrders = require('./lib/work_orders.js');
 const taskLists = require('./lib/task_lists.js');
 const pdf = require('./lib/pdf.js');
 const crew = require('./lib/crew.js');
+const vehicles = require('./lib/vehicles.js');
 const {emailRouter} = require('./lib/email');
 
-global.SERVER_APP_ROOT = __dirname;
 
+global.SERVER_APP_ROOT = __dirname;
+global.ROOT_URL = process.env.NODE_ENV == 'production' ? "http://icontrol.raineyelectronics.com" : "http://scheduling.com:8000";
 nextApp
   .prepare()
   .then(() => {
@@ -56,6 +59,7 @@ nextApp
     ////////////////
     
     // Custom Routes
+
     app.use(cors({ origin: '*' }));
 
     app.use('/scheduling/tasks', tasks);
@@ -64,6 +68,7 @@ nextApp
     app.use('/scheduling/pdf', pdf);
     app.use('/scheduling/email', emailRouter);
     app.use('/scheduling/crew', crew);
+    app.use('/scheduling/vehicles', vehicles);
     //
 
     //Session   ////
@@ -95,7 +100,8 @@ nextApp
     /////////////////
 
     // Authenticate User
-    auth({ ROOT_URL: process.env.NODE_ENV == 'production' ? "http://icontrol.raineyelectronics.com" : "http://scheduling.com:8000", app ,database})
+    auth({ ROOT_URL, app ,database})
+    bouncie({ROOT_URL, app, database});
 
     app.get('*', (req, res) => {
       return handle(req, res);

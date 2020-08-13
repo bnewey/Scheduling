@@ -8,15 +8,16 @@ import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 
 import cogoToast from 'cogo-toast';
 import MapMarkerInfoWindow from './MapMarkerInfoWindow';
+import MapVehicleInfoWindow from './MapVehicleInfoWindow';
 
 import Tasks from '../../../js/Tasks';
 import TaskLists from '../../../js/TaskLists';
 import Util from '../../../js/Util';
+import Vehicles from '../../../js/Vehicles';
 import TaskListFilter from '../TaskList/TaskListFilter';
 import { TaskContext } from '../TaskContainer';
 
 import {createFilter} from '../../../js/Filter';
-
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -38,17 +39,63 @@ const useStyles = makeStyles(theme => ({
 const MapContainer = (props) => {
     const classes = useStyles();
 
+    const {user} = props;
+
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap,
           filters, setFilter, filterInOrOut, filterAndOr, setTaskListTasksSaved} = useContext(TaskContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
+    const [activeVehicle, setActiveVehicle] = useState(null);
     const [bounds, setBounds] = useState(null);
     
     const [mapRows, setMapRows] = useState(null); 
     const [resetBounds, setResetBounds] = React.useState(true);
     const [markedRows, setMarkedRows] = useState([]);
     const [noMarkerRows, setNoMarkerRows] = useState(null);
+    
     const [infoWeather, setInfoWeather] = useState(null);
+
+    const [vehicleRows, setVehicleRows] = useState(null);
+    const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
+
+    useEffect(()=>{
+      if(vehicleRows == null){
+        var locations = [];
+        //Get all vehicle locations and combine into vehicleRows
+        Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations({id: user.id ,authCode: user.bouncieAuthCode, token: user.bouncieToken, expiresAt: user.bouncieExpiresAt})])
+        .then((values)=>{
+          //console.log("valuies",values);
+          let linuxp_loc_array = values[0]["data"]["locations"];
+          let tmpData = linuxp_loc_array.map((item,i )=> ({latitude: item.latitude, 
+                                                        longitude: item.longitude, 
+                                                        make: item.make, 
+                                                        model: item.model, 
+                                                        name: item.firstName+' '+item.lastName,
+                                                      vin: item.vin }))
+          locations.splice(locations.length, 0, ...tmpData);
+          let tmpData2 =[];
+          if(values[1]["error"]){
+            console.error("Custom Error from bouncie", values[1]["error"]);
+            setBouncieAuthNeeded(true);
+          }else{
+            tmpData2 =  values[1].map((item,i )=> ({latitude: item['stats']['location'].lat, 
+              longitude: item['stats']['location'].lon, 
+              make: item['model'].make, 
+              model: item['model'].name, 
+              name: item.nickName,
+            vin: item.vin }))
+          }
+           
+          locations.splice(locations.length, 0, ...tmpData2);
+          setVehicleRows(locations);
+          console.log(locations);
+        })
+        .catch((error)=>{
+          console.error("Vehicle error", error);
+        })
+
+      }
+    },[vehicleRows])
 
     useEffect( () =>{ //useEffect for inputText
       if(mapRows != null)
@@ -90,7 +137,7 @@ const MapContainer = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            console.log("MapContainer tmpData in loop", tmpData);
+                            //console.log("MapContainer tmpData in loop", tmpData);
                         }
                         //Add to our big array
                         tmpData.splice(tmpData.length, 0, ...tmpTmpData);
@@ -109,18 +156,15 @@ const MapContainer = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            console.log("MapContainer tmpData in loop", tmpData);
+                            //console.log("MapContainer tmpData in loop", tmpData);
                         }
                     }
                     
-                    console.log("TaskListFilter each loop, ",tmpData);
+                    //console.log("TaskListFilter each loop, ",tmpData);
                   })              
                 }  
                 
                 setTaskListTasksSaved(data);
-                console.log("MapContainer tmpData final",tmpData);
-                console.log("MapContainer filters final",filters);
-                      console.log("MapContainer inORout final",filterInOrOut);
                 
                 //No filters 
                 if(filters && !filters.length){
@@ -227,7 +271,15 @@ const MapContainer = (props) => {
         var task = mapRows.filter((row, i) => row.t_id === id)[0];
         setActiveMarker(task);
         setShowingInfoWindow(true);
+        setActiveVehicle(null);
     }
+
+    const updateActiveVehicle = id => (props, marker, e) => {
+      var vehicle = vehicleRows.filter((row, i) => row.vin === id)[0];
+      setActiveVehicle(vehicle);
+      setShowingInfoWindow(true);
+      setActiveMarker(null)
+  }
 
     
 
@@ -293,20 +345,41 @@ const MapContainer = (props) => {
                           url: handleMarkerURL(marker.t_id)
                         }}/>
                 ))}
+                {
+                  vehicleRows && vehicleRows.map((vehicle,i)=> (
+                    <Marker key={vehicle.vin} 
+                        position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
+                         onClick = { updateActiveVehicle(vehicle.vin) }
+                        
+                        id={vehicle.vin}
+                        title={vehicle.name} 
+                        name={vehicle.name}
+                        icon={{
+                          url: 'static/icons8-car-top-view-50.png'
+                        }}/>
+                  ))
+                }
                 { <MapMarkerInfoWindow {...props} 
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
-                          infoWeather={infoWeather} setInfoWeather={setInfoWeather}
+                          setInfoWeather={setInfoWeather} infoWeather={infoWeather}
                           showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/>}
+                {
+                  <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
+                  showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>
+                }
               </Map>
             </Grid>
             <Grid item xs={3}>
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
                           markedRows={markedRows} setMarkedRows={setMarkedRows}
+                          vehicleRows={vehicleRows} setVehicleRows={setVehicleRows}
+                          activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle}
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                           setShowingInfoWindow={setShowingInfoWindow}
                           setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
                           setResetBounds={setResetBounds}
                           infoWeather={infoWeather} setInfoWeather={setInfoWeather}
+                          bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
                           />
             </Grid>
           </Grid>
