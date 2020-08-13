@@ -3,21 +3,21 @@ module.exports = (tl_data) => {
 
     var rows = "";
     tl_data.forEach((task, i)=> {
-      if(i != 0 && i%42 === 0){
+      if(i != 0 && i%49 === 0){
         rows += `<tr></tr>
         </tbody>
         </table>
-        <p>${tl_data.length} Work Order(s) CONTINUED</p>
+        <p>${tl_data.length} Task(s) CONTINUED</p>
         <table class="minimalistBlack">
           <thead>
             <tr>
-              <th class="small">Order</th>
-              <th class="small">WO #</th>
+              <th class="tiny">Order</th>
+              <th class="tiny">WO #</th>
               <th class="small">Date</th>
               <th class="small">Name</th>
-              <th>City</th>
-              <th>State</th>
-              <th class="small">Type</th>
+              <th class="small">City</th>
+              <th class="tiny">State</th>
+              <th class="tiny">Type</th>
               <th class="medium">SCBD</th>
               <th class="small">Sign</th>
               <th class="small">Artwork</th>
@@ -31,10 +31,11 @@ module.exports = (tl_data) => {
           <tbody>`;
       }
 
-      rows +=`<tr><td class="small">${task.priority_order}</td><td class="small">${task.table_id}</td><td class="small">${task.wo_date}</td><td class="small">${task.t_name}</td>` +
-      `<td class="small">${task.city}</td><td class="small">${task.state}</td><td class="small">${task.type}</td><td class="medium">${task.description}</td>` +
-      `<td class="small">${task.sign}</td><td class="small">${task.artwork}</td><td class="small">${task.drilling}</td>` + 
-      `<td class="small">${task.drill_date}</td><td class="small">${task.drill_crew}</td><td class="small">${task.install_date}</td><td class="small">${task.install_crew}</td></tr>`;
+      rows +=`<tr><td class="small">${task.priority_order}</td><td class="small">${task.table_id ? task.table_id : ""}</td><td class="small">${task.wo_date ? task.wo_date : ""}</td><td class="small">${task.t_name ? task.t_name : ""}</td>` +
+      `<td class="small">${task.city ? task.city : ""}</td><td class="small">${task.state ? task.state : ""}</td><td class="small">${task.type ? task.type : ""}</td><td class="medium">${task.description ? task.description : ""}</td>` +
+      `<td class="small">${task.sign ? task.sign : ""}</td><td class="small">${task.artwork ? task.artwork : ""}</td><td class="small">${task.drilling ? task.drilling : ""}</td>` + 
+      `<td class="small">${task.drill_date ? task.drill_date : ""}</td><td class="small">${task.drill_crew_leader ? task.drill_crew_leader : (task.drill_crew ? 'Crew '+task.drill_crew : "") }</td>` + 
+      `<td class="small">${task.install_date ? task.install_date : ""}</td><td class="small">${task.install_crew_leader ? task.install_crew_leader : (task.install_crew ? 'Crew '+task.install_crew : "")}</td></tr>`;
     });
     
 return `
@@ -53,16 +54,16 @@ return `
           }
           table.minimalistBlack td, table.minimalistBlack th {
             border: 1px solid #989898;
-            padding: 3px 2px;
+            padding: 1px 2px;
           }
           table.minimalistBlack tbody td {
-            font-size: 9px;
+            font-size: 5px;
             overflow: hidden;
             white-space: nowrap;
 
           }
           table.minimalistBlack tbody tr {
-            height:.7em;
+            height:.5em;
 
           }
           table.minimalistBlack tr:nth-child(even) {
@@ -76,7 +77,7 @@ return `
             border-bottom: 1px solid #858585;
           }
           table.minimalistBlack thead th {
-            font-size: 12px;
+            font-size: 6px;
             font-weight: bold;
             color: #212121;
             text-align: left;
@@ -87,28 +88,31 @@ return `
           }
 
           table.minimalistBlack tfoot td {
-            font-size: 9px;
+            font-size: 5px;
+          }
+          .tiny{
+            width: 20px;
           }
           .small {
-            width: 70px;
+            width: 35px;
           }
           .medium {
-            width: 120px;
+            width: 90px;
           }
         </style>
        </head>
        <body>
-         <p>${tl_data.length} Work Order(s)</p>
+         <p>${tl_data.length} Task(s)</p>
           <table class="minimalistBlack">
             <thead>
               <tr>
-                <th class="small">Order</th>
-                <th class="small">WO #</th>
+                <th class="tiny">Order</th>
+                <th class="tiny">WO #</th>
                 <th class="small">Date</th>
                 <th class="small">Name</th>
-                <th>City</th>
-                <th>State</th>
-                <th class="small">Type</th>
+                <th class="small">City</th>
+                <th class="tiny">State</th>
+                <th class="tiny">Type</th>
                 <th class="medium">SCBD</th>
                 <th class="small">Sign</th>
                 <th class="small">Artwork</th>

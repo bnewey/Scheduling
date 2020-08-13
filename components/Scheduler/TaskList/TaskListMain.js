@@ -216,7 +216,7 @@ const TaskListMain = (props) => {
                     {text: "Order", field: "priority_order", width: '4%',style: 'smallListItemText', type: 'number'},
                     {text: "WO #", field: "table_id", width: '4%',style: 'smallListItemText', type: 'number'},
                     {text: "Desired Date", field: "date_desired", width: '7%', style: 'smallListItemText', type: 'date'},
-                    {text: "Date Entered", field: "tl_date_entered", width: '6%', style: 'smallListItemText', type: 'date'},
+                    {text: "Order Date", field: "wo_date", width: '6%', style: 'smallListItemText', type: 'date'},
                     {text: "1st Game", field: "first_game", width: '6%', type: 'date'},
                     {text: "Name", field: "t_name", width: '12%', style: 'boldListItemText', type: 'text'},
                     {text: "State", field: "state", width: '4%', style: 'smallListItemText', type: 'text'},
