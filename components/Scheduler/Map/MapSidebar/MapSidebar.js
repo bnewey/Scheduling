@@ -27,12 +27,13 @@ const MapSidebar = (props) => {
             bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows} = props;
 
     useEffect( () =>{ //useEffect for inputText
-        if(activeMarker && activeMarker.geocoded)
+        if(activeMarker && activeMarker.geocoded && expanded!="taskMarker" ){
             setExpanded('taskMarker');
             setExpandedAnimDone(false);
-
-        if(activeVehicle){
-            setExpanded('vehicleMarker');
+        }
+            
+        if(activeVehicle && expanded != "vehicleMarker"){
+            setExpanded('vehicleMarker' )
             setExpandedAnimDone(false);
         }
         return () => { //clean up
@@ -48,12 +49,11 @@ const MapSidebar = (props) => {
     //FUNCTIONS
     const handleChange = panel => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
-        setExpandedAnimDone(false);
     };
 
     const handleResetAfterAuth = (event)=>{
-        setVehicleRows(null);
-        setBouncieAuthNeeded(false);
+        //setVehicleRows(null);
+        //setBouncieAuthNeeded(false);
     }
 
     const handleAnimationEnd = (event) => {
@@ -72,7 +72,7 @@ const MapSidebar = (props) => {
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="taskMarkerbh-content"
                     id="taskMarkerbh-header"
-                ><ListIcon className={classes.icon}/><span>Mapped Markers:&nbsp;&nbsp;{markedRows.length} Items</span>
+                ><ListIcon className={classes.icon}/><span>Tasks:&nbsp;&nbsp;{markedRows.length} Items</span>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails ref={panelRef} className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400}>

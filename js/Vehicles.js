@@ -94,6 +94,7 @@ async function getBouncieLocations(user){
         if(!data.ok){
             throw new Error("getBouncieLocations returned empty list or bad query")
         }
+        //console.log("data from getBouncieLocations", await data.json());
         var list = await data.json();
         return(list);
     }catch(error){

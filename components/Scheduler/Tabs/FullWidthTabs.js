@@ -64,7 +64,7 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
       }
     }
     if(!isNaN(tabValue)){
-      window.localStorage.setItem('tabValue', JSON.stringify(tabValue));
+      window.localStorage.setItem('tabValue', JSON.stringify(tabValue ? tabValue : 0));
     }
     
   }, [tabValue]);

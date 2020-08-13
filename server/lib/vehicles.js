@@ -49,8 +49,11 @@ router.post('/getBouncieLocations', async (req,res) => {
                 "Content-Type": "application/json",
                 }
             })
+            
+            console.log("reponse", response);
             const dsa = await response.json();
             //res.send(dsa)
+            console.log("dsa",dsa)
             return dsa;
         }
         catch(error){
@@ -66,10 +69,11 @@ router.post('/getBouncieLocations', async (req,res) => {
         .then((data)=>{
             //Update database
             User.updateUserBouncie(database,user.authCode, data.access_token, data.expires_in, user.id)
-            .then((data)=>{
+            .then((updateResponse)=>{
                 //Get locations
                 getLocations(data.access_token)
                 .then((locations)=>{
+                    console.log("Locations", locations);
                     console.log("Got new token and got locations")
                     res.send(locations);
                 })

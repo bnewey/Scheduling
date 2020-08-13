@@ -17,6 +17,8 @@ import Util from '../../../js/Util';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
+
+import PDF from '../../../js/Pdf';
 import {CrewContext} from '../Crew/CrewContextContainer';
 import TaskListAddCrewDialog from './TaskListAddCrewDialog';
 
@@ -25,6 +27,7 @@ const TaskListSidebar = (props) => {
     //STATE
     const [editOpen, setEditOpen] = React.useState(false);
     const [editList, setEditList] = React.useState(null);
+    const [pdfLoaded,setPDFLoaded] = React.useState(false);
 
     //PROPS
     const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
@@ -120,6 +123,22 @@ const TaskListSidebar = (props) => {
     }
 
 
+    const handleCreateAndOpenPDF = (event)=>{
+        if(!taskListTasks){
+            cogoToast.error("Failed to create PDF");
+            return;
+        }
+        PDF.createTLPdf(taskListTasks)
+            .then( (data) => {
+                cogoToast.success("Created PDF");
+                setPDFLoaded(true);
+                // setLoading(false);
+            })
+            .catch( error => {
+              console.warn(error);
+            })
+    }
+
 
     return(
         <Paper className={classes.root}>
@@ -206,10 +225,26 @@ const TaskListSidebar = (props) => {
                                 Simple
                             </span>
                     </div>
-                
-                <div className={classes.singleLineDiv}>
 
+                <div className={classes.priority_info_heading}>
+                    <span>PDF</span>
                 </div>
+                <div className={classes.singleLineDiv}>
+                    <span
+                        className={classes.text_button} 
+                        onClick={event =>  handleCreateAndOpenPDF(event)}>
+                        Create PDF
+                    </span>
+                </div>
+                { pdfLoaded ? 
+                <div className={classes.singleLineDiv}>
+                    <span className={classes.text_button}  >
+                            <a href={"./static/task_list.pdf"}
+                        target="_blank" >Open PDF</a>
+                        
+                    </span>
+                </div>
+                : <></>}
             </div>
         </Paper>
     );

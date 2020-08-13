@@ -76,7 +76,7 @@ const WorkOrderPdf = function(props) {
                 temp.sort((a,b) => a[orderBy]-b[orderBy]);
             }
 
-            Pdf.createPdf(temp)
+            Pdf.createWOPdf(temp)
             .then( (data) => {
                 setLoaded(true);
                 setLoading(false);

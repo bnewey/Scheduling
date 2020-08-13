@@ -1,5 +1,4 @@
 const passport = require('passport');
-const OAuth2Strategy = require('passport-oauth2');
 const User = require('./user');
 const logger = require('../../logs');
 const { response } = require('express');
