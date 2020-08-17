@@ -45,16 +45,7 @@ nextApp
   .then(() => {
 
     app.get('/', (req,res)=>{
-      const parsedUrl = parse(req.url, true)
-      const { pathname } = parsedUrl;
-
-      if (pathname === '/sw.js' || pathname.startsWith('/workbox-')) {
-        console.log("SW or Worker");
-        const filePath = path.join(__dirname, '.next', pathname)
-        app.serveStatic(req, res, filePath)
-      } else {
-        handle(req, res, parsedUrl)
-      }
+      
     })
 
     app.use(favicon(__dirname + '/../public/static/favicon.ico'));
@@ -118,7 +109,17 @@ nextApp
     bouncie({ROOT_URL, app, database});
 
     app.get('*', (req, res) => {
-      return handle(req, res);
+      const parsedUrl = parse(req.url, true)
+      const { pathname } = parsedUrl;
+
+      if (pathname === '/sw.js' || pathname.startsWith('/workbox-')) {
+        console.log("SW or Worker");
+        const filePath = path.join(__dirname, '.next', pathname)
+        app.serveStatic(req, res, filePath)
+      } else {
+        handle(req, res, parsedUrl)
+      }
+      //return handle(req, res);
     });
 
     server.listen(PORT, err => {
