@@ -7,6 +7,7 @@ const expressValidator = require('express-validator');
 const http = require("http");
 const favicon = require('serve-favicon');
 const cors = require('cors');
+const { parse } = require('url')
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 
@@ -42,6 +43,19 @@ global.ROOT_URL = process.env.NODE_ENV == 'production' ? "http://icontrol.rainey
 nextApp
   .prepare()
   .then(() => {
+
+    app.get('/', (req,res)=>{
+      const parsedUrl = parse(req.url, true)
+      const { pathname } = parsedUrl;
+
+      if (pathname === '/sw.js' || pathname.startsWith('/workbox-')) {
+        console.log("SW or Worker");
+        const filePath = path.join(__dirname, '.next', pathname)
+        app.serveStatic(req, res, filePath)
+      } else {
+        handle(req, res, parsedUrl)
+      }
+    })
 
     app.use(favicon(__dirname + '/../public/static/favicon.ico'));
     app.use(expressValidator());

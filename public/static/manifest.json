@@ -2,7 +2,7 @@
     "name": "REI Scheduling",
     "short_name": "Scheduling",
     "lang": "en-US",
-    "start_url": "/scheduling",
+    "start_url": "/",
     "display": "browser",
     "theme_color": "#5b7087",
     "icons": [

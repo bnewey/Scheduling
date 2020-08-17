@@ -9,6 +9,7 @@ module.exports = withPWA({
     pwa: {
       dest: 'public/static',
       disable: process.env.NODE_ENV === 'development',
-      scope: '/scheduling',
+      scope: '/',
+      subdomainPrefix: '/scheduling',
     }
   })
