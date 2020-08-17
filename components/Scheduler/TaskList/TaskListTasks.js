@@ -38,8 +38,7 @@ const TaskListTasks = (props) =>{
     // //FUNCTIONS
 
 
-    useEffect( () =>{ //useEffect for inputText
-      console.log("Changed");  
+    useEffect( () =>{ //useEffect for inputText  
       return () => { //clean up
             
             if(taskListToMap){
@@ -54,7 +53,7 @@ const TaskListTasks = (props) =>{
         setSelectedTasks([]);
       },[filters])
 
-
+    
     // const handleRemoveFromTaskList = (event, id, tl_id, name) => {
     //   const remove = () => {
     //     TaskLists.removeTaskFromList(id, tl_id)

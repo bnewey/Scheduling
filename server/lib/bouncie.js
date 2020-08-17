@@ -64,14 +64,20 @@ function bouncie({ROOT_URL, app, database}) {
                 console.log("date saved", response.expires_in);
                 User.updateUserBouncie(database,code, response.access_token, response.expires_in, user_id)
                 .then((data)=>{
+                    console.log("code", code)
+                    console.log("update response", data);
+                    console.log("session",req.session)
+                    res.redirect('/');
                 })
                 .catch((error)=>{
                     console.error("Failed to update Bouncie access token", error);
+                    res.redirect('/');
                 })
 
             })
             .catch((error)=>{
                 console.error("Failed to exchanged for token.", error);
+                res.redirect('/');
             })
             
 
@@ -83,7 +89,7 @@ function bouncie({ROOT_URL, app, database}) {
             res.redirect('/error');
         }
         
-        res.redirect('/');
+        
     })
 }
 

@@ -2,7 +2,8 @@
 import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 
 import {makeStyles, Paper, Grid, Button} from '@material-ui/core';
-
+import ActiveVehicleIcon from '@material-ui/icons/PlayArrow';
+import StoppedVehicleIcon from '@material-ui/icons/Stop';
 import MapSidebar from './MapSidebar/MapSidebar';
 import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 
@@ -57,6 +58,7 @@ const MapContainer = (props) => {
 
     const [vehicleRows, setVehicleRows] = useState(null);
     const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
+    const [visibleItems, setVisibleItems] = React.useState(() => ['tasks', 'vehicles']);
 
     useEffect(()=>{
       if(vehicleRows == null){
@@ -64,14 +66,16 @@ const MapContainer = (props) => {
         //Get all vehicle locations and combine into vehicleRows
         Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations({id: user.id ,authCode: user.bouncieAuthCode, token: user.bouncieToken, expiresAt: user.bouncieExpiresAt})])
         .then((values)=>{
-          //console.log("valuies",values);
+          console.log("valuies",values);
           let linuxp_loc_array = values[0]["data"]["locations"];
           let tmpData = linuxp_loc_array.map((item,i )=> ({latitude: item.latitude, 
                                                         longitude: item.longitude, 
                                                         make: item.make, 
                                                         model: item.model, 
                                                         name: item.firstName+' '+item.lastName,
-                                                      vin: item.vin }))
+                                                      vin: item.vin,
+                                                      service: 'linxup',
+                                                    active: item.speed > 0 ? true : false }))
           locations.splice(locations.length, 0, ...tmpData);
           let tmpData2 =[];
           if(values[1]["error"] || !Array.isArray(values[1])){
@@ -83,7 +87,9 @@ const MapContainer = (props) => {
               make: item['model'].make, 
               model: item['model'].name, 
               name: item.nickName,
-            vin: item.vin }))
+            vin: item.vin,
+            service: 'bouncie',
+           active: item['stats'].isRunning }))
           }
            
           locations.splice(locations.length, 0, ...tmpData2);
@@ -93,7 +99,6 @@ const MapContainer = (props) => {
         .catch((error)=>{
           console.error("Vehicle error", error);
         })
-
       }
     },[vehicleRows])
 
@@ -156,13 +161,15 @@ const MapContainer = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            //console.log("MapContainer tmpData in loop", tmpData);
+                            console.log("MapContainer tmpData in loop", tmpData);
                         }
                     }
                     
-                    //console.log("TaskListFilter each loop, ",tmpData);
+                    console.log("TaskListFilter each loop, ",tmpData);
                   })              
-                }  
+                }else{
+                  console.log("else on filters && filters.length > 0")
+                }
                 
                 setTaskListTasksSaved(data);
                 
@@ -183,7 +190,11 @@ const MapContainer = (props) => {
                 cogoToast.error(`Error getting Task List`, {hideAfter: 4});
                 console.error("Error getting tasklist", error);
             })
+        }else{
+          console.log("else on taskLists && taskListToMap && taskListToMap.id ");
         }
+      }else{
+        console.log("else on mapRows == null && filterInOrOut != null && filterAndOr != null")
       }
       if(mapRows){
         //filter geocoded, then sort by priority_order
@@ -198,7 +209,7 @@ const MapContainer = (props) => {
       
       return () => { //clean up
       }
-    },[mapRows,filterInOrOut, filterAndOr]);
+    },[mapRows,filterInOrOut, filterAndOr,taskLists, taskListToMap]);
 
     useEffect(()=>{
         if(noMarkerRows == null && mapRows){
@@ -310,7 +321,26 @@ const MapContainer = (props) => {
       event.preventDefault();
     };
     ////
-    
+    const handleFindVehicleIcon = (vehicle)=>{
+      if(!vehicle){
+        console.error("Bad vehilce for handleFindVehcileIcon");
+        return
+      }
+      let url = "";
+      switch (vehicle.service){
+        case 'bouncie':
+          url = vehicle.active ? 'static/vehicle_icons/bouncie_active_nonselected.png' : 'static/vehicle_icons/bouncie_stop_nonselected.png';
+          break;
+        case 'linxup':
+          url = vehicle.active ? 'static/vehicle_icons/linxup_active_nonselected.png' : 'static/vehicle_icons/linxup_stop_nonselected.png';
+          break;
+        default:
+          break;
+      }
+      console.log("url",url)
+      return url;
+    }
+
     return (
       <div>
         <Grid container spacing={1}>
@@ -329,7 +359,7 @@ const MapContainer = (props) => {
                 onClick = { onMapClick}
                 bounds={bounds}
               >
-                {markedRows.map((marker) => (
+                {visibleItems.indexOf("tasks") != -1 && markedRows.map((marker) => (
                 <Marker key={marker.t_id} 
                         position={{ lat: marker.lat, lng: marker.lng}}
                         onClick = { updateActiveMarker(marker.t_id) }
@@ -346,7 +376,7 @@ const MapContainer = (props) => {
                         }}/>
                 ))}
                 {
-                  vehicleRows && vehicleRows.map((vehicle,i)=> (
+                  visibleItems.indexOf("vehicles") != -1 && vehicleRows && vehicleRows.map((vehicle,i)=> (
                     <Marker key={vehicle.vin} 
                         position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
                          onClick = { updateActiveVehicle(vehicle.vin) }
@@ -355,7 +385,7 @@ const MapContainer = (props) => {
                         title={vehicle.name} 
                         name={vehicle.name}
                         icon={{
-                          url: 'static/icons8-car-top-view-50.png'
+                          url: handleFindVehicleIcon(vehicle)
                         }}/>
                   ))
                 }
@@ -380,6 +410,7 @@ const MapContainer = (props) => {
                           setResetBounds={setResetBounds}
                           infoWeather={infoWeather} setInfoWeather={setInfoWeather}
                           bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
+                          visibleItems={visibleItems} setVisibleItems={setVisibleItems}
                           />
             </Grid>
           </Grid>

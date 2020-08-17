@@ -2,6 +2,7 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Paper, MenuItem, InputLabel, FormHelperText, FormControl, Select, Button, Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
 
+
 import TaskLists from '../../../../js/TaskLists';
 import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
@@ -9,13 +10,14 @@ import { TaskContext } from '../../TaskContainer';
 import EnhancedTableAddTL from "../../Table/EnhancedTableAddTL";
 
 
-const MapSidebarTaskList = (props) => {
+const MapSidebarToolbar = (props) => {
     //PROPS
-    const { mapRows, setMapRows,setActiveMarker, setResetBounds} = props;
+    const { mapRows, setMapRows,setActiveMarker, setResetBounds, setVehicleRows} = props;
     const { taskLists, setTaskLists, priorityList, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
     //STATE  
     const [open, setOpen] = React.useState(false);
     const [tempTaskListToMap, setTempTaskListToMap] = useState(null);
+    
     //CSS
     const classes = useStyles();
 
@@ -26,7 +28,6 @@ const MapSidebarTaskList = (props) => {
         }
     },[taskListToMap]);
   
-
 
     //FUNCTIONS
     const handleChangeTaskListToMap = (event) => {
@@ -53,21 +54,23 @@ const MapSidebarTaskList = (props) => {
         setTaskListToMap(priorityList);
     }; 
 
+    const handleFetchVehicles = (event)=>{
+        setVehicleRows(null);
+    }
+
      
     return(
         <React.Fragment>
-            
-{ taskListToMap ? <p className={classes.p_activeTask}>Active Task List: {taskListToMap.list_name} {taskListToMap.is_priority ? "(PRIORITY LIST)" : "" }</p> 
-                        : <><p className={classes.p_noActiveTask}>No Active Task List!</p></>}
-            <Button className={classes.openButton} onClick={handleMapTaskList}>Map PriorityList</Button>
-            {taskListToMap ? <></> : <EnhancedTableAddTL />}
+            <div>
+                <Button className={classes.openButton} onClick={event => handleFetchVehicles(event)}>Refetch Vehicles</Button>     
+            </div>
         </React.Fragment>
       
     );
 
 } 
 
-export default MapSidebarTaskList;
+export default MapSidebarToolbar;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -75,6 +78,22 @@ const useStyles = makeStyles(theme => ({
     },
     dialog:{
         
+    },
+    buttonGroup:{
+        backgroundColor: '#e8fdff',
+        borderRadius: '2px',
+        margin: '2% 3% 1%',
+        padding: '1%',
+    },
+    visibleButton:{
+        backgroundColor: '#fff !important',
+        border: '1px solid #9c9c9c',
+        padding: '5px 11px',
+    },
+    nonVisibleButton:{
+        backgroundColor: 'rgba(0, 0, 0, 0.12) !important',
+        border: '1px solid #9c9c9c',
+        padding: '5px 11px',
     },
     title:{
         '&& .MuiTypography-root':{

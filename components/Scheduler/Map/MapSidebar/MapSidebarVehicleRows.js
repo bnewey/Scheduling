@@ -55,8 +55,6 @@ const MapSiderbarVehicleRows = (props) =>{
           console.log(activeVehicle);
           return;
         }
-        console.log("el",el)
-        console.log("box", vehiclePanelRef.current);
 
         if(!isInViewport(el, vehiclePanelRef.current)){
           el.scrollIntoView({behavior: "smooth",inline: "nearest"});
@@ -96,7 +94,7 @@ const MapSiderbarVehicleRows = (props) =>{
                                 className={isSelected ? classes.selectedRow : classes.nonSelectedRow}
                                 >
                       <ListItemText id={labelId}>
-                            <><div className={classes.MarkerInfo}>{row.name}</div>
+                <><div className={classes.MarkerInfo}>{row.name}<span className={classes.activeText}>{row.active ? "ACTIVE": ""}</span></div>
                             <div className={classes.MarkerSubInfo}>   </div></>
                       </ListItemText>
                       <ListItemSecondaryAction>
@@ -133,6 +131,10 @@ const useStyles = makeStyles(theme => ({
   },
   items:{
       color: '#fcfcfc'
+  },
+  activeText:{
+    color: '#4991ff',
+    padding: '0px 5px',
   },
   selectedRow:{
     backgroundColor: '#abb7c9 !important',

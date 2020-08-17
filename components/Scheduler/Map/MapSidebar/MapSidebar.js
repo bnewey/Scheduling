@@ -1,14 +1,16 @@
 import React, {useRef, useState, useEffect} from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ListIcon from '@material-ui/icons/List';
-import VisiblityOffIcon from '@material-ui/icons/VisibilityOff';
+import DirectionsCarIcon from '@material-ui/icons/DirectionsCar';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import VisibilityOnIcon from '@material-ui/icons/Visibility';
 import { Scrollbars} from 'react-custom-scrollbars';
 import {makeStyles, Paper, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary} from '@material-ui/core'
 
 import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
 import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
 import MapSidebarVehicleRows from './MapSidebarVehicleRows';
-import MapSidebarTaskList from './MapSidebarTaskList';
+import MapSidebarToolbar from './MapSidebarToolbar';
 
 import { withRouter } from "next/router";
 import Link from "next/link";
@@ -24,7 +26,7 @@ const MapSidebar = (props) => {
     //PROPS
     const {mapRows, setMapRows, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
             setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds, activeVehicle, setActiveVehicle, 
-            bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows} = props;
+            bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows, visibleItems, setVisibleItems} = props;
 
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded && expanded!="taskMarker" ){
@@ -59,11 +61,24 @@ const MapSidebar = (props) => {
     const handleAnimationEnd = (event) => {
         setExpandedAnimDone(true);
     }
+
+    const handleVisible = (event, newVisible) => {
+        if(visibleItems.indexOf(newVisible) == -1){
+            setVisibleItems([...visibleItems, newVisible]);
+        }else{
+            setVisibleItems([...visibleItems.filter((item,i)=> item != newVisible)]);
+        }   
+        event.stopPropagation();
+    };
+
+    const isVisible = (item) =>{
+        return(visibleItems.indexOf(item) != -1);
+    }
      
     return(
         <Paper className={classes.root}>
             <Paper className={classes.head}>
-                <MapSidebarTaskList {...props} />
+                <MapSidebarToolbar {...props} />
                 
             </Paper>
             <ExpansionPanel expanded={expanded === 'taskMarker'} onChange={handleChange('taskMarker')} className={classes.body } 
@@ -72,7 +87,10 @@ const MapSidebar = (props) => {
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="taskMarkerbh-content"
                     id="taskMarkerbh-header"
+                    classes={{content: classes.expPanelSummary}}
                 ><ListIcon className={classes.icon}/><span>Tasks:&nbsp;&nbsp;{markedRows.length} Items</span>
+                {isVisible('tasks') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'tasks')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'tasks')}/>}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails ref={panelRef} className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400}>
@@ -89,7 +107,10 @@ const MapSidebar = (props) => {
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="vehicleMarkerbh-content"
                     id="vehicleMarkerbh-header"
-                ><ListIcon className={classes.icon}/><span>Vehicles:&nbsp;&nbsp;{bouncieAuthNeeded ? "Authentication needed" : (vehicleRows ? vehicleRows.length : "") }</span>
+                    classes={{content: classes.expPanelSummary}}
+                ><DirectionsCarIcon className={classes.icon}/><span>Vehicles:&nbsp;&nbsp;{bouncieAuthNeeded ? "Authentication needed" : (vehicleRows ? vehicleRows.length : "") }</span>
+                {isVisible('vehicles') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'vehicles')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'vehicles')}/>}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails  ref={vehiclePanelRef} className={classes.details}>
                     <>
@@ -118,7 +139,8 @@ const MapSidebar = (props) => {
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="taskMarkerbh-content"
                     id="taskMarkerbh-header"
-                ><VisiblityOffIcon className={classes.icon}/><span>Unmapped Markers:&nbsp;&nbsp;{noMarkerRows.length} Items</span>
+                    classes={{content: classes.expPanelSummary}}
+                ><VisibilityOffIcon className={classes.icon}/><span>Unmapped Markers:&nbsp;&nbsp;{noMarkerRows.length} Items</span>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.details} >
                     <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
@@ -171,6 +193,15 @@ const useStyles = makeStyles(theme => ({
         margin: '1px 12px 1px 1px',
         color: '#a0a0a0',
     },
+    iconClickable:{
+        margin: '1px 12px 1px 1px',
+        color: '#a0a0a0',
+        '&:hover':{
+            color: '#3c3c3c !important',
+            cursor: 'pointer',
+            
+        }
+    },
     authDiv:{
         backgroundColor: '#f1bebeb0',
         fontSize: '1em',
@@ -178,5 +209,8 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center',
         color: '#25272b',
         cursor: 'pointer',
-    }
+    },
+    expPanelSummary:{
+        justifyContent: 'space-between'
+    },
   }));

@@ -69,6 +69,8 @@ router.post('/getBouncieLocations', async (req,res) => {
         //Refetch token and get locations using new token
         exhangeCodeForToken( ROOT_URL, user.authCode )
         .then((data)=>{
+            console.log("auth code", user.authCode);
+            console.log("data from exchange", data);
             //Update database
             User.updateUserBouncie(database,user.authCode, data.access_token, data.expires_in, user.id)
             .then((updateResponse)=>{
@@ -77,6 +79,7 @@ router.post('/getBouncieLocations', async (req,res) => {
                 .then((locations)=>{
                     console.log("Locations", locations);
                     console.log("Got new token and got locations")
+                    console.log("session", req.session);
                     res.send(locations);
                 })
                 .catch((error)=>{

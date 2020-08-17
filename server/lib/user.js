@@ -164,7 +164,7 @@ async function updateUserBouncie(database, authCode ,accessToken, expires_in, id
   }
   catch(error){
       logger.error("User (updateUserBouncieAuthCode): " + error);
-      return 0;
+      return error;
   }
 };
 
