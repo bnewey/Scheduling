@@ -87,7 +87,7 @@ router.post('/getBouncieLocations', async (req,res) => {
                 })
             })
             .catch((error)=>{
-                console.error("Failed to update Bouncie access token", error);
+                console.error("Failed to update Bouncie access token in vehicles", error);
             })
         })
         .catch((error)=>{

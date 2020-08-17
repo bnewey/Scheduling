@@ -1,0 +1,15 @@
+{
+    "name": "REI Scheduling",
+    "short_name": "Scheduling",
+    "lang": "en-US",
+    "start_url": "/scheduling",
+    "display": "browser",
+    "theme_color": "#5b7087",
+    "icons": [
+      {
+        "src": "/static/favicon.ico",
+        "sizes": "48x48",
+        "type": "png"
+      }
+    ]
+  }
