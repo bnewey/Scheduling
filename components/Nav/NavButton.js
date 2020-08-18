@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from "next/router";
 
 const NavButton = props => {
+  const {sizeStyle} = props;
 
   const useStyles = makeStyles(theme => ({
     a:{  
@@ -39,7 +40,7 @@ const NavButton = props => {
   const classes = useStyles();
 
   return (
-      <Link href={props.path} as={`/scheduling/${props.path}`}><div className={`NavButton ${
+      <Link display={{ xs: 'none', md: 'block' }} href={props.path} as={`/scheduling/${props.path}`}><div className={`NavButton ${
         props.router.pathname === props.path ? "active" : ""
       }`}>
           <a className={classes.a + " " + (props.router.pathname === props.path ? classes.active : "") } >{props.label} </a></div>

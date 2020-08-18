@@ -174,6 +174,6 @@ export default TaskContainer
 
 const useStyles = makeStyles(theme => ({
   root:{
-    margin: '25px 0px 0px 0px',
+    margin: '1% 0 0 0',
   },
 }));

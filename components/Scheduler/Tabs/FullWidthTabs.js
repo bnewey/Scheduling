@@ -96,8 +96,9 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
           <Tab className={tabValue === 0 ? classes.selectedTab : classes.nonSelectedTab} 
               label={ 
                 <React.Fragment>
-                  <span className={classes.tabSpan}>
-                    <TaskIcon className={ classes.icon}/>&nbsp;Scheduler
+                  <span  className={classes.tabSpan}>
+                    <TaskIcon className={ classes.icon}/>
+                    <Box display={{ xs: 'none', md: 'inline' }}  component="span">Scheduler</Box>
                   </span>
                   {/* {activeTask ? 
                     <p className={classes.p_selected}>
@@ -105,13 +106,22 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
                     </p> : <></>
                   } */}
               </React.Fragment>} {...a11yProps(0)} />
-          <Tab className={tabValue === 1 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><MapIcon className={classes.icon}/>&nbsp;Map</span>} {...a11yProps(1)} />
-          <Tab className={tabValue === 2 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} label={ <span className={classes.tabSpan}><CrewIcon className={classes.icon}/>&nbsp;Crew</span>} {...a11yProps(2)} />
+          <Tab className={tabValue === 1 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
+                    label={ <span className={classes.tabSpan}>
+                                <MapIcon className={classes.icon}/>
+                                    <Box display={{ xs: 'none', md: 'inline' }}  component="span">Map</Box>
+                            </span>} {...a11yProps(1)} />
+          <Tab className={tabValue === 2 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
+              label={ <span  className={classes.tabSpan}>
+                                <CrewIcon className={classes.icon}/>
+                                <Box display={{ xs: 'none', md: 'inline' }}  component="span">Crew</Box>
+                            </span>} {...a11yProps(2)} />
           
           <Tab className={tabValue === 3 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
               label={ <React.Fragment>
                           <span className={classes.tabSpan}> 
-                            <ViewListIcon className={classes.icon}/>&nbsp;All Tasks
+                            <ViewListIcon className={classes.icon}/>
+                            <Box display={{ xs: 'none', md: 'inline' }}  component="span">All Tasks</Box>
                           </span>
                           {/* {numSelected ? <p className={classes.p_selected}>
                             {numSelected} Selected {activeTask ? "" : "(UNSAVED)"}
@@ -138,6 +148,7 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
 }
 
 const useStyles = makeStyles(theme => ({
+  //[theme.breakpoints.down('sm')]: sm, md, lg
   root: {
     width: '100%',
     '& header':{

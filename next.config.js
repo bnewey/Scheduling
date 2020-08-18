@@ -7,7 +7,7 @@ module.exports = withPWA({
 	    basePath: process.env.NODE_ENV === 'development' ? '' : '/scheduling',
     },
     pwa: {
-      dest: 'public/static',
+      dest: 'public',
       disable: process.env.NODE_ENV === 'development',
       scope: '/',
       subdomainPrefix: '/scheduling',

@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,
-     Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControlLabel, Switch,Grid, List, FilledInput, t } from '@material-ui/core';
+     Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControlLabel, Switch,Grid, List, Box } from '@material-ui/core';
 
      import FilterIcon from '@material-ui/icons/ShortText';
      import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
@@ -310,7 +310,7 @@ const TaskListFilter = (props) => {
                     color="secondary"
                     size="medium"
                 >   <Filter/>
-                        &nbsp;FILTER
+                        <Box display={{ xs: 'none', md: 'inline' }}  component="span">FILTER</Box>
                 </Button>
                 {filters && filters.length > 0 ? <>
                     <Button className={classes.clearFilterButton}
@@ -320,8 +320,19 @@ const TaskListFilter = (props) => {
                         size="medium"
                     >
                         <DeleteForeverIcon/>
-                        &nbsp;Clear Filters
+                        <Box display={{ xs: 'none', md: 'inline' }}  component="span">Clear Filters</Box>
                     </Button>
+                    
+                    <div className={classes.filterTypeInfoDiv}>
+                        <span className={classes.filterTypeInfoLabel}>Filtering</span>
+                        <t classes={{tooltip: classes.tooltip}} title={"Filtering 'OUT' removes items matching filters and 'IN' shows only items matching"}>
+                        <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateInorOut(event, filterInOrOut)}>{filterInOrOut}</span>
+                        </t>
+                        <span className={classes.filterTypeInfoLabel}>USING</span>
+                        <t  classes={{tooltip: classes.tooltip}} title={"'OR' shows items matching at least one filter. 'AND' shows items matching every filter."}>
+                        <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateAndorOr(event, filterAndOr)}>{filterAndOr}</span>
+                        </t>
+                    </div>
                     <div className={classes.chipDiv}>
                     {filters && filters.map((filter,i)=>{
                         return(<>
@@ -334,16 +345,6 @@ const TaskListFilter = (props) => {
                                 />
                             </>);
                     })}
-                    </div>
-                    <div className={classes.filterTypeInfoDiv}>
-                        <span className={classes.filterTypeInfoLabel}>Filtering</span>
-                        <t classes={{tooltip: classes.tooltip}} title={"Filtering 'OUT' removes items matching filters and 'IN' shows only items matching"}>
-                        <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateInorOut(event, filterInOrOut)}>{filterInOrOut}</span>
-                        </t>
-                        <span className={classes.filterTypeInfoLabel}>USING</span>
-                        <t  classes={{tooltip: classes.tooltip}} title={"'OR' shows items matching at least one filter. 'AND' shows items matching every filter."}>
-                        <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateAndorOr(event, filterAndOr)}>{filterAndOr}</span>
-                        </t>
                     </div>
                     
                 </>
@@ -490,10 +491,11 @@ const useStyles = makeStyles(theme => ({
     filterDiv:{
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         alignItems: 'center',
         padding: '5px',
         backgroundColor: '#d0cde0',
+        flexWrap: 'wrap',
     },
     filterButton:{
         margin: '0px 10px',
@@ -504,7 +506,8 @@ const useStyles = makeStyles(theme => ({
         '&&:hover':{
             backgroundColor: '#97bec9',
             color: '#000',
-        }
+        },
+        margin: '5px 0px'
     },
     clearFilterButton:{
         margin: '0px 10px',

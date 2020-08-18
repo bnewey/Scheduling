@@ -44,9 +44,6 @@ nextApp
   .prepare()
   .then(() => {
 
-    app.get('/', (req,res)=>{
-      
-    })
 
     app.use(favicon(__dirname + '/../public/static/favicon.ico'));
     app.use(expressValidator());

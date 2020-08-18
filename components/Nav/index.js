@@ -11,7 +11,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 
 import {withRouter} from "next/router";
 import NavButton from '../Nav/NavButton';
-
+import {Box, Drawer,List,Divider,ListItem, ListItemIcon, ListItemText} from '@material-ui/core';
 
 /*`
   display: flex;
@@ -31,10 +31,26 @@ const Nav = (props) => {
     button: {
       cursor: 'pointer',
       
+    },
+    list:{
+
+    },
+    listItem:{
+      border: '1px solid #ececec',
+      padding: '0% 20%'
     }
     
    
   }));
+
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const handleOpenDrawer = (event) =>{
+    setDrawerOpen(true);
+  }
+
+  const closeDrawer = (event) =>{
+    setDrawerOpen(false);
+  }
 
   //only works inside a functional component
   const classes = useStyles();
@@ -42,15 +58,27 @@ const Nav = (props) => {
   return(
   <AppBar position="static" classes={{root: classes.root}}>
     <Toolbar className={classes.toolbar}>
-          <IconButton edge="start" color="inherit" aria-label="menu">
+          <Box display={{ xs: 'inline', md: 'none' }}  component="span">
+          <IconButton edge="start" color="inherit" aria-label="menu" onClick={event=> handleOpenDrawer(event)}>
             <MenuIcon />
           </IconButton>
+          <Drawer anchor={'left'} open={drawerOpen} onClose={event => closeDrawer(event)}>
+            <List className={classes.list}>
+                {props.navButtons.map(button => (
+                  <ListItem className={classes.listItem}>
+                      <Link href={button.path} as={`/scheduling/${button.path}`}><h3>{button.label}</h3></Link>
+                  </ListItem>
+                ))}
+            </List>
+          </Drawer>
+          </Box>
           {props.navButtons.map(button => (
+            <Box display={{ xs: 'none', md: 'inline' }}  component="span">
           <NavButton className={classes.button}
             key={button.path}
             path={button.path}
             label={button.label}
-          />
+          /></Box>
           ))}
         </Toolbar>    
   </AppBar>

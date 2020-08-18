@@ -22,18 +22,21 @@ import {createFilter} from '../../../js/Filter';
 
 const useStyles = makeStyles(theme => ({
     root: {
-      width: '69% !important',
-      height: '90% !important',
-      position: 'absolute',
-      '&& .gm-style-iw-a':{
-        marginTop: '-45px',
-      }
+      // width: '69% !important',
+      // height: '90% !important',
+      // position: 'absolute',
+      // '&& .gm-style-iw-a':{
+      //   marginTop: '-45px',
+      // }
     },
     map:{
 
     },
     infoWindow: {
       backgroundColor: '#000'
+    },
+    mainContainer:{
+      height: '500px'
     }
   }));
 
@@ -59,6 +62,8 @@ const MapContainer = (props) => {
     const [vehicleRows, setVehicleRows] = useState(null);
     const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
     const [visibleItems, setVisibleItems] = React.useState(() => ['tasks', 'vehicles']);
+
+    const [mapHeight,setMapHeight] = useState('400px');
 
     useEffect(()=>{
       if(vehicleRows == null){
@@ -268,6 +273,15 @@ const MapContainer = (props) => {
         }
     }, [noMarkerRows, mapRows])
 
+    const mapRef = React.useRef(null)
+    useEffect(()=>{
+      if(mapRef && document){
+        console.log("mapref",mapRef);
+        //console.log("style", mapRef.current.style.height)
+      }else{
+        console.log("No document")
+      }
+    },[mapHeight, mapRef])
 
     //Get Bounds 
     //useCallback saves dep on mapRows, improves performance
@@ -348,16 +362,31 @@ const MapContainer = (props) => {
           <TaskListFilter setFilteredItems={setMapRows}/>
           </Grid>
         </Grid>
-          <Grid container spacing={3}>
+          <Grid container spacing={3} className={classes.mainContainer}>
             
-            <Grid item xs={9}>
+            <Grid item xs={12} md={8}>
             
               <Map
                 google={props.google}
                 zoom={6}
+                ref={mapRef}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                }}
+                containerStyle = {{
+                  position: 'relative',  
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '250px',
+                }}
                 className={classes.root}
                 onClick = { onMapClick}
                 bounds={bounds}
+                mapTypeControl={true}
+                mapTypeControlOptions={{
+                  style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                }}
               >
                 {visibleItems.indexOf("tasks") != -1 && markedRows.map((marker) => (
                 <Marker key={marker.t_id} 
@@ -399,7 +428,7 @@ const MapContainer = (props) => {
                 }
               </Map>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={12} md={4}>
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
                           markedRows={markedRows} setMarkedRows={setMarkedRows}
                           vehicleRows={vehicleRows} setVehicleRows={setVehicleRows}
