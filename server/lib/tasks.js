@@ -88,14 +88,14 @@ router.post('/updateTask', async (req,res) => {
     logger.info(JSON.stringify(task));
 
 
-    const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
+    const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired=date_format( ? , \'%Y-%m-%d %H:%i:%S\'),first_game=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
     ' date_completed=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , description= ? , notes= ? , ' +
     ' task_status= ?, drilling= ? , sign= ? , artwork= ?   , ' + 
     ' sch_install_crew= ? , sch_install_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\'),  ' +
     ' drill_crew= ? , drill_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\')  ' + 
     ' WHERE id = ? ';
 
-    const params = [task.t_name, task.hours_estimate, task.date_desired, task.date_assigned, task.date_completed, task.description, task.notes, 
+    const params = [task.t_name, task.hours_estimate, task.date_desired, task.first_game, task.date_assigned, task.date_completed, task.description, task.notes, 
     task.task_status, task.drilling, task.sign, task.artwork, task.install_crew, task.install_date, task.drill_crew, task.drill_date , task.t_id ];
     //todo  table_id (address, in db), first_game(in db, add to form), install_location(in db), 
     //       assigned users(not in db),  maybe missing something...

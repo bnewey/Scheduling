@@ -97,7 +97,7 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
 
     const sql = 'SELECT * '  + 
         ' FROM work_orders_items woi ' +
-        ' WHERE woi.work_order =  ? AND woi.scoreboard_or_sign > 0' +
+        ' WHERE woi.work_order =  ? ' +
         ' ORDER BY woi.ordernum ASC ' + 
         ' LIMIT 100';
 

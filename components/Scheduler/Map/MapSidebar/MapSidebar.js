@@ -164,6 +164,7 @@ const useStyles = makeStyles(theme => ({
         background: 'linear-gradient( #dadada, #a2a2a2)',
         boxShadow: '0px 1px 8px 0px rgba(0,0,0,0.52)',
         //minHeight: '400px',
+        height: '100%',
     },
     head: {
         padding: '1% 2% 1% 2%',

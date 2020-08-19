@@ -3,6 +3,8 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, Switch, FormControlLabel, List, ListItem, ListItemText,ListItemIcon, Modal, Backdrop, Fade, Grid, TextField, FormControl, InputLabel, MenuItem, Select, 
     ButtonGroup, Button, CircularProgress, Avatar} from '@material-ui/core';
 import BulletIcon from '@material-ui/icons/Crop75';
+import RemoveIcon from '@material-ui/icons/Remove';
+import PersonalVideoIcon from '@material-ui/icons/PersonalVideo';
 import cogoToast from 'cogo-toast';
 
 import WorkOrders from '../../../../js/Work_Orders';
@@ -27,6 +29,7 @@ const TaskModalWOSignArtItems = (props) =>{
         if(signItems == null){
             WorkOrders.getAllWorkOrderSignArtItems(taskId)
             .then((data)=>{
+                console.log("items", data);
                 setSignItems(data);
             })
             .catch((error)=>{
@@ -56,7 +59,7 @@ const TaskModalWOSignArtItems = (props) =>{
             ?
             <Grid item xs={12} className={classes.paper}>
                <div className={classes.root}>
-                    <p className={classes.taskTitle}>Signs & Scoreboards </p> 
+                    <p className={classes.taskTitle}>Work Order Items </p> 
                     <FormControlLabel
                         control={<Switch checked={showDates} onChange={handleChangeShowDates} />}
                         label="Show Comp Dates"
@@ -65,12 +68,12 @@ const TaskModalWOSignArtItems = (props) =>{
                         {signItems.map((item)=> (
                             <ListItem button className={classes.list_item_root}>
                                 <ListItemIcon>
-                                    <BulletIcon/>
+                                { item.scoreboard_or_sign > 0 ?<PersonalVideoIcon/> : <RemoveIcon/> }
                                 </ListItemIcon>
                                 <ListItemText>
                                     <>
-                                    <div className={classes.item_head}>{item.description}&nbsp;-&nbsp;{item.vendor}</div>
-                                    <div className={classes.item_info}>
+                        <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})&nbsp;-&nbsp;{item.vendor}</div>
+                                    { item.scoreboard_or_sign > 0 ? <><div className={classes.item_info}>
                                         <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}>Sign Built</div> 
                                         <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>Copy Received</div>
                                         <div className={item.sent_for_approval ? classes.item_info_item : classes.item_info_item_na}>Sent for Appr</div>
@@ -87,7 +90,7 @@ const TaskModalWOSignArtItems = (props) =>{
                                         <div className={item.artwork_completed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.artwork_completed)}</div>
                                         <div className={item.sign_popped_and_boxed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.sign_popped_and_boxed)}</div>
                                     </div>
-                                    : <></> }
+                                    : <></> } </> : <></>}
                                     </>
                                     </ListItemText>
                             </ListItem>

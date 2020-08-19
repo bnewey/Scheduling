@@ -79,24 +79,30 @@ const TaskModalTaskInfo = (props) => {
             </div>
             <div className={classes.subsectionContainer_date} >
                 <Grid container className={classes.lowerGridHead} style={{backgroundColor: '#ececec'}}>
-                    <Grid item xs={4} >
+                    <Grid item xs={3} >
                         <Typography variant="body1" component="span" className={classes.text_head}>Order Date</Typography>
                     </Grid> 
-                    <Grid item xs={4} >
+                    <Grid item xs={3} >
                         <Typography variant="body1" component="span" className={classes.text_head}>Desired Date</Typography>
                     </Grid>
-                    <Grid item xs={4} >
+                    <Grid item xs={3} >
+                        <Typography variant="body1" component="span" className={classes.text_head}>First Game</Typography>
+                    </Grid>
+                    <Grid item xs={3} >
                         <Typography variant="body1" component="span" className={classes.text_head}>Completed Date</Typography>
                     </Grid>
                 </Grid>
                 <Grid container className={classes.lowerGrid}>
-                    <Grid item xs={4} className={classes.text_info_grid}>
+                    <Grid item xs={3} className={classes.text_info_grid}>
                     <Typography variant="body1" component="span" className={classes.text_info}>&nbsp;{modalTask.wo_date}</Typography>
                     </Grid> 
-                    <Grid item xs={4} className={classes.text_info_grid}>
+                    <Grid item xs={3} className={classes.text_info_grid}>
                         <Typography variant="body1" component="span" className={classes.text_info}>&nbsp;{modalTask.date_desired}</Typography>
                     </Grid>
-                    <Grid item xs={4} className={classes.text_info_grid}>
+                    <Grid item xs={3} className={classes.text_info_grid}>
+                        <Typography variant="body1" component="span" className={classes.text_info}>&nbsp;{modalTask.first_game}</Typography>
+                    </Grid>
+                    <Grid item xs={3} className={classes.text_info_grid}>
                         <Typography variant="body1" component="span" className={classes.text_info}>&nbsp;{modalTask.date_completed}</Typography>
                     </Grid>
                 </Grid>
@@ -138,6 +144,7 @@ const TaskModalTaskInfo = (props) => {
             
             <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Assigned Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.wo_date} onChange={value => handleInputOnChange(value, true, "datetime", "date_assigned")} /></MuiPickersUtilsProvider>
             <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Desired Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.date_desired} onChange={value => handleInputOnChange(value, true, "datetime", "date_desired")} /></MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="First Game" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.first_game} onChange={value => handleInputOnChange(value, true, "datetime", "first_game")} /></MuiPickersUtilsProvider>
             <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Completed Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.date_completed} onChange={value => handleInputOnChange(value, true, "datetime", "date_completed")} /></MuiPickersUtilsProvider>
         </>}
         </>

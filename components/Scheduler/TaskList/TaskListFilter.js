@@ -597,8 +597,15 @@ const useStyles = makeStyles(theme => ({
         },
     },
     container: {
-        width: '40%',
-        maxWidth: '50%',
+        [theme.breakpoints.down('sm')]:{
+            width: '70%',
+            maxWidth: '70%',
+        },
+        [theme.breakpoints.down('md')]:{
+            width: '40%',
+            maxWidth: '50%',
+        },
+        
         textAlign: 'center',
         minHeight: '600px'
     },

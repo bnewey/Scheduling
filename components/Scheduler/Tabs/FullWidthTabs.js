@@ -134,6 +134,7 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
         index={tabValue}
         onChangeIndex={handleChangeIndex}
         className={classes.tabRoot}
+        disabled={true}
       >
      
          {children.map((child, index) => (   <TabPanel className={classes.tab} key={index} tabValue={tabValue} index={index} dir={theme.direction}>

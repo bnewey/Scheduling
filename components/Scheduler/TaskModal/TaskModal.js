@@ -56,7 +56,7 @@ export default function TaskModal(props){
     
 
     const variables_to_update = {
-        task_info: ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired", "date_completed"],
+        task_info: ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired","first_game", "date_completed"],
         delivery_install: ["delivery_date", "delivery_crew", "delivery_order", "install_date","drill_date", "install_order"],
         task:["task_status", "drilling", "artwork", "sign"]
     };

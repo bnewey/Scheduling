@@ -80,7 +80,8 @@ const MapContainer = (props) => {
                                                         name: item.firstName+' '+item.lastName,
                                                       vin: item.vin,
                                                       service: 'linxup',
-                                                    active: item.speed > 0 ? true : false }))
+                                                    active: item.speed > 0 ? true : false,
+                                                    direction:  item.direction}))
           locations.splice(locations.length, 0, ...tmpData);
           let tmpData2 =[];
           if(values[1]["error"] || !Array.isArray(values[1])){
@@ -94,7 +95,8 @@ const MapContainer = (props) => {
               name: item.nickName,
             vin: item.vin,
             service: 'bouncie',
-           active: item['stats'].isRunning }))
+           active: item['stats'].isRunning,
+            direction: item['stats']['location'].heading }))
           }
            
           locations.splice(locations.length, 0, ...tmpData2);
@@ -409,12 +411,12 @@ const MapContainer = (props) => {
                     <Marker key={vehicle.vin} 
                         position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
                          onClick = { updateActiveVehicle(vehicle.vin) }
-                        
+                        className={'marker'+i}
                         id={vehicle.vin}
                         title={vehicle.name} 
                         name={vehicle.name}
                         icon={{
-                          url: handleFindVehicleIcon(vehicle)
+                          url: handleFindVehicleIcon(vehicle), transform: 'rotate(45deg)' 
                         }}/>
                   ))
                 }
