@@ -285,6 +285,10 @@ const MapContainer = (props) => {
       }
     },[mapHeight, mapRef])
 
+    useEffect(()=>{
+      
+    },[vehicleRows])
+
     //Get Bounds 
     //useCallback saves dep on mapRows, improves performance
     const getBounds = useCallback( () => {
@@ -342,13 +346,26 @@ const MapContainer = (props) => {
         console.error("Bad vehilce for handleFindVehcileIcon");
         return
       }
+      let selected = false;
+      if(activeVehicle && vehicle.vin === activeVehicle.vin){
+        selected = true;
+      }
       let url = "";
       switch (vehicle.service){
         case 'bouncie':
-          url = vehicle.active ? 'static/vehicle_icons/bouncie_active_nonselected.png' : 'static/vehicle_icons/bouncie_stop_nonselected.png';
+          if(selected){
+            url = vehicle.active ? 'static/vehicle_icons/bouncie_active_selected.png' : 'static/vehicle_icons/bouncie_stop_selected.png';
+          }else{
+            url = vehicle.active ? 'static/vehicle_icons/bouncie_active_nonselected.png' : 'static/vehicle_icons/bouncie_stop_nonselected.png';
+          }
+          
           break;
         case 'linxup':
-          url = vehicle.active ? 'static/vehicle_icons/linxup_active_nonselected.png' : 'static/vehicle_icons/linxup_stop_nonselected.png';
+          if(selected){
+            url = vehicle.active ? 'static/vehicle_icons/linxup_active_selected.png' : 'static/vehicle_icons/linxup_stop_selected.png';
+          }else{
+            url = vehicle.active ? 'static/vehicle_icons/linxup_active_nonselected.png' : 'static/vehicle_icons/linxup_stop_nonselected.png';
+          }
           break;
         default:
           break;
@@ -416,7 +433,8 @@ const MapContainer = (props) => {
                         title={vehicle.name} 
                         name={vehicle.name}
                         icon={{
-                          url: handleFindVehicleIcon(vehicle), transform: 'rotate(45deg)' 
+                          url: handleFindVehicleIcon(vehicle),
+                          scaledSize: new google.maps.Size(40,40)
                         }}/>
                   ))
                 }

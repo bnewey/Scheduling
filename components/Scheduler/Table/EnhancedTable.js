@@ -152,6 +152,32 @@ const TableFilter = dynamic(
       setFilterSelectedOnly(false);
     };
 
+    const handleClick = (event, record_id) => {
+
+      const selectedIndex = selectedIds.indexOf(record_id);
+      let newSelected = [];
+      const row = filteredRows.filter((row, index)=> row.t_id == record_id);
+      if(row == []){
+        error.log("No row found in filteredRows");
+      }
+
+      if (selectedIndex === -1) {
+        newSelected = newSelected.concat(selectedIds, record_id);
+      } else if (selectedIndex === 0) {
+        newSelected = newSelected.concat(selectedIds.slice(1));
+      } else if (selectedIndex === selectedIds.length - 1) {
+        newSelected = newSelected.concat(selectedIds.slice(0, -1));
+      } else if (selectedIndex > 0) {
+        newSelected = newSelected.concat(
+          selectedIds.slice(0, selectedIndex),
+          selectedIds.slice(selectedIndex + 1),
+        );
+      }
+    
+      setSelectedIds(newSelected);
+
+    };
+
 
 
     //Modal
