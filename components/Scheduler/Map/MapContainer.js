@@ -1,11 +1,21 @@
 
-import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
+//import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 
 import {makeStyles, Paper, Grid, Button} from '@material-ui/core';
 import ActiveVehicleIcon from '@material-ui/icons/PlayArrow';
 import StoppedVehicleIcon from '@material-ui/icons/Stop';
 import MapSidebar from './MapSidebar/MapSidebar';
 import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
+
+const fetch = require("isomorphic-fetch");
+const { compose, withProps, withHandlers } = require("recompose");
+const {
+  withScriptjs,
+  withGoogleMap,
+  GoogleMap,
+  Marker,
+} = require("react-google-maps");
+const { MarkerClusterer } = require("react-google-maps/lib/components/addons/MarkerClusterer");
 
 import cogoToast from 'cogo-toast';
 import MapMarkerInfoWindow from './MapMarkerInfoWindow';
@@ -30,13 +40,11 @@ const useStyles = makeStyles(theme => ({
       // }
     },
     map:{
-
     },
     infoWindow: {
       backgroundColor: '#000'
     },
     mainContainer:{
-      height: '500px'
     }
   }));
 
@@ -73,15 +81,16 @@ const MapContainer = (props) => {
         .then((values)=>{
           console.log("valuies",values);
           let linuxp_loc_array = values[0]["data"]["locations"];
-          let tmpData = linuxp_loc_array.map((item,i )=> ({latitude: item.latitude, 
-                                                        longitude: item.longitude, 
-                                                        make: item.make, 
-                                                        model: item.model, 
-                                                        name: item.firstName+' '+item.lastName,
-                                                      vin: item.vin,
-                                                      service: 'linxup',
-                                                    active: item.speed > 0 ? true : false,
-                                                    direction:  item.direction}))
+          let tmpData = linuxp_loc_array.map((item,i )=> (
+                                                { latitude: item.latitude, 
+                                                  longitude: item.longitude, 
+                                                  make: item.make, 
+                                                  model: item.model, 
+                                                  name: item.firstName+' '+item.lastName,
+                                                  vin: item.vin,
+                                                  service: 'linxup',
+                                                  active: item.speed > 0 ? true : false,
+                                                  direction:  item.direction }))
           locations.splice(locations.length, 0, ...tmpData);
           let tmpData2 =[];
           if(values[1]["error"] || !Array.isArray(values[1])){
@@ -89,14 +98,14 @@ const MapContainer = (props) => {
             setBouncieAuthNeeded(true);
           }else{
             tmpData2 =  values[1].map((item,i )=> ({latitude: item['stats']['location'].lat, 
-              longitude: item['stats']['location'].lon, 
-              make: item['model'].make, 
-              model: item['model'].name, 
-              name: item.nickName,
-            vin: item.vin,
-            service: 'bouncie',
-           active: item['stats'].isRunning,
-            direction: item['stats']['location'].heading }))
+                      longitude: item['stats']['location'].lon, 
+                      make: item['model'].make, 
+                      model: item['model'].name, 
+                      name: item.nickName,
+                      vin: item.vin,
+                      service: 'bouncie',
+                      active: item['stats'].isRunning,
+                      direction: item['stats']['location'].heading }))
           }
            
           locations.splice(locations.length, 0, ...tmpData2);
@@ -107,18 +116,18 @@ const MapContainer = (props) => {
           console.error("Vehicle error", error);
         })
       }
-    },[vehicleRows])
+    },[vehicleRows]);
 
-    useEffect( () =>{ //useEffect for inputText
-      if(mapRows != null)
-        getBounds();
-        //setResetBounds(false);
-      return () => { //clean up
-          if(resetBounds){
+    // useEffect( () =>{ //useEffect for inputText
+    //   if(mapRows != null)
+    //     getBounds();
+    //     //setResetBounds(false);
+    //   return () => { //clean up
+    //       if(resetBounds){
               
-          }
-      }
-    },[resetBounds, mapRows]);
+    //       }
+    //   }
+    // },[resetBounds, mapRows]);
 
 
     useEffect( () =>{ //useEffect for inputText
@@ -289,14 +298,7 @@ const MapContainer = (props) => {
       
     },[vehicleRows])
 
-    //Get Bounds 
-    //useCallback saves dep on mapRows, improves performance
-    const getBounds = useCallback( () => {
-      const points = mapRows.filter((v, i)=> v.geocoded).map((item, index)=> ({ lat: item.lat, lng: item.lng}));
-      var tempBounds = new props.google.maps.LatLngBounds();
-      for (var i = 0; i < points.length; i++) {    tempBounds.extend(points[i]);    }
-      setBounds(tempBounds);
-    },[ mapRows ] );
+    
 
     const updateActiveMarker = id => (props, marker, e) => {
         var task = mapRows.filter((row, i) => row.t_id === id)[0];
@@ -384,8 +386,8 @@ const MapContainer = (props) => {
           <Grid container spacing={3} className={classes.mainContainer}>
             
             <Grid item xs={12} md={8}>
-            
-              <Map
+            <MapWithAMarkerClusterer markers={markedRows} updateActiveMarker={updateActiveMarker} resetBounds={resetBounds}/>
+              {/* <Map
                 google={props.google}
                 zoom={6}
                 ref={mapRef}
@@ -446,7 +448,7 @@ const MapContainer = (props) => {
                   <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
                   showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>
                 }
-              </Map>
+              </Map> */}
             </Grid>
             <Grid item xs={12} md={4}>
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
@@ -468,7 +470,83 @@ const MapContainer = (props) => {
     }
   
 
-  export default GoogleApiWrapper({
+  /*export default GoogleApiWrapper({
     apiKey: 'AIzaSyBd9JvLz52kD4ouQvqlHePUAqlBWzACJ-c'
   })(MapContainer);
+*/
 
+  //Get Bounds 
+    //useCallback saves dep on mapRows, improves performance
+    const getBounds = (map, markers)=> {
+      console.log("map",map);
+      const points = markers.filter((v, i)=> v.geocoded).map((item, index)=> ({ lat: item.lat, lng: item.lng}));
+      var tempBounds = new map.LatLngBounds();
+      console.log("NE", tempBounds.getCenter());
+      for (var i = 0; i < points.length; i++) {    tempBounds.extend(points[i]);    }
+      //setBounds(tempBounds);
+      console.log("TempBounds in getBounds", tempBounds)
+      return tempBounds
+    };
+
+  
+
+const MapWithAMarkerClusterer = compose(
+  withProps({
+    googleMapURL: "https://maps.googleapis.com/maps/api/js?key=AIzaSyBd9JvLz52kD4ouQvqlHePUAqlBWzACJ-c&v=3.exp&libraries=geometry,drawing,places",
+    loadingElement: <div style={{ height: `100%` }} />,
+    containerElement: <div style={{ height: '100%',minHeight: `450px` }} />,
+    mapElement: <div style={{ height: `100%` }} />,
+  }),
+  withHandlers({
+    onMarkerClustererClick: () => (markerClusterer) => {
+      const clickedMarkers = markerClusterer.getMarkers()
+      console.log(`Current clicked markers length: ${clickedMarkers.length}`);
+      console.log("clickedMarkers",clickedMarkers);
+    },
+  }),
+  withScriptjs,
+  withGoogleMap
+)(props =>{
+
+  const googleMap = React.useRef(null);
+  const {markers,resetBounds} = props;
+
+  useEffect( () =>{ //useEffect for inputText
+    console.log("Google.maps", google.maps)
+    console.log("Ref google current", googleMap.current)
+    if(markers != null)
+    googleMap.current.fitBounds(getBounds(google.maps, markers));
+      //setResetBounds(false);
+    return () => { //clean up
+        if(resetBounds){
+            
+        }
+    }
+  },[resetBounds, markers, googleMap]);
+
+  return(
+  <GoogleMap
+    defaultZoom={5} 
+    ref={googleMap}
+    defaultCenter={{ lat: 34.731, lng: -94.3749 }}
+  >
+    <MarkerClusterer
+      onClick={props.onMarkerClustererClick}
+      averageCenter
+      enableRetinaIcons
+      maxZoom={10}
+      gridSize={40}
+    >{console.log("GoogleMap",google.maps) }{console.log("props", props)}
+      {props.markers.map(marker => (
+        <Marker
+          key={marker.t_id} 
+          position={{ lat: marker.lat, lng: marker.lng}}
+          onClick = { props.updateActiveMarker(marker.t_id) }
+        />
+      ))}
+    </MarkerClusterer>
+  </GoogleMap>
+  )}
+);
+
+export default MapContainer;
