@@ -2,7 +2,14 @@ import React, {useRef, useState, useEffect} from 'react';
 
 import ReactDOM from 'react-dom';
 import {makeStyles, Avatar, Tooltip} from '@material-ui/core';
-import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
+//import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
+const {
+    withScriptjs,
+    withGoogleMap,
+    GoogleMap,
+    Marker,
+    InfoWindow
+  } = require("react-google-maps");
 
 import Util from '../../../js/Util';
 
@@ -66,10 +73,10 @@ const MapMarkerInfoWindow = (props)=>{
 
     return (
         <InfoWindowEx
-        position = {activeMarker ? { lat: activeMarker.lat , lng: activeMarker.lng} : null}
-        visible = { showingInfoWindow }
+        position = {activeMarker ? { lat: activeMarker.lat , lng: activeMarker.lng} : {lat: 0, lng:0}}
+        open = { showingInfoWindow }
         style = {classes.infoWindow}
-        onClose={handleInfoWindowClose}
+        onCloseClick={handleInfoWindowClose}
         {...props}
         >
         <div >
@@ -170,7 +177,9 @@ class InfoWindowEx extends React.Component {
           React.Children.only(this.props.children),
           this.contentElement
         );
-        this.infoWindowRef.current.infowindow.setContent(this.contentElement);
+        //console.log("Infowindowref", this.infoWindowRef.current);
+        //this.infoWindowRef.current.setContent(this.contentElement);
+        
       }
     }
   

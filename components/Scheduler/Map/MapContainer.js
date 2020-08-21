@@ -16,6 +16,7 @@ const {
   Marker,
 } = require("react-google-maps");
 const { MarkerClusterer } = require("react-google-maps/lib/components/addons/MarkerClusterer");
+const { MarkerWithLabel } = require("react-google-maps/lib/components/addons/MarkerWithLabel");
 
 import cogoToast from 'cogo-toast';
 import MapMarkerInfoWindow from './MapMarkerInfoWindow';
@@ -386,7 +387,12 @@ const MapContainer = (props) => {
           <Grid container spacing={3} className={classes.mainContainer}>
             
             <Grid item xs={12} md={8}>
-            <MapWithAMarkerClusterer markers={markedRows} updateActiveMarker={updateActiveMarker} resetBounds={resetBounds}/>
+            <MapWithAMarkerClusterer taskMarkers={markedRows} vehicleMarkers={vehicleRows} visibleItems={visibleItems} 
+                  updateActiveMarker={updateActiveMarker} updateActiveVehicle={updateActiveVehicle} handleFindVehicleIcon={handleFindVehicleIcon}
+                  resetBounds={resetBounds}
+                  activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                  setInfoWeather={setInfoWeather} infoWeather={infoWeather}
+                  showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/>
               {/* <Map
                 google={props.google}
                 zoom={6}
@@ -509,24 +515,26 @@ const MapWithAMarkerClusterer = compose(
 )(props =>{
 
   const googleMap = React.useRef(null);
-  const {markers,resetBounds} = props;
+  const {taskMarkers, vehicleMarkers, visibleItems, resetBounds, activeMarker, setActiveMarker, setInfoWeather, infoWeather,
+          showingInfoWindow, setShowingInfoWindow} = props;
+
 
   useEffect( () =>{ //useEffect for inputText
     console.log("Google.maps", google.maps)
     console.log("Ref google current", googleMap.current)
-    if(markers != null)
-    googleMap.current.fitBounds(getBounds(google.maps, markers));
+    if(taskMarkers != null)
+      googleMap.current.fitBounds(getBounds(google.maps, taskMarkers));
       //setResetBounds(false);
     return () => { //clean up
         if(resetBounds){
             
         }
     }
-  },[resetBounds, markers, googleMap]);
+  },[resetBounds, taskMarkers, googleMap]);
 
   return(
   <GoogleMap
-    defaultZoom={5} 
+    defaultZoom={6} 
     ref={googleMap}
     defaultCenter={{ lat: 34.731, lng: -94.3749 }}
   >
@@ -537,7 +545,7 @@ const MapWithAMarkerClusterer = compose(
       maxZoom={10}
       gridSize={40}
     >{console.log("GoogleMap",google.maps) }{console.log("props", props)}
-      {props.markers.map(marker => (
+      {taskMarkers && visibleItems.indexOf("tasks") != -1 && taskMarkers.map(marker => (
         <Marker
           key={marker.t_id} 
           position={{ lat: marker.lat, lng: marker.lng}}
@@ -545,6 +553,27 @@ const MapWithAMarkerClusterer = compose(
         />
       ))}
     </MarkerClusterer>
+    {vehicleMarkers && visibleItems.indexOf("vehicles") != -1 && vehicleMarkers.map((vehicle,i) => (
+        <MarkerWithLabel
+          position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
+          onClick = { props.updateActiveVehicle(vehicle.vin) }
+          className={'marker'+i}
+          id={vehicle.vin}
+          key={vehicle.vin}
+          title={vehicle.name} 
+          name={vehicle.name}
+          icon={{
+            url: props.handleFindVehicleIcon(vehicle),
+            scaledSize: new google.maps.Size(30 ,30)
+          }}
+          labelAnchor={new google.maps.Point( vehicle.name.length / 2 * 7 , 0)}
+          labelStyle={{backgroundColor: "rgba(177, 177, 177, 0.3)", fontSize: "10px", padding: "2px"}}
+        ><div>{vehicle.name}</div></MarkerWithLabel>
+      ))}
+    {showingInfoWindow && activeMarker ? <MapMarkerInfoWindow {...props} 
+                          activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                          setInfoWeather={setInfoWeather} infoWeather={infoWeather}
+                          showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/> : <></>}
   </GoogleMap>
   )}
 );
