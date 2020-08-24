@@ -204,7 +204,7 @@ const TaskListToolbar = (props) => {
         <>
         
         <Paper className={classes.head}>
-            <span className={classes.tasklistHeadSpan}>TaskList View</span>
+            <span className={classes.tasklistHeadSpan}>{taskListToMap ? taskListToMap.list_name : 'TaskList'}&nbsp;View</span>
                 {taskLists ? 
                 <>
                     <TaskListTasksEdit props={{list: editList, open: editOpen, handleClose: handleEditClose, ...props}}/>

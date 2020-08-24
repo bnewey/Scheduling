@@ -114,11 +114,53 @@ function numberToColorHsl(i, min, max) {
     return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'; 
 }
 
+function getDirectionFromDegree(degree){
+    if(isNaN(degree)){
+        console.error("Not a number in Util.js getDirectionFromDegree")
+        return;
+    }
+    //divide by 45 to get all 8 directions
+    let num = Math.round(degree / 45); 
+    switch(num){
+        case 0:
+            return 'N';
+            break;
+        case 1:
+            return 'NE';
+            break;
+        case 2:
+            return 'E'
+            break;
+        case 3:
+            return 'SE'
+            break;
+        case 4:
+            return 'S'
+            break;
+        case 5:
+            return 'SW'
+            break;
+        case 6:
+            return 'W'
+            break;
+        case 7:
+            return 'NW'
+            break;
+        case 8:
+            return 'N'
+            break;
+        default:
+            console.error("Bad calc in Util.js getDirectionFromDegree ")
+            return;
+    }
+}
+
 
 
 module.exports = { 
-    convertISODateTimeToMySqlDateTime: convertISODateTimeToMySqlDateTime,
-    convertISODateToMySqlDate: convertISODateToMySqlDate,
-    getWeather: getWeather,
+    convertISODateTimeToMySqlDateTime,
+    convertISODateToMySqlDate,
+    getWeather,
     numberToColorHsl,
+    getDirectionFromDegree,
 }

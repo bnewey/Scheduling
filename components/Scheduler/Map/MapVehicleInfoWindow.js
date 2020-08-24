@@ -2,9 +2,17 @@ import React, {useRef, useState, useEffect} from 'react';
 
 import ReactDOM from 'react-dom';
 import {makeStyles, Avatar, Tooltip} from '@material-ui/core';
-import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
+
 
 import Util from '../../../js/Util';
+
+const {
+  withScriptjs,
+  withGoogleMap,
+  GoogleMap,
+  Marker,
+  InfoWindow
+} = require("react-google-maps");
 
 const days=["Sunday",'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -28,15 +36,20 @@ const MapVehicleInfoWindow = (props)=>{
 
     return (
         <InfoWindowEx
-        position = {activeVehicle ? { lat: activeVehicle.latitude , lng: activeVehicle.longitude} : null}
-        visible = { showingInfoWindow }
+        position = {activeVehicle ? { lat: activeVehicle.latitude , lng: activeVehicle.longitude} : {lat: 0, lng:0}}
+        open = { showingInfoWindow }
         style = {classes.infoWindow}
-        onClose={handleInfoWindowClose}
+        onCloseClick={handleInfoWindowClose}
+        defaultOptions={{pixelOffset: new google.maps.Size(0,-25) }}
         {...props}
         >
             {activeVehicle ? 
-                <><div className={classes.MarkerInfo}>{activeVehicle.name}</div>
-                <div className={classes.MarkerSubInfo}></div>
+                <><div className={classes.MarkerInfo}>{activeVehicle.name}&nbsp;{activeVehicle.active ? 'Active': "Inactive"}
+                        </div>
+                <div className={classes.MarkerSubInfo}>
+                {activeVehicle.active ? <>
+                              Direction:&nbsp;{Util.getDirectionFromDegree(activeVehicle.direction)} </> : <></>}
+                  </div>
                </> :<></> }
         </InfoWindowEx>
     );
@@ -58,7 +71,7 @@ class InfoWindowEx extends React.Component {
           React.Children.only(this.props.children),
           this.contentElement
         );
-        this.infoWindowRef.current.infowindow.setContent(this.contentElement);
+        //this.infoWindowRef.current.infowindow.setContent(this.contentElement);
       }
     }
   

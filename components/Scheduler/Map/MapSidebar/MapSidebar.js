@@ -165,6 +165,10 @@ const useStyles = makeStyles(theme => ({
         boxShadow: '0px 1px 8px 0px rgba(0,0,0,0.52)',
         //minHeight: '400px',
         height: '100%',
+        [theme.breakpoints.up('md')]:{
+            minHeight: '647px',
+        },
+        
     },
     head: {
         padding: '1% 2% 1% 2%',

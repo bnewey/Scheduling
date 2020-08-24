@@ -21,6 +21,7 @@ import {TaskContext} from '../TaskContainer';
 import PDF from '../../../js/Pdf';
 import {CrewContext} from '../Crew/CrewContextContainer';
 import TaskListAddCrewDialog from './TaskListAddCrewDialog';
+import TaskListMoveTasks from './Actions/TaskListMoveTasks';
 
 const TaskListSidebar = (props) => {
 
@@ -35,7 +36,7 @@ const TaskListSidebar = (props) => {
 
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen, setSorters} = useContext(TaskContext);
+        modalOpen, setModalOpen, setSorters, setFilters} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
@@ -139,6 +140,20 @@ const TaskListSidebar = (props) => {
             })
     }
 
+    const handleChangeTaskListToMap = (event, taskList) =>{
+        if(!taskList){
+            console.error("Bad tasklist in handleChangeTaskListToMap");
+        }
+        setSorters([{property: 'priority_order', 
+                        direction: "ASC"}]);
+        //TODO: add task_list_id to filters objects that are saved, so we can remember filters on tl switches
+        // implement if we add more task_list switching functionality
+        setFilters([]);
+        setTaskListTasks(null);
+        setSelectedTasks([]);
+        setTaskListToMap(taskList);
+    }
+
 
     return(
         <Paper className={classes.root}>
@@ -182,7 +197,9 @@ const TaskListSidebar = (props) => {
                          </span>
                       </div></>
                          :<></>}
-
+                    { selectedTasks && selectedTasks.length > 0 ? <>
+                    <TaskListMoveTasks  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setTaskListTasks={setTaskListTasks}/>
+                        </> : <></>}
                     {/* <div className={classes.singleLineDiv}>
                     <span
                         className={classes.text_button} 
@@ -200,7 +217,23 @@ const TaskListSidebar = (props) => {
                 </div>
                 <TaskListAddCrewDialog taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
 
-
+                <div className={classes.priority_info_heading}>
+                    <span>Other TaskLists</span>
+                </div>
+                    <div className={classes.singleLineDiv}>
+                            {
+                                taskLists && taskListToMap && taskLists.filter((v,i)=> (v.id != taskListToMap.id)).map((tl, index)=>{
+                                    return(
+                                        <span
+                                            className={classes.text_button} 
+                                            onClick={event => handleChangeTaskListToMap(event, tl)}>
+                                            {tl.list_name}
+                                        </span>
+                                    )
+                                })
+                            }
+                            
+                    </div>
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>

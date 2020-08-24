@@ -391,8 +391,10 @@ const MapContainer = (props) => {
                   updateActiveMarker={updateActiveMarker} updateActiveVehicle={updateActiveVehicle} handleFindVehicleIcon={handleFindVehicleIcon}
                   resetBounds={resetBounds}
                   activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                  activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle}
                   setInfoWeather={setInfoWeather} infoWeather={infoWeather}
-                  showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/>
+                  showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}
+                  bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>
               {/* <Map
                 google={props.google}
                 zoom={6}
@@ -515,15 +517,15 @@ const MapWithAMarkerClusterer = compose(
 )(props =>{
 
   const googleMap = React.useRef(null);
-  const {taskMarkers, vehicleMarkers, visibleItems, resetBounds, activeMarker, setActiveMarker, setInfoWeather, infoWeather,
-          showingInfoWindow, setShowingInfoWindow} = props;
+  const {taskMarkers, vehicleMarkers, visibleItems, resetBounds, activeMarker, setActiveMarker,activeVehicle, setActiveVehicle,
+     setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded} = props;
 
 
   useEffect( () =>{ //useEffect for inputText
     console.log("Google.maps", google.maps)
     console.log("Ref google current", googleMap.current)
     if(taskMarkers != null)
-      googleMap.current.fitBounds(getBounds(google.maps, taskMarkers));
+      googleMap.current.fitBounds(getBounds(google.maps, [...taskMarkers]));
       //setResetBounds(false);
     return () => { //clean up
         if(resetBounds){
@@ -544,6 +546,7 @@ const MapWithAMarkerClusterer = compose(
       enableRetinaIcons
       maxZoom={10}
       gridSize={40}
+      styles={[{ textColor: 'black', height: 53, url: "/static/ClusterIcons/m1.png", width: 53 }, { textColor: 'black', height: 56, url: "/static/ClusterIcons/m2.png", width: 56 }, { textColor: 'white', height: 66, url: "/static/ClusterIcons/m3.png", width: 66 }, { textColor: 'white', height: 78, url: "/static/ClusterIcons/m4.png", width: 78 }, { textColor: 'white', height: 90, url: "/static/ClusterIcons/m5.png", width: 90 }]}
     >{console.log("GoogleMap",google.maps) }{console.log("props", props)}
       {taskMarkers && visibleItems.indexOf("tasks") != -1 && taskMarkers.map(marker => (
         <Marker
@@ -574,6 +577,8 @@ const MapWithAMarkerClusterer = compose(
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
                           setInfoWeather={setInfoWeather} infoWeather={infoWeather}
                           showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/> : <></>}
+    {showingInfoWindow && activeVehicle ? <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
+                  showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>: <></>}
   </GoogleMap>
   )}
 );

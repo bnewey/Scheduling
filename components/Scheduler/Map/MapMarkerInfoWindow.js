@@ -77,6 +77,7 @@ const MapMarkerInfoWindow = (props)=>{
         open = { showingInfoWindow }
         style = {classes.infoWindow}
         onCloseClick={handleInfoWindowClose}
+        defaultOptions={{pixelOffset: new google.maps.Size(0,-35) }}
         {...props}
         >
         <div >
