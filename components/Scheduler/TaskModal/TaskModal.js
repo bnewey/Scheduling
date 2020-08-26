@@ -48,13 +48,12 @@ export default function TaskModal(props){
 
     const [modalTask, setModalTask] = React.useState(null); 
     const [shouldUpdate, setShouldUpdate] = React.useState(false);
+    const [shouldUpdateAddressInfo, setShouldUpdateAddressInfo] = React.useState(false);
     const [shouldReFetch, setShouldReFetch] = React.useState(false);
 
     const [editTaskInfo, setEditTaskInfo] = React.useState(false);
     const [editAddressInfo, setEditAddressInfo] = React.useState(false);
     
-    
-
     const variables_to_update = {
         task_info: ["t_name", "description", "notes", "type", "hours_estimate", "date_assigned", "date_desired","first_game", "date_completed"],
         delivery_install: ["delivery_date", "delivery_crew", "delivery_order", "install_date","drill_date", "install_order"],
@@ -74,6 +73,7 @@ export default function TaskModal(props){
         if(modalTaskId) {
           Tasks.getTask(modalTaskId)
           .then( (data) => {
+              console.log("taskmodal task", data);
               setModalTask(data[0]);
               if(shouldReFetch){
                 setShouldReFetch(false);
@@ -160,7 +160,6 @@ export default function TaskModal(props){
             return;
         }
 
-        //TODO validate form
  
         if(shouldUpdate){
             var updateModalTask = {...task};
@@ -256,7 +255,9 @@ export default function TaskModal(props){
                                     handleShouldUpdate={handleShouldUpdate}
                                     handleSave={handleSave}
                                     ref_object={ref_object}
-                                    editAddressInfo={editAddressInfo} setEditAddressInfo={setEditAddressInfo}/>
+                                    editAddressInfo={editAddressInfo} setEditAddressInfo={setEditAddressInfo}
+                                    setShouldReFetch={setShouldReFetch}
+                                    shouldUpdateAddressInfo={shouldUpdateAddressInfo} setShouldUpdateAddressInfo={setShouldUpdateAddressInfo}/>
                     
                     <hr className={classes.hr}/>
                 
@@ -591,5 +592,20 @@ const useStyles = makeStyles(theme => ({
         '&& label':{
             backgroundColor: '#fff',
         }
+    },
+    textButtonDiv:{
+        display: 'inline',
+        backgroundColor: '#416182',
+        margin: '0px 10px',
+        '&:hover':{
+            backgroundColor: '#6a88a7',
+        },
+    },
+    text_button:{
+        cursor: 'pointer',
+        fontSize: '14px',
+        color: '#fff',
+        margin: '1% 2%',
+        padding: '1%',
     },
   }));

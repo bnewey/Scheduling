@@ -53,16 +53,11 @@ const MapSidebarToolbar = (props) => {
         }
         setTaskListToMap(priorityList);
     }; 
-
-    const handleFetchVehicles = (event)=>{
-        setVehicleRows(null);
-    }
-
      
     return(
         <React.Fragment>
-            <div>
-                <Button className={classes.openButton} onClick={event => handleFetchVehicles(event)}>Refetch Vehicles</Button>     
+            <div>Map Sidebar
+                {/* <Button className={classes.openButton} onClick={event => handleFetchVehicles(event)}>Refetch Vehicles</Button>      */}
             </div>
         </React.Fragment>
       

@@ -179,7 +179,7 @@ const useStyles = makeStyles(theme => ({
         display: 'block',
     },
     body:{
-        padding: '1% 1% 1% 1%',
+        padding: '0% 1% 0% 1%',
         margin: '0',
         fontWeight: '400',
         fontSize: 'larger',

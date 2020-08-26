@@ -14,10 +14,12 @@ router.get('/getAllTasks', async (req,res) => {
     ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, t.drill_crew, ' +
     ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
     ' t.delivery_crew, t.delivery_order,t.install_order, ' + 
-    ' t.sch_install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded '  +
+    ' t.sch_install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded , ea.record_id AS address_id , ea.entities_id '  +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id ' +
-    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1)' +
+    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
+        ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+            ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
     ' ORDER BY t_id DESC ' + 
     ' limit 1000';
    try{
@@ -45,10 +47,13 @@ router.post('/getTask', async (req,res) => {
     ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
     ' t.drill_crew, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
     ' t.sch_install_crew as install_crew, date_format(sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
-    ' ea.zip, ea.lat, ea.lng, ea.geocoded '  +
+    ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.record_id AS address_id, ea.entities_id '  +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id '  +
-    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1) WHERE t.id = ? ';
+    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
+        ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+            ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' + 
+    ' WHERE t.id = ?  ';
 
     try{
         const results = await database.query(sql, id);
@@ -152,24 +157,22 @@ router.post('/updateMultipleTaskDates', async (req,res) => {
 });
 
 router.post('/saveCoordinates', async (req,res) => {
-    var t_id, coordinates;
+    var record_id, coordinates;
     if(req.body){
-        t_id = req.body.t_id;
+        record_id = req.body.record_id;
         coordinates = req.body.coordinates;
     }
  
 
-    const sql = ' UPDATE entities_addresses ea ' + 
-    ' INNER JOIN work_orders wo ON wo.account_id = ea.entities_id ' +
-    ' INNER JOIN tasks t ON t.table_id = wo.record_id ' +
+    const sql = ' UPDATE entities_addresses ea ' +
     ' SET ea.geocoded = 1, ea.lat = ?, ea.lng = ? ' +
-    ' WHERE t.id = ? AND ea.geocoded = 0';
+    ' WHERE ea.record_id = ?';
 
-    const params = [coordinates.lat, coordinates.lng, t_id ];
+    const params = [coordinates.lat, coordinates.lng, record_id ];
 
     try{
     const results = await database.query(sql, params);
-    logger.verbose("Saved Entity Address Coord from task" + t_id );
+    logger.verbose("Saved Entity Address Coord from record_id:" + record_id );
     res.sendStatus(200);
     }
     catch(error){
@@ -178,6 +181,28 @@ router.post('/saveCoordinates', async (req,res) => {
     }
 });
 
+router.post('/addAndSaveAddress', async (req,res) => {
+    var addressObj, entities_id;
+    if(req.body){
+        addressObj = req.body.addressObj;
+        entities_id = req.body.entities_id;
+    }
+    //Add a new address to entities_addresses and set task = 1, remove task =1 from all others
+    const sql = ' UPDATE entities_addresses set task = 0 WHERE entities_id = ? ; ' + 
+    ' INSERT INTO entities_addresses (name,to_name, address, city, state,zip, residence, geocoded, task, entities_id, lat, lng) ' + 
+    ' VALUES ( ? , ? , ? , ? , ? , ? , 0, 0, 1, ?, 0, 0 ) ';
+
+    try{
+        const results = await database.query(sql, [entities_id, addressObj.address_name, addressObj.address_name, addressObj.address,
+                            addressObj.city, addressObj.state, addressObj.zip, entities_id]);
+        logger.info("addAndSaveAddress " + addressObj );
+        res.json(results[1]);
+    }
+    catch(error){
+        logger.error("Tasks (addAndSaveAddress): " + error);
+        res.sendStatus(400);
+    }
+});
 
 
 

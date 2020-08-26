@@ -153,8 +153,8 @@ async function createUser ({database, createdAt, googleId,email,googleToken,disp
 
 
 async function updateUserBouncie(database, authCode ,accessToken, expires_in, id) {
-  const sql = 'UPDATE google_users set bouncieAuthCode= ?, bouncieToken =?, bouncieExpiresAt = (timestamp(DATE_ADD(NOW(), INTERVAL ? SECOND))) ' + 
-  ' WHERE id = ?  ';
+  const sql = 'UPDATE google_users set bouncieAuthCode= ?, bouncieToken =?, bouncieExpiresAt = (timestamp(DATE_ADD(NOW(), INTERVAL ? SECOND))) '; //+ 
+  //' WHERE id = ?  ';
 
   try{
       const results = await database.query(sql, [ authCode,accessToken,expires_in, id]);

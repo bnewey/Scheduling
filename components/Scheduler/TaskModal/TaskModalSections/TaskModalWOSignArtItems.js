@@ -72,7 +72,7 @@ const TaskModalWOSignArtItems = (props) =>{
                                 </ListItemIcon>
                                 <ListItemText>
                                     <>
-                        <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})&nbsp;-&nbsp;{item.vendor}</div>
+                        <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})&nbsp;-&nbsp;{item.vendor == 1 ? "Fair Play" : item.vendor == 2 ? "Rainey - In House" : "" }</div>
                                     { item.scoreboard_or_sign > 0 ? <><div className={classes.item_info}>
                                         <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}>Sign Built</div> 
                                         <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>Copy Received</div>

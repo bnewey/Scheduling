@@ -568,7 +568,6 @@ export default TaskListTasks;
 
 const useStyles = makeStyles(theme => ({
   root: {
-    
       margin: '0px 0px 0px 0px',
       padding:'0px',
       color: '#535353',
@@ -576,7 +575,6 @@ const useStyles = makeStyles(theme => ({
   },
   items:{
       color: '#fcfcfc',
-      
   },
   nonSelectedRow:{
     backgroundColor: '#dcf6ff !important',
@@ -589,7 +587,6 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     paddingRight: '6% !important',
     justifyContent: 'space-around',
-    
   },
   selectedRow:{
     backgroundColor: '#efe0ab !important',
@@ -602,7 +599,6 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     paddingRight: '6% !important',
     justifyContent: 'space-around',
-    
   },
   nonSelectedRowOffset:{
     backgroundColor: '#c5e2f3  !important',
@@ -652,7 +648,6 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     paddingRight: '6% !important',
     justifyContent: 'space-around',
-    
   },
   nonSelectedRowOffsetComp:{
     backgroundColor: '#989898b8  !important',

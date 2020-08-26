@@ -52,10 +52,10 @@ router.post('/getBouncieLocations', async (req,res) => {
                 }
             })
             
-            console.log("reponse", response);
+            //console.log("reponse", response);
             const dsa = await response.json();
             //res.send(dsa)
-            console.log("dsa",dsa)
+            //console.log("dsa",dsa)
             return dsa;
         }
         catch(error){

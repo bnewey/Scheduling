@@ -127,7 +127,7 @@ async function getCoordinates(address, city, state, zip){
 
 }
 
-async function saveCoordinates(t_id, coordinates){
+async function saveCoordinates(record_id, coordinates){
     const route = '/scheduling/tasks/saveCoordinates';
     try{
         var response = await fetch(route,
@@ -136,13 +136,34 @@ async function saveCoordinates(t_id, coordinates){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({t_id: t_id, coordinates: coordinates})
+                body: JSON.stringify({record_id: record_id, coordinates: coordinates})
             });
             return response.ok;
     }catch(error){
         throw error;
     }
+}
 
+async function addAndSaveAddress(addressObj, entities_id){
+    const route = '/scheduling/tasks/addAndSaveAddress';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({addressObj, entities_id})
+        });
+
+        if(!data.ok){
+            throw new Error("addAndSaveAddress returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
 }
 
 module.exports = {
@@ -153,4 +174,5 @@ module.exports = {
     updateMultipleTaskDates: updateMultipleTaskDates,
     getCoordinates: getCoordinates,
     saveCoordinates: saveCoordinates,
+    addAndSaveAddress,
 };

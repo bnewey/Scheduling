@@ -30,16 +30,12 @@ const TaskListActionAdd = (props) => {
     const handleDialogClose = () => {
         setSelectedTaskList(null);
         setDialogOpen(false);
-    };
-  
+    };    
 
     const handleMoveItems = (event, selectedTasks) =>{
         if(!selectedTasks || selectedTasks.length == 0 || !selectedTaskList || !taskListToMap){
             console.error("Failed to handleMoveItems, bad params")
             cogoToast.error("Failed to move items");
-            console.log("SelectedIds", selectedTasks);
-            console.log("selectedTaskList", selectedTaskList)
-            console.log("taskListToMap", taskListToMap);
             return;
         }
 

@@ -41,8 +41,8 @@ router.post('/getTaskList', async (req,res) => {
         ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, mad.member_name AS drill_crew_leader , '  +
         ' date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
-        ' date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
-        ' ea.zip, ea.lat, ea.lng, ea.geocoded ' +
+        ' date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
+        ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id ' +
         ' FROM task_list_items tli ' +
     
     ' LEFT JOIN task_list tl ON tli.task_list_id = tl.id ' +
@@ -54,8 +54,10 @@ router.post('/getTaskList', async (req,res) => {
     ' LEFT JOIN crew_members cmd ON cmd.crew_id = cjd.crew_id AND cmd.is_leader = 1  ' + 
     ' LEFT JOIN crew_members_available mai ON mai.id = cmi.member_id  ' + 
     ' LEFT JOIN crew_members_available mad ON mad.id = cmd.member_id  ' + 
-    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND main = 1) ' +
-    ' WHERE tli.task_list_id = ? ORDER BY tli.priority_order ASC' ;
+    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
+        ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+            ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
+    ' WHERE tli.task_list_id = ? ORDER BY tli.priority_order ASC ' ;
 
     try{
         const results = await database.query(sql, id);

@@ -28,6 +28,8 @@ import Util from '../../../js/Util';
 import Vehicles from '../../../js/Vehicles';
 import TaskListFilter from '../TaskList/TaskListFilter';
 import { TaskContext } from '../TaskContainer';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import {createFilter} from '../../../js/Filter';
 
@@ -69,13 +71,14 @@ const MapContainer = (props) => {
     const [infoWeather, setInfoWeather] = useState(null);
 
     const [vehicleRows, setVehicleRows] = useState(null);
+    const [vehicleNeedsRefresh, setVehicleNeedsRefresh] = useState(true);
     const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
     const [visibleItems, setVisibleItems] = React.useState(() => ['tasks', 'vehicles']);
 
     const [mapHeight,setMapHeight] = useState('400px');
 
     useEffect(()=>{
-      if(vehicleRows == null){
+      if(vehicleNeedsRefresh == true){
         var locations = [];
         //Get all vehicle locations and combine into vehicleRows
         Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations({id: user.id ,authCode: user.bouncieAuthCode, token: user.bouncieToken, expiresAt: user.bouncieExpiresAt})])
@@ -111,24 +114,30 @@ const MapContainer = (props) => {
            
           locations.splice(locations.length, 0, ...tmpData2);
           setVehicleRows(locations);
+          setVehicleNeedsRefresh(false);
           console.log(locations);
+
+          //Move our info window by resetting activeVehicle with update info
+          if(activeVehicle){
+            var refreshedActive = locations.filter((v, i)=> v.vin == activeVehicle.vin)[0];
+            setActiveVehicle(refreshedActive);
+          }
         })
         .catch((error)=>{
           console.error("Vehicle error", error);
         })
       }
-    },[vehicleRows]);
+    },[vehicleNeedsRefresh]);
 
-    // useEffect( () =>{ //useEffect for inputText
-    //   if(mapRows != null)
-    //     getBounds();
-    //     //setResetBounds(false);
-    //   return () => { //clean up
-    //       if(resetBounds){
-              
-    //       }
-    //   }
-    // },[resetBounds, mapRows]);
+    
+    //Refetches vehicle Rows every 30 seconds
+    useEffect(()=>{
+      const timeoutId = setTimeout(()=>{
+        setVehicleNeedsRefresh(true);
+
+      }, 30000)
+      return () => clearTimeout(timeoutId);
+    }, [vehicleRows])
 
 
     useEffect( () =>{ //useEffect for inputText
@@ -258,7 +267,7 @@ const MapContainer = (props) => {
               setMapRows(tmpMapRows);
               setNoMarkerRows(tmpMapRows.filter((row, index) => !row.geocoded));
               //Save lat, lng, geocoded to db
-              Tasks.saveCoordinates(row.t_id, data)
+              Tasks.saveCoordinates(row.address_id, data)
               .then((ok)=>{
                 if(!ok){
                   console.warn("Did not save coordinates.");
@@ -320,7 +329,7 @@ const MapContainer = (props) => {
 
     const onMapClick = (props) => {
       if (showingInfoWindow) {
-        setInfoWeather(null);
+          setInfoWeather(null);
           setShowingInfoWindow(false);
           setResetBounds(true);
       }
@@ -354,26 +363,23 @@ const MapContainer = (props) => {
         selected = true;
       }
       let url = "";
+      let direction = Util.getDirectionFromDegree(vehicle.direction);
       switch (vehicle.service){
         case 'bouncie':
-          if(selected){
-            url = vehicle.active ? 'static/vehicle_icons/bouncie_active_selected.png' : 'static/vehicle_icons/bouncie_stop_selected.png';
-          }else{
-            url = vehicle.active ? 'static/vehicle_icons/bouncie_active_nonselected.png' : 'static/vehicle_icons/bouncie_stop_nonselected.png';
-          }
+          // if(selected){
+          //   url = vehicle.active ? 'static/vehicle_icons/bouncie_active_selected.png' : 'static/vehicle_icons/bouncie_stop_selected.png';
+          // }else{
+          //   url = vehicle.active ? 'static/vehicle_icons/bouncie_active_nonselected.png' : 'static/vehicle_icons/bouncie_stop_nonselected.png';
+          // }
+          url = vehicle.active ?  `static/vehicle_icons/bouncie_active_${direction.toLowerCase()}.png` 
+                :   `static/vehicle_icons/bouncie_stop.png`;
           
           break;
         case 'linxup':
-          if(selected){
-            url = vehicle.active ? 'static/vehicle_icons/linxup_active_selected.png' : 'static/vehicle_icons/linxup_stop_selected.png';
-          }else{
-            url = vehicle.active ? 'static/vehicle_icons/linxup_active_nonselected.png' : 'static/vehicle_icons/linxup_stop_nonselected.png';
-          }
-          break;
-        default:
+          url = vehicle.active ?  `static/vehicle_icons/linxup_active_${direction.toLowerCase()}.png` 
+                :   `static/vehicle_icons/linxup_stop.png`;
           break;
       }
-      console.log("url",url)
       return url;
     }
 
@@ -387,76 +393,15 @@ const MapContainer = (props) => {
           <Grid container spacing={3} className={classes.mainContainer}>
             
             <Grid item xs={12} md={8}>
-            <MapWithAMarkerClusterer taskMarkers={markedRows} vehicleMarkers={vehicleRows} visibleItems={visibleItems} 
-                  updateActiveMarker={updateActiveMarker} updateActiveVehicle={updateActiveVehicle} handleFindVehicleIcon={handleFindVehicleIcon}
-                  resetBounds={resetBounds}
-                  activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
-                  activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle}
-                  setInfoWeather={setInfoWeather} infoWeather={infoWeather}
-                  showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}
-                  bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>
-              {/* <Map
-                google={props.google}
-                zoom={6}
-                ref={mapRef}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                }}
-                containerStyle = {{
-                  position: 'relative',  
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '250px',
-                }}
-                className={classes.root}
-                onClick = { onMapClick}
-                bounds={bounds}
-                mapTypeControl={true}
-                mapTypeControlOptions={{
-                  style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-                }}
-              >
-                {visibleItems.indexOf("tasks") != -1 && markedRows.map((marker) => (
-                <Marker key={marker.t_id} 
-                        position={{ lat: marker.lat, lng: marker.lng}}
-                        onClick = { updateActiveMarker(marker.t_id) }
-                        
-                        id={marker.t_id}
-                        title={marker.t_name} 
-                        name={marker.t_name}
-                        drilling={marker.drilling}
-                        artwork={marker.artwork}
-                        sign={marker.sign}
-
-                        icon={{
-                          url: handleMarkerURL(marker.t_id)
-                        }}/>
-                ))}
-                {
-                  visibleItems.indexOf("vehicles") != -1 && vehicleRows && vehicleRows.map((vehicle,i)=> (
-                    <Marker key={vehicle.vin} 
-                        position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
-                         onClick = { updateActiveVehicle(vehicle.vin) }
-                        className={'marker'+i}
-                        id={vehicle.vin}
-                        title={vehicle.name} 
-                        name={vehicle.name}
-                        icon={{
-                          url: handleFindVehicleIcon(vehicle),
-                          scaledSize: new google.maps.Size(40,40)
-                        }}/>
-                  ))
-                }
-                { <MapMarkerInfoWindow {...props} 
-                          activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
-                          setInfoWeather={setInfoWeather} infoWeather={infoWeather}
-                          showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/>}
-                {
-                  <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
-                  showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>
-                }
-              </Map> */}
+                <MapWithAMarkerClusterer taskMarkers={markedRows} vehicleMarkers={vehicleRows} visibleItems={visibleItems} 
+                      updateActiveMarker={updateActiveMarker} updateActiveVehicle={updateActiveVehicle} handleFindVehicleIcon={handleFindVehicleIcon}
+                      resetBounds={resetBounds}
+                      activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                      activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle}
+                      setInfoWeather={setInfoWeather} infoWeather={infoWeather}
+                      showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}
+                      bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
+                      setMapRows={setMapRows} mapRows={mapRows}/>
             </Grid>
             <Grid item xs={12} md={4}>
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
@@ -477,25 +422,16 @@ const MapContainer = (props) => {
     );
     }
   
-
-  /*export default GoogleApiWrapper({
-    apiKey: 'AIzaSyBd9JvLz52kD4ouQvqlHePUAqlBWzACJ-c'
-  })(MapContainer);
-*/
-
   //Get Bounds 
     //useCallback saves dep on mapRows, improves performance
     const getBounds = (map, markers)=> {
-      console.log("map",map);
+      
       const points = markers.filter((v, i)=> v.geocoded).map((item, index)=> ({ lat: item.lat, lng: item.lng}));
       var tempBounds = new map.LatLngBounds();
-      console.log("NE", tempBounds.getCenter());
       for (var i = 0; i < points.length; i++) {    tempBounds.extend(points[i]);    }
-      //setBounds(tempBounds);
-      console.log("TempBounds in getBounds", tempBounds)
+      
       return tempBounds
     };
-
   
 
 const MapWithAMarkerClusterer = compose(
@@ -511,6 +447,50 @@ const MapWithAMarkerClusterer = compose(
       console.log(`Current clicked markers length: ${clickedMarkers.length}`);
       console.log("clickedMarkers",clickedMarkers);
     },
+    onMapClick: ()=> (event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, activeMarker, setActiveMarker)=> {
+      if(showingInfoWindow && event.placeId){
+        setShowingInfoWindow(false);
+      }
+      if(markerToRemap){
+        let coords  = {lat: event.latLng.lat(),lng: event.latLng.lng()};
+        const save = () =>{
+            Tasks.saveCoordinates(markerToRemap.address_id, coords)
+            .then((data)=>{
+              cogoToast.success("Remapped Marker")
+              setMarkerToRemap(null);
+              setMapRows(null);
+              //Refresh activeMarker with new coords
+              if(activeMarker){
+                let refreshedMarker = {...activeMarker};
+                refreshedMarker['lat'] = coords.lat;
+                refreshedMarker['lng'] = coords.lng;
+                setActiveMarker(refreshedMarker);
+              }
+            })
+            .catch((error)=>{
+              console.error("failed to remap", error);
+              cogoToast.error("Failed to remap marker");
+            })
+        }
+
+        confirmAlert({
+          customUI: ({onClose}) => {
+              
+              return(
+                  <ConfirmYesNo onYes={save} onClose={onClose} customMessage="Change coordinates?"/>
+              );
+          },
+          afterClose: ()=>{
+            setMarkerToRemap(null);
+            cogoToast.info("Cancelled Remap");
+          }
+        })
+      }
+    },
+    infoWindowContentChanged: () => (window)=>{
+      //console.log("infowindow content changed ", window)
+
+    }
   }),
   withScriptjs,
   withGoogleMap
@@ -518,12 +498,11 @@ const MapWithAMarkerClusterer = compose(
 
   const googleMap = React.useRef(null);
   const {taskMarkers, vehicleMarkers, visibleItems, resetBounds, activeMarker, setActiveMarker,activeVehicle, setActiveVehicle,
-     setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded} = props;
+     setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded, setMapRows, mapRows, vehicleRows} = props;
 
+  const [markerToRemap, setMarkerToRemap] = React.useState(null);
 
   useEffect( () =>{ //useEffect for inputText
-    console.log("Google.maps", google.maps)
-    console.log("Ref google current", googleMap.current)
     if(taskMarkers != null)
       googleMap.current.fitBounds(getBounds(google.maps, [...taskMarkers]));
       //setResetBounds(false);
@@ -534,11 +513,21 @@ const MapWithAMarkerClusterer = compose(
     }
   },[resetBounds, taskMarkers, googleMap]);
 
+  useEffect(()=>{
+    var a = googleMap.current.getDiv();
+    if(markerToRemap != null){     
+        a.style.border = '8px solid #ffa500';
+    }else{
+        a.style.border = '';
+    }
+  }, [markerToRemap])
+
   return(
   <GoogleMap
     defaultZoom={6} 
     ref={googleMap}
     defaultCenter={{ lat: 34.731, lng: -94.3749 }}
+    onClick={event => props.onMapClick(event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, activeMarker, setActiveMarker)}
   >
     <MarkerClusterer
       onClick={props.onMarkerClustererClick}
@@ -547,7 +536,7 @@ const MapWithAMarkerClusterer = compose(
       maxZoom={10}
       gridSize={40}
       styles={[{ textColor: 'black', height: 53, url: "/static/ClusterIcons/m1.png", width: 53 }, { textColor: 'black', height: 56, url: "/static/ClusterIcons/m2.png", width: 56 }, { textColor: 'white', height: 66, url: "/static/ClusterIcons/m3.png", width: 66 }, { textColor: 'white', height: 78, url: "/static/ClusterIcons/m4.png", width: 78 }, { textColor: 'white', height: 90, url: "/static/ClusterIcons/m5.png", width: 90 }]}
-    >{console.log("GoogleMap",google.maps) }{console.log("props", props)}
+    >
       {taskMarkers && visibleItems.indexOf("tasks") != -1 && taskMarkers.map(marker => (
         <Marker
           key={marker.t_id} 
@@ -556,6 +545,14 @@ const MapWithAMarkerClusterer = compose(
         />
       ))}
     </MarkerClusterer>
+    <MarkerClusterer
+      onClick={props.onMarkerClustererClick}
+      averageCenter
+      enableRetinaIcons
+      maxZoom={14}
+      gridSize={30}
+      styles={[{ textColor: 'black', height: 40, url: "/static/VehicleCluster/m3.png", width: 40 }, { textColor: 'black', height: 40, url: "/static/VehicleCluster/m4.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m3.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m4.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m5.png", width: 40 }]}
+    >
     {vehicleMarkers && visibleItems.indexOf("vehicles") != -1 && vehicleMarkers.map((vehicle,i) => (
         <MarkerWithLabel
           position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
@@ -573,11 +570,12 @@ const MapWithAMarkerClusterer = compose(
           labelStyle={{backgroundColor: "rgba(177, 177, 177, 0.3)", fontSize: "10px", padding: "2px"}}
         ><div>{vehicle.name}</div></MarkerWithLabel>
       ))}
-    {showingInfoWindow && activeMarker ? <MapMarkerInfoWindow {...props} 
+    </MarkerClusterer>
+    {showingInfoWindow && activeMarker ? <MapMarkerInfoWindow {...props} onContentChanged={props.infoWindowContentChanged} 
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
                           setInfoWeather={setInfoWeather} infoWeather={infoWeather}
-                          showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}/> : <></>}
-    {showingInfoWindow && activeVehicle ? <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
+                          showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} markerToRemap={markerToRemap} setMarkerToRemap={setMarkerToRemap}/> : <></>}
+    {showingInfoWindow && activeVehicle && vehicleMarkers ? <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
                   showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>: <></>}
   </GoogleMap>
   )}

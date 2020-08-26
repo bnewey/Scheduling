@@ -18,7 +18,7 @@ const days=["Sunday",'Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const MapMarkerInfoWindow = (props)=>{
 
     //PROPS
-    const {activeMarker, setActiveMarker, infoWeather, setInfoWeather, showingInfoWindow, setShowingInfoWindow} = props;
+    const {activeMarker, setActiveMarker, infoWeather, setInfoWeather, showingInfoWindow, setShowingInfoWindow,markerToRemap, setMarkerToRemap} = props;
     //STATE
 
     //CSS
@@ -28,6 +28,7 @@ const MapMarkerInfoWindow = (props)=>{
     useEffect( () =>{ //useEffect for inputText
         setInfoWeather(null);
     },[activeMarker]);
+
 
     const handleInfoWindowClose = () =>{
         setInfoWeather(null);
@@ -71,6 +72,15 @@ const MapMarkerInfoWindow = (props)=>{
           return(icon_url);
     }
 
+    const handleSetMarkerToRemap = (event)=>{
+        setMarkerToRemap(activeMarker);
+
+        //Set cursor to crosshair, maybe focus the map
+    }
+    const handleCancelRemap = (event)=>{
+        setMarkerToRemap(null);
+    }
+
     return (
         <InfoWindowEx
         position = {activeMarker ? { lat: activeMarker.lat , lng: activeMarker.lng} : {lat: 0, lng:0}}
@@ -104,6 +114,12 @@ const MapMarkerInfoWindow = (props)=>{
         <button type="button" onClick={event => getWeather(event, activeMarker.lat, activeMarker.lng)} className={classes.infoButton}>
             Weather {infoWeather ? "X" : ""}
         </button>
+        <button type="button" onClick={event => handleSetMarkerToRemap(event)} className={classes.infoButton}>
+            Remap Marker
+        </button>
+        {markerToRemap ? <button type="button" onClick={event => handleCancelRemap(event)} className={classes.infoButton}>
+            Cancel Remap
+        </button> : <></>}
         { infoWeather ? <div className={classes.weather_div}> 
             <table className={classes.weather_table}>
                 <thead>
