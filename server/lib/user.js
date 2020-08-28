@@ -106,7 +106,7 @@ async function  getUserById (database, id) {
 
   try{
       const results = await database.query(sql, [id]);
-      logger.info("Got User By Id");
+      logger.verbose("Got User By Id");
       var user = await json(results);
       return (user);
   }

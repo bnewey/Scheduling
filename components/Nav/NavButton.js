@@ -13,7 +13,7 @@ const NavButton = props => {
       display: 'block',
       fontSize: 'small',
       fontWeight: '600',
-      padding: '10px 10px 10px 10px',
+      padding: '4%',
       margin: '0px 0px 0px 10px',
       minWidth: '100px',
       textDecoration: 'none',

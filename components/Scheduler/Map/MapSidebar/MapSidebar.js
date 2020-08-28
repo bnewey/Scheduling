@@ -26,7 +26,9 @@ const MapSidebar = (props) => {
     //PROPS
     const {mapRows, setMapRows, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
             setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds, activeVehicle, setActiveVehicle, 
-            bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows, visibleItems, setVisibleItems} = props;
+            bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows, visibleItems, setVisibleItems,
+            radarActive,setRadarActive, visualTimestamp, setVisualTimestamp,
+            radarControl, setRadarControl} = props;
 
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded && expanded!="taskMarker" ){
@@ -73,6 +75,12 @@ const MapSidebar = (props) => {
 
     const isVisible = (item) =>{
         return(visibleItems.indexOf(item) != -1);
+    }
+
+    const handleChangeRadarControl = (control) =>{
+        setRadarControl({
+            control
+        });
     }
      
     return(
@@ -131,6 +139,33 @@ const MapSidebar = (props) => {
                             </>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
+            
+            <ExpansionPanel expanded={expanded === 'radarExp'} onChange={handleChange('radarExp')} className={classes.body } 
+                TransitionProps={{onEntered: event=> handleAnimationEnd(event)}}>
+                <ExpansionPanelSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="radarExpbh-content"
+                    id="radarExpbh-header"
+                    classes={{content: classes.expPanelSummary}}
+                ><ListIcon className={classes.icon}/><span>Radar Controls</span>
+                {isVisible('radar') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')}/>}
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails ref={panelRef} className={classes.details}>
+                    <Scrollbars universal autoHeight autoHeightMax={400}>
+                        { isVisible('radar') &&
+                        <>
+                        <span>Timestamp: {visualTimestamp}</span>
+                        <a onClick={event => handleChangeRadarControl("reverse")}>{"<"}</a>
+                        <a onClick={event => handleChangeRadarControl("play")}>{"Play"}</a>
+                        <a onClick={event => handleChangeRadarControl("stop")}>{"Stop"}</a>
+                        <a onClick={event => handleChangeRadarControl("forward")}>{">"}</a>
+                        </>
+                        }
+                    </Scrollbars>
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
+            
 
             { noMarkerRows && noMarkerRows.length >0  ? 
             <ExpansionPanel expanded={expanded === 'panel2'} onChange={handleChange('panel2')} className={classes.body} 

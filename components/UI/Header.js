@@ -101,11 +101,10 @@ const useStyles = makeStyles(theme => ({
     padding: '0px',
     margin:'0px',
     height:'auto',
-    minHeight: '50px'
+    minHeight: '20px'
   },
   grid_container: {
     padding:'0px',
     margin: '0px',
-    height: '50px',
   }
 }));

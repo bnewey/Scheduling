@@ -136,9 +136,9 @@ const TaskContainer = function(props) {
                              sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue} setTabValue={setTabValue} 
-                        numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}>
+                        numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >
           
-            <div>
+            <div >
               
                 <TaskListContainer />
               
@@ -174,6 +174,9 @@ export default TaskContainer
 
 const useStyles = makeStyles(theme => ({
   root:{
-    margin: '1% 0 0 0',
+    margin: '.5% 0 0 0',
   },
+  test:{
+    padding: '10px',
+  }
 }));

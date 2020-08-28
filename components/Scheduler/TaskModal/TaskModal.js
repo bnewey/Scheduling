@@ -105,6 +105,8 @@ export default function TaskModal(props){
         setModalOpen(false);
         setModalTask(null);
         setModalTaskId(null);
+        setShouldUpdate(false);
+        setShouldUpdateAddressInfo(false);
     };
 
     const handleDelete = id => () => {
@@ -235,7 +237,7 @@ export default function TaskModal(props){
                 </span>
             </div>
             <Grid container >  
-                <Grid item xs={8} className={classes.paperScroll}>
+                <Grid item xs={9} className={classes.paperScroll}>
                 <hr className={classes.hr}/>
                 
                 <TaskModalTaskInfo  classes={classes} 
@@ -265,7 +267,7 @@ export default function TaskModal(props){
                 <TaskModalWOSignArtItems taskId={modalTask.table_id}/>
                         
                 </Grid>
-                <Grid item xs={4} className={classes.paper}>
+                <Grid item xs={3} className={classes.paper}>
                     
                 
                 <div className={classes.drill_sign_art_div}>
@@ -390,6 +392,16 @@ export default function TaskModal(props){
                         </FormControl>
                     </div> */}
                     <ButtonGroup className={classes.buttonGroup}>
+                    <Button
+                            onClick={() => handleClose()}
+                            variant="contained"
+                            color="primary"
+                            size="large"
+                            className={classes.saveButton}
+                        >
+                            Close
+                        </Button></ButtonGroup>
+                    <ButtonGroup className={classes.buttonGroup}>
                         {/* <Button
                             onClick={handleDelete(modalTask.t_id)}
                             variant="contained"
@@ -398,6 +410,7 @@ export default function TaskModal(props){
                             className={classes.deleteButton}
                         ><TrashIcon />
                         </Button> */}
+                        
                         <Button
                             onClick={handleSave(modalTask)}
                             variant="contained"
@@ -436,7 +449,7 @@ const useStyles = makeStyles(theme => ({
       boxShadow: theme.shadows[5],
       padding: '3% !important',
       position: 'relative',
-      maxHeight: '600px',
+      maxHeight: '650px',
       overflowY: 'auto',
     },
     paperScroll: {
@@ -445,7 +458,7 @@ const useStyles = makeStyles(theme => ({
         padding: '3% !important',
         position: 'relative',
         overflowY: 'auto',
-        maxHeight: '600px',
+        maxHeight: '650px',
 
         background: 'linear-gradient(white 30%, rgba(255, 255, 255, 0)), linear-gradient(rgba(255, 255, 255, 0), white 70%) 0 100%, radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)), radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, .52), rgba(0, 0, 0, 0)) 0 100%',
         backgroundRepeat: 'no-repeat',
@@ -460,7 +473,7 @@ const useStyles = makeStyles(theme => ({
         justifyContent:'flex-end',
     },
     container: {
-        width: '60%',
+        width: '75%',
         minHeight: '50%',
         textAlign: 'center',
         
@@ -547,6 +560,7 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#b7c3cd'
     },
     buttonGroup: {
+        marginLeft: '1%',
         '& .MuiButton-label':{
             color: '#fff',
         },

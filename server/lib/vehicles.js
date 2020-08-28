@@ -2,6 +2,7 @@ const express = require('express');
 var async = require("async");
 const fetch = require('node-fetch');
 
+var session = require('express-session');
 const router = express.Router();
 
 const logger = require('../../logs');
@@ -12,7 +13,7 @@ const database = require('./db');
 
 const {exhangeCodeForToken} = require('../lib/bouncie');
 
-function checkBouncieToken(token, expires, authCode) {
+function checkBouncieToken(token, expires, bouncieAuthCode) {
     //Handle expired
     if(expires){
         if(new Date() > new Date(expires)){
@@ -22,7 +23,7 @@ function checkBouncieToken(token, expires, authCode) {
         }
     }
     //Refetch token    
-    if(!token && authCode){
+    if(!token && bouncieAuthCode){
         logger.info("No token");
         return false;
     }   
@@ -31,13 +32,14 @@ function checkBouncieToken(token, expires, authCode) {
 }
 
 router.post('/getBouncieLocations', async (req,res) => {
-    var user;
-    if(req.body){
-        user = req.body.user;
-    }
-    if(!user.authCode || !user.id){
+    // i should be getting user from database not from client/nextjs
+    //pulling from database means that I can update token,
+
+    var user = await User.getUserById(database, req.session.passport.user);
+        
+    if(!user.bouncieAuthCode || !user.id){
         console.error("Bad user info sent to getBouncieLocations");
-        res.send({error:"authCode"});
+        res.send({error:"bouncieAuthCode"});
         return;
     }
 
@@ -52,38 +54,34 @@ router.post('/getBouncieLocations', async (req,res) => {
                 }
             })
             
-            //console.log("reponse", response);
             const dsa = await response.json();
-            //res.send(dsa)
-            //console.log("dsa",dsa)
             return dsa;
         }
         catch(error){
             logger.error("Vehicles (getBouncieLocations): " + error);
-            //res.sendStatus(400);
             return error;
         }
     }
 
-    if(!checkBouncieToken(user.token, user.expiresAt, user.authCode)){
+    if(!checkBouncieToken(user.bouncieToken, user.bouncieExpiresAt, user.bouncieAuthCode)){
         //Refetch token and get locations using new token
-        exhangeCodeForToken( ROOT_URL, user.authCode )
+        exhangeCodeForToken( ROOT_URL, user.bouncieAuthCode )
         .then((data)=>{
-            console.log("auth code", user.authCode);
+            console.log("auth code", user.bouncieAuthCode);
             console.log("data from exchange", data);
             //Update database
-            User.updateUserBouncie(database,user.authCode, data.access_token, data.expires_in, user.id)
+            User.updateUserBouncie(database,user.bouncieAuthCode, data.access_token, data.expires_in, user.id)
             .then((updateResponse)=>{
                 //Get locations
                 getLocations(data.access_token)
                 .then((locations)=>{
-                    console.log("Locations", locations);
+                    //console.log("Locations", locations);
                     console.log("Got new token and got locations")
-                    console.log("session", req.session);
                     res.send(locations);
                 })
                 .catch((error)=>{
                     logger.error(error);
+                    console.log("get locations error");
                 })
             })
             .catch((error)=>{
@@ -96,7 +94,7 @@ router.post('/getBouncieLocations', async (req,res) => {
         
     }else{
         //get locations using same old token
-        getLocations(user.token)
+        getLocations(user.bouncieToken)
         .then((locations)=>{
             console.log("Got locations for bouncie")
             res.send(locations);

@@ -47,6 +47,7 @@ function auth({ ROOT_URL, app, database }) {
 
   passport.deserializeUser(async (id, done) => {
     try {
+      console.log("deserializing user");
       const user = await User.getUserById(database, id);
       done(null, user);
     } catch (error) {

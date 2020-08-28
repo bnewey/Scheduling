@@ -11,7 +11,7 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 import CrewIcon from '@material-ui/icons/Group';
 
 function TabPanel(props) {
-  const { children, tabValue, index, ...other } = props;
+  const {classes, children, tabValue, index, ...other } = props;
 
   return (
     <Typography
@@ -22,7 +22,7 @@ function TabPanel(props) {
       aria-labelledby={`full-width-tab-${index}`}
       {...other}
     >
-      {tabValue === index && <Box p={2}>{children}</Box>}
+      {tabValue === index && <Box className={classes.tab_box} p={2}>{children}</Box>}
     </Typography>
   );
 }
@@ -137,7 +137,7 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
         disabled={true}
       >
      
-         {children.map((child, index) => (   <TabPanel className={classes.tab} key={index} tabValue={tabValue} index={index} dir={theme.direction}>
+         {children.map((child, index) => (   <TabPanel className={classes.tab} classes={classes}  key={index} tabValue={tabValue} index={index} dir={theme.direction}>
             {child}
           </TabPanel>
          ))}
@@ -153,7 +153,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     '& header':{
-      marginBottom: '20px',
+      marginBottom: '1%',
     },
   },
   icon:{
@@ -161,7 +161,7 @@ const useStyles = makeStyles(theme => ({
       color: '#a0a0a0',
   },
   tabSpan: {
-    fontSize: '19px',
+    fontSize: '16px',
     fontWeight: '500',
   },
   selectedTab: {
@@ -169,7 +169,9 @@ const useStyles = makeStyles(theme => ({
     boxShadow: 'inset 1px 2px 6px 0px #414d5a',
     color: '#d87904 !important',
     backgroundColor: '#ffedc4',
-    padding: '10px'
+    padding: '10px',
+    minHeight: '0px',
+    lineHeight: '1',
   },
   nonSelectedTab: {
     flexGrow : '2',
@@ -181,13 +183,17 @@ const useStyles = makeStyles(theme => ({
       borderBottom: '2px solid #a2ceff',
       color: '#d87904',
     },
+    minHeight: '0px',
+    lineHeight: '1',
   },
   selectedTabSmall: {
     flexGrow : '1',
     boxShadow: 'inset 1px 2px 6px 0px #414d5a',
     color: '#d87904 !important',
     backgroundColor: '#ffedc4',
-    padding: '10px'
+    padding: '10px',
+    minHeight: '0px',
+    lineHeight: '1',
   },
   nonSelectedTabSmall: {
     boxShadow:' -1px 1px 2px 0px #414d5a',
@@ -198,6 +204,8 @@ const useStyles = makeStyles(theme => ({
       borderBottom: '2px solid #a2ceff',
       color: '#d87904',
     },
+    minHeight: '0px',
+    lineHeight: '1',
   },
   tab:{
     backgroundColor: '#5b6164',
@@ -206,7 +214,7 @@ const useStyles = makeStyles(theme => ({
     
   },
   tabRoot:{
-
+    minHeight: '0px',
   },
   p_selected:{
     margin: '0px 0px',
@@ -222,5 +230,12 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#65aea4',
     borderRadius: '2px',
     boxShadow: 'inset 0px 1px 5px 0px rgba(0,0,0,0.2)',
+  },
+  test:{
+    padding: '10px',
+  },
+  tab_box:{
+    padding: '.5%',
+    overflow: 'hidden',
   }
 }));

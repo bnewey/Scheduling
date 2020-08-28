@@ -76,11 +76,7 @@ async function getLinxupLocations(){
 //eyJhbGciOiJIUzI1NiJ9.eyJjb21wYW55SWQiOiIzMjIyNzQiLCJpc3MiOiJhZ2lsaXMiLCJwZXJzb25JZCI6Ijg5MjA1MCIsImV4cCI6MTc1NDQxMzAyNCwiaWF0IjoxNTk2NjQ2NjI0LCJ1c2VybmFtZSI6ImJyYWluZXlAcmFpbmV5ZWxlY3Ryb25pY3MuY29tIn0.k_J9mOSXg2LaURjfSSpKl5E1VxCp1hB-S4hdPEH6pEs
 
 //BOUNCIE STUFF
-async function getBouncieLocations(user){
-    if(!user){
-        console.error("Bad bouncie user info", user);
-        return;
-    }
+async function getBouncieLocations(){
     const route = '/scheduling/vehicles/getBouncieLocations';
     try{
         var data = await fetch(route,
@@ -88,8 +84,7 @@ async function getBouncieLocations(user){
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({user})
+                }
             });
         if(!data.ok){
             throw new Error("getBouncieLocations returned empty list or bad query")

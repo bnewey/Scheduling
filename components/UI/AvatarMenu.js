@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from "react";
 import PropTypes from 'prop-types';
 
+
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -14,6 +16,7 @@ const AvatarMenu = ({options, src, alt}) => {
   
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
+  const classes = useStyles();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget );
@@ -32,6 +35,7 @@ const AvatarMenu = ({options, src, alt}) => {
           role="presentation"
           aria-owns="simple-menu"
           aria-haspopup="true"
+          className={classes.avatar}
           onClick={event => handleClick(event)}
           onKeyPress={event => handleClick(event)}
           src={src}
@@ -65,3 +69,10 @@ AvatarMenu.propTypes = {
 };
 
 export default AvatarMenu;
+
+const useStyles = makeStyles(theme => ({
+  avatar: {
+     height: '30px',
+     width: '30px',
+  },
+}))

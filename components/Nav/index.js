@@ -26,7 +26,7 @@ const Nav = (props) => {
       background: '#5b7087',
     },
     toolbar: {
-      minHeight: '48px',
+      minHeight: '33px',
     },
     button: {
       cursor: 'pointer',

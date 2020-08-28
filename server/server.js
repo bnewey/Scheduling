@@ -59,21 +59,19 @@ nextApp
       handle(req, res);
     });
     ////////////////
-    
-    // Custom Routes
 
     app.use(cors({ origin: '*' }));
-
+    //Custom Routes//
     app.use('/scheduling/tasks', tasks);
     app.use('/scheduling/workOrders', workOrders);
     app.use('/scheduling/taskLists', taskLists);
     app.use('/scheduling/pdf', pdf);
     app.use('/scheduling/email', emailRouter);
     app.use('/scheduling/crew', crew);
-    app.use('/scheduling/vehicles', vehicles);
-    //
+    ///
 
     //Session   ////
+    //Has to be above custom routes, otherwise req.session is not available to them
     var options = {
       host: process.env.host,
       port: 3306,
@@ -82,7 +80,7 @@ nextApp
       database: process.env.database,
       expiration: (14 * 24 * 60 * 60)
     };
-   
+    
     var sessionStore = new MySQLStore(options);
     //Could use existing connection like this 
     //var sessionStore = new MySQLStore({}/* session store options */, connection);
@@ -100,10 +98,14 @@ nextApp
         store: sessionStore,
     }));
     /////////////////
-
     // Authenticate User
     auth({ ROOT_URL, app ,database})
     bouncie({ROOT_URL, app, database});
+    
+    // Custom Routes with session
+      //Place vehicles here, because we need to access session.passport.user 
+    app.use('/scheduling/vehicles', vehicles);
+    //
 
     app.get('*', (req, res) => {
       const parsedUrl = parse(req.url, true)

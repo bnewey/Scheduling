@@ -54,7 +54,7 @@ const useStyles = makeStyles(theme => ({
 const MapContainer = (props) => {
     const classes = useStyles();
 
-    const {user} = props;
+    //const {} = props;
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap,
           filters, setFilter, filterInOrOut, filterAndOr, setTaskListTasksSaved} = useContext(TaskContext);
@@ -77,11 +77,16 @@ const MapContainer = (props) => {
 
     const [mapHeight,setMapHeight] = useState('400px');
 
+    const [radarActive, setRadarActive] = useState(false);
+    const [radarControl, setRadarControl] = useState(null);
+    const [visualTimestamp, setVisualTimestamp] = useState(null);
+
+
     useEffect(()=>{
       if(vehicleNeedsRefresh == true){
         var locations = [];
         //Get all vehicle locations and combine into vehicleRows
-        Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations({id: user.id ,authCode: user.bouncieAuthCode, token: user.bouncieToken, expiresAt: user.bouncieExpiresAt})])
+        Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations()])
         .then((values)=>{
           console.log("valuies",values);
           let linuxp_loc_array = values[0]["data"]["locations"];
@@ -401,7 +406,9 @@ const MapContainer = (props) => {
                       setInfoWeather={setInfoWeather} infoWeather={infoWeather}
                       showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}
                       bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
-                      setMapRows={setMapRows} mapRows={mapRows}/>
+                      setMapRows={setMapRows} mapRows={mapRows}
+                      visualTimestamp={visualTimestamp} setVisualTimestamp={setVisualTimestamp}
+                      radarControl={radarControl} setRadarControl={setRadarControl}/>
             </Grid>
             <Grid item xs={12} md={4}>
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
@@ -415,6 +422,8 @@ const MapContainer = (props) => {
                           infoWeather={infoWeather} setInfoWeather={setInfoWeather}
                           bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
                           visibleItems={visibleItems} setVisibleItems={setVisibleItems}
+                          visualTimestamp={visualTimestamp} setVisualTimestamp={setVisualTimestamp}
+                          radarControl={radarControl} setRadarControl={setRadarControl}
                           />
             </Grid>
           </Grid>
@@ -490,7 +499,8 @@ const MapWithAMarkerClusterer = compose(
     infoWindowContentChanged: () => (window)=>{
       //console.log("infowindow content changed ", window)
 
-    }
+    },
+    
   }),
   withScriptjs,
   withGoogleMap
@@ -498,9 +508,15 @@ const MapWithAMarkerClusterer = compose(
 
   const googleMap = React.useRef(null);
   const {taskMarkers, vehicleMarkers, visibleItems, resetBounds, activeMarker, setActiveMarker,activeVehicle, setActiveVehicle,
-     setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded, setMapRows, mapRows, vehicleRows} = props;
+     setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded, setMapRows,
+      mapRows, vehicleRows,radarActive,radarControl, setRadarControl, visualTimestamp, setVisualTimestamp} = props;
 
   const [markerToRemap, setMarkerToRemap] = React.useState(null);
+
+  const [timestamps,setTimestamps] =React.useState([]);
+  var radarLayers = [];
+  var animationPosition = 0;
+  var animationTimer = false;
 
   useEffect( () =>{ //useEffect for inputText
     if(taskMarkers != null)
@@ -521,8 +537,157 @@ const MapWithAMarkerClusterer = compose(
         a.style.border = '';
     }
   }, [markerToRemap])
+  
+   //Control the radar from props (controls in MapSidebar)
+   useEffect(()=>{
+    console.log("asd");
+    if(radarControl && googleMap){
+      console.log("Running radarcontrol");
+      switch(radarControl.control){
+        case "play":
+          play();
+          break;
+        case "stop":
+          stop();
+          break;
+        case "reverse":
+          stop();
+          showFrame(animationPosition - 1);
+          break;
+        case "forward":
+          stop(); 
+          showFrame(animationPosition + 1); 
+          break;
+      }
+    }
+  },[radarControl, googleMap])
+
+  useEffect(()=>{
+    if(visibleItems && visibleItems.indexOf("radar") != -1){
+      onRadarInit();
+    console.log("Ran radar init")
+    }else{
+      if(timestamps.length > 0){
+        googleMap.current.context.__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.overlayMapTypes.clear();
+        radarLayers=[];
+      }
+      
+      
+    }
+    
+  },[visibleItems])
+
+  useEffect(()=>{
+    if(visibleItems && visibleItems.indexOf("radar") != -1 && timestamps.length > 0 && googleMap && setVisualTimestamp){
+      //googleMap.current.overlayMapTypes = new MVCArray
+      console.log("googelmap overlay", googleMap.current.context.__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED);
+      //showFrame(-1);
+    }
+  },[visibleItems, timestamps, googleMap, setVisualTimestamp])
+
+  const onRadarInit = ( )=> {
+    Util.getWeatherRadar("https://api.rainviewer.com/public/maps.json")
+    .then((data)=>{
+        setTimestamps(data)
+        console.log("data",data);
+        
+    })
+    .catch((error)=>{
+      console.error("Radar error", error);
+      cogoToast.error("Radar Error");
+    })
+  }
+
+  const addLayer = (ts) =>   {
+    return new Promise( (resolve,reject) => {
+    if (!radarLayers[ts]) {
+       console.log("Boutta run addLayers googlemaps shit");
+        radarLayers[ts] = new google.maps.ImageMapType({
+          getTileUrl: function(coord, zoom) {
+            return ['https://tilecache.rainviewer.com/v2/radar/' + ts + '/256/',
+                zoom, '/', coord.x, '/', coord.y, '/2/1_1.png'].join('');
+          },
+          tileSize: new google.maps.Size(256, 256),
+          opacity: 0.001
+        });
+        
+        googleMap.current.context.__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.overlayMapTypes.push(radarLayers[ts]);        
+    }
+    resolve();
+    return
+  })
+  }
+  const changeRadarPosition = async (position, preloadOnly) => {
+    console.log("ChangeRadarPosition", position)
+      while (position >= timestamps.length) {
+        console.log("poistion min", position)
+          position -= timestamps.length;
+      }
+      while (position < 0) {
+        console.log("poistion add", position)
+        console.log("timestamps", timestamps.length);
+          position += timestamps.length;
+      }
+      
+      var currentTimestamp = timestamps[animationPosition];
+      var nextTimestamp = timestamps[position];
+      
+      await addLayer(nextTimestamp);
+      
+      if (preloadOnly) {
+          return;
+      }
+
+      animationPosition = position;
+      console.log("radarLayers", radarLayers);
+      if (radarLayers[currentTimestamp]) {
+          radarLayers[currentTimestamp].setOpacity(0);
+      }
+      radarLayers[nextTimestamp].setOpacity(100);
+      
+      
+      //document.getElementById("timestamp").innerHTML = (new Date(nextTimestamp * 1000)).toString();
+      setVisualTimestamp((new Date(nextTimestamp * 1000)).toString())
+  }
+  const showFrame = (nextPosition) => {
+      var preloadingDirection = nextPosition - animationPosition > 0 ? 1 : -1;
+      console.log("Before 1changeRadarPosition")
+      changeRadarPosition(nextPosition);
+      console.log("after 1changeRadarPosition")
+      // preload next next frame (typically, +1 frame)
+      // if don't do that, the animation will be blinking at the first loop
+      console.log("Before 2changeRadarPosition")
+      changeRadarPosition(nextPosition + preloadingDirection, true);
+      console.log("after 2changeRadarPosition")
+  }
+  const stop = () => {
+      console.log("animation timer", animationTimer)
+      if (animationTimer) {
+          console.log("Clearing timer")
+          clearTimeout(animationTimer);
+          animationTimer = false;
+          return true;
+      }
+      return false;
+  }
+
+  const play = ()=> {
+      console.log("playing");
+      showFrame(animationPosition + 1);
+
+      // Main animation driver. Run this function every 500 ms
+      animationTimer = (setTimeout(play, 500));
+  }
+
+  const  stopControl = ()=> {
+      stop();
+  }
+  const  playControl = ()=> {
+    play();
+}
 
   return(
+    <>
   <GoogleMap
     defaultZoom={6} 
     ref={googleMap}
@@ -577,7 +742,7 @@ const MapWithAMarkerClusterer = compose(
                           showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} markerToRemap={markerToRemap} setMarkerToRemap={setMarkerToRemap}/> : <></>}
     {showingInfoWindow && activeVehicle && vehicleMarkers ? <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
                   showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>: <></>}
-  </GoogleMap>
+  </GoogleMap></>
   )}
 );
 

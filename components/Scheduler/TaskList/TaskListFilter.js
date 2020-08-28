@@ -493,7 +493,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '5px',
+        padding: '0px',
         backgroundColor: '#d0cde0',
         flexWrap: 'wrap',
     },
