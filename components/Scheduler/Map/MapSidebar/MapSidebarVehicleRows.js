@@ -46,6 +46,8 @@ const MapSiderbarVehicleRows = (props) =>{
       );
     }
 
+   
+
     useEffect(()=>{
       if(activeVehicle && expandedAnimDone == true){
         
@@ -65,13 +67,13 @@ const MapSiderbarVehicleRows = (props) =>{
     
 
     //Modal
-    const handleRightClick = (event, id) => {
-      setModalTaskId(id);
-      setModalOpen(true);
+    // const handleRightClick = (event, id) => {
+    //   setModalTaskId(id);
+    //   setModalOpen(true);
 
-      //Disable Default context menu
-      event.preventDefault();
-    };
+    //   //Disable Default context menu
+    //   event.preventDefault();
+    // };
     ////
 
 
@@ -138,11 +140,13 @@ const useStyles = makeStyles(theme => ({
   },
   selectedRow:{
     backgroundColor: '#abb7c9 !important',
-    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    border: '1px solid #c7c7c7',
   },
   nonSelectedRow:{
-    backgroundColor: '#e8e8e8 !important',
-    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+    backgroundColor: '#fff !important',
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
+    border: '1px solid #c7c7c7',
   },
   MarkerInfo:{
     display: 'block',

@@ -50,6 +50,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     useEffect(()=>{
       if(activeMarker && expandedAnimDone == true){
         var el = panelRef.current.querySelector("#mapMarkedListItem"+activeMarker.t_id);
+        console.log("Panelref", panelRef.current);
         if(!el){
           console.error("No element for isInViewPort", el);
           console.log(activeMarker);

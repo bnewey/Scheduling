@@ -61,9 +61,50 @@ async function getAllWorkOrderSignArtItems(id){
 
 }
 
+async function updateWorkOrderItemArrivalDate(woi_id, date){
+    const route = '/scheduling/workOrders/updateWorkOrderItemArrivalDate';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi_id, date})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function updateWorkOrderItemVendor(woi_id, vendor){
+    const route = '/scheduling/workOrders/updateWorkOrderItemVendor';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi_id, vendor})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
 
 module.exports = {
     getAllWorkOrders: getAllWorkOrders,
     getAllWorkOrderItems: getAllWorkOrderItems,
     getAllWorkOrderSignArtItems: getAllWorkOrderSignArtItems,
+    updateWorkOrderItemArrivalDate: updateWorkOrderItemArrivalDate,
+    updateWorkOrderItemVendor,
 };

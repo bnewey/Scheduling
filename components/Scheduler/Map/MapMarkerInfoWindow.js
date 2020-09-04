@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect} from 'react';
 
 import ReactDOM from 'react-dom';
-import {makeStyles, Avatar, Tooltip} from '@material-ui/core';
+import {makeStyles, Avatar, Tooltip, Button} from '@material-ui/core';
 //import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 const {
     withScriptjs,
@@ -18,7 +18,8 @@ const days=["Sunday",'Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const MapMarkerInfoWindow = (props)=>{
 
     //PROPS
-    const {activeMarker, setActiveMarker, infoWeather, setInfoWeather, showingInfoWindow, setShowingInfoWindow,markerToRemap, setMarkerToRemap} = props;
+    const {taskMarkers, activeMarker, setActiveMarker, infoWeather, setInfoWeather, showingInfoWindow, setShowingInfoWindow,markerToRemap, setMarkerToRemap,
+        multipleMarkersOneLocation, setMultipleMarkersOneLocation} = props;
     //STATE
 
     //CSS
@@ -33,6 +34,7 @@ const MapMarkerInfoWindow = (props)=>{
     const handleInfoWindowClose = () =>{
         setInfoWeather(null);
         setShowingInfoWindow(false);
+        setMultipleMarkersOneLocation(null);
     }
 
     const getWeather = (event, lat, lng) => {
@@ -81,6 +83,31 @@ const MapMarkerInfoWindow = (props)=>{
         setMarkerToRemap(null);
     }
 
+    const handleNextMultiMarker =(event)=>{
+        let index = multipleMarkersOneLocation.indexOf(activeMarker.t_id.toString());
+        if(index >= multipleMarkersOneLocation.length-1){
+            index =0;
+        }else{
+            index++;
+        }
+        let newActiveId = multipleMarkersOneLocation[index];
+        let newActiveMarker = taskMarkers.filter((marker, i)=> marker.t_id == newActiveId)[0]; 
+
+        setActiveMarker(newActiveMarker);
+    }
+
+    const handlePrevMultiMarker =(event)=>{
+        let index = multipleMarkersOneLocation.indexOf(activeMarker.t_id.toString());
+        if(index <= 0){
+            index = multipleMarkersOneLocation.length-1;
+        }else{
+            index--;
+        }
+        let newActiveId = multipleMarkersOneLocation[index];
+        let newActiveMarker = taskMarkers.filter((marker, i)=> marker.t_id == newActiveId)[0]; 
+        setActiveMarker(newActiveMarker);
+    }
+
     return (
         <InfoWindowEx
         position = {activeMarker ? { lat: activeMarker.lat , lng: activeMarker.lng} : {lat: 0, lng:0}}
@@ -92,7 +119,17 @@ const MapMarkerInfoWindow = (props)=>{
         >
         <div >
             {activeMarker ? 
-                <><div className={classes.MarkerInfo}>{activeMarker.t_name}</div>
+                <>
+                {multipleMarkersOneLocation && 
+                    <div className={classes.multipleMarkersDiv}>
+                        <div className={classes.multiMarkerLabelDiv}><span className={classes.multipleMarkersSpan}>Multiple Markers!</span></div>
+                        <Button onClick={event=>handlePrevMultiMarker(event)}
+                                className={classes.multiMarkerButton}>{"Prev"}</Button>
+                        <Button onClick={event=>handleNextMultiMarker(event)}
+                                className={classes.multiMarkerButton}>{"Next"}</Button>
+                    </div>
+                }
+                <div className={classes.MarkerInfo}>{activeMarker.t_name}</div>
                 <div className={classes.MarkerSubInfo}>  ID:&nbsp;{activeMarker.t_id}&nbsp;&nbsp;Priority:&nbsp;{activeMarker.priority_order} </div>
                 <div className={classes.avatarContainer}>
                     {!(activeMarker.drilling == "" || activeMarker.drilling == null )
@@ -272,5 +309,27 @@ class InfoWindowEx extends React.Component {
     },
     avatarItem:{
         margin: '1px 15px',
+    },
+    multipleMarkersDiv:{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fdd4d4',
+        borderRadius: '6px',
+        border: '1px solid #c1c1c1',
+        margin: '3% 1%',
+    },
+    multiMarkerButton:{
+        border: '1px solid #444',
+        fontSize: '10px',
+        padding: '1%',
+        margin: '2% 1%',
+        backgroundColor: '#e8e8e8',
+        '&:hover':{
+            backgroundColor: '#cccccc'
+        }
+    },
+    multiMarkerLabelDiv:{
+        margin: '2%'
     }
   }));

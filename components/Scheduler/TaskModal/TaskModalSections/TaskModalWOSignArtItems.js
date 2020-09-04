@@ -1,6 +1,7 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
-import {makeStyles, Switch, FormControlLabel, List, ListItem, ListItemText,ListItemIcon, Modal, Backdrop, Fade, Grid, TextField, FormControl, InputLabel, MenuItem, Select, 
+import {makeStyles, Switch, FormControlLabel, List, ListItem, ListItemText,ListItemIcon, Modal, Backdrop, Fade, Grid, 
+    TextField, FormControl, InputLabel, MenuItem, Select, 
     ButtonGroup, Button, CircularProgress, Avatar} from '@material-ui/core';
 import BulletIcon from '@material-ui/icons/Crop75';
 import RemoveIcon from '@material-ui/icons/Remove';
@@ -10,9 +11,17 @@ import cogoToast from 'cogo-toast';
 import WorkOrders from '../../../../js/Work_Orders';
 import Util from '../../../../js/Util';
 
+import DateFnsUtils from '@date-io/date-fns';
+import {
+    DatePicker,
+    TimePicker,
+    DateTimePicker,
+    MuiPickersUtilsProvider,
+  } from '@material-ui/pickers';
+
 import { TaskContext } from '../../TaskContainer';
 
-
+const vendors  = []
 
 const TaskModalWOSignArtItems = (props) =>{
     const {taskId} = props;
@@ -24,6 +33,8 @@ const TaskModalWOSignArtItems = (props) =>{
     //State Variables
     const [signItems, setSignItems] = useState(null);
     const [showDates, setShowDates] = useState(false);
+
+    const [itemObject, setItemObject] = useState(null);
 
     useEffect(()=>{
         if(signItems == null){
@@ -37,12 +48,25 @@ const TaskModalWOSignArtItems = (props) =>{
                 cogoToast.error("Error getting work order items for sign/artwork");
             })
         }
-    },[signItems])
+        if(signItems && itemObject == null){
+            let in_house = signItems.filter((item)=> item.vendor != null && item.vendor == 2)
+            let fair_play = signItems.filter((item)=> item.vendor != null && item.vendor == 1)
+            let undefined_sign = signItems.filter((item)=> item.scoreboard_or_sign > 0 && item.vendor == null )
+            let reg_items = signItems.filter((item)=> item.scoreboard_or_sign == 0);
+            setItemObject({
+                in_house,
+                fair_play,
+                undefined_sign,
+                reg_items
+            })
+        }
+    },[signItems, itemObject])
 
     const handleChangeShowDates = event => {
         setShowDates(event.target.checked);
       };
 
+    
     const convertDate = (date) => {
         if(!date){
             return 'N/A';
@@ -50,12 +74,51 @@ const TaskModalWOSignArtItems = (props) =>{
         let date_string = Util.convertISODateToMySqlDate(date);
         return date_string;
     };
+
+    const handleUpdateArrivalDate = (value, woi)=>{
+        if(!value || !woi){
+            cogoToast.error("Bad value");
+            console.error("Bad value in handleUpdateArrivalDate");
+            return;
+        }
+        WorkOrders.updateWorkOrderItemArrivalDate(woi.record_id, Util.convertISODateToMySqlDate(value))
+        .then((data)=>{
+            if(data){
+                setSignItems(null);
+                setItemObject(null);
+            }
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to update arrival date");
+            console.error("Failed to update arrival date", error)
+        })
+    }
+
+    const handleChangeVendorProp = (value, woi_id) =>{
+        if(!value.target.value || !woi_id){
+            cogoToast.error("Bad value in handleChangeVendorProp");
+            console.error("Bad value in handleChangeVendorProp")
+            return;
+        }
+        WorkOrders.updateWorkOrderItemVendor(woi_id, value.target.value)
+        .then((data)=>{
+            if(data){
+                setSignItems(null);
+                setItemObject(null);
+            }
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to update vendor");
+            console.error("Failed to update vendor", error)
+        })
+        
+    }
     
 
     return(
         
         <Grid container >
-            {signItems && signItems.length > 0 
+            {itemObject  
             ?
             <Grid item xs={12} className={classes.paper}>
                <div className={classes.root}>
@@ -65,36 +128,229 @@ const TaskModalWOSignArtItems = (props) =>{
                         label="Show Comp Dates"
                         />
                     <List component="nav" aria-label="main mailbox folders" className={classes.list}>
-                        {signItems.map((item)=> (
+
+                        {itemObject.in_house.length > 0 &&  <ListItem className={classes.list_head_item}>
+                                <ListItemText  disableTypography className={classes.list_head_text}>
+                                    <Grid container>
+                                        <Grid item xs={8}>
+                                            Rainey - In House Signs
+                                        </Grid>
+                                        <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
+                                            Vendor
+                                        </Grid>
+                                        <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
+                                            Arrival Date
+                                        </Grid>
+                                    </Grid>
+                                </ListItemText>
+                            </ListItem>}
+                        {itemObject.in_house.length > 0 && itemObject.in_house.map((item)=> {
+                           
+                        return(
                             <ListItem button className={classes.list_item_root}>
                                 <ListItemIcon>
-                                { item.scoreboard_or_sign > 0 ?<PersonalVideoIcon/> : <RemoveIcon/> }
+                                    <PersonalVideoIcon/> 
                                 </ListItemIcon>
-                                <ListItemText>
-                                    <>
-                        <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})&nbsp;-&nbsp;{item.vendor == 1 ? "Fair Play" : item.vendor == 2 ? "Rainey - In House" : "" }</div>
-                                    { item.scoreboard_or_sign > 0 ? <><div className={classes.item_info}>
-                                        <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}>Sign Built</div> 
-                                        <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>Copy Received</div>
-                                        <div className={item.sent_for_approval ? classes.item_info_item : classes.item_info_item_na}>Sent for Appr</div>
-                                        <div className={item.final_copy_approved ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Final Copy Appr</div>
-                                        <div className={item.artwork_completed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Artwork Completed</div>
-                                        <div className={item.sign_popped_and_boxed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Sign Popped/Boxed</div>
-                                    </div>
-                                    {showDates ? 
-                                    <div className={classes.item_info}>
-                                        <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}> {convertDate(item.sign_built)}</div> 
-                                        <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>{convertDate(item.copy_received)}</div>
-                                        <div className={item.sent_for_approval ? classes.item_info_item : classes.item_info_item_na}>{convertDate(item.sent_for_approval)}</div>
-                                        <div className={item.final_copy_approved ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.final_copy_approved)}</div>
-                                        <div className={item.artwork_completed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.artwork_completed)}</div>
-                                        <div className={item.sign_popped_and_boxed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.sign_popped_and_boxed)}</div>
-                                    </div>
-                                    : <></> } </> : <></>}
-                                    </>
+                                <ListItemText className={classes.list_item_text}>
+                                    <Grid container >
+                                        <Grid item xs={8}>
+                                        <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})</div>
+                                        { item.scoreboard_or_sign > 0 ? <><div className={classes.item_info}>
+                                            <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}>Sign Built</div> 
+                                            <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>Copy Received</div>
+                                            <div className={item.sent_for_approval ? classes.item_info_item : classes.item_info_item_na}>Sent for Appr</div>
+                                            <div className={item.final_copy_approved ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Final Copy Appr</div>
+                                            <div className={item.artwork_completed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Artwork Completed</div>
+                                            <div className={item.sign_popped_and_boxed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Sign Popped/Boxed</div>
+                                        </div>
+                                        {showDates ? 
+                                        <div className={classes.item_info}>
+                                            <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}> {convertDate(item.sign_built)}</div> 
+                                            <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>{convertDate(item.copy_received)}</div>
+                                            <div className={item.sent_for_approval ? classes.item_info_item : classes.item_info_item_na}>{convertDate(item.sent_for_approval)}</div>
+                                            <div className={item.final_copy_approved ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.final_copy_approved)}</div>
+                                            <div className={item.artwork_completed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.artwork_completed)}</div>
+                                            <div className={item.sign_popped_and_boxed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.sign_popped_and_boxed)}</div>
+                                        </div>
+                                        : <></> } </> : <></>}
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                             <div className={classes.dateDiv}>
+                                                <select
+                                                id={"vendorinput"+item.record_id}
+                                                className={classes.selectBox}
+                                                value={item.vendor}
+                                                onChange={value => handleChangeVendorProp(value, item.record_id)}
+                                                >
+                                                <option value={null}>N/A</option>
+                                                <option value={1}>Fair Play</option> 
+                                                <option value={2}>Rainey</option>
+                                                </select> 
+                                            </div>                                       
+                                        </Grid>
+                                        <Grid item xs={2} className={classes.dateGrid}>
+                                            <div className={classes.dateDiv}>  
+                                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                                    <DatePicker className={classes.datePicker} inputVariant="outlined"
+                                                                    value={item.scoreboard_arrival_date} onChange={value => handleUpdateArrivalDate(value, item)} />
+                                                </MuiPickersUtilsProvider>
+                                            </div>
+                                        </Grid>
+                                    </Grid>
+
                                     </ListItemText>
                             </ListItem>
-                        ))}
+                        )})}
+
+                        {itemObject.fair_play.length > 0 && <ListItem className={classes.list_head_item}>
+                                <ListItemText  disableTypography className={classes.list_head_text}>
+                                    <Grid container>
+                                        <Grid item xs={8}>
+                                            Fair Play Signs
+                                        </Grid>
+                                        <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
+                                            Vendor
+                                        </Grid>
+                                        <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
+                                            Arrival Date
+                                        </Grid>
+                                    </Grid>
+                                </ListItemText>
+                            </ListItem>}
+                        {itemObject.fair_play.length > 0 && itemObject.fair_play.map((item)=> {
+                           
+                           return(
+                               <ListItem button className={classes.list_item_root}>
+                                   <ListItemIcon>
+                                       <PersonalVideoIcon/> 
+                                   </ListItemIcon>
+                                   <ListItemText className={classes.list_item_text}>
+                                        <Grid container >
+                                            <Grid item xs={8}>
+                                                <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})</div>
+                                            </Grid>
+                                            <Grid item xs={2}>
+                                             <div className={classes.dateDiv}>
+                                                <select
+                                                id={"vendorinput"+item.record_id}
+                                                className={classes.selectBox}
+                                                value={item.vendor}
+                                                onChange={value => handleChangeVendorProp(value, item.record_id)}
+                                                >
+                                                <option value={null}>N/A</option>
+                                                <option value={1}>Fair Play</option> 
+                                                <option value={2}>Rainey</option>
+                                                </select> 
+                                            </div>                                       
+                                            </Grid>
+                                            <Grid item xs={2} className={classes.dateGrid}>
+                                            <div className={classes.dateDiv}>  
+                                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                                    <DatePicker className={classes.datePicker} inputVariant="outlined"
+                                                                    value={item.scoreboard_arrival_date} onChange={value => handleUpdateArrivalDate(value, item)} />
+                                                </MuiPickersUtilsProvider>
+                                            </div>
+                                        </Grid>
+                                       </Grid>
+                                       </ListItemText>
+                               </ListItem>
+                        )})}
+
+                        {itemObject.undefined_sign.length > 0 &&
+                            <ListItem className={classes.list_head_item}>
+                                <ListItemText  disableTypography className={classes.list_head_text}>
+                                    <Grid container>
+                                        <Grid item xs={8}>
+                                            Unset Vendor Signs
+                                        </Grid>
+                                        <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
+                                            Vendor
+                                        </Grid>
+                                        <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
+                                            Arrival Date
+                                        </Grid>
+                                    </Grid>
+                                </ListItemText>
+                            </ListItem>}
+                        {itemObject.undefined_sign.length > 0 && itemObject.undefined_sign.map((item)=> {
+                           
+                           return(
+                               <ListItem button className={classes.list_item_root}>
+                                   <ListItemIcon>
+                                       <PersonalVideoIcon/> 
+                                   </ListItemIcon>
+                                   <ListItemText className={classes.list_item_text}>
+                                       <Grid container >
+                                        <Grid item xs={8}>
+                                        <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})</div>
+                                        { item.scoreboard_or_sign > 0 ? <><div className={classes.item_info}>
+                                            <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}>Sign Built</div> 
+                                            <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>Copy Received</div>
+                                            <div className={item.sent_for_approval ? classes.item_info_item : classes.item_info_item_na}>Sent for Appr</div>
+                                            <div className={item.final_copy_approved ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Final Copy Appr</div>
+                                            <div className={item.artwork_completed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Artwork Completed</div>
+                                            <div className={item.sign_popped_and_boxed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>Sign Popped/Boxed</div>
+                                        </div>
+                                        {showDates ? 
+                                        <div className={classes.item_info}>
+                                            <div className={item.sign_built ? classes.item_info_item : classes.item_info_item_na}> {convertDate(item.sign_built)}</div> 
+                                            <div className={item.copy_received ? classes.item_info_item : classes.item_info_item_na}>{convertDate(item.copy_received)}</div>
+                                            <div className={item.sent_for_approval ? classes.item_info_item : classes.item_info_item_na}>{convertDate(item.sent_for_approval)}</div>
+                                            <div className={item.final_copy_approved ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.final_copy_approved)}</div>
+                                            <div className={item.artwork_completed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.artwork_completed)}</div>
+                                            <div className={item.sign_popped_and_boxed ? classes.item_info_item_bigger : classes.item_info_item_bigger_na}>{convertDate(item.sign_popped_and_boxed)}</div>
+                                        </div>
+                                        : <></> } </> : <></>}
+                                        
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                             <div className={classes.dateDiv}>
+                                                <select
+                                                id={"vendorinput"+item.record_id}
+                                                className={classes.selectBox}
+                                                value={item.vendor}
+                                                onChange={value => handleChangeVendorProp(value, item.record_id)}
+                                                >
+                                                <option value={null}>N/A</option>
+                                                <option value={1}>Fair Play</option> 
+                                                <option value={2}>Rainey</option>
+                                                </select> 
+                                            </div>                                       
+                                        </Grid>
+                                        <Grid item xs={2} className={classes.dateGrid}>
+                                            <div className={classes.dateDiv}>  
+                                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                                    <DatePicker className={classes.datePicker} inputVariant="outlined"
+                                                                    value={item.scoreboard_arrival_date} onChange={value => handleUpdateArrivalDate(value, item)} />
+                                                </MuiPickersUtilsProvider>
+                                            </div>
+                                        </Grid>
+                                       </Grid>
+                                       </ListItemText>
+                               </ListItem>
+                        )})}
+
+                        {itemObject.reg_items.length > 0 &&<ListItem className={classes.list_head_item}>
+                            <ListItemText disableTypography className={classes.list_head_text}>
+                                Other Items
+                            </ListItemText>
+                        </ListItem>}
+                            {itemObject.reg_items.length > 0 && itemObject.reg_items.map((item)=> {
+                           
+                           return(
+                               <ListItem button className={classes.list_item_root}>
+                                   <ListItemIcon>
+                                       <RemoveIcon/> 
+                                   </ListItemIcon>
+                                   <ListItemText className={classes.list_item_text}>
+                                        <Grid container >
+                                            <Grid item xs={10}>
+                                                <div className={classes.item_head}>{item.description}&nbsp;(x{item.quantity})</div>
+                                            </Grid>
+                                       </Grid>
+                                       </ListItemText>
+                               </ListItem>
+                           )})}
                         
                     </List>
                 </div>
@@ -119,9 +375,16 @@ const useStyles = makeStyles(theme => ({
         padding: '0px',
     },
     list_item_root:{
-
+        paddingTop: '0px',
+        paddingBottom: '0px',
         borderBottom: '1px solid #ececec',
     },
+    list_item_text:{
+        marginTop: '0px',
+        marginBottom:'0px',
+        paddingTop: '0px',
+        paddingBottom: '0px',
+    },  
     item_head:{
         fontWeight: '600',
         color: '#2d3b4a',
@@ -163,4 +426,37 @@ const useStyles = makeStyles(theme => ({
         
         display: 'inline',
     },
+    list_head_item:{
+        padding: '0',
+        margin: '0 0 0 0',
+        backgroundColor: '#37495d'
+    },
+    list_head_text:{
+        fontSize: '1.25em',
+        fontWeight: '500',
+        color: '#fff',
+        padding: '2px 10px 2px 10px'
+    },
+    dateGrid:{
+        backgroundColor: '#ffeebb',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent:'center',
+    },  
+    dateDiv:{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '0px 5px',
+    },
+    dateLabel:{
+
+    },
+    datePicker:{
+        '& input':{
+            padding: '4px 0px',
+            backgroundColor: '#effeff',
+        }
+    }
   }));

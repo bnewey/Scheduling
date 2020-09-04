@@ -2,8 +2,10 @@ import React, {useRef, useState, useEffect} from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ListIcon from '@material-ui/icons/List';
 import DirectionsCarIcon from '@material-ui/icons/DirectionsCar';
+import CloudIcon from '@material-ui/icons/Cloud';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityOnIcon from '@material-ui/icons/Visibility';
+import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import { Scrollbars} from 'react-custom-scrollbars';
 import {makeStyles, Paper, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary} from '@material-ui/core'
 
@@ -11,6 +13,7 @@ import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
 import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
 import MapSidebarVehicleRows from './MapSidebarVehicleRows';
 import MapSidebarToolbar from './MapSidebarToolbar';
+import MapSidebarRadarControls from './MapSidebarRadarControls';
 
 import { withRouter } from "next/router";
 import Link from "next/link";
@@ -27,18 +30,32 @@ const MapSidebar = (props) => {
     const {mapRows, setMapRows, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
             setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds, activeVehicle, setActiveVehicle, 
             bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows, visibleItems, setVisibleItems,
-            radarActive,setRadarActive, visualTimestamp, setVisualTimestamp,
-            radarControl, setRadarControl} = props;
+            visualTimestamp, setVisualTimestamp,
+            radarControl, setRadarControl, radarOpacity, setRadarOpacity,
+            radarSpeed, setRadarSpeed, timestamps, setTimestamps,
+            multipleMarkersOneLocation,setMultipleMarkersOneLocation} = props;
+
+    //Ref to check if same vehicle is active so we dont keep expanding vehicle panel on vehicle refetch
+    const activeVehicleRef = useRef(null);
 
     useEffect( () =>{ //useEffect for inputText
         if(activeMarker && activeMarker.geocoded && expanded!="taskMarker" ){
             setExpanded('taskMarker');
             setExpandedAnimDone(false);
         }
-            
-        if(activeVehicle && expanded != "vehicleMarker"){
+
+        if(activeVehicle && expanded != "vehicleMarker" && ( activeVehicle.vin !=  activeVehicleRef.current)){
             setExpanded('vehicleMarker' )
-            setExpandedAnimDone(false);
+            setExpandedAnimDone(false);    
+        }
+
+        if(activeVehicle){
+            activeVehicleRef.current = activeVehicle.vin;
+        }
+
+        //Need to null multiple marker variable on new activeMarker
+        if(multipleMarkersOneLocation && activeMarker && multipleMarkersOneLocation.indexOf(activeMarker.t_id.toString())== -1 ){
+            setMultipleMarkersOneLocation(null);
         }
         return () => { //clean up
             if(activeMarker){
@@ -77,11 +94,7 @@ const MapSidebar = (props) => {
         return(visibleItems.indexOf(item) != -1);
     }
 
-    const handleChangeRadarControl = (control) =>{
-        setRadarControl({
-            control
-        });
-    }
+    
      
     return(
         <Paper className={classes.root}>
@@ -147,22 +160,21 @@ const MapSidebar = (props) => {
                     aria-controls="radarExpbh-content"
                     id="radarExpbh-header"
                     classes={{content: classes.expPanelSummary}}
-                ><ListIcon className={classes.icon}/><span>Radar Controls</span>
-                {isVisible('radar') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')} style={{ color: 'rgb(25, 109, 234)' }}/>
-                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')}/>}
+                ><CloudIcon className={classes.icon}/><span>Radar Controls</span>
+                {isVisible('radar') ? <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')}/>}
                 </ExpansionPanelSummary>
-                <ExpansionPanelDetails ref={panelRef} className={classes.details}>
-                    <Scrollbars universal autoHeight autoHeightMax={400}>
+                <ExpansionPanelDetails className={classes.details}>
+                    
                         { isVisible('radar') &&
                         <>
-                        <span>Timestamp: {visualTimestamp}</span>
-                        <a onClick={event => handleChangeRadarControl("reverse")}>{"<"}</a>
-                        <a onClick={event => handleChangeRadarControl("play")}>{"Play"}</a>
-                        <a onClick={event => handleChangeRadarControl("stop")}>{"Stop"}</a>
-                        <a onClick={event => handleChangeRadarControl("forward")}>{">"}</a>
+                        
+                        < MapSidebarRadarControls visibleItems={visibleItems} setVisibleItems={setVisibleItems}  visualTimestamp={visualTimestamp}
+                             setVisualTimestamp={setVisualTimestamp} radarControl={radarControl} setRadarControl={setRadarControl}
+                              radarOpacity={radarOpacity} setRadarOpacity={setRadarOpacity} radarSpeed={radarSpeed} setRadarSpeed={setRadarSpeed}
+                              timestamps={timestamps} setTimestamps={setTimestamps}/>
                         </>
                         }
-                    </Scrollbars>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
             
@@ -224,7 +236,9 @@ const useStyles = makeStyles(theme => ({
     details:{
         padding: '2px 8px 8px 6px',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        backgroundColor: '#ebfffb',
+        marginBottom: '4px',
     },
     attention:{
         color: 'red'

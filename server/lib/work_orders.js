@@ -113,5 +113,55 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
     }
 });
 
+router.post('/updateWorkOrderItemArrivalDate', async (req,res) => {
+
+    var woi_id, date;
+    if(req.body){
+        if(req.body.woi_id != null){
+            woi_id = req.body.woi_id;
+            date =req.body.date;
+        }  
+    }
+    
+
+    const sql = ' UPDATE work_orders_items set scoreboard_arrival_date = ? WHERE record_id = ? ';
+
+    try{
+        const results = await database.query(sql, [date, woi_id]);
+        logger.info("Work Order Item updated", woi_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Failed to updateWorkOrderItemArrivalDate: " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/updateWorkOrderItemVendor', async (req,res) => {
+
+    var woi_id, vendor;
+    if(req.body){
+        if(req.body.woi_id != null){
+            woi_id = req.body.woi_id;
+            vendor =req.body.vendor;
+        }  
+    }
+    
+
+    const sql = ' UPDATE work_orders_items set vendor = ? WHERE record_id = ? ';
+
+    try{
+        const results = await database.query(sql, [vendor, woi_id]);
+        logger.info("Work Order Item updated", woi_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Failed to updateWorkOrderItemVendor: " + error);
+        res.sendStatus(400);
+    }
+});
+
 
 module.exports = router;
