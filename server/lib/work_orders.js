@@ -149,7 +149,7 @@ router.post('/updateWorkOrderItemVendor', async (req,res) => {
     }
     
 
-    const sql = ' UPDATE work_orders_items set vendor = ? WHERE record_id = ? ';
+    const sql = ` UPDATE work_orders_items set vendor = ${vendor == 0 ? 'null' : '?'} WHERE record_id = ? `;
 
     try{
         const results = await database.query(sql, [vendor, woi_id]);

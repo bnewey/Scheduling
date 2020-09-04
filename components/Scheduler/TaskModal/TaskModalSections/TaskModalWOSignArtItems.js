@@ -100,6 +100,7 @@ const TaskModalWOSignArtItems = (props) =>{
             console.error("Bad value in handleChangeVendorProp")
             return;
         }
+        console.log(value.target);
         WorkOrders.updateWorkOrderItemVendor(woi_id, value.target.value)
         .then((data)=>{
             if(data){
@@ -179,10 +180,10 @@ const TaskModalWOSignArtItems = (props) =>{
                                                 <select
                                                 id={"vendorinput"+item.record_id}
                                                 className={classes.selectBox}
-                                                value={item.vendor}
+                                                value={item.vendor ? item.vendor : 0}
                                                 onChange={value => handleChangeVendorProp(value, item.record_id)}
                                                 >
-                                                <option value={null}>N/A</option>
+                                                <option value={0}>N/A</option>
                                                 <option value={1}>Fair Play</option> 
                                                 <option value={2}>Rainey</option>
                                                 </select> 
@@ -234,10 +235,10 @@ const TaskModalWOSignArtItems = (props) =>{
                                                 <select
                                                 id={"vendorinput"+item.record_id}
                                                 className={classes.selectBox}
-                                                value={item.vendor}
+                                                value={item.vendor ? item.vendor : 0}
                                                 onChange={value => handleChangeVendorProp(value, item.record_id)}
                                                 >
-                                                <option value={null}>N/A</option>
+                                                <option value={0}>N/A</option>
                                                 <option value={1}>Fair Play</option> 
                                                 <option value={2}>Rainey</option>
                                                 </select> 
@@ -308,10 +309,10 @@ const TaskModalWOSignArtItems = (props) =>{
                                                 <select
                                                 id={"vendorinput"+item.record_id}
                                                 className={classes.selectBox}
-                                                value={item.vendor}
+                                                value={item.vendor ? item.vendor : 0}
                                                 onChange={value => handleChangeVendorProp(value, item.record_id)}
                                                 >
-                                                <option value={null}>N/A</option>
+                                                <option value={0}>N/A</option>
                                                 <option value={1}>Fair Play</option> 
                                                 <option value={2}>Rainey</option>
                                                 </select> 
