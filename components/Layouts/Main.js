@@ -32,7 +32,7 @@ const Layout = (props) => {
           <main className='main-wrapper'>
             { children }
             <style jsx>{`
-                margin: 0% 5% 2% 5%
+                margin: 0% 3% 1% 3%
             `}</style>
           </main>
           <StyledFooter />

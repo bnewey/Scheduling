@@ -15,6 +15,7 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../js/Util';
 import HelpModal from './HelpModal/HelpModal';
+import CalendarContainer from './Calendar/CalendarContainer';
 
 
 var today =  new Date();
@@ -137,18 +138,21 @@ const TaskContainer = function(props) {
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue} setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >
-          
-            <div >
-              
-                <TaskListContainer />
-              
+            <div>
+                <CalendarContainer />
             </div>
+            <div >
+                <TaskListContainer />
+            </div>
+
             <div style={{minHeight: '600px'}}>
               <MapContainer user={user}/>
             </div>
+
             <div>
               <CrewContainer />
             </div>
+
             <div>
               <EnhancedTable rows={rows} setRows={setRows} filterConfig={filterConfig} setFilterConfig={setFilterConfig}/>
             </div> 

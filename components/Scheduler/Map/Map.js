@@ -40,10 +40,8 @@ const CustomMap = compose(
     onMarkerClustererClick: () => (markerClusterer,setMultipleMarkersOneLocation, googleMap) => {
       const clickedMarkers = markerClusterer.getMarkers()
       const zoom = googleMap.current.getZoom();
-      console.log("clickedMarkers",clickedMarkers);
       var marker_ids = clickedMarkers.map((marker,i)=> marker.getTitle());
-      console.log('marker ids', marker_ids);
-      console.log("zoom", zoom)
+      
       //open menu for selecting correct marker
       if(zoom == 22){
         setMultipleMarkersOneLocation(marker_ids);
@@ -153,7 +151,6 @@ const CustomMap = compose(
             if(timestamps.length > 0){
                 googleMap.current.context.__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.overlayMapTypes.clear();
                 radarLayers=[];
-                var animationPosition = 0;
             }
             if(animationTimer){
                 clearTimeout(animationTimer);
@@ -183,6 +180,19 @@ const CustomMap = compose(
                 setAnimationTimer(false);
             }
             showFrame(1); 
+            break;
+            case "current":
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                setAnimationTimer(false);
+            }
+            if(timestamps.length > 0){
+                googleMap.current.context.__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.overlayMapTypes.clear();
+                radarLayers=[];
+            }
+            animationPosition = 0;
+            showFrame(timestamps.length-1); 
+            
             break;
         }
         }
@@ -261,21 +271,19 @@ const CustomMap = compose(
         changeRadarPosition((animationPosition + nextPosition) + preloadingDirection, true);
     }
     ///END OF RADAR //////////////////////////////////////////////////////////////////////////////////////////////////////
-
   
     const getBounds = (map, markers)=> {
         const points = markers.filter((v, i)=> v.geocoded).map((item, index)=> ({ lat: item.lat, lng: item.lng}));
         var tempBounds = new map.LatLngBounds();
         for (var i = 0; i < points.length; i++) {    tempBounds.extend(points[i]);    }
         
-        return tempBounds
+        return tempBounds;
     };
 
     const handleClusterClick = (event)=>{
         console.log("event", event);
     }
 
-    
 
   return(
     <>
@@ -293,13 +301,17 @@ const CustomMap = compose(
         gridSize={40}
         styles={[{ textColor: 'black', height: 53, url: "/static/ClusterIcons/m1.png", width: 53 }, { textColor: 'black', height: 56, url: "/static/ClusterIcons/m2.png", width: 56 }, { textColor: 'white', height: 66, url: "/static/ClusterIcons/m3.png", width: 66 }, { textColor: 'white', height: 78, url: "/static/ClusterIcons/m4.png", width: 78 }, { textColor: 'white', height: 90, url: "/static/ClusterIcons/m5.png", width: 90 }]}
         >
-        {taskMarkers && visibleItems.indexOf("tasks") != -1 && taskMarkers.map(marker => (
-            <Marker
+        {taskMarkers && visibleItems.indexOf("tasks") != -1 && taskMarkers.map((marker,index) => (
+            <MarkerWithLabel
             key={marker.t_id}
             title={(marker.t_id).toString()} 
             position={{ lat: marker.lat, lng: marker.lng}}
             onClick = { props.updateActiveMarker(marker.t_id) }
-            />
+            labelAnchor={new google.maps.Point( `#${index+1}`.toString().length * 5 , 40)}
+            labelStyle={{backgroundColor: "rgba(202, 69, 58, 0.8)", fontSize: "13px", padding: "2px", borderRadius: '5px', color: '#fff',}}
+            >
+                <div>#{index+1}</div>
+            </MarkerWithLabel>
         ))}
         </MarkerClusterer>
         <MarkerClusterer

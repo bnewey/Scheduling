@@ -150,9 +150,15 @@ router.post('/updateWorkOrderItemVendor', async (req,res) => {
     
 
     const sql = ` UPDATE work_orders_items set vendor = ${vendor == 0 ? 'null' : '?'} WHERE record_id = ? `;
-
+    var results;
     try{
-        const results = await database.query(sql, [vendor, woi_id]);
+
+        if(vendor == 0){
+            results = await database.query(sql, [ woi_id]);
+        }else{
+            results = await database.query(sql, [vendor, woi_id]);
+        }
+        
         logger.info("Work Order Item updated", woi_id);
         res.json(results);
 

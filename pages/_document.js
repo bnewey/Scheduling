@@ -41,6 +41,8 @@ class MyDocument extends Document {
           <link rel="stylesheet" type="text/css" href="/static/nprogress.css" />
           <link rel="stylesheet" type="text/css" href="/static/styles.css" />
           <link rel="stylesheet" type="text/css" href="/static/react-confirm-alert.css" />
+          <link rel="stylesheet" type="text/css" href="/static/css/Timeline.css" />
+          
 
           {/* we could add global styles here */ }
         </Head>

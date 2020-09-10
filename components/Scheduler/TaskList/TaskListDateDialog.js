@@ -7,7 +7,11 @@ import AddIcon from '@material-ui/icons/Add';
 import Tasks from '../../../js/Tasks';
 import Util from '../../../js/Util';
 import { TaskContext } from '../TaskContainer';
+import { CrewContext} from '../Crew/CrewContextContainer';
 import cogoToast from 'cogo-toast';
+
+import Timeline from 'react-calendar-timeline'
+import moment from 'moment'
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -22,7 +26,9 @@ const TaskListDateDialog = (props) => {
  
     //PROPS
     const { selectedTasks,setSelectedTasks} = props;
-    const {taskLists, setTaskLists } = useContext(TaskContext);
+    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved } = useContext(TaskContext);
+    const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
+        allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
 
     //STATE
     const [dateDialogOpen, setDateDialogOpen] = React.useState(false);
@@ -83,6 +89,60 @@ const TaskListDateDialog = (props) => {
     };
 
     
+    const groups = allCrews ? [...allCrews.map((crew, i)=>(
+        {
+            id: crew.id,
+            title: crew.crew_leader_name ? crew.crew_leader_name : 'Crew '+crew.id,
+            stackItems: true,
+        }
+    )), {id: 0, title: "No Crew",stackItems: true,} ] : [];
+
+  
+    const items = taskListTasksSaved ? taskListTasksSaved.flatMap((task,i)=>{
+        var task_array = [];
+        if(task.drill_crew != null){
+            task_array.push({
+                id: Number.parseInt(task.t_id.toString() + '1'),
+                group: task.drill_crew,
+                title: task.t_name,
+                start_time: new Date(task.drill_date).getTime() ,
+                end_time: new Date(task.drill_date).getTime() + 86400000,
+            })
+        }
+        if(task.install_crew != null){
+            task_array.push({
+                id: Number.parseInt(task.t_id.toString() + '2'),
+                group: task.install_crew,
+                title: task.t_name,
+                start_time: new Date(task.install_date).getTime() ,
+                end_time: new Date(task.install_date).getTime()  + 86400000,
+            })
+        }
+        //Neither and install date
+        if(task.drill_crew== null && task.install_crew== null && task.install_date){
+            task_array.push({
+                id: Number.parseInt(task.t_id.toString() + '3'),
+                group: 0,
+                title: task.t_name,
+                start_time: new Date(task.install_date).getTime() ,
+                end_time: new Date(task.install_date).getTime()  + 86400000,
+            })
+        }
+        //Neither and drill date
+        if(task.drill_crew== null && task.install_crew== null && task.drill_date){
+            task_array.push({
+                id: Number.parseInt(task.t_id.toString() + '4'),
+                group: 0,
+                title: task.t_name,
+                start_time: new Date(task.drill_date).getTime() ,
+                end_time: new Date(task.drill_date).getTime()  + 86400000,
+            })
+        }
+        return (task_array)
+    }) : [];
+    console.log("Items", items);
+
+    
     return(
         <React.Fragment>
             { selectedTasks && selectedTasks.length > 0 ?
@@ -95,13 +155,41 @@ const TaskListDateDialog = (props) => {
                          </div>
             :<></>}
             
-            { dateDialogOpen && selectedTasks ? 
-            
+            { dateDialogOpen && selectedTasks ?
             <Dialog PaperProps={{className: classes.dialog}} open={handleOpenDateDialog} onClose={handleDateDialogClose}>
             <DialogTitle className={classes.title}>Set Date Type and Date</DialogTitle>
                 <DialogContent className={classes.content}>
-
                     <Grid container className={classes.formGrid}>
+                        <Grid item xs={12}>
+                            <div>
+                            <Timeline
+                                groups={groups}
+                                items={items}
+                                sidebarWidth={50}
+                                defaultTimeStart={moment().add(-3, 'day')}
+                                defaultTimeEnd={moment().add(14, 'day')}
+                               
+                                lineHeight={25}
+                                itemHeightRatio={.80}
+                                canMove={false}
+                                canResize={false}
+                                canChangeGroup={false}
+                                minZoom={24*60 * 60 * 1000}
+                                traditionalZoom={true}
+                                timeSteps={{
+                                    second: 0,
+                                    minute: 0,
+                                    hour: 24,
+                                    day: 1,
+                                    month: 1,
+                                    year: 1
+                                  }}
+                            />
+                            </div>
+                        </Grid>
+                    </Grid>
+
+                    <Grid container xs={5} className={classes.formGrid}>
                         <Grid item xs={6}>
                         <FormControl className={classes.inputField}>
                             <FormLabel component="legend">Type</FormLabel>
@@ -120,7 +208,7 @@ const TaskListDateDialog = (props) => {
                         </Grid>
                         <Grid item xs={6}>
                             <div className={classes.inputField}>
-                                <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker label="Date" className={classes.datePicker}  value={selectedDate} onChange={value => handleChangeSelectedDate(value)} /></MuiPickersUtilsProvider>
+                                <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker label="Date" className={classes.datePicker} value={selectedDate} onChange={value => handleChangeSelectedDate(value)} /></MuiPickersUtilsProvider>
                             </div>
                         </Grid>
                     </Grid>
@@ -134,7 +222,7 @@ const TaskListDateDialog = (props) => {
                             variant="contained"
                             color="secondary"
                             size="medium"
-                            className={classes.saveButton} >
+                            className={classes.saveButton}>
                             Save
                             </Button>
                     </DialogActions> 
@@ -155,19 +243,19 @@ const useStyles = makeStyles(theme => ({
 
     },
     dialog:{
-        
+        maxWidth: '75%'
     },
     title:{
         '&& .MuiTypography-root':{
-            fontSize: '22px',
+            fontSize: '16px',
             color: '#fff',
         },
-        
         backgroundColor: '#16233b',
-
+        padding: '7px 15px',
     },
     formGrid:{
         alignItems: 'baseline',
+        padding: '20px'
     },
     content:{
         minWidth: '500px',

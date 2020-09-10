@@ -37,7 +37,6 @@ const TaskListTasks = (props) =>{
     const classes = useStyles();
     // //FUNCTIONS
 
-
     useEffect( () =>{ //useEffect for inputText  
       return () => { //clean up
             
@@ -52,7 +51,6 @@ const TaskListTasks = (props) =>{
         //unselected tasks on any change to filter
         setSelectedTasks([]);
       },[filters])
-
     
     // const handleRemoveFromTaskList = (event, id, tl_id, name) => {
     //   const remove = () => {

@@ -59,7 +59,7 @@ const MapSidebar = (props) => {
         }
         return () => { //clean up
             if(activeMarker){
-                
+
             }
         }
     },[activeMarker, activeVehicle]);
@@ -221,7 +221,7 @@ const useStyles = makeStyles(theme => ({
         padding: '1% 2% 1% 2%',
         color: '#fff',
         backgroundColor: '#16233b',
-        fontSize: '30px',
+        fontSize: '16px',
         fontWeight: '400',
         display: 'block',
     },

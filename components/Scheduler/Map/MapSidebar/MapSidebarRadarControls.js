@@ -48,6 +48,9 @@ const MapSidebarRadarControls = (props) => {
                     <Button className={classes.controlButton} onClick={event => handleChangeRadarControl("forward")}>
                         <SkipNextIcon/>
                     </Button>
+                    <Button className={classes.controlButton} onClick={event => handleChangeRadarControl("current")}>
+                        Current
+                    </Button>
                 </ButtonGroup>
             </div>
             {  radarSpeed && radarControl && radarControl.control == "play" &&
