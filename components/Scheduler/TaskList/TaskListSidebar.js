@@ -91,8 +91,12 @@ const TaskListSidebar = (props) => {
             return;
         }
 
-        var newTaskIds = taskListTasks.sort(createSorter({property: 'install_date', 
-            direction: "DESC"})).map((task,i)=> task.t_id);
+        var tmpArray = taskListTasks.sort(createSorter({property: 'install_date', 
+            direction: "ASC"}))
+        
+        var tmpNoInstall = tmpArray.filter((v,i)=> v.install_date == null || v.install_date == "0000-00-00 00:00:00" || v.install_date == "1970-01-01 00:00:00")
+        var tmpInstall = tmpArray.filter((v,i)=> v.install_date != null || v.install_date != "0000-00-00 00:00:00" || v.install_date != "1970-01-01 00:00:00")
+        var newTaskIds = [...tmpInstall, ...tmpNoInstall ].map((task,i)=> task.t_id);
         
         console.log(newTaskIds);
 

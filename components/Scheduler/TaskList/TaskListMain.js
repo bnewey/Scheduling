@@ -323,7 +323,7 @@ const TaskListMain = (props) => {
                 <Grid item xs={10} >
                    
                     <Paper className={classes.root}>
-                        <TaskListFilter  setFilteredItems={setTaskListTasks} />
+                        <TaskListFilter filteredItems={taskListTasks}  setFilteredItems={setTaskListTasks} />
                         {taskListTasks && table_info ? 
                         <>
                             <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>

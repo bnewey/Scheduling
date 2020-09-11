@@ -33,6 +33,7 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import {createFilter} from '../../../js/Filter';
+import {createSorter} from '../../../js/Sort';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -53,7 +54,7 @@ const MapContainer = (props) => {
     //const {} = props;
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap,
-          filters, setFilter, filterInOrOut, filterAndOr, setTaskListTasksSaved} = useContext(TaskContext);
+          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved} = useContext(TaskContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const [activeVehicle, setActiveVehicle] = useState(null);
@@ -208,6 +209,15 @@ const MapContainer = (props) => {
                   //no change to tmpData
                   tmpData = [...data];
                 }
+
+                //SORT after filters -------------------------------------------------------------------------
+                if(sorters && sorters.length > 0){
+                  tmpData = tmpData.sort(createSorter(...sorters))
+                  //Set saved for filter list 
+                  //setTaskListTasksSaved(data);
+                }
+                //--------------------------------------------------------------------------------------------
+
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
                     setMapRows(tmpData);
@@ -226,11 +236,12 @@ const MapContainer = (props) => {
       }
       if(mapRows){
         //filter geocoded, then sort by priority_order
-        var tmp = mapRows.filter((row, index) => row.geocoded).sort((a,b)=>{
+        var tmp = mapRows.filter((row, index) => row.geocoded)
+        /*.sort((a,b)=>{
           if(a.priority_order > b.priority_order) return 1;
           if(b.priority_order > a.priority_order) return -1;
           return 0; 
-        });
+        });*/
         setMarkedRows(tmp);
       }
 
@@ -238,6 +249,19 @@ const MapContainer = (props) => {
       return () => { //clean up
       }
     },[mapRows,filterInOrOut, filterAndOr,taskLists, taskListToMap]);
+
+    //Sort
+    useEffect(()=>{
+      if (Array.isArray(sorters) && sorters.length) {
+          if (mapRows && mapRows.length) {
+              var tmpData = mapRows.sort(createSorter(...sorters))
+              console.log(tmpData);
+              var copyObject = [...tmpData];
+              setMapRows(copyObject);
+              cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
+          }
+      }
+    },[sorters]);
 
     useEffect(()=>{
         if(noMarkerRows == null && mapRows){
@@ -347,7 +371,7 @@ const MapContainer = (props) => {
       <div>
         <Grid container spacing={1}>
           <Grid item xs={12}>
-          <TaskListFilter setFilteredItems={setMapRows}/>
+          <TaskListFilter filteredItems={mapRows}  setFilteredItems={setMapRows}/>
           </Grid>
         </Grid>
           <Grid container spacing={3} className={classes.mainContainer}>
@@ -387,7 +411,7 @@ const MapContainer = (props) => {
                           radarSpeed={radarSpeed} setRadarSpeed={setRadarSpeed}
                           timestamps={timestamps} setTimestamps={setTimestamps}
                           multipleMarkersOneLocation={multipleMarkersOneLocation} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}
-                          />
+                          sorters={sorters} setSorters={setSorters}/>
             </Grid>
           </Grid>
         </div>

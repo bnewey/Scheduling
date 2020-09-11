@@ -3,11 +3,12 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ListIcon from '@material-ui/icons/List';
 import DirectionsCarIcon from '@material-ui/icons/DirectionsCar';
 import CloudIcon from '@material-ui/icons/Cloud';
+import SortFlipIcon from '@material-ui/icons/ImportExport';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityOnIcon from '@material-ui/icons/Visibility';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import { Scrollbars} from 'react-custom-scrollbars';
-import {makeStyles, Paper, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary} from '@material-ui/core'
+import {makeStyles, Paper, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Select,MenuItem, IconButton} from '@material-ui/core'
 
 import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
 import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
@@ -18,10 +19,21 @@ import MapSidebarRadarControls from './MapSidebarRadarControls';
 import { withRouter } from "next/router";
 import Link from "next/link";
 
+const sorter_table = [{text: "Order", field: "priority_order",  type: 'number'},
+                    {text: "1st Game", field: "first_game", type: 'date'},
+                    {text: "Name", field: "t_name", type: 'text'},
+                    {text: "State", field: "state", type: 'text'},
+                    {text: "Type", field: "type", type: 'text'},
+                    {text: "d_date", field: "drill_date", type: 'date'},
+                    {text: "i_date", field: "install_date", type: 'date'}]
+
 const MapSidebar = (props) => {
     //STATE
     const [expanded, setExpanded] = React.useState(false);
     const [expandedAnimDone,setExpandedAnimDone] = React.useState(false);
+
+    const [sorterVariable, setSorterVariable] = React.useState( "priority_order");
+    const [sorterState, setSorterState] = useState(0);
 
     const panelRef = useRef(null);
     const vehiclePanelRef = useRef(null);
@@ -33,7 +45,7 @@ const MapSidebar = (props) => {
             visualTimestamp, setVisualTimestamp,
             radarControl, setRadarControl, radarOpacity, setRadarOpacity,
             radarSpeed, setRadarSpeed, timestamps, setTimestamps,
-            multipleMarkersOneLocation,setMultipleMarkersOneLocation} = props;
+            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters} = props;
 
     //Ref to check if same vehicle is active so we dont keep expanding vehicle panel on vehicle refetch
     const activeVehicleRef = useRef(null);
@@ -63,6 +75,24 @@ const MapSidebar = (props) => {
             }
         }
     },[activeMarker, activeVehicle]);
+
+    //Sort
+    useEffect(()=>{
+        if(sorterVariable && sorterVariable != ""){
+            var item = sorter_table.filter((v,i)=> sorterVariable == v.field)[0];
+            //sort taskListItems according to item
+            //this sort can take multiple sorters but i dont think its necessary
+            // if it is, you will have to change the [0] to a dynamic index!
+            if(item.type == 'date' || item.type == 'number' || item.type == 'text'){
+                setSorters([{
+                    property: item.field, 
+                    direction: sorters && sorters[0] && sorters[0].property == item.field ? 
+                            ( sorterState === 0 ? "ASC" : sorterState === 1 ? "DESC" : "ASC" ) : "ASC"
+                }]);
+                
+            }
+        }
+    }, [sorterVariable, sorterState])
     
     //CSS
     const classes = useStyles();
@@ -94,7 +124,20 @@ const MapSidebar = (props) => {
         return(visibleItems.indexOf(item) != -1);
     }
 
-    
+    const handleChangeSorter = (event) =>{
+        if(event.target.value){
+            setSorterVariable(event.target.value);
+            setSorterState(0);
+            console.log("Sorter changed", event.target.value)
+        }
+
+        event.stopPropagation();
+    }
+
+    const handleFlipSort= (event)=>{
+        setSorterState( sorterState == 0 ? 1 : 0);
+        event.stopPropagation();
+    }
      
     return(
         <Paper className={classes.root}>
@@ -109,8 +152,28 @@ const MapSidebar = (props) => {
                     aria-controls="taskMarkerbh-content"
                     id="taskMarkerbh-header"
                     classes={{content: classes.expPanelSummary}}
-                ><ListIcon className={classes.icon}/><span>Tasks:&nbsp;&nbsp;{markedRows.length} Items</span>
-                {isVisible('tasks') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'tasks')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                >
+                    <ListIcon className={classes.icon}/><span>Tasks:&nbsp;&nbsp;{markedRows.length} Items</span>
+                    <div>Sort By:&nbsp;
+                        <Select
+                            value={sorterVariable}
+                            onChange={handleChangeSorter}
+                            displayEmpty
+                            className={classes.selectSorter}
+                            inputProps={{ 'aria-label': 'Without label' }}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            {sorter_table.map((item, i)=> (
+                                <MenuItem value={item.field}>{item.text}</MenuItem>
+                            ))}
+                        </Select>
+                        <IconButton className={classes.sortIcon} onClick={handleFlipSort}>
+                            <SortFlipIcon/>
+                        </IconButton>
+                    </div>
+                    {isVisible('tasks') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'tasks')} style={{ color: 'rgb(25, 109, 234)' }}/>
                             : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'tasks')}/>}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails ref={panelRef} className={classes.details}>
@@ -267,4 +330,7 @@ const useStyles = makeStyles(theme => ({
     expPanelSummary:{
         justifyContent: 'space-between'
     },
+    sortIcon:{
+        padding: '5px 5px',
+    }
   }));

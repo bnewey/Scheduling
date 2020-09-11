@@ -165,7 +165,7 @@ const TaskListDateDialog = (props) => {
                             <Timeline
                                 groups={groups}
                                 items={items}
-                                sidebarWidth={50}
+                                sidebarWidth={100}
                                 defaultTimeStart={moment().add(-3, 'day')}
                                 defaultTimeEnd={moment().add(14, 'day')}
                                

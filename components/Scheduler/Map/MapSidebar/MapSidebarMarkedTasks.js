@@ -24,7 +24,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
     const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
           setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, expanded, setExpanded, setActiveVehicle,
-          expandedAnimDone} = props;
+          expandedAnimDone, sorters } = props;
     
     const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
     //CSS
@@ -209,6 +209,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     }
     // END DND
 
+ 
 
     return(
         <List  className={classes.root}> 
@@ -243,7 +244,7 @@ const MapSiderbarMarkedTasks = (props) =>{
                   <Draggable key={row.t_id + 123123} 
                             draggableId={row.t_id.toString()} 
                             index={index} 
-                            isDragDisabled={false}
+                            isDragDisabled={sorters && sorters[0].property != "priority_order"}
                             >
                   {(provided, snapshot) => (
                     <ListItem key={row.t_id + 123123} 

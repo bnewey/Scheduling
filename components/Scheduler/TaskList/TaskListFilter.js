@@ -21,7 +21,7 @@ import {TaskContext} from '../TaskContainer';
 const TaskListFilter = (props) => {
    
     //PROPS
-    const { setFilteredItems } = props;
+    const { filteredItems, setFilteredItems } = props;
 
     const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters} = useContext(TaskContext);
 
@@ -347,11 +347,15 @@ const TaskListFilter = (props) => {
                     })}
                     </div>
                     
+                    
                 </>
                 :
                 <>
                     
                 </>}
+                <div className={classes.numItemsDiv}>
+                    {filteredItems ? filteredItems.length : 0}&nbsp;Item(s)
+                </div>
             </div> 
             <Modal aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"
@@ -519,6 +523,12 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: '#97bec9',
             color: '#000',
         }
+    },
+    numItemsDiv:{
+        margin: '1px 2px',
+        fontWeight: '700',
+        fontSize: '14px',
+        color: '#333333',
     },
     chipDiv:{
         backgroundColor: '#d3d2d6',

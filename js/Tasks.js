@@ -97,6 +97,7 @@ async function updateMultipleTaskDates(ids, date, date_type){
 async function getCoordinates(address, city, state, zip){
     var s_address = `${ (address ? address : "" + "+") + (city ? city : "" + "+") + (state ? state : "" + "+") + (zip ? zip : "")}`.replace(" ", "+");
     var return_value;
+    console.log("address", s_address)
     const route = `https://maps.googleapis.com/maps/api/geocode/json?address=` + 
         `${s_address}&key=AIzaSyBd9JvLz52kD4ouQvqlHePUAqlBWzACJ-c`;
     try{

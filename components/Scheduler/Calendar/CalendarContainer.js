@@ -1,7 +1,7 @@
 
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Dialog, DialogActions,
-    DialogContent, DialogTitle, Grid, TextField} from '@material-ui/core';
+    DialogContent, DialogTitle, Grid, TextField, Select, MenuItem} from '@material-ui/core';
 
 import Tasks from '../../../js/Tasks';
 import Util from '../../../js/Util';
@@ -28,7 +28,8 @@ const CalendarContainer = (props) => {
 
     //const {} = props;
 
-    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved, filterInOrOut, filterAndOr, taskListToMap, filters } = useContext(TaskContext);
+    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved, filterInOrOut, filterAndOr, taskListToMap, filters,
+        setModalTaskId, setModalOpen } = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
    
@@ -45,7 +46,6 @@ const CalendarContainer = (props) => {
                             .add(14, "day")
                             .valueOf())
     const [zoomUnit, setZoomUnit] = useState('biweek');
-
 
 
     useEffect(()=>{
@@ -67,7 +67,7 @@ const CalendarContainer = (props) => {
                 var task_array = [];
                 if(task.drill_crew != null){
                     task_array.push({
-                        id: Number.parseInt(task.t_id.toString() + '1'),
+                        id: (task.t_id.toString() + '#drill'),
                         group: task.drill_crew,
                         title: task.t_name,
                         start_time: new Date(task.drill_date).getTime() ,
@@ -76,7 +76,7 @@ const CalendarContainer = (props) => {
                 }
                 if(task.install_crew != null){
                     task_array.push({
-                        id: Number.parseInt(task.t_id.toString() + '2'),
+                        id: (task.t_id.toString() + '#install'),
                         group: task.install_crew,
                         title: task.t_name,
                         start_time: new Date(task.install_date).getTime() ,
@@ -86,7 +86,7 @@ const CalendarContainer = (props) => {
                 //Neither and install date
                 if(task.drill_crew== null && task.install_crew== null && task.install_date){
                     task_array.push({
-                        id: Number.parseInt(task.t_id.toString() + '3'),
+                        id: (task.t_id.toString() + '#nocrewinstall'),
                         group: 0,
                         title: task.t_name,
                         start_time: new Date(task.install_date).getTime() ,
@@ -96,7 +96,7 @@ const CalendarContainer = (props) => {
                 //Neither and drill date
                 if(task.drill_crew== null && task.install_crew== null && task.drill_date){
                     task_array.push({
-                        id: Number.parseInt(task.t_id.toString() + '4'),
+                        id: (task.t_id.toString() + '#nocrewdrill'),
                         group: 0,
                         title: task.t_name,
                         start_time: new Date(task.drill_date).getTime() ,
@@ -108,7 +108,20 @@ const CalendarContainer = (props) => {
         }
     },[calendarRows])
     
-    
+    //Modal
+    const handleRightClick = (id, event, time) => {
+        console.log("id", id);
+        var tmp = id.split('#');
+        var split_id = tmp[0];
+        //Drill, install, no crew drill/install
+        var split_type = tmp[1];
+        
+        setModalTaskId(split_id);
+        setModalOpen(true);
+  
+        //Disable Default context menu
+        event.preventDefault();
+      };
 
     //Filter
     useEffect( () =>{ //useEffect for inputText
@@ -202,12 +215,9 @@ const CalendarContainer = (props) => {
         //updateScrollCanvas(visibleTimeStart, visibleTimeEnd);
         setTimeStart(visibleTimeStart);
         setTimeEnd(visibleTimeEnd);
-        console.log("hey")
     }
     
-    const handleOpenTaskModal = (id , e ,time) =>{
-
-    }
+   
     
     const handleOnZoom = (timelineContext) => {
         console.log("timeline context", timelineContext);   
@@ -254,24 +264,98 @@ const CalendarContainer = (props) => {
                 break;
         }
     }
+    const format  = {
+        year: {
+          long: 'YYYY',
+          mediumLong: 'YYYY',
+          medium: 'YYYY',
+          short: 'YY'
+        },
+        month: {
+          long: 'MMMM YYYY',
+          mediumLong: 'MMMM',
+          medium: 'MMMM',
+          short: 'MM/YY'
+        },
+        week: {
+          long: 'w',
+          mediumLong: 'w',
+          medium: 'w',
+          short: 'w'
+        },
+        day: {
+          long: 'dddd, LL',
+          mediumLong: 'dddd, LL',
+          medium: 'dd D',
+          short: 'D'
+        },
+        hour: {
+          long: 'dddd, LL, HH:00',
+          mediumLong: 'L, HH:00',
+          medium: 'HH:00',
+          short: 'HH'
+        },
+        minute: {
+          long: 'HH:mm',
+          mediumLong: 'HH:mm',
+          medium: 'HH:mm',
+          short: 'mm',
+        }
+        }
+
+    const handleLabelFormats = (times, unit, labelWidth, formatOptions = format ) => {
+
+        var return_string = "";
+        var format_string = ""; 
+        if(labelWidth < 45){
+            format_string = format[unit].short; 
+        }else if(labelWidth > 150){
+            format_string = format[unit].mediumLong;
+        }else{
+            format_string = format[unit].medium;
+        }
+        return_string = moment(times[0], "dddd").format(format_string);
+        return return_string;
+    }
 
     return (
       <div>
         <Grid container spacing={1}>
           <Grid item xs={12}>
-                <TaskListFilter setFilteredItems={setCalendarRows}/>
+                <TaskListFilter filteredItems={calendarRows} setFilteredItems={setCalendarRows}/>
           </Grid>
         </Grid>
 
         
-        { groups && items &&
+        { groups && items && <>
+        
             <div className={classes.timeline_div}>
+                <div className={classes.timeline_toolbar}>
+                    <Grid container >
+                        <Grid item xs={11}>
+
+                        </Grid>
+                        <Grid item xs={1}>
+                            <FormControl variant="outlined" className={classes.formControl}>
+                                <Select
+                                id="demo-simple-select-outlined"
+                                value={zoomUnit}
+                                onChange={event => handleTimeHeaderChange(event.target.value)}
+                                classes={{ select: classes.selectZoom}}
+                                >
+                                <MenuItem value={"week"}>Week</MenuItem>
+                                <MenuItem value={"biweek"}>Biweek</MenuItem>
+                                <MenuItem value={"month"}>Month</MenuItem>
+                                <MenuItem value={"year"}>Year</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                    </Grid>
+                    
+                </div>
                 <Timeline
                         groups={groups}
                         items={items}
-                        
-                        // defaultTimeStart={moment().add(-3, 'day')}
-                        // defaultTimeEnd={ moment().add(14, 'day') }
                         visibleTimeStart={timeStart}
                         visibleTimeEnd={timeEnd}
                         dragSnap={ 86400 * 1000}
@@ -280,26 +364,21 @@ const CalendarContainer = (props) => {
                         onTimeChange={(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)=>handleTimeChange(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)}
                         canResize={false}
                         minZoom={24*60 * 60 * 1000}
-                        
-                        onItemContextMenu={(itemId,e,time)=>handleOpenTaskModal(itemId,e,time)}
+                        sidebarWidth={100}
+                        onItemContextMenu={(itemId,e,time)=>handleRightClick(itemId,e,time)}
                         onZoom={(timelineContext)=> handleOnZoom(timelineContext)}
                 >
                     <TimelineHeaders>
                     <DateHeader unit="primaryHeader"/>
-                        <DateHeader/>
+                        <DateHeader labelFormat={handleLabelFormats}/>
                     </TimelineHeaders>
                     <TimelineMarkers>
                         <TodayMarker interval={1000*60*15} />
                     </TimelineMarkers>
                     
                 </Timeline> 
-                <div>
-                    <button onClick={()=>handleTimeHeaderChange("week")}>Week</button>
-                    <button onClick={()=>handleTimeHeaderChange("biweek")}>Biweek</button>
-                    <button onClick={()=>handleTimeHeaderChange("month")}>Month</button>
-                    <button onClick={()=>handleTimeHeaderChange("year")}>Year</button>
-                    </div>
-            </div>}
+                
+            </div></>}
         
         </div>
     );
@@ -324,5 +403,20 @@ const useStyles = makeStyles(theme => ({
         marginTop: '.5%',
         padding: '1%',
         borderRadius: '4px',
+    },
+    timeline_toolbar:{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        padding: '0px 0px 10px 5px',
+    },
+    formControl:{
+
+    },
+    selectZoom:{
+        padding: '10px 20px',
+        background: "#fff",
+        fontSize: '18px',
+        display: 'flex',
+        alignItems: 'center',
     }
   }));

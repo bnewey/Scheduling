@@ -206,9 +206,8 @@ const useStyles = makeStyles(theme => ({
   },
   tab:{
     backgroundColor: '#5b6164',
-    boxShadow: 'inset 0 0 4px 4px #0000006b',
+    // boxShadow: 'inset 0 0 4px 4px #0000006b',
     border: '1px solid #7f7f7f',
-    
   },
   tabRoot:{
     minHeight: '0px',

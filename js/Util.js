@@ -74,7 +74,7 @@ async function getWeather(lat, lng){
                         return_value = result;
                     }
                     else{
-                        throw new Error("Geocoing results not OK");
+                        throw new Error("Weather results not OK");
                     }
                 })
                 .catch((error)=>{

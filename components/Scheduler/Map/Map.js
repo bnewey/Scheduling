@@ -307,10 +307,10 @@ const CustomMap = compose(
             title={(marker.t_id).toString()} 
             position={{ lat: marker.lat, lng: marker.lng}}
             onClick = { props.updateActiveMarker(marker.t_id) }
-            labelAnchor={new google.maps.Point( `#${index+1}`.toString().length * 5 , 40)}
+            labelAnchor={new google.maps.Point( `#${marker.priority_order}`.toString().length * 5 , 40)}
             labelStyle={{backgroundColor: "rgba(202, 69, 58, 0.8)", fontSize: "13px", padding: "2px", borderRadius: '5px', color: '#fff',}}
             >
-                <div>#{index+1}</div>
+                <div>#{marker.priority_order}</div>
             </MarkerWithLabel>
         ))}
         </MarkerClusterer>
