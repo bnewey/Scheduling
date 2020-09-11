@@ -4,6 +4,7 @@ import {makeStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbo
     DialogContent, DialogTitle, Grid, TextField, Select, MenuItem} from '@material-ui/core';
 
 import Tasks from '../../../js/Tasks';
+import Crew from '../../../js/Crew';
 import Util from '../../../js/Util';
 import TaskLists from '../../../js/TaskLists';
 
@@ -17,10 +18,7 @@ import moment from 'moment'
 import TaskListFilter from '../TaskList/TaskListFilter';
 
 
-
-
 import {createFilter} from '../../../js/Filter';
-
 
 
 const CalendarContainer = (props) => {
@@ -45,7 +43,7 @@ const CalendarContainer = (props) => {
                             .startOf("week")
                             .add(14, "day")
                             .valueOf())
-    const [zoomUnit, setZoomUnit] = useState('biweek');
+    const [zoomUnit, setZoomUnit] = useState(null);
 
 
     useEffect(()=>{
@@ -67,18 +65,18 @@ const CalendarContainer = (props) => {
                 var task_array = [];
                 if(task.drill_crew != null){
                     task_array.push({
-                        id: (task.t_id.toString() + '#drill'),
+                        id: (task.t_id.toString() + '#drill_date'),
                         group: task.drill_crew,
-                        title: task.t_name,
+                        title: 'D-'+task.t_name,
                         start_time: new Date(task.drill_date).getTime() ,
                         end_time: new Date(task.drill_date).getTime() + 86400000,
                     })
                 }
                 if(task.install_crew != null){
                     task_array.push({
-                        id: (task.t_id.toString() + '#install'),
+                        id: (task.t_id.toString() + '#sch_install_date'),
                         group: task.install_crew,
-                        title: task.t_name,
+                        title: 'I-'+task.t_name,
                         start_time: new Date(task.install_date).getTime() ,
                         end_time: new Date(task.install_date).getTime()  + 86400000,
                     })
@@ -86,9 +84,9 @@ const CalendarContainer = (props) => {
                 //Neither and install date
                 if(task.drill_crew== null && task.install_crew== null && task.install_date){
                     task_array.push({
-                        id: (task.t_id.toString() + '#nocrewinstall'),
+                        id: (task.t_id.toString() + '#sch_install_date'),
                         group: 0,
-                        title: task.t_name,
+                        title: 'I-'+task.t_name,
                         start_time: new Date(task.install_date).getTime() ,
                         end_time: new Date(task.install_date).getTime()  + 86400000,
                     })
@@ -96,9 +94,9 @@ const CalendarContainer = (props) => {
                 //Neither and drill date
                 if(task.drill_crew== null && task.install_crew== null && task.drill_date){
                     task_array.push({
-                        id: (task.t_id.toString() + '#nocrewdrill'),
+                        id: (task.t_id.toString() + '#drill_date'),
                         group: 0,
-                        title: task.t_name,
+                        title: 'D-'+task.t_name,
                         start_time: new Date(task.drill_date).getTime() ,
                         end_time: new Date(task.drill_date).getTime()  + 86400000,
                     })
@@ -122,6 +120,25 @@ const CalendarContainer = (props) => {
         //Disable Default context menu
         event.preventDefault();
       };
+
+    //
+    useEffect(()=>{
+        if(zoomUnit == null){
+            var tmp = window.localStorage.getItem('zoomUnit');
+            var tmpParsed;
+            if(tmp && tmp != undefined){
+                tmpParsed = JSON.parse(tmp);
+            }
+            if(tmpParsed){
+                handleTimeHeaderChange(tmpParsed);
+            }else{
+                handleTimeHeaderChange("biweek");
+            }
+        }
+        if((zoomUnit)){
+            window.localStorage.setItem('zoomUnit', JSON.stringify(zoomUnit));
+        }
+    }, [zoomUnit])
 
     //Filter
     useEffect( () =>{ //useEffect for inputText
@@ -318,6 +335,61 @@ const CalendarContainer = (props) => {
         return return_string;
     }
 
+    const handleItemMoved = (itemId, dragTime, newGroupOrder) => {
+        var tmp_array = itemId.split('#');
+        var id = tmp_array[0];
+        var type = tmp_array[1];
+        var job_id_type = type == 'sch_install_date' ? 'install' : 'drill';
+        console.log("job_id_type", job_id_type);
+        var crew_job = allCrewJobs.filter((item,i)=> item.task_id == id && item.job_type == job_id_type )[0]
+        var job_id; 
+        var date = moment(dragTime).format("YYYY-MM-DD");
+        var what_to_run;
+        if(crew_job){
+            job_id = crew_job.id;
+            if(groups[newGroupOrder].id == 0){
+                what_to_run == "delete";
+            }else{
+                what_to_run = "update";
+            }
+        }else{
+            if(groups[newGroupOrder].id == 0){
+                what_to_run = "nothing";
+            }else{
+                what_to_run = "create"; 
+            }
+        }
+        console.log("what_to_run", what_to_run);
+
+
+        const getFunction = (method) =>{
+            if(method == "delete"){
+                return Crew.deleteCrewJob(job_id);
+            }
+            if(method == "update"){
+                return  Crew.updateCrewJob( groups[newGroupOrder].id,job_id);
+            }
+            if(method == "nothing"){
+                return  ;
+            }
+            if(method == "create"){
+                return  addCrewJobs([id], [job_id_type], groups[newGroupOrder].id)
+            }
+        }
+
+        
+        //Need to add moving from no crew to crew
+        Promise.all([Tasks.updateMultipleTaskDates([id], date, type),  getFunction()  ])
+        .then((values)=>{
+            setCalendarRows(null);
+        })
+        .catch((error)=>{
+            console.error("Fail to move item", error)
+            cogoToast.error("Failed to moved item");
+            setCalendarRows(null);
+        })
+    }
+
     return (
       <div>
         <Grid container spacing={1}>
@@ -361,6 +433,7 @@ const CalendarContainer = (props) => {
                         dragSnap={ 86400 * 1000}
                         lineHeight={allCrews ? 35 : 35}
                         itemHeightRatio={allCrews ? .8 : .80}
+                        onItemMove={(itemId, dragTime, newGroupOrder)=>handleItemMoved(itemId, dragTime, newGroupOrder)}
                         onTimeChange={(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)=>handleTimeChange(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)}
                         canResize={false}
                         minZoom={24*60 * 60 * 1000}

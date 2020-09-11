@@ -147,7 +147,7 @@ router.post('/updateMultipleTaskDates', async (req,res) => {
         }
     }, err=> {
         if(err){
-            logger.error("Tasks (updateMultipleTaskDates): " + error);
+            logger.error("Tasks (updateMultipleTaskDates): " + err);
     res.sendStatus(400);
         }else{
             logger.info("Update MultipleTaskDates " + [ids] );
