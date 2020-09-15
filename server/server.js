@@ -35,6 +35,7 @@ const taskLists = require('./lib/task_lists.js');
 const pdf = require('./lib/pdf.js');
 const crew = require('./lib/crew.js');
 const vehicles = require('./lib/vehicles.js');
+const calendar = require('./lib/calendar.js');
 const {emailRouter} = require('./lib/email');
 
 
@@ -105,6 +106,7 @@ nextApp
     // Custom Routes with session
       //Place vehicles here, because we need to access session.passport.user 
     app.use('/scheduling/vehicles', vehicles);
+    app.use('/scheduling/calendar', calendar);
     //
 
     app.get('*', (req, res) => {

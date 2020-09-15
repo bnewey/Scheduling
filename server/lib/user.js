@@ -39,7 +39,7 @@ async function signInOrSignUp({ database, googleId, email, googleToken, displayN
       return user;
     }
 
-    if(!(await updateUserGoogleToken( database, user.googleTokenId , modifier))){
+    if(!(await updateUserGoogleToken( database, googleId , modifier))){
       console.error("Failed to update GoogleToken");
     }
 
@@ -116,14 +116,19 @@ async function  getUserById (database, id) {
   }
 };
 
-async function updateUserGoogleToken (database, googleTokenId, modifier) {
+async function updateUserGoogleToken (database, googleId, modifier) {
+  var accessToken ,refreshToken;
+  accessToken = modifier.access_token ? modifier.access_token : null;
+  refreshToken = modifier.refresh_token ? modifier.refresh_token : null;
+
   const sql = 'UPDATE google_token gt SET gt.accessToken=?, gt.refreshToken=? WHERE gt.id = (SELECT u.googleTokenId FROM google_users u WHERE u.googleId = ? ) ';
 
   try{
-      const results = await database.query(sql, [modifier.accessToken, modifier.refreshToken, googleTokenId]);
-      logger.info("Update UserGoogleToken");
+      const results = await database.query(sql, [accessToken, refreshToken, googleId]);
+      logger.info("Update UserGoogleToken", modifier);
+
       var response = await json(results);
-      return (response.ok);
+      return (response);
   }
   catch(error){
       logger.error("User (updateUserGoogleToken): " + error);

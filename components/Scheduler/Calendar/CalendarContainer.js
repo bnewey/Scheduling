@@ -3,10 +3,14 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Dialog, DialogActions,
     DialogContent, DialogTitle, Grid, TextField, Select, MenuItem} from '@material-ui/core';
 
+    import ToggleButton from '@material-ui/lab/ToggleButton';
+    import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+
 import Tasks from '../../../js/Tasks';
 import Crew from '../../../js/Crew';
 import Util from '../../../js/Util';
 import TaskLists from '../../../js/TaskLists';
+import Calendar from '../../../js/Calendar';
 
 import { TaskContext } from '../TaskContainer';
 import { CrewContext} from '../Crew/CrewContextContainer';
@@ -32,6 +36,7 @@ const CalendarContainer = (props) => {
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
    
     const [calendarRows, setCalendarRows] = useState(null);
+    const [googleCalendar, setGoogleCalendar] = useState(null);
     const [groups, setGroups] = useState(null);
     const [items, setItems] = useState(null);
 
@@ -67,44 +72,74 @@ const CalendarContainer = (props) => {
                     task_array.push({
                         id: (task.t_id.toString() + '#drill_date'),
                         group: task.drill_crew,
-                        title: 'D-'+task.t_name,
+                        title: task.t_name,
                         start_time: new Date(task.drill_date).getTime() ,
                         end_time: new Date(task.drill_date).getTime() + 86400000,
+                        selectedBgColor: '#4088c1',
+                        bgColor: '#216fac',
+                        color: '#fff',
+                        type: 'drill'
                     })
                 }
                 if(task.install_crew != null){
                     task_array.push({
                         id: (task.t_id.toString() + '#sch_install_date'),
                         group: task.install_crew,
-                        title: 'I-'+task.t_name,
+                        title: task.t_name,
                         start_time: new Date(task.install_date).getTime() ,
                         end_time: new Date(task.install_date).getTime()  + 86400000,
+                        selectedBgColor: '#e87727',
+                        bgColor: '#e25e00',
+                        color: '#fff',
+                        type: 'install',
+                        
                     })
                 }
                 //Neither and install date
-                if(task.drill_crew== null && task.install_crew== null && task.install_date){
+                if(task.install_crew== null && task.install_date){
                     task_array.push({
                         id: (task.t_id.toString() + '#sch_install_date'),
                         group: 0,
-                        title: 'I-'+task.t_name,
+                        title: task.t_name,
                         start_time: new Date(task.install_date).getTime() ,
                         end_time: new Date(task.install_date).getTime()  + 86400000,
+                        selectedBgColor: '#e87727',
+                        bgColor: '#e25e00',
+                        color: '#fff',
+                        type: 'install',
                     })
                 }
                 //Neither and drill date
-                if(task.drill_crew== null && task.install_crew== null && task.drill_date){
+                if(task.drill_crew== null && task.drill_date){
                     task_array.push({
                         id: (task.t_id.toString() + '#drill_date'),
                         group: 0,
-                        title: 'D-'+task.t_name,
+                        title: task.t_name,
                         start_time: new Date(task.drill_date).getTime() ,
                         end_time: new Date(task.drill_date).getTime()  + 86400000,
+                        selectedBgColor: '#4088c1',
+                        bgColor: '#216fac',
+                        color: '#fff',
+                        type: 'drill',
                     })
                 }
                 return (task_array)
             }));
         }
     },[calendarRows])
+
+    useEffect(()=>{
+        if(googleCalendar == null){
+            Calendar.getCalendar()
+            .then((data)=>{
+                console.log("data",data);
+            })
+            .catch((error)=>{
+                console.error("google calendar error",error);
+                cogoToast.error("Failed to get Google Calendar");
+            })
+        }
+    },[googleCalendar])
     
     //Modal
     const handleRightClick = (id, event, time) => {
@@ -130,9 +165,9 @@ const CalendarContainer = (props) => {
                 tmpParsed = JSON.parse(tmp);
             }
             if(tmpParsed){
-                handleTimeHeaderChange(tmpParsed);
+                handleTimeHeaderChange(null,tmpParsed);
             }else{
-                handleTimeHeaderChange("biweek");
+                handleTimeHeaderChange(null,"biweek");
             }
         }
         if((zoomUnit)){
@@ -240,7 +275,7 @@ const CalendarContainer = (props) => {
         console.log("timeline context", timelineContext);   
     }
 
-    const handleTimeHeaderChange = (unit) =>{
+    const handleTimeHeaderChange = (event, unit) =>{
         setZoomUnit(unit);
         switch (unit){
             case 'week':
@@ -341,14 +376,15 @@ const CalendarContainer = (props) => {
         var type = tmp_array[1];
         var job_id_type = type == 'sch_install_date' ? 'install' : 'drill';
         console.log("job_id_type", job_id_type);
-        var crew_job = allCrewJobs.filter((item,i)=> item.task_id == id && item.job_type == job_id_type )[0]
+        var crew_job = allCrewJobs.filter( (item,i)=> item.task_id == id && item.job_type == job_id_type )[0]
         var job_id; 
         var date = moment(dragTime).format("YYYY-MM-DD");
         var what_to_run;
+
         if(crew_job){
             job_id = crew_job.id;
             if(groups[newGroupOrder].id == 0){
-                what_to_run == "delete";
+                what_to_run = "delete";
             }else{
                 what_to_run = "update";
             }
@@ -359,36 +395,96 @@ const CalendarContainer = (props) => {
                 what_to_run = "create"; 
             }
         }
-        console.log("what_to_run", what_to_run);
 
-
-        const getFunction = (method) =>{
+        async function getFunction(method) {
             if(method == "delete"){
-                return Crew.deleteCrewJob(job_id);
+                return await Crew.deleteCrewJob(job_id);
             }
             if(method == "update"){
-                return  Crew.updateCrewJob( groups[newGroupOrder].id,job_id);
+                return  await Crew.updateCrewJob( groups[newGroupOrder].id,job_id);
             }
             if(method == "nothing"){
                 return  ;
             }
             if(method == "create"){
-                return  addCrewJobs([id], [job_id_type], groups[newGroupOrder].id)
+                return  await Crew.addCrewJobs([id], [job_id_type], groups[newGroupOrder].id)
             }
         }
 
-        
-        //Need to add moving from no crew to crew
-        Promise.all([Tasks.updateMultipleTaskDates([id], date, type),  getFunction()  ])
+        //getFunction does not work
+        Promise.all([Tasks.updateMultipleTaskDates([id], date, type),  getFunction(what_to_run)  ])
         .then((values)=>{
+            console.log(values);
             setCalendarRows(null);
+            setShouldResetCrewState(true);
+
         })
         .catch((error)=>{
             console.error("Fail to move item", error)
             cogoToast.error("Failed to moved item");
             setCalendarRows(null);
+            setShouldResetCrewState(true);
         })
     }
+
+    const itemRenderer = ({ item, timelineContext, itemContext, getItemProps, getResizeProps }) => {
+        const backgroundColor = itemContext.selected ? (itemContext.dragging ? "#44444450" : item.selectedBgColor) : item.bgColor;
+        const borderColor = itemContext.resizing ? "red" : item.color;
+        return (
+          <div
+            {...getItemProps({
+              style: {
+                backgroundColor,
+                color: item.color,
+                borderColor: '#fff',
+                borderStyle: "solid",
+                borderWidth: 1,
+                boxShadow: itemContext.selected ? '2px 2px 4px 0px #353535' : '',
+                border: itemContext.selected ? '1px solid #fbff00' : '1px solid #fff',
+                borderRadius: 4,
+              },
+              onMouseDown: () => {
+                
+              }
+            })}
+          >
+    
+            <div
+              style={{
+                
+                display: 'flex',
+                flexDirection: 'column',
+                height: itemContext.dimensions.height,
+                lineHeight: '1.5',
+              }}
+            >
+                <div
+                style={{
+                    
+                    overflow: "hidden",
+                    paddingLeft: 3,
+                    textOverflow: "clip",
+                    whiteSpace: "nowrap",
+                    backgroundColor: 'rgb(202, 202, 202)',
+                    color: '#4c4b4b',
+                    fontSize: '11px',
+                    lineHeight: '1.5',}}>
+                        {item.type == 'drill' ? 'DRILL' : item.type == 'install' ? 'INSTALL' : <></>}
+                </div>
+                <div
+                style={{
+                    
+                    overflow: "hidden",
+                    paddingLeft: 3,
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    lineHeight: '1.5',}}>
+                        {itemContext.title}
+                </div>
+            </div>
+          </div>
+        );
+      };
 
     return (
       <div>
@@ -404,23 +500,25 @@ const CalendarContainer = (props) => {
             <div className={classes.timeline_div}>
                 <div className={classes.timeline_toolbar}>
                     <Grid container >
-                        <Grid item xs={11}>
+                        <Grid item xs={10}>
 
                         </Grid>
-                        <Grid item xs={1}>
-                            <FormControl variant="outlined" className={classes.formControl}>
-                                <Select
-                                id="demo-simple-select-outlined"
-                                value={zoomUnit}
-                                onChange={event => handleTimeHeaderChange(event.target.value)}
-                                classes={{ select: classes.selectZoom}}
-                                >
-                                <MenuItem value={"week"}>Week</MenuItem>
-                                <MenuItem value={"biweek"}>Biweek</MenuItem>
-                                <MenuItem value={"month"}>Month</MenuItem>
-                                <MenuItem value={"year"}>Year</MenuItem>
-                                </Select>
-                            </FormControl>
+                        <Grid item xs={2}>
+                        <ToggleButtonGroup size="medium" value={zoomUnit} exclusive onChange={(event,value) => handleTimeHeaderChange(event, value)}
+                                    className={classes.zoomButtonGroup}>
+                            <ToggleButton classes={{selected: classes.selectedZoomButton, root: classes.zoomButton}} value="week">
+                                Week
+                            </ToggleButton>
+                            <ToggleButton classes={{selected: classes.selectedZoomButton, root: classes.zoomButton}} value="biweek">
+                                Biweek
+                            </ToggleButton>
+                            <ToggleButton classes={{selected: classes.selectedZoomButton, root: classes.zoomButton}} value="month">
+                                Month
+                            </ToggleButton>
+                            <ToggleButton classes={{selected: classes.selectedZoomButton, root: classes.zoomButton}} value="year">
+                                Year
+                            </ToggleButton>
+                        </ToggleButtonGroup>
                         </Grid>
                     </Grid>
                     
@@ -430,8 +528,9 @@ const CalendarContainer = (props) => {
                         items={items}
                         visibleTimeStart={timeStart}
                         visibleTimeEnd={timeEnd}
+                        itemRenderer={itemRenderer}
                         dragSnap={ 86400 * 1000}
-                        lineHeight={allCrews ? 35 : 35}
+                        lineHeight={allCrews ? 55 : 55}
                         itemHeightRatio={allCrews ? .8 : .80}
                         onItemMove={(itemId, dragTime, newGroupOrder)=>handleItemMoved(itemId, dragTime, newGroupOrder)}
                         onTimeChange={(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)=>handleTimeChange(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)}
@@ -491,5 +590,17 @@ const useStyles = makeStyles(theme => ({
         fontSize: '18px',
         display: 'flex',
         alignItems: 'center',
+    },
+    zoomButtonGroup: {
+        boxShadow: '1px 1px 2px 0px #717171',
+    },
+    zoomButton:{
+        backgroundColor: '#fff',
+        color: '#6d6d6d',
+    },
+    selectedZoomButton:{
+        border: '1px solid #87abe2 !important',
+        backgroundColor: '#e9f5ff',
+        color: '#20446b !important',
     }
   }));
