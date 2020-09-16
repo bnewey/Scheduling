@@ -154,7 +154,7 @@ const MapSidebar = (props) => {
                     classes={{content: classes.expPanelSummary}}
                 >
                     <ListIcon className={classes.icon}/><span>Tasks:&nbsp;&nbsp;{markedRows.length} Items</span>
-                    <div>Sort By:&nbsp;
+                    <div className={classes.sortByDiv}>Sort By:&nbsp;
                         <Select
                             value={sorterVariable}
                             onChange={handleChangeSorter}
@@ -332,5 +332,11 @@ const useStyles = makeStyles(theme => ({
     },
     sortIcon:{
         padding: '5px 5px',
+    },
+    sortByDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
     }
   }));

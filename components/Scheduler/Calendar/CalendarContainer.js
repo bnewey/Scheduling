@@ -128,18 +128,18 @@ const CalendarContainer = (props) => {
         }
     },[calendarRows])
 
-    useEffect(()=>{
-        if(googleCalendar == null){
-            Calendar.getCalendar()
-            .then((data)=>{
-                console.log("data",data);
-            })
-            .catch((error)=>{
-                console.error("google calendar error",error);
-                cogoToast.error("Failed to get Google Calendar");
-            })
-        }
-    },[googleCalendar])
+    // useEffect(()=>{
+    //     if(googleCalendar == null){
+    //         Calendar.getCalendar()
+    //         .then((data)=>{
+    //             console.log("data",data);
+    //         })
+    //         .catch((error)=>{
+    //             console.error("google calendar error",error);
+    //             cogoToast.error("Failed to get Google Calendar");
+    //         })
+    //     }
+    // },[googleCalendar])
     
     //Modal
     const handleRightClick = (id, event, time) => {

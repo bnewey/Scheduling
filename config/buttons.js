@@ -7,7 +7,11 @@ const navButtons = [
     },
     {
         label: "Work Orders",
-        path: "work_orders"
+        path: "work_orders",
+    },
+    {
+        label: "WO Table",
+        path: "work_orders_table"
     },
     {
         label: "Search Items",

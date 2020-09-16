@@ -23,6 +23,25 @@ async function getAllWorkOrders(dateRange){
 
 }
 
+async function searchAllWorkOrders(table, query){
+    const route = '/scheduling/workOrders/searchAllWorkOrders';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({table: table, search_query: query})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 async function getAllWorkOrderItems(table, query){
     const route = '/scheduling/workOrders/getAllWorkOrderItems';
     try{
@@ -103,6 +122,7 @@ async function updateWorkOrderItemVendor(woi_id, vendor){
 
 module.exports = {
     getAllWorkOrders: getAllWorkOrders,
+    searchAllWorkOrders,
     getAllWorkOrderItems: getAllWorkOrderItems,
     getAllWorkOrderSignArtItems: getAllWorkOrderSignArtItems,
     updateWorkOrderItemArrivalDate: updateWorkOrderItemArrivalDate,

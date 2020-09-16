@@ -127,7 +127,7 @@ const TaskListToolbar = (props) => {
             return;
         }
         setTaskListToMap(list);
-        setTabValue(1);
+        setTabValue(2);
     };
 
     // const handleAddNew = (event) =>{

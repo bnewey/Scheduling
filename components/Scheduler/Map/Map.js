@@ -302,16 +302,15 @@ const CustomMap = compose(
         styles={[{ textColor: 'black', height: 53, url: "/static/ClusterIcons/m1.png", width: 53 }, { textColor: 'black', height: 56, url: "/static/ClusterIcons/m2.png", width: 56 }, { textColor: 'white', height: 66, url: "/static/ClusterIcons/m3.png", width: 66 }, { textColor: 'white', height: 78, url: "/static/ClusterIcons/m4.png", width: 78 }, { textColor: 'white', height: 90, url: "/static/ClusterIcons/m5.png", width: 90 }]}
         >
         {taskMarkers && visibleItems.indexOf("tasks") != -1 && taskMarkers.map((marker,index) => (
-            <MarkerWithLabel
+            <Marker
             key={marker.t_id}
             title={(marker.t_id).toString()} 
             position={{ lat: marker.lat, lng: marker.lng}}
             onClick = { props.updateActiveMarker(marker.t_id) }
-            labelAnchor={new google.maps.Point( `#${marker.priority_order}`.toString().length * 5 , 40)}
-            labelStyle={{backgroundColor: "rgba(202, 69, 58, 0.8)", fontSize: "13px", padding: "2px", borderRadius: '5px', color: '#fff',}}
+            // labelAnchor={new google.maps.Point( `#${marker.priority_order}`.toString().length * 5 , 40)}
+            // labelStyle={{backgroundColor: "rgba(202, 69, 58, 0.8)", fontSize: "13px", padding: "2px", borderRadius: '5px', color: '#fff',}}
             >
-                <div>#{marker.priority_order}</div>
-            </MarkerWithLabel>
+            </Marker>
         ))}
         </MarkerClusterer>
         <MarkerClusterer

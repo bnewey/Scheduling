@@ -20,7 +20,7 @@ router.post('/getAllWorkOrders', async (req,res) => {
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
     ' WHERE date >= ? AND date <= ? ' + 
     ' ORDER BY date DESC ' +
-    ' limit 5000 ';
+    ' limit 2000 ';
     try{
         const results = await database.query(sql, [dateRange["from"], dateRange["to"]]);
         logger.info("Got Work Orders");
@@ -42,6 +42,46 @@ router.post('/getAllWorkOrders', async (req,res) => {
     }
     catch(error){
         logger.error("Work Orders: " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/searchAllWorkOrders', async (req,res) => {
+
+    var search_query, table;
+    if(req.body){
+        if(req.body.search_query != null){
+            search_query = "%" + req.body.search_query + "%";
+        }else{
+            search_query = "%";
+        }
+
+        if(req.body.table != null){
+            table = req.body.table;
+        }else{
+            return;
+        }
+        
+    }    
+
+    const sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
+        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
+        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
+        ' FROM work_orders wo ' +
+        ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
+        ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' +
+        ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' + 
+        ' WHERE ?? like ? ' +
+        ' LIMIT 500';
+
+    try{
+        const results = await database.query(sql, [table, search_query]);
+        logger.info("Got Work Orders by search", [table, search_query]);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Search work orders: " + error);
         res.sendStatus(400);
     }
 });
@@ -168,6 +208,9 @@ router.post('/updateWorkOrderItemVendor', async (req,res) => {
         res.sendStatus(400);
     }
 });
+
+
+
 
 
 module.exports = router;

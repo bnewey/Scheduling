@@ -293,8 +293,8 @@ const CrewCrews = (props) => {
         console.log("Properties", properties);
         console.log("crew", crew);
 
-        //1 = map
-        setTabValue(1);
+        //2 = map
+        setTabValue(2);
         let newFilters = [];
 
         properties.forEach((item,i)=>{
