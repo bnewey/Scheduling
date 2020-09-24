@@ -95,17 +95,30 @@ const useStyles = makeStyles(theme => ({
       color: '#a0a0a0',
   },
   tabSpan: {
-    fontSize: '19px',
-    fontWeight: '500'
+    fontSize: '16px',
+    fontWeight: '500',
   },
   selectedTab: {
-    boxShadow: 'inset 0 1px #414d5a',
+    flexGrow : '2',
+    boxShadow: 'inset 1px 2px 6px 0px #414d5a',
     color: '#d87904 !important',
     backgroundColor: '#ffedc4',
-    padding: '25px'
+    padding: '10px',
+    minHeight: '0px',
+    lineHeight: '1',
   },
   nonSelectedTab: {
+    flexGrow : '2',
+    boxShadow:' -1px 1px 2px 0px #414d5a',
     
+    '&:hover':{
+      backgroundColor: '#fff',
+      borderTop: '2px solid #a2ceff',
+      borderBottom: '2px solid #a2ceff',
+      color: '#d87904',
+    },
+    minHeight: '0px',
+    lineHeight: '1',
   },
   tab:{
     backgroundColor: '#e7eff2',

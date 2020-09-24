@@ -5,7 +5,7 @@ const Wrapper = ({children}) => {
     rootWrapper:  {
       borderBottom: '1px solid #ddd',
       backgroundColor: '#e6e6e6',
-      padding: '.5% 0% 2% 0%',
+      padding: '0%',
     },
   }) );
 

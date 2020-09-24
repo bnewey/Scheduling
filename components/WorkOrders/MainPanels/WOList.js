@@ -11,18 +11,24 @@ import TableRow from '@material-ui/core/TableRow';
 
 import cogoToast from 'cogo-toast';
 
-import Util from  '../../js/Util';
-import { WOContext } from './WOContainer';
+
+import Util from  '../../../js/Util';
+import { WOContext } from '../WOContainer';
 
 
 const OrdersList = function(props) {
   const {user} = props;
 
-  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange} = useContext(WOContext);
+  const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, 
+    currentView, setCurrentView, views, detailWOid,setDetailWOid} = useContext(WOContext);
   const classes = useStyles();
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(22);
+
+  useEffect(()=>{
+    setPage(0);
+  },[workOrders])
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -32,9 +38,21 @@ const OrdersList = function(props) {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const handleShowDetailView = (wo_id) =>{
+    if(!wo_id){
+      cogoToast.error("Failed to get work order");
+      console.error("Bad id");
+      return;
+    }
+    setCurrentView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
+    setDetailWOid(wo_id);
+
+  }
   
   const columns = [
-    { id: 'wo_record_id', label: 'WO#', minWidth: 35, align: 'center' },
+    { id: 'wo_record_id', label: 'WO#', minWidth: 20, align: 'center',
+      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableWOnumber}>{value}</span> },
     { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
     {
       id: 'wo_type',
@@ -135,7 +153,7 @@ const useStyles = makeStyles(theme => ({
   root:{
     // border: '1px solid #339933',
     padding: '1%',
-    minHeight: '600px',
+    minHeight: '730px',
   },
   container: {
     maxHeight: 650,
@@ -146,15 +164,28 @@ const useStyles = makeStyles(theme => ({
     fontFamily: 'sans-serif',
     fontSize: '15px',
     color: '#1b1b1b',
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    zIndex: '1',
+    
   },
   tableCell:{
     borderRight: '1px solid #c7c7c7' ,
     '&:last-child' :{
       borderRight: 'none' ,
-    }
+    },
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    maxWidth: '150px',
+    textOverflow: 'ellipsis',
   },
   tableCellHead:{
     
+  },
+  clickableWOnumber:{
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    '&:hover':{
+      color: '#ee3344',
+    }
   }
 }));

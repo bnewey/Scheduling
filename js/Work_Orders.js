@@ -23,6 +23,50 @@ async function getAllWorkOrders(dateRange){
 
 }
 
+async function getWorkOrderById(wo_id){
+    if(!wo_id){
+        throw new Error("No/bad id for getWorkOrderById");
+    }
+    const route = '/scheduling/workOrders/getWorkOrderById';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({wo_id: wo_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function getEmployeeNameFromId(id){
+    if(!id){
+        throw new Error("No/bad id for getEmployeeNameFromId");
+    }
+    const route = '/scheduling/workOrders/getEmployeeNameFromId';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id: id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 async function searchAllWorkOrders(table, query){
     const route = '/scheduling/workOrders/searchAllWorkOrders';
     try{
@@ -60,6 +104,7 @@ async function getAllWorkOrderItems(table, query){
     }
 
 }
+
 
 async function getAllWorkOrderSignArtItems(id){
     const route = '/scheduling/workOrders/getAllWorkOrderSignArtItems';
@@ -118,13 +163,53 @@ async function updateWorkOrderItemVendor(woi_id, vendor){
 
 }
 
+async function updateWorkOrder(workOrder){
+    const route = '/scheduling/workOrders/updateWorkOrder';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({workOrder})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
 
+}
+
+async function addWorkOrder(workOrder){
+    const route = '/scheduling/workOrders/addWorkOrder';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({workOrder})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
 
 module.exports = {
     getAllWorkOrders: getAllWorkOrders,
+    getWorkOrderById,
+    getEmployeeNameFromId,
     searchAllWorkOrders,
     getAllWorkOrderItems: getAllWorkOrderItems,
     getAllWorkOrderSignArtItems: getAllWorkOrderSignArtItems,
     updateWorkOrderItemArrivalDate: updateWorkOrderItemArrivalDate,
     updateWorkOrderItemVendor,
+    updateWorkOrder,
+    addWorkOrder,
 };

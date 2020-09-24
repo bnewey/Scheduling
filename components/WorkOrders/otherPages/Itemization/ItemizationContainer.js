@@ -5,7 +5,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import ItemizationTable from './Table/ItemizationTable';
 
-import Work_Orders from '../../../js/Work_Orders';
+import Work_Orders from '../../../../js/Work_Orders';
 
 //we can make this a functional component now
 const ItemizationContainer = function({searchText, searchTable,shouldFetch, setShouldFetch}) {

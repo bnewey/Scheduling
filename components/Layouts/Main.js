@@ -31,9 +31,9 @@ const Layout = (props) => {
           </Head>
           <main className='main-wrapper'>
             { children }
-            <style jsx>{`
+            {/* <style jsx>{`
                 margin: 0% 3% 1% 3%
-            `}</style>
+            `}</style> */}
           </main>
           <StyledFooter />
           

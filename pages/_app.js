@@ -50,9 +50,7 @@ class MyApp extends App {
     const { Component, pageProps } = this.props;
     return (
       <React.Fragment>
-        <Head>
-          <title>My page</title>
-        </Head>
+        
         {/* Wrap every page in Styles and Theme providers */}
         <StylesProvider
           generateClassName={this.pageContext.generateClassName}

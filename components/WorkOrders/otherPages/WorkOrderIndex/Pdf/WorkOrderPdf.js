@@ -4,7 +4,7 @@ import { makeStyles, CircularProgress, Button, FormHelperText, FormControl, Inpu
 import { Document, Page, pdfjs} from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = '../../../../static/pdf.worker.js';
 
-import Pdf from '../../../../js/Pdf';
+import Pdf from '../../../../../js/Pdf';
 
 //we can make this a functional component now
 const WorkOrderPdf = function(props) {

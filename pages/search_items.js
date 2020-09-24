@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import MainLayout from '../components/Layouts/Main';
 
 import IndexHead from '../components/UI/IndexHead';
-import ItemizationContainer from '../components/WorkOrders/Itemization/ItemizationContainer';
-import ItemizationSearch from '../components/WorkOrders/Itemization/ItemizationSearch';
+import ItemizationContainer from '../components/WorkOrders/otherPages/Itemization/ItemizationContainer';
+import ItemizationSearch from '../components/WorkOrders/otherPages/Itemization/ItemizationSearch';
 
 
 const Itemization = function () {
