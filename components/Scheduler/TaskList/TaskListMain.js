@@ -395,7 +395,7 @@ const useStyles = makeStyles(theme => ({
     root: {
         padding: '.62% .3% .3% .3%',
         margin: '0px 0px 5px 5px',
-        backgroundColor: '#eee',
+        backgroundColor: '#fff',
         height: '100%',
 
     },

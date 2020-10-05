@@ -39,16 +39,13 @@ const OrdersToolbar = function(props) {
       case "search":
         return <Search />
         break;
+      case "woPdf":
+      case "pastWO":  
+      case "packingSlip":
       case "woDetail":
         return (<Grid item className={classes.woDetailToolbarDiv} xs={ 5}>
                   <span className={classes.woLabelSpan}>WO#:{detailWOid}</span><span className={classes.woLabelSpan}>{activeWorkOrder && activeWorkOrder.c_name}</span>
                 </Grid>);
-        break;
-      case "packingSlip":
-        break;
-      case "woPdf":
-        break;
-      case "pastWO":
         break;
       default: 
         cogoToast.error("Bad view");

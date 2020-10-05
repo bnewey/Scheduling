@@ -498,8 +498,10 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'center',
         alignItems: 'center',
         padding: '0px',
-        backgroundColor: '#d0cde0',
+        background: 'linear-gradient(0deg, #beb8d8, #ddd9f5)',
         flexWrap: 'wrap',
+        border: '1px solid #918ca9',
+        borderRadius: 4,
     },
     filterButton:{
         margin: '0px 10px',
@@ -577,7 +579,7 @@ const useStyles = makeStyles(theme => ({
     root: {
         padding: '.62% .3% .3% .3%',
         margin: '0px 0px 5px 5px',
-        backgroundColor: '#eee',
+        backgroundColor: '#fff',
         height: '100%',
 
     },

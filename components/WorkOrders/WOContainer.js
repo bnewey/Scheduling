@@ -19,6 +19,7 @@ import WODetail from './MainPanels/WODetail';
 
 //Extras
 import AddEditModal from './AddEditWorkOrder/AddEditModal'
+import WOPackingSlip from './MainPanels/DetailSubPanels/WOPackingSlip';
 
 
 var today =  new Date();
@@ -39,9 +40,9 @@ const WOContainer = function(props) {
   const views = [ { value: "allWorkOrders", displayName: "Work Orders"},
                   {value: 'search', displayName: 'Search', closeToView: 'allWorkOrders'} ,
                   {value: "woDetail", displayName: 'W.O. Detail', closeToView: 'allWorkOrders', onClose: ()=>{setActiveWorkOrder(null); setDetailWOid(null)}}, 
-                  { value: "packingSlip", displayName: 'Packing Slip', closeToView: 'woDetail'},
-                  {value: "woPdf", displayName: 'W.O. PDF', closeToView: 'woDetail'},
-                  { value: "pastWO", displayName: 'Past W.Os', closeToView: 'woDetail'}];
+                  { value: "packingSlip", displayName: 'Packing Slip', closeToView: 'allWorkOrders', onClose: ()=>{setActiveWorkOrder(null); setDetailWOid(null)}},
+                  {value: "woPdf", displayName: 'W.O. PDF', closeToView: 'allWorkOrders', onClose: ()=>{setActiveWorkOrder(null); setDetailWOid(null)}},
+                  { value: "pastWO", displayName: 'Past W.Os', closeToView: 'allWorkOrders', onClose: ()=>{setActiveWorkOrder(null); setDetailWOid(null)}}];
   const [currentView,setCurrentView] = useState(views[0]);
   const [detailWOid,setDetailWOid] = useState(null);
   const [activeWorkOrder, setActiveWorkOrder] = useState(null);
@@ -112,6 +113,7 @@ const WOContainer = function(props) {
         return <WODetail />
         break;
       case "packingSlip":
+        return <WOPackingSlip />
         break;
       case "woPdf":
         break;
@@ -136,6 +138,7 @@ const WOContainer = function(props) {
         return <WOSidebarDetail />
         break;
       case "packingSlip":
+        return <WOSidebarDetail />
         break;
       case "woPdf":
         break;

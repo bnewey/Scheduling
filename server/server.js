@@ -31,6 +31,7 @@ const handle = nextApp.getRequestHandler();
 //var machines = require('./api/machines/machines');
 const tasks = require('./lib/tasks.js');
 const workOrders = require('./lib/work_orders.js');
+const workOrderDetail = require('./lib/work_order_detail.js');
 const taskLists = require('./lib/task_lists.js');
 const pdf = require('./lib/pdf.js');
 const crew = require('./lib/crew.js');
@@ -66,6 +67,7 @@ nextApp
     //Custom Routes//
     app.use('/scheduling/tasks', tasks);
     app.use('/scheduling/workOrders', workOrders);
+    app.use('/scheduling/workOrderDetail', workOrderDetail);
     app.use('/scheduling/taskLists', taskLists);
     app.use('/scheduling/pdf', pdf);
     app.use('/scheduling/email', emailRouter);
@@ -130,8 +132,7 @@ nextApp
       logger.info(`> Ready on localhost:${PORT}`);
     });
 
-
-  })
+    })
   .catch(ex => {
     logger.error(ex.stack);
     process.exit(1);

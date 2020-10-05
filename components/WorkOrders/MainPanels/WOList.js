@@ -59,18 +59,17 @@ const OrdersList = function(props) {
       label: 'Type',
       minWidth: 50,
       align: 'left',
-      //format: (value) => value.toLocaleString('en-US'),
     },
     {
       id: 'c_name',
       label: 'Product Goes To',
-      minWidth: 170,
+      minWidth: 250,
       align: 'left',
     },
     { id: 'sa_city', label: 'City', minWidth: 45, align: 'left' },
     { id: 'sa_state', label: 'State', minWidth: 35, align: 'left' },
-    { id: 'description', label: 'Description', minWidth: 170, align: 'left' },
-    { id: 'a_name', label: 'Bill Goes To', minWidth: 120, align: 'left' },
+    { id: 'description', label: 'Description', minWidth: 400, align: 'left' },
+    { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
   ];
 
   const StyledTableRow = withStyles((theme) => ({
@@ -121,7 +120,10 @@ const OrdersList = function(props) {
                   {columns.map((column) => {
                     const value = row[column.id];
                     return (
-                      <TableCell className={classes.tableCell} key={column.id} align={column.align}>
+                      <TableCell className={classes.tableCell} 
+                                key={column.id}
+                                 align={column.align}
+                                 style={{ minWidth: column.minWidth }}>
                         {column.format && typeof value === 'number' ? column.format(value) : value}
                       </TableCell>
                     );

@@ -259,7 +259,7 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
         padding: '.1% ',
         color: '#293a5a',
-        background: 'linear-gradient( #dadada, #a2a2a2)',
+        background: 'linear-gradient( #e0e0e0, #e3e3e3)',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: '6px',
@@ -393,10 +393,10 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
         justifyContent: 'center',
         margin: '.2em 2em',
-        backgroundColor: '#ececec',
+        backgroundColor: '#fbfbfb',
         padding: '7px 12px',
-        border: '2px solid #adb0b0',
-        borderRadius: '3px',
+        borderRadius: '5px',
+        boxShadow: 'inset 0 0 3px 0px #777',
     },
     icon_small:{
         verticalAlign: 'text-bottom'

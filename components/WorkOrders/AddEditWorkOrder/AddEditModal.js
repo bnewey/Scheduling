@@ -51,16 +51,15 @@ const AddEditModal = function(props) {
     const handleOpenEntityDraw = ()=>{
         setEntityDrawerOpen(true);
     }
-
-    
+   
     const fields = [
         //type: select must be hyphenated ex select-type
         {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name'},
         {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name'},
-        {field: 'date', label: 'Date Entered', type: 'date', updateBy: 'state',required: true},
+        {field: 'date', label: 'Date Entered*', type: 'date', updateBy: 'state',required: true},
         {field: 'requestor', label: 'Requestor', type: 'select-users', updateBy: 'ref'},
         {field: 'maker', label: 'Maker', type: 'select-users', updateBy: 'ref'},
-        {field: 'type', label: 'Type', type: 'select-type', updateBy: 'ref',required: true},
+        {field: 'type', label: 'Type*', type: 'select-type', updateBy: 'ref',required: true},
         {field: 'job_reference', label: 'Job Reference', type: 'text', updateBy: 'ref'},
         {field: 'description', label: 'Description', type: 'text', updateBy: 'ref'},
         {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref'},
@@ -120,7 +119,7 @@ const AddEditModal = function(props) {
         switch(field.type){
             case 'text':
             case 'number':
-                return(
+                return(<div className={classes.inputValue}>
                     <TextField id={field.field} 
                             error={error}
                              variant="outlined"
@@ -128,13 +127,13 @@ const AddEditModal = function(props) {
                              inputProps={{className: classes.inputStyle}} 
                              classes={{root: classes.inputRoot}}
                              defaultValue={ activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : null }
-                             onChange={()=>handleShouldUpdate(true)}  />
+                             onChange={()=>handleShouldUpdate(true)}  /></div>
                 )
                 break;
             case 'date':
-                return(
+                return(<div className={classes.inputValue}>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <KeyboardDatePicker className={classes.inputStyle} 
+                    <KeyboardDatePicker className={classes.inputStyleDate} 
                                     error={error}
                                     inputVariant="outlined"  
                                     disableFuture={field.field == "date" }
@@ -146,10 +145,10 @@ const AddEditModal = function(props) {
                                     inputProps={{className: classes.inputRoot}} 
                                     format={'M/dd/yyyy'}
                                     />
-                </MuiPickersUtilsProvider>);
+                </MuiPickersUtilsProvider></div>);
                 break;
             case 'select-users':
-                return(
+                return(<div className={classes.inputValueSelect}>
                     <Select
                         error={error}
                         id={field.field}
@@ -168,12 +167,13 @@ const AddEditModal = function(props) {
                                 </option>
                             )
                         })}
-                    </Select>
+                    </Select></div>
                 )
                 break;
             case 'select-type':
                 return(
-                    <Select
+                    <div className={classes.inputValueSelect}>
+                        <Select
                     error={error}
                         id={field.field}
                         value={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
@@ -191,31 +191,32 @@ const AddEditModal = function(props) {
                                 </option>
                             )
                         })}
-                    </Select>
+                    </Select></div>
                 )
                 break;
             case 'check':
                 return(
+                    <div className={classes.inputValue}>
                     <Checkbox
                         icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                         checkedIcon={<CheckBoxIcon fontSize="small" />}
                         name="checkedI"
-                        checked={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
+                        checked={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] == 1 ? true : false : false}
                         onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
-                    />
+                    /></div>
                 )
                 break;
             case 'entity':
-                return(<>{error && <span className={classes.errorSpan}>Entity Required</span> }
+                return(<div className={classes.inputValue}>{error && <span className={classes.errorSpan}>Entity Required</span> }
                 {activeWorkOrder && activeWorkOrder[field.field] ? <>
                         
-                        <span>{activeWorkOrder[field.displayField]} | ID:{activeWorkOrder[field.field]}</span>
+                        <span className={classes.inputRoot}>{activeWorkOrder[field.displayField]} | ID:{activeWorkOrder[field.field]}</span>
                         
                          </> : <></>}
                     <IconButton type="submit" className={classes.iconButton} aria-label="clear-search" onClick={()=> handleOpenEntityDraw()}>
                         <AccountBoxIcon />
                     </IconButton> 
-                    </>
+                    </div>
                 )
                 break;
             default: 
@@ -250,6 +251,10 @@ const AddEditModal = function(props) {
                         //Get updated values with textValueObject bc text values use ref
                         if(textValueObject[field.field])
                             updateWorkOrder[field.field] = textValueObject[field.field];
+                        break;
+                    case 'date':
+                        if(textValueObject[field.field])
+                            updateWorkOrder[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
                         break;
                     default:
                         //Others are updated with work_order (activeWorkOrder) state variable
@@ -354,7 +359,7 @@ const AddEditModal = function(props) {
                                 return(
                                 <div className={classes.inputDiv}>  
                                     <span className={classes.inputLabel}>{field.label}</span>
-                                    <div className={classes.inputValue}>{getInputByType(field)}</div>
+                                    {getInputByType(field)}
                                 </div>)
                             })}
                         </Grid>
@@ -487,19 +492,30 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         
     },
+    inputStyleDate:{
+        padding: '5px 7px',
+        width: '44%',
+        
+    },
     inputRoot: {
         padding: '5px 7px',
         width: '100%'
     },
     inputLabel:{
         flexBasis: '30%',
-        textAlign: 'left',
+        textAlign: 'right',
+        marginRight: '35px',
         fontSize: '15px',
-        color: '#454545',
+        color: '#787878',
     },
     inputValue:{
         flexBasis: '70%',
         textAlign: 'left',
+    },
+    inputValueSelect:{
+        flexBasis: '70%',
+        textAlign: 'left',
+        padding: '5px 7px',
     },
     inputFieldMatUi: {
         margin: '10px 17px 7px 17px',

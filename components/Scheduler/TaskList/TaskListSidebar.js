@@ -294,7 +294,7 @@ const useStyles = makeStyles(theme => ({
     root: {
         padding: '.62% .3% .3% .3%',
         margin: '0px 0px 5px 5px',
-        background: 'linear-gradient( #dadada, #a2a2a2)',
+        background: '#e2e2e2',
         height: '100%',
     },
     sidebarHead:{

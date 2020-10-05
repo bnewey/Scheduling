@@ -7,6 +7,8 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../../js/Util';
 import { WOContext } from '../WOContainer';
+import SidebarPages from './components/SidebarPages';
+import CompInvTool from './components/CompInvTool';
 
 
 const WOSidebarDetail = function(props) {
@@ -14,7 +16,7 @@ const WOSidebarDetail = function(props) {
 
 
 
-  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, setEditWOModalOpen, setEditModalMode} = useContext(WOContext);
+  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, setEditWOModalOpen, setEditModalMode, currentView} = useContext(WOContext);
   
   const classes = useStyles();
   
@@ -22,24 +24,66 @@ const WOSidebarDetail = function(props) {
     setEditModalMode("edit");
     setEditWOModalOpen(true);
   }
+
+  const sideBarTopButtons = () =>{
+    switch(currentView.value){
+      case "allWorkOrders":
+        return <Search />
+        break
+      case "search":
+        return <Search />
+        break;
+      case "woPdf":
+      case "pastWO":  
+      
+      case "woDetail":
+        return (<>
+          <div className={classes.newButtonDiv} >
+            <Button className={classes.newButton} classes={{label: classes.newButtonLabel}} variant="outlined">
+                <AddIcon className={classes.plusIcon}/>
+                <div>FairPlay Order</div>
+            </Button>
+          </div>
+          <div className={classes.newButtonDiv} >
+              <Button className={classes.newButton} 
+                    classes={{label: classes.newButtonLabel}} 
+                    variant="outlined"
+                    onClick={event=> handleOpenAddWOModal()}>
+                      <EditIcon className={classes.editIcon}/><div>Edit Info</div>
+              </Button>
+          </div></>);
+        break;
+      case "packingSlip":
+        return (<>
+        <div className={classes.newButtonDiv} >
+          <Button className={classes.newButton} classes={{label: classes.newButtonLabel}} variant="outlined">
+            <AddIcon className={classes.plusIcon}/>
+            <div>New Packing Slip</div>
+          </Button>
+        </div></>);
+        break;
+      default: 
+        cogoToast.error("Bad view");
+        return <></>;
+        break;
+    }
+  }
   
   return (
     <div className={classes.root}>
-        <div className={classes.newButtonDiv} ><Button className={classes.newButton} classes={{label: classes.newButtonLabel}} variant="outlined"><AddIcon className={classes.plusIcon}/><div>FairPlay Order</div></Button></div>
-        <div className={classes.newButtonDiv} >
-            <Button className={classes.newButton} 
-                  classes={{label: classes.newButtonLabel}} 
-                  variant="outlined"
-                  onClick={event=> handleOpenAddWOModal()}>
-                    <EditIcon className={classes.editIcon}/><div>Edit Info</div>
-            </Button>
-        </div>
+        {sideBarTopButtons()}
         {/* { current view == allWorkOrders && <div className={classes.dateRangeDiv}>
             <div className={classes.labelDiv}><span className={classes.dateRangeSpan}>Date Range</span></div>
             <div className={classes.inputDiv}>
               
             </div>
         </div>} */}
+        <div className={classes.pagesContainer}>
+          <SidebarPages />
+        </div>
+        <div className={classes.pagesContainer}>
+          <CompInvTool />
+        </div>
 
     </div>
   );
@@ -57,6 +101,7 @@ const useStyles = makeStyles(theme => ({
       padding: '4%',
       minHeight: '730px',
       borderRight: '1px solid #d2cece',
+      backgroundColor: '#f8f8f8'
     },
     newButtonDiv:{
       padding: '3%',
@@ -81,7 +126,7 @@ const useStyles = makeStyles(theme => ({
       padding: '4px 17px',
       borderRadius: '21px',
       fontSize: '14px',
-      background: 'linear-gradient(0deg, #efefef, white)',
+      background: 'linear-gradient(0deg, #f5f5f5, white)',
       '&:hover':{
         boxShadow: '0px 3px 10px 0px #8c8c8c',
       }
@@ -135,6 +180,12 @@ const useStyles = makeStyles(theme => ({
       textAlign: 'center',
       color: '#e91818',
       margin: '3px 10px'
+    },
+    pagesContainer:{
+      width: '100%',
+      padding: '8% 8%',
+      borderTop: '1px solid #d2cece',
+      borderBottom: '1px solid #d2cece',
     }
   
 }));

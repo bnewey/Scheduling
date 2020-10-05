@@ -5,6 +5,7 @@ import SwipeableViews from 'react-swipeable-views';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import {AppBar, Tabs, Tab, Typography, Box} from '@material-ui/core';
 
+import EventIcon from '@material-ui/icons/Event';
 import TaskIcon from '@material-ui/icons/Assignment';
 import MapIcon from '@material-ui/icons/Map';
 import ViewListIcon from '@material-ui/icons/ViewList';
@@ -95,12 +96,12 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
         >
           <Tab className={tabValue === 0 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
                     label={ <span className={classes.tabSpan}>
-                                <MapIcon className={classes.icon}/>
+                                <EventIcon className={classes.icon}/>
                                     <Box display={{ xs: 'none', md: 'inline' }}  component="span">Calendar</Box>
                             </span>} {...a11yProps(0)} />
           <Tab className={tabValue === 1 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
                     label={ <span className={classes.tabSpan}>
-                                <MapIcon className={classes.icon}/>
+                                <TaskIcon className={classes.icon}/>
                                     <Box display={{ xs: 'none', md: 'inline' }}  component="span">TaskList</Box>
                             </span>} {...a11yProps(1)} />
           <Tab className={tabValue === 2 ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 
@@ -130,7 +131,7 @@ export default function FullWidthTabs({children, tabValue, setTabValue, numSelec
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
         index={tabValue}
         onChangeIndex={handleChangeIndex}
-        className={classes.tabRoot}
+        className={classes.tabWindowRoot}
         disabled={true}
       >
      
@@ -149,6 +150,7 @@ const useStyles = makeStyles(theme => ({
   //[theme.breakpoints.down('sm')]: sm, md, lg
   root: {
     width: '100%',
+    backgroundColor: '#fff',
     '& header':{
       marginBottom: '1%',
     },
@@ -187,7 +189,7 @@ const useStyles = makeStyles(theme => ({
     flexGrow : '1',
     boxShadow: 'inset 1px 2px 6px 0px #414d5a',
     color: '#d87904 !important',
-    backgroundColor: '#ffedc4',
+    backgroundColor: '#5d5d5d',
     padding: '10px',
     minHeight: '0px',
     lineHeight: '1',
@@ -203,13 +205,17 @@ const useStyles = makeStyles(theme => ({
     },
     minHeight: '0px',
     lineHeight: '1',
+    background: 'linear-gradient(0deg, #c2c2c2, white)',
   },
   tab:{
-    backgroundColor: '#5b6164',
-    // boxShadow: 'inset 0 0 4px 4px #0000006b',
-    border: '1px solid #7f7f7f',
+    // backgroundColor: '#f5f5f5',
+
+    margin: '1% 2%',
   },
   tabRoot:{
+    minHeight: '0px',
+  },
+  tabWindowRoot:{
     minHeight: '0px',
   },
   p_selected:{

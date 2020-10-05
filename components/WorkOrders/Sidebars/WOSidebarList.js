@@ -101,6 +101,7 @@ const useStyles = makeStyles(theme => ({
       padding: '4%',
       minHeight: '730px',
       borderRight: '1px solid #d2cece',
+      backgroundColor: '#f8f8f8'
     },
     newButtonDiv:{
       padding: '3%',
@@ -108,6 +109,7 @@ const useStyles = makeStyles(theme => ({
     },
     dateRangeDiv:{
       borderTop: '1px solid #d2cece',
+      borderBottom: '1px solid #d2cece',
       padding: '3%',
       width: '100%',
       backgroundColor: '#f9f9f9',
@@ -125,7 +127,7 @@ const useStyles = makeStyles(theme => ({
       padding: '4px 17px',
       borderRadius: '21px',
       fontSize: '14px',
-      background: 'linear-gradient(0deg, #efefef, white)',
+      background: 'linear-gradient(0deg, #f5f5f5, white)',
       '&:hover':{
         boxShadow: '0px 3px 10px 0px #8c8c8c',
       }

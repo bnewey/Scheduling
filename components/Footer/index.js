@@ -8,6 +8,12 @@ const StyledFooter = (props) => {
       padding: '15px',
       background: '#5b7087',
       color: '#f5f5f5',
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      width: '-webkit-fill-available',
+      marginBottom: '0px',
+      boxShadow: 'inset 0px 4px 4px #434d59',
     },
   }));
 

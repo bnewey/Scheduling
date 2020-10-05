@@ -8,7 +8,10 @@ import ClearIcon from '@material-ui/icons/Clear';
 import cogoToast from 'cogo-toast';
 import { FixedSizeList } from 'react-window';
 
-
+import dynamic from 'next/dynamic'
+const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
+  ssr: false
+});
 
 import Util from '../../../js/Util.js';
 
@@ -45,25 +48,6 @@ const EntitiesDrawer = function(props) {
     
      
     const classes = useStyles();
-
-
-    const handleEntityOnChange = (entity, field, idField)=>{
-        console.log("entity in handleentity change", entity)
-        //handleInputOnChange([entity.record_id, entity.name], true, "entity", [idField, field])
-        // Settings.getEntityNameById(entity.record_id)
-        // .then((data)=>{
-        //     console.log('name',data);
-        //     var tmp = data[0].name;
-        //     console.log("TMP",tmp);
-        //     console.log("entity b4",entity);
-            
-        // })
-        // .catch((error)=>{
-        //     console.error("Error getting entity name", error);
-        //     cogoToast.error("Failed to get entity name");
-        // })        
-    }
-
 
     function renderRow(props) {
         const { data, index, style } = props;
@@ -121,45 +105,67 @@ const EntitiesDrawer = function(props) {
         setEntityRows(null)
       }
 
-      const handleSearch = ()=>{
-          if(!searchValue && searchValue != "" ){
-            cogoToast.error("Bad search value")
-            return;
-          }
+      const handleCloseEntityDrawer = ()=>{
+        setEntityDrawerOpen(false);
+        setSearchValue("");
+        setEntityRows(null);
+      }
 
-          Settings.getEntitiesSearch(searchValue)
-          .then((data)=>{
-              if(data){
-                  setEntityRows(data);
-              }
-          })
-          .catch((error)=>{
-              cogoToast.error("Failed to search entities")
-              console.error("Failed to saerch entities", error)
-          })
+      const handleSearch = (keyCode,event)=>{
+            if(!searchValue && searchValue != "" ){
+                cogoToast.error("Bad search value")
+                return;
+            }
+            if((keyCode) && event && !event.target.id){
+                console.error("Bad keycode or element on handleClearSelectedTasksOnEsc");
+                return;
+            }
+
+            var id = event ? event.target.id : null;
+
+            if((keyCode && event ) && !(keyCode === 13 && id ==  "ent_search_input")){
+                return;
+            }
+
+            Settings.getEntitiesSearch(searchValue)
+            .then((data)=>{
+                if(data){
+                    setEntityRows(data);
+                }
+            })
+            .catch((error)=>{
+                cogoToast.error("Failed to search entities")
+                console.error("Failed to saerch entities", error)
+            })
+            
       }
       //END OF SEARCH
 
     return(
         <div className={classes.root}>
+            <div className={classes.absCloseButton}>
+                <IconButton type="submit"  aria-label="clear-search" onClick={event=> handleCloseEntityDrawer()}>
+              <ClearIcon />
+            </IconButton></div>
             <div className={classes.titleDiv}>
                 <span className={classes.titleSpan}>Entities List</span>
             </div>
-            <div className={classes.searchDiv}>
-                <span>Search</span>
-                <div>
+            <div className={classes.searchContainer}>
+                <KeyBinding onKey={ (e) => handleSearch(e.keyCode, e) } />
+                <div className={classes.searchDiv}>
+                <div className={classes.searchInput}>
+                    <span className={classes.searchLabel}>Name:</span>
                 <InputBase
                     className={classes.input}
                     
                     classes={{input: classes.actualInputElement }}
                     placeholder="Search Work Orders"
-                    inputProps={{ 'aria-label': 'search work orders', id: "wo_search_input"}}
+                    inputProps={{ 'aria-label': 'search work orders', id: "ent_search_input"}}
                     autoFocus={true}
                     value={searchValue }
-                    startAdornment={'Name: '}
                     endAdornment={searchValue ? searchXButton() : ""}
                     onChange={event=> handleChangeSearchValue(event.target.value)}
-                />
+                /> </div>
                 <IconButton type="submit" className={classes.iconButton} aria-label="search" onClick={event=> handleSearch()}>
                     <SearchIcon />
                 </IconButton>    
@@ -179,7 +185,7 @@ const EntitiesDrawer = function(props) {
                         </ListItemText>
                         </ListItem>
                 </List>
-                <FixedSizeList itemData={entityRows} height={400}  itemSize={24} itemCount={entityRows.length}>
+                <FixedSizeList itemData={entityRows} height={350}  itemSize={24} itemCount={entityRows.length}>
                     {renderRow}
                 </FixedSizeList></>
                 : <>{<CircularProgress/>}</>}
@@ -199,17 +205,20 @@ const useStyles = makeStyles(theme => ({
 
     },
     titleDiv:{
-        padding: '3px 10px',
+        padding: '5px 10px',
+        marginBottom: '3px',
         borderBottom: '1px solid #aaa'
     },
     titleSpan:{
-        fontSize: '15px',
-        color: '999',
-        fontWeight: '600'
+        color: '#888',
+        fontSize: 15,
+        textTransform: 'uppercase',
+        fontFamily: 'sans-serif',
     },
     entityListItem:{
-        border: '1px solid #eee',
+        borderBottom: '1px solid #ddd',
         padding: '5px 9px',
+        background: '#fcfcfc'
     },
     entityHeadItem:{
         
@@ -233,7 +242,7 @@ const useStyles = makeStyles(theme => ({
         fontSize: '10px',
         flexBasis: '50%',
         textOverflow: 'ellipsis',
-        fontWeight: '600',
+        fontWeight: '500',
     },
     entityCheckSpan:{
         display: 'flex',
@@ -263,4 +272,36 @@ const useStyles = makeStyles(theme => ({
         flexBasis: '20%',
         textOverflow: 'ellipsis',
     },
+    searchDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        
+    },
+    searchInput:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'baseline',
+        border:'1px solid #ccc',
+        padding: '1% 2%',
+        margin:'1% 2% 0% 2%',
+        borderRadius: '20px',
+    },
+    searchLabel:{
+        fontSize: 11,
+        fontWeight: 600,
+        color: '#666',
+        marginRight: 7,
+        
+    },
+    iconButton:{
+        padding: '5px'
+    },
+    absCloseButton:{
+        position: 'absolute',
+        top:'10px',
+        left: '10px',
+    }
 }));

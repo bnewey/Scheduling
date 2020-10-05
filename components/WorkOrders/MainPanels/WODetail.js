@@ -21,7 +21,7 @@ const WODetail = function(props) {
   const {user} = props;
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen} = useContext(WOContext);
+    currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(WOContext);
   const classes = useStyles();
 
   const [workOrderItems, setWorkOrderItems] = React.useState(null)
@@ -48,15 +48,19 @@ const WODetail = function(props) {
 
   const detail_table = [{value: 'c_name', displayName: 'Product To', type: 'text'},
                         {value: 'a_name', displayName: 'Bill To', type: 'text'},
-                        {value: 'date', displayName: 'Date Entered', type: 'date'},
-                        {value: 'requestor', displayName: 'Requestor', type: 'number'},
-                        {value: 'maker', displayName: 'maker', type: 'number'},
+                        {value: 'date', displayName: 'Date Entered', type: 'date',
+                        format: (value,row)=> Util.convertISODateToMySqlDate(value)},
+                        {value: 'requestor', displayName: 'Requestor', type: 'number',
+                          format: (value,row)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0].name : value },
+                        {value: 'maker', displayName: 'maker', type: 'number',
+                          format: (value,row)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0].name : value },
                         {value: 'type', displayName: 'Type', type: 'text'},
                         {value: 'job_reference', displayName: 'Job Reference', type: 'text'},
                         {value: 'description', displayName: 'Description', type: 'text'},
                         {value: 'notes', displayName: 'Notes', type: 'text'},
                         {value: 'po_number', displayName: 'Purchase Order', type: 'number'},
-                        {value: 'requested_arrival_date', displayName: 'Date Desired', type: 'date'}]
+                        {value: 'requested_arrival_date', displayName: 'Date Desired', type: 'date',
+                        format: (value,row)=> Util.convertISODateToMySqlDate(value)}];
 
   const handleUpdateExpanded = (value)=>{
     var existing =  expanded && expanded.indexOf(value)
@@ -80,7 +84,7 @@ const WODetail = function(props) {
     //go to packing slip page
   }
 
-
+  
   const columns = [
     { id: 'record_id', label: 'ID', minWidth: 20, align: 'center',
       format: (value, row)=> <span onClick={()=>handleShowWOIView(value)} className={classes.clickableWOnumber}>{value}</span> },
@@ -100,11 +104,11 @@ const WODetail = function(props) {
       align: 'left',
     },
     { id: 'part_number', label: 'Part Number', minWidth: 45, align: 'left' },
-    { id: 'description', label: 'Description', minWidth: 100, align: 'left' },
+    { id: 'description', label: 'Description', minWidth: 250, align: 'left' },
     { id: 'price', label: 'Unit Price', minWidth: 50, align: 'left' },
     { id: 'price', label: 'Total Price', minWidth: 50, align: 'left',
         format: (value,row)=>  value*row.quantity},
-    { id: 'ship_to', label: 'Description', minWidth: 100, align: 'left', format: (value,row)=>  activeWorkOrder.c_name},
+    { id: 'ship_to', label: 'Ship To', minWidth: 100, align: 'left', format: (value,row)=>  activeWorkOrder.c_name},
     { id: 'packing_slip', label: 'Packing Slip', minWidth: 50, align: 'left', 
     format: (value)=> {
         if(value == 0){
@@ -159,9 +163,11 @@ const WODetail = function(props) {
                     {activeWorkOrder && detail_table.map((item,i)=> {
                       return(
                         
-                      <div className={classes.detailDiv}>
+                      <div className={classes.detailDiv} key={i}>
                         <span className={classes.detailLabel}>{item.displayName}:</span>
-                        <span className={classes.detailValue}>{activeWorkOrder[item.value] ? activeWorkOrder[item.value] : ""}</span>
+                        <span className={classes.detailValue}>
+                          {activeWorkOrder[item.value] ? (item.format ? item.format(activeWorkOrder[item.value], item) :  activeWorkOrder[item.value]) : ""}
+                          </span>
                       </div>
                       )
                     })}
@@ -198,7 +204,7 @@ const WODetail = function(props) {
                               <TableCell
                               className={classes.tableCellHead}
                               classes={{stickyHeader: classes.stickyHeader}}
-                                key={column.id + i}
+                                key={'header' +column.id + i}
                                 align={column.align}
                                 style={{ minWidth: column.minWidth }}
                               >
@@ -211,10 +217,12 @@ const WODetail = function(props) {
                           { workOrderItems.map((row) => {
                             return (
                               <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
-                                {columns.map((column) => {
+                                {columns.map((column,i) => {
                                   const value = row[column.id];
                                   return (
-                                    <TableCell className={classes.tableCell} key={column.id} align={column.align}>
+                                    <TableCell className={classes.tableCell}
+                                               key={column.id + i} align={column.align}
+                                               style={{ minWidth: column.minWidth }}>
                                       {column.format  ? column.format(value, row) : value}
                                     </TableCell>
                                   );
@@ -275,27 +283,30 @@ const useStyles = makeStyles(theme => ({
   },
   detailDiv:{
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'baseline',
     width: '40%',
-    
+    margin: '0px 7% 1%',
+    borderBottom: '1px solid #f1f1f1',
   },
   detailLabel:{
     fontFamily: 'serif',
     fontWeight: '600',
-    color: '#666',
+    color: '#777',
     width: '60%',
-    padding: '2px 3px',
+    padding: '2px 13px',
     textTransform: 'uppercase',
-    fontSize: '10px'
+    fontSize: '10px',
+    textAlign: 'right',
+
   },
   detailValue:{
-    fontFamily: 'sans-serif',
-    color: '#111',
+    fontFamily: 'monospace',
+    color: '#112',
     width: '100%',
     padding: '2px 3px',
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: '600',
     marginTop: '-5px',
     marginBottom: '2px',
@@ -319,9 +330,13 @@ const useStyles = makeStyles(theme => ({
 
     },
     minHeight: '15px !important',
+    display:'flex',
+    flexDirection: 'row-reverse',
+
   },
   headercontent:{
     margin: '0px !important',
+    
   },
   heading:{
     fontSize: '19px',
