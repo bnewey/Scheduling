@@ -575,6 +575,7 @@ const useStyles = makeStyles(theme => ({
         marginTop: '.5%',
         padding: '1%',
         borderRadius: '4px',
+        border: '1px solid #afafaf',
     },
     timeline_toolbar:{
         display: 'flex',
