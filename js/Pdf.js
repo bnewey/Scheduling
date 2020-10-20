@@ -67,10 +67,51 @@ async function fetchWOPdf(){
 
 }
 
+async function createPackingSlipPdf(psObject, woiArray){
+    const route = '/scheduling/pdf/createPackingSlipPdf';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'blob',
+                body: JSON.stringify({psObject, woiArray})
+            });
+            //console.log('data', data);
+        return( await data.blob());
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function createWorkOrderPdf(woObject, woiArray){
+    const route = '/scheduling/pdf/createWorkOrderPdf';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'blob',
+                body: JSON.stringify({woObject, woiArray})
+            });
+            //console.log('data', data);
+        return( await data.blob());
+    }catch(error){
+        throw error;
+    }
+
+}
 
 module.exports = {
     createWOPdf: createWOPdf,
     createTLPdf:createTLPdf,
     fetchWOPdf: fetchWOPdf,
+    createPackingSlipPdf,
+    createWorkOrderPdf,
     
 };

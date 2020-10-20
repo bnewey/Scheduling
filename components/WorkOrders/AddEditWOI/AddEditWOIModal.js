@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles,Modal, Backdrop, Fade, Grid,ButtonGroup, Button,TextField, InputBase, Select, MenuItem,
-     Checkbox,IconButton} from '@material-ui/core';
+     Checkbox,IconButton, Radio, RadioGroup, FormControl, FormControlLabel} from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -21,68 +21,107 @@ import Util from '../../../js/Util.js';
 import Settings from  '../../../js/Settings';
 import Work_Orders from  '../../../js/Work_Orders';
 import { ListContext } from '../WOContainer';
-import EntitiesDrawer from './EntitiesDrawer.js';
+import { DetailContext } from '../WOContainer';
 
 
-
-const AddEditModal = function(props) {
-    const {user, editModalMode} = props;
+const AddEditWOIModal = function(props) {
+    const {user } = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
+    const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, workOrderItems, setWorkOrderItems,editWOIModalOpen,
+        setEditWOIModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI} = useContext(DetailContext)
+    
     const [shouldUpdate, setShouldUpdate] = useState(false);
-    const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
     const [errorFields,setErrorFields] = useState([]);
 
     const classes = useStyles();
 
     const handleCloseModal = () => {
-        setEntityDrawerOpen(false);
-        setActiveWorkOrder(null);
-        setEditWOModalOpen(false);
+        setActiveWOI(null);
+        setEditWOIModalOpen(false);
         setShouldUpdate(false);
+        setErrorFields([]);
     };
 
     const handleShouldUpdate = (update) =>{
         setShouldUpdate(update)
     }
 
-    const handleOpenEntityDraw = ()=>{
-        setEntityDrawerOpen(true);
-    }
+
+
    
-    const fields = [
+    const woi_fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name'},
-        {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name'},
-        {field: 'date', label: 'Date Entered*', type: 'date', updateBy: 'state',required: true},
-        {field: 'requestor', label: 'Requestor', type: 'select-users', updateBy: 'ref'},
-        {field: 'maker', label: 'Maker', type: 'select-users', updateBy: 'ref'},
-        {field: 'type', label: 'Type*', type: 'select-type', updateBy: 'ref',required: true},
-        {field: 'job_reference', label: 'Job Reference', type: 'text', updateBy: 'ref'},
+        {field: 'item_type', label: 'Item Type', type: 'radio-type', updateBy: 'state', defaultValue: 3 ,required: true},
+        {field: 'quantity', label: 'Quantity*', type: 'text', updateBy: 'ref',required: true},
+        {field: 'part_number', label: 'Part Number', type: 'text', updateBy: 'ref'},
+        {field: 'size', label: 'Size', type: 'text', updateBy: 'ref'},
         {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'advertising_notes', label: 'Ad Notes', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'po_number', label: 'Purchase Order #', type: 'text', updateBy: 'ref'},
-        {field: 'requested_arrival_date', label: 'Desired Date', type: 'date', updateBy: 'state'},
-        {field: 'completed', label: 'Completed', type: 'check', updateBy: 'ref'},
-        {field: 'invoiced', label: 'Invoiced', type: 'check', updateBy: 'ref'},
+        {field: 'price', label: 'Price', type: 'text', updateBy: 'ref',defaultValue: (0.00).toFixed(2) ,},
+        {field: 'contact', label: 'Ship To', type: 'select-ship_to', updateBy: 'state'},
+
+        //Repair or Loaner
+        {field: 'receive_date', label: 'Receive Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.item_type == 3 },
+        {field: 'receive_by', label: 'Receive By', type: 'select-users', updateBy: 'state', hidden: (current_wo)=> current_wo?.item_type == 3},
+
     ];
 
+    const scbd_or_sign_fields = [
+        {field: 'scoreboard_or_sign', label: '', type: 'radio-scbd_or_sign', updateBy: 'state',required: true,defaultValue: 0 ,},
+        //Scoreboard OR Sign
+        {field: 'vendor', label: 'Vendor', type: 'select-vendor', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign == 0},
+        //Scoreboard
+        {field: 'model', label: 'Model', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'color', label: 'Color', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'scoreboard_arrival_date', label: 'Arrival Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'scoreboard_arrival_status', label: 'Arrival Status', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        //Sign
+        {field: 'mount', label: 'Mount', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'trim_size', label: 'Trim Size', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'trim_corners', label: 'Trim Corners', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'date_offset', label: 'Date Offset', type: 'text', updateBy: 'ref',defaultValue: 0, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'sign_due_date', label: 'Sign Due Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+    ];
+
+    const scbd_or_sign_radio_options = [
+        {displayField: 'Scoreboard', value: 1 },
+        {displayField: 'Sign', value: 2 },
+        {displayField: 'N/A', value: 0 },
+    ]
+
+    const item_type_radio_options = [
+        {displayField: 'Repair', value: 1 },
+        {displayField: 'Loaner', value: 2 },
+        {displayField: 'Billing Item', value: 3 },
+    ]
+
+    
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
-        if(editModalMode == "add"){
-            setActiveWorkOrder();
+        if(editWOIModalOpen && editWOIModalMode == "add"){
+            setActiveWOI({item_type: 3, scoreboard_or_sign: 0, date_offset: 0, price: 0.00  });
         }
-    },[editModalMode])
+    },[editWOIModalMode, editWOIModalOpen])
+
+
+    // useEffect(()=>{
+    //     if(activeWorkOrderItem == null){
+    //         if(detailWOid){
+    //             //set woi
+
+    //         }
+    //     }
+    // },[activeWorkOrderItem, detailWOid])
 
     //Building an object of refs to update text input values instead of having them tied to state and updating every character
     const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
     
-    const [ref_object, setRef_Object] = React.useState(buildRefObject(fields.map((v)=> v.field)));
+    const [ref_object, setRef_Object] = React.useState(buildRefObject([...woi_fields.map((v)=> v.field), ...scbd_or_sign_fields.map((v)=> v.field)]));
 
-    const job_types = ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
+    const item_types = [];
 
     const handleInputOnChange = (value, should, type, key) => {
         if(value == null || !type || !key){
@@ -90,22 +129,19 @@ const AddEditModal = function(props) {
             return;
         }
         
-        var tmpWorkOrder = {...activeWorkOrder};
+        var tmpWOI = {...activeWOI};
 
         if(type === "date") {
-            tmpWorkOrder[key] = Util.convertISODateTimeToMySqlDateTime(value);
+            tmpWOI[key] = Util.convertISODateTimeToMySqlDateTime(value);
         }
         if(type.split('-')[0] === "select"){
-            tmpWorkOrder[key] = value.target.value;
+            tmpWOI[key] = value.target.value;
         }
-        if(type === "check"){
-            tmpWorkOrder[key] = value;
+        if(type.split('-')[0] === "radio"){
+            tmpWOI[key] = value;
         }
-        if(type === "entity"){
-            tmpWorkOrder[key[0]] = value[0];
-            tmpWorkOrder[key[1]] = value[1];
-        }
-        setActiveWorkOrder(tmpWorkOrder);
+
+        setActiveWOI(tmpWOI);
         setShouldUpdate(should);
     }
 
@@ -127,8 +163,8 @@ const AddEditModal = function(props) {
                              multiline={field.multiline}
                              inputRef={ref_object[field.field]}
                              inputProps={{className: classes.inputStyle}} 
-                             classes={{root: classes.inputRoot}}
-                             defaultValue={ activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : null }
+                             classes={{root: classes.inputRoot, multiline: classes.multiline}}
+                             defaultValue={ activeWOI && activeWOI[field.field] ? activeWOI[field.field] : field?.defaultValue  }
                              onChange={()=>handleShouldUpdate(true)}  /></div>
                 )
                 break;
@@ -143,7 +179,7 @@ const AddEditModal = function(props) {
                                         handleInputOnChange(value, true, field.type, field.field)
                                         
                                     }}
-                                    value={activeWorkOrder &&  activeWorkOrder[field.field] ? Util.convertISODateTimeToMySqlDateTime(activeWorkOrder[field.field]) : null}
+                                    value={activeWOI &&  activeWOI[field.field] ? Util.convertISODateTimeToMySqlDateTime(activeWOI[field.field]) : null}
                                     inputProps={{className: classes.inputRoot}} 
                                     format={'M/dd/yyyy'}
                                     />
@@ -154,7 +190,7 @@ const AddEditModal = function(props) {
                     <Select
                         error={error}
                         id={field.field}
-                        value={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
+                        value={activeWOI && activeWOI[field.field] ? activeWOI[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
                         native
@@ -172,30 +208,52 @@ const AddEditModal = function(props) {
                     </Select></div>
                 )
                 break;
-            case 'select-type':
-                return(
-                    <div className={classes.inputValueSelect}>
-                        <Select
-                    error={error}
+            case 'select-vendor':
+                return(<div className={classes.inputValueSelect}>
+                    <Select
+                        error={error}
                         id={field.field}
-                        value={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
+                        value={activeWOI && activeWOI[field.field] ? activeWOI[field.field] : null}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
                         native
                     >
-                        <option value={0}>
+                        <option value={null}>
                             Select
                         </option>
-                        {job_types && job_types.map((user)=>{
+                        {vendorTypes && vendorTypes.map((item)=>{
                             return (
-                                <option value={user}>
-                                    {user}
+                                <option value={item.id}>
+                                    {item.name}
                                 </option>
                             )
                         })}
                     </Select></div>
                 )
                 break;
+                case 'select-ship_to':
+                    return(<div className={classes.inputValueSelect}>
+                        <Select
+                            error={error}
+                            id={field.field}
+                            value={activeWOI && activeWOI[field.field] ? activeWOI[field.field] : null}
+                            inputProps={{classes:  classes.inputSelect}}
+                            onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                            native
+                        >
+                            <option value={null}>
+                                Select
+                            </option>
+                            {shipToOptionsWOI && shipToOptionsWOI.map((item)=>{
+                                return (
+                                    <option value={item.ec_record_id}>
+                                        {item.ec_name}
+                                    </option>
+                                )
+                            })}
+                        </Select></div>
+                    )
+                    break;
             case 'check':
                 return(
                     <div className={classes.inputValue}>
@@ -203,22 +261,41 @@ const AddEditModal = function(props) {
                         icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                         checkedIcon={<CheckBoxIcon fontSize="small" />}
                         name="checkedI"
-                        checked={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] == 1 ? true : false : false}
+                        checked={activeWOI && activeWOI[field.field] ? activeWOI[field.field] == 1 ? true : false : false}
                         onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
                     /></div>
                 )
                 break;
-            case 'entity':
-                return(<div className={classes.inputValue}>{error && <span className={classes.errorSpan}>Entity Required</span> }
-                {activeWorkOrder && activeWorkOrder[field.field] ? <>
-                        
-                        <span className={classes.inputRoot}>{activeWorkOrder[field.displayField]} | ID:{activeWorkOrder[field.field]}</span>
-                        
-                         </> : <></>}
-                    <IconButton type="submit" className={classes.iconButton} aria-label="clear-search" onClick={()=> handleOpenEntityDraw()}>
-                        <AccountBoxIcon />
-                    </IconButton> 
-                    </div>
+            case 'radio-scbd_or_sign':
+                return(
+                    <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>
+                        <RadioGroup row 
+                                    aria-label="Scoreboard/Sign/Other" 
+                                    name="Scoreboard/Sign/Other" 
+                                    value={activeWOI && activeWOI[field.field] != null ? +activeWOI[field.field] : 0} 
+                                    onChange={event => handleInputOnChange(event?.target?.value, true, field.type, field.field)}
+                                    classes={{root: classes.radioGroup}}>
+                                        {scbd_or_sign_radio_options.map((item=>(
+                                            <FormControlLabel value={item.value} control={<Radio  classes={{checked: classes.radio }}/>} label={item.displayField} />
+                                        )))}
+                        </RadioGroup>
+                    </FormControl>
+                )
+                break;
+            case 'radio-type':
+                return(
+                    <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>
+                        <RadioGroup row 
+                                    aria-label="Scoreboard/Sign/Other" 
+                                    name="Scoreboard/Sign/Other" 
+                                    value={activeWOI && activeWOI[field.field] != null ? +activeWOI[field.field] : 3} 
+                                    onChange={event => handleInputOnChange(event?.target?.value, true, field.type, field.field)}
+                                    classes={{root: classes.radioGroup}}>
+                                        {item_type_radio_options.map((item=>(
+                                            <FormControlLabel value={item.value} control={<Radio classes={{checked: classes.radio }} />} label={item.displayField} />
+                                        )))}
+                        </RadioGroup>
+                    </FormControl>
                 )
                 break;
             default: 
@@ -227,18 +304,18 @@ const AddEditModal = function(props) {
         }
     }
 
-    const handleSave = work_order => {
+    const handleSave = woi => {
         console.log("Trying to save");
-        if(!work_order){
-            console.error("Bad work order")
+        if(!woi){
+            console.error("Bad work order item")
             return;
         }
-        var addOrEdit = editModalMode;
+        var addOrEdit = editWOIModalMode;
         
 
  
         if(shouldUpdate){
-            var updateWorkOrder = {...work_order};
+            var updateWOI = {...woi};
 
             //Create Object with our text input values using ref_object
             const objectMap = (obj, fn) =>
@@ -246,32 +323,33 @@ const AddEditModal = function(props) {
             var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
 
             //Get only values we need to updateTask()
-            fields.forEach((field, i)=>{
+            [...woi_fields, ...scbd_or_sign_fields].forEach((field, i)=>{
                 const type = field.type;
                 switch(type){
                     case 'text':
                         //Get updated values with textValueObject bc text values use ref
                         if(textValueObject[field.field])
-                            updateWorkOrder[field.field] = textValueObject[field.field];
+                            updateWOI[field.field] = textValueObject[field.field];
                         break;
                     case 'date':
                         if(textValueObject[field.field])
-                            updateWorkOrder[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
+                            updateWOI[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
                         break;
                     default:
-                        //Others are updated with work_order (activeWorkOrder) state variable
-                        if(work_order[field.field])
-                            updateWorkOrder[field.field] = work_order[field.field];
+                        //Others are updated with woi (activeWOI) state variable
+                        if(woi[field.field])
+                            updateWOI[field.field] = woi[field.field];
                         break;
                 }
             })
 
-            console.log("UPDATE", updateWorkOrder);
+            console.log("UPDATE", updateWOI);
+            
 
             //Validate Required Fields
-            var empty_required_fields = fields.
-                    filter((v,i)=> v.required).
-                    filter((item)=> updateWorkOrder[item.field] == null || updateWorkOrder[item.field] == undefined);;
+            var empty_required_fields = [...woi_fields, ...scbd_or_sign_fields].
+                    filter((v,i)=> v.required && !(v.hidden && v.hidden(activeWOI) )).
+                    filter((item)=> updateWOI[item.field] == null || updateWOI[item.field] == undefined);;
             if(empty_required_fields.length > 0){
                 cogoToast.error("Required fields are blank");
                 setErrorFields(empty_required_fields);
@@ -281,44 +359,41 @@ const AddEditModal = function(props) {
             
             //Add Id to this new object
             if(addOrEdit == "edit"){
-                updateWorkOrder["record_id"] = work_order.wo_record_id;
+                updateWOI["record_id"] = woi.record_id;
 
-                Work_Orders.updateWorkOrder( updateWorkOrder )
+                Work_Orders.updateWorkOrderItem( updateWOI )
                 .then( (data) => {
                     //Refetch our data on save
-                    cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
-                    setWorkOrders(null);
-                    setActiveWorkOrder(null);
+                    cogoToast.success(`Work Order Item ${woi.record_id} has been updated!`, {hideAfter: 4});
+                    setWorkOrderItems(null);
                     handleCloseModal();
                 })
                 .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error updating work_order. ` , {hideAfter: 4});
+                    console.error("Error updating woi.",error);
+                    cogoToast.error(`Error updating woi. ` , {hideAfter: 4});
                 })
             }
             if(addOrEdit == "add"){
-                Work_Orders.addWorkOrder( updateWorkOrder )
+                updateWOI["work_order"] = activeWorkOrder.wo_record_id;
+                Work_Orders.addWorkOrderItem( updateWOI )
                 .then( (data) => {
-                    //Get id of new workorder and set view to detail
+                    //Get id of new workorder item 
                     if(data && data.insertId){
-                        setDetailWOid(data.insertId);
-                        setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
+                        setWorkOrderItems(null);
                     }
-                    cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
-                    setWorkOrders(null);
-                    setActiveWorkOrder(null);
+                    cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
                     handleCloseModal();
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error adding work_order. ` , {hideAfter: 4});
+                    cogoToast.error(`Error adding woi. ` , {hideAfter: 4});
                 })
             }
             
         }else{
             
             if(addOrEdit == "add"){
-                cogoToast.info("Empty Work Order not allowed");
+                cogoToast.info("Empty Form not allowed");
             }else{
                 cogoToast.info("No Changes made");
                 handleCloseModal();
@@ -329,11 +404,11 @@ const AddEditModal = function(props) {
     };
 
     return(<>
-        { editWOModalOpen && <Modal
+        { editWOIModalOpen && <Modal
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             className={classes.modal}
-            open={editWOModalOpen}
+            open={editWOIModalOpen}
             onClose={handleCloseModal}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -341,23 +416,26 @@ const AddEditModal = function(props) {
             timeout: 500,
             }}
         >
-            <Fade in={editWOModalOpen}>
+            <Fade in={editWOIModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            {detailWOid && activeWorkOrder ? `Edit WO#: ${activeWorkOrder.wo_record_id}` : 'Add Work Order'} 
+                            { activeWOI?.record_id ? `Edit WOI#: ${activeWOI.record_id}` : 'Add Work Order Item'} 
                         </span>
                     </div>
-                
+
 
                     {/* BODY */}
                     {ref_object ? 
-                    <Grid container >  
-                        <Grid item xs={entityDrawerOpen ? 7 : 12} className={classes.paperScroll}>
+                    <Grid container className={classes.grid_container} >  
+                        <Grid item xs={ 7 } className={classes.paperScroll}>
                             {/*FORM*/}
-                            {fields.map((field, i)=>{
+                            {woi_fields.map((field, i)=>{
+                                if(field?.hidden && field.hidden(activeWOI)){
+                                    return (<></>);
+                                }
                                 return(
                                 <div className={classes.inputDiv}>  
                                     <span className={classes.inputLabel}>{field.label}</span>
@@ -365,11 +443,19 @@ const AddEditModal = function(props) {
                                 </div>)
                             })}
                         </Grid>
-                        {entityDrawerOpen && 
+                         
                             <Grid item xs={5} className={classes.paperScroll}>
-                                <EntitiesDrawer handleInputOnChange={handleInputOnChange}  
-                                     entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen}/>
-                            </Grid>}
+                            {scbd_or_sign_fields.map((field, i)=>{
+                                if(field?.hidden && field.hidden(activeWOI)){
+                                    return (<></>);
+                                }
+                                return(
+                                <div className={classes.inputDiv}>  
+                                    <span className={classes.inputLabel}>{field.label}</span>
+                                    {getInputByType(field)}
+                                </div>)
+                            })}
+                            </Grid>
                     </Grid>
                     : <></> }
 
@@ -387,8 +473,9 @@ const AddEditModal = function(props) {
                                     Close
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
+                                
                                 <Button
-                                    onClick={ () => { handleSave(activeWorkOrder) }}
+                                    onClick={ () => { handleSave(activeWOI) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -405,7 +492,7 @@ const AddEditModal = function(props) {
     </>) 
     }
 
-export default AddEditModal;
+export default AddEditWOIModal;
 
 const useStyles = makeStyles(theme => ({
     modal: {
@@ -439,9 +526,10 @@ const useStyles = makeStyles(theme => ({
     },
     container: {
         width: '70%',
-        minHeight: '50%',
         textAlign: 'center',
-        
+    },
+    grid_container:{
+        minHeight: 500,
     },
     modalTitleDiv:{
         background: 'linear-gradient(0deg, #f1f1f1, white)',
@@ -495,7 +583,7 @@ const useStyles = makeStyles(theme => ({
     },
     inputStyleDate:{
         padding: '5px 7px',
-        width: '44%',
+        width: '175px',
         
     },
     inputRoot: {
@@ -543,5 +631,18 @@ const useStyles = makeStyles(theme => ({
     },
     errorSpan:{
         color: '#bb4444',
+    },
+    radioGroup:{
+        flexWrap: 'nowrap',
+        justifyContent: 'center'
+    },
+    radioFormControl:{
+        flexBasis: '70%',
+    },
+    radio:{
+        color: '#000 !important',
+    },
+    multiline:{
+        padding: 0,
     }
 }));

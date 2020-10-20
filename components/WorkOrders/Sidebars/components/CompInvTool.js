@@ -9,14 +9,14 @@ import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import Util from  '../../../../js/Util';
 import Work_Orders from  '../../../../js/Work_Orders';
-import { WOContext } from '../../WOContainer';
+import { ListContext } from '../../WOContainer';
 
 
 const CompInvTool = function(props) {
     const {user} = props;
   
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-      currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers} = useContext(WOContext);
+      currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers} = useContext(ListContext);
     const classes = useStyles();
 
     const [completed, setCompleted] = useState(activeWorkOrder ? (activeWorkOrder["completed"] == 1 ? true : false ) : false )

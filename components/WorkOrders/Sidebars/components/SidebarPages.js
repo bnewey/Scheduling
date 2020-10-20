@@ -5,24 +5,26 @@ import DetailIcon from '@material-ui/icons/Dvr';
 import PackingSlipIcon from '@material-ui/icons/Receipt';
 import PDFIcon from '@material-ui/icons/PictureAsPdf';
 import ListIcon from '@material-ui/icons/List';
+import PastIcon from '@material-ui/icons/AccessTime';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 import clsx from 'clsx';
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../js/Util';
 import Work_Orders from  '../../../../js/Work_Orders';
-import { WOContext } from '../../WOContainer';
+import { ListContext } from '../../WOContainer';
 
 
 const SidebarPages = function(props) {
     const {user} = props;
   
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-      currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(WOContext);
+      currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
     const classes = useStyles();
 
     const pages = [
-        "woDetail", "packingSlip", "woPdf", "pastWO"
+        "woDetail", "woItems", "packingSlip", "woPdf", "pastWO", "woFPOrder"
     ];
 
     const handleChangePage = (view) =>{
@@ -35,6 +37,10 @@ const SidebarPages = function(props) {
                 return(<DetailIcon className={classes.icon}/>)
                 break;
             }
+            case 'woItems':{
+                return(<ListIcon className={classes.icon}/>)
+                break;
+            }
             case 'packingSlip':{
                 return(<PackingSlipIcon className={classes.icon}/>);
                 break;
@@ -44,7 +50,11 @@ const SidebarPages = function(props) {
                 break;
             }
             case 'pastWO':{
-                return(<ListIcon className={classes.icon}/>);
+                return(<PastIcon className={classes.icon}/>);
+                break;
+            }
+            case 'woFPOrder':{
+                return(<LocalShippingIcon className={classes.icon}/>);
                 break;
             }
         }

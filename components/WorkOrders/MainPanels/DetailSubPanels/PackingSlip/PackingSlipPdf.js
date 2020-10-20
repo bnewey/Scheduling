@@ -1,14 +1,13 @@
 import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, CircularProgress, Button, FormHelperText, FormControl, InputLabel, Select, MenuItem, Paper } from '@material-ui/core';
 
-import { Document, Page, pdfjs, Text, Image, View, StyleSheet,
-  createElement, pdf, PDFRenderer} from 'react-pdf';
+import { Document, Page, pdfjs} from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = '../../../../static/pdf.worker.js';
-import blobStream from 'blob-stream';
+
 import Pdf from '../../../../../js/Pdf';
 
 //we can make this a functional component now
-const WorkOrderPdf = function(props) {
+const PackingSlipPdf = function(props) {
       
     const {rows, setRows, pdfRows, setPdfRows} = props;
 
@@ -18,8 +17,6 @@ const WorkOrderPdf = function(props) {
     const [loading, setLoading] = useState(false);
     const [orderBy, setOrderBy] = useState("date");
     const [ascending, setAscending ] = useState(false);
-
-    const [pdfurl, setUrl] = useState(null);
 
     const handleOrderByChange = event => {
       setOrderBy(event.target.value);
@@ -79,18 +76,10 @@ const WorkOrderPdf = function(props) {
                 temp.sort((a,b) => a[orderBy]-b[orderBy]);
             }
 
-            Pdf.createPackingSlipPdf({},[])//createWOPdf(temp)
+            Pdf.createWOPdf(temp)
             .then( (data) => {
                 setLoaded(true);
                 setLoading(false);
-                setUrl(data);
-                //console.log("data", data);
-                //renderPdf(data);
-
-                var file = new Blob([data], {type: 'application/pdf'});
-                var fileURL = URL.createObjectURL(file);
-                window.open(fileURL);
-                
             })
             .catch( error => {
               console.warn(error);
@@ -101,42 +90,11 @@ const WorkOrderPdf = function(props) {
     const goToPdfLink = (event)=>{
 
     }
-
-
-  
       
     return (
     <React.Fragment>
       <Paper className={classes.paper}>
-        <div className={classes.textContainer}><p className={classes.text}>{pdfRows.length} Work Order(s) Selected</p></div>
-        <FormControl className={classes.formControl}>
-        <InputLabel id="order-by-select-label">Order By:</InputLabel>
-          <Select
-            labelId="order-by-select-label"
-            id="order-by-select"
-            value={orderBy}
-            onChange={handleOrderByChange}
-            className={classes.select}
-          >
-            <MenuItem value={'wo_record_id'}>Work Order #</MenuItem>
-            <MenuItem value={'date'}>Date</MenuItem>
-            <MenuItem value={'completed'}>Completed</MenuItem>
-            <MenuItem value={'invoiced'}>Invoiced</MenuItem>
-          </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-        <InputLabel id="ascdesc-select-label">Order By:</InputLabel>
-          <Select
-            labelId="ascdesc-select-label"
-            id="ascdesc-select"
-            value={ascending}
-            onChange={handleAscDescChange}
-            className={classes.select}
-          >
-            <MenuItem value={false}>Descending</MenuItem>
-            <MenuItem value={true}>Ascending</MenuItem>
-          </Select>
-          </FormControl>
+        
         <Button
             className={classes.pdfButton}
             variant="contained"
@@ -163,7 +121,7 @@ const WorkOrderPdf = function(props) {
           <div className={classes.document}>
           <Document
             
-            file={pdfurl}//"/static/work_orders.pdf"
+            file="/static/work_orders.pdf"
             onLoadSuccess={ onDocumentLoadSuccess}>
                 <Page pageNumber={pageNumber} />
           </Document>
@@ -187,7 +145,7 @@ const WorkOrderPdf = function(props) {
     
 }
 
-export default WorkOrderPdf
+export default PackingSlipPdf
 
 const useStyles = makeStyles(theme => ({
   root:{

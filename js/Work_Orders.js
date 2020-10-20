@@ -45,6 +45,28 @@ async function getWorkOrderById(wo_id){
 
 }
 
+async function getWorkOrderByIdForPDF(wo_id){
+    if(!wo_id){
+        throw new Error("No/bad id for getWorkOrderByIdForPDF");
+    }
+    const route = '/scheduling/workOrders/getWorkOrderByIdForPDF';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({wo_id: wo_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 async function getEmployeeNameFromId(id){
     if(!id){
         throw new Error("No/bad id for getEmployeeNameFromId");
@@ -120,6 +142,26 @@ async function getAllWorkOrderSignArtItems(id){
         var list = await data.json();
         return(list);
     }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function reorderWOI(woi_array, work_order_id){
+    const route = '/scheduling/workOrders/reorderWOI';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi_array,  work_order_id})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
         throw error;
     }
 
@@ -201,15 +243,57 @@ async function addWorkOrder(workOrder){
 
 }
 
+async function updateWorkOrderItem(woi){
+    const route = '/scheduling/workOrders/updateWorkOrderItem';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function addWorkOrderItem(woi){
+    const route = '/scheduling/workOrders/addWorkOrderItem';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 module.exports = {
     getAllWorkOrders: getAllWorkOrders,
     getWorkOrderById,
+    getWorkOrderByIdForPDF,
     getEmployeeNameFromId,
     searchAllWorkOrders,
     getAllWorkOrderItems: getAllWorkOrderItems,
     getAllWorkOrderSignArtItems: getAllWorkOrderSignArtItems,
+    reorderWOI,
     updateWorkOrderItemArrivalDate: updateWorkOrderItemArrivalDate,
     updateWorkOrderItemVendor,
     updateWorkOrder,
     addWorkOrder,
+    updateWorkOrderItem,
+    addWorkOrderItem,
 };

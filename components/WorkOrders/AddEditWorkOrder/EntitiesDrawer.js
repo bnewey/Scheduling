@@ -16,7 +16,7 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
 import Util from '../../../js/Util.js';
 
 import Settings from  '../../../js/Settings';
-import { WOContext } from '../WOContainer';
+import { ListContext } from '../WOContainer';
 
 
 
@@ -25,7 +25,7 @@ const EntitiesDrawer = function(props) {
     const {user, entityDrawerOpen, setEntityDrawerOpen, handleInputOnChange} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid,
-    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(WOContext);
+    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const [entityRows, setEntityRows] = useState(null);
     const [searchValue,setSearchValue] = useState("");

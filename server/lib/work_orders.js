@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+var async = require("async");
 
 const logger = require('../../logs');
 
@@ -55,7 +56,7 @@ router.post('/getWorkOrderById', async (req,res) => {
     }
 
     const sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, advertising_notes, ' +
     ' wo.customer_id AS customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state,  ' + 
     ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, wo.requested_arrival_date   ' +
     ' FROM work_orders wo ' +
@@ -64,6 +65,7 @@ router.post('/getWorkOrderById', async (req,res) => {
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
     ' WHERE wo.record_id = ? ' + 
     ' limit 1 ';
+
     try{
         const results = await database.query(sql, [wo_id]);
         logger.info("Got Work Order id:"+wo_id);
@@ -71,6 +73,44 @@ router.post('/getWorkOrderById', async (req,res) => {
     }
     catch(error){
         logger.error("Work Order id: " + id + " , " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getWorkOrderByIdForPDF', async (req,res) => {
+    var wo_id ;
+    if(req.body){
+        wo_id = req.body.wo_id;
+    }
+
+    const sql = 'SELECT  wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id,wo.customer_id AS customer_id, ' +
+    ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, date_format(wo.requested_arrival_date, \'%Y-%m-%d\') as requested_arrival_date,   ' +
+    //Shipping Info
+    ' enc.name AS c_entity_name,  eac.address AS c_address, eac.state AS c_state, eac.city AS c_city,eac.zip AS c_zip,   ' +
+    ' eac.residence AS c_residence, ecc.name AS c_contact_name, ecc.work_phone AS c_work_phone, ecc.cell AS c_cell_phone, ecc.home_phone AS c_other_phone, ' +
+    ' ecc.title AS c_contact_title, ' +
+    //Billing Info
+    ' ena.name AS a_entity_name, ena.account_number AS a_account_number, eaa.address AS a_address, eaa.state AS a_state, eaa.city AS a_city,eaa.zip AS a_zip, ' +
+    ' eca.name AS a_contact_name, eca.work_phone AS a_work_phone,  eca.fax AS a_fax, ' +
+    ' eca.title AS a_contact_title ' + 
+
+    ' FROM work_orders wo ' +
+    ' LEFT JOIN entities enc ON wo.customer_id = enc.record_id ' +
+    ' LEFT JOIN entities ena ON wo.account_id = ena.record_id ' +  
+    ' LEFT JOIN entities_contacts ecc ON enc.shipping = ecc.record_id ' + 
+    ' LEFT JOIN entities_contacts eca ON ena.billing = eca.record_id ' + 
+    ' LEFT JOIN entities_addresses eac ON (ecc.shipping = eac.record_id ) ' +
+    ' LEFT JOIN entities_addresses eaa ON (eca.billing = eaa.record_id ) ' +
+    ' WHERE wo.record_id = ? ' + 
+    ' limit 1 ';
+    try{
+        const results = await database.query(sql, [wo_id]);
+        logger.info("Got Work Order id:"+wo_id);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("Work Order for PDF id: " + wo_id + " , " + error);
         res.sendStatus(400);
     }
 });
@@ -186,7 +226,7 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
     logger.verbose(wo_id);
     
 
-    const sql = 'SELECT * '  + 
+    const sql = 'SELECT *  '  + 
         ' FROM work_orders_items woi ' +
         ' WHERE woi.work_order =  ? ' +
         ' ORDER BY woi.ordernum ASC ' + 
@@ -202,6 +242,38 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
         logger.error("Work Order Sign Art  Items: " + error);
         res.sendStatus(400);
     }
+});
+
+router.post('/reorderWOI', async (req,res) => {
+    var work_order_id, woi_array;
+    if(req.body){
+        work_order_id = req.body.work_order_id;
+        woi_array = req.body.woi_array;
+    }
+    
+    const sql = ' UPDATE work_orders_items SET ordernum = ? ' +
+    ' WHERE record_id = ? AND work_order = ? ';
+
+
+    async.forEachOf(woi_array, async (woi, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [woi.ordernum, woi.record_id, work_order_id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("WorkOrder (reorderWOI): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Reorder WorkOrderItems: " + work_order_id);
+            res.sendStatus(200);
+        }
+    })
 });
 
 router.post('/updateWorkOrderItemArrivalDate', async (req,res) => {
@@ -269,12 +341,13 @@ router.post('/updateWorkOrder', async (req,res) => {
         }  
     }
     const sql = ' UPDATE work_orders set customer_id = ?, account_id = ?, date = ?, requestor = ? , maker = ?, type = ?, ' +
-    '  job_reference = ? , description = ?, notes = ?, po_number = ?, requested_arrival_date = ?, completed = ?, invoiced = ? ' +
+    '  job_reference = ? , description = ?, notes = ?, po_number = ?, requested_arrival_date = ?, completed = ?, invoiced = ?, advertising_notes=? ' +
     '  WHERE record_id = ? ';
 
     try{
         const results = await database.query(sql, [wo.customer_id, wo.account_id, Util.convertISODateToMySqlDate(wo.date), wo.requestor, wo.maker, wo.type,
-                    wo.job_reference, wo.description, wo.notes, wo.po_number, Util.convertISODateToMySqlDate(wo.requested_arrival_date), wo.completed, wo.invoiced , wo.record_id]);
+                    wo.job_reference, wo.description, wo.notes, wo.po_number, Util.convertISODateToMySqlDate(wo.requested_arrival_date), wo.completed, wo.invoiced ,
+                    wo.advertising_notes, wo.record_id]);
         logger.info("Work Order  updated", wo.record_id);
         res.json(results);
 
@@ -309,6 +382,81 @@ router.post('/addWorkOrder', async (req,res) => {
     }
     catch(error){
         logger.error("Failed to updateWorkOrder: " + error);
+        res.sendStatus(400);
+    }
+});
+
+
+
+router.post('/updateWorkOrderItem', async (req,res) => {
+
+    var woi ;
+    if(req.body){
+        if(req.body.woi != null){
+            woi = req.body.woi;
+        }  
+    }
+
+    console.log("woi", woi)
+
+    const sql = ' UPDATE work_orders_items SET item_type = IFNULL(? ,DEFAULT(item_type)), quantity = IFNULL(? ,DEFAULT(quantity)), ' + 
+    ' part_number = ?, size = ?, description = ?, price = IFNULL(? ,DEFAULT(price)), receive_date =?, ' +
+    ' receive_by =?, contact = IFNULL(? ,DEFAULT(contact)), scoreboard_or_sign= IFNULL(? ,DEFAULT(scoreboard_or_sign)), model=?,color=? ,' +
+    ' trim=?,scoreboard_arrival_date=?,scoreboard_arrival_status=?, mount=?, ' + 
+    ' trim_size=?, trim_corners=?, date_offset= IFNULL(? ,DEFAULT(date_offset)), sign_due_date=?, vendor=? ' +
+    '  WHERE record_id = ? ';
+
+    try{ //Util.convertISODateToMySqlDate(wo.date)
+        const results = await database.query(sql, [ woi.item_type || null, woi.quantity || null, woi.part_number || null, woi.size || null,
+                woi.description || null,woi.price || (0).toFixed(2), Util.convertISODateToMySqlDate( woi.receive_date) , woi.receive_by || null,
+                woi.contact || null, woi.scoreboard_or_sign || null,
+                woi.model || null, woi.color || null, woi.trim  || null,
+                Util.convertISODateToMySqlDate(woi.scoreboard_arrival_date), woi.scoreboard_arrival_status || null,
+                 woi.mount || null, woi.trim_size || null, woi.trim_corners || null,
+                woi.date_offset || 0, Util.convertISODateToMySqlDate(woi.sign_due_date), woi.vendor || null, woi.record_id]);
+        logger.info("Work Order Item  updated", woi.record_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Failed to updateWorkOrderItem: " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/addWorkOrderItem', async (req,res) => {
+
+    var woi ;
+    if(req.body){
+        if(req.body.woi != null){
+            woi = req.body.woi;
+        }  
+    }
+
+
+
+    const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM work_orders_items woi WHERE work_order = ?; "
+
+    const sql = '  INSERT INTO work_orders_items ( work_order, item_type, user_entered, date_entered, quantity, part_number, size, ' +
+            ' description, price, receive_date, receive_by, packing_slip, contact, scoreboard_or_sign, model, color, trim, ' + 
+            ' scoreboard_arrival_date, scoreboard_arrival_status, mount, roy, trim_size, trim_corners, date_offset, sign_due_date, ordernum,vendor ) ' +
+            ' VALUES ( IFNULL(? ,DEFAULT(contact)), IFNULL(? ,DEFAULT(item_type)), IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(date_entered)), ' +
+            ' IFNULL(? ,DEFAULT(quantity)), ?, ?, ?, IFNULL(? ,DEFAULT(price)), ?, ?, DEFAULT(packing_slip), IFNULL(? ,DEFAULT(contact)), ' + 
+            ' IFNULL(? ,DEFAULT(scoreboard_or_sign)), ?,?,?,?,?,?,IFNULL(? ,DEFAULT(roy)), ?,?, IFNULL(? ,DEFAULT(date_offset)), ?, ' +
+            ' IFNULL(?, 0) , ?) ';
+
+    try{
+        const data = await database.query(getMax, [ woi.work_order ])
+        const results = await database.query(sql, [ woi.work_order, woi.item_type, woi.user_entered || 0, Util.convertISODateToMySqlDate(new Date()),
+            woi.quantity, woi.part_number, woi.size, woi.description, woi.price, Util.convertISODateToMySqlDate(woi.receive_date), woi.receive_by,// woi.packing_slip || 0,
+            woi.contact, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim, woi.scoreboard_arrival_date, woi.scoreboard_arrival_status,
+            woi.mount, 0, woi.trim_size, woi.trim_corners, woi.date_offset, Util.convertISODateToMySqlDate(woi.sign_due_date), data[0].max_num || 0, woi.vendor ]);
+        logger.info("Work Order Item added ");    
+        res.json(results);    
+ 
+    }
+    catch(error){
+        logger.error("Failed to updateWorkOrderItem: " + error);
         res.sendStatus(400);
     }
 });

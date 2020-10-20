@@ -5,7 +5,7 @@ import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../../js/Util';
-import { WOContext } from '../WOContainer';
+import { ListContext } from '../WOContainer';
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -14,7 +14,8 @@ import {
     DateTimePicker,
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
-
+import RecentWO from './components/RecentWO';
+import FilterCompInv from './components/FilterCompInv';
 
 const WOSidebarList = function(props) {
   const {user} = props;
@@ -22,9 +23,12 @@ const WOSidebarList = function(props) {
 
 
   const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, setCurrentView, 
-      editWOModalOpen, setEditWOModalOpen, setEditModalMode} = useContext(WOContext);
+      editWOModalOpen, setEditWOModalOpen, setEditModalMode} = useContext(ListContext);
   
   const classes = useStyles();
+
+  console.log("context",{workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, setCurrentView, 
+    editWOModalOpen, setEditWOModalOpen, setEditModalMode});
   
   
   const changeDateRange = (to, from) =>{
@@ -53,7 +57,8 @@ const WOSidebarList = function(props) {
               <div>New Order</div>
             </Button>
         </div>
-        { !searchOpen && <div className={classes.dateRangeDiv}>
+        <div className={classes.dateRangeDiv}>
+        { !searchOpen && <div>
             <div className={classes.labelDiv}><span className={classes.dateRangeSpan}>Date Range</span></div>
             <div className={classes.inputDiv}>
               <span className={classes.inputSpan}>FROM:</span>
@@ -84,7 +89,19 @@ const WOSidebarList = function(props) {
             <div className={classes.warningDiv}>
             {workOrders && workOrders.length >= 2000 ? <span className={classes.inlineErrorText}>The data has been limited to 2000 items, please select a smaller date range</span> : <></>}
             </div>
+
+            
         </div>}
+          { !searchOpen && 
+            <div>
+                <FilterCompInv/>
+            </div>
+          }
+        </div>
+          <div className={classes.dateRangeDiv}>
+            
+            <RecentWO />
+          </div>
     </div>
   );
 }
@@ -150,7 +167,6 @@ const useStyles = makeStyles(theme => ({
       color: '#a55400'
     },
     dateRangeSpan:{
-      marginRight: '10px',
       fontSize: '13px',
       fontFamily: 'sans-serif',
       fontWeight:'600',

@@ -1,10 +1,11 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles,Modal, Backdrop, Fade, Grid,ButtonGroup, Button,TextField, InputBase, Select, MenuItem,
-     Checkbox,IconButton} from '@material-ui/core';
+     Checkbox,IconButton, Radio, RadioGroup, FormControl, FormControlLabel} from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
+import clsx from 'clsx';
 
 import cogoToast from 'cogo-toast';
 
@@ -16,73 +17,104 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
+import moment from 'moment';
+
 import Util from '../../../js/Util.js';
+import WorkOrderDetail from  '../../../js/WorkOrderDetail';
 
 import Settings from  '../../../js/Settings';
 import Work_Orders from  '../../../js/Work_Orders';
 import { ListContext } from '../WOContainer';
-import EntitiesDrawer from './EntitiesDrawer.js';
+import { DetailContext } from '../WOContainer';
+import ScoreboardDrawer from './ScoreboardDrawer';
+import ScoreboardList from './ScoreboardList';
 
-
-
-const AddEditModal = function(props) {
-    const {user, editModalMode} = props;
+const AddEditFPOrder = function(props) {
+    const {user } = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
+    const {fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, workOrderItems, setWorkOrderItems,fpOrderModalOpen,
+        setFPOrderModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrders, setFPOrders} = useContext(DetailContext)
+    
     const [shouldUpdate, setShouldUpdate] = useState(false);
-    const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
     const [errorFields,setErrorFields] = useState([]);
+    const [scbdDrawerOpen, setScbdDrawerOpen] = useState(false);
+    const [scbdMode, setScbdMode] = useState("add");
+    const [activeFPOrderItem, setActiveFPOrderItem] = useState(null);
+    const [fpOrderItems, setFPOrderItems] = useState(null);
 
     const classes = useStyles();
 
+    useEffect(()=>{
+        if(activeFPOrder?.record_id && fpOrderItems == null){
+            WorkOrderDetail.getFPOrderItems( scbd.record_id )
+            .then( (data) => {
+                if(data){
+                    setFPOrderItems(data);
+                }                
+            })
+            .catch( error => {
+                console.error("Error getting fpOrderitem.",error);
+                cogoToast.error(`Error getting fpOrderitem. ` , {hideAfter: 4});
+            })
+        }
+    },[activeFPOrder])
+
     const handleCloseModal = () => {
-        setEntityDrawerOpen(false);
-        setActiveWorkOrder(null);
-        setEditWOModalOpen(false);
+        setActiveFPOrder(null);
+        setFPOrderModalOpen(false);
         setShouldUpdate(false);
+        setErrorFields([]);
     };
 
     const handleShouldUpdate = (update) =>{
         setShouldUpdate(update)
     }
 
-    const handleOpenEntityDraw = ()=>{
-        setEntityDrawerOpen(true);
-    }
-   
-    const fields = [
+
+    const fpOrderFields = [
         //type: select must be hyphenated ex select-type
-        {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name'},
-        {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name'},
-        {field: 'date', label: 'Date Entered*', type: 'date', updateBy: 'state',required: true},
-        {field: 'requestor', label: 'Requestor', type: 'select-users', updateBy: 'ref'},
-        {field: 'maker', label: 'Maker', type: 'select-users', updateBy: 'ref'},
-        {field: 'type', label: 'Type*', type: 'select-type', updateBy: 'ref',required: true},
-        {field: 'job_reference', label: 'Job Reference', type: 'text', updateBy: 'ref'},
-        {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'advertising_notes', label: 'Ad Notes', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'po_number', label: 'Purchase Order #', type: 'text', updateBy: 'ref'},
-        {field: 'requested_arrival_date', label: 'Desired Date', type: 'date', updateBy: 'state'},
-        {field: 'completed', label: 'Completed', type: 'check', updateBy: 'ref'},
-        {field: 'invoiced', label: 'Invoiced', type: 'check', updateBy: 'ref'},
+        {field: 'order_date', label: 'Order Date', type: 'date', updateBy: 'state', defaultValue: moment().format('MM/DD/YYYY')},
+        {field: 'ordered_by', label: 'Ordered By', type: 'select-users', updateBy: 'state'},
+        {field: 'ship_to', label: 'Ship To', type: 'text', updateBy: 'ref', multiline: true,
+                defaultValue: 'To be picked up by our freight truck for delivery to Rainey Electronics, Inc. in Little Rock, AR'},
+        {field: 'bill_to', label: 'Bill To', type: 'text', updateBy: 'ref', multiline: true,
+                defaultValue: "Rainey Electronics, Inc. Attn: Bob Rainey 19023 Colonel Glenn Road Little Rock, AR 72210"},
+        {field: 'discount', label: 'Discount', type: 'number', updateBy: 'ref',defaultValue: 0 },
+        {field: 'sales_order_id', label: 'Sales Order #', type: 'text', updateBy: 'ref'},
+        {field: 'special_instructions', label: 'Special Instructions', type: 'text', updateBy: 'ref', multiline: true},
     ];
 
+    const fpScbdFields = [
+        //{field: 'scoreboard_or_sign', label: '', type: 'radio-scbd_or_sign', updateBy: 'state',required: true,defaultValue: 0 ,},
+        {field: 'model', label: 'Model', type: 'text', updateBy: 'ref',required: true},
+        {field: 'model_quantity', label: 'Quantity*', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
+        {field: 'color', label: 'Color', type: 'text', updateBy: 'ref'},
+        {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref'},
+        {field: 'controller', label: 'Controller', type: 'text', updateBy: 'ref'},
+        {field: 'controller_quantity', label: 'Quantity*', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
+        {field: 'ctrl_case', label: 'Case', type: 'text', updateBy: 'ref'},
+        {field: 'horn', label: 'Horn', type: 'text', updateBy: 'ref'},
+        // {field: 'scoreboard_arrival_date', label: 'Arrival Date', type: 'date', updateBy: 'state'},
+        // {field: 'scoreboard_arrival_status', label: 'Arrival Status', type: 'text', updateBy: 'ref'},
+    ];
+    
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
-        if(editModalMode == "add"){
-            setActiveWorkOrder();
+        if(fpOrderModalOpen && fpOrderModalMode == "add"){
+            setActiveFPOrder({order_date: moment().format('MM/DD/YYYY') });
         }
-    },[editModalMode])
+    },[fpOrderModalMode, fpOrderModalOpen])
+
 
     //Building an object of refs to update text input values instead of having them tied to state and updating every character
     const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
     
-    const [ref_object, setRef_Object] = React.useState(buildRefObject(fields.map((v)=> v.field)));
+    const [ref_object, setRef_Object] = React.useState(buildRefObject(fpOrderFields.map((v)=> v.field)));
 
-    const job_types = ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
+    const item_types = [];
 
     const handleInputOnChange = (value, should, type, key) => {
         if(value == null || !type || !key){
@@ -90,26 +122,23 @@ const AddEditModal = function(props) {
             return;
         }
         
-        var tmpWorkOrder = {...activeWorkOrder};
+        var tmpWOI = {...activeFPOrder};
 
         if(type === "date") {
-            tmpWorkOrder[key] = Util.convertISODateTimeToMySqlDateTime(value);
+            tmpWOI[key] = Util.convertISODateTimeToMySqlDateTime(value);
         }
         if(type.split('-')[0] === "select"){
-            tmpWorkOrder[key] = value.target.value;
+            tmpWOI[key] = value.target.value;
         }
-        if(type === "check"){
-            tmpWorkOrder[key] = value;
+        if(type.split('-')[0] === "radio"){
+            tmpWOI[key] = value;
         }
-        if(type === "entity"){
-            tmpWorkOrder[key[0]] = value[0];
-            tmpWorkOrder[key[1]] = value[1];
-        }
-        setActiveWorkOrder(tmpWorkOrder);
+
+        setActiveFPOrder(tmpWOI);
         setShouldUpdate(should);
     }
 
-    const getInputByType =(field)=>{
+    const getInputByType =(field , ref_object)=>{
         if(!field || field.type == null){
             console.error("Bad field");
             return;
@@ -127,8 +156,8 @@ const AddEditModal = function(props) {
                              multiline={field.multiline}
                              inputRef={ref_object[field.field]}
                              inputProps={{className: classes.inputStyle}} 
-                             classes={{root: classes.inputRoot}}
-                             defaultValue={ activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : null }
+                             classes={{root: classes.inputRoot, multiline: classes.multiline}}
+                             defaultValue={ activeFPOrder && activeFPOrder[field.field] ? activeFPOrder[field.field] : field?.defaultValue  }
                              onChange={()=>handleShouldUpdate(true)}  /></div>
                 )
                 break;
@@ -143,7 +172,7 @@ const AddEditModal = function(props) {
                                         handleInputOnChange(value, true, field.type, field.field)
                                         
                                     }}
-                                    value={activeWorkOrder &&  activeWorkOrder[field.field] ? Util.convertISODateTimeToMySqlDateTime(activeWorkOrder[field.field]) : null}
+                                    value={activeFPOrder &&  activeFPOrder[field.field] ? Util.convertISODateTimeToMySqlDateTime(activeFPOrder[field.field]) : null}
                                     inputProps={{className: classes.inputRoot}} 
                                     format={'M/dd/yyyy'}
                                     />
@@ -154,7 +183,7 @@ const AddEditModal = function(props) {
                     <Select
                         error={error}
                         id={field.field}
-                        value={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
+                        value={activeFPOrder && activeFPOrder[field.field] ? activeFPOrder[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
                         native
@@ -172,30 +201,6 @@ const AddEditModal = function(props) {
                     </Select></div>
                 )
                 break;
-            case 'select-type':
-                return(
-                    <div className={classes.inputValueSelect}>
-                        <Select
-                    error={error}
-                        id={field.field}
-                        value={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
-                        inputProps={{classes:  classes.inputSelect}}
-                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
-                        native
-                    >
-                        <option value={0}>
-                            Select
-                        </option>
-                        {job_types && job_types.map((user)=>{
-                            return (
-                                <option value={user}>
-                                    {user}
-                                </option>
-                            )
-                        })}
-                    </Select></div>
-                )
-                break;
             case 'check':
                 return(
                     <div className={classes.inputValue}>
@@ -203,42 +208,29 @@ const AddEditModal = function(props) {
                         icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                         checkedIcon={<CheckBoxIcon fontSize="small" />}
                         name="checkedI"
-                        checked={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] == 1 ? true : false : false}
+                        checked={activeFPOrder && activeFPOrder[field.field] ? activeFPOrder[field.field] == 1 ? true : false : false}
                         onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
                     /></div>
                 )
                 break;
-            case 'entity':
-                return(<div className={classes.inputValue}>{error && <span className={classes.errorSpan}>Entity Required</span> }
-                {activeWorkOrder && activeWorkOrder[field.field] ? <>
-                        
-                        <span className={classes.inputRoot}>{activeWorkOrder[field.displayField]} | ID:{activeWorkOrder[field.field]}</span>
-                        
-                         </> : <></>}
-                    <IconButton type="submit" className={classes.iconButton} aria-label="clear-search" onClick={()=> handleOpenEntityDraw()}>
-                        <AccountBoxIcon />
-                    </IconButton> 
-                    </div>
-                )
-                break;
+            
             default: 
                 return <></>
                 break;
         }
     }
 
-    const handleSave = work_order => {
+    const handleSave = fpOrder => {
         console.log("Trying to save");
-        if(!work_order){
-            console.error("Bad work order")
+        if(!fpOrder){
+            console.error("Bad work order item")
             return;
         }
-        var addOrEdit = editModalMode;
+        var addOrEdit = fpOrderModalMode;
         
-
  
         if(shouldUpdate){
-            var updateWorkOrder = {...work_order};
+            var updateFpOrder = {...fpOrder};
 
             //Create Object with our text input values using ref_object
             const objectMap = (obj, fn) =>
@@ -246,32 +238,38 @@ const AddEditModal = function(props) {
             var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
 
             //Get only values we need to updateTask()
-            fields.forEach((field, i)=>{
+            fpOrderFields.forEach((field, i)=>{
                 const type = field.type;
                 switch(type){
                     case 'text':
                         //Get updated values with textValueObject bc text values use ref
                         if(textValueObject[field.field])
-                            updateWorkOrder[field.field] = textValueObject[field.field];
+                            updateFpOrder[field.field] = textValueObject[field.field];
                         break;
+                    case 'number':
+                         //Get updated values with textValueObject bc number values use ref
+                         if(textValueObject[field.field])
+                         updateFpOrder[field.field] = parseInt(textValueObject[field.field]);
+                     break;
                     case 'date':
                         if(textValueObject[field.field])
-                            updateWorkOrder[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
+                            updateFpOrder[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
                         break;
                     default:
-                        //Others are updated with work_order (activeWorkOrder) state variable
-                        if(work_order[field.field])
-                            updateWorkOrder[field.field] = work_order[field.field];
+                        //Others are updated with fpOrder (activeFPOrder) state variable
+                        if(fpOrder[field.field])
+                            updateFpOrder[field.field] = fpOrder[field.field];
                         break;
                 }
             })
 
-            console.log("UPDATE", updateWorkOrder);
+            console.log("UPDATE", updateFpOrder);
+            
 
             //Validate Required Fields
-            var empty_required_fields = fields.
-                    filter((v,i)=> v.required).
-                    filter((item)=> updateWorkOrder[item.field] == null || updateWorkOrder[item.field] == undefined);;
+            var empty_required_fields = fpOrderFields.
+                    filter((v,i)=> v.required && !(v.hidden && v.hidden(activeFPOrder) )).
+                    filter((item)=> updateFpOrder[item.field] == null || updateFpOrder[item.field] == undefined);;
             if(empty_required_fields.length > 0){
                 cogoToast.error("Required fields are blank");
                 setErrorFields(empty_required_fields);
@@ -281,44 +279,42 @@ const AddEditModal = function(props) {
             
             //Add Id to this new object
             if(addOrEdit == "edit"){
-                updateWorkOrder["record_id"] = work_order.wo_record_id;
+                updateFpOrder["record_id"] = fpOrder.record_id;
 
-                Work_Orders.updateWorkOrder( updateWorkOrder )
+                WorkOrderDetail.updateFpOrder( updateFpOrder )
                 .then( (data) => {
                     //Refetch our data on save
-                    cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
-                    setWorkOrders(null);
-                    setActiveWorkOrder(null);
+                    cogoToast.success(`Work Order Item ${fpOrder.record_id} has been updated!`, {hideAfter: 4});
+                    setFPOrders(null);
                     handleCloseModal();
                 })
                 .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error updating work_order. ` , {hideAfter: 4});
+                    console.error("Error updating fpOrder.",error);
+                    cogoToast.error(`Error updating fpOrder. ` , {hideAfter: 4});
                 })
             }
             if(addOrEdit == "add"){
-                Work_Orders.addWorkOrder( updateWorkOrder )
+                updateFpOrder["work_order"] = activeWorkOrder.wo_record_id;
+                WorkOrderDetail.addFPOrder( updateFpOrder )
                 .then( (data) => {
-                    //Get id of new workorder and set view to detail
+                    //Get id of new workorder item 
                     if(data && data.insertId){
-                        setDetailWOid(data.insertId);
-                        setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
+                        setFPOrders(null);
+                        //setFPOrderItems(null);
                     }
-                    cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
-                    setWorkOrders(null);
-                    setActiveWorkOrder(null);
+                    cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
                     handleCloseModal();
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error adding work_order. ` , {hideAfter: 4});
+                    cogoToast.error(`Error adding fpOrder. ` , {hideAfter: 4});
                 })
             }
             
         }else{
             
             if(addOrEdit == "add"){
-                cogoToast.info("Empty Work Order not allowed");
+                cogoToast.info("Empty Form not allowed");
             }else{
                 cogoToast.info("No Changes made");
                 handleCloseModal();
@@ -329,11 +325,11 @@ const AddEditModal = function(props) {
     };
 
     return(<>
-        { editWOModalOpen && <Modal
+        { fpOrderModalOpen && <Modal
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             className={classes.modal}
-            open={editWOModalOpen}
+            open={fpOrderModalOpen}
             onClose={handleCloseModal}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -341,35 +337,53 @@ const AddEditModal = function(props) {
             timeout: 500,
             }}
         >
-            <Fade in={editWOModalOpen}>
+            <Fade in={fpOrderModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            {detailWOid && activeWorkOrder ? `Edit WO#: ${activeWorkOrder.wo_record_id}` : 'Add Work Order'} 
+                            { activeFPOrder?.record_id ? `Edit FairPlay Order #: ${activeFPOrder.record_id}` : 'Add FairPlay Order'} 
                         </span>
                     </div>
-                
+
 
                     {/* BODY */}
                     {ref_object ? 
-                    <Grid container >  
-                        <Grid item xs={entityDrawerOpen ? 7 : 12} className={classes.paperScroll}>
+                    <Grid container className={classes.grid_container} >  
+                        <Grid item xs={ scbdDrawerOpen ?  7 : 12} className={clsx(classes.paperScroll, {
+                                                                    [classes.paperScrollAddItem]: scbdDrawerOpen,
+                                                                })}><>
                             {/*FORM*/}
-                            {fields.map((field, i)=>{
+                            {fpOrderFields.map((field, i)=>{
+                                if(field?.hidden && field.hidden(activeFPOrder)){
+                                    return (<></>);
+                                }
                                 return(
                                 <div className={classes.inputDiv}>  
                                     <span className={classes.inputLabel}>{field.label}</span>
-                                    {getInputByType(field)}
+                                    {getInputByType(field, ref_object)}
                                 </div>)
                             })}
+                            <hr/>
+                            <ScoreboardList scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 
+                                    activeFPOrderItem={activeFPOrderItem} setActiveFPOrderItem={setActiveFPOrderItem}
+                                    fpOrderItems={fpOrderItems} setFPOrderItems={setFPOrderItems} scbdMode={scbdMode} setScbdMode={setScbdMode}/>
+                            </>
                         </Grid>
-                        {entityDrawerOpen && 
+                         
+                            {scbdDrawerOpen && 
                             <Grid item xs={5} className={classes.paperScroll}>
-                                <EntitiesDrawer handleInputOnChange={handleInputOnChange}  
-                                     entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen}/>
+                                <>
+                                
+                                <ScoreboardDrawer handleInputOnChange={handleInputOnChange}  
+                                     scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 
+                                     fpScbdFields={fpScbdFields} getInputByType={getInputByType}
+                                     activeFPOrderItem={activeFPOrderItem} setActiveFPOrderItem={setActiveFPOrderItem}
+                                     fpOrderItems={fpOrderItems} setFPOrderItems={setFPOrderItems} scbdMode={scbdMode} setScbdMode={setScbdMode}/>
+                                </>
                             </Grid>}
+                            
                     </Grid>
                     : <></> }
 
@@ -387,8 +401,9 @@ const AddEditModal = function(props) {
                                     Close
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
+                                
                                 <Button
-                                    onClick={ () => { handleSave(activeWorkOrder) }}
+                                    onClick={ () => { handleSave(activeFPOrder) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -405,7 +420,7 @@ const AddEditModal = function(props) {
     </>) 
     }
 
-export default AddEditModal;
+export default AddEditFPOrder;
 
 const useStyles = makeStyles(theme => ({
     modal: {
@@ -423,13 +438,18 @@ const useStyles = makeStyles(theme => ({
         padding: '3% !important',
         position: 'relative',
         overflowY: 'auto',
-        maxHeight: '650px',
+        maxHeight: '750px',
 
         background: 'linear-gradient(white 30%, rgba(255, 255, 255, 0)), linear-gradient(rgba(255, 255, 255, 0), white 70%) 0 100%, radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)), radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, .52), rgba(0, 0, 0, 0)) 0 100%',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 40px, 100% 40px, 100% 14px, 100% 14px',
         /* Opera doesn't support this in the shorthand */
         backgroundAttachment: 'local, local, scroll, scroll',
+    },
+    paperScrollAddItem:{
+        backgroundColor: '#dadada',
+        background: '#dadada',
+        boxShadow: 'inset 0 0 3px 1px #989898',
     },
     paper_footer: {
         backgroundColor: '#ececec',
@@ -439,9 +459,10 @@ const useStyles = makeStyles(theme => ({
     },
     container: {
         width: '70%',
-        minHeight: '50%',
         textAlign: 'center',
-        
+    },
+    grid_container:{
+        minHeight: 600,
     },
     modalTitleDiv:{
         background: 'linear-gradient(0deg, #f1f1f1, white)',
@@ -495,7 +516,7 @@ const useStyles = makeStyles(theme => ({
     },
     inputStyleDate:{
         padding: '5px 7px',
-        width: '44%',
+        width: '175px',
         
     },
     inputRoot: {
@@ -543,5 +564,18 @@ const useStyles = makeStyles(theme => ({
     },
     errorSpan:{
         color: '#bb4444',
+    },
+    radioGroup:{
+        flexWrap: 'nowrap',
+        justifyContent: 'center'
+    },
+    radioFormControl:{
+        flexBasis: '70%',
+    },
+    radio:{
+        color: '#000 !important',
+    },
+    multiline:{
+        padding: 0,
     }
 }));

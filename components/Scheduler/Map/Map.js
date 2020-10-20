@@ -125,6 +125,11 @@ const CustomMap = compose(
 
     useEffect(()=>{
         var a = googleMap.current.getDiv();
+
+        if(a == null){
+            return
+        }
+
         if(markerToRemap != null){     
             a.style.border = '8px solid #ffa500';
         }else{

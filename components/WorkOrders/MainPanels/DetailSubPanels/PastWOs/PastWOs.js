@@ -14,25 +14,41 @@ import TableRow from '@material-ui/core/TableRow';
 import cogoToast from 'cogo-toast';
 
 
-import Util from  '../../../js/Util';
-import { ListContext } from '../WOContainer';
+import Util from  '../../../../../js/Util';
+import WorkOrderDetail from '../../../../../js/WorkOrderDetail';
+import { ListContext } from '../../../WOContainer';
 
 
-const OrdersList = function(props) {
+const PastWOs = function(props) {
   const {user} = props;
 
-  const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, 
+  const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, activeWorkOrder, 
     currentView, setCurrentView, views, detailWOid,setDetailWOid} = useContext(ListContext);
   const classes = useStyles();
 
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(null);
+  const [pastWOs, setPastWOs] = React.useState(null);
 
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
 
 
   useEffect(()=>{
-    setPage(0);
-  },[workOrders])
+    if( pastWOs == null && activeWorkOrder){
+        WorkOrderDetail.getPastWorkOrders(activeWorkOrder.customer_id)
+        .then((data)=>{
+            if(data){
+                setPastWOs(data);
+                setPage(0);
+            }
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to get past wos");
+            console.warn("Cust id maybe bad", activeWorkOrder.customer_id)
+            console.error("Failed to get past wos", error);
+        })
+    }
+
+  },[pastWOs])
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -43,25 +59,6 @@ const OrdersList = function(props) {
     setPage(0);
   };
 
-  //Save and/or Fetch rowsPerPage to local storage
-  useEffect(() => {
-    if(rowsPerPage == null){
-      var tmp = window.localStorage.getItem('rowsPerPage');
-      var tmpParsed;
-      if(tmp){
-        tmpParsed = JSON.parse(tmp);
-      }
-      if(!isNaN(tmpParsed) && tmpParsed != null){
-        setRowsPerPage(tmpParsed);
-      }else{
-        setRowsPerPage(25);
-      }
-    }
-    if(!isNaN(rowsPerPage) && rowsPerPage != null){
-      window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
-    }
-    
-  }, [rowsPerPage]);
 
   const handleShowDetailView = (wo_id) =>{
     if(!wo_id){
@@ -69,7 +66,7 @@ const OrdersList = function(props) {
       console.error("Bad id");
       return;
     }
-    setCurrentView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
+    setCurrentView(views && views.find((view, i)=> view.value == "woDetail"));
     setDetailWOid(wo_id);
 
   }
@@ -84,16 +81,17 @@ const OrdersList = function(props) {
       minWidth: 50,
       align: 'left',
     },
-    {
-      id: 'c_name',
-      label: 'Product Goes To',
-      minWidth: 250,
-      align: 'left',
-    },
+    { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
     { id: 'sa_city', label: 'City', minWidth: 45, align: 'left' },
     { id: 'sa_state', label: 'State', minWidth: 35, align: 'left' },
     { id: 'description', label: 'Description', minWidth: 400, align: 'left' },
-    { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
+    
+    {
+        id: 'c_name',
+        label: 'Product Goes To',
+        minWidth: 250,
+        align: 'left',
+      },
   ];
 
   const StyledTableRow = withStyles((theme) => ({
@@ -116,6 +114,7 @@ const OrdersList = function(props) {
       }
     },
   }))(TableRow);
+  
 
   return (
     <div className={classes.root}>
@@ -137,7 +136,7 @@ const OrdersList = function(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {workOrders && workOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+            {pastWOs && pastWOs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
               return (
                 <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
                   {columns.map((column) => {
@@ -160,7 +159,7 @@ const OrdersList = function(props) {
       <TablePagination
         rowsPerPageOptions={[25, 50, 100]}
         component="div"
-        count={workOrders ? workOrders.length : 0}
+        count={pastWOs ? pastWOs.length : 0}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}
@@ -170,7 +169,7 @@ const OrdersList = function(props) {
   );
 }
 
-export default OrdersList
+export default PastWOs
 
 
 

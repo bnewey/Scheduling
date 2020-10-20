@@ -8,7 +8,7 @@ const logger = require('../../logs');
 const database = require('./db');
 
 router.get('/getRaineyUsers', async (req,res) => {
-    const sql = ' SELECT user_id, name  ' + 
+    const sql = ' SELECT user_id, name, initials  ' + 
     ' FROM users ' +
     ' ORDER BY user_id ASC ' +
     'limit 1000';

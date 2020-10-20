@@ -10,7 +10,7 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../../js/Util';
 import Work_Orders from  '../../../js/Work_Orders';
-import { WOContext } from '../WOContainer';
+import { ListContext } from '../WOContainer';
 
 import Search from './Components/Search';
 
@@ -24,7 +24,7 @@ const OrdersToolbar = function(props) {
 
   
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, setCurrentView, views, detailWOid,setDetailWOid, activeWorkOrder} = useContext(WOContext);
+    currentView, setCurrentView, views, detailWOid,setDetailWOid, activeWorkOrder} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "allWorkOrders";
 
@@ -39,8 +39,10 @@ const OrdersToolbar = function(props) {
       case "search":
         return <Search />
         break;
+      case "woItems":
       case "woPdf":
       case "pastWO":  
+      case "woFPOrder":
       case "packingSlip":
       case "woDetail":
         return (<Grid item className={classes.woDetailToolbarDiv} xs={ 5}>
@@ -55,20 +57,27 @@ const OrdersToolbar = function(props) {
   }
 
   const toolBarLeftGrid = ()=>{
-    const handleCloseView = (onClose)=>{
-      setWorkOrders(null);
-      setCurrentView(views.filter((view)=> view.value == currentView.closeToView)[0]);
-      if(onClose){
-        onClose();
+    const handleCloseView = (view)=>{
+    
+      setCurrentView(views.find((view)=> view.value == currentView.closeToView));
+      //Run onClose and onClose of parent page in case it is child
+      if(view.onClose){
+        view.onClose();
+      }
+      if(view.parent){
+        var parent_view = views.find((v)=> v.value == view.parent);
+        if(parent_view?.onClose){
+          parent_view.onClose()
+        }
       }
     }
-    console.log("Currentview", currentView);
+
 
     if(backMode){
       return(
         <Slide direction="left" in={currentView.value} mountOnEnter unmountOnExit>
         <Grid item xs={2} className={classes.toolbarLeftGrid}>
-            <IconButton type="submit" className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView.onClose )}>
+            <IconButton type="submit" className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
                   <ArrowBackIcon className={classes.backIcon} />
             </IconButton>
             <span className={classes.toolbarLeftGridHeadSpan}>{currentView.displayName}</span>

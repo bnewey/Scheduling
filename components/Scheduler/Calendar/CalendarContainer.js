@@ -569,6 +569,7 @@ const useStyles = makeStyles(theme => ({
     },
     mainContainer:{
         padding: '2%',
+        
     },
     timeline_div:{
         backgroundColor: '#f1f1f1',
