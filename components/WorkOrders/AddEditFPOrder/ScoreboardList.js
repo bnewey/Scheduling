@@ -3,6 +3,7 @@ import {makeStyles, withStyles, List, ListItem, ListItemText,ListItemIcon, Circu
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 
+import clsx from 'clsx';
 import cogoToast from 'cogo-toast';
 import { FixedSizeList } from 'react-window';
 
@@ -47,19 +48,9 @@ const ScoreboardList = function(props) {
         }
 
         setScbdDrawerOpen(true);
-        if(scbd.record_id){
-            WorkOrderDetail.getFPOrderItems( scbd.record_id )
-            .then( (data) => {
-                if(data){
-                    setScbdMode("edit");
-                    setActiveFPOrderItem(data);
-                }                
-            })
-            .catch( error => {
-                console.error("Error getting fpOrderitem.",error);
-                cogoToast.error(`Error getting fpOrderitem. ` , {hideAfter: 4});
-            })
-        }
+        setScbdMode("edit");
+        setActiveFPOrderItem(scbd);
+        
     }
 
     const handleAddScbd =()=>{
@@ -78,8 +69,15 @@ const ScoreboardList = function(props) {
 
             
             { fpOrderItems && fpOrderItems.map((item,i)=>{
+                const isSelected = scbdMode == "edit" && (( activeFPOrderItem?.record_id  != null && activeFPOrderItem?.record_id == item.record_id ) ||  ( activeFPOrderItem?.tmp_record_id != null && activeFPOrderItem?.tmp_record_id == item.tmp_record_id ));
                 return(
-                    <ListItem key={'scbd'+i} dense button onClick={event => handleEditScbd(item)} className={classes.listItem}>
+                    <ListItem key={'scbd'+i} 
+                        dense 
+                        selected={ isSelected }
+                        button onClick={event => handleEditScbd(item)} 
+                        className={ clsx(classes.listItem, {
+                            [classes.listItemSelected]: isSelected,
+                          })}>
                         <ListItemIcon onClick={event => handleEditScbd(item)} >
                             <EditIcon />
                         </ListItemIcon>
@@ -121,13 +119,20 @@ const ScoreboardList = function(props) {
                 )
             })
             }
-                <ListItem button onClick={event => handleAddScbd()} className={classes.listItem}>
+                { fpOrderItems?.length >= 4 ? <>Max of 4 Scoreboards</> : 
+                        <ListItem 
+                            button 
+                            selected={scbdDrawerOpen&& scbdMode && scbdMode == "add"}
+                            onClick={event => handleAddScbd()} 
+                            className={ clsx(classes.listItem, {
+                                [classes.listItemSelected]: scbdDrawerOpen&& scbdMode && scbdMode == "add",
+                              })}>
                      <ListItemIcon  >
                             <AddIcon />
                     </ListItemIcon>
                     <ListItemText >Add New Scoreboard</ListItemText>
                     
-                </ListItem>
+                </ListItem> }
             </List>
         </div>
     )
@@ -151,6 +156,14 @@ const useStyles = makeStyles(theme => ({
         boxShadow: '0px 0px 2px 1px #787878, 0px 0px 2px 1px #92e1ff',
         '&:hover':{
             background: 'linear-gradient(0deg, #d0d0d0, #e9e9e9)',
+        },
+        width: 600,
+    },
+    listItemSelected:{
+        background: 'linear-gradient(0deg, #a0c1cb, #d5e9ef)',
+        boxShadow: '0px 0px 2px 1px #787878, 0px 0px 2px 1px #92e1ff',
+        '&:hover':{
+            background: 'linear-gradient(0deg, #87bbcb, #aad4e0)',
         },
         width: 600,
     },

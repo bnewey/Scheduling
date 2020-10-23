@@ -30,7 +30,7 @@ import ScoreboardDrawer from './ScoreboardDrawer';
 import ScoreboardList from './ScoreboardList';
 
 const AddEditFPOrder = function(props) {
-    const {user } = props;
+    const {user} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
@@ -43,13 +43,14 @@ const AddEditFPOrder = function(props) {
     const [scbdDrawerOpen, setScbdDrawerOpen] = useState(false);
     const [scbdMode, setScbdMode] = useState("add");
     const [activeFPOrderItem, setActiveFPOrderItem] = useState(null);
+    
     const [fpOrderItems, setFPOrderItems] = useState(null);
 
     const classes = useStyles();
 
     useEffect(()=>{
         if(activeFPOrder?.record_id && fpOrderItems == null){
-            WorkOrderDetail.getFPOrderItems( scbd.record_id )
+            WorkOrderDetail.getFPOrderItems( activeFPOrder.record_id )
             .then( (data) => {
                 if(data){
                     setFPOrderItems(data);
@@ -60,12 +61,13 @@ const AddEditFPOrder = function(props) {
                 cogoToast.error(`Error getting fpOrderitem. ` , {hideAfter: 4});
             })
         }
-    },[activeFPOrder])
+    },[activeFPOrder, fpOrderItems])
 
     const handleCloseModal = () => {
         setActiveFPOrder(null);
         setFPOrderModalOpen(false);
         setShouldUpdate(false);
+        setFPOrderItems(null);
         setErrorFields([]);
     };
 
@@ -76,12 +78,12 @@ const AddEditFPOrder = function(props) {
 
     const fpOrderFields = [
         //type: select must be hyphenated ex select-type
-        {field: 'order_date', label: 'Order Date', type: 'date', updateBy: 'state', defaultValue: moment().format('MM/DD/YYYY')},
-        {field: 'ordered_by', label: 'Ordered By', type: 'select-users', updateBy: 'state'},
+        {field: 'order_date', label: 'Order Date', type: 'date', updateBy: 'state', defaultValue: moment(new Date()).format('MM/DD/YYYY')},
+        {field: 'user_entered', label: 'User Entered', type: 'select-users', updateBy: 'state'},
         {field: 'ship_to', label: 'Ship To', type: 'text', updateBy: 'ref', multiline: true,
                 defaultValue: 'To be picked up by our freight truck for delivery to Rainey Electronics, Inc. in Little Rock, AR'},
         {field: 'bill_to', label: 'Bill To', type: 'text', updateBy: 'ref', multiline: true,
-                defaultValue: "Rainey Electronics, Inc. Attn: Bob Rainey 19023 Colonel Glenn Road Little Rock, AR 72210"},
+                defaultValue: "Rainey Electronics, Inc. Attention: Bob Rainey 19023 Colonel Glenn Road Little Rock, AR 72210"},
         {field: 'discount', label: 'Discount', type: 'number', updateBy: 'ref',defaultValue: 0 },
         {field: 'sales_order_id', label: 'Sales Order #', type: 'text', updateBy: 'ref'},
         {field: 'special_instructions', label: 'Special Instructions', type: 'text', updateBy: 'ref', multiline: true},
@@ -89,7 +91,7 @@ const AddEditFPOrder = function(props) {
 
     const fpScbdFields = [
         //{field: 'scoreboard_or_sign', label: '', type: 'radio-scbd_or_sign', updateBy: 'state',required: true,defaultValue: 0 ,},
-        {field: 'model', label: 'Model', type: 'text', updateBy: 'ref',required: true},
+        {field: 'model', label: 'Model*', type: 'text', updateBy: 'ref',required: true},
         {field: 'model_quantity', label: 'Quantity*', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
         {field: 'color', label: 'Color', type: 'text', updateBy: 'ref'},
         {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref'},
@@ -101,10 +103,11 @@ const AddEditFPOrder = function(props) {
         // {field: 'scoreboard_arrival_status', label: 'Arrival Status', type: 'text', updateBy: 'ref'},
     ];
     
+
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(fpOrderModalOpen && fpOrderModalMode == "add"){
-            setActiveFPOrder({order_date: moment().format('MM/DD/YYYY') });
+            setActiveFPOrder({order_date: moment(new Date()).format('MM/DD/YYYY') });
         }
     },[fpOrderModalMode, fpOrderModalOpen])
 
@@ -114,7 +117,6 @@ const AddEditFPOrder = function(props) {
     
     const [ref_object, setRef_Object] = React.useState(buildRefObject(fpOrderFields.map((v)=> v.field)));
 
-    const item_types = [];
 
     const handleInputOnChange = (value, should, type, key) => {
         if(value == null || !type || !key){
@@ -156,7 +158,7 @@ const AddEditFPOrder = function(props) {
                              multiline={field.multiline}
                              inputRef={ref_object[field.field]}
                              inputProps={{className: classes.inputStyle}} 
-                             classes={{root: classes.inputRoot, multiline: classes.multiline}}
+                             classes={{root: classes.inputRoot}}
                              defaultValue={ activeFPOrder && activeFPOrder[field.field] ? activeFPOrder[field.field] : field?.defaultValue  }
                              onChange={()=>handleShouldUpdate(true)}  /></div>
                 )
@@ -189,7 +191,7 @@ const AddEditFPOrder = function(props) {
                         native
                     >
                         <option value={0}>
-                            Select
+                            Select User
                         </option>
                         {raineyUsers && raineyUsers.map((user)=>{
                             return (
@@ -221,7 +223,6 @@ const AddEditFPOrder = function(props) {
     }
 
     const handleSave = fpOrder => {
-        console.log("Trying to save");
         if(!fpOrder){
             console.error("Bad work order item")
             return;
@@ -263,7 +264,6 @@ const AddEditFPOrder = function(props) {
                 }
             })
 
-            console.log("UPDATE", updateFpOrder);
             
 
             //Validate Required Fields
@@ -281,7 +281,7 @@ const AddEditFPOrder = function(props) {
             if(addOrEdit == "edit"){
                 updateFpOrder["record_id"] = fpOrder.record_id;
 
-                WorkOrderDetail.updateFpOrder( updateFpOrder )
+                WorkOrderDetail.updateFPOrder( updateFpOrder )
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Work Order Item ${fpOrder.record_id} has been updated!`, {hideAfter: 4});
@@ -295,12 +295,34 @@ const AddEditFPOrder = function(props) {
             }
             if(addOrEdit == "add"){
                 updateFpOrder["work_order"] = activeWorkOrder.wo_record_id;
-                WorkOrderDetail.addFPOrder( updateFpOrder )
+                WorkOrderDetail.addNewFPOrder( updateFpOrder )
                 .then( (data) => {
                     //Get id of new workorder item 
                     if(data && data.insertId){
-                        setFPOrders(null);
-                        //setFPOrderItems(null);
+
+                        
+                        //record_id exists so we can add item immediately
+                        if(fpOrderItems && Array.isArray(fpOrderItems)){
+                            var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
+
+                            WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
+                            .then((data)=>{
+                                if(data){
+                                    //refetch
+                                    setFPOrders(null);
+                                    setFPOrderItems(null);
+                                }
+                            })
+                            .catch((error)=>{
+                                cogoToast.error("Failed to add item");
+                                console.error("Failed to add item", error)
+                            })
+                        }else{
+                            setFPOrders(null);
+                            setFPOrderItems(null);
+                        }
+                        
+                        
                     }
                     cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
                     handleCloseModal();

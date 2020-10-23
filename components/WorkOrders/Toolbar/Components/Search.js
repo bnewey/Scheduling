@@ -105,10 +105,10 @@ const Search = function(props) {
           //console.log(data);
           //Update search history
           if(searchValue != ""){
-            var updateArray = [...searchHistory];
+            var updateArray = searchHistory ?  [...searchHistory] : [];
 
             //check if current matches last, if so no need to add
-            if(searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable){
+            if(searchHistory.length == 0 || (searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable)){
 
               if(updateArray.length > 15){
                   //remove first index

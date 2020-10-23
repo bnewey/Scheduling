@@ -84,8 +84,6 @@ const WorkOrderPdf = function(props) {
                 setLoaded(true);
                 setLoading(false);
                 setUrl(data);
-                //console.log("data", data);
-                //renderPdf(data);
 
                 var file = new Blob([data], {type: 'application/pdf'});
                 var fileURL = URL.createObjectURL(file);

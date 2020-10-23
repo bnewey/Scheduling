@@ -77,12 +77,14 @@ const WOFairPlayOrders = function(props) {
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
     currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
-    const {fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, workOrderItems, setWorkOrderItems,fpOrderModalOpen,
-        setFPOrderModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrders, setFPOrders} = useContext(DetailContext)
+    const { workOrderItems, setWorkOrderItems, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,
+      setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
+        fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders} = useContext(DetailContext)
 
     const classes = useStyles();
 
-    const [fpOrderItems, setFPOrderItems] = React.useState(null)
+    
+    
 
 
     //This will reset our state in case the view is reset
@@ -106,84 +108,53 @@ const WOFairPlayOrders = function(props) {
                 console.error("Failed to get Fp Orders", error)
             })
         }
-    },[fpOrders])
+    },[fpOrders, activeWorkOrder])
 
-    //Set fp order items if exists, if none then set to []
-    useEffect(()=>{
-        if(fpOrderItems == null && activeFPOrder?.record_id){
-            WorkOrderDetail.getFPOrderItems(activeFPOrder.record_id)
-            .then((data)=>{
-                if(data?.length > 0){
-                    setFPOrderItems(data);
-                }else{
-                    setFPOrderItems([])
-                }
-            })
-            .catch((error)=>{
-                cogoToast.error("Failed to get FP order items");
-                console.error("Failed to get Fp Order Items", error)
-                setFPOrderItems([])
-            })
-        }
-    },[fpOrderItems])
-
-    //WOI Data
-    useEffect( () =>{
-        if(fpOrderItems == null && activeWorkOrder) {
-            
-            Work_Orders.getAllWorkOrderSignArtItems(activeWorkOrder.wo_record_id)
-            .then( data => { setFPOrderItems(data); })
-            .catch( error => {
-            console.warn(error);
-            cogoToast.error(`Error getting wois`, {hideAfter: 4});
-            })
-        }
-    },[fpOrderItems, activeWorkOrder]);
+    
 
   const columns = [
     { field: 'record_id', title: 'ID', minWidth: 20, align: 'center', editable: 'never' },
-    { field: 'order_date', title: 'Order Date', minWidth: 80, align: 'center', editable: 'never' },
-    { field: 'ship_to', title: 'Ship To', minWidth: 45, align: 'left',editable: 'never'},
-    { field: 'bill_to', title: 'Bill To', minWidth: 45, align: 'left',editable: 'never'},
-    { field: 'sales_order_id', title: 'Sales Order #', minWidth: 45, align: 'left',editable: 'never'}
+    { field: 'order_date', title: 'Order Date', minWidth: 40, align: 'center', editable: 'never' },
+    { field: 'ship_to', title: 'Ship To', minWidth: 200, align: 'left',editable: 'never'},
+    { field: 'bill_to', title: 'Bill To', minWidth: 200, align: 'left',editable: 'never'},
+    { field: 'discount', title: 'Discount', minWidth: 20, align: 'center',editable: 'never'},
+    { field: 'sales_order_id', title: 'Sales Order #', minWidth: 45, align: 'center',editable: 'never'},
+    { field: 'special_instructions', title: 'Special Instr', minWidth: 200, align: 'left',editable: 'never'},
     
   ];
 
 
-    const handleUpdateFPOrder = (newData, oldData) => {
-        // return new Promise((resolve, reject)=>{
-        //     console.log("update", newData);
-        //     console.log("updatefrom", oldData);
-        //     WorkOrderDetail.updatePackingSlip(newData)
-        //     .then((data)=>{
-        //       cogoToast.success("Updated Packing Slip");
-        //       setPackingSlips(null);
-        //       resolve();
-        //     })
-        //     .catch((error)=>{
-        //       console.error("Failed to update Packing Slip", error);
-        //       cogoToast.error("Failed to update Packing Slip");
-        //       setPackingSlips(null);
-        //       reject();
-        //     })
-            
-        // })
+    const handleOpenEditModal = (row) => {
+      setFPOrderModalOpen(true);
+      setFPOrderModalMode("edit");
+      setActiveFPOrder(row);
     }   
 
     const handleCreateAndOpenPDF = (rowData) =>{
 
-      //var packingWOI = fpOrderItems.filter((item,i)=> item.packing_slip == rowData.record_id);
-      
+      var row = rowData;
+      row.c_name = activeWorkOrder?.c_name || null;
+      row.user_entered_name = raineyUsers.find((u)=> u.user_id == row.user_entered).name;
+      WorkOrderDetail.getFPOrderItems( rowData.record_id )
+      .then( (fpOrderItems) => {
+          if(fpOrderItems && Array.isArray(fpOrderItems)){
 
-    //   Pdf.createPackingSlipPdf(rowData, packingWOI)
-    //   .then((data)=>{
-    //     console.log("PDF Data", data);
-    //     var fileURL = URL.createObjectURL(data);
-    //     window.open(fileURL);
-    //   })
-    //   .catch((error)=>{
-    //     console.error("Failed to create and open pdf");
-    //   })
+              Pdf.createFairPlayOrderPdf(row, fpOrderItems)
+              .then((data)=>{
+                var fileURL = URL.createObjectURL(data);
+                window.open(fileURL);
+              })
+              .catch((error)=>{
+                console.error("Failed to create and open pdf");
+              })
+          }                
+      })
+      .catch( error => {
+          console.error("Error getting fpOrderitem.",error);
+          cogoToast.error(`Error getting fpOrderitem. ` , {hideAfter: 4});
+      })
+
+      
     }
 
     const handleDeleteFPOrder = (row)=>{
@@ -193,17 +164,17 @@ const WOFairPlayOrders = function(props) {
         return;
       }
       const deleteSlip = ()=>{
-        // WorkOrderDetail.deletePackingSlip(row.record_id)
-        // .then((data)=>{
-        //   if(data){
-        //     setPackingSlips(null);
-        //     cogoToast.success("Deleted fairplay order");
-        //   }
-        // })
-        // .catch((error)=>{
-        //     cogoToast.error("Failed to delete fairplay order")
-        //     console.error("Failed to delete fairplay order", error);
-        // })
+        WorkOrderDetail.deleteFPOrder(row.record_id)
+        .then((data)=>{
+          if(data){
+            setFPOrders(null);
+            cogoToast.success("Deleted fairplay order");
+          }
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to delete fairplay order")
+            console.error("Failed to delete fairplay order", error);
+        })
       }
 
       confirmAlert({
@@ -221,7 +192,7 @@ const WOFairPlayOrders = function(props) {
     <div className={classes.root}>
         {activeWorkOrder ?
         <div className={classes.container}> <>
-          <AddEditFPOrder />
+          <AddEditFPOrder  />
           <Grid container>
                   <Grid item xs={12}>
                     <div className={classes.woiDiv}>
@@ -253,6 +224,7 @@ const WOFairPlayOrders = function(props) {
                                   fontWeight: 600,
                                   color: '#444',
                                   padding: '5px',
+                                  zIndex: 0,
                                 },
                                 // actionsColumnIndex: -1,
                                 cellStyle: {
@@ -261,6 +233,7 @@ const WOFairPlayOrders = function(props) {
                                   whiteSpace: 'nowrap',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',
+                                  maxWidth: 250,
                                   borderLeft: '1px solid #c7c7c7' ,
                                 },
                                 actionsCellStyle:{
@@ -281,7 +254,7 @@ const WOFairPlayOrders = function(props) {
                               {
                                 icon: tableIcons.Edit,
                                 tooltip: 'Edit FP Order',
-                                onClick: (event, rowData) => handleUpdateFPOrder(rowData)
+                                onClick: (event, rowData) => handleOpenEditModal(rowData)
                               },
                             ]}
                             

@@ -57,7 +57,7 @@ function convertISODateToMySqlDate(param) {
     //     return null;
     // }
     // return (year + '-' + month + '-' + dt);
-    var tmp = moment(param).format('YYYY-MM-DD');
+    var tmp = moment(param, ["MM-DD-YYYY", "YYYY-MM-DD"]).format('YYYY-MM-DD');
     return (tmp);
 }
 

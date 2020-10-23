@@ -63,7 +63,7 @@ const CompInvTool = function(props) {
             <div className={classes.rowDiv}>
                 <span className={classes.label}>Completed</span>
                 <span className={classes.value}>
-                    <Checkbox checked={completed} 
+                    <Checkbox checked={completed ? true : false} 
                                 onChange={event => handleChange(event, "completed")}
                                 className={classes.checkbox}
                                 checkedIcon={ <CheckBoxIcon className={classes.iconChecked} /> }
@@ -73,7 +73,7 @@ const CompInvTool = function(props) {
             <div className={classes.rowDiv}>
                 <span className={classes.label}>Invoiced</span>
                 <span className={classes.value}>
-                <Checkbox checked={invoiced} 
+                <Checkbox checked={invoiced ? true : false} 
                                 onChange={event => handleChange(event, "invoiced")}
                                 className={classes.checkbox}
                                 checkedIcon={ <CheckBoxIcon className={classes.iconChecked} /> }

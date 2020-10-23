@@ -2,9 +2,12 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles,Modal, Backdrop, Fade, Grid,ButtonGroup, Button,TextField, InputBase, Select, MenuItem,
      Checkbox,IconButton, Radio, RadioGroup, FormControl, FormControlLabel} from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
+import DeleteIcon from '@material-ui/icons/Delete';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import AccountBoxIcon from '@material-ui/icons/AccountBox';
+
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import cogoToast from 'cogo-toast';
 
@@ -163,7 +166,7 @@ const AddEditWOIModal = function(props) {
                              multiline={field.multiline}
                              inputRef={ref_object[field.field]}
                              inputProps={{className: classes.inputStyle}} 
-                             classes={{root: classes.inputRoot, multiline: classes.multiline}}
+                             classes={{root: classes.inputRoot}}
                              defaultValue={ activeWOI && activeWOI[field.field] ? activeWOI[field.field] : field?.defaultValue  }
                              onChange={()=>handleShouldUpdate(true)}  /></div>
                 )
@@ -305,7 +308,6 @@ const AddEditWOIModal = function(props) {
     }
 
     const handleSave = woi => {
-        console.log("Trying to save");
         if(!woi){
             console.error("Bad work order item")
             return;
@@ -343,7 +345,6 @@ const AddEditWOIModal = function(props) {
                 }
             })
 
-            console.log("UPDATE", updateWOI);
             
 
             //Validate Required Fields
@@ -402,6 +403,33 @@ const AddEditWOIModal = function(props) {
         }
         
     };
+
+    const handleDeleteWOI = (woi) => {
+        if(!woi || !woi.record_id){
+            console.error("Bad woi in delete WOI");
+            return;
+        }
+
+        const deleteWOI = () =>{
+            Work_Orders.deleteWorkOrderItem(woi.record_id)
+            .then((data)=>{
+                setWorkOrderItems(null);
+                handleCloseModal();
+            })
+            .catch((error)=>{
+                cogoToast.error("Failed to Delete woi")
+                console.error("Failed to delete woi", error);
+            })
+        }
+
+        confirmAlert({
+            customUI: ({onClose}) => {
+                return(
+                    <ConfirmYesNo onYes={deleteWOI} onClose={onClose} customMessage={"Delete Work Order Item permanently?"}/>
+                );
+            }
+        })
+    }
 
     return(<>
         { editWOIModalOpen && <Modal
@@ -462,6 +490,15 @@ const AddEditWOIModal = function(props) {
                     {/* FOOTER */}
                     <Grid container >
                         <Grid item xs={12} className={classes.paper_footer}>
+                        <ButtonGroup className={classes.buttonGroup}>
+                            <Button
+                                    onClick={() => handleDeleteWOI(activeWOI)}
+                                    variant="contained"
+                                    size="large"
+                                    className={classes.deleteButton}
+                                >
+                                    <DeleteIcon />Delete
+                        </Button></ButtonGroup>
                         <ButtonGroup className={classes.buttonGroup}>
                             <Button
                                     onClick={() => handleCloseModal()}
@@ -545,9 +582,24 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#414d5a'
     },
     deleteButton:{
-        backgroundColor: '#b7c3cd'
+        backgroundColor: '#c4492e',
+        '&:hover':{
+            backgroundColor: '#f81010',
+        }
     },
     buttonGroup: {
+        marginLeft: '1%',
+        '& .MuiButton-label':{
+            color: '#fff',
+        },
+        '&:hover':{
+            '& .MuiButton-label':{
+                color: '#52c7ff',
+                
+            },
+        }
+    },
+    deleteButtonGroup: {
         marginLeft: '1%',
         '& .MuiButton-label':{
             color: '#fff',

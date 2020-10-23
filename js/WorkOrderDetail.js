@@ -309,6 +309,28 @@ async function addNewFPOrderItem(fpi_data){
     }
 }
 
+
+async function addMultipleFPOrderItems(fpi_array){
+    if(!fpi_array){
+        throw new Error("Bad array for addMultipleFPOrderItems");
+    }
+    const route = '/scheduling/workOrderDetail/addMultipleFPOrderItems';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({fpi_array})
+            });
+
+        return(data);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function updateFPOrderItem(fpi_data){
     if(!fpi_data){
         throw new Error("Bad id for updateFPOrderItem");
@@ -332,9 +354,9 @@ async function updateFPOrderItem(fpi_data){
 
 async function deleteFPOrderItem(fpi_id){
     if(!fpi_id){
-        throw new Error("Bad id for deleteFPOrder");
+        throw new Error("Bad id for deleteFPOrderItem");
     }
-    const route = '/scheduling/workOrderDetail/deleteFPOrder';
+    const route = '/scheduling/workOrderDetail/deleteFPOrderItem';
     try{
         var data = await fetch(route,
             {
@@ -369,6 +391,7 @@ module.exports = {
     deleteFPOrder,
     getFPOrderItems,
     addNewFPOrderItem,
+    addMultipleFPOrderItems,
     updateFPOrderItem,
     deleteFPOrderItem,
 

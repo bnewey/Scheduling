@@ -42,7 +42,6 @@ const WOItemization = function(props) {
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
     if(workOrderItems == null && activeWorkOrder) {
-      console.log(activeWorkOrder);
       Work_Orders.getAllWorkOrderSignArtItems(activeWorkOrder.wo_record_id)
       .then( data => { setWorkOrderItems(data); })
       .catch( error => {
@@ -182,8 +181,6 @@ const WOItemization = function(props) {
 
   const handleAddPackingSlip = (value, woi_id) =>{
 
-    console.log("SlipId", value);
-    console.log("WOI id", woi_id);
     WorkOrderDetail.addWOIToPackingSlip(value, woi_id)
     .then((data)=>{
       setWorkOrderItems(null);

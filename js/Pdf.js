@@ -107,11 +107,33 @@ async function createWorkOrderPdf(woObject, woiArray){
 
 }
 
+async function createFairPlayOrderPdf(fpOrder, orderItems){
+    const route = '/scheduling/pdf/createFairPlayOrderPdf';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'blob',
+                body: JSON.stringify({fpOrder, orderItems})
+            });
+            //console.log('data', data);
+        return( await data.blob());
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
 module.exports = {
     createWOPdf: createWOPdf,
     createTLPdf:createTLPdf,
     fetchWOPdf: fetchWOPdf,
     createPackingSlipPdf,
     createWorkOrderPdf,
+    createFairPlayOrderPdf,
     
 };

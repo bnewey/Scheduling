@@ -228,7 +228,6 @@ const AddEditModal = function(props) {
     }
 
     const handleSave = work_order => {
-        console.log("Trying to save");
         if(!work_order){
             console.error("Bad work order")
             return;
@@ -266,7 +265,6 @@ const AddEditModal = function(props) {
                 }
             })
 
-            console.log("UPDATE", updateWorkOrder);
 
             //Validate Required Fields
             var empty_required_fields = fields.

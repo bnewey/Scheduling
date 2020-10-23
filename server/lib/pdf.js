@@ -247,5 +247,57 @@ router.post('/createWorkOrderPdf', async (req,res) => {
 });
 
 
+router.post('/createFairPlayOrderPdf', async (req,res) => {
+    if(!req.body.fpOrder || !req.body.orderItems){
+        res.sendStatus(400);
+        return;
+    }
+    var fpOrder = req.body.fpOrder;
+    var orderItems = req.body.orderItems;
+
+    const makePdf = async() =>{
+        const doc = new PDFDocument();
+
+        doc.image(`${process.env.PWD}/public/static/PDFS/FairPlayOrderPDF.png`, 0, 0, {width: 600, height: 800})
+        
+        // add your content to the document here, as usual
+        doc.fontSize(10).text( fpOrder.order_date ? moment(fpOrder.order_date).format('MM/DD/YYYY') : "", 137, 157);
+        doc.text(fpOrder.user_entered_name, 405, 157);
+        doc.text(fpOrder.ship_to, 137, 192, {width: 125});
+        doc.text(fpOrder.bill_to, 405, 192, {width: 125});
+        doc.text(fpOrder.c_name, 137, 275, {width: 300});
+        doc.text(fpOrder.discount+'%', 405,298);
+
+        // doc.text(fpOrder.job_reference, 30, 250);
+
+        doc.fontSize(8);
+        if(orderItems && Array.isArray(orderItems)){
+            orderItems.forEach((item,i)=>{
+                doc.text(item.model, 130 , (334.3 + i*74.7))
+                doc.text(item.model_quantity, 243, (334.3 + i*74.7))
+                doc.text(item.color, 320, (334.3 + i*74.7))
+                doc.text(item.trim, 444, (334.3 + i*74.7))
+                doc.text(item.controller, 130, (346.2 + i*74.7))
+                doc.text(item.controller_quantity, 243, (346.2 + i*74.7))
+                doc.text(item.ctrl_case, 320, (346.2 + i*74.7))
+                doc.text(item.horn, 444, (346.2 + i*74.7))
+            })
+        }
+
+        doc.fontSize(10).text(fpOrder.special_instructions, 103, 645, {width: 400});
+        
+
+        doc.end();
+        return await getStream.buffer(doc)
+    }
+
+    const pdfBuffer = await makePdf();
+
+    res.setHeader('Content-disposition', 'inline;');
+    res.setHeader('Content-type', 'application/pdf');
+    res.send(pdfBuffer);
+    
+});
+
 
 module.exports = router;

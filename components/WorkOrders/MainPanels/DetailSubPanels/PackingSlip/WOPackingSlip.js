@@ -154,8 +154,6 @@ const WOPackingSlip = function(props) {
 
     const handleUpdatePackingSlip = (newData, oldData) => {
         return new Promise((resolve, reject)=>{
-            console.log("update", newData);
-            console.log("updatefrom", oldData);
             WorkOrderDetail.updatePackingSlip(newData)
             .then((data)=>{
               cogoToast.success("Updated Packing Slip");
@@ -179,7 +177,6 @@ const WOPackingSlip = function(props) {
 
       Pdf.createPackingSlipPdf(rowData, packingWOI)
       .then((data)=>{
-        console.log("PDF Data", data);
         var fileURL = URL.createObjectURL(data);
         window.open(fileURL);
       })

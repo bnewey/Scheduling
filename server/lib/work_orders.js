@@ -463,4 +463,29 @@ router.post('/addWorkOrderItem', async (req,res) => {
 
 
 
+router.post('/deleteWorkOrderItem', async (req,res) => {
+
+    var woi_id ;
+    if(req.body){
+        if(req.body.woi_id != null){
+            woi_id = req.body.woi_id;
+        }  
+    }
+
+    const sql = ' DELETE FROM work_orders_items WHERE record_id = ? LIMIT 1 ';
+
+    try{ 
+        const results = await database.query(sql, [ woi_id]);
+        logger.info("Work Order Item  deleted", woi_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Failed to deleteWorkOrderItem: " + error);
+        res.sendStatus(400);
+    }
+});
+
+
+
 module.exports = router;

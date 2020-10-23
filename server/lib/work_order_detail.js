@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+var async = require("async");
 
 const logger = require('../../logs');
 
@@ -236,7 +237,9 @@ router.post('/getFPOrders', async (req,res) => {
         wo_id = req.body.wo_id;
     }
 
-    const sql = ' SELECT * FROM fairplay_orders WHERE work_order = ? ORDER BY date_entered DESC ';
+    const sql = ' SELECT record_id, work_order, date_format(order_date, \'%Y-%m-%d\') AS order_date, date_format(date_entered, \'%Y-%m-%d\') AS date_entered, ' +
+    ' ship_to, bill_to, user_entered, discount, special_instructions, sales_order_id ' +
+    ' FROM fairplay_orders WHERE work_order = ? ORDER BY date_entered DESC ';
     try{
         const results = await database.query(sql, [wo_id]);
         logger.info("Got FairPlay Orders");
@@ -256,10 +259,10 @@ router.post('/addNewFPOrder', async (req,res) => {
     }
 
     const sql = ' INSERT INTO fairplay_orders ( work_order, order_date, ship_to, bill_to, user_entered, discount, special_instructions, sales_order_id ) ' +
-    ' VALUES ( contact, IFNULL(? ,DEFAULT(order_date)), ?, ?, IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(discount)),  ' + 
+    ' VALUES ( ?, IFNULL(? ,DEFAULT(order_date)), ?, ?, IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(discount)),  ' + 
     ' ?, ? ) ';
     try{
-        const results = await database.query(sql, [fp_data.work_order, fp_data.order_date, fp_data.ship_to, fp_data.bill_to, fp_data.user_entered,
+        const results = await database.query(sql, [fp_data.work_order, Util.convertISODateToMySqlDate(fp_data.order_date), fp_data.ship_to, fp_data.bill_to, fp_data.user_entered,
             fp_data.discount, fp_data.special_instructions, fp_data.sales_order_id]);
         logger.info("Added new fairplay order");
 
@@ -286,7 +289,7 @@ router.post('/updateFPOrder', async (req,res) => {
     ' special_instructions = ?, sales_order_id=?  ' +
     ' WHERE record_id = ? ';
     try{
-        const results = await database.query(sql, [fp_data.work_order, fp_data.order_date, fp_data.ship_to, fp_data.bill_to, fp_data.user_entered,
+        const results = await database.query(sql, [fp_data.work_order, Util.convertISODateToMySqlDate(fp_data.order_date), fp_data.ship_to, fp_data.bill_to, fp_data.user_entered,
             fp_data.discount, fp_data.special_instructions, fp_data.sales_order_id, fp_data.record_id]);
         logger.info("Added new fairplay order");
 
@@ -326,7 +329,7 @@ router.post('/getFPOrderItems', async (req,res) => {
         fpo_id = req.body.fpo_id;
     }
 
-    const sql = ' SELECT * FROM fairplay_orders_items WHERE fairplay_order = ? ORDER BY record_id DESC ';
+    const sql = ' SELECT * FROM fairplay_orders_items WHERE fairplay_order = ? ORDER BY record_id ASC ';
     try{
         const results = await database.query(sql, [fpo_id]);
         logger.info("Got FairPlay Order Items");
@@ -359,6 +362,38 @@ router.post('/addNewFPOrderItem', async (req,res) => {
         logger.error("addNewFPOrderItem: " + error);
         res.sendStatus(400);
     }
+});
+
+router.post('/addMultipleFPOrderItems', async (req,res) => {
+    var fpi_array;
+    if(req.body){
+        fpi_array = req.body.fpi_array;
+    }
+
+    const sql = ' INSERT INTO fairplay_orders_items ( fairplay_order, model, model_quantity, color, trim, controller, controller_quantity, ctrl_case, horn ) ' +
+    ' VALUES ( ?, ?, IFNULL(? ,DEFAULT(model_quantity)), ?, ? , ?, IFNULL(? ,DEFAULT(controller_quantity)), ?, ?) ';
+
+    async.forEachOf(fpi_array, async (fpi_data, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [fpi_data.fairplay_order, fpi_data.model, fpi_data.model_quantity, fpi_data.color, fpi_data.trim,
+                fpi_data.controller, fpi_data.controller_quantity, fpi_data.ctrl_case, fpi_data.horn ]);
+            
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("addMultipleFPOrderItems: " + error);
+            res.sendStatus(400);
+        }else{
+            logger.info("Added new fairplay order item");
+            res.sendStatus(200);
+        }
+    })
 });
 
 router.post('/updateFPOrderItem', async (req,res) => {

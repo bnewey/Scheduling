@@ -110,7 +110,6 @@ const WOContainer = function(props) {
     if(currentView){
       window.localStorage.setItem('currentView', JSON.stringify(currentView.value));
     }
-    console.log("View updated", currentView);
     
   }, [currentView]);
 
@@ -122,7 +121,6 @@ const WOContainer = function(props) {
       
       Work_Orders.getAllWorkOrders(rowDateRange)
       .then( data => { 
-        console.log("getWorkOrders",data);
         if(compInvState){
 
           var comp = compInvState.completed;
@@ -176,7 +174,6 @@ const WOContainer = function(props) {
       Work_Orders.getWorkOrderById(detailWOid)
       .then((data)=>{
         if(data){
-          console.log("activeWorkOrder",data)
           setActiveWorkOrder(data[0]);
         }
       })
@@ -250,7 +247,7 @@ const WOContainer = function(props) {
             //remove first index
             updateArray.shift();
         }
-        if( updateArray.length > 0 && updateArray[updateArray.length-1]?.wo_record_id != activeWorkOrder.wo_record_id ){
+        if( updateArray.length == 0 || ( updateArray.length > 0 && updateArray[updateArray.length-1]?.wo_record_id != activeWorkOrder.wo_record_id) ){
           setRecentWO([...updateArray, { wo_record_id: activeWorkOrder.wo_record_id, c_name: activeWorkOrder.c_name }])
         }
         

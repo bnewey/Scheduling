@@ -33,7 +33,7 @@ const PastWOs = function(props) {
 
 
   useEffect(()=>{
-    if( pastWOs == null && activeWorkOrder){
+    if( pastWOs == null && activeWorkOrder?.customer_id){
         WorkOrderDetail.getPastWorkOrders(activeWorkOrder.customer_id)
         .then((data)=>{
             if(data){
@@ -118,7 +118,8 @@ const PastWOs = function(props) {
 
   return (
     <div className={classes.root}>
-        <TableContainer className={classes.container}>
+        {pastWOs ? <><TableContainer className={classes.container}>
+        
         <Table stickyHeader  size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -136,7 +137,7 @@ const PastWOs = function(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {pastWOs && pastWOs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+            { pastWOs?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
               return (
                 <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
                   {columns.map((column) => {
@@ -155,7 +156,9 @@ const PastWOs = function(props) {
             })}
           </TableBody>
         </Table>
+        
       </TableContainer>
+      
       <TablePagination
         rowsPerPageOptions={[25, 50, 100]}
         component="div"
@@ -164,7 +167,8 @@ const PastWOs = function(props) {
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
+      /></>
+      : <div className={classes.infoDiv}><span className={classes.infoSpan}>No Past Work Orders</span></div>}
     </div>
   );
 }
@@ -213,4 +217,15 @@ const useStyles = makeStyles(theme => ({
       color: '#ee3344',
     }
   },
+  infoSpan:{
+    fontSize: '20px'
+  },
+  infoDiv:{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    width: '-webkit-fill-available',
+  }
 }));

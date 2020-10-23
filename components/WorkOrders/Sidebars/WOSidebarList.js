@@ -26,10 +26,7 @@ const WOSidebarList = function(props) {
       editWOModalOpen, setEditWOModalOpen, setEditModalMode} = useContext(ListContext);
   
   const classes = useStyles();
-
-  console.log("context",{workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, setCurrentView, 
-    editWOModalOpen, setEditWOModalOpen, setEditModalMode});
-  
+ 
   
   const changeDateRange = (to, from) =>{
     setDateRowRange({

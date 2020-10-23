@@ -40,9 +40,19 @@ const ScoreboardDrawer = function(props) {
     const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
     
     const [ref_object, setRef_Object] = React.useState(buildRefObject(fpScbdFields.map((v)=> v.field)));
+
+    useEffect(()=>{
+        if(scbdDrawerOpen && activeFPOrderItem){
+            //reset fields
+            
+
+            for( const ref in ref_object){
+                ref_object[ref].current.value = activeFPOrderItem[ref] || null
+            }
+        }
+    },[activeFPOrderItem])
      
     const handleSave = fpoItem => {
-        console.log("Trying to save");
         if(!fpoItem){
             console.error("Bad work order item")
             return;
@@ -58,8 +68,6 @@ const ScoreboardDrawer = function(props) {
             Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
         var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
 
-        console.log("ref",textValueObject);
-        console.log("Fields", fpScbdFields);
 
         //Get only values we need to updateTask()
         fpScbdFields.forEach((field, i)=>{
@@ -87,7 +95,6 @@ const ScoreboardDrawer = function(props) {
             }
         })
 
-        console.log("UPDATE", updateFPOItem);
         
 
         //Validate Required Fields
@@ -121,10 +128,14 @@ const ScoreboardDrawer = function(props) {
             }
             //set items to state and we will add items with FP order later
             if(fpOrderModalMode == "add"){
+                if(!activeFPOrderItem.tmp_record_id){
+                    console.warn("No tmp_record_id for activeFPOrderItem.")
+                }
+                
                 var index;
                 var items = fpOrderItems ? [...fpOrderItems] : [];
                 var itemToUpdate = items.find((item,i)=> { 
-                    if(item.record_id == activeFPOrderItem.record_id){
+                    if(item.tmp_record_id == activeFPOrderItem.tmp_record_id){
                         index = i;
                         return true;
                     }else{
@@ -133,11 +144,10 @@ const ScoreboardDrawer = function(props) {
                     
                 })
 
-                if(itemToUpdate){
-                    items.splice(index, 1, itemToUpdate);
+                if(updateFPOItem){
+                    items.splice(index, 1, updateFPOItem);
                 }
 
-                console.log("Items to update to ", items)
                 //set items and we will save these on FP order save
                 setFPOrderItems(items);
                 handleCloseScbdDrawer();
@@ -146,9 +156,10 @@ const ScoreboardDrawer = function(props) {
             
         }
         if(scbdMode == "add"){
-            updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
-
+            
+            
             if(fpOrderModalMode =="edit"){
+                updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
                 //record_id exists so we can add item immediately
                 WorkOrderDetail.addNewFPOrderItem(updateFPOItem)
                 .then((data)=>{
@@ -165,59 +176,71 @@ const ScoreboardDrawer = function(props) {
 
             }
             if(fpOrderModalMode =="add"){
+                //Give random id so that we can identify when editing item before its into DB
+                updateFPOItem["tmp_record_id"] = Math.floor((Math.random() * 10000) + 1);
                 //add later
-                var index;
-                var items = fpOrderItems ? [...fpOrderItems] : [];
-                var itemToUpdate = items.find((item,i)=> { 
-                    if(item.record_id == activeFPOrderItem.record_id){
-                        index = i;
-                        return true;
-                    }else{
-                        return false;
-                    }
-                    
-                })
 
-                if(itemToUpdate){
-                    items.splice(index, 1, itemToUpdate);
-                }
 
-                console.log("Items to update to ", items)
                 //set items and we will save these on FP order save
+                //setFPOrderItems(items);
+                // handleCloseScbdDrawer();
+                var items = fpOrderItems ? [...fpOrderItems, updateFPOItem] : [updateFPOItem];
                 setFPOrderItems(items);
                 handleCloseScbdDrawer();
 
             }
-            var items = fpOrderItems ? [...fpOrderItems, updateFPOItem] : [updateFPOItem];
-            setFPOrderItems(items);
-            handleCloseScbdDrawer();
-
+            
         }
         
     };
 
-    const handleDeleteItem = (item)=>{
-        if(!item ||  !item.record_id){
-            console.error("Bad id or item to delete");
+    const handleDeleteItem = (deleteItem)=>{
+        if(!deleteItem ||  !(deleteItem.record_id || deleteItem.tmp_record_id)){
+            console.error("Bad id or deleteItem to delete");
             return;
         }
+        //In DB
+        if(deleteItem.record_id){
+            WorkOrderDetail.deleteFPOrderItem(deleteItem.record_id)
+            .then((data)=>{
+                if(data){
+                    setFPOrderItems(null)
+                    handleCloseScbdDrawer();
+                }
+            })
+            .catch((error)=>{
+                cogoToast.error("Failed to delete item");
+                console.error("Failed to delete item", error)
+            })
+        }
+        //If item is not in DB 
+        if(deleteItem.tmp_record_id){
+            var index;
+            var items = fpOrderItems ? [...fpOrderItems] : [];
+            //Find index
+            var itemToDelete = items.find((item,i)=> { 
+                
+                if(item.tmp_record_id == deleteItem.tmp_record_id){
+                    index = i;
+                    return true;
+                }else{
+                    return false;
+                }
+                
+            })
 
-        WorkOrderDetail.deleteFPOrderItem(item.record_id)
-        .then((data)=>{
-            if(data){
-                setWorkOrderItems(null)
-                handleCloseScbdDrawer();
+            if(itemToDelete){
+                items.splice(index, 1);
             }
-        })
-        .catch((error)=>{
-            cogoToast.error("Failed to delete item");
-            console.error("Failed to delete item", error)
-        })
+            setFPOrderItems(items);
+            handleCloseScbdDrawer();
+        }
+        
     }
     
     const handleCloseScbdDrawer = () =>{
         setScbdDrawerOpen(false);
-        setActiveFPOrder({});
+        setActiveFPOrderItem({});
         setErrorFields([]);
     }
 
@@ -242,7 +265,7 @@ const ScoreboardDrawer = function(props) {
                                     return (<></>);
                                 }
                                 return(
-                                <div className={classes.inputDiv}>  
+                                <div key={'scbdfield'+i} className={classes.inputDiv}>  
                                     <span className={classes.inputLabel}>{field.label}</span>
                                     {getInputByType(field, ref_object)}
                                 </div>)

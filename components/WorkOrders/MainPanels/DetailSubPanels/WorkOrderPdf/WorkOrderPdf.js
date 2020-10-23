@@ -33,9 +33,8 @@ const WorkOrderPdf = function(props) {
                 Work_Orders.getWorkOrderByIdForPDF(activeWorkOrder.wo_record_id)])
             .then( values => {
 
-                console.log("promise all for creat pdf",values);
                 if(values[1][0] && values[0]){
-                    console.log("TRUE working")
+                  
                 }else{
                     console.error("NOT WORKING");
                 }
