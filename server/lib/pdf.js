@@ -175,11 +175,12 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         var billing_items=woiArray.filter((w)=>w.item_type == 3);
 
         if(loaners && loaners.length > 0){
-            doc.text("X", 45 , 230, {lineBreak: false});
+            
             loaners.forEach((item,i)=>{
                 if(i >= 8){
                     //new page?
                 }
+                doc.fontSize(10).text("X", 45 , (230 + i*13.5) , {lineBreak: false});
                 doc.fontSize(8);
                 doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (232 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);
@@ -189,12 +190,13 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         }
 
         if(repairs && repairs.length > 0){
-            doc.text("X", 66 , 230, {lineBreak: false});
+            
             
             repairs.forEach((item,i)=>{
                 if(i >= 8){
                     //new page?
                 }
+                doc.fontSize(10).text("X", 66 , (230 + i*13.5), {lineBreak: false});
                 doc.fontSize(8);
                 doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (232 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);
