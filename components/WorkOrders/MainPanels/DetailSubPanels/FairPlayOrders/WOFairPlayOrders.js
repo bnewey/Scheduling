@@ -134,7 +134,10 @@ const WOFairPlayOrders = function(props) {
 
       var row = rowData;
       row.c_name = activeWorkOrder?.c_name || null;
-      row.user_entered_name = raineyUsers.find((u)=> u.user_id == row.user_entered).name;
+      var tmpUser = raineyUsers.find((u)=> u.user_id == row.user_entered);
+      if(tmpUser){
+        row.user_entered_name = tmpUser.name;
+      } 
       WorkOrderDetail.getFPOrderItems( rowData.record_id )
       .then( (fpOrderItems) => {
           if(fpOrderItems && Array.isArray(fpOrderItems)){

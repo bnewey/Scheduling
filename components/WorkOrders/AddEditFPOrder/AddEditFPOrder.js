@@ -79,7 +79,7 @@ const AddEditFPOrder = function(props) {
     const fpOrderFields = [
         //type: select must be hyphenated ex select-type
         {field: 'order_date', label: 'Order Date', type: 'date', updateBy: 'state', defaultValue: moment(new Date()).format('MM/DD/YYYY')},
-        {field: 'user_entered', label: 'User Entered', type: 'select-users', updateBy: 'state'},
+        {field: 'user_entered', label: 'User Entered', type: 'select-users', updateBy: 'state', required: true},
         {field: 'ship_to', label: 'Ship To', type: 'text', updateBy: 'ref', multiline: true,
                 defaultValue: 'To be picked up by our freight truck for delivery to Rainey Electronics, Inc. in Little Rock, AR'},
         {field: 'bill_to', label: 'Bill To', type: 'text', updateBy: 'ref', multiline: true,

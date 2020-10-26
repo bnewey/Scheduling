@@ -139,7 +139,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         doc.text(woObject.type, 340, 45 , {lineBreak: false});
 
         //Ship To 
-        doc.text(woObject.c_entity_name, 43, 73 , {lineBreak: false});
+        doc.text(woObject.c_address_to_name, 43, 73 , {lineBreak: false});
         doc.text(woObject.c_address, 43, 93 , {lineBreak: false});
         doc.text(woObject.c_residence ? 'X' : "", 293, 93 , {lineBreak: false});
         doc.text(woObject.c_city, 43, 113 , {lineBreak: false});
@@ -152,7 +152,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         doc.text(woObject.c_other_phone ? woObject.c_other_phone : '', 220, 151 , {lineBreak: false});
 
         //Bill To
-        doc.text(woObject.a_entity_name, 328, 73 , {lineBreak: false});
+        doc.text(woObject.a_address_to_name, 328, 73 , {lineBreak: false});
         doc.text(woObject.a_account_number, 510, 73 , {lineBreak: false});
         doc.text(woObject.a_address, 328, 93 , {lineBreak: false});
         doc.text(woObject.a_city, 328, 113 , {lineBreak: false});
@@ -170,7 +170,6 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         //Work Order Items Sections
         var loaners=woiArray.filter((w)=>w.item_type == 2);
         var repairs=woiArray.filter((w)=>w.item_type == 1);
-        repairs =[...repairs, ...repairs, ...repairs, ...repairs];
 
         var billing_items=woiArray.filter((w)=>w.item_type == 3);
 
@@ -180,7 +179,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 if(i >= 8){
                     //new page?
                 }
-                doc.fontSize(10).text("X", 45 , (230 + i*13.5) , {lineBreak: false});
+                doc.fontSize(10).text("X", 45 , (230 + i*13.7) , {lineBreak: false});
                 doc.fontSize(8);
                 doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (232 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);
@@ -196,7 +195,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 if(i >= 8){
                     //new page?
                 }
-                doc.fontSize(10).text("X", 66 , (230 + i*13.5), {lineBreak: false});
+                doc.fontSize(10).text("X", 66 , (230 + i*13.7), {lineBreak: false});
                 doc.fontSize(8);
                 doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (232 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);

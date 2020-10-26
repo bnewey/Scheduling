@@ -99,7 +99,7 @@ const EntitiesDrawer = function(props) {
           setSearchValue(str)
         } 
       }
-
+   
       const handleClearSearch = () =>{
         setSearchValue("");
         setEntityRows(null)
@@ -137,9 +137,8 @@ const EntitiesDrawer = function(props) {
                 cogoToast.error("Failed to search entities")
                 console.error("Failed to saerch entities", error)
             })
-            
-      }
-      //END OF SEARCH
+        }
+            //END OF SEARCH
 
     return(
         <div className={classes.root}>
@@ -157,12 +156,11 @@ const EntitiesDrawer = function(props) {
                     <span className={classes.searchLabel}>Name:</span>
                 <InputBase
                     className={classes.input}
-                    
                     classes={{input: classes.actualInputElement }}
-                    placeholder="Search Work Orders"
-                    inputProps={{ 'aria-label': 'search work orders', id: "ent_search_input"}}
+                    placeholder="Search Entities"
+                    inputProps={{ 'aria-label': 'search entities', id: "ent_search_input"}}
                     autoFocus={true}
-                    value={searchValue }
+                    value={searchValue}
                     endAdornment={searchValue ? searchXButton() : ""}
                     onChange={event=> handleChangeSearchValue(event.target.value)}
                 /> </div>

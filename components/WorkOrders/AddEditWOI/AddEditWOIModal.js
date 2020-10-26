@@ -490,7 +490,7 @@ const AddEditWOIModal = function(props) {
                     {/* FOOTER */}
                     <Grid container >
                         <Grid item xs={12} className={classes.paper_footer}>
-                        <ButtonGroup className={classes.buttonGroup}>
+                        { editWOIModalMode == "edit" && activeWOI.record_id ? <ButtonGroup className={classes.buttonGroup}>
                             <Button
                                     onClick={() => handleDeleteWOI(activeWOI)}
                                     variant="contained"
@@ -498,7 +498,7 @@ const AddEditWOIModal = function(props) {
                                     className={classes.deleteButton}
                                 >
                                     <DeleteIcon />Delete
-                        </Button></ButtonGroup>
+                        </Button></ButtonGroup> :<></>}
                         <ButtonGroup className={classes.buttonGroup}>
                             <Button
                                     onClick={() => handleCloseModal()}
