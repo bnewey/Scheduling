@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {makeStyles, withStyles, List, ListItem, ListItemText, CircularProgress, Checkbox, InputBase, IconButton} from '@material-ui/core';
+import {makeStyles, withStyles, List, ListItem, ListItemText, CircularProgress, Checkbox, InputBase, IconButton,} from '@material-ui/core';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import SearchIcon from '@material-ui/icons/Search';
@@ -30,6 +30,7 @@ const EntitiesDrawer = function(props) {
     const [entityRows, setEntityRows] = useState(null);
     const [searchValue,setSearchValue] = useState("");
 
+
      useEffect(()=>{
         if(entityRows == null){
             Settings.getEntities()
@@ -43,12 +44,10 @@ const EntitiesDrawer = function(props) {
                 console.error("Failed to get entities", error);
             })
         }
-        
      }, [entityRows])
     
-     
     const classes = useStyles();
-
+    
     function renderRow(props) {
         const { data, index, style } = props;
         let entity = data[index];
@@ -74,7 +73,9 @@ const EntitiesDrawer = function(props) {
                     />
                 </div>
                 <span className={classes.entityIdSpan}>{entity.record_id}</span>
-                <span className={classes.entityCountyOrParishSpan}>{entity.county_or_parish}</span>
+                {/*<span className={classes.entityCountyOrParishSpan}>{entity.county_or_parish}</span>*/}
+                <span className={classes.entityCountyOrParishSpan}>{entity.city}</span>
+                <span className={classes.entityIdSpan}>{entity.state}</span>
                 </div>
             </ListItemText>
           </ListItem>
@@ -178,7 +179,9 @@ const EntitiesDrawer = function(props) {
                             <span className={classes.entityNameSpan}>Name</span>
                             <span className={classes.entityCheckSpan}>Assign</span>
                             <span className={classes.entityIdSpan}>ID</span>
-                            <span className={classes.entityCountyOrParishSpan}>County</span>
+                            {/*<span className={classes.entityCountyOrParishSpan}>County</span>*/}
+                            <span className={classes.entityCountyOrParishSpan}>City</span>
+                            <span className={classes.entityIdSpan}>State</span>
                             </div>
                         </ListItemText>
                         </ListItem>

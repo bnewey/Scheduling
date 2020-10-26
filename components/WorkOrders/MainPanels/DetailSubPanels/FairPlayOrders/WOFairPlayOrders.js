@@ -148,7 +148,7 @@ const WOFairPlayOrders = function(props) {
                 window.open(fileURL);
               })
               .catch((error)=>{
-                console.error("Failed to create and open pdf");
+                console.error("Failed to create and open pdf", error);
               })
           }                
       })

@@ -24,7 +24,7 @@ router.get('/getRaineyUsers', async (req,res) => {
  });
 
  router.get('/getEntities', async (req,res) => {
-    const sql = ' SELECT record_id, name, company, entities_types_id, county_or_parish   ' + 
+    const sql = ' SELECT record_id, name, company, entities_types_id, county_or_parish, city, state   ' + 
       ' FROM entities ' +
       ' ORDER BY name ASC ';
     try{
@@ -49,7 +49,7 @@ router.post('/getEntitiesSearch', async (req,res) => {
     }
   }
 
-  const sql = ' SELECT record_id, name, company, entities_types_id, county_or_parish ' + 
+  const sql = ' SELECT record_id, name, company, entities_types_id, county_or_parish, city, state ' + 
   ' FROM entities ' +
   ' WHERE name like ? ';
 
