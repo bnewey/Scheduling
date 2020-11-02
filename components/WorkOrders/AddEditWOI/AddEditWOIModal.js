@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles,Modal, Backdrop, Fade, Grid,ButtonGroup, Button,TextField, InputBase, Select, MenuItem,
-     Checkbox,IconButton, Radio, RadioGroup, FormControl, FormControlLabel} from '@material-ui/core';
+     Checkbox,IconButton, Radio, RadioGroup, FormControl, FormControlLabel, CircularProgress} from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -8,6 +8,8 @@ import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
+
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import cogoToast from 'cogo-toast';
 
@@ -20,6 +22,7 @@ import {
   } from '@material-ui/pickers';
 
 import Util from '../../../js/Util.js';
+import FormBuilder from '../../UI/FormComponents/FormBuilder'
 
 import Settings from  '../../../js/Settings';
 import Work_Orders from  '../../../js/Work_Orders';
@@ -36,25 +39,19 @@ const AddEditWOIModal = function(props) {
     const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, workOrderItems, setWorkOrderItems,editWOIModalOpen,
         setEditWOIModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI} = useContext(DetailContext)
     
-    const [shouldUpdate, setShouldUpdate] = useState(false);
-    const [errorFields,setErrorFields] = useState([]);
+    const saveRef = React.createRef();
+    
 
     const classes = useStyles();
 
     const handleCloseModal = () => {
         setActiveWOI(null);
         setEditWOIModalOpen(false);
-        setShouldUpdate(false);
-        setErrorFields([]);
     };
 
-    const handleShouldUpdate = (update) =>{
-        setShouldUpdate(update)
-    }
+    
 
 
-
-   
     const woi_fields = [
         //type: select must be hyphenated ex select-type
         {field: 'item_type', label: 'Item Type', type: 'radio-type', updateBy: 'state', defaultValue: 3 ,required: true},
@@ -64,11 +61,9 @@ const AddEditWOIModal = function(props) {
         {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
         {field: 'price', label: 'Price', type: 'text', updateBy: 'ref',defaultValue: (0.00).toFixed(2) ,},
         {field: 'contact', label: 'Ship To', type: 'select-ship_to', updateBy: 'state'},
-
         //Repair or Loaner
         {field: 'receive_date', label: 'Receive Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.item_type == 3 },
         {field: 'receive_by', label: 'Receive By', type: 'select-users', updateBy: 'state', hidden: (current_wo)=> current_wo?.item_type == 3},
-
     ];
 
     const scbd_or_sign_fields = [
@@ -76,8 +71,32 @@ const AddEditWOIModal = function(props) {
         //Scoreboard OR Sign
         {field: 'vendor', label: 'Vendor', type: 'select-vendor', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign == 0},
         //Scoreboard
-        {field: 'model', label: 'Model', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
-        {field: 'color', label: 'Color', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'model', label: 'Model', type: 'auto', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
+            dataGetterFunc: async () =>{
+                return new Promise(async function (resolve, reject) {
+                     try{
+                         var results = await Settings.getPastScoreboardParams("model")
+                         resolve(results);
+                     }
+                     catch(error){
+                         reject(error);
+                         console.error("Failed to get models", error)
+                     }
+                })
+            }},
+        {field: 'color', label: 'Color', type: 'auto', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
+            dataGetterFunc: async () =>{
+                return new Promise(async function (resolve, reject) {
+                    try{
+                        var results = await Settings.getPastScoreboardParams("color")
+                        resolve(results);
+                    }
+                    catch(error){
+                        reject(error);
+                        console.error("Failed to get colors", error)
+                    }
+               })
+            }},
         {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
         {field: 'scoreboard_arrival_date', label: 'Arrival Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
         {field: 'scoreboard_arrival_status', label: 'Arrival Status', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
@@ -110,299 +129,43 @@ const AddEditWOIModal = function(props) {
     },[editWOIModalMode, editWOIModalOpen])
 
 
-    // useEffect(()=>{
-    //     if(activeWorkOrderItem == null){
-    //         if(detailWOid){
-    //             //set woi
-
-    //         }
-    //     }
-    // },[activeWorkOrderItem, detailWOid])
-
-    //Building an object of refs to update text input values instead of having them tied to state and updating every character
-    const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
-    
-    const [ref_object, setRef_Object] = React.useState(buildRefObject([...woi_fields.map((v)=> v.field), ...scbd_or_sign_fields.map((v)=> v.field)]));
-
-    const item_types = [];
-
-    const handleInputOnChange = (value, should, type, key) => {
-        if(value == null || !type || !key){
-            console.error("Bad handleInputOnChange call");
-            return;
-        }
+    const handleSave = (woi, updateItem, addOrEdit) => {
         
-        var tmpWOI = {...activeWOI};
+        //Add Id to this new object
+        if(addOrEdit == "edit"){
+            updateItem["record_id"] = woi.record_id;
 
-        if(type === "date") {
-            tmpWOI[key] = Util.convertISODateTimeToMySqlDateTime(value);
-        }
-        if(type.split('-')[0] === "select"){
-            tmpWOI[key] = value.target.value;
-        }
-        if(type.split('-')[0] === "radio"){
-            tmpWOI[key] = value;
-        }
-
-        setActiveWOI(tmpWOI);
-        setShouldUpdate(should);
-    }
-
-    const getInputByType =(field)=>{
-        if(!field || field.type == null){
-            console.error("Bad field");
-            return;
-        }
-
-        var error = errorFields.filter((v)=> v.field == field.field).length > 0 ? true : false;
-        
-        switch(field.type){
-            case 'text':
-            case 'number':
-                return(<div className={classes.inputValue}>
-                    <TextField id={field.field} 
-                            error={error}
-                             variant="outlined"
-                             multiline={field.multiline}
-                             inputRef={ref_object[field.field]}
-                             inputProps={{className: classes.inputStyle}} 
-                             classes={{root: classes.inputRoot}}
-                             defaultValue={ activeWOI && activeWOI[field.field] ? activeWOI[field.field] : field?.defaultValue  }
-                             onChange={()=>handleShouldUpdate(true)}  /></div>
-                )
-                break;
-            case 'date':
-                return(<div className={classes.inputValue}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <KeyboardDatePicker className={classes.inputStyleDate} 
-                                    error={error}
-                                    inputVariant="outlined"  
-                                    disableFuture={field.field == "date" }
-                                    onChange={(value, value2)=> {
-                                        handleInputOnChange(value, true, field.type, field.field)
-                                        
-                                    }}
-                                    value={activeWOI &&  activeWOI[field.field] ? Util.convertISODateTimeToMySqlDateTime(activeWOI[field.field]) : null}
-                                    inputProps={{className: classes.inputRoot}} 
-                                    format={'M/dd/yyyy'}
-                                    />
-                </MuiPickersUtilsProvider></div>);
-                break;
-            case 'select-users':
-                return(<div className={classes.inputValueSelect}>
-                    <Select
-                        error={error}
-                        id={field.field}
-                        value={activeWOI && activeWOI[field.field] ? activeWOI[field.field] : 0}
-                        inputProps={{classes:  classes.inputSelect}}
-                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
-                        native
-                    >
-                        <option value={0}>
-                            Select
-                        </option>
-                        {raineyUsers && raineyUsers.map((user)=>{
-                            return (
-                                <option value={user.user_id}>
-                                    {user.name}
-                                </option>
-                            )
-                        })}
-                    </Select></div>
-                )
-                break;
-            case 'select-vendor':
-                return(<div className={classes.inputValueSelect}>
-                    <Select
-                        error={error}
-                        id={field.field}
-                        value={activeWOI && activeWOI[field.field] ? activeWOI[field.field] : null}
-                        inputProps={{classes:  classes.inputSelect}}
-                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
-                        native
-                    >
-                        <option value={null}>
-                            Select
-                        </option>
-                        {vendorTypes && vendorTypes.map((item)=>{
-                            return (
-                                <option value={item.id}>
-                                    {item.name}
-                                </option>
-                            )
-                        })}
-                    </Select></div>
-                )
-                break;
-                case 'select-ship_to':
-                    return(<div className={classes.inputValueSelect}>
-                        <Select
-                            error={error}
-                            id={field.field}
-                            value={activeWOI && activeWOI[field.field] ? activeWOI[field.field] : null}
-                            inputProps={{classes:  classes.inputSelect}}
-                            onChange={value => handleInputOnChange(value, true, field.type, field.field)}
-                            native
-                        >
-                            <option value={null}>
-                                Select
-                            </option>
-                            {shipToOptionsWOI && shipToOptionsWOI.map((item)=>{
-                                return (
-                                    <option value={item.ec_record_id}>
-                                        {item.ec_name}
-                                    </option>
-                                )
-                            })}
-                        </Select></div>
-                    )
-                    break;
-            case 'check':
-                return(
-                    <div className={classes.inputValue}>
-                    <Checkbox
-                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                        checkedIcon={<CheckBoxIcon fontSize="small" />}
-                        name="checkedI"
-                        checked={activeWOI && activeWOI[field.field] ? activeWOI[field.field] == 1 ? true : false : false}
-                        onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
-                    /></div>
-                )
-                break;
-            case 'radio-scbd_or_sign':
-                return(
-                    <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>
-                        <RadioGroup row 
-                                    aria-label="Scoreboard/Sign/Other" 
-                                    name="Scoreboard/Sign/Other" 
-                                    value={activeWOI && activeWOI[field.field] != null ? +activeWOI[field.field] : 0} 
-                                    onChange={event => handleInputOnChange(event?.target?.value, true, field.type, field.field)}
-                                    classes={{root: classes.radioGroup}}>
-                                        {scbd_or_sign_radio_options.map((item=>(
-                                            <FormControlLabel value={item.value} control={<Radio  classes={{checked: classes.radio }}/>} label={item.displayField} />
-                                        )))}
-                        </RadioGroup>
-                    </FormControl>
-                )
-                break;
-            case 'radio-type':
-                return(
-                    <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>
-                        <RadioGroup row 
-                                    aria-label="Scoreboard/Sign/Other" 
-                                    name="Scoreboard/Sign/Other" 
-                                    value={activeWOI && activeWOI[field.field] != null ? +activeWOI[field.field] : 3} 
-                                    onChange={event => handleInputOnChange(event?.target?.value, true, field.type, field.field)}
-                                    classes={{root: classes.radioGroup}}>
-                                        {item_type_radio_options.map((item=>(
-                                            <FormControlLabel value={item.value} control={<Radio classes={{checked: classes.radio }} />} label={item.displayField} />
-                                        )))}
-                        </RadioGroup>
-                    </FormControl>
-                )
-                break;
-            default: 
-                return <></>
-                break;
-        }
-    }
-
-    const handleSave = woi => {
-        if(!woi){
-            console.error("Bad work order item")
-            return;
-        }
-        var addOrEdit = editWOIModalMode;
-        
-
- 
-        if(shouldUpdate){
-            var updateWOI = {...woi};
-
-            //Create Object with our text input values using ref_object
-            const objectMap = (obj, fn) =>
-                Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
-            var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
-
-            //Get only values we need to updateTask()
-            [...woi_fields, ...scbd_or_sign_fields].forEach((field, i)=>{
-                const type = field.type;
-                switch(type){
-                    case 'text':
-                        //Get updated values with textValueObject bc text values use ref
-                        if(textValueObject[field.field])
-                            updateWOI[field.field] = textValueObject[field.field];
-                        break;
-                    case 'date':
-                        if(textValueObject[field.field])
-                            updateWOI[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
-                        break;
-                    default:
-                        //Others are updated with woi (activeWOI) state variable
-                        if(woi[field.field])
-                            updateWOI[field.field] = woi[field.field];
-                        break;
-                }
-            })
-
-            
-
-            //Validate Required Fields
-            var empty_required_fields = [...woi_fields, ...scbd_or_sign_fields].
-                    filter((v,i)=> v.required && !(v.hidden && v.hidden(activeWOI) )).
-                    filter((item)=> updateWOI[item.field] == null || updateWOI[item.field] == undefined);;
-            if(empty_required_fields.length > 0){
-                cogoToast.error("Required fields are blank");
-                setErrorFields(empty_required_fields);
-                console.error("Required fields are blank", empty_required_fields)
-                return;
-            }
-            
-            //Add Id to this new object
-            if(addOrEdit == "edit"){
-                updateWOI["record_id"] = woi.record_id;
-
-                Work_Orders.updateWorkOrderItem( updateWOI )
-                .then( (data) => {
-                    //Refetch our data on save
-                    cogoToast.success(`Work Order Item ${woi.record_id} has been updated!`, {hideAfter: 4});
-                    setWorkOrderItems(null);
-                    handleCloseModal();
-                })
-                .catch( error => {
-                    console.error("Error updating woi.",error);
-                    cogoToast.error(`Error updating woi. ` , {hideAfter: 4});
-                })
-            }
-            if(addOrEdit == "add"){
-                updateWOI["work_order"] = activeWorkOrder.wo_record_id;
-                Work_Orders.addWorkOrderItem( updateWOI )
-                .then( (data) => {
-                    //Get id of new workorder item 
-                    if(data && data.insertId){
-                        setWorkOrderItems(null);
-                    }
-                    cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
-                    handleCloseModal();
-                })
-                .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error adding woi. ` , {hideAfter: 4});
-                })
-            }
-            
-        }else{
-            
-            if(addOrEdit == "add"){
-                cogoToast.info("Empty Form not allowed");
-            }else{
-                cogoToast.info("No Changes made");
+            Work_Orders.updateWorkOrderItem( updateItem )
+            .then( (data) => {
+                //Refetch our data on save
+                cogoToast.success(`Work Order Item ${woi.record_id} has been updated!`, {hideAfter: 4});
+                setWorkOrderItems(null);
                 handleCloseModal();
-            }
-            
+            })
+            .catch( error => {
+                console.error("Error updating woi.",error);
+                cogoToast.error(`Error updating woi. ` , {hideAfter: 4});
+            })
         }
+        if(addOrEdit == "add"){
+            updateItem["work_order"] = activeWorkOrder.wo_record_id;
+            Work_Orders.addWorkOrderItem( updateItem )
+            .then( (data) => {
+                //Get id of new workorder item 
+                if(data && data.insertId){
+                    setWorkOrderItems(null);
+                }
+                cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
+                handleCloseModal();
+            })
+            .catch( error => {
+                console.warn(error);
+                cogoToast.error(`Error adding woi. ` , {hideAfter: 4});
+            })
+        }
+    }
         
-    };
+    
 
     const handleDeleteWOI = (woi) => {
         if(!woi || !woi.record_id){
@@ -450,47 +213,36 @@ const AddEditWOIModal = function(props) {
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            { activeWOI?.record_id ? `Edit WOI#: ${activeWOI.record_id}` : 'Add Work Order Item'} 
+                            { activeWOI?.record_id ? `Edit WOI#: ${activeWOI?.record_id}` : 'Add Work Order Item'} 
                         </span>
                     </div>
 
 
                     {/* BODY */}
-                    {ref_object ? 
+                     
                     <Grid container className={classes.grid_container} >  
-                        <Grid item xs={ 7 } className={classes.paperScroll}>
+                        <Grid item xs={ 12 } className={classes.paperScroll}>
                             {/*FORM*/}
-                            {woi_fields.map((field, i)=>{
-                                if(field?.hidden && field.hidden(activeWOI)){
-                                    return (<></>);
-                                }
-                                return(
-                                <div className={classes.inputDiv}>  
-                                    <span className={classes.inputLabel}>{field.label}</span>
-                                    {getInputByType(field)}
-                                </div>)
-                            })}
+                            <FormBuilder 
+                                ref={saveRef}
+                                fields={[...woi_fields, ...scbd_or_sign_fields]} 
+                                mode={editWOIModalMode} 
+                                classes={classes} 
+                                formObject={activeWOI} 
+                                setFormObject={setActiveWOI}
+                                handleClose={handleCloseModal} 
+                                handleSave={handleSave}
+                                scbd_or_sign_radio_options={scbd_or_sign_radio_options} shipToOptionsWOI={shipToOptionsWOI}
+                                raineyUsers={raineyUsers} vendorTypes={vendorTypes} item_type_radio_options={item_type_radio_options}/>
+
                         </Grid>
-                         
-                            <Grid item xs={5} className={classes.paperScroll}>
-                            {scbd_or_sign_fields.map((field, i)=>{
-                                if(field?.hidden && field.hidden(activeWOI)){
-                                    return (<></>);
-                                }
-                                return(
-                                <div className={classes.inputDiv}>  
-                                    <span className={classes.inputLabel}>{field.label}</span>
-                                    {getInputByType(field)}
-                                </div>)
-                            })}
-                            </Grid>
                     </Grid>
-                    : <></> }
+                    
 
                     {/* FOOTER */}
                     <Grid container >
                         <Grid item xs={12} className={classes.paper_footer}>
-                        { editWOIModalMode == "edit" && activeWOI.record_id ? <ButtonGroup className={classes.buttonGroup}>
+                        { editWOIModalMode == "edit" && activeWOI?.record_id ? <ButtonGroup className={classes.buttonGroup}>
                             <Button
                                     onClick={() => handleDeleteWOI(activeWOI)}
                                     variant="contained"
@@ -512,7 +264,7 @@ const AddEditWOIModal = function(props) {
                             <ButtonGroup className={classes.buttonGroup}>
                                 
                                 <Button
-                                    onClick={ () => { handleSave(activeWOI) }}
+                                    onClick={ () => { saveRef.current.handleSaveParent(activeWOI) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -696,5 +448,71 @@ const useStyles = makeStyles(theme => ({
     },
     multiline:{
         padding: 0,
-    }
+    },
+    underline: {
+        "&&&:before": {
+          borderBottom: "none"
+        },
+        "&&:after": {
+          borderBottom: "none"
+        },
+        border: '1px solid #c4c4c4',
+        borderRadius: 4,
+        '&:hover':{
+            border: '1px solid #555',
+        }
+    },
+    optionLi:{
+        padding: 0,
+        borderBottom: '1px solid #ececec',
+        '&:last-child':{
+            borderBottom: '1px solid #fff'
+        },
+       
+    },
+    optionList:{
+        padding: '5px 1px 5px 1px',
+        border: '1px solid #888',
+        borderTop: "none",
+        display: 'flex',
+        flexDirection: 'column-reverse',
+        alignItems: 'stretch',
+    },
+    optionDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems:'center',
+        width: '100%',
+        backgroundColor: '#fff',
+        borderLeft: '2px solid #fff',
+         '&:hover':{
+          backgroundColor: '#d3d3d3',
+          borderLeft: '2px solid #ff9007'
+        },
+      },
+      optionSearchValueSpan:{
+        fontFamily: 'sans-serif',
+        color: '#000',
+        overflow: 'hidden',
+        maxWidth: '200px',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        padding: '1px 5px 1px 5px',
+      },
+      optionSearchResultsSpan:{
+        padding: '4px 5px 4px 10px',
+        fontFamily: 'sans-serif',
+        color: '#888',
+        flexBasis: '20%'
+      },
+      autocompleteRoot:{
+          width: '70%',
+      },
+      actualInputElement:{
+        
+        padding: '4px 5px !important',
+        
+      }
 }));
+

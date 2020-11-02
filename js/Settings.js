@@ -78,10 +78,34 @@ async function getEntityNameById(id){
 
 
 
+async function getPastScoreboardParams(column){
+    const route = '/scheduling/settings/getPastScoreboardParams';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({column})
+        });
+
+        if(!data.ok){
+            throw new Error("getPastScoreboardParams returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
 
 module.exports = {
     getRaineyUsers,
     getEntities,
     getEntityNameById,
-    getEntitiesSearch
+    getEntitiesSearch,
+    getPastScoreboardParams
 };

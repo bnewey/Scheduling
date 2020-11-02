@@ -81,6 +81,7 @@ const WOItemization = function(props) {
     var tmp = workOrderItems.find((v)=> v.record_id == woi_id) || -1;
     if(tmp){
       setActiveWOI(tmp);
+      console.log("WOI to edit", tmp);
       setEditWOIModalMode("edit");
       setEditWOIModalOpen(true)
     }else{

@@ -86,27 +86,28 @@ router.post('/getEntityNameById', async (req,res) => {
   }
 });
 
-// router.post('/updateTaskList', async (req,res) => {
-//     var taskList;
-//     if(req.body){
-//     taskList = req.body.taskList;
-//     }
 
-//     const sql = ' UPDATE task_list SET list_name = ? ' +
-//     ' WHERE id = ? ';
+router.post('/getPastScoreboardParams', async (req,res) => {
+  var column;
+  if(req.body){
+    column = req.body.column;
+  }
 
-//     const params = [taskList.list_name, taskList.id ];
 
-//     try{
-//         const results = await database.query(sql, params);
-//         logger.info("Update TaskList " + taskList.id );
-//         res.sendStatus(200);
-//     }
-//     catch(error){
-//         logger.error("TasksList (updateTaskList): " + error);
-//         res.sendStatus(400);
-//     }
-// });
+  const sql = ' SELECT DISTINCT ??   ' + 
+  ' FROM work_orders_items WHERE ?? is not null ORDER BY ?? desc ';
+
+  try{
+      const results = await database.query(sql, [column,column,column]);
+      logger.info("Got Past Scbd Param. Column: " +  column);
+      res.json(results);
+  }
+  catch(error){
+      logger.error("Settings (getPastScoreboardParams): " + error);
+      res.sendStatus(400);
+  }
+});
+
 
 
 module.exports = router;

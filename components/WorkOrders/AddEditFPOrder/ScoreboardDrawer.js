@@ -19,11 +19,11 @@ import WorkOrderDetail from  '../../../js/WorkOrderDetail';
 import Settings from  '../../../js/Settings';
 import { ListContext } from '../WOContainer';
 import { DetailContext } from '../WOContainer';
-
+import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 
 const ScoreboardDrawer = function(props) {
-    const {user, scbdDrawerOpen, setScbdDrawerOpen, handleInputOnChange, fpScbdFields, getInputByType, activeFPOrderItem, setActiveFPOrderItem,
+    const {user, scbdDrawerOpen, setScbdDrawerOpen, fpScbdFields, activeFPOrderItem, setActiveFPOrderItem,
         fpOrderItems, setFPOrderItems, scbdMode, setScbdMode} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid,
@@ -33,81 +33,22 @@ const ScoreboardDrawer = function(props) {
         setFPOrderModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI} = useContext(DetailContext)
 
     const classes = useStyles();
+    const saveRef = React.createRef();
 
-    const [errorFields,setErrorFields] = useState([]);
-
-    //Building an object of refs to update text input values instead of having them tied to state and updating every character
-    const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
-    
-    const [ref_object, setRef_Object] = React.useState(buildRefObject(fpScbdFields.map((v)=> v.field)));
 
     useEffect(()=>{
-        if(scbdDrawerOpen && activeFPOrderItem){
-            //reset fields
-            
-
-            for( const ref in ref_object){
-                ref_object[ref].current.value = activeFPOrderItem[ref] || null
-            }
+        if(scbdDrawerOpen == false){
+            handleCloseScbdDrawer();
         }
-    },[activeFPOrderItem])
+    },[scbdDrawerOpen])
      
-    const handleSave = fpoItem => {
+    const handleSave = (fpoItem, updateFPOItem, scbdAddOrEdit) => {
         if(!fpoItem){
             console.error("Bad work order item")
             return;
         }
        
-        
- 
-        
-        var updateFPOItem = {...fpoItem};
-
-        //Create Object with our text input values using ref_object
-        const objectMap = (obj, fn) =>
-            Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
-        var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
-
-
-        //Get only values we need to updateTask()
-        fpScbdFields.forEach((field, i)=>{
-            const type = field.type;
-            switch(type){
-                case 'text':
-                    //Get updated values with textValueObject bc text values use ref
-                    if(textValueObject[field.field])
-                        updateFPOItem[field.field] = textValueObject[field.field];
-                    break;
-                case 'number':
-                        //Get updated values with textValueObject bc number values use ref
-                        if(textValueObject[field.field])
-                        updateFPOItem[field.field] = parseInt(textValueObject[field.field]);
-                    break;
-                case 'date':
-                    if(textValueObject[field.field])
-                        updateFPOItem[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
-                    break;
-                default:
-                    //Others are updated with fpoItem (activeFPOrderItem) state variable
-                    if(fpoItem[field.field])
-                        updateFPOItem[field.field] = fpoItem[field.field];
-                    break;
-            }
-        })
-
-        
-
-        //Validate Required Fields
-        var empty_required_fields = fpScbdFields.
-                filter((v,i)=> v.required && !(v.hidden && v.hidden(activeFPOrderItem) )).
-                filter((item)=> updateFPOItem[item.field] == null || updateFPOItem[item.field] == undefined);;
-        if(empty_required_fields.length > 0){
-            cogoToast.error("Required fields are blank");
-            setErrorFields(empty_required_fields);
-            console.error("Required fields are blank", empty_required_fields)
-            return;
-        }
-        
+                
         //Add Id to this new object
         if(scbdMode == "edit"){
             updateFPOItem["record_id"] = fpoItem.record_id;
@@ -241,13 +182,9 @@ const ScoreboardDrawer = function(props) {
     const handleCloseScbdDrawer = () =>{
         setScbdDrawerOpen(false);
         setActiveFPOrderItem({});
-        setErrorFields([]);
     }
 
     
-  
-
-
     return(
         <div className={classes.root}>
             <div className={classes.absCloseButton}>
@@ -260,22 +197,22 @@ const ScoreboardDrawer = function(props) {
 
             <div className={classes.listDiv}>
                 <>
-                {fpScbdFields.map((field, i)=>{
-                                if(field?.hidden && field.hidden(activeFPOrderItem)){
-                                    return (<></>);
-                                }
-                                return(
-                                <div key={'scbdfield'+i} className={classes.inputDiv}>  
-                                    <span className={classes.inputLabel}>{field.label}</span>
-                                    {getInputByType(field, ref_object)}
-                                </div>)
-                            })}  
+                    <FormBuilder 
+                        ref={saveRef}
+                        fields={fpScbdFields} 
+                        mode={scbdMode} 
+                        classes={classes} 
+                        formObject={activeFPOrderItem} 
+                        setFormObject={setActiveFPOrderItem}
+                        handleClose={handleCloseScbdDrawer} 
+                        handleSave={handleSave}
+                        vendorTypes={vendorTypes} />
                 </>
             </div>
             <div className={classes.buttonDiv}>
                 <Button variant="outlined" onClick={event => handleCloseScbdDrawer()}>Cancel</Button>
                 { scbdMode == "edit" && <Button variant="outlined" onClick={event => handleDeleteItem(activeFPOrderItem)}>Delete</Button>}
-                <Button variant="outlined" onClick={event => handleSave(activeFPOrderItem)}>Save</Button>
+                <Button variant="outlined" onClick={event => saveRef.current.handleSaveParent(activeFPOrderItem)}>Save</Button>
                 
             </div>
         </div>
@@ -409,4 +346,98 @@ const useStyles = makeStyles(theme => ({
         fontSize: '15px',
         color: '#787878',
     },
+    inputRoot: {
+        padding: '5px 7px',
+        width: '100%',
+        '&& .MuiOutlinedInput-multiline': {
+            padding: '0px'
+        },
+    },
+    inputStyle:{
+        padding: '5px 7px',
+        width: '100%',
+        
+    },
+    inputStyleDate:{
+        padding: '5px 7px',
+        width: '175px',
+        
+    },
+    inputValue:{
+        flexBasis: '70%',
+        textAlign: 'left',
+    },
+    inputValueSelect:{
+        flexBasis: '70%',
+        textAlign: 'left',
+        padding: '5px 7px',
+    },
+    multiline:{
+        padding: 0,
+    },
+    underline: {
+        "&&&:before": {
+          borderBottom: "none"
+        },
+        "&&:after": {
+          borderBottom: "none"
+        },
+        border: '1px solid #c4c4c4',
+        borderRadius: 4,
+        '&:hover':{
+            border: '1px solid #555',
+        }
+    },
+    optionLi:{
+        padding: 0,
+        borderBottom: '1px solid #ececec',
+        '&:last-child':{
+            borderBottom: '1px solid #fff'
+        },
+       
+    },
+    optionList:{
+        padding: '5px 1px 5px 1px',
+        border: '1px solid #888',
+        borderTop: "none",
+        display: 'flex',
+        flexDirection: 'column-reverse',
+        alignItems: 'stretch',
+    },
+    optionDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems:'center',
+        width: '100%',
+        backgroundColor: '#fff',
+        borderLeft: '2px solid #fff',
+         '&:hover':{
+          backgroundColor: '#d3d3d3',
+          borderLeft: '2px solid #ff9007'
+        },
+      },
+      optionSearchValueSpan:{
+        fontFamily: 'sans-serif',
+        color: '#000',
+        overflow: 'hidden',
+        maxWidth: '200px',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        padding: '1px 5px 1px 5px',
+      },
+      optionSearchResultsSpan:{
+        padding: '4px 5px 4px 10px',
+        fontFamily: 'sans-serif',
+        color: '#888',
+        flexBasis: '20%'
+      },
+      autocompleteRoot:{
+          width: '70%',
+      },
+      actualInputElement:{
+        
+        padding: '4px 5px !important',
+        
+      }
 }));

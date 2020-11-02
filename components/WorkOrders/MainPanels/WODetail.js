@@ -152,8 +152,8 @@ const useStyles = makeStyles(theme => ({
     padding: '2px 13px',
     textTransform: 'uppercase',
     fontSize: '10px',
-    textAlign: 'left',
-    flexBasis: '18%',
+    textAlign: 'right',
+    flexBasis: '20%',
   },
   detailValue:{
     fontFamily: 'monospace',

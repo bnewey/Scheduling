@@ -275,7 +275,7 @@ const MapContainer = (props) => {
             if(!row.address){
               return;
             }
-              
+                
             Tasks.getCoordinates(row.address, row.city, row.state, row.zip)
             .then((data)=>{
               if(!data){

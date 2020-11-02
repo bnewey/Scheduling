@@ -29,6 +29,8 @@ import { DetailContext } from '../WOContainer';
 import ScoreboardDrawer from './ScoreboardDrawer';
 import ScoreboardList from './ScoreboardList';
 
+import FormBuilder from '../../UI/FormComponents/FormBuilder';
+
 const AddEditFPOrder = function(props) {
     const {user} = props;
 
@@ -38,11 +40,11 @@ const AddEditFPOrder = function(props) {
     const {fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, workOrderItems, setWorkOrderItems,fpOrderModalOpen,
         setFPOrderModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrders, setFPOrders} = useContext(DetailContext)
     
-    const [shouldUpdate, setShouldUpdate] = useState(false);
-    const [errorFields,setErrorFields] = useState([]);
     const [scbdDrawerOpen, setScbdDrawerOpen] = useState(false);
     const [scbdMode, setScbdMode] = useState("add");
     const [activeFPOrderItem, setActiveFPOrderItem] = useState(null);
+
+    const saveRef = React.createRef();
     
     const [fpOrderItems, setFPOrderItems] = useState(null);
 
@@ -63,26 +65,28 @@ const AddEditFPOrder = function(props) {
         }
     },[activeFPOrder, fpOrderItems])
 
+    useEffect(()=>{
+        if(fpOrderModalOpen == false){
+            handleCloseModal();
+        }
+    },[fpOrderModalOpen])
+
     const handleCloseModal = () => {
         setActiveFPOrder(null);
         setFPOrderModalOpen(false);
-        setShouldUpdate(false);
         setFPOrderItems(null);
-        setErrorFields([]);
+        setScbdDrawerOpen(false);
+        setActiveFPOrderItem(null);
     };
-
-    const handleShouldUpdate = (update) =>{
-        setShouldUpdate(update)
-    }
 
 
     const fpOrderFields = [
         //type: select must be hyphenated ex select-type
         {field: 'order_date', label: 'Order Date', type: 'date', updateBy: 'state', defaultValue: moment(new Date()).format('MM/DD/YYYY')},
         {field: 'user_entered', label: 'User Entered', type: 'select-users', updateBy: 'state', required: true},
-        {field: 'ship_to', label: 'Ship To', type: 'text', updateBy: 'ref', multiline: true,
+        {field: 'ship_to', label: 'Ship To', type: 'text', updateBy: 'ref', multiline: true, required: true,
                 defaultValue: 'To be picked up by our freight truck for delivery to Rainey Electronics, Inc. in Little Rock, AR'},
-        {field: 'bill_to', label: 'Bill To', type: 'text', updateBy: 'ref', multiline: true,
+        {field: 'bill_to', label: 'Bill To', type: 'text', updateBy: 'ref', multiline: true, required: true,
                 defaultValue: "Rainey Electronics, Inc. Attention: Bob Rainey 19023 Colonel Glenn Road Little Rock, AR 72210"},
         {field: 'discount', label: 'Discount', type: 'number', updateBy: 'ref',defaultValue: 0 },
         {field: 'sales_order_id', label: 'Sales Order #', type: 'text', updateBy: 'ref'},
@@ -91,9 +95,34 @@ const AddEditFPOrder = function(props) {
 
     const fpScbdFields = [
         //{field: 'scoreboard_or_sign', label: '', type: 'radio-scbd_or_sign', updateBy: 'state',required: true,defaultValue: 0 ,},
-        {field: 'model', label: 'Model*', type: 'text', updateBy: 'ref',required: true},
+        {field: 'model', label: 'Model', type: 'auto', updateBy: 'state',  ref: React.useRef(null),
+            dataGetterFunc: async () =>{
+                return new Promise(async function (resolve, reject) {
+                     try{
+                         var results = await Settings.getPastScoreboardParams("model")
+                         resolve(results);
+                     }
+                     catch(error){
+                         reject(error);
+                         console.error("Failed to get models", error)
+                     }
+                })
+            }},
+        
         {field: 'model_quantity', label: 'Quantity*', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
-        {field: 'color', label: 'Color', type: 'text', updateBy: 'ref'},
+        {field: 'color', label: 'Color', type: 'auto', updateBy: 'state',  ref: React.useRef(null),
+            dataGetterFunc: async () =>{
+                return new Promise(async function (resolve, reject) {
+                    try{
+                        var results = await Settings.getPastScoreboardParams("color")
+                        resolve(results);
+                    }
+                    catch(error){
+                        reject(error);
+                        console.error("Failed to get colors", error)
+                    }
+               })
+            }},
         {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref'},
         {field: 'controller', label: 'Controller', type: 'text', updateBy: 'ref'},
         {field: 'controller_quantity', label: 'Quantity*', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
@@ -112,237 +141,70 @@ const AddEditFPOrder = function(props) {
     },[fpOrderModalMode, fpOrderModalOpen])
 
 
-    //Building an object of refs to update text input values instead of having them tied to state and updating every character
-    const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
-    
-    const [ref_object, setRef_Object] = React.useState(buildRefObject(fpOrderFields.map((v)=> v.field)));
-
-
-    const handleInputOnChange = (value, should, type, key) => {
-        if(value == null || !type || !key){
-            console.error("Bad handleInputOnChange call");
-            return;
-        }
-        
-        var tmpWOI = {...activeFPOrder};
-
-        if(type === "date") {
-            tmpWOI[key] = Util.convertISODateTimeToMySqlDateTime(value);
-        }
-        if(type.split('-')[0] === "select"){
-            tmpWOI[key] = value.target.value;
-        }
-        if(type.split('-')[0] === "radio"){
-            tmpWOI[key] = value;
-        }
-
-        setActiveFPOrder(tmpWOI);
-        setShouldUpdate(should);
-    }
-
-    const getInputByType =(field , ref_object)=>{
-        if(!field || field.type == null){
-            console.error("Bad field");
-            return;
-        }
-
-        var error = errorFields.filter((v)=> v.field == field.field).length > 0 ? true : false;
-        
-        switch(field.type){
-            case 'text':
-            case 'number':
-                return(<div className={classes.inputValue}>
-                    <TextField id={field.field} 
-                            error={error}
-                             variant="outlined"
-                             multiline={field.multiline}
-                             inputRef={ref_object[field.field]}
-                             inputProps={{className: classes.inputStyle}} 
-                             classes={{root: classes.inputRoot}}
-                             defaultValue={ activeFPOrder && activeFPOrder[field.field] ? activeFPOrder[field.field] : field?.defaultValue  }
-                             onChange={()=>handleShouldUpdate(true)}  /></div>
-                )
-                break;
-            case 'date':
-                return(<div className={classes.inputValue}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <KeyboardDatePicker className={classes.inputStyleDate} 
-                                    error={error}
-                                    inputVariant="outlined"  
-                                    disableFuture={field.field == "date" }
-                                    onChange={(value, value2)=> {
-                                        handleInputOnChange(value, true, field.type, field.field)
-                                        
-                                    }}
-                                    value={activeFPOrder &&  activeFPOrder[field.field] ? Util.convertISODateTimeToMySqlDateTime(activeFPOrder[field.field]) : null}
-                                    inputProps={{className: classes.inputRoot}} 
-                                    format={'M/dd/yyyy'}
-                                    />
-                </MuiPickersUtilsProvider></div>);
-                break;
-            case 'select-users':
-                return(<div className={classes.inputValueSelect}>
-                    <Select
-                        error={error}
-                        id={field.field}
-                        value={activeFPOrder && activeFPOrder[field.field] ? activeFPOrder[field.field] : 0}
-                        inputProps={{classes:  classes.inputSelect}}
-                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
-                        native
-                    >
-                        <option value={0}>
-                            Select User
-                        </option>
-                        {raineyUsers && raineyUsers.map((user)=>{
-                            return (
-                                <option value={user.user_id}>
-                                    {user.name}
-                                </option>
-                            )
-                        })}
-                    </Select></div>
-                )
-                break;
-            case 'check':
-                return(
-                    <div className={classes.inputValue}>
-                    <Checkbox
-                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                        checkedIcon={<CheckBoxIcon fontSize="small" />}
-                        name="checkedI"
-                        checked={activeFPOrder && activeFPOrder[field.field] ? activeFPOrder[field.field] == 1 ? true : false : false}
-                        onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
-                    /></div>
-                )
-                break;
-            
-            default: 
-                return <></>
-                break;
-        }
-    }
-
-    const handleSave = fpOrder => {
+    const handleSave = (fpOrder, updateItem,addOrEdit) => {
         if(!fpOrder){
             console.error("Bad work order item")
             return;
         }
-        var addOrEdit = fpOrderModalMode;
         
- 
-        if(shouldUpdate){
-            var updateFpOrder = {...fpOrder};
-
-            //Create Object with our text input values using ref_object
-            const objectMap = (obj, fn) =>
-                Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
-            var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
-
-            //Get only values we need to updateTask()
-            fpOrderFields.forEach((field, i)=>{
-                const type = field.type;
-                switch(type){
-                    case 'text':
-                        //Get updated values with textValueObject bc text values use ref
-                        if(textValueObject[field.field])
-                            updateFpOrder[field.field] = textValueObject[field.field];
-                        break;
-                    case 'number':
-                         //Get updated values with textValueObject bc number values use ref
-                         if(textValueObject[field.field])
-                         updateFpOrder[field.field] = parseInt(textValueObject[field.field]);
-                     break;
-                    case 'date':
-                        if(textValueObject[field.field])
-                            updateFpOrder[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
-                        break;
-                    default:
-                        //Others are updated with fpOrder (activeFPOrder) state variable
-                        if(fpOrder[field.field])
-                            updateFpOrder[field.field] = fpOrder[field.field];
-                        break;
-                }
-            })
-
             
+        //Add Id to this new object
+        if(addOrEdit == "edit"){
+            updateItem["record_id"] = fpOrder.record_id;
 
-            //Validate Required Fields
-            var empty_required_fields = fpOrderFields.
-                    filter((v,i)=> v.required && !(v.hidden && v.hidden(activeFPOrder) )).
-                    filter((item)=> updateFpOrder[item.field] == null || updateFpOrder[item.field] == undefined);;
-            if(empty_required_fields.length > 0){
-                cogoToast.error("Required fields are blank");
-                setErrorFields(empty_required_fields);
-                console.error("Required fields are blank", empty_required_fields)
-                return;
-            }
-            
-            //Add Id to this new object
-            if(addOrEdit == "edit"){
-                updateFpOrder["record_id"] = fpOrder.record_id;
-
-                WorkOrderDetail.updateFPOrder( updateFpOrder )
-                .then( (data) => {
-                    //Refetch our data on save
-                    cogoToast.success(`Work Order Item ${fpOrder.record_id} has been updated!`, {hideAfter: 4});
-                    setFPOrders(null);
-                    handleCloseModal();
-                })
-                .catch( error => {
-                    console.error("Error updating fpOrder.",error);
-                    cogoToast.error(`Error updating fpOrder. ` , {hideAfter: 4});
-                })
-            }
-            if(addOrEdit == "add"){
-                updateFpOrder["work_order"] = activeWorkOrder.wo_record_id;
-                WorkOrderDetail.addNewFPOrder( updateFpOrder )
-                .then( (data) => {
-                    //Get id of new workorder item 
-                    if(data && data.insertId){
-
-                        
-                        //record_id exists so we can add item immediately
-                        if(fpOrderItems && Array.isArray(fpOrderItems)){
-                            var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
-
-                            WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
-                            .then((data)=>{
-                                if(data){
-                                    //refetch
-                                    setFPOrders(null);
-                                    setFPOrderItems(null);
-                                }
-                            })
-                            .catch((error)=>{
-                                cogoToast.error("Failed to add item");
-                                console.error("Failed to add item", error)
-                            })
-                        }else{
-                            setFPOrders(null);
-                            setFPOrderItems(null);
-                        }
-                        
-                        
-                    }
-                    cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
-                    handleCloseModal();
-                })
-                .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error adding fpOrder. ` , {hideAfter: 4});
-                })
-            }
-            
-        }else{
-            
-            if(addOrEdit == "add"){
-                cogoToast.info("Empty Form not allowed");
-            }else{
-                cogoToast.info("No Changes made");
+            WorkOrderDetail.updateFPOrder( updateItem )
+            .then( (data) => {
+                //Refetch our data on save
+                cogoToast.success(`Work Order Item ${fpOrder.record_id} has been updated!`, {hideAfter: 4});
+                setFPOrders(null);
                 handleCloseModal();
-            }
-            
+            })
+            .catch( error => {
+                console.error("Error updating fpOrder.",error);
+                cogoToast.error(`Error updating fpOrder. ` , {hideAfter: 4});
+            })
         }
+        if(addOrEdit == "add"){
+            updateItem["work_order"] = activeWorkOrder.wo_record_id;
+            WorkOrderDetail.addNewFPOrder( updateItem )
+            .then( (data) => {
+                //Get id of new workorder item 
+                if(data && data.insertId){
+
+                    
+                    //record_id exists so we can add item immediately
+                    if(fpOrderItems && Array.isArray(fpOrderItems)){
+                        var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
+
+                        WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
+                        .then((data)=>{
+                            if(data){
+                                //refetch
+                                setFPOrders(null);
+                                setFPOrderItems(null);
+                            }
+                        })
+                        .catch((error)=>{
+                            cogoToast.error("Failed to add item");
+                            console.error("Failed to add item", error)
+                        })
+                    }else{
+                        setFPOrders(null);
+                        setFPOrderItems(null);
+                    }
+                    
+                    
+                }
+                cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
+                handleCloseModal();
+            })
+            .catch( error => {
+                console.warn(error);
+                cogoToast.error(`Error adding fpOrder. ` , {hideAfter: 4});
+            })
+        }
+            
+        
         
     };
 
@@ -371,13 +233,13 @@ const AddEditFPOrder = function(props) {
 
 
                     {/* BODY */}
-                    {ref_object ? 
+                    
                     <Grid container className={classes.grid_container} >  
                         <Grid item xs={ scbdDrawerOpen ?  7 : 12} className={clsx(classes.paperScroll, {
                                                                     [classes.paperScrollAddItem]: scbdDrawerOpen,
                                                                 })}><>
                             {/*FORM*/}
-                            {fpOrderFields.map((field, i)=>{
+                            {/* {fpOrderFields.map((field, i)=>{
                                 if(field?.hidden && field.hidden(activeFPOrder)){
                                     return (<></>);
                                 }
@@ -386,7 +248,18 @@ const AddEditFPOrder = function(props) {
                                     <span className={classes.inputLabel}>{field.label}</span>
                                     {getInputByType(field, ref_object)}
                                 </div>)
-                            })}
+                            })} */}
+                            <FormBuilder 
+                                ref={saveRef}
+                                fields={fpOrderFields} 
+                                mode={fpOrderModalMode} 
+                                classes={classes} 
+                                formObject={activeFPOrder} 
+                                setFormObject={setActiveFPOrder}
+                                handleClose={handleCloseModal} 
+                                handleSave={handleSave}
+                                shipToOptionsWOI={shipToOptionsWOI}
+                                raineyUsers={raineyUsers} vendorTypes={vendorTypes} />
                             <hr/>
                             <ScoreboardList scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 
                                     activeFPOrderItem={activeFPOrderItem} setActiveFPOrderItem={setActiveFPOrderItem}
@@ -398,16 +271,15 @@ const AddEditFPOrder = function(props) {
                             <Grid item xs={5} className={classes.paperScroll}>
                                 <>
                                 
-                                <ScoreboardDrawer handleInputOnChange={handleInputOnChange}  
+                                <ScoreboardDrawer 
                                      scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 
-                                     fpScbdFields={fpScbdFields} getInputByType={getInputByType}
+                                     fpScbdFields={fpScbdFields} 
                                      activeFPOrderItem={activeFPOrderItem} setActiveFPOrderItem={setActiveFPOrderItem}
                                      fpOrderItems={fpOrderItems} setFPOrderItems={setFPOrderItems} scbdMode={scbdMode} setScbdMode={setScbdMode}/>
                                 </>
                             </Grid>}
                             
                     </Grid>
-                    : <></> }
 
                     {/* FOOTER */}
                     <Grid container >
@@ -425,7 +297,7 @@ const AddEditFPOrder = function(props) {
                             <ButtonGroup className={classes.buttonGroup}>
                                 
                                 <Button
-                                    onClick={ () => { handleSave(activeFPOrder) }}
+                                    onClick={ () => { saveRef.current.handleSaveParent(activeFPOrder) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"

@@ -47,6 +47,7 @@ const Search = function(props) {
   useEffect(()=>{
     if(searchTable){
       if(searchRef.current){
+        console.log("Currnet", searchRef.current);
          searchRef.current.focus();
          searchRef.current.select();
       }

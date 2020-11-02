@@ -23,6 +23,7 @@ import Work_Orders from  '../../../js/Work_Orders';
 import { ListContext } from '../WOContainer';
 import EntitiesDrawer from './EntitiesDrawer.js';
 
+import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 
 const AddEditModal = function(props) {
@@ -31,22 +32,16 @@ const AddEditModal = function(props) {
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
-    const [shouldUpdate, setShouldUpdate] = useState(false);
     const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
-    const [errorFields,setErrorFields] = useState([]);
 
+    const saveRef = React.createRef();
     const classes = useStyles();
 
     const handleCloseModal = () => {
         setEntityDrawerOpen(false);
         setActiveWorkOrder(null);
         setEditWOModalOpen(false);
-        setShouldUpdate(false);
     };
-
-    const handleShouldUpdate = (update) =>{
-        setShouldUpdate(update)
-    }
 
     const handleOpenEntityDraw = ()=>{
         setEntityDrawerOpen(true);
@@ -54,8 +49,8 @@ const AddEditModal = function(props) {
    
     const fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name'},
-        {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name'},
+        {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name', onClick: ()=>handleOpenEntityDraw()},
+        {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name', onClick: ()=>handleOpenEntityDraw()},
         {field: 'date', label: 'Date Entered*', type: 'date', updateBy: 'state',required: true},
         {field: 'requestor', label: 'Requestor', type: 'select-users', updateBy: 'ref'},
         {field: 'maker', label: 'Maker', type: 'select-users', updateBy: 'ref'},
@@ -73,255 +68,54 @@ const AddEditModal = function(props) {
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(editModalMode == "add"){
-            setActiveWorkOrder();
+            setActiveWorkOrder({});
         }
     },[editModalMode])
 
-    //Building an object of refs to update text input values instead of having them tied to state and updating every character
-    const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
-    
-    const [ref_object, setRef_Object] = React.useState(buildRefObject(fields.map((v)=> v.field)));
-
     const job_types = ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
-
-    const handleInputOnChange = (value, should, type, key) => {
-        if(value == null || !type || !key){
-            console.error("Bad handleInputOnChange call");
-            return;
-        }
         
-        var tmpWorkOrder = {...activeWorkOrder};
 
-        if(type === "date") {
-            tmpWorkOrder[key] = Util.convertISODateTimeToMySqlDateTime(value);
-        }
-        if(type.split('-')[0] === "select"){
-            tmpWorkOrder[key] = value.target.value;
-        }
-        if(type === "check"){
-            tmpWorkOrder[key] = value;
-        }
-        if(type === "entity"){
-            tmpWorkOrder[key[0]] = value[0];
-            tmpWorkOrder[key[1]] = value[1];
-        }
-        setActiveWorkOrder(tmpWorkOrder);
-        setShouldUpdate(should);
-    }
-
-    const getInputByType =(field)=>{
-        if(!field || field.type == null){
-            console.error("Bad field");
-            return;
-        }
-
-        var error = errorFields.filter((v)=> v.field == field.field).length > 0 ? true : false;
-        
-        switch(field.type){
-            case 'text':
-            case 'number':
-                return(<div className={classes.inputValue}>
-                    <TextField id={field.field} 
-                            error={error}
-                             variant="outlined"
-                             multiline={field.multiline}
-                             inputRef={ref_object[field.field]}
-                             inputProps={{className: classes.inputStyle}} 
-                             classes={{root: classes.inputRoot}}
-                             defaultValue={ activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : null }
-                             onChange={()=>handleShouldUpdate(true)}  /></div>
-                )
-                break;
-            case 'date':
-                return(<div className={classes.inputValue}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <KeyboardDatePicker className={classes.inputStyleDate} 
-                                    error={error}
-                                    inputVariant="outlined"  
-                                    disableFuture={field.field == "date" }
-                                    onChange={(value, value2)=> {
-                                        handleInputOnChange(value, true, field.type, field.field)
-                                        
-                                    }}
-                                    value={activeWorkOrder &&  activeWorkOrder[field.field] ? Util.convertISODateTimeToMySqlDateTime(activeWorkOrder[field.field]) : null}
-                                    inputProps={{className: classes.inputRoot}} 
-                                    format={'M/dd/yyyy'}
-                                    />
-                </MuiPickersUtilsProvider></div>);
-                break;
-            case 'select-users':
-                return(<div className={classes.inputValueSelect}>
-                    <Select
-                        error={error}
-                        id={field.field}
-                        value={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
-                        inputProps={{classes:  classes.inputSelect}}
-                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
-                        native
-                    >
-                        <option value={0}>
-                            Select
-                        </option>
-                        {raineyUsers && raineyUsers.map((user)=>{
-                            return (
-                                <option value={user.user_id}>
-                                    {user.name}
-                                </option>
-                            )
-                        })}
-                    </Select></div>
-                )
-                break;
-            case 'select-type':
-                return(
-                    <div className={classes.inputValueSelect}>
-                        <Select
-                    error={error}
-                        id={field.field}
-                        value={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] : 0}
-                        inputProps={{classes:  classes.inputSelect}}
-                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
-                        native
-                    >
-                        <option value={0}>
-                            Select
-                        </option>
-                        {job_types && job_types.map((user)=>{
-                            return (
-                                <option value={user}>
-                                    {user}
-                                </option>
-                            )
-                        })}
-                    </Select></div>
-                )
-                break;
-            case 'check':
-                return(
-                    <div className={classes.inputValue}>
-                    <Checkbox
-                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                        checkedIcon={<CheckBoxIcon fontSize="small" />}
-                        name="checkedI"
-                        checked={activeWorkOrder && activeWorkOrder[field.field] ? activeWorkOrder[field.field] == 1 ? true : false : false}
-                        onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
-                    /></div>
-                )
-                break;
-            case 'entity':
-                return(<div className={classes.inputValue}>{error && <span className={classes.errorSpan}>Entity Required</span> }
-                {activeWorkOrder && activeWorkOrder[field.field] ? <>
-                        
-                        <span className={classes.inputRoot}>{activeWorkOrder[field.displayField]} | ID:{activeWorkOrder[field.field]}</span>
-                        
-                         </> : <></>}
-                    <IconButton type="submit" className={classes.iconButton} aria-label="clear-search" onClick={()=> handleOpenEntityDraw()}>
-                        <AccountBoxIcon />
-                    </IconButton> 
-                    </div>
-                )
-                break;
-            default: 
-                return <></>
-                break;
-        }
-    }
-
-    const handleSave = work_order => {
+    const handleSave = (work_order, updateWorkOrder ,addOrEdit) => {
         if(!work_order){
             console.error("Bad work order")
             return;
         }
-        var addOrEdit = editModalMode;
-        
-
  
-        if(shouldUpdate){
-            var updateWorkOrder = {...work_order};
+        
+        //Add Id to this new object
+        if(addOrEdit == "edit"){
+            updateWorkOrder["record_id"] = work_order.wo_record_id;
 
-            //Create Object with our text input values using ref_object
-            const objectMap = (obj, fn) =>
-                Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
-            var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
-
-            //Get only values we need to updateTask()
-            fields.forEach((field, i)=>{
-                const type = field.type;
-                switch(type){
-                    case 'text':
-                        //Get updated values with textValueObject bc text values use ref
-                        if(textValueObject[field.field])
-                            updateWorkOrder[field.field] = textValueObject[field.field];
-                        break;
-                    case 'date':
-                        if(textValueObject[field.field])
-                            updateWorkOrder[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
-                        break;
-                    default:
-                        //Others are updated with work_order (activeWorkOrder) state variable
-                        if(work_order[field.field])
-                            updateWorkOrder[field.field] = work_order[field.field];
-                        break;
-                }
-            })
-
-
-            //Validate Required Fields
-            var empty_required_fields = fields.
-                    filter((v,i)=> v.required).
-                    filter((item)=> updateWorkOrder[item.field] == null || updateWorkOrder[item.field] == undefined);;
-            if(empty_required_fields.length > 0){
-                cogoToast.error("Required fields are blank");
-                setErrorFields(empty_required_fields);
-                console.error("Required fields are blank", empty_required_fields)
-                return;
-            }
-            
-            //Add Id to this new object
-            if(addOrEdit == "edit"){
-                updateWorkOrder["record_id"] = work_order.wo_record_id;
-
-                Work_Orders.updateWorkOrder( updateWorkOrder )
-                .then( (data) => {
-                    //Refetch our data on save
-                    cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
-                    setWorkOrders(null);
-                    setActiveWorkOrder(null);
-                    handleCloseModal();
-                })
-                .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error updating work_order. ` , {hideAfter: 4});
-                })
-            }
-            if(addOrEdit == "add"){
-                Work_Orders.addWorkOrder( updateWorkOrder )
-                .then( (data) => {
-                    //Get id of new workorder and set view to detail
-                    if(data && data.insertId){
-                        setDetailWOid(data.insertId);
-                        setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
-                    }
-                    cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
-                    setWorkOrders(null);
-                    setActiveWorkOrder(null);
-                    handleCloseModal();
-                })
-                .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error adding work_order. ` , {hideAfter: 4});
-                })
-            }
-            
-        }else{
-            
-            if(addOrEdit == "add"){
-                cogoToast.info("Empty Work Order not allowed");
-            }else{
-                cogoToast.info("No Changes made");
+            Work_Orders.updateWorkOrder( updateWorkOrder )
+            .then( (data) => {
+                //Refetch our data on save
+                cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
+                setWorkOrders(null);
+                setActiveWorkOrder(null);
                 handleCloseModal();
-            }
-            
+            })
+            .catch( error => {
+                console.warn(error);
+                cogoToast.error(`Error updating work_order. ` , {hideAfter: 4});
+            })
+        }
+        if(addOrEdit == "add"){
+            Work_Orders.addWorkOrder( updateWorkOrder )
+            .then( (data) => {
+                //Get id of new workorder and set view to detail
+                if(data && data.insertId){
+                    setDetailWOid(data.insertId);
+                    setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
+                }
+                cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
+                setWorkOrders(null);
+                setActiveWorkOrder(null);
+                handleCloseModal();
+            })
+            .catch( error => {
+                console.warn(error);
+                cogoToast.error(`Error adding work_order. ` , {hideAfter: 4});
+            })
         }
         
     };
@@ -351,25 +145,28 @@ const AddEditModal = function(props) {
                 
 
                     {/* BODY */}
-                    {ref_object ? 
+                    
                     <Grid container >  
                         <Grid item xs={entityDrawerOpen ? 7 : 12} className={classes.paperScroll}>
                             {/*FORM*/}
-                            {fields.map((field, i)=>{
-                                return(
-                                <div className={classes.inputDiv}>  
-                                    <span className={classes.inputLabel}>{field.label}</span>
-                                    {getInputByType(field)}
-                                </div>)
-                            })}
+                            <FormBuilder 
+                                ref={saveRef}
+                                fields={fields} 
+                                mode={editModalMode} 
+                                classes={classes} 
+                                formObject={activeWorkOrder} 
+                                setFormObject={setActiveWorkOrder}
+                                handleClose={handleCloseModal} 
+                                handleSave={handleSave}
+                                raineyUsers={raineyUsers} job_types={job_types} />
                         </Grid>
                         {entityDrawerOpen && 
                             <Grid item xs={5} className={classes.paperScroll}>
-                                <EntitiesDrawer handleInputOnChange={handleInputOnChange}  
-                                     entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen}/>
+                                <EntitiesDrawer  
+                                     entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen} saveRef={saveRef}/>
                             </Grid>}
                     </Grid>
-                    : <></> }
+                    
 
                     {/* FOOTER */}
                     <Grid container >
@@ -386,7 +183,7 @@ const AddEditModal = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
-                                    onClick={ () => { handleSave(activeWorkOrder) }}
+                                    onClick={ () => { saveRef.current.handleSaveParent(activeWorkOrder) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"

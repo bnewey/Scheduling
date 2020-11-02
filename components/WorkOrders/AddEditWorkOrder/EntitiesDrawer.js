@@ -22,7 +22,7 @@ import { ListContext } from '../WOContainer';
 
 
 const EntitiesDrawer = function(props) {
-    const {user, entityDrawerOpen, setEntityDrawerOpen, handleInputOnChange} = props;
+    const {user, entityDrawerOpen, setEntityDrawerOpen, saveRef} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid,
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
@@ -47,6 +47,38 @@ const EntitiesDrawer = function(props) {
      }, [entityRows])
     
     const classes = useStyles();
+
+    const handleInputOnChange = (value, should, type, key) => {
+        //this function updates by state instead of ref
+        if(value == null || !type || !key){
+            console.error("Bad handleInputOnChange call");
+            return;
+        }
+        
+        var tmpWorkOrder = {...activeWorkOrder};
+
+        if(type === "date") {
+            tmpWorkOrder[key] = Util.convertISODateTimeToMySqlDateTime(value);
+        }
+        if(type.split('-')[0] === "select"){
+            tmpWorkOrder[key] = value.target.value;
+        }
+        if(type.split('-')[0] === "radio"){
+            tmpWorkOrder[key] = value;
+        }
+        if(type.split('-')[0] === "auto"){
+            tmpWorkOrder[key] = value;
+        }
+        if(type === "check"){
+            tmpWorkOrder[key] = value;
+        }
+        if(type === "entity"){
+            tmpWorkOrder[key[0]] = value[0];
+            tmpWorkOrder[key[1]] = value[1];
+        }
+        saveRef.current.handleShouldUpdate(true);
+        setActiveWorkOrder(tmpWorkOrder);
+    }
     
     function renderRow(props) {
         const { data, index, style } = props;
