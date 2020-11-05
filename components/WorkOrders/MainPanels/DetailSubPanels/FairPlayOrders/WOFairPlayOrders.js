@@ -127,6 +127,7 @@ const WOFairPlayOrders = function(props) {
     const handleOpenEditModal = (row) => {
       setFPOrderModalOpen(true);
       setFPOrderModalMode("edit");
+      console.log("row to active fp", row)
       setActiveFPOrder(row);
     }   
 

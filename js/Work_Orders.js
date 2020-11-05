@@ -278,7 +278,24 @@ async function addWorkOrderItem(woi){
     }catch(error){
         throw error;
     }
+}
 
+async function addMultipleWorkOrderItems(wo_id, woi_array){
+    const route = '/scheduling/workOrders/addMultipleWorkOrderItems';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({wo_id, woi_array})
+            });
+        var list = response.ok;
+        return(list);
+    }catch(error){
+        throw error;
+    }
 }
 
 async function deleteWorkOrderItem(woi_id){
@@ -315,5 +332,6 @@ module.exports = {
     addWorkOrder,
     updateWorkOrderItem,
     addWorkOrderItem,
+    addMultipleWorkOrderItems,
     deleteWorkOrderItem,
 };

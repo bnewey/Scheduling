@@ -463,6 +463,50 @@ router.post('/addWorkOrderItem', async (req,res) => {
     }
 });
 
+router.post('/addMultipleWorkOrderItems', async (req,res) => {
+    var wo_id, woi_array;
+    if(req.body){
+        wo_id = req.body.wo_id;
+        woi_array = req.body.woi_array;
+    }
+    
+    const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM work_orders_items woi WHERE work_order = ?; "
+
+    const sql = ' INSERT INTO work_orders_items ( work_order, item_type, user_entered, date_entered, quantity, part_number, size, ' +
+    ' description, price, receive_date, receive_by, packing_slip, contact, scoreboard_or_sign, model, color, trim, ' + 
+    ' scoreboard_arrival_date, scoreboard_arrival_status, mount, roy, trim_size, trim_corners, date_offset, sign_due_date, ordernum,vendor ) ' +
+    ' VALUES ( IFNULL(? ,DEFAULT(contact)), IFNULL(? ,DEFAULT(item_type)), IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(date_entered)), ' +
+    ' IFNULL(? ,DEFAULT(quantity)), ?, ?, ?, IFNULL(? ,DEFAULT(price)), ?, ?, DEFAULT(packing_slip), IFNULL(? ,DEFAULT(contact)), ' + 
+    ' IFNULL(? ,DEFAULT(scoreboard_or_sign)), ?,?,?,?,?,?,IFNULL(? ,DEFAULT(roy)), ?,?, IFNULL(? ,DEFAULT(date_offset)), ?, ' +
+    ' IFNULL(?, 0) , ?) ';
+
+    const data = await database.query(getMax, [ wo_id ])
+    var max = data[0].max_num || 0;
+
+    async.forEachOf(woi_array, async (woi, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [wo_id, woi.item_type, woi.user_entered || 0, Util.convertISODateToMySqlDate(new Date()),
+                woi.quantity, woi.part_number, woi.size, woi.description, woi.price, Util.convertISODateToMySqlDate(woi.receive_date), woi.receive_by,// woi.packing_slip || 0,
+                woi.contact, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim, woi.scoreboard_arrival_date, woi.scoreboard_arrival_status,
+                woi.mount, 0, woi.trim_size, woi.trim_corners, woi.date_offset, Util.convertISODateToMySqlDate(woi.sign_due_date), max+i+1, woi.vendor ]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("WorkOrder (addMultipleWorkOrderItems): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Add WorkOrderItems to: " + wo_id);
+            res.sendStatus(200);
+        }
+    })
+});
+
 
 
 router.post('/deleteWorkOrderItem', async (req,res) => {

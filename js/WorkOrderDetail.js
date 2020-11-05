@@ -202,6 +202,28 @@ async function getFPOrders(wo_id){
     }
 }
 
+async function getFPOrderById(fp_id){
+    if(!fp_id){
+        throw new Error("Bad id for getFPOrderById");
+    }
+    const route = '/scheduling/workOrderDetail/getFPOrderById';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({fp_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
 async function addNewFPOrder(fp_data){
     if(!fp_data){
         throw new Error("Bad id for addNewFPOrder");
@@ -286,6 +308,45 @@ async function getFPOrderItems(fpo_id){
     }catch(error){
         throw error;
     }
+}
+
+
+async function getAllFPOrderItems(){
+
+    const route = '/scheduling/workOrderDetail/getAllFPOrderItems';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
+async function searchAllFPOrderItems(table, query){
+    const route = '/scheduling/workOrderDetail/searchAllFPOrderItems';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({table: table, search_query: query})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
 }
 
 async function addNewFPOrderItem(fpi_data){
@@ -386,10 +447,13 @@ module.exports = {
     getShipToWOIOptions,
     getPastWorkOrders,
     getFPOrders,
+    getFPOrderById,
     addNewFPOrder,
     updateFPOrder,
     deleteFPOrder,
     getFPOrderItems,
+    getAllFPOrderItems,
+    searchAllFPOrderItems,
     addNewFPOrderItem,
     addMultipleFPOrderItems,
     updateFPOrderItem,

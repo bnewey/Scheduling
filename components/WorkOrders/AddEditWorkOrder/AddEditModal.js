@@ -65,6 +65,8 @@ const AddEditModal = function(props) {
         {field: 'invoiced', label: 'Invoiced', type: 'check', updateBy: 'ref'},
     ];
 
+    const types = ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
+
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(editModalMode == "add"){
@@ -72,7 +74,6 @@ const AddEditModal = function(props) {
         }
     },[editModalMode])
 
-    const job_types = ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
         
 
     const handleSave = (work_order, updateWorkOrder ,addOrEdit) => {
@@ -148,7 +149,7 @@ const AddEditModal = function(props) {
                     
                     <Grid container >  
                         <Grid item xs={entityDrawerOpen ? 7 : 12} className={classes.paperScroll}>
-                            {/*FORM*/}
+                            {/*FORM*/ console.log("Job types in parent", types)}
                             <FormBuilder 
                                 ref={saveRef}
                                 fields={fields} 
@@ -158,7 +159,7 @@ const AddEditModal = function(props) {
                                 setFormObject={setActiveWorkOrder}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                raineyUsers={raineyUsers} job_types={job_types} />
+                                raineyUsers={raineyUsers} jobTypes={types} />
                         </Grid>
                         {entityDrawerOpen && 
                             <Grid item xs={5} className={classes.paperScroll}>

@@ -252,6 +252,27 @@ router.post('/getFPOrders', async (req,res) => {
     }
 });
 
+router.post('/getFPOrderById', async (req,res) => {
+    var fp_id = {};
+    if(req.body){
+        fp_id = req.body.fp_id;
+    }
+
+    const sql = ' SELECT record_id, work_order, date_format(order_date, \'%Y-%m-%d\') AS order_date, date_format(date_entered, \'%Y-%m-%d\') AS date_entered, ' +
+    ' ship_to, bill_to, user_entered, discount, special_instructions, sales_order_id ' +
+    ' FROM fairplay_orders WHERE record_id = ?  ';
+    try{
+        const results = await database.query(sql, [fp_id]);
+        logger.info("Got FairPlay Order by Id", fp_id);
+
+        res.json(results);
+    }
+    catch(error){
+        logger.error("Fair Play Order: " + error);
+        res.sendStatus(400);
+    }
+});
+
 router.post('/addNewFPOrder', async (req,res) => {
     var fp_data = {};
     if(req.body){
@@ -342,6 +363,73 @@ router.post('/getFPOrderItems', async (req,res) => {
     }
 });
 
+router.post('/getAllFPOrderItems', async (req,res) => {
+    
+    const sql = ' SELECT fpoi.record_id, fpoi.fairplay_order, fpoi.model, fpoi.model_quantity, fpoi.color, fpoi.trim, fpoi.controller, ' + 
+    ' fpoi.controller_quantity, fpoi.ctrl_case, fpoi.horn, date_format(fpoi.arrival_estimate, \'%m/%d/%Y\') AS arrival_estimate,  ' + 
+    ' date_format(fpoi.arrival_date, \'%m/%d/%Y\') AS arrival_date, ' +
+    ' wo.type, wo.record_id AS work_order, fpo.sales_order_id, date_format(fpo.order_date, \'%m/%d/%Y\') AS order_date ,  en.name AS job_name, en.state, en.city ' +
+    '   FROM fairplay_orders_items fpoi ' +
+    ' LEFT JOIN fairplay_orders fpo ON fpoi.fairplay_order = fpo.record_id ' +
+    ' LEFT JOIN work_orders wo ON fpo.work_order = wo.record_id ' + 
+    ' LEFT JOIN entities en ON wo.customer_id = en.record_id ' +
+    ' ORDER BY record_id DESC ';
+    
+    try{
+        const results = await database.query(sql);
+        logger.info("Got All FairPlay Order Items");
+
+        res.json(results);
+    }
+    catch(error){
+        logger.error("All Fair Play Order Items: " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/searchAllFPOrderItems', async (req,res) => {
+
+    var search_query, table;
+    if(req.body){
+        if(req.body.search_query != null){
+            search_query = "%" + req.body.search_query + "%";
+        }else{
+            search_query = "%";
+        }
+
+        if(req.body.table != null){
+            table = req.body.table;
+        }else{
+            return;
+        }
+        
+    }    
+
+    const sql = 'SELECT fpoi.record_id, fpoi.fairplay_order, fpoi.model, fpoi.model_quantity, fpoi.color, fpoi.trim, fpoi.controller, ' + 
+    ' fpoi.controller_quantity, fpoi.ctrl_case, fpoi.horn, date_format(fpoi.arrival_estimate, \'%m/%d/%Y\') AS arrival_estimate,  ' + 
+    ' date_format(fpoi.arrival_date, \'%m/%d/%Y\') AS arrival_date, ' +
+    ' wo.type, wo.record_id AS work_order, fpo.sales_order_id, date_format(fpo.order_date, \'%m/%d/%Y\') AS order_date ,  en.name AS job_name, en.state, en.city ' +
+    '   FROM fairplay_orders_items fpoi ' +
+    ' LEFT JOIN fairplay_orders fpo ON fpoi.fairplay_order = fpo.record_id ' +
+    ' LEFT JOIN work_orders wo ON fpo.work_order = wo.record_id ' + 
+    ' LEFT JOIN entities en ON wo.customer_id = en.record_id ' +
+    ' WHERE ?? like ? ' +
+    ' ORDER BY fpoi.record_id DESC ';
+
+    try{
+        const results = await database.query(sql, [table, search_query]);
+        logger.info("Got FP Items by search", [table, search_query]);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Search FP Items: " + error);
+        res.sendStatus(400);
+    }
+});
+
+
+
 router.post('/addNewFPOrderItem', async (req,res) => {
     var fpi_data = {};
     if(req.body){
@@ -408,12 +496,13 @@ router.post('/updateFPOrderItem', async (req,res) => {
     }
 
     const sql = ' UPDATE fairplay_orders_items  SET  fairplay_order=?, model=?, model_quantity=?, color=?, trim=?, controller=?, ' + 
-    ' controller_quantity=?, ctrl_case=?, horn=?  ' +
+    ' controller_quantity=?, ctrl_case=?, horn=?, arrival_estimate=?, arrival_date=?  ' +
     ' WHERE record_id = ? ';
 
     try{
         const results = await database.query(sql, [fpi_data.fairplay_order, fpi_data.model, fpi_data.model_quantity, fpi_data.color, fpi_data.trim,
-            fpi_data.controller, fpi_data.controller_quantity, fpi_data.ctrl_case, fpi_data.horn, fpi_data.record_id ]);
+            fpi_data.controller, fpi_data.controller_quantity, fpi_data.ctrl_case, fpi_data.horn,  Util.convertISODateToMySqlDate(fpi_data.arrival_estimate),
+            Util.convertISODateToMySqlDate(fpi_data.arrival_date),fpi_data.record_id ]);
         logger.info("Added new fairplay order item");
 
         res.json(results);

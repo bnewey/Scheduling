@@ -21,11 +21,9 @@ import moment from 'moment';
 
 import Util from '../../../js/Util.js';
 import WorkOrderDetail from  '../../../js/WorkOrderDetail';
-
 import Settings from  '../../../js/Settings';
 import Work_Orders from  '../../../js/Work_Orders';
-import { ListContext } from '../WOContainer';
-import { DetailContext } from '../WOContainer';
+import { ListContext } from '../POContainer';
 import ScoreboardDrawer from './ScoreboardDrawer';
 import ScoreboardList from './ScoreboardList';
 
@@ -34,11 +32,10 @@ import FormBuilder from '../../UI/FormComponents/FormBuilder';
 const AddEditFPOrder = function(props) {
     const {user} = props;
 
-    const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
-    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    const { fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, fpOrders, setFPOrders,
+        purchaseOrders, setPurchaseOrders, currentView, setCurrentView, views,  vendorTypes, setVendorTypes,
+        fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, arrivedState, setArrivedState} = useContext(ListContext);
 
-    const {fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, workOrderItems, setWorkOrderItems,fpOrderModalOpen,
-        setFPOrderModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrders, setFPOrders} = useContext(DetailContext)
     
     const [scbdDrawerOpen, setScbdDrawerOpen] = useState(false);
     const [scbdMode, setScbdMode] = useState("add");
@@ -72,6 +69,7 @@ const AddEditFPOrder = function(props) {
     },[fpOrderModalOpen])
 
     const handleCloseModal = () => {
+        setPurchaseOrders(null);
         setActiveFPOrder(null);
         setFPOrderModalOpen(false);
         setFPOrderItems(null);
@@ -79,9 +77,9 @@ const AddEditFPOrder = function(props) {
         setActiveFPOrderItem(null);
     };
 
-
     const fpOrderFields = [
         //type: select must be hyphenated ex select-type
+        {field: 'work_order', label: 'Work Order', type: 'text', updateBy: 'ref', required: true,},
         {field: 'order_date', label: 'Order Date', type: 'date', updateBy: 'state', defaultValue: moment(new Date()).format('MM/DD/YYYY')},
         {field: 'user_entered', label: 'User Entered', type: 'select-users', updateBy: 'state', required: true},
         {field: 'ship_to', label: 'Ship To', type: 'text', updateBy: 'ref', multiline: true, required: true,
@@ -130,15 +128,11 @@ const AddEditFPOrder = function(props) {
         {field: 'horn', label: 'Horn', type: 'text', updateBy: 'ref'},
         {field: 'arrival_estimate', label: 'Arrival Estimate', type: 'date', updateBy: 'state'},
         {field: 'arrival_date', label: 'Arrival Date', type: 'date', updateBy: 'state'},
+        
     ];
     
 
-    //Set active worker to a tmp value for add otherwise activeworker will be set to edit
-    useEffect(()=>{
-        if(fpOrderModalOpen && fpOrderModalMode == "add"){
-            setActiveFPOrder({order_date: moment(new Date()).format('MM/DD/YYYY') });
-        }
-    },[fpOrderModalMode, fpOrderModalOpen])
+    
 
 
     const handleSave = (fpOrder, updateItem,addOrEdit) => {
@@ -165,35 +159,51 @@ const AddEditFPOrder = function(props) {
             })
         }
         if(addOrEdit == "add"){
-            updateItem["work_order"] = activeWorkOrder.wo_record_id;
+            //updateItem["work_order"] = activeWorkOrder.wo_record_id;
             WorkOrderDetail.addNewFPOrder( updateItem )
             .then( (data) => {
                 //Get id of new workorder item 
                 if(data && data.insertId){
-
                     
                     //record_id exists so we can add item immediately
                     if(fpOrderItems && Array.isArray(fpOrderItems)){
-                        var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
 
-                        WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
+                        var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
+                        var woi_array =  fpOrderItems.map((item, i)=>{
+                                item["item_type"] = 3; //billing item
+                                item["scoreboard_or_sign"] = 1; //scbd
+                                item["scoreboard_arrival_date"] = item.arrival_date;
+                                item["vendor"] = 1; //fairplay
+                                item["user_entered"] = updateItem.user_entered;
+                                item["date_entered"] = updateItem.date_entered;
+                                item["quantity"] = item.model_quantity;
+                                item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
+                            return item
+                        });
+                        
+
+                        Promise.all([Work_Orders.addMultipleWorkOrderItems(updateItem.work_order, woi_array),
+                              WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)   ])
                         .then((data)=>{
-                            if(data){
+                            if(data[0] && data[1]){
                                 //refetch
                                 setFPOrders(null);
                                 setFPOrderItems(null);
+                                setPurchaseOrders(null);
                             }
                         })
                         .catch((error)=>{
                             cogoToast.error("Failed to add item");
                             console.error("Failed to add item", error)
+                            setFPOrders(null);
+                            setFPOrderItems(null);
+                            setPurchaseOrders(null);
                         })
                     }else{
                         setFPOrders(null);
+                        setPurchaseOrders(null);
                         setFPOrderItems(null);
                     }
-                    
-                    
                 }
                 cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
                 handleCloseModal();
@@ -258,7 +268,6 @@ const AddEditFPOrder = function(props) {
                                 setFormObject={setActiveFPOrder}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                shipToOptionsWOI={shipToOptionsWOI}
                                 raineyUsers={raineyUsers} vendorTypes={vendorTypes} />
                             <hr/>
                             <ScoreboardList scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 

@@ -68,7 +68,7 @@ const SidebarPages = function(props) {
                 var view = views.filter((v)=> v.value === page)[0];
                 var selected = currentView.value === page;
                 return(
-                    <ListItem button selected={selected} 
+                    <ListItem button key={"sidepage"+i} selected={selected} 
                                 onClick={() =>handleChangePage(view)}
                                 className={ clsx({ [classes.selectedExpList] : selected ,
                                             [classes.nonselectedExpList]: !selected })}>

@@ -39,12 +39,12 @@ const FormBuilder = forwardRef((props, ref) => {
             handleSave,//save function supplied with update object on save, handleSaveParent is exposed to parent component via saveRef
             item_type_radio_options, //specific data for woi item_type
             scbd_or_sign_radio_options, //specific data for woi scoreboard_or_sign
-            job_types, //specific data for woi job types, for some reason only works when referenced as props.job_types (its not camelcase)
+            jobTypes, //specific data for woi job types, for some reason only works when referenced as props.jobTypes (its not camelcase)
             shipToOptionsWOI, //specific data for woi ship_to
             vendorTypes, //specific data for woi vendor
             raineyUsers //specific data for all select-users
         } = props;
-
+        console.log("Props", props);
         
     const [shouldUpdate, setShouldUpdate] = useState(false);
     const [errorFields,setErrorFields] = useState([]);
@@ -69,16 +69,16 @@ const FormBuilder = forwardRef((props, ref) => {
     }
 
 
-    useEffect(()=>{
-        if(formObject){
-            //reset fields to either defaultValue or blank
-            for( const ref in ref_object){
-                if(ref_object[ref].current){
-                    ref_object[ref].current.value = formObject[ref] || fields.find((f)=> f.field == ref)?.defaultValue || null
-                }
-            }
-        }
-    },[formObject])
+    // useEffect(()=>{
+    //     if(formObject){
+    //         //reset fields to either defaultValue or blank
+    //         for( const ref in ref_object){
+    //             if(ref_object[ref].current){
+    //                 ref_object[ref].current.value = formObject[ref] || fields.find((f)=> f.field == ref)?.defaultValue || null
+    //             }
+    //         }
+    //     }
+    // },[formObject])
 
 
 
@@ -104,11 +104,11 @@ const FormBuilder = forwardRef((props, ref) => {
             tmpObject[key] = value;
         }
         if(type === "check"){
-            tmpWorkOrder[key] = value;
+            tmpObject[key] = value;
         }
         if(type === "entity"){
-            tmpWorkOrder[key[0]] = value[0];
-            tmpWorkOrder[key[1]] = value[1];
+            tmpObject[key[0]] = value[0];
+            tmpObject[key[1]] = value[1];
         }
 
         setFormObject(tmpObject);
@@ -117,84 +117,95 @@ const FormBuilder = forwardRef((props, ref) => {
 
     //This exposes child functions to the parent component using ref
     useImperativeHandle( ref, () => ({
+        handleResetFormToDefault: ()=>{
+            if(formObject){
+                //reset fields to either defaultValue or blank
+                for( const ref in ref_object){
+                    if(ref_object[ref].current){
+                        ref_object[ref].current.value = formObject[ref] || fields.find((f)=> f.field == ref)?.defaultValue || null
+                    }
+                }
+            }
+        },
         handleShouldUpdate: (update)=>{
             handleShouldUpdate(update)
         },
-      handleSaveParent: (itemToSave) =>{
-        if(!itemToSave){
-            console.error("Bad itemToSave")
-            return;
-        }
-        var addOrEdit = mode;
-        
-        if(shouldUpdate){
-            //Create Object with our text input values using ref_object
-            const objectMap = (obj, fn) =>
-            Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
-            var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
-
-            var updateItem = {...itemToSave};
-
-            
-            //Get only values we need to updateTask()
-            fields.forEach((field, i)=>{
-                const type = field.type;
-                switch(type){
-                    case 'text':
-                        //Get updated values with textValueObject bc text values use ref
-                        if(textValueObject[field.field])
-                            updateItem[field.field] = textValueObject[field.field];
-                        break;
-                    case 'date':
-                        if(textValueObject[field.field])
-                            updateItem[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
-                        break;
-                    // case 'auto':
-                    //     //Auto doesnt usually use ref but leaving in case we need to switch from state
-                    //     //Get updated values with textValueObject bc text values use ref
-                    //     if(textValueObject[field.field])
-                    //         console.log("TEST",textValueObject[field.field]);
-                    //         updateItem[field.field] = textValueObject[field.field];
-                    //     break;
-                    default:
-                        //Others are updated with itemToSave (formObject) state variable
-                        if(itemToSave[field.field])
-                            updateItem[field.field] = itemToSave[field.field];
-                        break;
-                }
-            })
-
-            
-
-            //Validate Required Fields
-            var empty_required_fields = fields.
-                    filter((v,i)=> v.required && !(v.hidden && v.hidden(formObject) )).
-                    filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined);;
-            if(empty_required_fields.length > 0){
-                cogoToast.error("Required fields are blank");
-                setErrorFields(empty_required_fields);
-                console.error("Required fields are blank", empty_required_fields)
+        handleSaveParent: (itemToSave) =>{
+            if(!itemToSave){
+                console.error("Bad itemToSave")
                 return;
             }
-
-            console.log("Update", updateItem);
+            var addOrEdit = mode;
             
-            //Run given handlSave
-            if(handleSave){
-                handleSave(itemToSave, updateItem, addOrEdit);
-            }
+            if(shouldUpdate){
+                //Create Object with our text input values using ref_object
+                const objectMap = (obj, fn) =>
+                Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
+                var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
 
-        }else{
-            
-            if(addOrEdit == "add"){
-                cogoToast.info("Empty Form not allowed");
+                var updateItem = {...itemToSave};
+
+                
+                //Get only values we need to updateTask()
+                fields.forEach((field, i)=>{
+                    const type = field.type;
+                    switch(type){
+                        case 'number':
+                        case 'text':
+                            //Get updated values with textValueObject bc text values use ref
+                            if(textValueObject[field.field])
+                                updateItem[field.field] = textValueObject[field.field];
+                            break;
+                        case 'date':
+                            if(textValueObject[field.field])
+                                updateItem[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
+                            break;
+                        // case 'auto':
+                        //     //Auto doesnt usually use ref but leaving in case we need to switch from state
+                        //     //Get updated values with textValueObject bc text values use ref
+                        //     if(textValueObject[field.field])
+                        //         console.log("TEST",textValueObject[field.field]);
+                        //         updateItem[field.field] = textValueObject[field.field];
+                        //     break;
+                        default:
+                            //Others are updated with itemToSave (formObject) state variable
+                            if(itemToSave[field.field])
+                                updateItem[field.field] = itemToSave[field.field];
+                            break;
+                    }
+                })
+
+                
+
+                //Validate Required Fields
+                var empty_required_fields = fields.
+                        filter((v,i)=> v.required && !(v.hidden && v.hidden(formObject) )).
+                        filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined);;
+                if(empty_required_fields.length > 0){
+                    cogoToast.error("Required fields are blank");
+                    setErrorFields(empty_required_fields);
+                    console.error("Required fields are blank", empty_required_fields)
+                    return;
+                }
+
+                console.log("Update", updateItem);
+                
+                //Run given handlSave
+                if(handleSave){
+                    handleSave(itemToSave, updateItem, addOrEdit);
+                }
+
             }else{
-                cogoToast.info("No Changes made");
-                handleCloseParent();
+                
+                if(addOrEdit == "add"){
+                    cogoToast.info("Empty Form not allowed");
+                }else{
+                    cogoToast.info("No Changes made");
+                    handleCloseParent();
+                }
+                
             }
-            
         }
-    }
     }));
 
     return(<>
@@ -301,10 +312,11 @@ const GetInputByType = function(props){
                     <option value={0}>
                         Select
                     </option>
-                    {props.job_types ? props.job_types.map((user)=>{
+                    {["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"] ? ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"].map((type)=>{
+                        
                         return (
-                            <option value={user}>
-                                {user}
+                            <option value={type}>
+                                {type}
                             </option>
                         )
                     }) :  <></>}
