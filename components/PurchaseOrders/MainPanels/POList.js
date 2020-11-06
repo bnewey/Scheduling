@@ -109,8 +109,8 @@ const POrdersList = function(props) {
       console.error("Failed to get FP Order", error);
       cogoToast.error("Failed to get FP Order");
     })
-   
   }
+
 
   const handleGoToWorkOrderId = (wo_id, row) =>{
     console.log("woi", wo_id);
@@ -338,7 +338,7 @@ const useStyles = makeStyles(theme => ({
     '& input':{
         textAlign: 'center',
         cursor: 'pointer',
-        padding: '4px 0px',
+        padding: '1px 0px 0px 0px',
         backgroundColor: '#f5fdff',
     }
   } 

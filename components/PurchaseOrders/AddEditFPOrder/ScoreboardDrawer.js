@@ -95,10 +95,18 @@ const ScoreboardDrawer = function(props) {
             
         }
         if(scbdMode == "add"){
-            
-            
+
             if(fpOrderModalMode =="edit"){
                 updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
+
+                item["item_type"] = 3; //billing item
+                item["scoreboard_or_sign"] = 1; //scbd
+                item["scoreboard_arrival_date"] = item.arrival_date;
+                item["vendor"] = 1; //fairplay
+                item["user_entered"] = updateItem.user_entered;
+                item["date_entered"] = updateItem.date_entered;
+                item["quantity"] = item.model_quantity;
+                item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
                 //record_id exists so we can add item immediately
                 WorkOrderDetail.addNewFPOrderItem(updateFPOItem)
                 .then((data)=>{

@@ -178,14 +178,15 @@ const AddEditFPOrder = function(props) {
                                 item["date_entered"] = updateItem.date_entered;
                                 item["quantity"] = item.model_quantity;
                                 item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
-                            return item
+                            return item;
                         });
                         
 
-                        Promise.all([Work_Orders.addMultipleWorkOrderItems(updateItem.work_order, woi_array),
-                              WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)   ])
+                        // Promise.all([Work_Orders.addMultipleWorkOrderItems(updateItem.work_order, woi_array),
+                        //       WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)   ])
+                        WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
                         .then((data)=>{
-                            if(data[0] && data[1]){
+                            if( data){//data[0] && data[1]){
                                 //refetch
                                 setFPOrders(null);
                                 setFPOrderItems(null);
