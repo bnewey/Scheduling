@@ -18,7 +18,7 @@ const Entities = function (props) {
     );
 }
 
-//does work when were being passed props 
+//does work when were being passed prop
 // Entities.getInitialProps = async ({ query }) => ({ settings: query.settings });
 
 // Entities.propTypes = {
