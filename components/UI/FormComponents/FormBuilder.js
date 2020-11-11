@@ -84,7 +84,7 @@ const FormBuilder = forwardRef((props, ref) => {
 
     const handleInputOnChange = (value, should, type, key) => {
         //this function updates by state instead of ref
-        if(value == null || !type || !key){
+        if( !type || !key){
             console.error("Bad handleInputOnChange call");
             return;
         }
@@ -92,7 +92,7 @@ const FormBuilder = forwardRef((props, ref) => {
         var tmpObject = {...formObject};
 
         if(type === "date") {
-            tmpObject[key] = Util.convertISODateTimeToMySqlDateTime(value);
+            tmpObject[key] = value ? Util.convertISODateTimeToMySqlDateTime(value) : value;
         }
         if(type.split('-')[0] === "select"){
             tmpObject[key] = value.target.value;
@@ -262,6 +262,8 @@ const GetInputByType = function(props){
             return(<div className={classes.inputValue}>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <KeyboardDatePicker className={classes.inputStyleDate} 
+                                showTodayButton
+                                clearable
                                 error={error}
                                 inputVariant="outlined"  
                                 disableFuture={field.field == "date" }

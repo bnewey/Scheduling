@@ -13,7 +13,7 @@ const Entities = function (props) {
 
     return (
         <MainLayout>
-              <WOContainer user={user}/>
+              {/* <EntitiesContainer user={user}/> */}
         </MainLayout>
     );
 }

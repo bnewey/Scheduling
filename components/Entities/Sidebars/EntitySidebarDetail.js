@@ -12,7 +12,7 @@ import { ListContext } from '../EntitiesContainer';
 import { DetailContext } from '../EntitiesContainer';
 
 import SidebarPages from './components/SidebarPages';
-import CompInvTool from './components/CompInvTool';
+//import CompInvTool from './components/CompInvTool';
 
 
 const EntitySidebarDetail = function(props) {
@@ -96,7 +96,7 @@ const EntitySidebarDetail = function(props) {
           <SidebarPages />
         </div>
         <div className={classes.pagesContainer}>
-          <CompInvTool />
+          {/* <CompInvTool /> */}
         </div>
 
     </div>

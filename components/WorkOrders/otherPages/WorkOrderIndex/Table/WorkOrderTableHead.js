@@ -83,6 +83,8 @@ function WorkOrderTableHead(props) {
           <Typography className={classes.inlineHeadText}>Displaying Work Orders from &nbsp;</Typography>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <DatePicker    format="MM/dd/yyyy"
+                                clearable
+                                showTodayButton
                                 variant="inline"
                                 className={classes.inputField}
                                 value={rowDateRange.from} 

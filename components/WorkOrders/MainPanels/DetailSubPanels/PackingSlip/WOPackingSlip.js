@@ -120,6 +120,8 @@ const WOPackingSlip = function(props) {
       editComponent: props => (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <KeyboardDatePicker className={classes.inputStyleDate} 
+                                    clearable
+                                    showTodayButton
                                     inputVariant="outlined"  
                                     onChange={(value, value2)=> props.onChange( value)}
                                     value={Util.convertISODateTimeToMySqlDateTime(props.value) }

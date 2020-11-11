@@ -137,14 +137,14 @@ export default function TaskModal(props){
     }
 
     const handleInputOnChange = (value, param, type, key) => {
-        if(!value || !param || !type || !key){
+        if( !param || !type || !key){
             console.error("Bad handleInputOnChange call");
             return;
         }
         var tmpModalTask = {...modalTask};
 
         if(type === "datetime") {
-            tmpModalTask[key] = Util.convertISODateTimeToMySqlDateTime(value.toISOString());
+            tmpModalTask[key] = value ? Util.convertISODateTimeToMySqlDateTime(value.toISOString()) : null;
 
         }
         if(type === "select"){
@@ -347,11 +347,11 @@ export default function TaskModal(props){
                 <br/>
                 <p className={classes.taskTitle}>Drill Date</p>
                 <div>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker className={classes.inputField} inputVariant="outlined"  value={modalTask.drill_date} onChange={value => handleInputOnChange(value, true, "datetime", "drill_date")} /></MuiPickersUtilsProvider>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker clearable showTodayButton  format="MM/dd/yyyy" className={classes.inputField} inputVariant="outlined"  value={modalTask.drill_date} onChange={value => handleInputOnChange(value, true, "datetime", "drill_date")} /></MuiPickersUtilsProvider>
                 </div>
                 <p className={classes.taskTitle}>Install Date</p>
                 <div>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker clearable showTodayButton format="MM/dd/yyyy" className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider>
                 </div>
                 
                 <TaskModalCrew modalTask={modalTask} modalOpen={modalOpen} setModalOpen={setModalOpen} />

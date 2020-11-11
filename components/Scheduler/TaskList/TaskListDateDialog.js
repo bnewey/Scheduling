@@ -208,7 +208,7 @@ const TaskListDateDialog = (props) => {
                         </Grid>
                         <Grid item xs={6}>
                             <div className={classes.inputField}>
-                                <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker label="Date" className={classes.datePicker} value={selectedDate} onChange={value => handleChangeSelectedDate(value)} /></MuiPickersUtilsProvider>
+                                <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker label="Date" showTodayButton clearable format="MM/dd/yyyy" className={classes.datePicker} value={selectedDate} onChange={value => handleChangeSelectedDate(value)} /></MuiPickersUtilsProvider>
                             </div>
                         </Grid>
                     </Grid>

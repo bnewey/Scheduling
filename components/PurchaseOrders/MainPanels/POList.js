@@ -185,7 +185,8 @@ const POrdersList = function(props) {
     {id: 'arrival_estimate', label: 'Est Arrival', type: 'date',align: 'center' ,
               format: (value,row)=> {return(
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <DatePicker     format="MM/dd/yyyy"
+                  <DatePicker     format="MM/dd/yyyy" showTodayButton
+                                  clearable
                                   inputVariant="outlined"
                                   variant="inline" 
                                   maxDate={new Date('01-01-2100')}
@@ -199,6 +200,7 @@ const POrdersList = function(props) {
               format: (value,row)=> (
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                   <DatePicker     format="MM/dd/yyyy"
+                                  clearable showTodayButton
                                   inputVariant="outlined"
                                   variant="inline" 
                                   maxDate={new Date('01-01-2100')}

@@ -1,5 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {makeStyles, Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText, FormControlLabel, Switch,Grid, List } from '@material-ui/core';
+import {makeStyles, Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText, FormControlLabel, Switch,Grid, List,
+     TableContainer, Table, TableHead, TableRow, TableCell } from '@material-ui/core';
 
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
@@ -180,7 +181,6 @@ const TaskListMain = (props) => {
         }
     },[sorters]);
 
-
     const handleChangeTaskView = (view)=>{
         if(!view){
             setTableInfo(null);
@@ -213,22 +213,22 @@ const TaskListMain = (props) => {
             case "compact":
             default:
                 viewArray = [
-                    {text: "Order", field: "priority_order", width: '4%',style: 'smallListItemText', type: 'number'},
-                    {text: "WO #", field: "table_id", width: '4%',style: 'smallListItemText', type: 'number'},
-                    {text: "Desired Date", field: "date_desired", width: '7%', style: 'smallListItemText', type: 'date'},
-                    {text: "Order Date", field: "wo_date", width: '6%', style: 'smallListItemText', type: 'date'},
-                    {text: "1st Game", field: "first_game", width: '6%', type: 'date'},
-                    {text: "Name", field: "t_name", width: '12%', style: 'boldListItemText', type: 'text'},
-                    {text: "State", field: "state", width: '4%', style: 'smallListItemText', type: 'text'},
-                    {text: "Type", field: "type", width: '7%',style: 'smallListItemText', type: 'text'},
-                    {text: "Description", field: "description", width: '10%', style: 'smallListItemText', type: 'text'},
-                    {text: "Art", field: "artwork", width: '6%', style: 'artSignDrillSmallListItemText', type: 'text'},
-                    {text: "Signs", field: "sign", width: '6%', style: 'artSignDrillSmallListItemText', type: 'text'},
-                    {text: "Drill", field: "drilling", width: '6%', style: 'artSignDrillSmallListItemText', type: 'text'},
-                    {text: "d_date", field: "drill_date", width: '6%', style: 'drillSmallListItemText', type: 'date'},
-                    {text: "d_crew", field: "drill_crew", width: '6%', style: 'drillSmallListItemText', type: 'text'}, 
-                    {text: "i_date", field: "install_date", width: '5%',style: 'installSmallListItemText', type: 'date'},
-                    {text: "i_crew", field: "install_crew", width: '5%',style: 'installSmallListItemText',  type: 'text'}
+                    {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+                    {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
+                    {text: "Desired Date", field: "date_desired", width: '6%', maxWidth: 100, style: 'smallListItemText', type: 'date'},
+                    {text: "Order Date", field: "wo_date", width: '6%', maxWidth: 100, style: 'smallListItemText', type: 'date'},
+                    {text: "1st Game", field: "first_game", width: '6%', maxWidth: 100, type: 'date'},
+                    {text: "Name", field: "t_name", width: '11%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                    {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+                    {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+                    {text: "Description", field: "description", width: '10%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                    {text: "Art", field: "artwork", width: '5%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "Signs", field: "sign", width: '5%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "Drill", field: "drilling", width: '5%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "d_date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
+                    {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text'}, 
+                    {text: "i_date", field: "install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+                    {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}
                     
                 ];
                 break;
@@ -324,31 +324,52 @@ const TaskListMain = (props) => {
                    
                     <Paper className={classes.root}>
                         <TaskListFilter filteredItems={taskListTasks}  setFilteredItems={setTaskListTasks} />
-                        {taskListTasks && table_info ? 
-                        <>
-                            <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
+                        {taskListTasks && table_info && taskListTasksSaved ? 
+                        <>  
+                            <TableContainer>
+                                <Table >
+                                <colgroup>
+                                <col style={{ width: "3%" }} />
+                                <col style={{ width: "3%" }} />
                                 {table_info.map((item, i)=>{
-                                    const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
-                                    const isASC = sorterState === 1;
                                     return(
-                                    <ListItemText id={"Head-ListItem"+i} 
-                                                    key={item.field + i +'_head'}
-                                                    className={classes.listItemText} 
-                                                    style={{flex: `0 0 ${item.width}`}} 
-                                                    classes={{primary: classes.listItemTextPrimary}}
-                                                    onClick={event=>handleListSort(event, item)}
-                                                    >
-                                                        <span>
-                                                    {item.text}
-                                                    {isSorted ?
-                                                         <div>
-                                                             {isASC ? <ArrowDropDownIcon/> : <ArrowDropUpIcon/>}
-                                                         </div> 
-                                                         : <></>}
-                                                         </span>
-                                    </ListItemText>
-                                )})}
-                                <ListItemSecondaryAction>            
+                                        <col style={{ width: item.width }} />
+                                    )
+                                })}
+                                <col style={{ width: "3%" }} />
+                                </colgroup>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>&nbsp;</TableCell>
+                                        <TableCell>&nbsp;</TableCell>
+                                    {table_info.map((item, i)=>{
+                                        const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
+                                        const isASC = sorterState === 1;
+                                        return(
+                                        <TableCell      id={"Head-ListItem"+i} 
+                                                        align="center"
+                                                        key={item.field + i +'_head'}
+                                                        className={classes.listItemText} 
+                                                        // style={{flex: `0 0 ${item.width}`}} 
+                                                        //classes={{primary: classes.listItemTextPrimary}}
+                                                        onClick={event=>handleListSort(event, item)}
+                                                        >
+                                                            <span>
+                                                        {item.text}
+                                                        {isSorted ?
+                                                            <div>
+                                                                {isASC ? <ArrowDropDownIcon/> : <ArrowDropUpIcon/>}
+                                                            </div> 
+                                                            : <></>}
+                                                            </span>
+                                        </TableCell>
+                                    )})}
+                                    <TableCell>&nbsp;</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                            {/* <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}> */}
+                                
+                                {/* <ListItemSecondaryAction>            
                                         <React.Fragment>
                                         <IconButton edge="end" aria-label="edit">
                                         
@@ -358,8 +379,8 @@ const TaskListMain = (props) => {
                                         </IconButton> 
                                         </React.Fragment>
                                     &nbsp;&nbsp;&nbsp;
-                                </ListItemSecondaryAction>
-                            </ListItem>
+                                </ListItemSecondaryAction> */}
+                            {/* </ListItem> */}
                             <TaskListTasks 
                                 selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
                                 taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
@@ -369,13 +390,15 @@ const TaskListMain = (props) => {
                                 table_info={table_info}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
                                 taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}/>
+                                </Table>
+                            </TableContainer>
                         </>
                         : <>
-                        <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
-                                <ListItemText id="Head-ListItem" classes={{primary: classes.listItemTextPrimary}}>
+                        <div className={classes.HeadListItem} classes={{container: classes.liContainer}}>
+                                <span id="Head-ListItem" className={classes.listItemTextPrimary}>
                                         Select a Task List in the dropdown menu above.
-                                </ListItemText>
-                            </ListItem>
+                                </span>
+                            </div>
                         </>}
 
                         

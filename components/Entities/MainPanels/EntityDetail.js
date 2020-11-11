@@ -17,7 +17,7 @@ import Work_Orders from  '../../../js/Work_Orders';
 import { ListContext } from '../EntitiesContainer';
 import { DetailContext } from '../EntitiesContainer';
 
-import AddEditWOIModal from '../AddEditWOI/AddEditWOIModal';
+//import AddEditWOIModal from '../AddEditWOI/AddEditWOIModal';
 
 
 const EntityDetail = function(props) {

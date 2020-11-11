@@ -14,8 +14,8 @@ import {
     DateTimePicker,
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
-import RecentWO from './components/RecentWO';
-import FilterCompInv from './components/FilterCompInv';
+//import RecentWO from './components/RecentWO';
+//import FilterCompInv from './components/FilterCompInv';
 
 const EntitySidebarList = function(props) {
   const {user} = props;
@@ -60,7 +60,9 @@ const EntitySidebarList = function(props) {
             <div className={classes.inputDiv}>
               <span className={classes.inputSpan}>FROM:</span>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <DatePicker    format="MM/dd/yyyy"
+                  <DatePicker    clearable
+                                  showTodayButton
+                                  format="MM/dd/yyyy"
                                   inputVariant="outlined"
                                   variant="inline" 
                                   maxDate={new Date('01-01-2100')}
@@ -73,7 +75,9 @@ const EntitySidebarList = function(props) {
             <div className={classes.inputDiv}>
               <span className={classes.inputSpan}>TO:</span>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <DatePicker    format="MM/dd/yyyy"
+                <DatePicker    clearable
+                                showTodayButton
+                                format="MM/dd/yyyy"
                                 inputVariant="outlined"
                                 variant="inline" 
                                 maxDate={new Date('01-01-2100')}
@@ -91,13 +95,13 @@ const EntitySidebarList = function(props) {
         </div>}
           { !searchOpen && 
             <div>
-                <FilterCompInv/>
+                {/* <FilterCompInv/> */}
             </div>
           }
         </div>
           <div className={classes.dateRangeDiv}>
             
-            <RecentWO />
+            {/* <RecentWO /> */}
           </div>
     </div>
   );

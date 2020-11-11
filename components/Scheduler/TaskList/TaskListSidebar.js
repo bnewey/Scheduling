@@ -46,7 +46,7 @@ const TaskListSidebar = (props) => {
 
     const handleEditClickOpen = (event, list) => {
         setEditList(list);
-        setEditOpen(true);   
+        setEditOpen(true);  
     };
 
     const handleEditClose = () => {

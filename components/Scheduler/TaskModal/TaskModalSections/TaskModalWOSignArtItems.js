@@ -1,10 +1,11 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Switch, FormControlLabel, List, ListItem, ListItemText,ListItemIcon, Modal, Backdrop, Fade, Grid, 
-    TextField, FormControl, InputLabel, MenuItem, Select, 
+    TextField, FormControl, InputLabel, MenuItem, Select, IconButton,
     ButtonGroup, Button, CircularProgress, Avatar} from '@material-ui/core';
 import BulletIcon from '@material-ui/icons/Crop75';
 import RemoveIcon from '@material-ui/icons/Remove';
+import ClearIcon from '@material-ui/icons/Clear';
 import PersonalVideoIcon from '@material-ui/icons/PersonalVideo';
 import cogoToast from 'cogo-toast';
 
@@ -40,7 +41,6 @@ const TaskModalWOSignArtItems = (props) =>{
         if(signItems == null){
             WorkOrders.getAllWorkOrderSignArtItems(taskId)
             .then((data)=>{
-                console.log("items", data);
                 setSignItems(data);
             })
             .catch((error)=>{
@@ -64,8 +64,7 @@ const TaskModalWOSignArtItems = (props) =>{
 
     const handleChangeShowDates = event => {
         setShowDates(event.target.checked);
-      };
-
+    };
     
     const convertDate = (date) => {
         if(!date){
@@ -76,7 +75,7 @@ const TaskModalWOSignArtItems = (props) =>{
     };
 
     const handleUpdateArrivalDate = (value, woi)=>{
-        if(!value || !woi){
+        if( !woi ){
             cogoToast.error("Bad value");
             console.error("Bad value in handleUpdateArrivalDate");
             return;
@@ -192,8 +191,11 @@ const TaskModalWOSignArtItems = (props) =>{
                                         <Grid item xs={2} className={classes.dateGrid}>
                                             <div className={classes.dateDiv}>  
                                                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                                    <DatePicker className={classes.datePicker} inputVariant="outlined"
-                                                                    value={item.scoreboard_arrival_date} onChange={value => handleUpdateArrivalDate(value, item)} />
+                                                    <DatePicker clearable showTodayButton className={classes.datePicker} inputVariant="outlined"
+                                                                    value={item.scoreboard_arrival_date} 
+                                                                    format="MM/dd/yyyy"
+                                                                    onChange={value => handleUpdateArrivalDate(value, item)} 
+                                                                    />
                                                 </MuiPickersUtilsProvider>
                                             </div>
                                         </Grid>
@@ -247,7 +249,7 @@ const TaskModalWOSignArtItems = (props) =>{
                                             <Grid item xs={2} className={classes.dateGrid}>
                                             <div className={classes.dateDiv}>  
                                                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                                    <DatePicker className={classes.datePicker} inputVariant="outlined"
+                                                    <DatePicker clearable format="MM/dd/yyyy" showTodayButton className={classes.datePicker} inputVariant="outlined"
                                                                     value={item.scoreboard_arrival_date} onChange={value => handleUpdateArrivalDate(value, item)} />
                                                 </MuiPickersUtilsProvider>
                                             </div>
@@ -321,7 +323,7 @@ const TaskModalWOSignArtItems = (props) =>{
                                         <Grid item xs={2} className={classes.dateGrid}>
                                             <div className={classes.dateDiv}>  
                                                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                                    <DatePicker className={classes.datePicker} inputVariant="outlined"
+                                                    <DatePicker clearable format="MM/dd/yyyy" showTodayButton className={classes.datePicker} inputVariant="outlined"
                                                                     value={item.scoreboard_arrival_date} onChange={value => handleUpdateArrivalDate(value, item)} />
                                                 </MuiPickersUtilsProvider>
                                             </div>

@@ -61,6 +61,8 @@ const WOSidebarList = function(props) {
               <span className={classes.inputSpan}>FROM:</span>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                   <DatePicker    format="MM/dd/yyyy"
+                                  clearable
+                                  showTodayButton
                                   inputVariant="outlined"
                                   variant="inline" 
                                   maxDate={new Date('01-01-2100')}
@@ -74,6 +76,8 @@ const WOSidebarList = function(props) {
               <span className={classes.inputSpan}>TO:</span>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <DatePicker    format="MM/dd/yyyy"
+                                clearable
+                                showTodayButton
                                 inputVariant="outlined"
                                 variant="inline" 
                                 maxDate={new Date('01-01-2100')}

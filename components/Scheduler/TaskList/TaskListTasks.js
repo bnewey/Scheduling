@@ -1,19 +1,30 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect, useContext, useCallback} from 'react';
 
 import {makeStyles, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Checkbox, IconButton, CircularProgress, 
-  Popover, ListSubheader,Tooltip} from '@material-ui/core';
+  Popover, ListSubheader,Tooltip,  TableRow, TableCell, TableBody} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import ReorderIcon from '@material-ui/icons/Reorder';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import TaskLists from '../../../js/TaskLists';
+import Tasks from '../../../js/Tasks';
 import cogoToast from 'cogo-toast';
 import Util from '../../../js/Util';
 import { select } from 'async';
 import { CrewContext } from '../Crew/CrewContextContainer';
+
+import DateFnsUtils from '@date-io/date-fns';
+import {
+    DatePicker,
+    TimePicker,
+    DateTimePicker,
+    MuiPickersUtilsProvider,
+  } from '@material-ui/pickers';
+
 
 import Crew from '../../../js/Crew';
 
@@ -52,30 +63,6 @@ const TaskListTasks = (props) =>{
         setSelectedTasks([]);
       },[filters])
     
-    // const handleRemoveFromTaskList = (event, id, tl_id, name) => {
-    //   const remove = () => {
-    //     TaskLists.removeTaskFromList(id, tl_id)
-    //         .then( (data) => {
-    //                 const filtered_rows = taskListTasks.filter((task, i)=>task.t_id != id);
-    //                 setTaskListTasks(filtered_rows);
-    //                 setTaskListToMap(priorityList);
-    //                 setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
-                    
-    //                 cogoToast.success(`Removed task ${id} from Task List`, {hideAfter: 4});
-    //             })
-    //         .catch( error => {
-    //         console.warn("Error removing task",error);
-    //         cogoToast.error(`Error removing Task from Task List`, {hideAfter: 4});
-    //          });
-    //   }
-    //   confirmAlert({
-    //       customUI: ({onClose}) => {
-    //           return(
-    //               <ConfirmYesNo onYes={remove} onClose={onClose} customMessage={"Remove task: \"" + name + "\" from TaskList?"}/>
-    //           );
-    //       }
-    //   })
-    // }
 
     //Modal
     const handleRightClick = (event, id) => {
@@ -125,20 +112,20 @@ const TaskListTasks = (props) =>{
       margin: `0 0 1px 0`,
 
       // change background colour if dragging
-      background: isDragging ? "lightgreen" : "grey",
+      //background: isDragging ? "lightgreen" : "#f9f9f9",
       // styles we need to apply on draggables
       ...draggableStyle,
       top: isDragging ? draggableStyle["top"] - (draggableStyle["top"] * .25) : '',
       left: isDragging ? '1800px' : '',
     })};
 
-    const getListStyle = isDraggingOver => ({
+    const getListStyle =  isDraggingOver => ({
       background: isDraggingOver ? "lightblue" : "rgba(0,0,0,0)",
       padding: grid,
       width: 'auto'
     });
 
-    const onDragEnd = (result) => {
+    const onDragEnd = useCallback((result) => {
       //console.log(result);
       // dropped outside the list
       if (!result.destination) {
@@ -166,10 +153,10 @@ const TaskListTasks = (props) =>{
             console.error(error);
           });
           
-    }
+    },[sorters,taskListTasksSaved, selectedTasks, taskListTasks])
     // END DND
 
-    const handleClick = (event, record_id) => {
+    const handleClick = useCallback( (event, record_id) => {
       
       //TODO If user changes filter to exclude some already selected items, this breaks?
       const selectedIndex = selectedTasks.indexOf(record_id);
@@ -197,7 +184,7 @@ const TaskListTasks = (props) =>{
     
       setSelectedTasks(newSelected);
 
-    };
+    },[selectedTasks, taskListTasks]);
 
 
     //Add/Swap Popover for crews
@@ -230,7 +217,7 @@ const TaskListTasks = (props) =>{
     const addSwapCrewPopoverOpen = Boolean(addSwapCrewAnchorEl);
     const addSwapCrewPopoverId = open ? 'add-popover' : undefined;
 
-    const handleAddSwapCrew = (event, new_crew) => {
+    const handleAddSwapCrew = useCallback((event, new_crew) => {
         if(!new_crew.id || !addSwapCrewJob || !addSwapCrewJob.job_id || !addSwapCrewJob.job_type){
           cogoToast.error("Could not swap.");
           console.error("Bad member or addSwapCrewJob for add/update.");
@@ -316,10 +303,10 @@ const TaskListTasks = (props) =>{
           handleAddMemberPopoverClose();
         }
         
-    }
+    },[addSwapCrewJob])
     //// END OF Add/Swap Popover for crews
 
-    const isSelected = record_id => selectedTasks.indexOf(record_id) !== -1;
+    const isSelected = useCallback((record_id) => selectedTasks.indexOf(record_id) !== -1 ,[taskListTasks, selectedTasks]);;
 
     const indexFromPriorityOrder = priority => {
       var ind = taskListTasksSaved.map((task,i)=>task.priority_order).indexOf(priority);
@@ -344,9 +331,30 @@ const TaskListTasks = (props) =>{
       return dndTask;
     }
 
+    const handleUpdateTaskDate = useCallback( (value, task, fieldId) =>{
+      if(!task){
+        console.error("No task, Failed to update", task);
+      }
+
+      var updateTask = {...task};
+      console.log("Fieldid", fieldId);
+
+      updateTask[fieldId] = Util.convertISODateToMySqlDate(value);
+      console.log("Update task", updateTask);
+      Tasks.updateTask(updateTask)
+      .then((data)=>{
+        cogoToast.success(`Updated ${fieldId}`)
+        setTaskListTasks(null);
+      })
+      .catch((error)=>{
+        console.error("Failed to update task", error);
+        cogoToast.error("Failed to update task");
+      })
+
+    },[taskListTasks]);
 
 
-    const handleSpecialTableValues = (fieldId, value, type, task) =>{
+    const handleSpecialTableValues = useCallback((fieldId, value, type, task) =>{
       if(fieldId == null || task == null){
         console.error("Bad fieldId or task in handleSpecialTableValues");
         return;
@@ -394,6 +402,34 @@ const TaskListTasks = (props) =>{
           }
           break;
         }
+        case 'drill_date':{
+          return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <DatePicker     format="MM/dd/yyyy" showTodayButton
+                          clearable
+                          inputVariant="outlined"
+                          variant="inline" 
+                          maxDate={new Date('01-01-2100')}
+                          minDate={new Date('01-01-1970')}
+                          className={classes.datePicker}
+                          value={value} 
+                          onChange={value => handleUpdateTaskDate(value, task, "drill_date")} />
+                  </MuiPickersUtilsProvider></div>
+            break;
+        }
+        case 'install_date':{
+          return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <DatePicker     format="MM/dd/yyyy" showTodayButton
+                          clearable
+                          inputVariant="outlined"
+                          variant="inline" 
+                          maxDate={new Date('01-01-2100')}
+                          minDate={new Date('01-01-1970')}
+                          className={classes.datePicker}
+                          value={value} 
+                          onChange={value => handleUpdateTaskDate(value, task, "install_date")} />
+                  </MuiPickersUtilsProvider></div>
+                  break;
+        }
         default:{
           
         }
@@ -403,166 +439,193 @@ const TaskListTasks = (props) =>{
         return <>&nbsp;</>;
       }
       return return_value
-    }
+    },[taskListTasks]);
 
     return(
         <React.Fragment>
-        { taskListTasks && taskListTasksSaved ? <>
-        <List className={classes.root}>  
-            <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="droppable" 
-            renderClone={(provided, snapshot, rubric) => (
-              <div
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                ref={provided.innerRef}
-              >
-                <ListItem key={rubric.source.index} 
-                                role={undefined} dense button 
-                                className={classes.nonSelectedRow}
-                                >
-                      <ListItemText className={classes.draggingListItemTextStyle}>
-                            {taskListTasks[rubric.source.index].t_id} | {taskListTasks[rubric.source.index].t_name} 
-                      </ListItemText>
-                    </ListItem>
-              </div>
-            )}>
-            {(provided, snapshot) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                style={getListStyle(snapshot.isDraggingOver)}
-              >          
-              {taskListTasks && taskListTasks.length > 0 ? 
-                <> { taskListTasks.map((row, index) => {
-                  if(row['filter']){
-                    return (<></>);
-                  }
-                  const isItemSelected = isSelected(row.t_id);
-                  const labelId = `checkbox-list-label-${row.t_id}`;
-                  const isItemCompleted = row.completed_wo == 1;
-                  return (
-                    <Draggable key={row.t_id + 321321} 
-                                draggableId={(row.priority_order-1).toString()} 
-                                index={index} 
-                                isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }
-                    >
-                    {(provided, snapshot) => (
-                      <ListItem key={taskListTasksSaved[index].t_id + 321321} 
-                                  role={undefined} dense button 
-                                  onContextMenu={event => handleRightClick(event, row.t_id)}
-                                  onMouseUp={event => handleClick(event, row.t_id)}
-                                  className={ index % 2 == 0 ? 
-                                            (isItemCompleted ? ( isItemSelected ? classes.selectedRowComp : classes.nonSelectedRowComp ):( isItemSelected ? classes.selectedRow : classes.nonSelectedRow ) )
-                                            : 
-                                            (isItemCompleted ? ( isItemSelected ? classes.selectedRowOffsetComp : classes.nonSelectedRowOffsetComp) : ( isItemSelected ? classes.selectedRowOffset : classes.nonSelectedRowOffset))}
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  style={getItemStyle(
-                                    snapshot.isDragging,
-                                    provided.draggableProps.style
-                                  )}>
-                        { taskListToMap 
-                        ? <>
-                            <Checkbox checked={isItemSelected} className={classes.tli_checkbox}/>
-                          </> 
-                        : <></>}
-                        {table_info.map((item, i)=>{
-                          var value = row[item.field];
-                          
-                          return( <Tooltip title={value} enterDelay={800}>
-                          <ListItemText id={labelId}
-                                        key={item.field + i}
-                                        className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
-                                        style={{flex: `0 0 ${item.width}`}}
-                                        classes={item.style ?  {primary: classes[item.style]} : {}}>
-                                          { handleSpecialTableValues(item.field, value, item.type,row)}
-                                   {/* { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') }  */}
-                          </ListItemText>
-                          </Tooltip>
-                        )})}
-                        { taskListToMap 
-                        ? 
-                        <ListItemSecondaryAction>            
-                              <React.Fragment>
-                                <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
-                                <EditIcon />
-                                </IconButton>
-                                {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.tl_id, row.t_name)}>
-                                  <DeleteIcon />
-                                </IconButton>  */}
-                              </React.Fragment>
-                          &nbsp;&nbsp;&nbsp;
-                        </ListItemSecondaryAction>
-                        : <></>}
-                      </ListItem>
-                      )}
-                      </Draggable>
-                    );
-                    
-                 })} </> : 
-                 //taskListTasks.length < 0
-                 <>
-                  <div className={classes.no_tasks_info_div}>
-                    <span className={classes.no_tasks_info_text}>
-                      No Tasks added to this Task List yet! Click the TASKS tab to add some tasks!
-                    </span>
-                  </div>
-                  </>}
-            
-            {provided.placeholder}
-            </div>
-          )} 
-        </Droppable>
-      </DragDropContext>
-        </List>
-              <Popover
-              id={addSwapCrewPopoverId}
-              open={addSwapCrewPopoverOpen}
-              anchorEl={addSwapCrewAnchorEl}
-              onClose={handleAddMemberPopoverClose}
-              anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-              }}
-              transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
-              }}
-              className={classes.popover}
-              classes={{paper: classes.popoverPaper}}
-          >
-              <List 
-                  subheader={
-                      <ListSubheader className={classes.list_head} component="div" id="nested-list-subheader">
-                          Add/Update Crew
-                      </ListSubheader>
-                  }>
-                    <ListItem className={classes.crew_list_item} onMouseUp={(event)=>handleAddSwapCrew(event, {id: -1})}>
-                            <ListItemText button primary={'*Create New*'}/>
-                        </ListItem>
-                  {addSwapCrewJob && addSwapCrewJob.crew_id && allCrews && allCrews.filter((fil_crew, i)=>{
-                                return(fil_crew.id != addSwapCrewJob.crew_id || addSwapCrewJob.crew_id == -1)
-                            }).map((crew, i)=>(
-                            <ListItem className={classes.crew_list_item} 
-                                        key={`crew_members+${i}`} button
-                                        onMouseUp={(event)=>handleAddSwapCrew(event, crew)}>
-                                <ListItemText primary={crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id} />
-                            </ListItem>
-                        ))}
-              </List>
-          </Popover> 
-          </>
-        : <div>
-            <CircularProgress style={{marginLeft: "47%"}}/>
-        </div> 
-        }   
+          <TaskListTasksRows taskListTasks={taskListTasks} taskListTasksSaved={taskListTasksSaved} classes={classes} isSelected={isSelected} 
+          handleRightClick={handleRightClick} handleClick={handleClick} taskListToMap={taskListToMap} getItemStyle={getItemStyle}
+    table_info={table_info} handleSpecialTableValues={handleSpecialTableValues} addSwapCrewAnchorEl={addSwapCrewAnchorEl} 
+    addSwapCrewJob={addSwapCrewJob} addSwapCrewPopoverId={addSwapCrewPopoverId} addSwapCrewPopoverOpen={addSwapCrewPopoverOpen}
+    handleAddMemberPopoverClose={handleAddMemberPopoverClose} allCrews={allCrews} handleAddSwapCrew={handleAddSwapCrew}
+    onDragEnd={onDragEnd} selectedTasks={selectedTasks}/>
+        {/* <List className={classes.root}>   */}
+           
         </React.Fragment>
     );
 
 }
-export default TaskListTasks;
+export default React.memo(TaskListTasks);
+
+const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classes, isSelected, handleRightClick, handleClick, taskListToMap, getItemStyle,
+    table_info, handleSpecialTableValues, addSwapCrewAnchorEl, addSwapCrewJob, addSwapCrewPopoverId, addSwapCrewPopoverOpen,
+    handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks})=>{
+      
+      console.log("Tasks13", taskListTasks);
+      const getListStyle =  isDraggingOver => ({
+        background: isDraggingOver ? "lightblue" : "rgba(0,0,0,0)",
+        padding: grid,
+        width: 'auto'
+      });
+
+      const grid = 8;
+
+    return(<>
+      <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="droppable" 
+      renderClone={(provided, snapshot, rubric) => (
+        <div
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          ref={provided.innerRef}
+        >
+          <div key={rubric.source.index} 
+                          role={undefined} dense button 
+                          className={classes.nonSelectedRow}
+                          >
+                <span className={classes.draggingListItemTextStyle}>
+                      {taskListTasks[rubric.source.index].t_id} | {taskListTasks[rubric.source.index].t_name} 
+                </span>
+              </div>
+        </div>
+      )}>
+      {(provided, snapshot) => (
+        <TableBody
+          {...provided.droppableProps}
+          ref={provided.innerRef}
+          style={getListStyle(snapshot.isDraggingOver)}
+        >          
+        {taskListTasks && taskListTasks.length > 0 ? 
+          <> { taskListTasks.map((row, index) => {
+            if(row['filter']){
+              return (<></>);
+            }
+            const isItemSelected = isSelected(row.t_id);
+            const labelId = `checkbox-list-label-${row.t_id}`;
+            const isItemCompleted = row.completed_wo == 1;
+            return (
+              <Draggable key={row.t_id + 321321} 
+                          draggableId={(row.priority_order-1).toString()} 
+                          index={index} 
+                          isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }
+              >
+              {(provided, snapshot) => (
+                <TableRow key={taskListTasksSaved[index].t_id + 321321} 
+                            role={undefined} dense button 
+                            onContextMenu={event => handleRightClick(event, row.t_id)}
+                            onMouseUp={event => handleClick(event, row.t_id)}
+                            className={ index % 2 == 0 ? 
+                                      (isItemCompleted ? ( isItemSelected ? classes.selectedRowComp : classes.nonSelectedRowComp ):( isItemSelected ? classes.selectedRow : classes.nonSelectedRow ) )
+                                      : 
+                                      (isItemCompleted ? ( isItemSelected ? classes.selectedRowOffsetComp : classes.nonSelectedRowOffsetComp) : ( isItemSelected ? classes.selectedRowOffset : classes.nonSelectedRowOffset))}
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            // {...provided.dragHandleProps}
+                            style={getItemStyle(
+                              snapshot.isDragging,
+                              provided.draggableProps.style
+                            )}>
+                  { taskListToMap 
+                  ? <>
+                      <TableCell className={classes.listItemTextStyle}>
+                        <Checkbox checked={isItemSelected} className={classes.tli_checkbox}/>
+                      </TableCell>
+                      <TableCell className={classes.listItemTextStyle} >
+                        <div {...provided.dragHandleProps}>
+                          <ReorderIcon />
+                        </div>
+                      </TableCell>
+                    </> 
+                  : <></>}
+                  {table_info.map((item, i)=>{
+                    var value = row[item.field];
+                    
+                    return( <Tooltip title={value} enterDelay={800}>
+                    <TableCell id={labelId}
+                                  key={item.field + i}
+                                  style={{ maxWidth: 5 }}
+                                  className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
+                                  // style={{flex: `0 0 ${item.width}`}}
+                                  //classes={item.style ?  {primary: classes[item.style]} : {}}
+                                  >
+                                  <span>{ handleSpecialTableValues(item.field, value, item.type,row)}</span>
+                             {/* { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') }  */}
+                    </TableCell>
+                    </Tooltip>
+                  )})}
+                  { taskListToMap 
+                  ? 
+                  <TableCell className={classes.listItemTextStyle}>            
+                        <React.Fragment>
+                          <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
+                          <EditIcon />
+                          </IconButton>
+                          {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.tl_id, row.t_name)}>
+                            <DeleteIcon />
+                          </IconButton>  */}
+                        </React.Fragment>
+                    &nbsp;&nbsp;&nbsp;
+                  </TableCell>
+                  : <></>}
+                </TableRow>
+                )}
+                </Draggable>
+              );
+              
+           })} </> : 
+           //taskListTasks.length < 0
+           <>
+            <div className={classes.no_tasks_info_div}>
+              <span className={classes.no_tasks_info_text}>
+                No Tasks added to this Task List yet! Click the TASKS tab to add some tasks!
+              </span>
+            </div>
+            </>}
+      
+      {provided.placeholder}
+      </TableBody>
+    )} 
+  </Droppable>
+</DragDropContext>
+  {/* </List> */}
+        <Popover
+        id={addSwapCrewPopoverId}
+        open={addSwapCrewPopoverOpen}
+        anchorEl={addSwapCrewAnchorEl}
+        onClose={handleAddMemberPopoverClose}
+        anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'center',
+        }}
+        transformOrigin={{
+        vertical: 'top',
+        horizontal: 'center',
+        }}
+        className={classes.popover}
+        classes={{paper: classes.popoverPaper}}
+    >
+        <List 
+            subheader={
+                <ListSubheader className={classes.list_head} component="div" id="nested-list-subheader">
+                    Add/Update Crew
+                </ListSubheader>
+            }>
+              <ListItem className={classes.crew_list_item} onMouseUp={(event)=>handleAddSwapCrew(event, {id: -1})}>
+                      <ListItemText button primary={'*Create New*'}/>
+                  </ListItem>
+            {addSwapCrewJob && addSwapCrewJob.crew_id && allCrews && allCrews.filter((fil_crew, i)=>{
+                          return(fil_crew.id != addSwapCrewJob.crew_id || addSwapCrewJob.crew_id == -1)
+                      }).map((crew, i)=>(
+                      <ListItem className={classes.crew_list_item} 
+                                  key={`crew_members+${i}`} button
+                                  onMouseUp={(event)=>handleAddSwapCrew(event, crew)}>
+                          <ListItemText primary={crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id} />
+                      </ListItem>
+                  ))}
+        </List>
+    </Popover> 
+    </>)
+})
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -575,149 +638,103 @@ const useStyles = makeStyles(theme => ({
       color: '#fcfcfc',
   },
   nonSelectedRow:{
-    backgroundColor: '#dcf6ff !important',
-    '&:hover':{
-      backgroundColor: '#fff !important',
-    },
+    background: '#f9f9f9',
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
+
     justifyContent: 'space-around',
   },
   selectedRow:{
-    backgroundColor: '#efe0ab !important',
-    '&:hover':{
-      backgroundColor: '#d0bc77 !important',
-    },
+    background: '#c2e5f5',
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
     justifyContent: 'space-around',
   },
   nonSelectedRowOffset:{
-    backgroundColor: '#c5e2f3  !important',
-    '&:hover':{
-      backgroundColor: '#fff !important',
-    },
+    background: '#e9e9e9',
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
+
     justifyContent: 'space-around',
   },
   selectedRowOffset:{
-    backgroundColor: '#efe0ab  !important',
-    '&:hover':{
-      backgroundColor: '#d0bc77 !important',
-    },
+    background: '#b8def0',
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
     justifyContent: 'space-around',
   },
   nonSelectedRowComp:{
-    backgroundColor: '#989898b8 !important',
-    '&:hover':{
-      backgroundColor: '#c1c1c1 !important',
-    },
+    background: '#ababab',
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
+
     justifyContent: 'space-around',
     
   },
   selectedRowComp:{
-    backgroundColor: '#989898b8 !important',
-    '&:hover':{
-      backgroundColor: '#c1c1c1 !important',
-    },
+    background: '#ababff',
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
     justifyContent: 'space-around',
   },
   nonSelectedRowOffsetComp:{
-    backgroundColor: '#989898b8  !important',
-    '&:hover':{
-      backgroundColor: '#c1c1c1 !important',
-    },
+
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
+
     justifyContent: 'space-around',
   },
   selectedRowOffsetComp:{
-    backgroundColor: '#989898b8  !important',
-    '&:hover':{
-      backgroundColor: '#c1c1c1 !important',
-    },
+
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
+
     justifyContent: 'space-around',
   },
   nonSelectedRowPriority:{
-    backgroundColor: '#fffbf1 !important',
-    '&:hover':{
-      backgroundColor: '#fbdfa8 !important',
-    },
+
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
+
     justifyContent: 'space-around',
     cursor: 'default',
     
   },
   nonSelectedRowOffsetPriority:{
-    backgroundColor: '#fdf6e8  !important',
-    '&:hover':{
-      backgroundColor: '#fbdfa8 !important',
-    },
+
     border: '1px solid #7c8080',
     boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)',
-    display:'flex',
-    flexWrap: 'nowrap',
-    paddingRight: '6% !important',
+
     justifyContent: 'space-around',
     cursor: 'default',
   },
   listItemTextStyle:{
-    flex: '0 0 11%',
+    // flex: '0 0 11%',
     textAlign: 'center',
-
+    padding: 0,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    '& span':{
+    },
+    
   },
   draggingListItemTextStyle:{
     flex: '0 0 51%',
     textAlign: 'center',
+    padding: 0,
 
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    '& span':{
+    },
   },
   boldListItemText:{
-    flex: '0 0 11%',
+    // flex: '0 0 11%',
     textAlign: 'center',
-
+    padding: 0,
+    
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -728,9 +745,10 @@ const useStyles = makeStyles(theme => ({
     }
   },
   smallListItemText: {
-    flex: '0 0 11%',
+    // flex: '0 0 11%',
     textAlign: 'center',
-
+    padding: 0,
+    
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -740,51 +758,54 @@ const useStyles = makeStyles(theme => ({
     },
   },
   artSignDrillSmallListItemText:{
-    flex: '0 0 11%',
+    // flex: '0 0 11%',
     textAlign: 'center',
     margin: '0px',
     padding: '4px 0 4px 0',
+    backgroundColor: '#7bffc847',
+
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-
-    backgroundColor: '#7bffc847',
     '& span':{
       fontSize: 'x-small',
       backgroundColor: '#ffffff00',
-      color: '#0e0e0e'
+      color: '#0e0e0e',
     },
   },
   drillSmallListItemText: {
-    flex: '0 0 11%',
+    // flex: '0 0 11%',
     textAlign: 'center',
     margin: '0px',
     padding: '4px 0 4px 0',
+    
+    padding: 0,
+    backgroundColor: '#ffeacb7a',
+
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-
-    backgroundColor: '#ffeacb7a',
     '& span':{
       fontSize: 'x-small',
       backgroundColor: '#ffffff00',
-      color: '#0e0e0e'
+      color: '#0e0e0e',
     },
     
   },
   installSmallListItemText: {
-    flex: '0 0 11%',
+    // flex: '0 0 11%',
     textAlign: 'center',
     margin: '0px',
     padding: '4px 0 4px 0',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    
     backgroundColor: '#ffb87b73',
     '& span':{
       fontSize: 'x-small',
       backgroundColor: '#ffffff00',
-      color: '#0e0e0e'
+      color: '#0e0e0e',
     },
   },
   no_tasks_info_div:{
@@ -795,9 +816,7 @@ const useStyles = makeStyles(theme => ({
     fontSize:' 25px',
   },
   tli_checkbox:{
-    position: 'absolute',
-    padding: '0px',
-    left: '0px',
+    
     '& span':{
       color: '#444',
       '&:hover':{
@@ -834,5 +853,13 @@ const useStyles = makeStyles(theme => ({
     color: '#fff',
     backgroundColor: '#61a4a1',
   },
+  datePicker:{
+    '& input':{
+        textAlign: 'center',
+        cursor: 'pointer',
+        padding: '1px 0px 0px 0px',
+        backgroundColor: '#f5fdff',
+    }
+  } 
 
 }));
