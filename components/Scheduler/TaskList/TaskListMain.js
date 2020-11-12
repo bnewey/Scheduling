@@ -326,32 +326,23 @@ const TaskListMain = (props) => {
                         <TaskListFilter filteredItems={taskListTasks}  setFilteredItems={setTaskListTasks} />
                         {taskListTasks && table_info && taskListTasksSaved ? 
                         <>  
-                            <TableContainer>
-                                <Table >
-                                <colgroup>
-                                <col style={{ width: "3%" }} />
-                                <col style={{ width: "3%" }} />
-                                {table_info.map((item, i)=>{
-                                    return(
-                                        <col style={{ width: item.width }} />
-                                    )
-                                })}
-                                <col style={{ width: "3%" }} />
-                                </colgroup>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>&nbsp;</TableCell>
-                                        <TableCell>&nbsp;</TableCell>
+                            {/* <TableContainer> */}
+                                <List >
+                                
+                                {/* <TableHead> */}
+                                    <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
+                                        {/* <TableCell>&nbsp;</TableCell>
+                                        <TableCell>&nbsp;</TableCell> */}
                                     {table_info.map((item, i)=>{
                                         const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
                                         const isASC = sorterState === 1;
                                         return(
-                                        <TableCell      id={"Head-ListItem"+i} 
+                                        <ListItemText      id={"Head-ListItem"+i} 
                                                         align="center"
                                                         key={item.field + i +'_head'}
                                                         className={classes.listItemText} 
-                                                        // style={{flex: `0 0 ${item.width}`}} 
-                                                        //classes={{primary: classes.listItemTextPrimary}}
+                                                        style={{flex: `0 0 ${item.width}`}} 
+                                                        classes={{primary: classes.listItemTextPrimary}}
                                                         onClick={event=>handleListSort(event, item)}
                                                         >
                                                             <span>
@@ -362,11 +353,11 @@ const TaskListMain = (props) => {
                                                             </div> 
                                                             : <></>}
                                                             </span>
-                                        </TableCell>
+                                        </ListItemText>
                                     )})}
-                                    <TableCell>&nbsp;</TableCell>
-                                    </TableRow>
-                                </TableHead>
+                                    {/* <TableCell>&nbsp;</TableCell> */}
+                                    </ListItem>
+                                {/* </TableHead> */}
                             {/* <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}> */}
                                 
                                 {/* <ListItemSecondaryAction>            
@@ -390,8 +381,8 @@ const TaskListMain = (props) => {
                                 table_info={table_info}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
                                 taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}/>
-                                </Table>
-                            </TableContainer>
+                                </List>
+                            {/* </TableContainer> */}
                         </>
                         : <>
                         <div className={classes.HeadListItem} classes={{container: classes.liContainer}}>
