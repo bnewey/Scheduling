@@ -433,7 +433,7 @@ const TaskListTasks = (props) =>{
           <DatePicker     format="MM/dd/yyyy" showTodayButton
                           clearable
                           inputVariant="outlined"
-                          variant="inline" 
+                          variant="modal" 
                           maxDate={new Date('01-01-2100')}
                           minDate={new Date('01-01-1970')}
                           className={classes.datePicker}
@@ -447,7 +447,7 @@ const TaskListTasks = (props) =>{
           <DatePicker     format="MM/dd/yyyy" showTodayButton
                           clearable
                           inputVariant="outlined"
-                          variant="inline" 
+                          variant="modal" 
                           maxDate={new Date('01-01-2100')}
                           minDate={new Date('01-01-1970')}
                           className={classes.datePicker}
@@ -467,77 +467,6 @@ const TaskListTasks = (props) =>{
       return return_value
     },[taskListTasks])
 
-    const getRowRender = (tasks) => ({ index, style }) => {
-      const row = tasks[index];
-      
-      if(row['filter']){
-        return (<></>);
-      }
-      const isItemSelected = isSelected(row.t_id);
-      const labelId = `checkbox-list-label-${row.t_id}`;
-      const isItemCompleted = row.completed_wo == 1;
-
-      return (
-        <Draggable key={row.t_id + 321321} 
-                    draggableId={(row.priority_order-1).toString()} 
-                    index={index} 
-                    isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }>
-          {(provided, snapshot) => (
-            <div key={taskListTasksSaved[index].t_id + 321321} 
-                      role={undefined} dense button 
-                      onContextMenu={event => handleRightClick(event, row.t_id)}
-                      onMouseUp={event => handleClick(event, row.t_id)}
-                      className={ index % 2 == 0 ? 
-                                (isItemCompleted ? ( isItemSelected ? classes.selectedRowComp : classes.nonSelectedRowComp ):( isItemSelected ? classes.selectedRow : classes.nonSelectedRow ) )
-                                : 
-                                (isItemCompleted ? ( isItemSelected ? classes.selectedRowOffsetComp : classes.nonSelectedRowOffsetComp) : ( isItemSelected ? classes.selectedRowOffset : classes.nonSelectedRowOffset))}
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      // style={getItemStyle(
-                      //   snapshot.isDragging,
-                      //   provided.draggableProps.style
-                      // )}
-                      style={style}
-                      >
-            { taskListToMap 
-            ? <>
-                <Checkbox checked={isItemSelected} className={classes.tli_checkbox}/>
-              </> 
-            : <></>}
-            {table_info.map((item, i)=>{
-              var value = row[item.field];
-              
-              return( <Tooltip key={item.field+i+'key'} title={value} enterDelay={800}>
-              <span id={labelId}
-                            key={item.field + i}
-                            className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
-                            style={{flex: `0 0 ${item.width}`}}
-                            classes={item.style ?  {primary: classes[item.style]} : {}}>
-                              { handleSpecialTableValues(item.field, value, item.type,row)}
-                      {/* { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') }  */}
-              </span>
-              </Tooltip>
-            )})}
-            { taskListToMap 
-            ? 
-            <>            
-                  <React.Fragment>
-                    <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
-                    <EditIcon />
-                    </IconButton>
-                    {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.tl_id, row.t_name)}>
-                      <DeleteIcon />
-                    </IconButton>  */}
-                  </React.Fragment>
-              &nbsp;&nbsp;&nbsp;
-            </>
-            : <></>}
-          </div>
-          )}
-        </Draggable>
-      );
-    };
 
     return(
         <React.Fragment>
@@ -569,6 +498,10 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
 
   const getRowRender = (tasks) => ({ index, style }) => {
     const row = tasks[index];
+
+    if (!row) {
+      return null;
+    }
     
     if(row['filter']){
       return (<></>);
@@ -598,7 +531,10 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
                     //   snapshot.isDragging,
                     //   provided.draggableProps.style
                     // )}
-                    style={style}
+                    style={{ ...getItemStyle(
+                         snapshot.isDragging,
+                         provided.draggableProps.style),
+                         ...style}}
                     >
           { taskListToMap 
           ? <>
@@ -609,14 +545,14 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
             var value = row[item.field];
             
             return( <Tooltip key={item.field+i+'key'} title={value} enterDelay={800}>
-            <span id={labelId}
+            <div id={labelId}
                           key={item.field + i}
                           className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
                           style={{flex: `0 0 ${item.width}`}}
                           classes={item.style ?  {primary: classes[item.style]} : {}}>
-                            { handleSpecialTableValues(item.field, value, item.type,row)}
+                           <span> { handleSpecialTableValues(item.field, value, item.type,row)}</span>
                     {/* { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') }  */}
-            </span>
+            </div>
             </Tooltip>
           )})}
           { taskListToMap 
@@ -626,9 +562,6 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
                   <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
                   <EditIcon />
                   </IconButton>
-                  {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromTaskList(event, row.t_id, row.tl_id, row.t_name)}>
-                    <DeleteIcon />
-                  </IconButton>  */}
                 </React.Fragment>
             &nbsp;&nbsp;&nbsp;
           </>
@@ -638,6 +571,8 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
       </Draggable>
     );
   };
+
+
 
   return(
       <React.Fragment>
@@ -661,63 +596,31 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
                   </div>
             </div>
           )}>
-          {(provided, snapshot) => (
-          //   <div
-          //     {...provided.droppableProps}
-          //     ref={provided.innerRef}
-          //     style={getListStyle(snapshot.isDraggingOver)}
-          //   >          
-          //   {taskListTasks && taskListTasks.length > 0 ? 
-          //     <> { taskListTasks.map((row, index) => {
-          //       if(row['filter']){
-          //         return (<></>);
-          //       }
-          //       const isItemSelected = isSelected(row.t_id);
-          //       const labelId = `checkbox-list-label-${row.t_id}`;
-          //       const isItemCompleted = row.completed_wo == 1;
-          //       return (
-          //         <Draggable key={row.t_id + 321321} 
-          //                     draggableId={(row.priority_order-1).toString()} 
-          //                     index={index} 
-          //                     isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }
-          //         >
-          //         {(provided, snapshot) => (
-                    
-          //           )}
-          //           </Draggable>
-          //         );
-                  
-          //      })} </> : 
-          //      //taskListTasks.length < 0
-          //      <>
-          //       <div className={classes.no_tasks_info_div}>
-          //         <span className={classes.no_tasks_info_text}>
-          //           No Tasks added to this Task List yet! Click the TASKS tab to add some tasks!
-          //         </span>
-          //       </div>
-          //       </>}
-          
-          // {provided.placeholder}
-          // </div>
-          <List
-          height={650}
-          rowCount={taskListTasks.length}
-          rowHeight={50}
-          width={1500}
-          ref={(ref) => {
-            // react-virtualized has no way to get the list's ref that I can so
-            // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
-            if (ref) {
-              // eslint-disable-next-line react/no-find-dom-node
-              const whatHasMyLifeComeTo = ReactDOM.findDOMNode(ref);
-              if (whatHasMyLifeComeTo) {
-                provided.innerRef(whatHasMyLifeComeTo);
-              }
-            }
-          }}
-          rowRenderer={getRowRender(taskListTasks)}
-        />
-        )} 
+          {(provided, snapshot) => { 
+              const itemCount = snapshot.isUsingPlaceholder
+              ? taskListTasks.length + 1
+              : taskListTasks.length;
+            return(
+              <List
+              height={650}
+              rowCount={itemCount}
+              rowHeight={26}
+              width={1500}
+              ref={(ref) => {
+                // react-virtualized has no way to get the list's ref that I can so
+                // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
+                if (ref) {
+                  // eslint-disable-next-line react/no-find-dom-node
+                  const whatHasMyLifeComeTo = ReactDOM.findDOMNode(ref);
+                  if (whatHasMyLifeComeTo) {
+                    provided.innerRef(whatHasMyLifeComeTo);
+                  }
+                }
+              }}
+              rowRenderer={getRowRender(taskListTasks)}
+            />);
+          }
+        } 
       </Droppable>
     </DragDropContext>
       {/* </List> */}
@@ -788,6 +691,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     // paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   selectedRow:{
     backgroundColor: '#c2e5f5 !important',
@@ -800,6 +704,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     // paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   nonSelectedRowOffset:{
     backgroundColor: '#e9e9e9  !important',
@@ -812,6 +717,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   selectedRowOffset:{
     backgroundColor: '#b8def0  !important',
@@ -824,6 +730,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   nonSelectedRowComp:{
     backgroundColor: '#ababab !important',
@@ -836,7 +743,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
-    
+    alignItems: 'center',
   },
   selectedRowComp:{
     backgroundColor: '#ababff !important',
@@ -849,6 +756,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   nonSelectedRowOffsetComp:{
     backgroundColor: '#989898b8  !important',
@@ -861,6 +769,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   selectedRowOffsetComp:{
     backgroundColor: '#989898b8  !important',
@@ -873,6 +782,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   nonSelectedRowPriority:{
     backgroundColor: '#fffbf1 !important',
@@ -885,6 +795,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
     cursor: 'default',
     
   },
@@ -899,6 +810,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'nowrap',
     //paddingRight: '6% !important',
     justifyContent: 'space-around',
+    alignItems: 'center',
     cursor: 'default',
   },
   listItemTextStyle:{
@@ -925,8 +837,9 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     '& span':{
+      fontFamily: 'sans-serif',
       fontWeight: 600,
-      color: '#303d4b',
+      color: '#11254b',
       fontSize: 'small',
     }
   },
@@ -938,6 +851,7 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     '& span':{
+      fontFamily: 'sans-serif',
       color: '#0e0e0e',
       fontSize: 'x-small',
     },
@@ -953,6 +867,7 @@ const useStyles = makeStyles(theme => ({
 
     backgroundColor: '#7bffc847',
     '& span':{
+      fontFamily: 'sans-serif',
       fontSize: 'x-small',
       backgroundColor: '#ffffff00',
       color: '#0e0e0e'
@@ -969,6 +884,7 @@ const useStyles = makeStyles(theme => ({
 
     backgroundColor: '#ffeacb7a',
     '& span':{
+      fontFamily: 'sans-serif',
       fontSize: 'x-small',
       backgroundColor: '#ffffff00',
       color: '#0e0e0e'
@@ -985,6 +901,7 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     backgroundColor: '#ffb87b73',
     '& span':{
+      fontFamily: 'sans-serif',
       fontSize: 'x-small',
       backgroundColor: '#ffffff00',
       color: '#0e0e0e'
