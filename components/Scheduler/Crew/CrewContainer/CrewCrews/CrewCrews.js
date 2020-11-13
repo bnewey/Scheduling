@@ -2,6 +2,8 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox, Button,
     Collapse } from '@material-ui/core';
+
+import clsx from 'clsx';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import SwapIcon from '@material-ui/icons/SwapHoriz';
@@ -19,6 +21,7 @@ import CrewMemberActionEdit from '../CrewMemberActionEdit';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import CrewCrewsCrews from './CrewCrewsCrews';
+import Util from '../../../../../js/Util';
 
 
 function arraysEqual(_arr1, _arr2) {
@@ -59,7 +62,8 @@ const CrewCrews = (props) => {
             Crew.getCrewJobsByCrew(selectedCrew.id)
             .then((data)=>{
                 if(data){
-                    setCrewJobs(data);
+                    console.log("Data",data);
+                    setCrewJobs( data);
                 }
             })
             .catch((error)=>{
@@ -200,7 +204,7 @@ const CrewCrews = (props) => {
     // a little function to help us with reordering the result
     const reorder = (list, startIndex, endIndex) => {
         if(!selectedCrew){
-        cogoToast.info(`No member to reorder`, {hideAfter: 4});
+        cogoToast.info(`No crew to reorder`, {hideAfter: 4});
         return;
         }
         const result = Array.from(list);
@@ -229,41 +233,40 @@ const CrewCrews = (props) => {
     })};
                 
     const getListStyle = isDraggingOver => ({
-        background: isDraggingOver ? "lightblue" : "lightgrey",
+        background: isDraggingOver ? "#fff" : "lightgrey",
         padding: grid,
         width: 'auto'
     });
 
     const onDragEnd = (result) => {
         console.log("RESULT",result)
-        // if(!taskListToMap){
-        // return;
-        // }
-        // // dropped outside the list
-        // if (!result.destination) {
-        // return;
-        // }
+        if(!selectedCrew){
+        return;
+        }
+        // dropped outside the list
+        if (!result.destination) {
+        return;
+        }
     
-        // const items = reorder(
-        // markedRows,
-        // result.source.index,
-        // result.destination.index
-        // );
-        
-        // var temp = items.map((item, i)=> item.t_id);
-        // TaskLists.reorderTaskList(temp,taskListToMap.id)
-        // .then( (ok) => {
-        //         if(!ok){
-        //             throw new Error("Could not reorder tasklist" + taskListToMap.id);
-        //         }
-        //         cogoToast.success(`Reordered Task List`, {hideAfter: 4});
-        //         //refresh tasklist
-        //         setReFetchTaskList(true);
-        //     })
-        // .catch( error => {
-        //     console.error(error);
-        //     cogoToast.warn(`Could not reorder task list`, {hideAfter: 4});
-        //     });
+        const items = reorder(
+        crewJobs,
+        result.source.index,
+        result.destination.index
+        );
+        var temp = items.map((item, i)=> item.id);
+        Crew.reorderCrewJobs(temp,selectedCrew.id)
+        .then( (ok) => {
+            if(!ok){
+                throw new Error("Could not reorder crew" + selectedCrew.id);
+            }
+            cogoToast.success(`Reordered Crew Jobs`, {hideAfter: 4});
+            setCrewJobs(null);
+            setSelectedCrew({...selectedCrew});
+        })
+        .catch( error => {
+            console.error(error);
+            cogoToast.warn(`Could not reorder crew jobs`, {hideAfter: 4});
+        });
             
     }
     // END DND
@@ -354,13 +357,22 @@ const CrewCrews = (props) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
                                 return (
                                 <Draggable key={row.id + index+ 'draggable'} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
-                                {(provided, snapshot) => (
+                                {(provided, snapshot) => { 
+                                    const date = row.install_date || row.drill_date || null;
+                                    const datePassed = date && (new Date(date) < new Date());
+                                    const selected = selectedJob?.id === row.id;
+                                    return (
                                     <ListItem key={row.id + index} 
                                                 role={undefined} dense button 
                                                 onClick={event => handleSelectJob(event, row)}
                                                 onContextMenu={event => handleRightClick(event, row.task_id)}
                                                 selected={selectedJob && selectedJob.id === row.id}
-                                                className={selectedJob ? (selectedJob.id === row.id ? classes.selectedRow : classes.nonSelectedRow) : classes.nonSelectedRow}
+                                                className={ clsx( {[classes.selectedRow]: selected },
+                                                    {[classes.nonSelectedRow]: !selected},
+                                                    {[classes.datePassedRow]: !selected && datePassed },
+                                                    {[classes.datePassedSelectedRow]: selected && datePassed }
+                                                    )}
+                                                    //selectedJob ? (selectedJob.id === row.id ? classes.selectedRow : classes.nonSelectedRow) : classes.nonSelectedRow}
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
@@ -371,9 +383,13 @@ const CrewCrews = (props) => {
                                     <ListItemText id={labelId}>
                                             <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
                                             <div className={classes.job_list_task_info}> 
-                                                    {row.job_type == 'install' ? <span>INSTALL DATE: {row.install_date ? row.install_date : 'Not Assigned'}</span>
-                                                     : row.job_type == 'drill' ? <span>DRILL DATE: {row.drill_date ? row.install_date : 'Not Assigned'}</span> : 'BAD TYPE'}
-                                                    
+                                                    {row.job_type == 'install' ? <><span className={classes.installSpan}>
+                                                            INSTALL DATE:</span> <span> {row.install_date ? Util.convertISODateToMySqlDate(row.install_date) : 'Not Assigned'}
+                                                        </span></>
+                                                     : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
+                                                         DRILL DATE: </span> <span>{row.drill_date ? Util.convertISODateToMySqlDate(row.drill_date) : 'Not Assigned'}</span> </>
+                                                         : 'BAD TYPE'}
+                                                    &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
                                               </div></>
                                     </ListItemText>
                                     <ListItemSecondaryAction className={classes.secondary_div}>
@@ -393,7 +409,7 @@ const CrewCrews = (props) => {
                                         
                                     </ListItemSecondaryAction>
                                     </ListItem>
-                                    )}
+                                    )}}
                                     </Draggable>
                                 );
                             })}
@@ -524,21 +540,25 @@ const useStyles = makeStyles(theme => ({
     },
     selectedRow:{
         border: '1px solid #fbff08',
-        backgroundColor: '#b6cee3 !important',
+        backgroundColor: '#bff6ff !important',
         '&:hover':{
-            backgroundColor: '#92bfe5 !important',
-            border: '1px solid #ececec',
+            border: '1px solid #fbff08',
         },
         boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
     },
     nonSelectedRow:{
         border: '1px solid #91979c',
-        backgroundColor: '#dcf6ff !important',
+        backgroundColor: '#fff !important',
         '&:hover':{
-          backgroundColor: '#fff !important',
           border: '1px solid #ececec',
         },
         boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+    },
+    datePassedRow:{
+        backgroundColor: '#bbb !important',
+    },
+    datePassedSelectedRow:{
+        backgroundColor: '#b6d1d6 !important',
     },
     swapPopover:{
 
@@ -572,6 +592,12 @@ const useStyles = makeStyles(theme => ({
             color: '#d87b04'
         }
     },
+    installSpan:{
+        color: '#e25e00',
+    },
+    drillSpan:{
+        color: '#216fac',
+    }
     
   }));
 

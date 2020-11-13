@@ -10,11 +10,12 @@ import { Scrollbars} from 'react-custom-scrollbars';
 import {CrewContext} from '../../Crew/CrewContextContainer';
 
 import Crew from '../../../../js/Crew';
+import TaskListAddCrewDialog from '../../TaskList/TaskListAddCrewDialog';
 
 export default function TaskModalCrew(props){
     const classes = useStyles();
 
-    const { modalTask,  modalOpen, setModalOpen} = props;
+    const { modalTask,  modalOpen, setModalOpen, setShouldReFetch, setTaskLists} = props;
     const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs, 
         setShouldResetCrewState, setMemberJobs} = useContext(CrewContext);
 
@@ -90,8 +91,8 @@ export default function TaskModalCrew(props){
                             Remove
                         </a> 
                     </div>
-
                 ))}
+                <TaskListAddCrewDialog selectedTasks={[modalTask.t_id]}  onClose={()=>{setShouldReFetch(true); setTaskLists(null)}}/>
                 </Scrollbars>
                 </>
             : <></>

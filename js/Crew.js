@@ -402,7 +402,23 @@ async function getCrewJobsByCrew(id){
     }
 }
 
-
+async function reorderCrewJobs(cj_array, crew_id){
+    const route = '/scheduling/crew/reorderCrewJobs';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({cj_array,  crew_id})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
 
 module.exports = {
     addCrewMember,
@@ -426,6 +442,6 @@ module.exports = {
     deleteCrew,
     getAllCrews,
     getCrewJobsByCrew,
-
+    reorderCrewJobs,
 
 };

@@ -302,7 +302,6 @@ const TaskListMain = (props) => {
             setSelectedTasks([]);
         }
     }
-
      
     return(
         <>
@@ -333,6 +332,7 @@ const TaskListMain = (props) => {
                                     <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
                                         {/* <TableCell>&nbsp;</TableCell>
                                         <TableCell>&nbsp;</TableCell> */}
+                                        <div style={{flex: `0 0 2%`}}>&nbsp;</div>
                                     {table_info.map((item, i)=>{
                                         const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
                                         const isASC = sorterState === 1;
@@ -422,7 +422,7 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'nowrap',
         justifyContent: 'space-around',
         padding: '3px',
-        paddingRight: '6%',
+        paddingRight: '4% !important',
         
     },
     liContainer: {
@@ -450,6 +450,9 @@ const useStyles = makeStyles(theme => ({
      },
     listItemText:{
         textAlign: 'center',
+     },
+     checkHead:{
+
      }
 
       

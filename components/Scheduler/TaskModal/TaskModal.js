@@ -161,7 +161,6 @@ export default function TaskModal(props){
         if(!task || !task.t_id){
             return;
         }
-
  
         if(shouldUpdate){
             var updateModalTask = {...task};
@@ -354,7 +353,7 @@ export default function TaskModal(props){
                     <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker clearable showTodayButton format="MM/dd/yyyy" className={classes.inputField} inputVariant="outlined"  value={modalTask.install_date} onChange={value => handleInputOnChange(value, true, "datetime", "install_date")} /></MuiPickersUtilsProvider>
                 </div>
                 
-                <TaskModalCrew modalTask={modalTask} modalOpen={modalOpen} setModalOpen={setModalOpen} />
+                <TaskModalCrew modalTask={modalTask} modalOpen={modalOpen} setModalOpen={setModalOpen} setTaskLists={setTaskLists} setShouldReFetch={setShouldReFetch} />
                 { taskLists ?
                     <TaskModalTaskList taskLists={taskLists} setTaskLists={setTaskLists} 
                                         modalTask={modalTask}

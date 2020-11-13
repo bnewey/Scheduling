@@ -22,7 +22,7 @@ import { CrewContext } from '../Crew/CrewContextContainer';
 const TaskListAddCrewDialog = (props) => {
  
     //PROPS
-    const { selectedTasks,setSelectedTasks, taskListTasks, setTaskListTasks} = props;
+    const { selectedTasks, onClose} = props;
     const { taskLists, setTaskLists, taskListTasksSaved } = useContext(TaskContext);
     const { allCrews, crewMembers, setShouldResetCrewState } = useContext(CrewContext);
 
@@ -138,7 +138,9 @@ const TaskListAddCrewDialog = (props) => {
                             if(response){
                                 cogoToast.success("Set leader of new crew");
                                 handleCrewDialogClose();
-                                setTaskListTasks(null);
+                                if(onClose){
+                                    onClose();
+                                }
                                 setShouldResetCrewState(true);
                                 return;
                             }
@@ -161,7 +163,9 @@ const TaskListAddCrewDialog = (props) => {
                     cogoToast.success("Created and added to crew");
                     handleCrewDialogClose();
                     setShouldResetCrewState(true);
-                    setTaskListTasks(null);
+                    if(onClose){
+                        onClose();
+                    }
                 }
             })
             .catch((err)=>{

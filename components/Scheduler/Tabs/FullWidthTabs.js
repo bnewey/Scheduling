@@ -210,7 +210,7 @@ const useStyles = makeStyles(theme => ({
   tab:{
     // backgroundColor: '#f5f5f5',
 
-    margin: '1% 2%',
+    // margin: '1% 2%',
   },
   tabRoot:{
     minHeight: '0px',

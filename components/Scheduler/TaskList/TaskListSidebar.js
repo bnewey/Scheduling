@@ -219,12 +219,13 @@ const TaskListSidebar = (props) => {
                 <div className={classes.priority_info_heading}>
                     <span>Crew</span>
                 </div>
-                <TaskListAddCrewDialog taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
+                <TaskListAddCrewDialog taskListTasks={taskListTasks} selectedTasks={selectedTasks} onClose={()=>{setTaskListTasks(null);}} setSelectedTasks={setSelectedTasks}/>
 
                 <div className={classes.priority_info_heading}>
                     <span>Other TaskLists</span>
                 </div>
                     <div className={classes.singleLineDiv}>
+                        <div className={classes.otherTaskListsDiv}>
                             {
                                 taskLists && taskListToMap && taskLists.filter((v,i)=> (v.id != taskListToMap.id)).map((tl, index)=>{
                                     return(
@@ -236,7 +237,7 @@ const TaskListSidebar = (props) => {
                                     )
                                 })
                             }
-                            
+                        </div>
                     </div>
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
@@ -407,5 +408,11 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#66afa5a6',
         color: '#fff',
         borderRadius: '8px',
+    },
+    otherTaskListsDiv:{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
     }
   }));

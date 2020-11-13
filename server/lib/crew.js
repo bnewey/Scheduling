@@ -296,7 +296,7 @@ router.post('/deleteCrewJobMember', async (req,res) => {
 });
 
 router.post('/getAllCrewJobs', async (req,res) => {
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id , ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id , j.ordernum, ' + 
     ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' ;
@@ -324,15 +324,20 @@ router.post('/addCrewJobs', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' INSERT INTO crew_jobs (task_id, job_type, crew_id) VALUES (? , ? , ?)  ' + 
+    const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj WHERE crew_id = ?; "
+
+    const sql = ' INSERT INTO crew_jobs (task_id, job_type, crew_id, ordernum) VALUES (? , ? , ?, ?)  ' + 
             ' ON DUPLICATE KEY UPDATE crew_id = VALUES(crew_id) '  ;
     
     var all_results = [];
 
+    const data = await database.query(getMax, [ crew_id ])
+    var max = data[0].max_num || 0;
+
     async.forEachOf(ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            all_results.push(await database.query(sql, [id, job_type, crew_id]));
+            all_results.push(await database.query(sql, [id, job_type, crew_id, max+i+1]));
             return;
         }
         catch(error){
@@ -468,14 +473,14 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
         crew_id = req.body.crew_id;
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, ' + 
     ' cm.id as crew_leader_id,  ' +
     ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' +
     ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
     ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' +
-    ' WHERE cc.id = ?  ';
+    ' WHERE cc.id = ? ORDER BY j.ordernum  ';
     
     try{
         const results = await database.query(sql, [crew_id]);
@@ -488,6 +493,37 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
     }
 });
 
+router.post('/reorderCrewJobs', async (req,res) => {
+    var crew_id, cj_array;
+    if(req.body){
+        crew_id = req.body.crew_id;
+        cj_array = req.body.cj_array;
+    }
+    
+    const sql = ' UPDATE crew_jobs SET ordernum = ? ' +
+    ' WHERE id = ? AND crew_id = ? ';
+
+
+    async.forEachOf(cj_array, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [i+1, id, crew_id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("Crew (reorderCrewJobs): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("reorderCrewJobs: " + crew_id);
+            res.sendStatus(200);
+        }
+    })
+});
 
 
 module.exports = router;

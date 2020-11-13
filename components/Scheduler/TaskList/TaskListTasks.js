@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useContext, useCallback} from 'react';
+import React, {useRef, useState, useEffect, useContext, useCallback, useLayoutEffect} from 'react';
 
 import {makeStyles, List as MUIList, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Checkbox, IconButton, CircularProgress, 
   Popover, ListSubheader,Tooltip} from '@material-ui/core';
@@ -8,6 +8,7 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import useWindowSize from '../../UI/useWindowSize';
 
 import TaskLists from '../../../js/TaskLists';
 import Tasks from '../../../js/Tasks';
@@ -42,9 +43,25 @@ const TaskListTasks = (props) =>{
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
+
     //Popover Add/swap crew
     const [addSwapCrewAnchorEl, setAddSwapCrewAnchorEl] = React.useState(null);
     const [addSwapCrewJob, setAddSwapCrewJob] = useState(null);
+
+    const targetRef = React.useRef();
+    const [dimensions, setDimensions] = useState({ width:1500, height: 650 });
+
+    //Gets size of our list container so that we can size our virtual list appropriately
+    useLayoutEffect(() => {
+      if (targetRef.current) {
+        
+        setDimensions({
+          width: targetRef.current.offsetWidth,
+          height: targetRef.current.offsetHeight
+        });
+      }
+    }, []);
+    
 
     //CSS
     const classes = useStyles();
@@ -65,30 +82,6 @@ const TaskListTasks = (props) =>{
         setSelectedTasks([]);
       },[filters])
     
-    // const handleRemoveFromTaskList = (event, id, tl_id, name) => {
-    //   const remove = () => {
-    //     TaskLists.removeTaskFromList(id, tl_id)
-    //         .then( (data) => {
-    //                 const filtered_rows = taskListTasks.filter((task, i)=>task.t_id != id);
-    //                 setTaskListTasks(filtered_rows);
-    //                 setTaskListToMap(priorityList);
-    //                 setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
-                    
-    //                 cogoToast.success(`Removed task ${id} from Task List`, {hideAfter: 4});
-    //             })
-    //         .catch( error => {
-    //         console.warn("Error removing task",error);
-    //         cogoToast.error(`Error removing Task from Task List`, {hideAfter: 4});
-    //          });
-    //   }
-    //   confirmAlert({
-    //       customUI: ({onClose}) => {
-    //           return(
-    //               <ConfirmYesNo onYes={remove} onClose={onClose} customMessage={"Remove task: \"" + name + "\" from TaskList?"}/>
-    //           );
-    //       }
-    //   })
-    // }
 
     //Modal
     const handleRightClick = (event, id) => {
@@ -471,12 +464,14 @@ const TaskListTasks = (props) =>{
     return(
         <React.Fragment>
         { taskListTasks && taskListTasksSaved ? <>
+        <div ref={targetRef}>
           <TaskListTasksRows taskListTasks={taskListTasks} taskListTasksSaved={taskListTasksSaved} classes={classes} isSelected={isSelected} 
                 handleRightClick={handleRightClick} handleClick={handleClick} taskListToMap={taskListToMap} getItemStyle={getItemStyle}
           table_info={table_info} handleSpecialTableValues={handleSpecialTableValues} addSwapCrewAnchorEl={addSwapCrewAnchorEl} 
           addSwapCrewJob={addSwapCrewJob} addSwapCrewPopoverId={addSwapCrewPopoverId} addSwapCrewPopoverOpen={addSwapCrewPopoverOpen}
           handleAddMemberPopoverClose={handleAddMemberPopoverClose} allCrews={allCrews} handleAddSwapCrew={handleAddSwapCrew}
-          onDragEnd={onDragEnd} selectedTasks={selectedTasks}/> </>
+          onDragEnd={onDragEnd} selectedTasks={selectedTasks} dimensions={dimensions}/>
+          </div> </>
      : <></>}
         </React.Fragment>
     );
@@ -486,7 +481,7 @@ export default TaskListTasks;
 
 const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classes, isSelected, handleRightClick, handleClick, taskListToMap, getItemStyle,
   table_info, handleSpecialTableValues, addSwapCrewAnchorEl, addSwapCrewJob, addSwapCrewPopoverId, addSwapCrewPopoverOpen,
-  handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks})=>{
+  handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks, dimensions})=>{
 
   const getListStyle =  isDraggingOver => ({
     background: isDraggingOver ? "lightblue" : "rgba(0,0,0,0)",
@@ -537,9 +532,9 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
                          ...style}}
                     >
           { taskListToMap 
-          ? <>
+          ? <div className={classes.checkBoxDiv}>
               <Checkbox checked={isItemSelected} className={classes.tli_checkbox}/>
-            </> 
+            </div> 
           : <></>}
           {table_info.map((item, i)=>{
             var value = row[item.field];
@@ -602,10 +597,10 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
               : taskListTasks.length;
             return(
               <List
-              height={650}
+              height={dimensions?.height}
               rowCount={itemCount}
               rowHeight={26}
-              width={1500}
+              width={dimensions?.width}
               ref={(ref) => {
                 // react-virtualized has no way to get the list's ref that I can so
                 // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
@@ -882,7 +877,7 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
 
-    backgroundColor: '#ffeacb7a',
+    backgroundColor: '#efefef',
     '& span':{
       fontFamily: 'sans-serif',
       fontSize: 'x-small',
@@ -899,7 +894,7 @@ const useStyles = makeStyles(theme => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    backgroundColor: '#ffb87b73',
+    // backgroundColor: '#ffb87b73',
     '& span':{
       fontFamily: 'sans-serif',
       fontSize: 'x-small',
@@ -914,20 +909,15 @@ const useStyles = makeStyles(theme => ({
   no_tasks_info_text:{
     fontSize:' 25px',
   },
+  checkBoxDiv:{
+    flex: '0 0 2%',
+  },
   tli_checkbox:{
-    position: 'absolute',
-    padding: '0px',
-    left: '0px',
-    '& span':{
-      color: '#444',
-      '&:hover':{
-        color: '#000',
-      }
-    }
+    padding: '2px',
   },
   popOverDiv:{
     border: '1px solid #a9a9a9',
-
+    backgroundColor: '#fff',
     '&:hover':{
       boxShadow: '0px 0px 4px 0px black',
       cursor: 'pointer',
