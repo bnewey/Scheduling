@@ -21,8 +21,8 @@ const MapSiderbarVehicleRows = (props) =>{
     //STATE
 
     //PROPS
-    //activeVehicleId / setActiveVehicleId / vehicleRows passed from MapContainer => MapSidebar => Here
-    const { mapRows, setMapRows,activeVehicle, setActiveVehicle, setActiveMarker, setShowingInfoWindow, vehicleRows, setMarkedRows , 
+    //activeMarkerId / setActiveMarkerId / vehicleRows passed from MapContainer => MapSidebar => Here
+    const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, vehicleRows, setMarkedRows , 
           setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, vehiclePanelRef, expanded, setExpanded, expandedAnimDone} = props;
     
     const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
@@ -31,9 +31,8 @@ const MapSiderbarVehicleRows = (props) =>{
     //FUNCTIONS
     const handleToggle = (id, event) => {     
         var vehicle = vehicleRows.filter((row, i) => row.vin === id)[0];
-        setActiveVehicle(vehicle);
+        setActiveMarker({type: "vehicle", item: vehicle});
         setShowingInfoWindow(true);
-        setActiveMarker(null);
     };
 
     //scroll into view 
@@ -49,12 +48,12 @@ const MapSiderbarVehicleRows = (props) =>{
    
 
     useEffect(()=>{
-      if(activeVehicle && expandedAnimDone == true){
+      if(activeMarker?.type =="vehicle" && activeMarker?.item && expandedAnimDone == true){
         
-        var el = vehiclePanelRef.current.querySelector("#mapVehicleListItem"+activeVehicle.vin);
+        var el = vehiclePanelRef.current.querySelector("#mapVehicleListItem"+activeMarker.item.vin);
         if(!el){
           console.error("No element for isInViewPort", el);
-          console.log(activeVehicle);
+          console.log(activeMarker);
           return;
         }
 
@@ -62,7 +61,7 @@ const MapSiderbarVehicleRows = (props) =>{
           el.scrollIntoView({behavior: "smooth",inline: "nearest"});
         }
       }
-    },[activeVehicle, expanded, expandedAnimDone])
+    },[activeMarker, expanded, expandedAnimDone])
 
     
 
@@ -83,7 +82,7 @@ const MapSiderbarVehicleRows = (props) =>{
         
             {vehicleRows && vehicleRows.map((row, index) => {
                 const labelId = `checkbox-list-label-${row.vin}`;
-                const isSelected = activeVehicle ? activeVehicle.vin == row.vin : false;
+                const isSelected = activeMarker?.item ? activeMarker.item.vin == row.vin : false;
                 return (
                   
                   
@@ -100,13 +99,13 @@ const MapSiderbarVehicleRows = (props) =>{
                             <div className={classes.MarkerSubInfo}>   </div></>
                       </ListItemText>
                       <ListItemSecondaryAction>
-                        { activeVehicle && activeVehicle.vin === row.vin ? 
+                        { activeMarker?.item && activeMarker.item.vin === row.vin ? 
                             <React.Fragment>
                               {/* <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.vin)}>
                               <EditIcon />
                               </IconButton> */}
                               
-                              {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromSelected(event, activeVehicle.vin)}>
+                              {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromSelected(event, activeMarker.item.vin)}>
                                 <DeleteIcon />
                               </IconButton>  */}
                              

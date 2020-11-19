@@ -46,6 +46,7 @@ const TaskContainer = function(props) {
 
   //Map Props
     const [taskListToMap, setTaskListToMap] = useState(null);
+    const [crewToMap, setCrewToMap] = useState(null);
     //map rows is in MapContainer
   //Table Props
     const [selectedIds, setSelectedIds] = useState([]);
@@ -122,7 +123,28 @@ const TaskContainer = function(props) {
   }, [filters]);
 
   
-
+  //Save and/or Fetch tabValue to local storage
+  useEffect(() => {
+    if(tabValue == null){
+      var tmp = window.localStorage.getItem('tabValue');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(!isNaN(tmpParsed) && tmpParsed != null){
+        if(tmpParsed > 3 || tmpParsed < 0){
+          console.error("Bad tabValue in localstorage");
+        }
+        setTabValue(tmpParsed);
+      }else{
+        setTabValue(0);
+      }
+    }
+    if(!isNaN(tabValue) && tabValue != null){
+      window.localStorage.setItem('tabValue', JSON.stringify(tabValue ? tabValue : 0));
+    }
+    
+  }, [tabValue]);
   
 
   
@@ -131,12 +153,12 @@ const TaskContainer = function(props) {
   return (
     <div className={classes.root}>
       <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, selectedIds, setSelectedIds, 
-                            tabValue, setTabValue, taskListToMap, setTaskListToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
+                            tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
                              sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
-          <FullWidthTabs tabValue={tabValue} setTabValue={setTabValue} 
+          <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >
             <div>
                 <CalendarContainer />

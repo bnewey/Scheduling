@@ -74,7 +74,7 @@ router.post('/getCrewMembersByTask', async (req,res) => {
     }
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, cm.id as m_id, ma.member_name, j.job_type, cm.is_leader, cm.crew_id, ' + 
-        ' t.name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' + 
+        ' t.name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' + 
         ' FROM crew_jobs j ' + 
         ' LEFT JOIN crew_members_available ma ON cm.member_id = ma.id ' + 
         ' LEFT JOIN crew_members cm ON j.crew_id = m.crew_id ' +
@@ -127,7 +127,7 @@ router.post('/getCrewJobsByMember', async (req,res) => {
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ' + 
             ' cm.is_leader, cm.id as cm_id, ma.member_name, ma.id as ma_id,  ' +
-            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
+            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
             ' LEFT JOIN crew_members cm ON cm.crew_id = j.crew_id ' +
@@ -157,7 +157,7 @@ router.post('/getCrewJobsByTask', async (req,res) => {
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ma.member_name, ' + 
             ' cm.id as crew_leader_id,  ' +
-            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
+            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
             ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
@@ -188,7 +188,7 @@ router.post('/getCrewJobsByTaskIds', async (req,res) => {
     }
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
-            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
+            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id' + 
             ' LEFT JOIN crew_members m ON j.crew_members_id = m.id ' +
@@ -297,7 +297,7 @@ router.post('/deleteCrewJobMember', async (req,res) => {
 
 router.post('/getAllCrewJobs', async (req,res) => {
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id , j.ordernum, ' + 
-    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
+    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' ;
     
@@ -475,11 +475,16 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, ' + 
     ' cm.id as crew_leader_id,  ' +
-    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.install_date, \'%Y-%m-%d %H:%i:%S\') as install_date ' +
+    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ' +
+    ' ea.lat, ea.lng, ea.geocoded ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' +
+    ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 
     ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
     ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' +
+    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
+    ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+        ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' + 
     ' WHERE cc.id = ? ORDER BY j.ordernum  ';
     
     try{

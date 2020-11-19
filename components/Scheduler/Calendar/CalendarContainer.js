@@ -86,8 +86,8 @@ const CalendarContainer = (props) => {
                         id: (task.t_id.toString() + '#sch_install_date'),
                         group: task.install_crew,
                         title: task.t_name,
-                        start_time: new Date(task.install_date).getTime() ,
-                        end_time: new Date(task.install_date).getTime()  + 86400000,
+                        start_time: new Date(task.sch_install_date).getTime() ,
+                        end_time: new Date(task.sch_install_date).getTime()  + 86400000,
                         selectedBgColor: '#e87727',
                         bgColor: '#e25e00',
                         color: '#fff',
@@ -96,13 +96,13 @@ const CalendarContainer = (props) => {
                     })
                 }
                 //Neither and install date
-                if(task.install_crew== null && task.install_date){
+                if(task.install_crew== null && task.sch_install_date){
                     task_array.push({
                         id: (task.t_id.toString() + '#sch_install_date'),
                         group: 0,
                         title: task.t_name,
-                        start_time: new Date(task.install_date).getTime() ,
-                        end_time: new Date(task.install_date).getTime()  + 86400000,
+                        start_time: new Date(task.sch_install_date).getTime() ,
+                        end_time: new Date(task.sch_install_date).getTime()  + 86400000,
                         selectedBgColor: '#e87727',
                         bgColor: '#e25e00',
                         color: '#fff',
@@ -530,8 +530,8 @@ const CalendarContainer = (props) => {
                         visibleTimeEnd={timeEnd}
                         itemRenderer={itemRenderer}
                         dragSnap={ 86400 * 1000}
-                        lineHeight={allCrews ? 55 : 55}
-                        itemHeightRatio={allCrews ? .8 : .80}
+                        lineHeight={allCrews ? 40 : 40}
+                        itemHeightRatio={allCrews ? .9 : .90}
                         onItemMove={(itemId, dragTime, newGroupOrder)=>handleItemMoved(itemId, dragTime, newGroupOrder)}
                         onTimeChange={(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)=>handleTimeChange(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)}
                         canResize={false}

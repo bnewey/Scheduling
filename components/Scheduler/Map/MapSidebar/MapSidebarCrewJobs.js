@@ -6,16 +6,18 @@ import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import cogoToast from 'cogo-toast';
 
+import clsx from 'clsx';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Tasks from '../../../../js/Tasks';
+import Crew from '../../../../js/Crew';
 import TaskLists from '../../../../js/TaskLists';
 import {TaskContext} from '../../TaskContainer';
 import Util from '../../../../js/Util';
 
 
-const MapSiderbarMarkedTasks = (props) =>{
+const MapSiderbarCrewJobs = (props) =>{
 
 
     //STATE
@@ -24,15 +26,15 @@ const MapSiderbarMarkedTasks = (props) =>{
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
     const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
           setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, expanded, setExpanded, setActiveVehicle,
-          expandedAnimDone, sorters } = props;
+          expandedAnimDone, sorters, crewJobs, setCrewJobs,  } = props;
     
-    const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
+    const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved,crewToMap, setCrewToMap} = useContext(TaskContext);
     //CSS
     const classes = useStyles();
     //FUNCTIONS
     const handleToggle = (id, event) => {     
-        var task = markedRows.filter((row, i) => row.t_id === id)[0];
-        setActiveMarker({type: "task", item: task});
+        var job = crewJobs.filter((row, i) => row.id === id)[0];
+        setActiveMarker({type: 'crew', item: job});
         setShowingInfoWindow(true);
     };
 
@@ -47,8 +49,8 @@ const MapSiderbarMarkedTasks = (props) =>{
     }
 
     useEffect(()=>{
-      if(activeMarker?.type === "task" && activeMarker?.item && expandedAnimDone == true){
-        var el = panelRef.current.querySelector("#mapMarkedListItem"+activeMarker.item.t_id);
+      if(activeMarker?.type === "crew" && activeMarker?.item && expandedAnimDone == true){
+        var el = panelRef.current.querySelector("#mapCrewJobItem"+activeMarker.item.id);
         console.log("Panelref", panelRef.current);
         if(!el){
           console.error("No element for isInViewPort", el);
@@ -88,22 +90,17 @@ const MapSiderbarMarkedTasks = (props) =>{
     //   return result;
     // };
 
-    const reorderMultiple = (list, ids, endIndex) =>{
-      var result = Array.from(list); 
-      const removedArray = [];
-      result = result.filter((task, i)=>{
-        //check if in our selectedids and remove if so
-        if(ids.filter((id, p)=> ( task.t_id == id) ).length){
-          removedArray.push(result[i]);
-          return false;
-        }
-        return true;
-      })
-      //Add tasks back in, in the appro spot
-      result.splice(endIndex , 0, ...removedArray);
-      
+    const reorder = (list, startIndex, endIndex) => {
+      if(!crewToMap){
+      cogoToast.info(`No crew to reorder`, {hideAfter: 4});
+      return;
+      }
+      const result = Array.from(list);
+      const [removed] = result.splice(startIndex, 1);
+      result.splice(endIndex, 0, removed);
+
       return result;
-    }
+    };
 
     const grid = 8;
 
@@ -130,7 +127,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     });
 
     const onDragEnd = (result) => {
-      if(!taskListToMap){
+      if(!crewToMap){
         return;
       }
       // dropped outside the list
@@ -138,22 +135,26 @@ const MapSiderbarMarkedTasks = (props) =>{
         return;
       }
   
-      var items = reorderMultiple(taskListTasksSaved, [mapRows[result.source.index].t_id], mapRows[result.destination.index].priority_order-1);     
-      
-      var newTaskIds = items.map((item, i)=> item.t_id);
-      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id)
+      const items = reorder(
+        crewJobs,
+        result.source.index,
+        result.destination.index
+      );
+
+      var temp = items.map((item, i)=> item.id);
+        Crew.reorderCrewJobs(temp,crewToMap.id)
         .then( (ok) => {
-                if(!ok){
-                  throw new Error("Could not reorder tasklist" + taskListToMap.id);
-                }
-                cogoToast.success(`Reordered Task List`, {hideAfter: 4});
-                //refresh tasklist
-                setMapRows(null);
-            })
+            if(!ok){
+                throw new Error("Could not reorder crew" + crewToMap.id);
+            }
+            cogoToast.success(`Reordered Crew Jobs`, {hideAfter: 4});
+            setCrewJobs(null);
+            setCrewToMap({...crewToMap});
+        })
         .catch( error => {
             console.error(error);
-            cogoToast.warn(`Could not reorder task list`, {hideAfter: 4});
-          });
+            cogoToast.warn(`Could not reorder crew jobs`, {hideAfter: 4});
+        });
           
     }
     // END DND
@@ -170,12 +171,12 @@ const MapSiderbarMarkedTasks = (props) =>{
                 {...provided.dragHandleProps}
                 ref={provided.innerRef}
               >
-                <ListItem key={markedRows[rubric.source.index].t_id} 
+                <ListItem key={crewJobs[rubric.source.index].id} 
                                 role={undefined} dense button 
                                 className={classes.nonSelectedRow}
                                 >
                       <ListItemText>
-                            {markedRows[rubric.source.index].t_id} | {markedRows[rubric.source.index].t_name} 
+                            {crewJobs[rubric.source.index].id} | {crewJobs[rubric.source.index].t_name} 
                       </ListItemText>
                     </ListItem>
               </div>
@@ -186,44 +187,56 @@ const MapSiderbarMarkedTasks = (props) =>{
                 ref={provided.innerRef}
                 style={getListStyle(snapshot.isDraggingOver)}
               >                 
-            {markedRows && markedRows.map((row, index) => {
-                const labelId = `checkbox-list-label-${row.t_id}`;
-                const isSelected = activeMarker?.item ? activeMarker.item.t_id == row.t_id : false;
+            { crewJobs && crewJobs.map((row, index) => {
+                const labelId = `checkbox-list-label-${row.id}`;
+                const date = row.sch_install_date || row.drill_date || null;
+                const datePassed = date && (new Date(date) < new Date());
+                const isSelected = activeMarker?.item ? activeMarker.item.id == row.id : false;
                 return (
-                  <Draggable key={row.t_id + 123123} 
-                            draggableId={row.t_id.toString()} 
+                  <Draggable key={row.id + 123123} 
+                            draggableId={row.id.toString()} 
                             index={index} 
                             isDragDisabled={sorters && sorters[0].property != "priority_order"}
                             >
                   {(provided, snapshot) => (
-                    <ListItem key={row.t_id + 123123} 
-                                id={"mapMarkedListItem"+row.t_id}
+                    <ListItem key={row.id + 123123} 
+                                id={"mapCrewJobItem"+row.id}
                                 role={undefined} dense button 
-                                onClick={event => handleToggle(row.t_id, event)}
-                                onContextMenu={event => handleRightClick(event, row.t_id)}
+                                onClick={event => handleToggle(row.id, event)}
+                                onContextMenu={event => handleRightClick(event, row.task_id)}
                                 selected={isSelected}
-                                className={isSelected ? classes.selectedRow : classes.nonSelectedRow}
+                                className={ clsx( {[classes.selectedRow]: isSelected },
+                                    {[classes.nonSelectedRow]: !isSelected},
+                                    {[classes.datePassedRow]: !isSelected && datePassed },
+                                    {[classes.datePassedSelectedRow]: isSelected && datePassed }
+                                    )}
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                style={taskListToMap ? getItemStyle(
+                                style={crewToMap ? getItemStyle(
                                   snapshot.isDragging,
                                   provided.draggableProps.style
                                 ) : {}}>
-                      <ListItemText id={labelId}>
-                            <><div className={classes.MarkerInfo}>{row.t_name}</div>
-                            <div className={classes.MarkerSubInfo}>  Priority:&nbsp;{row.priority_order}
-                                &nbsp;&nbsp;{row.sch_install_date ? <>I-date:&nbsp;{Util.convertISODateToMySqlDate(row.sch_install_date)}&nbsp;</>: ""}
-                                {row.drill_date ? <>D-date:&nbsp;{Util.convertISODateToMySqlDate(row.drill_date)}</> :""} </div></>
-                      </ListItemText>
+                            <ListItemText id={labelId}>
+                                    <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
+                                    <div className={classes.job_list_task_info}> 
+                                            {row.job_type == 'install' ? <><span className={classes.installSpan}>
+                                                    INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
+                                                </span></>
+                                                : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
+                                                    DRILL DATE: </span> <span>{date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}</span> </>
+                                                    : 'BAD TYPE'}
+                                            &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
+                                        </div></>
+                            </ListItemText>
                       <ListItemSecondaryAction>
-                        { activeMarker?.item && activeMarker.item.t_id === row.t_id ? 
+                        { activeMarker?.item && activeMarker.item.id === row.id ? 
                             <React.Fragment>
-                              <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
+                              <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.task_id)}>
                               <EditIcon />
                               </IconButton>
                               
-                              {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromSelected(event, activeMarker.t_id)}>
+                              {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveFromSelected(event, activeMarker.item.id)}>
                                 <DeleteIcon />
                               </IconButton>  */}
                              
@@ -245,7 +258,7 @@ const MapSiderbarMarkedTasks = (props) =>{
     );
 
 }
-export default MapSiderbarMarkedTasks;
+export default MapSiderbarCrewJobs;
 
 
 const useStyles = makeStyles(theme => ({
@@ -258,13 +271,27 @@ const useStyles = makeStyles(theme => ({
       color: '#fcfcfc'
   },
   selectedRow:{
-    backgroundColor: '#abb7c9 !important',
-    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-  },
-  nonSelectedRow:{
-    backgroundColor: '#ffffff !important',
-    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
-  },
+        border: '1px solid #fbff08',
+        backgroundColor: '#bff6ff !important',
+        '&:hover':{
+            border: '1px solid #fbff08',
+        },
+        boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+    },
+    nonSelectedRow:{
+        border: '1px solid #91979c',
+        backgroundColor: '#fff !important',
+        '&:hover':{
+            border: '1px solid #ececec',
+        },
+        boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.46)'
+    },
+    datePassedRow:{
+        backgroundColor: '#bbb !important',
+    },
+    datePassedSelectedRow:{
+        backgroundColor: '#b6d1d6 !important',
+    },
   MarkerInfo:{
     display: 'block',
     fontSize: '12px',
@@ -281,4 +308,21 @@ const useStyles = makeStyles(theme => ({
       fontWeight: '400',
       color: '#666464',
   },
+    task_name_div:{
+        '& span':{
+            fontWeight: '600',
+            color: '#1f2f52',
+        },
+    },
+    job_list_task_info:{
+        '& span':{
+            fontWeight: '500',
+        }
+    },
+    installSpan:{
+      color: '#e25e00',
+    },
+    drillSpan:{
+        color: '#216fac',
+    }
 }));

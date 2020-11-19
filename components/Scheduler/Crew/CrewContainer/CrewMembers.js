@@ -363,8 +363,8 @@ const CrewMembers = (props) => {
                                     <ListItemText id={labelId}>
                                             <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
                                             <div className={classes.job_list_task_info}> 
-                                                    {row.job_type == 'install' ? <span>INSTALL DATE: {row.install_date ? row.install_date : 'Not Assigned'}</span>
-                                                     : row.job_type == 'drill' ? <span>DRILL DATE: {row.drill_date ? row.install_date : 'Not Assigned'}</span> : 'BAD TYPE'}
+                                                    {row.job_type == 'install' ? <span>INSTALL DATE: {row.sch_install_date ? row.sch_install_date : 'Not Assigned'}</span>
+                                                     : row.job_type == 'drill' ? <span>DRILL DATE: {row.drill_date ? row.drill_date : 'Not Assigned'}</span> : 'BAD TYPE'}
                                                     
                                               </div></>
                                     </ListItemText>

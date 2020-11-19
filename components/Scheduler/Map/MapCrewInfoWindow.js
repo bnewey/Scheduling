@@ -11,23 +11,38 @@ const {
     InfoWindow
   } = require("react-google-maps");
 
+import Tasks from '../../../js/Tasks';
 import Util from '../../../js/Util';
+import cogoToast from 'cogo-toast';
 
 const days=["Sunday",'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-const MapMarkerInfoWindow = (props)=>{
+const MapCrewInfoWindow = (props)=>{
 
     //PROPS
     const {taskMarkers, activeMarker, setActiveMarker, infoWeather, setInfoWeather, showingInfoWindow, setShowingInfoWindow,markerToRemap, setMarkerToRemap,
         multipleMarkersOneLocation, setMultipleMarkersOneLocation} = props;
     //STATE
-
+    const [jobTask, setJobTask] = useState(null);
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
     useEffect( () =>{ //useEffect for inputText
         setInfoWeather(null);
+
+        if(activeMarker){
+            Tasks.getTask(activeMarker.item?.task_id)
+            .then((data)=>{
+                if(data){
+                    setJobTask(data[0]);
+                }
+            })
+            .catch((error)=>{
+                console.error("Failed to get task for job", error);
+                cogoToast.error("Failed to get task for job");
+            })
+        }
     },[activeMarker]);
 
 
@@ -75,7 +90,12 @@ const MapMarkerInfoWindow = (props)=>{
     }
 
     const handleSetMarkerToRemap = (event)=>{
-        setMarkerToRemap(activeMarker);
+        if(!jobTask || !activeMarker){
+            cogoToast.error("Error remapping");
+            console.error("Failed to set remap marker; no jobtask")
+            return;
+        }
+        setMarkerToRemap({type: activeMarker.type , item: jobTask});
 
         //Set cursor to crosshair, maybe focus the map
     }
@@ -83,30 +103,6 @@ const MapMarkerInfoWindow = (props)=>{
         setMarkerToRemap(null);
     }
 
-    const handleNextMultiMarker =(event)=>{
-        let index = multipleMarkersOneLocation.indexOf(activeMarker.item.t_id.toString());
-        if(index >= multipleMarkersOneLocation.length-1){
-            index =0;
-        }else{
-            index++;
-        }
-        let newActiveId = multipleMarkersOneLocation[index];
-        let newActiveMarker = taskMarkers.filter((marker, i)=> marker.t_id == newActiveId)[0]; 
-
-        setActiveMarker({type: 'task', item: newActiveMarker});
-    }
-
-    const handlePrevMultiMarker =(event)=>{
-        let index = multipleMarkersOneLocation.indexOf(activeMarker.item.t_id.toString());
-        if(index <= 0){
-            index = multipleMarkersOneLocation.length-1;
-        }else{
-            index--;
-        }
-        let newActiveId = multipleMarkersOneLocation[index];
-        let newActiveMarker = taskMarkers.filter((marker, i)=> marker.t_id == newActiveId)[0]; 
-        setActiveMarker({type: "task", item: newActiveMarker});
-    }
 
     return (
         <InfoWindowEx
@@ -120,33 +116,24 @@ const MapMarkerInfoWindow = (props)=>{
         <div >
             {activeMarker?.item ? 
                 <>
-                {multipleMarkersOneLocation && 
-                    <div className={classes.multipleMarkersDiv}>
-                        <div className={classes.multiMarkerLabelDiv}><span className={classes.multipleMarkersSpan}>Multiple Markers!</span></div>
-                        <Button onClick={event=>handlePrevMultiMarker(event)}
-                                className={classes.multiMarkerButton}>{"Prev"}</Button>
-                        <Button onClick={event=>handleNextMultiMarker(event)}
-                                className={classes.multiMarkerButton}>{"Next"}</Button>
-                    </div>
-                }
                 <div className={classes.MarkerInfo}>{activeMarker.item.t_name}</div>
-                <div className={classes.MarkerSubInfo}>  ID:&nbsp;{activeMarker.item.t_id}&nbsp;&nbsp;Priority:&nbsp;{activeMarker.item.priority_order} </div>
-                <div className={classes.avatarContainer}>
-                    {!(activeMarker.item.drilling == "" || activeMarker.item.drilling == null )
+                <div className={classes.MarkerSubInfo}>  ID:&nbsp;{activeMarker.item.task_id}&nbsp;&nbsp;Priority:&nbsp;{activeMarker.item.ordernum} </div>
+                {jobTask && <div className={classes.avatarContainer}>
+                    {!(jobTask.drilling == "" || jobTask.drilling == null )
                         ? 
-                        <Tooltip title={"Drilling"}><div className={classes.avatarItem}> <Avatar src='/static/drilling-icon.png' alt="Drilling" className={classes.avatar} style={{left: '25%'}}/>{activeMarker.item.drilling} </div> 
+                        <Tooltip title={"Drilling"}><div className={classes.avatarItem}> <Avatar src='/static/drilling-icon.png' alt="Drilling" className={classes.avatar} style={{left: '25%'}}/>{jobTask.drilling} </div> 
                         </Tooltip>: <></>}
-                    {!(activeMarker.item.sign == "" || activeMarker.item.sign == null )
+                    {!(jobTask.sign == "" || jobTask.sign == null )
                         ? 
                         <Tooltip title={"Sign Status"}>
-                        <div className={classes.avatarItem}><Avatar src='/static/sign-build-icon.png' alt="Sign Status" className={classes.avatar} style={{left: '25%'}}/> {activeMarker.item.sign} </div>
+                        <div className={classes.avatarItem}><Avatar src='/static/sign-build-icon.png' alt="Sign Status" className={classes.avatar} style={{left: '25%'}}/> {jobTask.sign} </div>
                         </Tooltip>: <></>}
-                    {!(activeMarker.item.artwork == "" || activeMarker.item.artwork == null )
+                    {!(jobTask.artwork == "" || jobTask.artwork == null )
                         ? 
                         <Tooltip title={"Artwork"}>
-                        <div className={classes.avatarItem}><Avatar src='/static/art-icon.png' alt="Artwork" className={classes.avatar} style={{left: '25%'}}/> {activeMarker.item.artwork} </div> 
+                        <div className={classes.avatarItem}><Avatar src='/static/art-icon.png' alt="Artwork" className={classes.avatar} style={{left: '25%'}}/> {jobTask.artwork} </div> 
                         </Tooltip>: <></>}
-                 </div>
+                 </div>}
             </>  : <p>No Data</p>}
         <button type="button" onClick={event => getWeather(event, activeMarker.item.lat, activeMarker.item.lng)} className={classes.infoButton}>
             Weather {infoWeather ? "X" : ""}
@@ -215,7 +202,7 @@ const MapMarkerInfoWindow = (props)=>{
     );
 }
 
-export default MapMarkerInfoWindow;
+export default MapCrewInfoWindow;
 
 
 class InfoWindowEx extends React.Component {

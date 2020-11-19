@@ -171,6 +171,25 @@ async function removeTaskFromList(task_id, taskList_id){
 
 }
 
+async function moveTaskToList(task_id, taskList_id){
+    const route = '/scheduling/taskLists/moveTaskToList';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id: task_id, tl_id: taskList_id})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+
+}
+
 async function removeMultipleFromList(task_ids, taskList_id){
     const route = '/scheduling/taskLists/removeMultipleFromList';
     try{
@@ -240,6 +259,7 @@ module.exports = {
     updateTaskList: updateTaskList,
     addTaskToList: addTaskToList,
     removeTaskFromList: removeTaskFromList,
+    moveTaskToList,
     removeMultipleFromList:removeMultipleFromList,
     reorderTaskList: reorderTaskList,
     setPriorityTaskList: setPriorityTaskList,

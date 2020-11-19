@@ -24,6 +24,7 @@ import MapMarkerInfoWindow from './MapMarkerInfoWindow';
 import MapVehicleInfoWindow from './MapVehicleInfoWindow';
 
 import Tasks from '../../../js/Tasks';
+import Crew from '../../../js/Crew';
 import TaskLists from '../../../js/TaskLists';
 import Util from '../../../js/Util';
 import Vehicles from '../../../js/Vehicles';
@@ -34,6 +35,7 @@ import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import {createFilter} from '../../../js/Filter';
 import {createSorter} from '../../../js/Sort';
+import { use } from 'passport';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -53,11 +55,12 @@ const MapContainer = (props) => {
 
     //const {} = props;
 
-    const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap,
+    const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
           filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved} = useContext(TaskContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
-    const [activeVehicle, setActiveVehicle] = useState(null);
+    const markerTypes = ["task", "vehicle", "crew"];
+
     const [bounds, setBounds] = useState(null);
     
     const [mapRows, setMapRows] = useState(null); 
@@ -68,10 +71,12 @@ const MapContainer = (props) => {
     
     const [infoWeather, setInfoWeather] = useState(null);
 
+    const [crewJobs, setCrewJobs] = useState(null);
+
     const [vehicleRows, setVehicleRows] = useState(null);
     const [vehicleNeedsRefresh, setVehicleNeedsRefresh] = useState(true);
     const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
-    const [visibleItems, setVisibleItems] = React.useState(() => ['tasks', 'vehicles']);
+    const [visibleItems, setVisibleItems] = React.useState(() => ['tasks' ,'vehicles']);
 
     const [mapHeight,setMapHeight] = useState('400px');
 
@@ -81,7 +86,7 @@ const MapContainer = (props) => {
     const [radarSpeed, setRadarSpeed] = React.useState(400);
     const [visualTimestamp, setVisualTimestamp] = useState(null);
 
-
+    //useEffect for vehicleRows
     useEffect(()=>{
       if(vehicleNeedsRefresh == true){
         var locations = [];
@@ -123,9 +128,9 @@ const MapContainer = (props) => {
           console.log(locations);
 
           //Move our info window by resetting activeVehicle with update info
-          if(activeVehicle){
-            var refreshedActive = locations.filter((v, i)=> v.vin == activeVehicle.vin)[0];
-            setActiveVehicle(refreshedActive);
+          if(activeMarker?.type === "vehicle" && activeMarker?.item){
+            var refreshedActive = locations.filter((v, i)=> v.vin == activeMarker.item.vin)[0];
+            setActiveMarker({type: 'vehicle', item: refreshedActive});
           }
         })
         .catch((error)=>{
@@ -144,8 +149,8 @@ const MapContainer = (props) => {
       return () => clearTimeout(timeoutId);
     }, [vehicleRows])
 
-
-    useEffect( () =>{ //useEffect for inputText
+    //useEffect for mapRows
+    useEffect( () =>{ 
       if(mapRows == null && filterInOrOut != null && filterAndOr != null){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
             TaskLists.getTaskList(taskListToMap.id)
@@ -203,7 +208,6 @@ const MapContainer = (props) => {
                 }
                 
                 setTaskListTasksSaved(data);
-                
                 //No filters 
                 if(filters && !filters.length){
                   //no change to tmpData
@@ -245,7 +249,6 @@ const MapContainer = (props) => {
         setMarkedRows(tmp);
       }
 
-      
       return () => { //clean up
       }
     },[mapRows,filterInOrOut, filterAndOr,taskLists, taskListToMap]);
@@ -263,6 +266,7 @@ const MapContainer = (props) => {
       }
     },[sorters]);
 
+    //Use effect for tasks with no locations (nomarkerrows)
     useEffect(()=>{
         if(noMarkerRows == null && mapRows){
            setNoMarkerRows(mapRows.filter((row, index) => !row.geocoded));
@@ -299,9 +303,7 @@ const MapContainer = (props) => {
                 }
                 if(i == noMarkerRows.length){
                   cogoToast.info('Unmapped Markers have been added to map', {hideAfter: 4});
-                }
-
-                
+                }     
               })
               .catch((error)=> {
                 console.error(error);
@@ -318,23 +320,61 @@ const MapContainer = (props) => {
           
         }
     }, [noMarkerRows, mapRows])
-    
 
-    const updateActiveMarker = (id) => (props, marker, e) => {
-        var task = mapRows.filter((row, i) => row.t_id === id)[0];
-        setActiveMarker(task);
-        setShowingInfoWindow(true);
-        setActiveVehicle(null);
+    useEffect(()=>{
+      if(crewJobs == null && crewToMap){
+        Crew.getCrewJobsByCrew(crewToMap.id)
+            .then((data)=>{
+                if(data){
+                    console.log("Data",data);
+                    setCrewJobs( data);
+                }
+            })
+            .catch((error)=>{
+                console.error("Error getting crewJobs", error);
+                cogoToast.error("Failed to get crew jobs");
+            })
+      }
+    },[crewJobs, crewToMap])
+    
+    const updateActiveMarker = (id, type) => (props, marker, e) =>{
+      var item;
+      if(type === "task"){
+        item = mapRows.filter((row, i) => row.t_id === id)[0];
+      }
+      if(type === "vehicle"){
+        item = vehicleRows.filter((row, i) => row.vin === id)[0];
+      }
+      if(type === "crew"){
+        item = crewJobs.filter((row, i) => row.id === id)[0];
+      }
+
+      if(!item){
+        console.error("Bad marker type or item not found");
+        return
+      }else{
         setMultipleMarkersOneLocation(null);
+        setActiveMarker({type, item});
+        setShowingInfoWindow(true);
+      }
+
+
     }
 
-    const updateActiveVehicle = id => (props, marker, e) => {
-      var vehicle = vehicleRows.filter((row, i) => row.vin === id)[0];
-      setActiveVehicle(vehicle);
-      setShowingInfoWindow(true);
-      setActiveMarker(null)
-  }
+    // const updateActiveMarker = (id) => (props, marker, e) => {
+    //     var task = mapRows.filter((row, i) => row.t_id === id)[0];
+    //     setActiveMarker(task);
+    //     setShowingInfoWindow(true);
+    //     setActiveVehicle(null);
+        
+    // }
 
+    // const updateActiveVehicle = id => (props, marker, e) => {
+    //   var vehicle = vehicleRows.filter((row, i) => row.vin === id)[0];
+    //   setActiveVehicle(vehicle);
+    //   setShowingInfoWindow(true);
+    //   setActiveMarker(null)
+    // }
 
     ////
     const handleFindVehicleIcon = (vehicle)=>{
@@ -343,7 +383,7 @@ const MapContainer = (props) => {
         return
       }
       let selected = false;
-      if(activeVehicle && vehicle.vin === activeVehicle.vin){
+      if(activeMarker?.type === "vehicle" && vehicle.vin === activeMarker?.item.vin){
         selected = true;
       }
       let url = "";
@@ -367,6 +407,34 @@ const MapContainer = (props) => {
       return url;
     }
 
+    const handleFindCrewIcon = (job)=>{
+      if(!job){
+        console.error("Bad vehilce for handleFindVehcileIcon");
+        return
+      }
+      let selected = false;
+      if(activeMarker?.type === "crew" && job.id === activeMarker?.item.id){
+        selected = true;
+      }
+      let url = "";
+
+      if(!job.job_type){
+        console.error("No job type ")
+        return;
+      }
+
+      switch (job.job_type){
+        case 'drill':
+          url =   `static/crew_icons/drill_marker.png` ;
+          
+          break;
+        case 'install':
+          url =   `static/crew_icons/install_marker.png` ;
+          break;
+      }
+      return url;
+    }
+
     return (
       <div>
         <Grid container spacing={1}>
@@ -377,11 +445,13 @@ const MapContainer = (props) => {
           <Grid container spacing={3} className={classes.mainContainer}>
             
             <Grid item xs={12} md={8}>
-                <CustomMap taskMarkers={markedRows} vehicleMarkers={vehicleRows} visibleItems={visibleItems} 
-                      updateActiveMarker={updateActiveMarker} updateActiveVehicle={updateActiveVehicle} handleFindVehicleIcon={handleFindVehicleIcon}
+                <CustomMap taskMarkers={markedRows} setTaskMarkers={setMarkedRows} vehicleMarkers={vehicleRows}
+                     crewMarkers={crewJobs} setCrewMarkers={setCrewJobs} visibleItems={visibleItems} 
+                      updateActiveMarker={updateActiveMarker} handleFindVehicleIcon={handleFindVehicleIcon}
+                      handleFindCrewIcon={handleFindCrewIcon}
                       resetBounds={resetBounds}
                       activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
-                      activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle}
+                      
                       setInfoWeather={setInfoWeather} infoWeather={infoWeather}
                       showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}
                       bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
@@ -397,7 +467,6 @@ const MapContainer = (props) => {
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
                           markedRows={markedRows} setMarkedRows={setMarkedRows}
                           vehicleRows={vehicleRows} setVehicleRows={setVehicleRows}
-                          activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle}
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                           setShowingInfoWindow={setShowingInfoWindow}
                           setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
@@ -411,7 +480,9 @@ const MapContainer = (props) => {
                           radarSpeed={radarSpeed} setRadarSpeed={setRadarSpeed}
                           timestamps={timestamps} setTimestamps={setTimestamps}
                           multipleMarkersOneLocation={multipleMarkersOneLocation} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}
-                          sorters={sorters} setSorters={setSorters}/>
+                          sorters={sorters} setSorters={setSorters}
+                          crewJobs={crewJobs} setCrewJobs={setCrewJobs}
+                          crewToMap={crewToMap} setCrewToMap={setCrewToMap}/>
             </Grid>
           </Grid>
         </div>

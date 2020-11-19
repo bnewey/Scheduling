@@ -19,7 +19,7 @@ const days=["Sunday",'Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const MapVehicleInfoWindow = (props)=>{
 
     //PROPS
-    const {activeVehicle, setActiveVehicle, showingInfoWindow, setShowingInfoWindow} = props;
+    const {activeMarker, setActiveMarker, showingInfoWindow, setShowingInfoWindow} = props;
     //STATE
 
     //CSS
@@ -27,7 +27,7 @@ const MapVehicleInfoWindow = (props)=>{
 
     //FUNCTIONS
     useEffect( () =>{ //useEffect for inputText
-    },[activeVehicle]);
+    },[activeMarker]);
 
     const handleInfoWindowClose = () =>{
         setShowingInfoWindow(false);
@@ -36,19 +36,19 @@ const MapVehicleInfoWindow = (props)=>{
 
     return (
         <InfoWindowEx
-        position = {activeVehicle ? { lat: activeVehicle.latitude , lng: activeVehicle.longitude} : {lat: 0, lng:0}}
+        position = {activeMarker?.item ? { lat: activeMarker.item.latitude , lng: activeMarker.item.longitude} : {lat: 0, lng:0}}
         open = { showingInfoWindow }
         style = {classes.infoWindow}
         onCloseClick={handleInfoWindowClose}
         defaultOptions={{pixelOffset: new google.maps.Size(0,-25) }}
         {...props}
         >
-            {activeVehicle ? 
-                <><div className={classes.MarkerInfo}>{activeVehicle.name}&nbsp;{activeVehicle.active ? 'Active': "Inactive"}
+            {activeMarker?.item ? 
+                <><div className={classes.MarkerInfo}>{activeMarker.item.name}&nbsp;{activeMarker.item.active ? 'Active': "Inactive"}
                         </div>
                 <div className={classes.MarkerSubInfo}>
-                {activeVehicle.active ? <>
-                              Direction:&nbsp;{Util.getDirectionFromDegree(activeVehicle.direction)} </> : <></>}
+                {activeMarker.item.active ? <>
+                              Direction:&nbsp;{Util.getDirectionFromDegree(activeMarker.item.direction)} </> : <></>}
                   </div>
                </> :<></> }
         </InfoWindowEx>

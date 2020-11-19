@@ -42,14 +42,15 @@ function arraysEqual(_arr1, _arr2) {
 const CrewCrews = (props) => {
 
     const {} = props;
-    const {setModalTaskId, setModalOpen, setTabValue, filters, setFilters, setFilterInOrOut, setFilterAndOr} = useContext(TaskContext);
+    const {setModalTaskId, setModalOpen, setTabValue, filters, setFilters, setFilterInOrOut, setFilterAndOr, crewToMap, setCrewToMap} = useContext(TaskContext);
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
-        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState} = useContext(CrewContext);
+        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState,
+        crewJobs, setCrewJobs, } = useContext(CrewContext);
     const classes = useStyles();
 
     const [selectedCrew, setSelectedCrew] = useState(null);
-    const [crewJobs, setCrewJobs] = useState(null);
+    const [localCrewJobs, setLocalCrewJobs] = useState(null);
     const [selectedCrewMembers, setSelectedCrewMembers] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
     //Popover
@@ -58,16 +59,16 @@ const CrewCrews = (props) => {
     const [swapJobId, setSwapJobId] = useState(null); 
     
     useEffect(()=>{
-        if(selectedCrew && crewJobs == null){
+        if(selectedCrew && localCrewJobs == null){
             Crew.getCrewJobsByCrew(selectedCrew.id)
             .then((data)=>{
                 if(data){
                     console.log("Data",data);
-                    setCrewJobs( data);
+                    setLocalCrewJobs( data);
                 }
             })
             .catch((error)=>{
-                console.error("Error getting crewJobs", error);
+                console.error("Error getting localCrewJobs", error);
                 cogoToast.error("Failed to get crew jobs");
             })
         }
@@ -144,7 +145,7 @@ const CrewCrews = (props) => {
         const deleteMember = () => {
             Crew.deleteCrewJob(id)
                 .then( (data) => {
-                        setCrewJobs(null);
+                        setLocalCrewJobs(null);
                         cogoToast.success(`Removed job ${id} from crew jobs`, {hideAfter: 4});
                     })
                 .catch( error => {
@@ -186,7 +187,7 @@ const CrewCrews = (props) => {
         console.log(swapJobId);
         Crew.updateCrewJob(crew.id, swapJobId)
         .then((data)=>{
-            setCrewJobs(null);
+            setLocalCrewJobs(null);
             setShouldResetCrewState(true);
             setSelectedCrew({...selectedCrew});
         })
@@ -249,7 +250,7 @@ const CrewCrews = (props) => {
         }
     
         const items = reorder(
-        crewJobs,
+        localCrewJobs,
         result.source.index,
         result.destination.index
         );
@@ -260,7 +261,7 @@ const CrewCrews = (props) => {
                 throw new Error("Could not reorder crew" + selectedCrew.id);
             }
             cogoToast.success(`Reordered Crew Jobs`, {hideAfter: 4});
-            setCrewJobs(null);
+            setLocalCrewJobs(null);
             setSelectedCrew({...selectedCrew});
         })
         .catch( error => {
@@ -276,6 +277,24 @@ const CrewCrews = (props) => {
             cogoToast.error("Failed to Map crew jobs");
             console.log("Bad crew in handleMapCrewJobs");
             return;
+        }      
+        if(!selectedCrew){
+            console.error("No selected crew in handleMapCrewJobs")
+            return;
+        }
+
+        //2 = map
+        setTabValue(2);
+      
+        //setCrewJobs(localCrewJobs);
+        setCrewToMap(selectedCrew);
+    }
+
+    const handleFilterCrewJobs = (event, crew, jobs) => {
+        if(!crew){
+            cogoToast.error("Failed to Map crew jobs");
+            console.log("Bad crew in handleFilterCrewJobs");
+            return;
         }
         if(!filters){
             console.error("Filters is null");
@@ -290,14 +309,13 @@ const CrewCrews = (props) => {
             if(v.job_type == "install"){
                 return "install_crew"
             }
-            console.log("Bad properttties man");
             return "";
         }));
         console.log("Properties", properties);
         console.log("crew", crew);
 
-        //2 = map
-        setTabValue(2);
+        //1 = tasklist
+        setTabValue(1);
         let newFilters = [];
 
         properties.forEach((item,i)=>{
@@ -310,6 +328,7 @@ const CrewCrews = (props) => {
         setFilters(newFilters);
         setFilterInOrOut("in");
         setFilterAndOr("or");
+
     }
 
 
@@ -317,7 +336,7 @@ const CrewCrews = (props) => {
         <>
         <Grid container className={classes.crew_grid}>
             <Grid item xs={6} >
-                <CrewCrewsCrews selectedCrew={selectedCrew} setSelectedCrew={setSelectedCrew} crewJobs={crewJobs} setCrewJobs={setCrewJobs}
+                <CrewCrewsCrews selectedCrew={selectedCrew} setSelectedCrew={setSelectedCrew} localCrewJobs={localCrewJobs} setLocalCrewJobs={setLocalCrewJobs}
                      selectedCrewMembers={selectedCrewMembers} setSelectedCrewMembers={setSelectedCrewMembers} 
                      selectedJob={selectedJob} setSelectedJob={setSelectedJob}/>
                 
@@ -337,12 +356,12 @@ const CrewCrews = (props) => {
                                 {...provided.dragHandleProps}
                                 ref={provided.innerRef}
                             >
-                                <ListItem key={crewJobs[rubric.source.index].id} 
+                                <ListItem key={localCrewJobs[rubric.source.index].id} 
                                                 role={undefined} dense button 
                                                 className={classes.nonSelectedRow}
                                                 >
                                     <ListItemText>
-                                            {crewJobs[rubric.source.index].id} | {crewJobs[rubric.source.index].t_name} 
+                                            {localCrewJobs[rubric.source.index].id} | {localCrewJobs[rubric.source.index].t_name} 
                                     </ListItemText>
                                     </ListItem>
                             </div>
@@ -353,12 +372,14 @@ const CrewCrews = (props) => {
                                 ref={provided.innerRef}
                                 style={getListStyle(snapshot.isDraggingOver)}
                             >
-                            {crewJobs && crewJobs.map((row, index) => {
+                            {localCrewJobs && localCrewJobs.map((row, index) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
                                 return (
                                 <Draggable key={row.id + index+ 'draggable'} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
                                 {(provided, snapshot) => { 
-                                    const date = row.install_date || row.drill_date || null;
+                                    console.log("row", row);
+                                    const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
+                                    console.log("date",date);
                                     const datePassed = date && (new Date(date) < new Date());
                                     const selected = selectedJob?.id === row.id;
                                     return (
@@ -384,10 +405,10 @@ const CrewCrews = (props) => {
                                             <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
                                             <div className={classes.job_list_task_info}> 
                                                     {row.job_type == 'install' ? <><span className={classes.installSpan}>
-                                                            INSTALL DATE:</span> <span> {row.install_date ? Util.convertISODateToMySqlDate(row.install_date) : 'Not Assigned'}
+                                                            INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
                                                         </span></>
                                                      : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
-                                                         DRILL DATE: </span> <span>{row.drill_date ? Util.convertISODateToMySqlDate(row.drill_date) : 'Not Assigned'}</span> </>
+                                                         DRILL DATE: </span> <span>{date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}</span> </>
                                                          : 'BAD TYPE'}
                                                     &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
                                               </div></>
@@ -419,8 +440,8 @@ const CrewCrews = (props) => {
                         </Droppable>
                     </DragDropContext>
                         </List> 
-                        <Button className={classes.openButton} onClick={event => handleMapCrewJobs(event, selectedCrew.id, crewJobs)}>Map Crew Jobs</Button>
-                        
+                        <Button className={classes.openButton} onClick={event => handleMapCrewJobs(event, selectedCrew.id, localCrewJobs)}>Map Crew Jobs</Button>
+                        <Button className={classes.openButton} onClick={event => handleFilterCrewJobs(event, selectedCrew.id, localCrewJobs)}>Filter Crew in TaskList</Button>
                         </> : <>Select a crew member to view jobs</> }
             <Popover
                 id={jobPopoverId}

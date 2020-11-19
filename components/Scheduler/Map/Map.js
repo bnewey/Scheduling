@@ -16,6 +16,7 @@ const { MarkerWithLabel } = require("react-google-maps/lib/components/addons/Mar
 import cogoToast from 'cogo-toast';
 import MapMarkerInfoWindow from './MapMarkerInfoWindow';
 import MapVehicleInfoWindow from './MapVehicleInfoWindow';
+import MapCrewInfoWindow from './MapCrewInfoWindow';
 
 import Tasks from '../../../js/Tasks';
 import Util from '../../../js/Util';
@@ -48,24 +49,36 @@ const CustomMap = compose(
         //useEffect below sets marker_ids[0] to activeMarker
       }
     },
-    onMapClick: ()=> (event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, activeMarker, setActiveMarker)=> {
+    onMapClick: ()=> (event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, 
+        activeMarker, setActiveMarker, setCrewMarkers, setTaskMarkers )=> {
       if(showingInfoWindow && event.placeId){
         setShowingInfoWindow(false);
       }
       if(markerToRemap){
         let coords  = {lat: event.latLng.lat(),lng: event.latLng.lng()};
         const save = () =>{
-            Tasks.saveCoordinates(markerToRemap.address_id, coords)
+            console.log("markerToRemap", markerToRemap)
+            Tasks.saveCoordinates(markerToRemap.item?.address_id, coords)
             .then((data)=>{
               cogoToast.success("Remapped Marker")
               setMarkerToRemap(null);
               setMapRows(null);
+
               //Refresh activeMarker with new coords
-              if(activeMarker){
-                let refreshedMarker = {...activeMarker};
+              if(activeMarker?.item){
+                let refreshedMarker = {...activeMarker.item};
                 refreshedMarker['lat'] = coords.lat;
                 refreshedMarker['lng'] = coords.lng;
-                setActiveMarker(refreshedMarker);
+                console.log("Active marker", activeMarker);
+                console.log("Refreshed marker", refreshedMarker);
+                setActiveMarker({type: activeMarker.type, item: refreshedMarker});
+              }
+              if(activeMarker?.type == "task"){
+                  console.log("resetting task markers");
+                  setTaskMarkers(null);
+              }
+              if(activeMarker?.type == "crew"){
+                  setCrewMarkers(null);
               }
             })
             .catch((error)=>{
@@ -101,7 +114,7 @@ const CustomMap = compose(
 )(props =>{
 
     const googleMap = React.useRef(null);
-    const {taskMarkers, vehicleMarkers, visibleItems, resetBounds, activeMarker, setActiveMarker,activeVehicle, setActiveVehicle,
+    const {taskMarkers, setTaskMarkers, vehicleMarkers, crewMarkers, setCrewMarkers,visibleItems, resetBounds, activeMarker, setActiveMarker,
         setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded, setMapRows,
         mapRows, vehicleRows, radarControl, setRadarControl, visualTimestamp, setVisualTimestamp, radarOpacity, radarSpeed, setTimestamps, timestamps,
         multipleMarkersOneLocation,setMultipleMarkersOneLocation} = props;
@@ -141,9 +154,8 @@ const CustomMap = compose(
         if(multipleMarkersOneLocation && multipleMarkersOneLocation.length){
             let newActiveMarker = taskMarkers.filter((marker,i)=> marker.t_id == multipleMarkersOneLocation[0])[0];
             console.log("NewactiveMarker", newActiveMarker);
-            setActiveMarker(newActiveMarker);
+            setActiveMarker({ type: 'task', item: newActiveMarker});
             setShowingInfoWindow(true);
-            setActiveVehicle(null);
         }
     }, multipleMarkersOneLocation)
 
@@ -296,7 +308,8 @@ const CustomMap = compose(
         defaultZoom={7} 
         ref={googleMap}
         defaultCenter={{ lat: 34.731, lng: -94.3749 }}
-        onClick={event => props.onMapClick(event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, activeMarker, setActiveMarker)}
+        onClick={event => props.onMapClick(event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, 
+            activeMarker, setActiveMarker, setCrewMarkers, setTaskMarkers)}
     >
         <MarkerClusterer
         onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap)}
@@ -312,7 +325,7 @@ const CustomMap = compose(
             key={marker.t_id}
             title={(marker.t_id).toString()} 
             position={{ lat: marker.lat, lng: marker.lng}}
-            onClick = { props.updateActiveMarker(marker.t_id) }
+            onClick = { props.updateActiveMarker(marker.t_id, "task") }
              labelAnchor={new google.maps.Point( `#${index}`.toString().length * 5 , 40)}
              labelStyle={{backgroundColor: "rgba(202, 69, 58, 0.8)", fontSize: "13px", padding: "2px", borderRadius: '5px', color: '#fff',}}
             ><div>#{index+1}</div> 
@@ -330,7 +343,7 @@ const CustomMap = compose(
         {vehicleMarkers && visibleItems.indexOf("vehicles") != -1 && vehicleMarkers.map((vehicle,i) => (
             <MarkerWithLabel
             position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
-            onClick = { props.updateActiveVehicle(vehicle.vin) }
+            onClick = { props.updateActiveMarker(vehicle.vin, "vehicle") }
             className={'marker'+i}
             id={vehicle.vin}
             key={vehicle.vin}
@@ -345,12 +358,34 @@ const CustomMap = compose(
             ><div>{vehicle.name}</div></MarkerWithLabel>
         ))}
         </MarkerClusterer>
-        {showingInfoWindow && activeMarker ? <MapMarkerInfoWindow {...props} onContentChanged={props.infoWindowContentChanged} 
+        {crewMarkers && visibleItems.indexOf("crewJobs") != -1 && crewMarkers.map((crew,i) => { 
+            const label = crew?.t_name?.length <= 15 ?  `#${i+1} ${crew.t_name}` : `#${i+1} ${crew.t_name.slice(0,15)}..` 
+            return(
+            <MarkerWithLabel
+            position={{ lat: crew.lat, lng: crew.lng}}
+            onClick = { props.updateActiveMarker(crew.id, "crew") }
+            className={'marker'+i}
+            id={crew.id}
+            key={crew.id}
+            title={crew.t_name} 
+            icon={{
+                url: props.handleFindCrewIcon(crew),
+                scaledSize: new google.maps.Size(30 ,30)
+            }}
+            labelAnchor={new google.maps.Point( label.toString().length / 2 * 5 , 0)}
+            labelStyle={{backgroundColor: "rgba(177, 177, 177, 0.7)", fontSize: "10px", padding: "2px"}}
+            ><div>{label}</div></MarkerWithLabel>
+        ) })}
+        {showingInfoWindow && activeMarker?.type ==="task" ? <MapMarkerInfoWindow {...props} onContentChanged={props.infoWindowContentChanged} 
                             activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
                             setInfoWeather={setInfoWeather} infoWeather={infoWeather}
                             multipleMarkersOneLocation={multipleMarkersOneLocation} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}
                             showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} markerToRemap={markerToRemap} setMarkerToRemap={setMarkerToRemap}/> : <></>}
-        {showingInfoWindow && activeVehicle && vehicleMarkers ? <MapVehicleInfoWindow activeVehicle={activeVehicle} setActiveVehicle={setActiveVehicle} 
+        {showingInfoWindow && activeMarker?.type ==="crew" ? <MapCrewInfoWindow {...props} onContentChanged={props.infoWindowContentChanged} 
+                            activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                            setInfoWeather={setInfoWeather} infoWeather={infoWeather}
+                            showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} markerToRemap={markerToRemap} setMarkerToRemap={setMarkerToRemap}/> : <></>}
+        {showingInfoWindow && activeMarker?.type === "vehicle" && vehicleMarkers ? <MapVehicleInfoWindow activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                     showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>: <></>}
     </GoogleMap></>
   )}

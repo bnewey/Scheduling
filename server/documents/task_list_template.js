@@ -35,7 +35,7 @@ module.exports = (tl_data) => {
       `<td class="small">${task.city ? task.city : ""}</td><td class="small">${task.state ? task.state : ""}</td><td class="small">${task.type ? task.type : ""}</td><td class="medium">${task.description ? task.description : ""}</td>` +
       `<td class="small">${task.sign ? task.sign : ""}</td><td class="small">${task.artwork ? task.artwork : ""}</td><td class="small">${task.drilling ? task.drilling : ""}</td>` + 
       `<td class="small">${task.drill_date ? task.drill_date : ""}</td><td class="small">${task.drill_crew_leader ? task.drill_crew_leader : (task.drill_crew ? 'Crew '+task.drill_crew : "") }</td>` + 
-      `<td class="small">${task.install_date ? task.install_date : ""}</td><td class="small">${task.install_crew_leader ? task.install_crew_leader : (task.install_crew ? 'Crew '+task.install_crew : "")}</td></tr>`;
+      `<td class="small">${task.sch_install_date ? task.sch_install_date : ""}</td><td class="small">${task.install_crew_leader ? task.install_crew_leader : (task.install_crew ? 'Crew '+task.install_crew : "")}</td></tr>`;
     });
     
 return `

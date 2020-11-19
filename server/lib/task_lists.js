@@ -41,7 +41,7 @@ router.post('/getTaskList', async (req,res) => {
         ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, mad.member_name AS drill_crew_leader , '  +
         ' date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
-        ' date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
+        ' date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id ' +
         ' FROM task_list_items tli ' +
     
@@ -254,6 +254,31 @@ router.post('/removeTaskFromList', async (req,res) => {
     }
     catch(error){
         logger.error("TasksList (removeTaskFromList): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/moveTaskToList', async (req,res) => {
+    var taskList_id, task_id;
+    if(req.body){
+    task_id = req.body.id;
+    taskList_id = req.body.tl_id;
+    }
+    //we need to reorder priority_order in the list
+    const sql_select = ' select max(priority_order) AS max_priority from task_list_items where task_list_id = ? ' ; 
+    
+    const sql = ' UPDATE task_list_items ' +
+    ' SET task_list_id = ?, priority_order =?  WHERE task_id = ? LIMIT 1 ';
+
+    try{
+        const select_results = await database.query(sql_select, taskList_id);
+        const max_priority = select_results[0]["max_priority"] + 1;
+        const results = await database.query(sql, [taskList_id, max_priority, task_id]);
+        logger.info("Move Task: " + task_id +" to TaskList " + taskList_id);
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("TasksList (moveTaskToList): " + error);
         res.sendStatus(400);
     }
 });

@@ -64,7 +64,7 @@ const WOSidebarList = function(props) {
                                   clearable
                                   showTodayButton
                                   inputVariant="outlined"
-                                  variant="inline" 
+                                  variant="modal" 
                                   maxDate={new Date('01-01-2100')}
                                   minDate={new Date('01-01-1970')}
                                   className={classes.inputField}
@@ -79,7 +79,7 @@ const WOSidebarList = function(props) {
                                 clearable
                                 showTodayButton
                                 inputVariant="outlined"
-                                variant="inline" 
+                                variant="modal" 
                                 maxDate={new Date('01-01-2100')}
                                   minDate={new Date('01-01-1970')}
                                 className={classes.inputField}

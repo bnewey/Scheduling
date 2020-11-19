@@ -191,7 +191,7 @@ const TaskListMain = (props) => {
                 viewArray = [
                     {text: "Desired Date", field: "date_desired", width: '9%', style: 'boldListItemText', type: 'date'},
                     {text: "1st Game", field: "first_game", width: '9%', type: 'date'},
-                    {text: "install_date", field: "install_date", width: '9%', type: 'date'},
+                    {text: "install_date", field: "sch_install_date", width: '9%', type: 'date'},
                     {text: "drill_date", field: "drill_date", width: '9%', type: 'date'},
                     {text: "Name", field: "t_name", width: '48%', style: 'boldListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '16%', type: 'text'}
@@ -203,7 +203,7 @@ const TaskListMain = (props) => {
                     {text: "WO #", field: "table_id", width: '7%', type: 'number'},
                     {text: "Desired Date", field: "date_desired", width: '10%', style: 'boldListItemText', type: 'date'},
                     {text: "1st Game", field: "first_game", width: '10%', type: 'date'},
-                    {text: "install_date", field: "install_date", width: '10%', type: 'date'},
+                    {text: "install_date", field: "sch_install_date", width: '10%', type: 'date'},
                     {text: "Name", field: "t_name", width: '20%', style: 'boldListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '8%', type: 'text'},
                     {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
@@ -227,7 +227,7 @@ const TaskListMain = (props) => {
                     {text: "Drill", field: "drilling", width: '5%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text'},
                     {text: "d_date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
                     {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text'}, 
-                    {text: "i_date", field: "install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+                    {text: "i_date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
                     {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}
                     
                 ];

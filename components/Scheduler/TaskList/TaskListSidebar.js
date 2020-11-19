@@ -91,11 +91,11 @@ const TaskListSidebar = (props) => {
             return;
         }
 
-        var tmpArray = taskListTasks.sort(createSorter({property: 'install_date', 
+        var tmpArray = taskListTasks.sort(createSorter({property: 'sch_install_date', 
             direction: "ASC"}))
         
-        var tmpNoInstall = tmpArray.filter((v,i)=> v.install_date == null || v.install_date == "0000-00-00 00:00:00" || v.install_date == "1970-01-01 00:00:00")
-        var tmpInstall = tmpArray.filter((v,i)=> v.install_date != null || v.install_date != "0000-00-00 00:00:00" || v.install_date != "1970-01-01 00:00:00")
+        var tmpNoInstall = tmpArray.filter((v,i)=> v.sch_install_date == null || v.sch_install_date == "0000-00-00 00:00:00" || v.sch_install_date == "1970-01-01 00:00:00")
+        var tmpInstall = tmpArray.filter((v,i)=> v.sch_install_date != null || v.sch_install_date != "0000-00-00 00:00:00" || v.sch_install_date != "1970-01-01 00:00:00")
         var newTaskIds = [...tmpInstall, ...tmpNoInstall ].map((task,i)=> task.t_id);
         
         console.log(newTaskIds);
@@ -293,7 +293,7 @@ export default TaskListSidebar;
 
 const useStyles = makeStyles(theme => ({
     root: {
-        padding: '.62% .3% .3% .3%',
+        padding: '.3% .3% .3% .3%',
         margin: '0px 0px 5px 5px',
         background: '#e2e2e2',
         height: '100%',

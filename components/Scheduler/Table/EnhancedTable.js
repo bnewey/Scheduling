@@ -210,7 +210,7 @@ const TableFilter = dynamic(
     return (
       <div className={classes.root}>
          
-        <Paper className={classes.paper}>
+        <div className={classes.paper}>
           <EnhancedTableToolbar numSelected={selectedIds.length}/>
             <Table
               className={classes.table}
@@ -299,7 +299,7 @@ const TableFilter = dynamic(
             onChangePage={handleChangePage}
             onChangeRowsPerPage={handleChangeRowsPerPage}
           />
-        </Paper>
+        </div>
         
         <FormControlLabel
           control={<Switch checked={dense} onChange={handleChangeDense} />}

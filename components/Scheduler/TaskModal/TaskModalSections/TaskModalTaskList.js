@@ -70,11 +70,12 @@ export default function TaskModalTaskList(props){
                 if(!ok)
                     console.warn("Failed to Reorder before Adding to TaskList");
                     
-                TaskLists.addTaskToList(id, tl_id)
-                    .then( (ok) => {
+                    TaskLists.moveTaskToList(id, tl_id)
+                    .then( (data) => {
                         //we need to refetch modalTask
-                        if(!ok)
-                            throw new Error("Failed to add Task to TaskList");
+                        if(!data){
+                            throw new Error("Failed to move Task to TaskList");
+                        }
                         cogoToast.success(`Task ${id} added to Task List ${tl_id} `, {hideAfter: 4});
                         handleCloseAddToTaskListDialog();
                         setShouldReFetch(true);
@@ -83,6 +84,8 @@ export default function TaskModalTaskList(props){
                         console.error(error);
                         cogoToast.error(`Error adding to task list.`, {hideAfter: 4});
                     }) 
+
+                
             })
             .catch(error => {
                 console.error(error);
@@ -153,18 +156,18 @@ export default function TaskModalTaskList(props){
                 </>
             : <></>
             } 
-                { !relatedTaskLists ? <div className={classes.add_link_div}>
-                    <a className={classes.remove_link} onClick={event => /*handleOpenAddToTaskListDialog(event)*/ handleAddToTaskList(event, modalTask.t_id , taskLists[0].id)}> Add to Task List </a>
-                </div> : <></>}
+                {  <div className={classes.add_link_div}>
+                    <a className={classes.remove_link} onClick={event => handleOpenAddToTaskListDialog(event) /*handleAddToTaskList(event, modalTask.t_id , taskLists[0].id)*/}> Move to Task List </a>
+                </div>}
                 <div>
                     { open 
                     ? 
                         <Dialog PaperProps={{className: classes.dialog}} open={open} onClose={handleCloseAddToTaskListDialog}>
-                            <DialogTitle className={classes.title}>Select a Task List to Map</DialogTitle>
+                            <DialogTitle className={classes.title}>Select a Task List move to</DialogTitle>
                             <DialogContent className={classes.content}>
                                 <FormControl variant="outlined" className={classes.inputField}>
                                 <InputLabel id="task-list-label">
-                                Add to Task List
+                                Move to Task List
                                 </InputLabel>
                                 <Select
                                 labelId="task-list-label"

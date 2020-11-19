@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ListIcon from '@material-ui/icons/List';
 import DirectionsCarIcon from '@material-ui/icons/DirectionsCar';
@@ -8,13 +8,16 @@ import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityOnIcon from '@material-ui/icons/Visibility';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import { Scrollbars} from 'react-custom-scrollbars';
-import {makeStyles, Paper, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Select,MenuItem, IconButton} from '@material-ui/core'
+import {makeStyles, Paper, Accordion, AccordionDetails, AccordionSummary, Select,MenuItem, IconButton} from '@material-ui/core'
 
 import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
 import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
+import MapSidebarCrewJobs from './MapSidebarCrewJobs';
 import MapSidebarVehicleRows from './MapSidebarVehicleRows';
 import MapSidebarToolbar from './MapSidebarToolbar';
 import MapSidebarRadarControls from './MapSidebarRadarControls';
+
+import { CrewContext } from '../../Crew/CrewContextContainer';
 
 import { withRouter } from "next/router";
 import Link from "next/link";
@@ -25,7 +28,7 @@ const sorter_table = [{text: "Order", field: "priority_order",  type: 'number'},
                     {text: "State", field: "state", type: 'text'},
                     {text: "Type", field: "type", type: 'text'},
                     {text: "d_date", field: "drill_date", type: 'date'},
-                    {text: "i_date", field: "install_date", type: 'date'}]
+                    {text: "i_date", field: "sch_install_date", type: 'date'}]
 
 const MapSidebar = (props) => {
     //STATE
@@ -37,36 +40,47 @@ const MapSidebar = (props) => {
 
     const panelRef = useRef(null);
     const vehiclePanelRef = useRef(null);
+    const crewPanelRef = useRef(null);
+
+    const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
+        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState,
+         } = useContext(CrewContext);
+
 
     //PROPS
     const {mapRows, setMapRows, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
-            setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds, activeVehicle, setActiveVehicle, 
+            setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds,  
             bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows, visibleItems, setVisibleItems,
             visualTimestamp, setVisualTimestamp,
             radarControl, setRadarControl, radarOpacity, setRadarOpacity,
             radarSpeed, setRadarSpeed, timestamps, setTimestamps,
-            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters} = props;
+            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters, crewJobs, setCrewJobs, crewToMap, setCrewToMap} = props;
 
     //Ref to check if same vehicle is active so we dont keep expanding vehicle panel on vehicle refetch
     const activeVehicleRef = useRef(null);
 
     useEffect( () =>{ //useEffect for inputText
-        if(activeMarker && activeMarker.geocoded && expanded!="taskMarker" ){
+        if( activeMarker?.type === "task" && activeMarker?.item?.geocoded && expanded!="taskMarker" ){
             setExpanded('taskMarker');
             setExpandedAnimDone(false);
         }
 
-        if(activeVehicle && expanded != "vehicleMarker" && ( activeVehicle.vin !=  activeVehicleRef.current)){
+        if ( activeMarker?.type === "vehicle" && expanded != "vehicleMarker" && ( activeMarker.item.vin !=  activeVehicleRef.current)){
             setExpanded('vehicleMarker' )
             setExpandedAnimDone(false);    
         }
 
-        if(activeVehicle){
-            activeVehicleRef.current = activeVehicle.vin;
+        if( activeMarker?.type === "crew" && expanded != "crewJobMarker"){
+            setExpanded('crewJobMarker');
+            setExpandedAnimDone(false);
+        }
+
+        if(activeMarker?.type === "vehicle"){
+            activeVehicleRef.current = activeMarker.item?.vin;
         }
 
         //Need to null multiple marker variable on new activeMarker
-        if(multipleMarkersOneLocation && activeMarker && multipleMarkersOneLocation.indexOf(activeMarker.t_id.toString())== -1 ){
+        if(multipleMarkersOneLocation && activeMarker?.type ==="task" && multipleMarkersOneLocation.indexOf(activeMarker.item.t_id.toString())== -1 ){
             setMultipleMarkersOneLocation(null);
         }
         return () => { //clean up
@@ -74,7 +88,7 @@ const MapSidebar = (props) => {
 
             }
         }
-    },[activeMarker, activeVehicle]);
+    },[activeMarker]);
 
     //Sort
     useEffect(()=>{
@@ -93,6 +107,15 @@ const MapSidebar = (props) => {
             }
         }
     }, [sorterVariable, sorterState])
+
+    //Set crewjobs as visible on crewToMap Change
+    useEffect(()=>{
+        if(crewToMap){
+            if(visibleItems.indexOf("crewJobs") == -1){
+                toggleVisible(null, 'crewJobs')
+            }
+        }
+    },[crewToMap])
     
     //CSS
     const classes = useStyles();
@@ -111,13 +134,33 @@ const MapSidebar = (props) => {
         setExpandedAnimDone(true);
     }
 
-    const handleVisible = (event, newVisible) => {
+    const toggleVisible = (event, newVisible) => {
+        
+        //newVisible not currently in, so add
         if(visibleItems.indexOf(newVisible) == -1){
-            setVisibleItems([...visibleItems, newVisible]);
+            var updateVisible = [...visibleItems, newVisible]
+
+            if(newVisible === "tasks"){
+                if(visibleItems.indexOf("crewJobs") != -1){
+                    updateVisible = [...updateVisible.filter((item,i)=> item != "crewJobs")]
+                }
+            }
+            if(newVisible === "crewJobs"){
+                if(visibleItems.indexOf("tasks") != -1){
+                    updateVisible = [...updateVisible.filter((item,i)=> item != "tasks")]
+                }
+            }
+
+            setVisibleItems(updateVisible);
         }else{
+            //newVisible is already in, so remove
             setVisibleItems([...visibleItems.filter((item,i)=> item != newVisible)]);
         }   
-        event.stopPropagation();
+
+        if(event){
+            event.stopPropagation();
+        }
+        
     };
 
     const isVisible = (item) =>{
@@ -138,6 +181,23 @@ const MapSidebar = (props) => {
         setSorterState( sorterState == 0 ? 1 : 0);
         event.stopPropagation();
     }
+
+    const handleChangeCrewToMap = (event)=>{
+        if(event.target.value === ""){
+            setCrewJobs(null);
+            setCrewToMap(null);
+            if(activeMarker?.type === "crew"){
+                setActiveMarker(null);
+            }
+        }
+        if(event.target.value){
+            console.log("event.target.value", event.target.value)
+            var crew = allCrews.find((item)=> item.id == event.target.value);
+            setCrewToMap(crew);
+            setCrewJobs(null);
+        }
+        event.stopPropagation();
+    }
      
     return(
         <Paper className={classes.root}>
@@ -145,15 +205,15 @@ const MapSidebar = (props) => {
                 <MapSidebarToolbar {...props} />
                 
             </Paper>
-            <ExpansionPanel expanded={expanded === 'taskMarker'} onChange={handleChange('taskMarker')} className={classes.body } 
+            <Accordion expanded={expanded === 'taskMarker'} onChange={handleChange('taskMarker')} className={classes.body } 
                 TransitionProps={{onEntered: event=> handleAnimationEnd(event)}}>
-                <ExpansionPanelSummary
+                <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="taskMarkerbh-content"
                     id="taskMarkerbh-header"
                     classes={{content: classes.expPanelSummary}}
                 >
-                    <ListIcon className={classes.icon}/><span>Tasks:&nbsp;&nbsp;{markedRows.length} Items</span>
+                    <ListIcon className={classes.icon}/><span>Tasks:&nbsp;&nbsp;{markedRows?.length} Items</span>
                     <div className={classes.sortByDiv}>Sort By:&nbsp;
                         <Select
                             value={sorterVariable}
@@ -173,30 +233,67 @@ const MapSidebar = (props) => {
                             <SortFlipIcon/>
                         </IconButton>
                     </div>
-                    {isVisible('tasks') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'tasks')} style={{ color: 'rgb(25, 109, 234)' }}/>
-                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'tasks')}/>}
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails ref={panelRef} className={classes.details}>
+                    {isVisible('tasks') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'tasks')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'tasks')}/>}
+                </AccordionSummary>
+                <AccordionDetails ref={panelRef} className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400}>
                         <MapSidebarMarkedTasks {...props} panelRef={panelRef} expanded={expanded} 
                                         expandedAnimDone={expandedAnimDone}
                                                 />
                     </Scrollbars>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
+                </AccordionDetails>
+            </Accordion>
+
+            <Accordion expanded={expanded === 'crewJobMarker'} onChange={handleChange('crewJobMarker')} className={classes.body } 
+                TransitionProps={{onEntered: event=> handleAnimationEnd(event)}}>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="crewJobMarkerbh-content"
+                    id="crewJobMarkerbh-header"
+                    classes={{content: classes.expPanelSummary}}
+                >
+                    <ListIcon className={classes.icon}/><span>Crew Jobs:&nbsp;&nbsp;{crewJobs?.length} Items</span>
+                    <div className={classes.sortByDiv}>Select Crew:&nbsp;
+                        <Select
+                            value={crewToMap?.id}
+                            onChange={handleChangeCrewToMap}
+                            displayEmpty
+                            className={classes.selectSorter}
+                            inputProps={{ 'aria-label': 'Without label' }}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            {allCrews && allCrews.map((item, i)=> (
+                                <MenuItem value={item.id}>{item.crew_leader_name}</MenuItem>
+                            ))}
+                        </Select>
+                    </div>
+                    {isVisible('crewJobs') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')}/>}
+                </AccordionSummary>
+                <AccordionDetails ref={crewPanelRef} className={classes.details}>
+                    <Scrollbars universal autoHeight autoHeightMax={400}>
+                        {<MapSidebarCrewJobs {...props} panelRef={crewPanelRef} expanded={expanded} 
+                                        expandedAnimDone={expandedAnimDone}
+                                                /> }
+                    </Scrollbars>
+                </AccordionDetails>
+            </Accordion>
             
-            <ExpansionPanel expanded={expanded === 'vehicleMarker'} onChange={handleChange('vehicleMarker')} className={classes.body }
+            <Accordion expanded={expanded === 'vehicleMarker'} onChange={handleChange('vehicleMarker')} className={classes.body }
                 TransitionProps={{onEntered: event=> handleAnimationEnd(event)}} >
-                <ExpansionPanelSummary
+                <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="vehicleMarkerbh-content"
                     id="vehicleMarkerbh-header"
                     classes={{content: classes.expPanelSummary}}
                 ><DirectionsCarIcon className={classes.icon}/><span>Vehicles:&nbsp;&nbsp;{bouncieAuthNeeded ? "Authentication needed" : (vehicleRows ? vehicleRows.length : "") }</span>
-                {isVisible('vehicles') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'vehicles')} style={{ color: 'rgb(25, 109, 234)' }}/>
-                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'vehicles')}/>}
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails  ref={vehiclePanelRef} className={classes.details}>
+                {isVisible('vehicles') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'vehicles')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'vehicles')}/>}
+                </AccordionSummary>
+                <AccordionDetails  ref={vehiclePanelRef} className={classes.details}>
                     <>
                     <Scrollbars universal autoHeight autoHeightMax={400}>
                          <><MapSidebarVehicleRows {...props} vehiclePanelRef={vehiclePanelRef} expanded={expanded} setExpanded={setExpanded}
@@ -213,21 +310,21 @@ const MapSidebar = (props) => {
                             </div>
                             </> : <></>}
                             </>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
+                </AccordionDetails>
+            </Accordion>
             
-            <ExpansionPanel expanded={expanded === 'radarExp'} onChange={handleChange('radarExp')} className={classes.body } 
+            <Accordion expanded={expanded === 'radarExp'} onChange={handleChange('radarExp')} className={classes.body } 
                 TransitionProps={{onEntered: event=> handleAnimationEnd(event)}}>
-                <ExpansionPanelSummary
+                <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="radarExpbh-content"
                     id="radarExpbh-header"
                     classes={{content: classes.expPanelSummary}}
                 ><CloudIcon className={classes.icon}/><span>Radar Controls</span>
-                {isVisible('radar') ? <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')} style={{ color: 'rgb(25, 109, 234)' }}/>
-                            : <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> handleVisible(event, 'radar')}/>}
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.details}>
+                {isVisible('radar') ? <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'radar')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                            : <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'radar')}/>}
+                </AccordionSummary>
+                <AccordionDetails className={classes.details}>
                     
                         { isVisible('radar') &&
                         <>
@@ -238,26 +335,26 @@ const MapSidebar = (props) => {
                               timestamps={timestamps} setTimestamps={setTimestamps}/>
                         </>
                         }
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
+                </AccordionDetails>
+            </Accordion>
             
 
             { noMarkerRows && noMarkerRows.length >0  ? 
-            <ExpansionPanel expanded={expanded === 'panel2'} onChange={handleChange('panel2')} className={classes.body} 
+            <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')} className={classes.body} 
                 classes={noMarkerRows && noMarkerRows.length > 0 ? {root: classes.attention} : {}}>
-                <ExpansionPanelSummary
+                <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="taskMarkerbh-content"
                     id="taskMarkerbh-header"
                     classes={{content: classes.expPanelSummary}}
-                ><VisibilityOffIcon className={classes.icon}/><span>Unmapped Markers:&nbsp;&nbsp;{noMarkerRows.length} Items</span>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.details} >
+                ><VisibilityOffIcon className={classes.icon}/><span>Unmapped Markers:&nbsp;&nbsp;{noMarkerRows?.length} Items</span>
+                </AccordionSummary>
+                <AccordionDetails className={classes.details} >
                     <Scrollbars universal autoHeight autoHeightMax={400} style={{marginLeft: '20px'}}>
                         <MapSidebarMissingMarkers {...props}/>
                     </Scrollbars>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
+                </AccordionDetails>
+            </Accordion>
             :<></>}
 
         </Paper>

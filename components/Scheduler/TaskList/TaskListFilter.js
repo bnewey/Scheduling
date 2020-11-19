@@ -31,15 +31,15 @@ const TaskListFilter = (props) => {
     const [tableConfig, setTableInfo] = useState([
         {text: "Type", field: "type", type: 'text'},
         {text: "Completed", field: "completed_wo",  type: 'number'}, 
-        {text: "i_crew", field: "install_crew",  type: 'text'},
-        {text: "d_crew", field: "drill_crew",  type: 'text'},
+        // {text: "i_crew", field: "install_crew",  type: 'text'},
+        // {text: "d_crew", field: "drill_crew",  type: 'text'},
         {text: "Drilling", field: "drilling", type: 'text'},
         {text: "Art", field: "artwork", type: 'text'},
         {text: "Signs", field: "sign",  type: 'text'},
         {text: "State", field: "state", type: 'text'},
         {text: "City", field: "city", type: 'text'},
         {text: "d_date", field: "drill_date",  type: 'date'},  
-        {text: "i_date", field: "install_date", type: 'date'},
+        {text: "i_date", field: "sch_install_date", type: 'date'},
         {text: "Desired Date", field: "date_desired", type: 'date'},
         {text: "Date Entered", field: "tl_date_entered", type: 'date'},
         {text: "1st Game", field: "first_game", type: 'date'},
@@ -48,6 +48,12 @@ const TaskListFilter = (props) => {
         {text: "Description", field: "description",  type: 'text'}, 
         {text: "Order", field: "priority_order", type: 'number'}
     ]);
+
+    const filterTypes = [
+        "Task Columns",
+        "Crews",
+        "Saved Filters"
+    ]
     
     //Save and/or Fetch filterInOrOut to local storage
     useEffect(() => {
@@ -591,8 +597,8 @@ const useStyles = makeStyles(theme => ({
         textAlign: "-webkit-center",
         width: '100%',
         overflowY: 'auto',
-        maxHeight: '500px',
-        minHeight: '500px',
+        maxHeight: '650px',
+        minHeight: '650px',
         background: 'linear-gradient(white 30%, rgba(255, 255, 255, 0)), linear-gradient(rgba(255, 255, 255, 0), white 70%) 0 100%, radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)), radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, .52), rgba(0, 0, 0, 0)) 0 100%',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 40px, 100% 40px, 100% 14px, 100% 14px',
@@ -614,12 +620,13 @@ const useStyles = makeStyles(theme => ({
             maxWidth: '70%',
         },
         [theme.breakpoints.down('md')]:{
-            width: '40%',
-            maxWidth: '50%',
+            width: '60%',
+            maxWidth: '60%',
         },
         
         textAlign: 'center',
-        minHeight: '600px'
+        minHeight: '600px',
+        minWidth: '1000px',
     },
     modalTitleDiv:{
         backgroundColor: '#5b7087',

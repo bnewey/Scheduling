@@ -33,7 +33,7 @@ const TaskListDateDialog = (props) => {
     //STATE
     const [dateDialogOpen, setDateDialogOpen] = React.useState(false);
     const [selectedDate, setSelectedDate] = React.useState(null);
-    const [dateType, setDateType] = React.useState("install_date");
+    const [dateType, setDateType] = React.useState("sch_install_date");
 
     const date_params = [{ field: 'sch_install_date', label: 'Install Date'},{ field: 'drill_date', label: 'Drill Date'},{ field: 'delivery_date', label: 'Delivery Date'}];
 
@@ -114,18 +114,18 @@ const TaskListDateDialog = (props) => {
                 id: Number.parseInt(task.t_id.toString() + '2'),
                 group: task.install_crew,
                 title: task.t_name,
-                start_time: new Date(task.install_date).getTime() ,
-                end_time: new Date(task.install_date).getTime()  + 86400000,
+                start_time: new Date(task.sch_install_date).getTime() ,
+                end_time: new Date(task.sch_install_date).getTime()  + 86400000,
             })
         }
         //Neither and install date
-        if(task.drill_crew== null && task.install_crew== null && task.install_date){
+        if(task.drill_crew== null && task.install_crew== null && task.sch_install_date){
             task_array.push({
                 id: Number.parseInt(task.t_id.toString() + '3'),
                 group: 0,
                 title: task.t_name,
-                start_time: new Date(task.install_date).getTime() ,
-                end_time: new Date(task.install_date).getTime()  + 86400000,
+                start_time: new Date(task.sch_install_date).getTime() ,
+                end_time: new Date(task.sch_install_date).getTime()  + 86400000,
             })
         }
         //Neither and drill date

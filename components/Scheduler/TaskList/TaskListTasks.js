@@ -435,7 +435,7 @@ const TaskListTasks = (props) =>{
                   </MuiPickersUtilsProvider></div>
             break;
         }
-        case 'install_date':{
+        case 'sch_install_date':{
           return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
           <DatePicker     format="MM/dd/yyyy" showTodayButton
                           clearable
@@ -445,7 +445,7 @@ const TaskListTasks = (props) =>{
                           minDate={new Date('01-01-1970')}
                           className={classes.datePicker}
                           value={value} 
-                          onChange={value => handleUpdateTaskDate(value, task, "install_date")} />
+                          onChange={value => handleUpdateTaskDate(value, task, "sch_install_date")} />
                   </MuiPickersUtilsProvider></div>
                   break;
         }

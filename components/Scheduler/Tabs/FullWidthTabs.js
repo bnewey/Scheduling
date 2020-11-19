@@ -43,32 +43,11 @@ function a11yProps(index) {
 
 
 
-export default function FullWidthTabs({children, tabValue, setTabValue, numSelected, activeTask}) {
+export default function FullWidthTabs({children, tabValue , setTabValue, numSelected, activeTask}) {
   const classes = useStyles();
   const theme = useTheme();
 
-  //Save and/or Fetch tabValue to local storage
-  useEffect(() => {
-    if(tabValue == null){
-      var tmp = window.localStorage.getItem('tabValue');
-      var tmpParsed;
-      if(tmp){
-        tmpParsed = JSON.parse(tmp);
-      }
-      if(!isNaN(tmpParsed) && tmpParsed != null){
-        if(tmpParsed > 3 || tmpParsed < 0){
-          console.error("Bad tabValue in localstorage");
-        }
-        setTabValue(tmpParsed);
-      }else{
-        setTabValue(0);
-      }
-    }
-    if(!isNaN(tabValue) && tabValue != null){
-      window.localStorage.setItem('tabValue', JSON.stringify(tabValue ? tabValue : 0));
-    }
-    
-  }, [tabValue]);
+  
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);

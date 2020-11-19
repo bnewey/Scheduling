@@ -45,7 +45,7 @@ const CrewContainer = (props) => {
         setSelectedPage(page);
     }
 
-    const pageNames = ["Crew Members", "Crews"];
+    const pageNames = ["Crews", "Crew Members"];
 
     return(
         <>
@@ -119,7 +119,8 @@ const useStyles = makeStyles(theme => ({
     },
     paper: {
         backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[5],
+        //boxShadow: theme.shadows[5],
+        borderLeft: '1px solid #ccc',
         padding: '2% 3% 3% 3% !important',
         position: 'relative',
         width: '100%',
@@ -135,7 +136,7 @@ const useStyles = makeStyles(theme => ({
 
     paperList:{
         backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[5],
+        //boxShadow: theme.shadows[5],
         padding: '1% !important',
         position: 'relative',
         width: '100%'

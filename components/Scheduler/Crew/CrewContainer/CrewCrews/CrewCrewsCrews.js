@@ -14,17 +14,13 @@ import { TaskContext } from '../../../TaskContainer';
 import cogoToast from 'cogo-toast';
 
 import Crew from '../../../../../js/Crew';
-import CrewMemberActionAdd from '../CrewMemberActionAdd';
-import CrewMemberActionEdit from '../CrewMemberActionEdit';
 
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-
-
 const CrewCrewsCrews = (props) => {
 
-    const {selectedCrew, setSelectedCrew, crewJobs, setCrewJobs, selectedCrewMembers, setSelectedCrewMembers, selectedJob, setSelectedJob} = props;
+    const {selectedCrew, setSelectedCrew, localCrewJobs, setLocalCrewJobs, selectedCrewMembers, setSelectedCrewMembers, selectedJob, setSelectedJob} = props;
     const {setModalTaskId, setModalOpen} = useContext(TaskContext);
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
@@ -46,7 +42,7 @@ const CrewCrewsCrews = (props) => {
             setSelectedCrew(null);
             return;
         }
-        setCrewJobs(null);
+        setLocalCrewJobs(null);
         setSelectedCrewMembers(null);
         setSelectedCrew(crew);
     }
@@ -102,7 +98,7 @@ const CrewCrewsCrews = (props) => {
                     cogoToast.success("Deleted Crew");
                     setAllCrews(null);
                     setAllCrewJobs(null);
-                    setCrewJobs(null);
+                    setLocalCrewJobs(null);
                     setShouldResetCrewState(true);
                 }
             })
@@ -274,7 +270,7 @@ const useStyles = makeStyles(theme => ({
     list_head:{
         lineHeight: '24px',
         borderRadius: '5px',
-        color: '#dddddd'
+        color: '#575757'
     },
     crewMemberList:{
         width: '100%',
