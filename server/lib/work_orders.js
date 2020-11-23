@@ -228,7 +228,10 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
     logger.verbose(wo_id);
     
 
-    const sql = 'SELECT *  '  + 
+    const sql = 'SELECT record_id, work_order, item_type, user_entered, date_format(date_entered, \'%m-%d-%Y\') as date_entered, quantity, part_number, size, description, ' +
+        ' price, date_format(receive_date, \'%m-%d-%Y\') as receive_date , receive_by, packing_slip, contact, scoreboard_or_sign, model, color, trim , date_format(scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
+        ' mount, sign_built, copy_received, sent_for_approval, final_copy_approved, artwork_completed, sign_popped_and_boxed, roy, trim_size, trim_corners, ' +
+        ' date_offset, date_format(sign_due_date, \'%m-%d-%Y\') as sign_due_date , ordernum, vendor ' + 
         ' FROM work_orders_items woi ' +
         ' WHERE woi.work_order =  ? ' +
         ' ORDER BY woi.ordernum ASC ' + 
