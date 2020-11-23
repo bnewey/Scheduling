@@ -292,7 +292,7 @@ router.post('/updateWorkOrderItemArrivalDate', async (req,res) => {
     const sql = ' UPDATE work_orders_items set scoreboard_arrival_date = ? WHERE record_id = ? ';
 
     try{
-        const results = await database.query(sql, [date, woi_id]);
+        const results = await database.query(sql, [Util.convertISODateToMySqlDate(date), woi_id]);
         logger.info("Work Order Item updated", woi_id);
         res.json(results);
 

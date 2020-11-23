@@ -210,7 +210,7 @@ const MapSiderbarMarkedTasks = (props) =>{
                                   snapshot.isDragging,
                                   provided.draggableProps.style
                                 ) : {}}>
-                      <ListItemText id={labelId}>
+                      <ListItemText id={labelId} className={classes.listItemText}>
                             <><div className={classes.MarkerInfo}>{row.t_name}</div>
                             <div className={classes.MarkerSubInfo}>  Priority:&nbsp;{row.priority_order}
                                 &nbsp;&nbsp;{row.sch_install_date ? <>I-date:&nbsp;{Util.convertISODateToMySqlDate(row.sch_install_date)}&nbsp;</>: ""}
@@ -281,4 +281,8 @@ const useStyles = makeStyles(theme => ({
       fontWeight: '400',
       color: '#666464',
   },
+    listItemText:{
+      marginTop: 0,
+      marginBottom: 0,
+    }
 }));

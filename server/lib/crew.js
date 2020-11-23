@@ -6,6 +6,7 @@ const router = express.Router();
 const logger = require('../../logs');
 //Handle Database
 const database = require('./db');
+const Util = require('../../js/Util');
 
 
 router.post('/addCrewMember', async (req,res) => {
@@ -296,7 +297,7 @@ router.post('/deleteCrewJobMember', async (req,res) => {
 });
 
 router.post('/getAllCrewJobs', async (req,res) => {
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id , j.ordernum, ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id , j.ordernum, j.completed, j.completed_date, ' + 
     ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' ;
@@ -393,6 +394,34 @@ router.post('/updateCrewJob', async (req,res) => {
     }
 });
 
+router.post('/updateCrewJobCompleted', async (req,res) => {
+    var  job_id, completed;
+    if(req.body){
+        completed = req.body.completed;
+        job_id = req.body.job_id;
+    }
+    var completed_date;
+    if(completed){
+        completed_date = new Date();
+    }else{
+        completed_date = null;
+    }
+    console.log("Completed", completed);
+
+    const sql = 'UPDATE crew_jobs SET completed = ?, completed_date = ? ' +
+    ' WHERE id = ? ';
+    
+    try{
+        const response = await database.query(sql, [ completed, Util.convertISODateTimeToMySqlDateTime(completed_date), job_id]);
+        logger.info("Updated crew job " + job_id );
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crews (updateCrewJob): " + error);
+        res.sendStatus(400);
+    }
+});
+
 router.post('/updateCrewJobMember', async (req,res) => {
     var crew_id, member_id, is_leader, job_id;
     if(req.body){
@@ -473,7 +502,7 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
         crew_id = req.body.crew_id;
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, j.completed, date_format(j.completed_date, \'%Y-%m-%d %H:%i:%S\') as completed_date, ' + 
     ' cm.id as crew_leader_id,  ' +
     ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ' +
     ' ea.lat, ea.lng, ea.geocoded ' +

@@ -309,6 +309,23 @@ async function updateCrewJob(  crew_id,job_id){
     }
 }
 
+async function updateCrewJobCompleted(  completed,job_id){
+    const route = '/scheduling/crew/updateCrewJobCompleted';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({job_id,  completed})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
 async function updateCrewJobMember(crew_id, member_id, is_leader, job_id){
     const route = '/scheduling/crew/updateCrewJobMember';
     try{
@@ -437,6 +454,7 @@ module.exports = {
     addCrewJobs,
     deleteCrewJob,
     updateCrewJob,
+    updateCrewJobCompleted,
     updateCrewJobMember,
     addNewCrew,
     deleteCrew,

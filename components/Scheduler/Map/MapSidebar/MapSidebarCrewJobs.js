@@ -217,7 +217,7 @@ const MapSiderbarCrewJobs = (props) =>{
                                   snapshot.isDragging,
                                   provided.draggableProps.style
                                 ) : {}}>
-                            <ListItemText id={labelId}>
+                            <ListItemText id={labelId} className={classes.listItemText}>
                                     <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
                                     <div className={classes.job_list_task_info}> 
                                             {row.job_type == 'install' ? <><span className={classes.installSpan}>
@@ -324,5 +324,9 @@ const useStyles = makeStyles(theme => ({
     },
     drillSpan:{
         color: '#216fac',
+    },
+    listItemText:{
+      marginTop: 0,
+      marginBottom: 0,
     }
 }));

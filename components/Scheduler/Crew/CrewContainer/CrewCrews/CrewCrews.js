@@ -3,6 +3,9 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox, Button,
     Collapse } from '@material-ui/core';
 
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+
 import clsx from 'clsx';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
@@ -331,6 +334,24 @@ const CrewCrews = (props) => {
 
     }
 
+    const handleUpdateJobCompleted =(event, job_id)=>{
+        var completed = event.target.checked ? 1 : 0;
+        console.log("Completed", completed);
+
+        Crew.updateCrewJobCompleted(completed, job_id )
+        .then((data)=>{
+            
+            setLocalCrewJobs(null);
+            setSelectedCrew({...selectedCrew});
+            cogoToast.success("Successfully update crew job");
+
+        })
+        .catch((error)=>{
+            console.error("Failed to update completed of crew job");
+            cogoToast.error("Failed to update crew job");
+        })
+    }
+
 
     return(
         <>
@@ -363,7 +384,7 @@ const CrewCrews = (props) => {
                                     <ListItemText>
                                             {localCrewJobs[rubric.source.index].id} | {localCrewJobs[rubric.source.index].t_name} 
                                     </ListItemText>
-                                    </ListItem>
+                                </ListItem>
                             </div>
                             )}>
                             {(provided, snapshot) => (
@@ -392,8 +413,7 @@ const CrewCrews = (props) => {
                                                     {[classes.nonSelectedRow]: !selected},
                                                     {[classes.datePassedRow]: !selected && datePassed },
                                                     {[classes.datePassedSelectedRow]: selected && datePassed }
-                                                    )}
-                                                    //selectedJob ? (selectedJob.id === row.id ? classes.selectedRow : classes.nonSelectedRow) : classes.nonSelectedRow}
+                                                )}
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
@@ -401,25 +421,33 @@ const CrewCrews = (props) => {
                                                 snapshot.isDragging,
                                                 provided.draggableProps.style
                                                 ) : {}}>
-                                    <ListItemText id={labelId}>
-                                            <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
-                                            <div className={classes.job_list_task_info}> 
-                                                    {row.job_type == 'install' ? <><span className={classes.installSpan}>
-                                                            INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
-                                                        </span></>
-                                                     : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
-                                                         DRILL DATE: </span> <span>{date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}</span> </>
-                                                         : 'BAD TYPE'}
-                                                    &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
-                                              </div></>
-                                    </ListItemText>
-                                    <ListItemSecondaryAction className={classes.secondary_div}>
-                                            
-                                    <IconButton onClick={event => handleOpenSwapPopover(event, row)} >
-                                        <SwapIcon edge="end" aria-label="edit" />
-                                    </IconButton>
-                                            
-                                            
+                                        <ListItemText id={labelId} className={classes.listItemText}>
+                                                <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
+                                                <div className={classes.job_list_task_info}> 
+                                                        {row.job_type == 'install' ? <><span className={classes.installSpan}>
+                                                                INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
+                                                            </span></>
+                                                        : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
+                                                            DRILL DATE: </span> <span>{date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}</span> </>
+                                                            : 'BAD TYPE'}
+                                                        &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
+                                                </div></>
+                                        </ListItemText>
+                                        <ListItemSecondaryAction className={classes.secondary_div}>
+                                                
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="medium" className={classes.icon} />}
+                                                checkedIcon={<CheckBoxIcon fontSize="medium" className={classes.iconChecked} />}
+                                                name="checkedI"
+                                                checked={row.completed}
+                                                onChange={(event)=> handleUpdateJobCompleted(event, row.id)}
+                                            />
+
+                                            <IconButton onClick={event => handleOpenSwapPopover(event, row)} >
+                                                <SwapIcon edge="end" aria-label="edit" />
+                                            </IconButton>
+                                                
+                                                
                                             <IconButton className={classes.secondary_button} edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.task_id)}>
                                             <EditIcon />
                                             </IconButton>
@@ -427,8 +455,8 @@ const CrewCrews = (props) => {
                                             <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleRemoveCrewJob(event, row.id)}>
                                                 <DeleteIcon />
                                             </IconButton> 
-                                        
-                                    </ListItemSecondaryAction>
+                                            
+                                        </ListItemSecondaryAction>
                                     </ListItem>
                                     )}}
                                     </Draggable>
@@ -618,6 +646,24 @@ const useStyles = makeStyles(theme => ({
     },
     drillSpan:{
         color: '#216fac',
+    },
+    iconChecked:{
+        width: '1em',
+        height: '1em',
+        color:'#33bb22',
+    },
+    icon:{
+        width: '1em',
+        height: '1em',
+        color:'#929292',
+        '&:hover':{
+            color: '#303030',
+        },
+        backgroundColor: 'linear-gradient(0deg, #f5f5f5, white)'
+    },
+    listItemText:{
+        marginTop: 0,
+        marginBottom: 0,
     }
     
   }));

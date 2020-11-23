@@ -266,7 +266,7 @@ const MapSidebar = (props) => {
                                 <em>None</em>
                             </MenuItem>
                             {allCrews && allCrews.map((item, i)=> (
-                                <MenuItem value={item.id}>{item.crew_leader_name}</MenuItem>
+                                <MenuItem value={item.id}>{item.crew_leader_name ? item.crew_leader_name : `Crew ${item.id}`}</MenuItem>
                             ))}
                         </Select>
                     </div>

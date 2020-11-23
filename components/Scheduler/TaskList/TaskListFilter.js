@@ -1,13 +1,17 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,
+import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,Collapse, ListSubheader, ListItemIcon,
      Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControlLabel, Switch,Grid, List, Box } from '@material-ui/core';
 
      import FilterIcon from '@material-ui/icons/ShortText';
      import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
      import Filter from '@material-ui/icons/Sort';
+     import ListIcon from '@material-ui/icons/List';
+     import ExpandLess from '@material-ui/icons/ExpandLess';
+     import ExpandMore from '@material-ui/icons/ExpandMore';
+     import PeopleIcon from '@material-ui/icons/People';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
-
+import clsx from 'clsx';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import Crew from '../../../js/Crew';
@@ -17,6 +21,7 @@ import {createFilter} from '../../../js/Filter';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
+import {CrewContext} from '../Crew/CrewContextContainer';
 
 const TaskListFilter = (props) => {
    
@@ -24,8 +29,10 @@ const TaskListFilter = (props) => {
     const { filteredItems, setFilteredItems } = props;
 
     const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters} = useContext(TaskContext);
-
+    const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
+        allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
+    const [openCategory, setCategory] = useState(null);
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedField, setSelectedField] = useState(null);
     const [tableConfig, setTableInfo] = useState([
@@ -54,7 +61,7 @@ const TaskListFilter = (props) => {
         "Crews",
         "Saved Filters"
     ]
-    
+
     //Save and/or Fetch filterInOrOut to local storage
     useEffect(() => {
         if(filterInOrOut == null){
@@ -304,6 +311,68 @@ const TaskListFilter = (props) => {
         }
     }
 
+    const handleOpenCategory =(event, category)=>{
+        if(!category){
+            console.error("Bad category");
+            return;
+        }
+        if(openCategory === category){
+            setCategory(null);
+        }else{
+            setCategory(category);
+        }
+    }
+
+    const handleFilterCrew = (event, crew) =>{
+        if(!crew){
+            cogoToast.error("Failed to Map crew jobs");
+            console.log("Bad crew in handleFilterCrewJobs");
+            return;
+        }
+        if(!filters){
+            console.error("Filters is null");
+            return;
+        }
+
+        Crew.getCrewJobsByCrew(crew.id)
+        .then((data)=>{
+            //Check jobs for install and/or drill
+            let properties = new Set([...data].map((v,i)=>{
+                if(v.job_type == "drill"){
+                    return "drill_crew"
+                }
+                if(v.job_type == "install"){
+                    return "install_crew"
+                }
+                return "";
+            }));
+            console.log("Properties", properties);
+            console.log("crew", crew);
+
+            //1 = tasklist
+            //setTabValue(1);
+            let newFilters = [];
+
+            properties.forEach((item,i)=>{
+                newFilters.push({
+                    property: item, 
+                    value: crew.id.toString(),
+                })
+            })
+            
+            setFilters(newFilters);
+            setFilterInOrOut("in");
+            setFilterAndOr("or");
+            cogoToast.success(`Filtering by crew ${crew.crew_leader_name ? crew.crew_leader_name : `Crew ${crew.id}` }`)
+        })
+        .catch((error)=>{
+            console.error("Failed to get crew jobs in filter", error);
+            cogoToast.error("Failed to filter crew");
+        })
+
+        
+    }
+
     
     return(
         <>
@@ -382,29 +451,73 @@ const TaskListFilter = (props) => {
                             </span>
                         </div>
                         <Grid item xs={4} className={classes.paper}>
-                            <List className={classes.fieldList}>
+                        <List
+                            component="nav"
+                            aria-labelledby="nested-list-subheader"
+                            subheader={
+                                <ListSubheader component="div" id="nested-list-subheader">
+                                Filter Categories
+                                </ListSubheader>
+                            }
+                            className={classes.root}
+                            >
+                                {/* TASK COLUMNS */}
+                                <ListItem button onClick={event => handleOpenCategory(event, "task_columns")}
+                                    className={ clsx( { [classes.headListItem]: openCategory !== "task_columns" },
+                                                      { [classes.headListItemSelected]: openCategory === "task_columns" })}>
+                                    <ListItemIcon>
+                                    <ListIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Task Columns" />
+                                    {openCategory && openCategory == "task_columns" ? <ExpandLess /> : <ExpandMore />}
+                                </ListItem>
                             
+                                <Collapse in={openCategory && openCategory === "task_columns"} timeout="auto" unmountOnExit>
+                                <List component="div" className={classes.fieldList} >
                                 
-                                {tableConfig && tableConfig.map((item,i)=>{
-                                    const isSelected = selectedField === item; 
-                                    return(
-                                        <ListItem key={item.field + i} dense button
-                                            onMouseUp={event => handleSelectField(event, item)}
-                                            className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
-                                        >
-                                            <ListItemText key={"tableConfigText"+i} className={classes.fieldListItemText}>
-                                                {item.text}
-                                            </ListItemText>
-                                        </ListItem>
-                                        );
-                                })}
+                                    
+                                    {tableConfig && tableConfig.map((item,i)=>{
+                                        const isSelected = selectedField === item; 
+                                        return(
+                                            <ListItem key={item.field + i} dense button
+                                                onMouseUp={event => handleSelectField(event, item)}
+                                                className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
+                                            >
+                                                <ListItemText key={"tableConfigText"+i} className={classes.fieldListItemText}>
+                                                    {item.text}
+                                                </ListItemText>
+                                            </ListItem>
+                                            );
+                                    })}
+                                    
+                                </List>
+                                </Collapse>
+                                
+                                {/* CREW FILTERS */}
+                                <ListItem button onClick={event => handleOpenCategory(event, "crews")}
+                                    className={clsx( { [classes.headListItem]: openCategory !== "crews" },
+                                                     { [classes.headListItemSelected]: openCategory === "crews" })}>
+                                    <ListItemIcon>
+                                    <PeopleIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Crews" />
+                                    {openCategory && openCategory == "crews" ? <ExpandLess /> : <ExpandMore />}
+                                </ListItem>
+                            
                                 
                             </List>
                         </Grid>
                         <Grid item xs={8} className={classes.paper}>
                             <>
 
-                            <FormControlLabel
+                            
+                        <List className={classes.filterList}>
+                                
+                            
+                                    {openCategory && openCategory == "task_columns" &&  
+                                
+                                <>
+                                    <FormControlLabel
                                         key={"formControlInOut"}
                                         control={
                                         <Switch
@@ -431,11 +544,7 @@ const TaskListFilter = (props) => {
                                     label={filterAndOr && filterAndOr  == "or" ? "Filter using OR. Shows items matching at least one filter." :
                                          "Filter using AND. Shows items matching all filters."}
                                     />
-                        <List className={classes.filterList}>
-                                
-                            
-                                    {selectedField && taskListTasksSaved ? 
-                                <>
+                                   {selectedField && taskListTasksSaved ? <> 
                                     {taskListTasksSaved.map((task)=> task[selectedField.field]).filter((v, i, array)=> array.indexOf(v)===i ).map((item,i)=>{
                                         const isFiltered =  (filters.filter((filter, i)=> 
                                         {
@@ -461,7 +570,29 @@ const TaskListFilter = (props) => {
                                             </div>);
                                     })}
                                 </>
-                            :<>Select a field to the left to FILTER by.</> }
+                            :<>Select a field to the left to FILTER by.</> } </>}
+                            {  openCategory && openCategory == "crews" &&
+                                <Collapse in={openCategory && openCategory === "crews"} timeout="auto" unmountOnExit>
+                                <List component="div" className={classes.fieldList} >
+                                
+                                    
+                                    {allCrews && allCrews.map((item,i)=>{
+                                        const isSelected = selectedField === item; 
+                                        return(
+                                            <ListItem key={item.id} dense button
+                                                onMouseUp={event => handleFilterCrew(event, item)}
+                                                className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
+                                            >
+                                                <ListItemText  className={classes.fieldListItemText}>
+                                                    {item.crew_leader_name ? item.crew_leader_name : `Crew ${item.id}`}
+                                                </ListItemText>
+                                            </ListItem>
+                                            );
+                                    })}
+                                    
+                                </List>
+                                </Collapse>
+                            }
                             </List>
                             </>
                         </Grid>
@@ -668,9 +799,11 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: "#c6ccd3",
         color: '#2d343b',
         border: '1px solid #ececec',
+        paddingLeft: 10,
         
     },
     fieldListItemSelected:{
+        paddingLeft: 10,
         boxShadow: 'inset 0 0 5px 0px #44585896',
         backgroundColor: "#c8ffff",
         color: '#0f447a',
@@ -727,7 +860,14 @@ const useStyles = makeStyles(theme => ({
             color: '#000',
           }
         }
-      }
+      },
+    headListItem: {
+        border: '1px solid #bdbdbd',
+    },
+    headListItemSelected: {
+        border: '1px solid #bdbdbd',
+        background: '#a9ecff'
+    }
 
       
   }));
