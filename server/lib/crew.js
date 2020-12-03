@@ -8,6 +8,46 @@ const logger = require('../../logs');
 const database = require('./db');
 const Util = require('../../js/Util');
 
+const reorderCrewJobsFromDB = async function(crew_id){
+    return new Promise(async function (resolve, reject) {
+        const selector = ' SELECT * FROM crew_jobs WHERE crew_id = ? AND completed = 0 ';
+        const sql = ' UPDATE crew_jobs SET ordernum = ? ' +
+        ' WHERE id = ? AND crew_id = ? ';
+
+        var crewJobs;
+        try{
+            crewJobs = await database.query(selector, [crew_id]);
+
+            if(!crewJobs){    logger.error("crewJobs is null in reorderCrewJobsFromDB"); reject(-1);    }
+            if(crewJobs.length == 0){ resolve(0) }
+
+            async.forEachOf(crewJobs, async (job, i, callback) => {
+                //will automatically call callback after successful execution
+                try{
+                    const results = await database.query(sql, [i+1, job.id, crew_id]);
+                    return;
+                }
+                catch(error){   
+                    //callback(error);         
+                    throw error; 
+                }
+            }, err=> {
+                if(err){
+                    logger.error("Crew (reorderCrewJobs): " + err);
+                    reject(-1);
+                }else{
+                    logger.info("reorderCrewJobs: " + crew_id);
+                    resolve(1);
+                }
+            })
+        }
+        catch(error){
+            logger.error("reorderCrewJobsFromDB failed in selector")
+            reject(-1);
+        }
+    }) 
+}
+
 
 router.post('/addCrewMember', async (req,res) => {
     var name;
@@ -156,7 +196,7 @@ router.post('/getCrewJobsByTask', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ma.member_name, ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
             ' cm.id as crew_leader_id,  ' +
             ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
@@ -357,14 +397,29 @@ router.post('/addCrewJobs', async (req,res) => {
 
 router.post('/deleteCrewJob', async (req,res) => {
     const sql = 'DELETE FROM crew_jobs WHERE id = ? LIMIT 1';
-    var id;
+    var id, crew_id;
     if(req.body){
         id = req.body.id;
+        crew_id = req.body.crew_id;
     }
     
     try{
         const results = await database.query(sql, id);
         logger.info("Deleted crew job " + id);
+
+        //Reorder crew jobs to maintain correct order
+        if(crew_id){
+            logger.info("Attempting to reorder crew");
+            var reorderStatus = await reorderCrewJobsFromDB(crew_id)
+            logger.info("Reorder status " + reorderStatus)
+            if(reorderStatus == 1){
+                logger.info("Reordered crew" + crew_id);
+            }else{
+                if(reorderStatus == 0){  logger.info("Did not reorder on delete") };
+                if(reorderStatus == -1){ logger.info("Error in reorderCrewJobsFromDB")}
+            }
+        }
+        
         res.sendStatus(200);
     }
     catch(error){
@@ -380,11 +435,16 @@ router.post('/updateCrewJob', async (req,res) => {
         job_id = req.body.job_id;
     }
 
-    const sql = 'UPDATE crew_jobs SET crew_id = ?, date_assigned = now() ' +
+    const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj WHERE crew_id = ? AND completed = 0; "
+
+    const sql = 'UPDATE crew_jobs SET crew_id = ?, date_assigned = now(), ordernum = ? ' +
     ' WHERE id = ? ';
     
     try{
-        const response = await database.query(sql, [crew_id, job_id]);
+        var data = await database.query(getMax, [ crew_id ]);
+        var max = data[0].max_num || 0;
+        
+        const response = await database.query(sql, [crew_id, max+1, job_id  ]);
         logger.info("Updated crew job " + job_id + " to crew: " + crew_id);
         res.sendStatus(200);
     }
@@ -395,10 +455,13 @@ router.post('/updateCrewJob', async (req,res) => {
 });
 
 router.post('/updateCrewJobCompleted', async (req,res) => {
-    var  job_id, completed;
+    //if completing job, remove its ordernum and set comp date
+    //if uncompleting job, find max and set ordernum and remove comp date
+    var  job_id, completed, crew_id;
     if(req.body){
         completed = req.body.completed;
         job_id = req.body.job_id;
+        crew_id = req.body.crew_id;
     }
     var completed_date;
     if(completed){
@@ -406,14 +469,37 @@ router.post('/updateCrewJobCompleted', async (req,res) => {
     }else{
         completed_date = null;
     }
-    console.log("Completed", completed);
 
-    const sql = 'UPDATE crew_jobs SET completed = ?, completed_date = ? ' +
+    const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj " + 
+                " WHERE cj.crew_id = ? "
+
+    const sql = 'UPDATE crew_jobs SET completed = ?, completed_date = ?, ordernum = ? ' +
     ' WHERE id = ? ';
     
     try{
-        const response = await database.query(sql, [ completed, Util.convertISODateTimeToMySqlDateTime(completed_date), job_id]);
-        logger.info("Updated crew job " + job_id );
+        var data;
+        var max = 0;
+        if(!completed){
+            data = await database.query(getMax, [ crew_id ])
+            max = data[0].max_num;
+        }
+
+        const response = await database.query(sql, [ completed, Util.convertISODateTimeToMySqlDateTime(completed_date),max , job_id]);
+
+        if(completed){
+            //Reorder crew jobs to maintain correct order
+            if(crew_id){
+                logger.info("Attempting to reorder crew");
+                var reorderStatus = await reorderCrewJobsFromDB(crew_id)
+                logger.info("Reorder status " + reorderStatus)
+                if(reorderStatus == 1){
+                    logger.info("Reordered crew" + crew_id);
+                }else{
+                    if(reorderStatus == 0){  logger.info("Did not reorder on delete") };
+                    if(reorderStatus == -1){ logger.info("Error in reorderCrewJobsFromDB")}
+                }
+            }
+        }
         res.sendStatus(200);
     }
     catch(error){
@@ -502,10 +588,11 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
         crew_id = req.body.crew_id;
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, j.completed, date_format(j.completed_date, \'%Y-%m-%d %H:%i:%S\') as completed_date, ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date, ' + 
     ' cm.id as crew_leader_id,  ' +
-    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ' +
-    ' ea.lat, ea.lng, ea.geocoded ' +
+    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d\') as sch_install_date, ' +
+    ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
+    ' t.table_id, t.description ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' +
     ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 

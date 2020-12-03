@@ -127,6 +127,25 @@ async function createFairPlayOrderPdf(fpOrder, orderItems){
 
 }
 
+async function createCrewJobPdf(crew, jobs){
+    const route = '/scheduling/pdf/createCrewJobPdf';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'blob',
+                body: JSON.stringify({crew, jobs})
+            });
+            //console.log('data', data);
+        return( await data.blob());
+    }catch(error){
+        throw error;
+    }
+
+}
 
 module.exports = {
     createWOPdf: createWOPdf,
@@ -135,5 +154,6 @@ module.exports = {
     createPackingSlipPdf,
     createWorkOrderPdf,
     createFairPlayOrderPdf,
+    createCrewJobPdf,
     
 };

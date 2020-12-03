@@ -274,7 +274,7 @@ async function addCrewJobs(ids, job_type, crew_id){
     }
 }
 
-async function deleteCrewJob(id){
+async function deleteCrewJob(id, crew_id){
     const route = '/scheduling/crew/deleteCrewJob';
     try{
         var response = await fetch(route,
@@ -283,7 +283,7 @@ async function deleteCrewJob(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, crew_id})
             });
         return response.ok;
     }catch(error){
@@ -309,7 +309,7 @@ async function updateCrewJob(  crew_id,job_id){
     }
 }
 
-async function updateCrewJobCompleted(  completed,job_id){
+async function updateCrewJobCompleted(  completed,job_id, crew_id){
     const route = '/scheduling/crew/updateCrewJobCompleted';
     try{
         var response = await fetch(route,
@@ -318,7 +318,7 @@ async function updateCrewJobCompleted(  completed,job_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({job_id,  completed})
+                body: JSON.stringify({job_id,  completed, crew_id})
             });
         return response.ok;
     }catch(error){

@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
 
-import {makeStyles, List, ListItem, ListItemSecondaryAction, ListItemText,IconButton} from '@material-ui/core';
+import {makeStyles, List, ListItem, ListItemSecondaryAction, ListItemText,IconButton, Switch} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import cogoToast from 'cogo-toast';
@@ -26,7 +26,7 @@ const MapSiderbarCrewJobs = (props) =>{
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
     const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
           setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, expanded, setExpanded, setActiveVehicle,
-          expandedAnimDone, sorters, crewJobs, setCrewJobs,  } = props;
+          expandedAnimDone, sorters, crewJobs, setCrewJobs ,showCompletedJobs,setShowCompletedJobs } = props;
     
     const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved,crewToMap, setCrewToMap} = useContext(TaskContext);
     //CSS
@@ -159,9 +159,29 @@ const MapSiderbarCrewJobs = (props) =>{
     }
     // END DND
 
+
+    const handleChangeShowComp = (event)=>{
+      setShowCompletedJobs(event.target.checked);
+      setCrewJobs(null);
+      event.stopPropagation();
+    }
+
  
 
     return(
+      <>
+      { crewJobs && crewToMap && <>
+                        <div className={classes.showCompletedDiv}>
+                          <span className={classes.showCompletedSpan}>Show Completed</span>
+                          <Switch
+                            checked={showCompletedJobs}
+                            onChange={event => handleChangeShowComp(event)}
+                            name="showCompleted"
+                            label="Show Completed"
+                          />
+                        </div>
+                        </>
+                    }
         <List  className={classes.root}> 
         <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="droppable"
@@ -218,7 +238,8 @@ const MapSiderbarCrewJobs = (props) =>{
                                   provided.draggableProps.style
                                 ) : {}}>
                             <ListItemText id={labelId} className={classes.listItemText}>
-                                    <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
+                                    <><div className={classes.task_name_div}><span className={classes.taskNameSpan}>{row.t_name}</span>
+                                <span className={classes.taskNameCompSpan}>{row.completed == 1 ? "COMPLETED" : ""}</span></div>
                                     <div className={classes.job_list_task_info}> 
                                             {row.job_type == 'install' ? <><span className={classes.installSpan}>
                                                     INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
@@ -254,7 +275,9 @@ const MapSiderbarCrewJobs = (props) =>{
           )}
         </Droppable>
       </DragDropContext>
+      
         </List>
+        </>
     );
 
 }
@@ -309,10 +332,21 @@ const useStyles = makeStyles(theme => ({
       color: '#666464',
   },
     task_name_div:{
-        '& span':{
-            fontWeight: '600',
-            color: '#1f2f52',
-        },
+        display:'flex',
+        flexDirection: 'row',
+        justifyContent:'space-between',
+        alignItems:'center'
+    },
+    taskNameSpan:{
+        fontWeight: '600',
+        color: '#1f2f52',
+    },
+    taskNameCompSpan:{
+      color: '#33bb23',
+      background: '#ffffffa3',
+      borderRadius: 2,
+      padding: '0px 9px',
+      fontWeight: 600,
     },
     job_list_task_info:{
         '& span':{
@@ -328,5 +362,16 @@ const useStyles = makeStyles(theme => ({
     listItemText:{
       marginTop: 0,
       marginBottom: 0,
+    },
+    showCompletedDiv:{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      background: '#cef3eb',
+    },
+    showCompletedSpan:{
+      fontSize: '.8em',
+      fontFamily: 'sans-serif',
+      color: '#333'
     }
 }));

@@ -121,7 +121,7 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: theme.palette.background.paper,
         //boxShadow: theme.shadows[5],
         borderLeft: '1px solid #ccc',
-        padding: '2% 3% 3% 3% !important',
+        padding: '1% 1% 1% 1% !important',
         position: 'relative',
         width: '100%',
         overflowY: 'auto',

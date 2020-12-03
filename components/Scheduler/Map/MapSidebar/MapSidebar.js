@@ -8,7 +8,7 @@ import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityOnIcon from '@material-ui/icons/Visibility';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import { Scrollbars} from 'react-custom-scrollbars';
-import {makeStyles, Paper, Accordion, AccordionDetails, AccordionSummary, Select,MenuItem, IconButton} from '@material-ui/core'
+import {makeStyles, Paper, Accordion, AccordionDetails, AccordionSummary, Select,MenuItem, IconButton, Switch} from '@material-ui/core'
 
 import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
 import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
@@ -42,6 +42,8 @@ const MapSidebar = (props) => {
     const vehiclePanelRef = useRef(null);
     const crewPanelRef = useRef(null);
 
+    
+
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
         setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState,
          } = useContext(CrewContext);
@@ -54,7 +56,8 @@ const MapSidebar = (props) => {
             visualTimestamp, setVisualTimestamp,
             radarControl, setRadarControl, radarOpacity, setRadarOpacity,
             radarSpeed, setRadarSpeed, timestamps, setTimestamps,
-            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters, crewJobs, setCrewJobs, crewToMap, setCrewToMap} = props;
+            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters, crewJobs, setCrewJobs, crewToMap, setCrewToMap,
+            showCompletedJobs, setShowCompletedJobs} = props;
 
     //Ref to check if same vehicle is active so we dont keep expanding vehicle panel on vehicle refetch
     const activeVehicleRef = useRef(null);
@@ -198,6 +201,7 @@ const MapSidebar = (props) => {
         }
         event.stopPropagation();
     }
+
      
     return(
         <Paper className={classes.root}>
@@ -272,12 +276,12 @@ const MapSidebar = (props) => {
                     </div>
                     {isVisible('crewJobs') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')} style={{ color: 'rgb(25, 109, 234)' }}/>
                             : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')}/>}
+                    
                 </AccordionSummary>
                 <AccordionDetails ref={crewPanelRef} className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400}>
                         {<MapSidebarCrewJobs {...props} panelRef={crewPanelRef} expanded={expanded} 
-                                        expandedAnimDone={expandedAnimDone}
-                                                /> }
+                                        expandedAnimDone={expandedAnimDone} showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs} /> }
                     </Scrollbars>
                 </AccordionDetails>
             </Accordion>

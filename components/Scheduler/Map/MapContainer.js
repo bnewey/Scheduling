@@ -86,6 +86,8 @@ const MapContainer = (props) => {
     const [radarSpeed, setRadarSpeed] = React.useState(400);
     const [visualTimestamp, setVisualTimestamp] = useState(null);
 
+    const [showCompletedJobs, setShowCompletedJobs] = React.useState(false);
+
     //useEffect for vehicleRows
     useEffect(()=>{
       if(vehicleNeedsRefresh == true){
@@ -326,8 +328,15 @@ const MapContainer = (props) => {
         Crew.getCrewJobsByCrew(crewToMap.id)
             .then((data)=>{
                 if(data){
-                    console.log("Data",data);
-                    setCrewJobs( data);
+                  var tmpData = [...data];
+                  
+                  if(!showCompletedJobs){
+                    console.log("Filtering out completed")
+                    tmpData = tmpData.filter((item)=> item.completed==0)
+                  }
+                  
+                  console.log("Data",tmpData);
+                  setCrewJobs( tmpData);
                 }
             })
             .catch((error)=>{
@@ -482,7 +491,9 @@ const MapContainer = (props) => {
                           multipleMarkersOneLocation={multipleMarkersOneLocation} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}
                           sorters={sorters} setSorters={setSorters}
                           crewJobs={crewJobs} setCrewJobs={setCrewJobs}
-                          crewToMap={crewToMap} setCrewToMap={setCrewToMap}/>
+                          crewToMap={crewToMap} setCrewToMap={setCrewToMap}
+                          showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs}
+                           />
             </Grid>
           </Grid>
         </div>

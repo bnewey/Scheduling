@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox, Button,
-    Collapse } from '@material-ui/core';
+    Collapse, Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core';
 
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -9,6 +9,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import clsx from 'clsx';
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SwapIcon from '@material-ui/icons/SwapHoriz';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../../UI/ConfirmYesNo';
@@ -21,11 +22,20 @@ import Crew from '../../../../../js/Crew';
 import CrewMemberActionAdd from '../CrewMemberActionAdd';
 import CrewMemberActionEdit from '../CrewMemberActionEdit';
 
+import moment from 'moment'
+
+import DateFnsUtils from '@date-io/date-fns';
+import {
+    DatePicker,
+    TimePicker,
+    DateTimePicker,
+    MuiPickersUtilsProvider,
+  } from '@material-ui/pickers';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import CrewCrewsCrews from './CrewCrewsCrews';
 import Util from '../../../../../js/Util';
-
+import Pdf from '../../../../../js/Pdf';
 
 function arraysEqual(_arr1, _arr2) {
     if (!Array.isArray(_arr1) || ! Array.isArray(_arr2) || _arr1.length !== _arr2.length)
@@ -49,25 +59,51 @@ const CrewCrews = (props) => {
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
         setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState,
-        crewJobs, setCrewJobs, } = useContext(CrewContext);
+        crewJobs, setCrewJobs, crewJobDateRange, setCrewJobDateRange } = useContext(CrewContext);
     const classes = useStyles();
 
     const [selectedCrew, setSelectedCrew] = useState(null);
     const [localCrewJobs, setLocalCrewJobs] = useState(null);
     const [selectedCrewMembers, setSelectedCrewMembers] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
+    const [expanded, setExpanded] = useState('activeJobPanel');
+
+    const [unfilteredJobs, setUnfilteredJobs] = useState(null);
     //Popover
     //Swap Jobs
     const [jobAnchorEl, setJobAnchorEl] = React.useState(null);
     const [swapJobId, setSwapJobId] = useState(null); 
-    
+
+    const [listHeight, setListHeight] = React.useState(370)
+
     useEffect(()=>{
         if(selectedCrew && localCrewJobs == null){
             Crew.getCrewJobsByCrew(selectedCrew.id)
             .then((data)=>{
                 if(data){
                     console.log("Data",data);
-                    setLocalCrewJobs( data);
+                    //filter using to and from dates
+                    var updateData = data.filter((j)=>j.completed == 0)
+                    if(crewJobDateRange){
+                        updateData = updateData.filter((job,i)=>{
+                            var date;
+                            if(job.job_type == "install"){
+                                date = Util.convertISODateToMySqlDate(job.sch_install_date) || null;
+                            }
+                            if(job.job_type == "drill"){
+                                date = Util.convertISODateToMySqlDate(job.drill_date) || null;
+                            }
+
+                            if(date != null){
+                                return moment(date).isAfter( Util.convertISODateToMySqlDate(crewJobDateRange.from)) && moment(date).isBefore(Util.convertISODateToMySqlDate(crewJobDateRange.to))
+                            }else{
+                                //Date not assigned
+                                return true
+                            }
+                        })
+                    }
+                    setUnfilteredJobs([...data]);
+                    setLocalCrewJobs( updateData);
                 }
             })
             .catch((error)=>{
@@ -92,7 +128,7 @@ const CrewCrews = (props) => {
                 }
             })
         }
-    },[selectedCrew])
+    },[selectedCrew, localCrewJobs])
 
 
     const handleSelectJob =(event,job)=>{
@@ -138,7 +174,7 @@ const CrewCrews = (props) => {
         event.preventDefault();
     };
 
-    const handleRemoveCrewJob = (event, id) => {
+    const handleRemoveCrewJob = (event, id, crew_id) => {
         if(!id){
             cogoToast.error("Couldnt delete job");
             console.error("Bad/no id on delete");
@@ -146,7 +182,7 @@ const CrewCrews = (props) => {
         }
 
         const deleteMember = () => {
-            Crew.deleteCrewJob(id)
+            Crew.deleteCrewJob(id, crew_id)
                 .then( (data) => {
                         setLocalCrewJobs(null);
                         cogoToast.success(`Removed job ${id} from crew jobs`, {hideAfter: 4});
@@ -186,8 +222,7 @@ const CrewCrews = (props) => {
             console.error("Bad member or swapJobId for swap.");
             return;
         }
-        console.log(crew.id);
-        console.log(swapJobId);
+        
         Crew.updateCrewJob(crew.id, swapJobId)
         .then((data)=>{
             setLocalCrewJobs(null);
@@ -211,9 +246,12 @@ const CrewCrews = (props) => {
         cogoToast.info(`No crew to reorder`, {hideAfter: 4});
         return;
         }
-        const result = Array.from(list);
-        const [removed] = result.splice(startIndex, 1);
-        result.splice(endIndex, 0, removed);
+        const result = unfilteredJobs.filter((j)=>j.completed == 0);
+        var start = list[startIndex].ordernum;
+        var end = list[endIndex].ordernum;
+        const [removed] = result.splice(start-1, 1);
+        result.splice(end-1, 0, removed);
+
 
         return result;
     };
@@ -243,13 +281,16 @@ const CrewCrews = (props) => {
     });
 
     const onDragEnd = (result) => {
-        console.log("RESULT",result)
         if(!selectedCrew){
         return;
         }
         // dropped outside the list
         if (!result.destination) {
         return;
+        }
+        if(!unfilteredJobs){
+            console.error("no unfiltered items");
+            return;
         }
     
         const items = reorder(
@@ -258,6 +299,13 @@ const CrewCrews = (props) => {
         result.destination.index
         );
         var temp = items.map((item, i)=> item.id);
+        
+        if(!temp){
+            console.error("Failed to reorder, bad temp list to update")
+            return;
+        }
+       
+
         Crew.reorderCrewJobs(temp,selectedCrew.id)
         .then( (ok) => {
             if(!ok){
@@ -334,11 +382,11 @@ const CrewCrews = (props) => {
 
     }
 
-    const handleUpdateJobCompleted =(event, job_id)=>{
+    const handleUpdateJobCompleted =(event, job_id, crew_id)=>{
         var completed = event.target.checked ? 1 : 0;
         console.log("Completed", completed);
 
-        Crew.updateCrewJobCompleted(completed, job_id )
+        Crew.updateCrewJobCompleted(completed, job_id, crew_id )
         .then((data)=>{
             
             setLocalCrewJobs(null);
@@ -352,23 +400,173 @@ const CrewCrews = (props) => {
         })
     }
 
+    const handleOpenCrewPDF = (event, crew, jobs)=>{
+        //var row = jobs;
+      //row.c_name = activeWorkOrder?.c_name || null;
+    //   var tmpUser = raineyUsers.find((u)=> u.user_id == row.user_entered);
+    //   if(tmpUser){
+    //     row.user_entered_name = tmpUser.name;
+    //   } 
+    //   WorkOrderDetail.getFPOrderItems( rowData.record_id )
+    //   .then( (fpOrderItems) => {
+          if(jobs && Array.isArray(jobs)){
+
+              Pdf.createCrewJobPdf(crew, jobs)
+              .then((data)=>{
+                var fileURL = URL.createObjectURL(data);
+                window.open(fileURL);
+              })
+              .catch((error)=>{
+                console.error("Failed to create and open pdf", error);
+              })
+          }                
+    //   })
+    //   .catch( error => {
+    //       console.error("Error getting fpOrderitem.",error);
+    //       cogoToast.error(`Error getting fpOrderitem. ` , {hideAfter: 4});
+    //   })
+
+    }
+
+    const changeDateRange = (to, from) =>{
+        setCrewJobDateRange({
+          to: to ? new Date(to) : crewJobDateRange.to,
+          from: from ? new Date(from) : crewJobDateRange.from
+        })
+        setLocalCrewJobs(null);
+    }
+
+    const handleChangePanel = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+      };
+
+    const handleShowAllDates = (event)=>{
+        if(!selectedCrew || !unfilteredJobs || !crewJobDateRange){
+            console.error("Bad crew or jobs or dates in handleShowAllDates");
+            return;
+        }
+        var minDate = moment() ;
+        var maxDate = moment() ;
+
+        //Get min and max dates for our jobs
+        unfilteredJobs.filter((j)=> j.completed == 0).forEach((job)=>{
+            var date;
+            if(job.job_type == "install"){
+                date = Util.convertISODateToMySqlDate(job.sch_install_date) || null;
+            }
+            if(job.job_type == "drill"){
+                date = Util.convertISODateToMySqlDate(job.drill_date) || null;
+            }
+
+            if(moment(Util.convertISODateToMySqlDate(minDate)).isAfter( date )){
+                minDate = date;
+            }
+            if(moment(Util.convertISODateToMySqlDate(maxDate)).isBefore(date)){
+                maxDate = date;
+            }
+
+        });
+        console.log("maxDate", maxDate);
+        console.log("MinDate", minDate);
+        setCrewJobDateRange({
+            to: moment(maxDate).add(1, 'days').format(),
+            from: moment(minDate).subtract(1, 'days').format()
+        })
+        setLocalCrewJobs(null);
+
+    }
+
+    const getShowingSpan = () =>{
+        if(!localCrewJobs){
+            return "";
+        }
+        var jobList = [...localCrewJobs];
+        var allJobList = unfilteredJobs?.filter((j)=>j.completed ==0);
+        if(!jobList || !allJobList){
+            return ""
+        }
+        if(jobList?.length == allJobList.length){
+            return ("");
+        }
+        return(
+            <><span>Showing {jobList.length || ""} of {allJobList.length} Active Jobs</span>
+                        <span className={classes.spanLink} onClick={event=> handleShowAllDates(event)}>(Show All)</span></>)
+    }
+
+    // const handleToggleExpandList = () =>{
+    //     if(listHeight === 370){
+    //         setListHeight(600);
+    //     }else{
+    //         setListHeight(370);
+    //     }
+    // }
 
     return(
         <>
         <Grid container className={classes.crew_grid}>
-            <Grid item xs={6} >
+            <Grid item xs={4} >
                 <CrewCrewsCrews selectedCrew={selectedCrew} setSelectedCrew={setSelectedCrew} localCrewJobs={localCrewJobs} setLocalCrewJobs={setLocalCrewJobs}
                      selectedCrewMembers={selectedCrewMembers} setSelectedCrewMembers={setSelectedCrewMembers} 
                      selectedJob={selectedJob} setSelectedJob={setSelectedJob}/>
                 
             </Grid>
 
-            <Grid item xs={5} className={classes.job_root}>
+            <Grid item xs={7} className={classes.job_root}>
                 <div className={classes.job_list_head}>
                 <span>Job List - {selectedCrew ? selectedCrew.crew_leader_name ? selectedCrew.crew_leader_name : 'Crew ' + selectedCrew.id : ""}</span>
                 </div>
                 {selectedCrew ? <>
-                <List > 
+                <Accordion expanded={expanded === 'activeJobPanel'} onChange={handleChangePanel('activeJobPanel')}>
+                <AccordionSummary
+                className={classes.expandedSummary}
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1a-content"
+                id="panel1a-header"
+                ><div><span className={classes.expansionTitleSpan}>Active Jobs</span></div>
+                {expanded === 'activeJobPanel' && <div className={classes.buttonDiv}>
+                <Button className={classes.openButton} onClick={event => handleMapCrewJobs(event, selectedCrew.id, localCrewJobs)}>Map Jobs</Button>
+                <Button className={classes.openButton} onClick={event => handleFilterCrewJobs(event, selectedCrew.id, localCrewJobs)}>Filter in TaskList</Button>
+                <Button className={classes.openButton} onClick={event => handleOpenCrewPDF(event, selectedCrew, localCrewJobs)}>PDF</Button>
+                </div>}
+                </AccordionSummary>
+                <AccordionDetails
+                className={classes.expansionDetail}><>
+                <div className={classes.dateRangeDiv}>
+                        <div className={classes.inputDiv}>
+                        <span className={classes.inputSpan}>FROM:</span>
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <DatePicker    format="MM/dd/yyyy"
+                                            clearable
+                                            showTodayButton
+                                            inputVariant="outlined"
+                                            variant="modal" 
+                                            maxDate={new Date('01-01-2100')}
+                                            minDate={new Date('01-01-1970')}
+                                            className={classes.inputField}
+                                            value={crewJobDateRange.from} 
+                                            onChange={value => changeDateRange(null, value)} />
+                        </MuiPickersUtilsProvider>
+                        </div>
+                        <div className={classes.inputDiv}>
+                        <span className={classes.inputSpan}>TO:</span>
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <DatePicker    format="MM/dd/yyyy"
+                                            clearable
+                                            showTodayButton
+                                            inputVariant="outlined"
+                                            variant="modal" 
+                                            maxDate={new Date('01-01-2100')}
+                                            minDate={new Date('01-01-1970')}
+                                            className={classes.inputField}
+                                            value={crewJobDateRange.to} 
+                                            onChange={value => changeDateRange(value, null)} />
+                        </MuiPickersUtilsProvider>
+                    </div>
+                    </div>
+                <div>{ getShowingSpan() }
+                        
+                    </div>
+                <List style={{maxHeight: `${listHeight}px`}} className={classes.jobList}> 
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable"
                             renderClone={(provided, snapshot, rubric) => (
@@ -398,9 +596,9 @@ const CrewCrews = (props) => {
                                 return (
                                 <Draggable key={row.id + index+ 'draggable'} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
                                 {(provided, snapshot) => { 
-                                    console.log("row", row);
+                                    //console.log("row", row);
                                     const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
-                                    console.log("date",date);
+                                    //console.log("date",date);
                                     const datePassed = date && (new Date(date) < new Date());
                                     const selected = selectedJob?.id === row.id;
                                     return (
@@ -422,16 +620,21 @@ const CrewCrews = (props) => {
                                                 provided.draggableProps.style
                                                 ) : {}}>
                                         <ListItemText id={labelId} className={classes.listItemText}>
-                                                <><div className={classes.task_name_div}><span>{row.t_name}</span></div>
-                                                <div className={classes.job_list_task_info}> 
-                                                        {row.job_type == 'install' ? <><span className={classes.installSpan}>
-                                                                INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
-                                                            </span></>
-                                                        : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
-                                                            DRILL DATE: </span> <span>{date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}</span> </>
-                                                            : 'BAD TYPE'}
-                                                        &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
-                                                </div></>
+                                                <div className={classes.listItemDiv}>
+                                                <div><span className={classes.listItemOrderNum}>{row.ordernum}</span></div>
+                                                <div className={classes.listItemInfoDiv}>
+                                                    <div className={classes.task_name_div}><span>{row.t_name}</span></div>
+                                                    <div className={classes.job_list_task_info}> 
+                                                            {row.job_type == 'install' ? <><span className={classes.installSpan}>
+                                                                    INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
+                                                                </span></>
+                                                            : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
+                                                                DRILL DATE: </span> <span>{date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}</span> </>
+                                                                : 'BAD TYPE'}
+                                                            &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
+                                                    </div>
+                                                    </div>
+                                                </div>
                                         </ListItemText>
                                         <ListItemSecondaryAction className={classes.secondary_div}>
                                                 
@@ -440,7 +643,7 @@ const CrewCrews = (props) => {
                                                 checkedIcon={<CheckBoxIcon fontSize="medium" className={classes.iconChecked} />}
                                                 name="checkedI"
                                                 checked={row.completed}
-                                                onChange={(event)=> handleUpdateJobCompleted(event, row.id)}
+                                                onChange={(event)=> handleUpdateJobCompleted(event, row.id, row.crew_id)}
                                             />
 
                                             <IconButton onClick={event => handleOpenSwapPopover(event, row)} >
@@ -452,7 +655,7 @@ const CrewCrews = (props) => {
                                             <EditIcon />
                                             </IconButton>
                                             
-                                            <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleRemoveCrewJob(event, row.id)}>
+                                            <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleRemoveCrewJob(event, row.id, row.crew_id)}>
                                                 <DeleteIcon />
                                             </IconButton> 
                                             
@@ -468,9 +671,9 @@ const CrewCrews = (props) => {
                         </Droppable>
                     </DragDropContext>
                         </List> 
-                        <Button className={classes.openButton} onClick={event => handleMapCrewJobs(event, selectedCrew.id, localCrewJobs)}>Map Crew Jobs</Button>
-                        <Button className={classes.openButton} onClick={event => handleFilterCrewJobs(event, selectedCrew.id, localCrewJobs)}>Filter Crew in TaskList</Button>
-                        </> : <>Select a crew member to view jobs</> }
+                        {/* <div><span onClick={event => handleToggleExpandList()}>Expand</span></div> */}
+                        
+                       
             <Popover
                 id={jobPopoverId}
                 open={jobPopoverOpen}
@@ -502,7 +705,85 @@ const CrewCrews = (props) => {
                             </ListItem>
                         ))}
                 </List>
-            </Popover>
+            </Popover></>
+            </AccordionDetails>
+            </Accordion>
+            <Accordion expanded={expanded === 'completedPanel'} onChange={handleChangePanel('completedPanel')}>
+                <AccordionSummary
+                className={classes.expandedSummary}
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="completedPanel-content"
+                id="completedPanel-header"
+                >
+                <span className={classes.expansionTitleSpan}>Completed Jobs</span>
+                </AccordionSummary>
+                <AccordionDetails
+                    className={classes.expansionDetail}>
+                    <List className={classes.completedList}> 
+                    {unfilteredJobs && unfilteredJobs.filter((j)=> j.completed == 1).map((row, index) => {
+                                const labelId = `checkbox-list-label-${row.id}`;
+                                const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
+                                //console.log("date",date);
+                                const datePassed = date && (new Date(date) < new Date());
+                                const selected = selectedJob?.id === row.id;
+                                return (
+                                <ListItem key={row.id + index} 
+                                            role={undefined} dense button 
+                                            onClick={event => handleSelectJob(event, row)}
+                                            onContextMenu={event => handleRightClick(event, row.task_id)}
+                                            selected={selectedJob && selectedJob.id === row.id}
+                                            className={ clsx( {[classes.selectedRow]: selected },
+                                                {[classes.nonSelectedRow]: !selected},
+                                                {[classes.datePassedRow]: !selected && datePassed },
+                                                {[classes.datePassedSelectedRow]: selected && datePassed }
+                                            )}
+                                            >
+                                    <ListItemText id={labelId} className={classes.listItemText}>
+                                                <div className={classes.listItemDiv}>
+                                                <div className={classes.listItemInfoDiv}>
+                                                    <div className={classes.task_name_div}><span>{row.t_name}</span></div>
+                                                    <div className={classes.job_list_task_info}> 
+                                                            {row.job_type == 'install' ? <><span className={classes.installSpan}>
+                                                                    INSTALL DATE:</span> <span> {date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}
+                                                                </span></>
+                                                            : row.job_type == 'drill' ? <><span className={classes.drillSpan}>
+                                                                DRILL DATE: </span> <span>{date ? Util.convertISODateToMySqlDate(date) : 'Not Assigned'}</span> </>
+                                                                : 'BAD TYPE'}
+                                                            &nbsp;<span>{datePassed ? "DATE PASSED" : ""}</span>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                        </ListItemText>
+                                    <ListItemSecondaryAction className={classes.secondary_div}>
+                                            
+                                        <Checkbox
+                                            icon={<CheckBoxOutlineBlankIcon fontSize="medium" className={classes.icon} />}
+                                            checkedIcon={<CheckBoxIcon fontSize="medium" className={classes.iconChecked} />}
+                                            name="checkedI"
+                                            checked={row.completed}
+                                            onChange={(event)=> handleUpdateJobCompleted(event, row.id, row.crew_id)}
+                                        />
+
+                                        {/* <IconButton onClick={event => handleOpenSwapPopover(event, row)} >
+                                            <SwapIcon edge="end" aria-label="edit" />
+                                        </IconButton> */}
+                                            
+                                            
+                                        <IconButton className={classes.secondary_button} edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.task_id)}>
+                                        <EditIcon />
+                                        </IconButton>
+                                        
+                                        {/* <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleRemoveCrewJob(event, row.id)}>
+                                            <DeleteIcon />
+                                        </IconButton>  */}
+                                        
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                )})}
+                                </List>   
+                </AccordionDetails>
+            </Accordion>
+            </> : <>Select a crew member to view jobs</> }
             </Grid>
 
 
@@ -570,6 +851,17 @@ const useStyles = makeStyles(theme => ({
         padding: '5px',
         margin: '1%'
     },
+    jobList:{
+        //maxHeight: 359,
+        overflowY: 'scroll',
+    },
+    completedList:{
+        maxHeight: 359,
+        overflowY: 'scroll',
+        background: 'lightgrey',
+        padding: '5px',
+        width: '100%',
+    },
     job_list_head:{
         backgroundColor: '#327370',
         color: '#fff',
@@ -580,9 +872,10 @@ const useStyles = makeStyles(theme => ({
         // margin: '0% 5%',
         color: '#535353',
         padding: '.6%',
-        backgroundColor: '#eeeeee',
+        backgroundColor: '#fff',
         borderRadius: '4px',
-        boxShadow: '0px 1px 3px 0px #000000db',
+        //boxShadow: '0px 1px 3px 0px #000000db',
+        maxHeight: '700px',
     },
     items:{
         color: '#fcfcfc'
@@ -618,15 +911,27 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#6f6f6f',
     },
     task_name_div:{
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        flexBasis: '60%',
         '& span':{
             fontWeight: '600',
             color: '#1f2f52',
         },
     },
     job_list_task_info:{
+        flexBasis: '40%',
         '& span':{
             fontWeight: '500',
         }
+    },
+    buttonDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: '4px',
     },
     openButton:{
         backgroundColor: '#fca437',
@@ -661,9 +966,90 @@ const useStyles = makeStyles(theme => ({
         },
         backgroundColor: 'linear-gradient(0deg, #f5f5f5, white)'
     },
+    listItemDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: '2px 2px'
+    },
+    listItemInfoDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'start',
+        alignItems: 'center',
+        margin: '0px 15px',
+        flexBasis: '76%',
+    },
+    listItemOrderNum:{
+        fontFamily: 'sans-serif',
+        padding: '0px 5px'
+    },
     listItemText:{
         marginTop: 0,
         marginBottom: 0,
+    },
+    labelDiv:{
+        textAlign: 'center',
+    },  
+    inputDiv:{
+        display:'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        //width: '25%',
+        margin: '5px 0px',
+        paddingRight:'15px', 
+        color: '#a55400'
+    },
+    dateRangeDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dateRangeSpan:{
+        fontSize: '13px',
+        fontFamily: 'sans-serif',
+        fontWeight:'600',
+        color: '#666',
+        textAlign: 'center'
+    },
+        inputSpan:{
+        marginRight: '10px',
+        fontSize: '13px',
+        fontFamily: 'sans-serif',
+    },
+    inputField:{
+        '& input':{
+            backgroundColor: '#fff',
+            padding: '5px 8px',
+            width: '80px'
+        }
+    },
+    expansionTitleSpan:{
+        fontFamily: 'sans-serif',
+        fontSize: '1.4em',
+        color: '#555',
+    },
+    expandedSummary:{
+        background: 'linear-gradient(0deg, #efefef, white)',
+        boxShadow: '0px 3px 3px 0px #cecece',
+        border: '1px solid #b2b2b2',
+        '& .MuiAccordionSummary-content.Mui-expanded':{
+            margin: 0,
+        },
+        minHeight: '40px !important',
+    },
+    expansionDetail:{
+        display: 'block',
+        backgroundColor: '#ededed',
+        //boxShadow: 'inset 0 0 3px 1px #9a9a9a',
+    },
+    spanLink:{
+        cursor: 'pointer',
+        textDecoration: 'underline',
+        color: '#2222bb',
+        padding: '0px 5px',
     }
     
   }));

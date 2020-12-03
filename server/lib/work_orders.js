@@ -225,8 +225,8 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
             wo_id = req.body.wo_id;
         }  
     }
-    logger.verbose(wo_id);
-    
+    logger.verbose(wo_id);    
+
 
     const sql = 'SELECT record_id, work_order, item_type, user_entered, date_format(date_entered, \'%m-%d-%Y\') as date_entered, quantity, part_number, size, description, ' +
         ' price, date_format(receive_date, \'%m-%d-%Y\') as receive_date , receive_by, packing_slip, contact, scoreboard_or_sign, model, color, trim , date_format(scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 

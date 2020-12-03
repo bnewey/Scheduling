@@ -7,6 +7,7 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../../js/Util';
 
+var today =  new Date();
 
 export const CrewContext = createContext(null);
 
@@ -22,6 +23,9 @@ const CrewContainer = function(props) {
     const [allCrews, setAllCrews] = useState(null);
     const [memberJobs, setMemberJobs] = useState(null);
     const [shouldResetCrewState, setShouldResetCrewState] = useState(false);
+    const [crewJobDateRange, setCrewJobDateRange] = useState({to: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()+30))),
+        from: Util.convertISODateToMySqlDate(today)})
+        
     //Modal Props
     const [crewModalOpen, setCrewModalOpen] = React.useState(false);
 
@@ -113,7 +117,7 @@ const CrewContainer = function(props) {
     return (
     <div className={classes.root}>
         <CrewContext.Provider value={{setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
-                allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} } >
+                allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews, crewJobDateRange, setCrewJobDateRange} } >
                     <> <>{children} </>
    
                     </>

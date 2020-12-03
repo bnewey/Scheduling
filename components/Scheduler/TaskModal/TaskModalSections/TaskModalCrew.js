@@ -55,12 +55,12 @@ export default function TaskModalCrew(props){
         setOpen(false);
     };
 
-    const handleRemoveCrewMemberFromTask = (event, task_id, j_id) =>{
+    const handleRemoveCrewMemberFromTask = (event, task_id, j_id, c_id) =>{
         if(task_id == null || j_id == null){
             cogoToast.error("Couldn't remove");
             console.error("Taskid or j_id is null in remove crew member")
         }
-        Crew.deleteCrewJob(j_id)
+        Crew.deleteCrewJob(j_id, c_id)
         .then((response)=>{
             setShouldResetCrewState(true);
             setModalCrewJobs(null);
@@ -86,14 +86,16 @@ export default function TaskModalCrew(props){
                 {modalCrewJobs.map((job) => ( 
                     <div className={classes.task_list_div}>
                         <span className={classes.p_task_name}>{job.member_name ? job.member_name : `Crew ${job.crew_id}`} - ({job.job_type})</span>
+                        <span>{job.completed == 1 ? `Completed ${job.completed_date ? job.completed_date : ''}` : ""}</span>
                         <a  className={classes.remove_link}
-                            onClick={event => handleRemoveCrewMemberFromTask(event, modalTask.t_id, job.id)}>
+                            onClick={event => handleRemoveCrewMemberFromTask(event, modalTask.t_id, job.id, job.crew_id)}>
                             Remove
                         </a> 
                     </div>
                 ))}
-                <TaskListAddCrewDialog selectedTasks={[modalTask.t_id]}  onClose={()=>{setShouldReFetch(true); setTaskLists(null)}}/>
+                
                 </Scrollbars>
+                <TaskListAddCrewDialog selectedTasks={[modalTask.t_id]}  onClose={()=>{setShouldReFetch(true); setTaskLists(null)}}/>
                 </>
             : <></>
             } 
@@ -110,7 +112,7 @@ const useStyles = makeStyles(theme => ({
         fontSize: '19px',
         color: '#414d5a',
         fontWeight: '600',
-        marginBlockStart: '10px',
+        marginBlockStart: '0px',
         marginBlockEnd: '0px',
     },
     inputField: {
@@ -139,6 +141,7 @@ const useStyles = makeStyles(theme => ({
     },
     task_list_div:{
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
         alignContent: 'center',
         backgroundColor: '#f3fbff',

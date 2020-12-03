@@ -4,7 +4,7 @@ const pdf = require('html-pdf');
 const fs = require('fs');
 const woTemplate = require(`../documents/work_order_template`);
 const taskListTemplate = require(`../documents/task_list_template`);
-const packingSlipTemplate = require(`../documents/packing_slip_template`);
+const crewJobsTemplate = require(`../documents/crew_jobs_template`)
 
 const moment = require('moment');
 
@@ -300,5 +300,32 @@ router.post('/createFairPlayOrderPdf', async (req,res) => {
     
 });
 
+
+router.post('/createCrewJobPdf', async (req,res) => {
+    if(!req.body.crew || !req.body.jobs){
+        res.sendStatus(400);
+    }
+    var crew = req.body.crew;
+    var jobs = req.body.jobs;
+
+    const options = {
+        orientation: 'landscape'
+    };
+
+    
+
+    pdf.create(crewJobsTemplate(crew, jobs), options).toBuffer(function(err, buffer){
+        if(err){
+            res.sendStatus(400);
+        }
+        if(Buffer.isBuffer(buffer) ){
+            res.send(buffer);
+
+        }else{
+            res.sendStatus(400);
+        }
+    })
+
+});
 
 module.exports = router;

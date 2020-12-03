@@ -104,7 +104,7 @@ const CrewMembers = (props) => {
         event.preventDefault();
     };
 
-    const handleRemoveCrewJob = (event, id) => {
+    const handleRemoveCrewJob = (event, id, crew_id) => {
         if(!id){
             cogoToast.error("Couldnt delete job");
             console.error("Bad/no id on delete");
@@ -112,7 +112,7 @@ const CrewMembers = (props) => {
         }
 
         const deleteMember = () => {
-            Crew.deleteCrewJob(id)
+            Crew.deleteCrewJob(id, crew_id)
                 .then( (data) => {
                         setShouldResetCrewState(true);
                         cogoToast.success(`Removed job ${id} from crew jobs`, {hideAfter: 4});
@@ -379,9 +379,9 @@ const CrewMembers = (props) => {
                                             <EditIcon />
                                             </IconButton>
                                             
-                                            <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveCrewJob(event, row.id)}>
+                                            {/* <IconButton edge="end" aria-label="delete" onClick={event => handleRemoveCrewJob(event, row.id, row.crew_id)}>
                                                 <DeleteIcon />
-                                            </IconButton> 
+                                            </IconButton>  */}
                                             
                                             </React.Fragment>
                                         

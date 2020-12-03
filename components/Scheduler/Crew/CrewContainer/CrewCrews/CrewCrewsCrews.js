@@ -400,6 +400,7 @@ const useStyles = makeStyles(theme => ({
         fontWeight: '500',
         fontSize: '.8em',
         color: '#555',
+        whiteSpace: 'pre-wrap',
     },
     jobCountSpan:{
         fontSize: '1em',
