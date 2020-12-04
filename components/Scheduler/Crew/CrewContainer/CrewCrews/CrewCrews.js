@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Paper, Grid, List, ListItem, ListSubheader, ListItemText, ListItemSecondaryAction, IconButton, Popover, Checkbox, Button,
-    Collapse, Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core';
+    Collapse, Accordion, AccordionDetails, AccordionSummary, Tooltip} from '@material-ui/core';
 
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -81,7 +81,6 @@ const CrewCrews = (props) => {
             Crew.getCrewJobsByCrew(selectedCrew.id)
             .then((data)=>{
                 if(data){
-                    console.log("Data",data);
                     //filter using to and from dates
                     var updateData = data.filter((j)=>j.completed == 0)
                     if(crewJobDateRange){
@@ -216,14 +215,14 @@ const CrewCrews = (props) => {
     const jobPopoverOpen = Boolean(jobAnchorEl);
     const jobPopoverId = open ? 'swap-popover' : undefined;
 
-    const handleSwapJob = (event, crew) => {
+    const handleSwapJob = (event, crew, old_crew_id) => {
         if(!crew.id || !swapJobId){
             cogoToast.error("Could not swap.");
             console.error("Bad member or swapJobId for swap.");
             return;
         }
         
-        Crew.updateCrewJob(crew.id, swapJobId)
+        Crew.updateCrewJob(crew.id, swapJobId, old_crew_id)
         .then((data)=>{
             setLocalCrewJobs(null);
             setShouldResetCrewState(true);
@@ -247,11 +246,20 @@ const CrewCrews = (props) => {
         return;
         }
         const result = unfilteredJobs.filter((j)=>j.completed == 0);
+
+        //This part is dependent on the index and ordernum matching up
         var start = list[startIndex].ordernum;
         var end = list[endIndex].ordernum;
+
+        if(start == undefined || start == null){
+            console.error("Bad start index in reorder");
+        }
+        if(end == undefined || end == null){
+            console.error("Bad start index in reorder");
+        }
+
         const [removed] = result.splice(start-1, 1);
         result.splice(end-1, 0, removed);
-
 
         return result;
     };
@@ -264,7 +272,7 @@ const CrewCrews = (props) => {
         // some basic styles to make the items look a bit nicer
         userSelect: "none",
         padding: '3px',
-        margin: `0 0 4px 0`,
+        margin: `0 0 1px 0`,
 
         // change background colour if dragging
         background: isDragging ? "lightgreen" : "grey",
@@ -298,8 +306,9 @@ const CrewCrews = (props) => {
         result.source.index,
         result.destination.index
         );
+        console.log("Items", items);
+
         var temp = items.map((item, i)=> item.id);
-        
         if(!temp){
             console.error("Failed to reorder, bad temp list to update")
             return;
@@ -362,8 +371,6 @@ const CrewCrews = (props) => {
             }
             return "";
         }));
-        console.log("Properties", properties);
-        console.log("crew", crew);
 
         //1 = tasklist
         setTabValue(1);
@@ -384,7 +391,6 @@ const CrewCrews = (props) => {
 
     const handleUpdateJobCompleted =(event, job_id, crew_id)=>{
         var completed = event.target.checked ? 1 : 0;
-        console.log("Completed", completed);
 
         Crew.updateCrewJobCompleted(completed, job_id, crew_id )
         .then((data)=>{
@@ -401,30 +407,22 @@ const CrewCrews = (props) => {
     }
 
     const handleOpenCrewPDF = (event, crew, jobs)=>{
-        //var row = jobs;
-      //row.c_name = activeWorkOrder?.c_name || null;
-    //   var tmpUser = raineyUsers.find((u)=> u.user_id == row.user_entered);
-    //   if(tmpUser){
-    //     row.user_entered_name = tmpUser.name;
-    //   } 
-    //   WorkOrderDetail.getFPOrderItems( rowData.record_id )
-    //   .then( (fpOrderItems) => {
-          if(jobs && Array.isArray(jobs)){
 
-              Pdf.createCrewJobPdf(crew, jobs)
-              .then((data)=>{
-                var fileURL = URL.createObjectURL(data);
-                window.open(fileURL);
-              })
-              .catch((error)=>{
-                console.error("Failed to create and open pdf", error);
-              })
-          }                
-    //   })
-    //   .catch( error => {
-    //       console.error("Error getting fpOrderitem.",error);
-    //       cogoToast.error(`Error getting fpOrderitem. ` , {hideAfter: 4});
-    //   })
+        if(jobs && Array.isArray(jobs)){
+
+            Pdf.createCrewJobPdf(crew, jobs)
+            .then((data)=>{
+            var fileURL = URL.createObjectURL(data);
+            window.open(fileURL);
+            })
+            .catch((error)=>{
+            console.error("Failed to create and open pdf", error);
+            })
+        }    
+
+        if(event){
+            event.stopPropagation();
+        }
 
     }
 
@@ -466,8 +464,7 @@ const CrewCrews = (props) => {
             }
 
         });
-        console.log("maxDate", maxDate);
-        console.log("MinDate", minDate);
+        
         setCrewJobDateRange({
             to: moment(maxDate).add(1, 'days').format(),
             from: moment(minDate).subtract(1, 'days').format()
@@ -596,9 +593,7 @@ const CrewCrews = (props) => {
                                 return (
                                 <Draggable key={row.id + index+ 'draggable'} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
                                 {(provided, snapshot) => { 
-                                    //console.log("row", row);
                                     const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
-                                    //console.log("date",date);
                                     const datePassed = date && (new Date(date) < new Date());
                                     const selected = selectedJob?.id === row.id;
                                     return (
@@ -637,14 +632,14 @@ const CrewCrews = (props) => {
                                                 </div>
                                         </ListItemText>
                                         <ListItemSecondaryAction className={classes.secondary_div}>
-                                                
+                                            <Tooltip title="Mark as Completed" >
                                             <Checkbox
                                                 icon={<CheckBoxOutlineBlankIcon fontSize="medium" className={classes.icon} />}
                                                 checkedIcon={<CheckBoxIcon fontSize="medium" className={classes.iconChecked} />}
                                                 name="checkedI"
                                                 checked={row.completed}
                                                 onChange={(event)=> handleUpdateJobCompleted(event, row.id, row.crew_id)}
-                                            />
+                                            /></Tooltip>
 
                                             <IconButton onClick={event => handleOpenSwapPopover(event, row)} >
                                                 <SwapIcon edge="end" aria-label="edit" />
@@ -700,7 +695,7 @@ const CrewCrews = (props) => {
                             }).map((crew, i)=>(
                             <ListItem className={classes.member_list_item} 
                                         key={`crew_members+${i}`} button
-                                        onMouseUp={(event)=>handleSwapJob(event, crew)}>
+                                        onMouseUp={(event)=>handleSwapJob(event, crew, selectedCrew.id)}>
                                 <ListItemText primary={crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id} />
                             </ListItem>
                         ))}
@@ -723,7 +718,7 @@ const CrewCrews = (props) => {
                     {unfilteredJobs && unfilteredJobs.filter((j)=> j.completed == 1).map((row, index) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
                                 const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
-                                //console.log("date",date);
+                                
                                 const datePassed = date && (new Date(date) < new Date());
                                 const selected = selectedJob?.id === row.id;
                                 return (
@@ -1050,7 +1045,7 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'underline',
         color: '#2222bb',
         padding: '0px 5px',
-    }
+    },
     
   }));
 

@@ -292,7 +292,7 @@ async function deleteCrewJob(id, crew_id){
     }
 }
 
-async function updateCrewJob(  crew_id,job_id){
+async function updateCrewJob(  crew_id,job_id, old_crew_id){
     const route = '/scheduling/crew/updateCrewJob';
     try{
         var response = await fetch(route,
@@ -301,7 +301,7 @@ async function updateCrewJob(  crew_id,job_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({job_id,  crew_id})
+                body: JSON.stringify({job_id,  crew_id, old_crew_id})
             });
         return response.ok;
     }catch(error){

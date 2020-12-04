@@ -401,7 +401,7 @@ const CalendarContainer = (props) => {
                 return await Crew.deleteCrewJob(job_id, crew_job.crew_id);
             }
             if(method == "update"){
-                return  await Crew.updateCrewJob( groups[newGroupOrder].id,job_id);
+                return  await Crew.updateCrewJob( groups[newGroupOrder].id,job_id, crew_job.crew_id);
             }
             if(method == "nothing"){
                 return  ;

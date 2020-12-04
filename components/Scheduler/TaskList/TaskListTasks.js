@@ -236,8 +236,8 @@ const TaskListTasks = (props) =>{
     const addSwapCrewPopoverOpen = Boolean(addSwapCrewAnchorEl);
     const addSwapCrewPopoverId = open ? 'add-popover' : undefined;
 
-    const handleAddSwapCrew = useCallback((event, new_crew) => {
-        if(!new_crew.id || !addSwapCrewJob || !addSwapCrewJob.job_id || !addSwapCrewJob.job_type){
+    const handleAddSwapCrew = useCallback((event, new_crew, old_crew_id) => {
+        if(!new_crew.id || !addSwapCrewJob || !addSwapCrewJob.job_id || !addSwapCrewJob.job_type ){
           cogoToast.error("Could not swap.");
           console.error("Bad member or addSwapCrewJob for add/update.");
           return;
@@ -246,9 +246,12 @@ const TaskListTasks = (props) =>{
         console.log(addSwapCrewJob);
         // Update Job
         if(addSwapCrewJob.crew_id != -1){
+          if(!old_crew_id){
+            console.error("No old_crew_id given to handleAddSwapCrew");
+          }
           //Update Function
-          const updateJob = (id)=>{
-              Crew.updateCrewJob(id, addSwapCrewJob.job_id)
+          const updateJob = (id, old_crew_id)=>{
+              Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id)
                       .then((data)=>{
                           setShouldResetCrewState(true);
                           setTaskListTasks(null);
@@ -266,7 +269,7 @@ const TaskListTasks = (props) =>{
                   if(!isNaN(data)){
                       var id = data;
                       //Update Job
-                      updateJob(id);
+                      updateJob(id,old_crew_id);
                   }
               })
               .catch((error)=>{
@@ -275,7 +278,7 @@ const TaskListTasks = (props) =>{
               })
               //Just Update
           }else{
-              updateJob(new_crew.id);
+              updateJob(new_crew.id, old_crew_id);
           }
           
         }
@@ -649,7 +652,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
                           }).map((crew, i)=>(
                           <ListItem className={classes.crew_list_item} 
                                       key={`crew_members+${i}`} button
-                                      onMouseUp={(event)=>handleAddSwapCrew(event, crew)}>
+                                      onMouseUp={(event)=>handleAddSwapCrew(event, crew, addSwapCrewJob.crew_id )}>
                               <ListItemText primary={crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id} />
                           </ListItem>
                       ))}

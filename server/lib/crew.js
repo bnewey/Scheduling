@@ -378,7 +378,7 @@ router.post('/addCrewJobs', async (req,res) => {
     async.forEachOf(ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            all_results.push(await database.query(sql, [id, job_type, crew_id, max+i+1]));
+            all_results.push(await database.query(sql, [id, job_type, crew_id, max+i]));
             return;
         }
         catch(error){
@@ -429,10 +429,11 @@ router.post('/deleteCrewJob', async (req,res) => {
 });
 
 router.post('/updateCrewJob', async (req,res) => {
-    var crew_id, job_id;
+    var crew_id, job_id, old_crew_id;
     if(req.body){
         crew_id = req.body.crew_id;
         job_id = req.body.job_id;
+        old_crew_id = req.body.old_crew_id;
     }
 
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj WHERE crew_id = ? AND completed = 0; "
@@ -444,8 +445,22 @@ router.post('/updateCrewJob', async (req,res) => {
         var data = await database.query(getMax, [ crew_id ]);
         var max = data[0].max_num || 0;
         
-        const response = await database.query(sql, [crew_id, max+1, job_id  ]);
-        logger.info("Updated crew job " + job_id + " to crew: " + crew_id);
+        const response = await database.query(sql, [crew_id, max, job_id  ]);
+
+        //Reorder crew jobs to maintain correct order
+        if(old_crew_id){
+            logger.info("Attempting to reorder crew");
+            var reorderStatus = await reorderCrewJobsFromDB(old_crew_id)
+            logger.info("Reorder status " + reorderStatus)
+            if(reorderStatus == 1){
+                logger.info("Reordered crew" + old_crew_id);
+            }else{
+                if(reorderStatus == 0){  logger.info("Did not reorder on delete") };
+                if(reorderStatus == -1){ logger.info("Error in reorderCrewJobsFromDB")}
+            }
+        }
+
+        logger.info("Updated crew job " + job_id + " to crew: " + crew_id + " from crew: " + old_crew_id);
         res.sendStatus(200);
     }
     catch(error){
