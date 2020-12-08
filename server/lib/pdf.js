@@ -314,16 +314,17 @@ router.post('/createCrewJobPdf', async (req,res) => {
 
     
 
-    pdf.create(crewJobsTemplate(crew, jobs), options).toBuffer(function(err, buffer){
+    pdf.create(crewJobsTemplate(crew, jobs), options).toStream(function(err, stream){
         if(err){
             res.sendStatus(400);
         }
-        if(Buffer.isBuffer(buffer) ){
-            res.send(buffer);
-
-        }else{
-            res.sendStatus(400);
-        }
+        //if(Buffer.isBuffer(stream) ){
+            //res.send(stream);
+        res.set('Content-type', 'application/pdf');
+        stream.pipe(res)
+        //}else{
+        //    res.sendStatus(400);
+        //}
     })
 
 });
