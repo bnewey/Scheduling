@@ -50,7 +50,7 @@ const MapSiderbarCrewJobs = (props) =>{
   const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
         setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, expanded, setExpanded, setActiveVehicle,
         expandedAnimDone, sorters, crewJobs, setCrewJobs ,showCompletedJobs,setShowCompletedJobs, crewJobDateRange, setCrewJobDateRange,
-        allCrews, setAllCrews, localCrewJobs, setLocalCrewJobs } = props;
+        allCrews, setAllCrews, localCrewJobs, setLocalCrewJobs, setShouldResetCrewState } = props;
   
   const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved,crewToMap, setCrewToMap} = useContext(TaskContext);
 
@@ -60,7 +60,7 @@ const MapSiderbarCrewJobs = (props) =>{
   const [jobAnchorEl, setJobAnchorEl] = React.useState(null);
   const [swapJobId, setSwapJobId] = useState(null); 
 
-  const [listHeight, setListHeight] = React.useState(370)
+  const [listHeight, setListHeight] = React.useState(260)
 
   //CSS
   const classes = useStyles();
@@ -230,7 +230,7 @@ const MapSiderbarCrewJobs = (props) =>{
           return ("");
       }
       return(
-          <><span>Showing {jobList.length || ""} of {allJobList.length} Active Jobs</span>
+          <><span className={classes.showingSpan}>Showing {jobList.length || ""} of {allJobList.length} Active Jobs</span>
                       <span className={classes.spanLink} onClick={event=> handleShowAllDates(event)}>(Show All)</span></>)
   }
 
@@ -404,7 +404,7 @@ const MapSiderbarCrewJobs = (props) =>{
                         </MuiPickersUtilsProvider>
                     </div>
                     </div>
-                <div>{ getShowingSpan() }
+                <div className={classes.showingDiv}>{ getShowingSpan() }
                         
                     </div>
                 <List style={{maxHeight: `${listHeight}px`}} className={classes.jobList}> 
@@ -964,13 +964,21 @@ const useStyles = makeStyles(theme => ({
   expansionDetail:{
       display: 'block',
       backgroundColor: '#ededed',
+      padding: '0px 16px 0px'
       //boxShadow: 'inset 0 0 3px 1px #9a9a9a',
+  },
+  showingDiv:{
+    textAlign:'center',
+  },
+  showingSpan:{
+    fontSize: '.8em',
   },
   spanLink:{
       cursor: 'pointer',
       textDecoration: 'underline',
       color: '#2222bb',
       padding: '0px 5px',
+      fontSize: '.8em',
   },
   jobPanelIcon:{
     padding: '6px',

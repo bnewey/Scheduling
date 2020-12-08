@@ -287,7 +287,8 @@ const MapSidebar = (props) => {
                         {<MapSidebarCrewJobs {...props} panelRef={crewPanelRef} expanded={expanded} 
                                         expandedAnimDone={expandedAnimDone} showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs}
                                         crewJobDateRange={crewJobDateRange} setCrewJobDateRange={setCrewJobDateRange}
-                                        allCrews={allCrews} setAllCrews={setAllCrews} localCrewJobs={localCrewJobs} setLocalCrewJobs={setLocalCrewJobs} /> }
+                                        allCrews={allCrews} setAllCrews={setAllCrews} localCrewJobs={localCrewJobs} setLocalCrewJobs={setLocalCrewJobs}
+                                        setShouldResetCrewState={setShouldResetCrewState} /> }
                     </Scrollbars>
                 </AccordionDetails>
             </Accordion>

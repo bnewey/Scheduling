@@ -34,7 +34,7 @@ const TaskListFilterSaveDialog = React.memo(  (props) => {
     };
   
 
-    const handleAddNew = React.useContext((event, name) =>{
+    const handleAddNew = React.useCallback((event, name) =>{
         if(!name || !user || !filterInOrOut || !filterAndOr){
             console.error("Bad parameters in handleAddNew filter save")
             return;
