@@ -9,12 +9,17 @@ import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,C
      import ExpandLess from '@material-ui/icons/ExpandLess';
      import ExpandMore from '@material-ui/icons/ExpandMore';
      import PeopleIcon from '@material-ui/icons/People';
+     import SaveIcon from '@material-ui/icons/Save';
+     import DeleteIcon from '@material-ui/icons/Clear';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import clsx from 'clsx';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import Crew from '../../../js/Crew';
+import Settings from '../../../js/Settings';
+
+import TaskListFilterSaveDialog from './TaskListFilterSaveDialog'
 
 import TaskLists from '../../../js/TaskLists';
 import {createFilter} from '../../../js/Filter';
@@ -24,11 +29,10 @@ import {TaskContext} from '../TaskContainer';
 import {CrewContext} from '../Crew/CrewContextContainer';
 
 const TaskListFilter = (props) => {
-   
     //PROPS
     const { filteredItems, setFilteredItems } = props;
 
-    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters} = useContext(TaskContext);
+    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters, user} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
@@ -55,6 +59,8 @@ const TaskListFilter = (props) => {
         {text: "Description", field: "description",  type: 'text'}, 
         {text: "Order", field: "priority_order", type: 'number'}
     ]);
+
+    const [taskUserFilters, setTaskUserFilters] = React.useState(null);
 
     const filterTypes = [
         "Task Columns",
@@ -148,11 +154,11 @@ const TaskListFilter = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            console.log("MapContainer tmpData in loop", tmpData);
+                            
                         }
                     }
                     
-                    console.log("TaskListFilter each loop, ",tmpData);
+                    
                 })        
                 
                 //No filters 
@@ -169,6 +175,28 @@ const TaskListFilter = (props) => {
             setFilteredItems(null);
         }
     },[filters, filterInOrOut, filterAndOr]);
+
+    useEffect(()=>{
+        if(taskUserFilters == null){
+            console.log("user", user);
+            var user_id = user?.id;
+            Settings.getTaskUserFilters(user_id)
+            .then((data)=>{
+                if(data){
+                    var savedFilters = data?.map((item)=>{
+                        item.filter_json = JSON.parse(item.filter_json);
+                        return item;
+                    })
+                    console.log("taskUSerfilters", savedFilters);
+                    setTaskUserFilters(savedFilters);
+                }
+            })
+            .catch((error)=>{
+                console.error("Failed to get taskUserFilters", error);
+                cogoToast.error("Failed to get taskUserFilters");
+            })
+        }
+    },[taskUserFilters])
 
     
     const handleModalOpen = () => {
@@ -368,11 +396,46 @@ const TaskListFilter = (props) => {
         .catch((error)=>{
             console.error("Failed to get crew jobs in filter", error);
             cogoToast.error("Failed to filter crew");
-        })
-
-        
+        })   
     }
 
+    const handleApplySavedFilter = (event, item) =>{
+        if(!item){
+            console.error("Bad filter in handleApplySavedFilter ");
+            return;
+        }
+        setFilters(item.filter_json);
+        setFilterInOrOut(item.in_out == 0 ? "in" : (item.in_out == 1 ? "out": null ) );
+        setFilterAndOr(item.and_or == 0 ? "and" : (item.and_or == 1 ? "or": null ));
+        cogoToast.success(`Filtering by ${item.name}`)
+
+    }
+
+    const handleRemoveSavedFilter = (event, item)=>{
+        if(!item){
+            console.error("Bad item in removeSavedFilter");
+            return;
+        }
+       
+
+        const deleteFilter = () => {
+            Settings.removedSavedFilter(item.id)
+            .then((data)=>{
+                setTaskUserFilters(null);
+            })
+            .catch((error)=>{
+                cogoToast.error("Failed to remove saved filter");
+                console.error("Failed to removed saved filter", error);
+            })
+          }
+          confirmAlert({
+              customUI: ({onClose}) => {
+                  return(
+                      <ConfirmYesNo onYes={deleteFilter} onClose={onClose} customMessage={"Delete saved filter?"}/>
+                  );
+              }
+          })
+    }
     
     return(
         <>
@@ -503,7 +566,16 @@ const TaskListFilter = (props) => {
                                     <ListItemText primary="Crews" />
                                     {openCategory && openCategory == "crews" ? <ExpandLess /> : <ExpandMore />}
                                 </ListItem>
-                            
+                                {/* SAVED FILTERS */}
+                                <ListItem button onClick={event => handleOpenCategory(event, "saved_filters")}
+                                    className={clsx( { [classes.headListItem]: openCategory !== "saved_filters" },
+                                                     { [classes.headListItemSelected]: openCategory === "saved_filters" })}>
+                                    <ListItemIcon>
+                                    <SaveIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Saved Filters" />
+                                    {openCategory && openCategory == "saved_filters" ? <ExpandLess /> : <ExpandMore />}
+                                </ListItem>
                                 
                             </List>
                         </Grid>
@@ -586,6 +658,33 @@ const TaskListFilter = (props) => {
                                                 <ListItemText  className={classes.fieldListItemText}>
                                                     {item.crew_leader_name ? item.crew_leader_name : `Crew ${item.id}`}
                                                 </ListItemText>
+                                            </ListItem>
+                                            );
+                                    })}
+                                    
+                                </List>
+                                </Collapse>
+                            }
+                            {  openCategory && openCategory == "saved_filters" &&
+                                <Collapse in={openCategory && openCategory === "saved_filters"} timeout="auto" unmountOnExit>
+                                <List component="div" className={classes.fieldList} >
+                                    <TaskListFilterSaveDialog  taskUserFilters={taskUserFilters}  setTaskUserFilters={setTaskUserFilters}/>
+                                    
+                                    {taskUserFilters && taskUserFilters.map((item,i)=>{
+                                        const isSelected = selectedField === item; 
+                                        return(
+                                            <ListItem key={item.id} dense button
+                                                onMouseUp={event => handleApplySavedFilter(event, item)}
+                                                className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
+                                            >
+                                                <ListItemText  className={classes.fieldListItemText}>
+                                                    {item.name}
+                                                </ListItemText>
+                                                <ListItemSecondaryAction className={classes.secondary_div}>
+                                                    <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleRemoveSavedFilter(event, item)}>
+                                                    <DeleteIcon />
+                                                    </IconButton> 
+                                                </ListItemSecondaryAction>
                                             </ListItem>
                                             );
                                     })}
@@ -867,7 +966,14 @@ const useStyles = makeStyles(theme => ({
     headListItemSelected: {
         border: '1px solid #bdbdbd',
         background: '#a9ecff'
-    }
+    },
+    secondary_div:{
+        display: 'flex',
+    },
+    secondary_button:{
+        padding: '5px',
+        margin: '1%'
+    },
 
       
   }));

@@ -94,7 +94,7 @@ const CrewCrews = (props) => {
                             }
 
                             if(date != null){
-                                return moment(date).isAfter( Util.convertISODateToMySqlDate(crewJobDateRange.from)) && moment(date).isBefore(Util.convertISODateToMySqlDate(crewJobDateRange.to))
+                                return moment(date).isAfter( moment(Util.convertISODateToMySqlDate(crewJobDateRange.from)).subtract(1, 'days')) && moment(date).isBefore( moment(Util.convertISODateToMySqlDate(crewJobDateRange.to)).add(1,'days'))
                             }else{
                                 //Date not assigned
                                 return true
@@ -260,7 +260,6 @@ const CrewCrews = (props) => {
 
         const [removed] = result.splice(start-1, 1);
         result.splice(end-1, 0, removed);
-
         return result;
     };
 
@@ -466,8 +465,8 @@ const CrewCrews = (props) => {
         });
         
         setCrewJobDateRange({
-            to: moment(maxDate).add(1, 'days').format(),
-            from: moment(minDate).subtract(1, 'days').format()
+            to: moment(maxDate).format(),
+            from: moment(minDate).format()
         })
         setLocalCrewJobs(null);
 

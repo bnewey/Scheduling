@@ -3,20 +3,21 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, FormControl, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 
-import Crew from '../../../../js/Crew';
-import { CrewContext } from '../CrewContextContainer';
+import Settings from '../../../js/Settings';
+import { TaskContext } from '../TaskContainer';
 import cogoToast from 'cogo-toast';
 
 
-const CrewMemberActionAdd = (props) => {
+
+const TaskListFilterSaveDialog = React.memo(  (props) => {
  
     //PROPS
-    const {  } = props;
-    const {crewMembers, setCrewMembers } = useContext(CrewContext);
+    const { taskUserFilters, setTaskUserFilters } = props;
+    const { filters, user, filterInOrOut, filterAndOr } = useContext(TaskContext);
 
     //STATE
     const [addOpen, setAddOpen] = React.useState(false);
-    const [newMemberName, setNewMemberName] = React.useState("New Member");
+    const [newFilterName, setNewFilterName] = React.useState("New Filter");
 
     //CSS
     const classes = useStyles();
@@ -28,61 +29,67 @@ const CrewMemberActionAdd = (props) => {
     };
 
     const handleAddClose = () => {
-        setNewMemberName(null);
+        setNewFilterName(null);
         setAddOpen(false);
     };
   
 
-      const handleAddNew = (event, name) =>{
-          if(!name){
-              return;
-          }
-        Crew.addCrewMember(name)
-                .then((reponse) => {
-                    console.log(reponse);
-                    if(!reponse){
-                        console.warn("Bad reponse returned from addCrewMember");
-                        throw "Bad response from server on addCrewMember";
-                    }
-                    //refetch members
-                    setCrewMembers(null);
-                    handleAddClose();
-                    cogoToast.success(`Added new member`, {hideAfter: 4});
-                })
-                .catch( error => {
-                    cogoToast.error(`Error adding new member`, {hideAfter: 4});
-                    console.error(error);
-            });
-    };
+    const handleAddNew = React.useContext((event, name) =>{
+        if(!name || !user || !filterInOrOut || !filterAndOr){
+            console.error("Bad parameters in handleAddNew filter save")
+            return;
+        }
+        Settings.addSavedTaskFilter(name, user.id, filterAndOr == "and" ? 0 : 1, filterInOrOut == "in" ? 0 : 1, filters)
+            .then((response) => {
+                
+                //refetch tasklists
+                setTaskUserFilters(null);
+                
+                handleAddClose();
+                cogoToast.success(`Added new Saved Task Filter`, {hideAfter: 4});
+            })
+            .catch( error => {
+                cogoToast.error(`Error adding new saved task filter`, {hideAfter: 4});
+                console.error(error);
+        });
+    },[ user, filterInOrOut, filterAndOr ])
 
+    const NameTextField = React.useCallback(() =>{
+        const handleChangeText = (value) =>{
+            setNewFilterName(value);
+        }
+        return(<TextField key={"textField1"} id="task-list-edit-name" 
+        className={classes.textField}
+        label="Name"
+        value={newFilterName}
+        onChange={event => handleChangeText(event.target.value)}/>)
+    },[newFilterName, setNewFilterName])
+
+    
     return(
         <React.Fragment>
             <Button         
                     onClick={event => handleAddClickOpen(event)}    
                     variant="text"
                     color="secondary"
-                    size="small"
-                    className={classes.text_button}
-            ><AddIcon className={classes.icon_small} fontSize="small"/><span>Add Member</span></Button>
+                    size="large"
+                    className={classes.darkButton}
+            ><AddIcon className={classes.icon_small} fontSize="small"/><span>New Saved Filter from current Filter</span></Button>
             
-            { addOpen && crewMembers ? 
+            { addOpen && filters ? 
             
-            <Dialog PaperProps={{className: classes.dialog}} open={addOpen} onClose={handleAddClose}>
-            <DialogTitle className={classes.title}>Name of New Crew Member</DialogTitle>
+            <Dialog key={"dialogkey"} PaperProps={{className: classes.dialog}} open={addOpen} onClose={handleAddClose}>
+            <DialogTitle className={classes.title}>Name of New Saved Filter</DialogTitle>
                 <DialogContent className={classes.content}>
             <FormControl className={classes.inputField}>
-                <TextField id="task-list-edit-name" 
-                            className={classes.textField}
-                            label="Name"
-                            value={newMemberName}
-                            onChange={event => setNewMemberName(event.target.value)}/>
+                {NameTextField()}
             </FormControl>
             <DialogActions>
                 <Button onMouseDown={handleAddClose} color="primary">
                     Cancel
                 </Button>
                  <Button
-                    onMouseDown={event => handleAddNew(event, newMemberName)}
+                    onMouseDown={event => handleAddNew(event, newFilterName)}
                     variant="contained"
                     color="secondary"
                     size="medium"
@@ -98,9 +105,9 @@ const CrewMemberActionAdd = (props) => {
       
     );
 
-} 
+} )
 
-export default CrewMemberActionAdd;
+export default TaskListFilterSaveDialog;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -178,22 +185,11 @@ const useStyles = makeStyles(theme => ({
         padding:'1%',
       '&:hover':{
         border: '',
-        backgroundColor: '#ffedc4',
-        color: '#d87b04'
+        backgroundColor: '#e49027',
+        color: '#fff'
       },
     },
     icon_small:{
         verticalAlign: 'text-bottom'
-    },
-    text_button:{
-        textAlign: 'center',
-        cursor: 'pointer',
-        fontSize: '12px',
-        color: '#677fb3',
-        margin: '0% 3% 0% 0%',
-        '&:hover':{
-            color: '#697fb1',
-            textDecoration: 'underline',
-        }
     },
   }));

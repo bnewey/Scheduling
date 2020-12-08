@@ -600,7 +600,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
               : taskListTasks.length;
             return(
               <List
-              height={dimensions?.height}
+              height={dimensions?.height - 20}
               rowCount={itemCount}
               rowHeight={26}
               width={dimensions?.width}

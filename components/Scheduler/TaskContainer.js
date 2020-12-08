@@ -156,7 +156,7 @@ const TaskContainer = function(props) {
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
-                             sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved} } >
+                             sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved, user} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >
