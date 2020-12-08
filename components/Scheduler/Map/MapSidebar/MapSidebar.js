@@ -42,10 +42,12 @@ const MapSidebar = (props) => {
     const vehiclePanelRef = useRef(null);
     const crewPanelRef = useRef(null);
 
+    const [localCrewJobs, setLocalCrewJobs] = useState(null);
+
     
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
-        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState,
+        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState, crewJobDateRange, setCrewJobDateRange
          } = useContext(CrewContext);
 
 
@@ -188,6 +190,7 @@ const MapSidebar = (props) => {
     const handleChangeCrewToMap = (event)=>{
         if(event.target.value === ""){
             setCrewJobs(null);
+            setLocalCrewJobs(null);
             setCrewToMap(null);
             if(activeMarker?.type === "crew"){
                 setActiveMarker(null);
@@ -198,6 +201,7 @@ const MapSidebar = (props) => {
             var crew = allCrews.find((item)=> item.id == event.target.value);
             setCrewToMap(crew);
             setCrewJobs(null);
+            setLocalCrewJobs(null)
         }
         event.stopPropagation();
     }
@@ -281,7 +285,9 @@ const MapSidebar = (props) => {
                 <AccordionDetails ref={crewPanelRef} className={classes.details}>
                     <Scrollbars universal autoHeight autoHeightMax={400}>
                         {<MapSidebarCrewJobs {...props} panelRef={crewPanelRef} expanded={expanded} 
-                                        expandedAnimDone={expandedAnimDone} showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs} /> }
+                                        expandedAnimDone={expandedAnimDone} showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs}
+                                        crewJobDateRange={crewJobDateRange} setCrewJobDateRange={setCrewJobDateRange}
+                                        allCrews={allCrews} setAllCrews={setAllCrews} localCrewJobs={localCrewJobs} setLocalCrewJobs={setLocalCrewJobs} /> }
                     </Scrollbars>
                 </AccordionDetails>
             </Accordion>
