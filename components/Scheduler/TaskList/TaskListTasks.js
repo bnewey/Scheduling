@@ -642,7 +642,6 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
               : taskListTasks.length;
             return(
               <List
-              key={`taskList` + getRand}
               height={dimensions?.height - 20}
               rowCount={itemCount}
               rowHeight={26}
