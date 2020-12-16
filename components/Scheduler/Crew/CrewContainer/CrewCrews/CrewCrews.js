@@ -55,7 +55,7 @@ function arraysEqual(_arr1, _arr2) {
 const CrewCrews = (props) => {
 
     const {} = props;
-    const {setModalTaskId, setModalOpen, setTabValue, filters, setFilters, setFilterInOrOut, setFilterAndOr, crewToMap, setCrewToMap} = useContext(TaskContext);
+    const {setModalTaskId, setModalOpen, setTabValue, filters, setFilters, setFilterInOrOut, setFilterAndOr, crewToMap, setCrewToMap, refreshView} = useContext(TaskContext);
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
         setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState,
@@ -64,6 +64,7 @@ const CrewCrews = (props) => {
 
     const [selectedCrew, setSelectedCrew] = useState(null);
     const [localCrewJobs, setLocalCrewJobs] = useState(null);
+    const [localCrewJobsRefetch, setLocalCrewJobsRefetch] = useState(false);
     const [selectedCrewMembers, setSelectedCrewMembers] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
     const [expanded, setExpanded] = useState('activeJobPanel');
@@ -76,8 +77,20 @@ const CrewCrews = (props) => {
 
     const [listHeight, setListHeight] = React.useState(370)
 
+    //Refresh state for components outside scope
     useEffect(()=>{
-        if(selectedCrew && localCrewJobs == null){
+        if(refreshView && refreshView == "crew"){
+            //setShouldResetCrewState(true)
+            setLocalCrewJobsRefetch(true);
+        }
+    },[refreshView])
+
+    useEffect(()=>{
+
+        if(selectedCrew && (localCrewJobs == null || localCrewJobsRefetch == true)){
+            if(localCrewJobsRefetch == true){
+                setLocalCrewJobsRefetch(false);
+            }
             Crew.getCrewJobsByCrew(selectedCrew.id)
             .then((data)=>{
                 if(data){
@@ -102,7 +115,7 @@ const CrewCrews = (props) => {
                         })
                     }
                     setUnfilteredJobs([...data]);
-                    setLocalCrewJobs( updateData);
+                    setLocalCrewJobs([...updateData]);
                 }
             })
             .catch((error)=>{
@@ -111,6 +124,10 @@ const CrewCrews = (props) => {
             })
         }
 
+       
+    },[ selectedCrew, localCrewJobs, localCrewJobsRefetch])
+
+    useEffect(()=>{
         if(selectedCrew && selectedCrewMembers ==null){
             Crew.getCrewMembersByCrew(selectedCrew.id)
             .then((data)=>{
@@ -127,7 +144,7 @@ const CrewCrews = (props) => {
                 }
             })
         }
-    },[selectedCrew, localCrewJobs])
+    },[selectedCrew])
 
 
     const handleSelectJob =(event,job)=>{
@@ -183,7 +200,8 @@ const CrewCrews = (props) => {
         const deleteMember = () => {
             Crew.deleteCrewJob(id, crew_id)
                 .then( (data) => {
-                        setLocalCrewJobs(null);
+                        //setLocalCrewJobs(null);
+                        setLocalCrewJobsRefetch(true)
                         cogoToast.success(`Removed job ${id} from crew jobs`, {hideAfter: 4});
                     })
                 .catch( error => {
@@ -202,6 +220,9 @@ const CrewCrews = (props) => {
 
     //Swap Popover for Jobs
     const handleOpenSwapPopover = (event, job) =>{
+        console.log('event pop',event);
+        console.log("event target", event.currentTarget);
+        console.log("anchor ele", jobAnchorEl);
         setJobAnchorEl(event.currentTarget);
         setSwapJobId(job.id);
     }
@@ -224,9 +245,10 @@ const CrewCrews = (props) => {
         
         Crew.updateCrewJob(crew.id, swapJobId, old_crew_id)
         .then((data)=>{
-            setLocalCrewJobs(null);
+            //setLocalCrewJobs(null);
+            setLocalCrewJobsRefetch(true);
             setShouldResetCrewState(true);
-            setSelectedCrew({...selectedCrew});
+            //setSelectedCrew({...selectedCrew});
         })
         .catch((error)=>{
             console.error(error);
@@ -299,13 +321,14 @@ const CrewCrews = (props) => {
             console.error("no unfiltered items");
             return;
         }
+
     
         const items = reorder(
         localCrewJobs,
         result.source.index,
         result.destination.index
         );
-        console.log("Items", items);
+        //console.log("Items", items);
 
         var temp = items.map((item, i)=> item.id);
         if(!temp){
@@ -320,8 +343,9 @@ const CrewCrews = (props) => {
                 throw new Error("Could not reorder crew" + selectedCrew.id);
             }
             cogoToast.success(`Reordered Crew Jobs`, {hideAfter: 4});
-            setLocalCrewJobs(null);
-            setSelectedCrew({...selectedCrew});
+            //setLocalCrewJobs(null);
+            setLocalCrewJobsRefetch(true)
+            //setSelectedCrew({...selectedCrew});
         })
         .catch( error => {
             console.error(error);
@@ -394,8 +418,9 @@ const CrewCrews = (props) => {
         Crew.updateCrewJobCompleted(completed, job_id, crew_id )
         .then((data)=>{
             
-            setLocalCrewJobs(null);
-            setSelectedCrew({...selectedCrew});
+            //setLocalCrewJobs(null);
+            setLocalCrewJobsRefetch(true)
+            //setSelectedCrew({...selectedCrew});
             cogoToast.success("Successfully update crew job");
 
         })
@@ -430,12 +455,13 @@ const CrewCrews = (props) => {
           to: to ? new Date(to) : crewJobDateRange.to,
           from: from ? new Date(from) : crewJobDateRange.from
         })
-        setLocalCrewJobs(null);
+        //setLocalCrewJobs(null);
+        setLocalCrewJobsRefetch(true)
     }
 
     const handleChangePanel = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
-      };
+    };
 
     const handleShowAllDates = (event)=>{
         if(!selectedCrew || !unfilteredJobs || !crewJobDateRange){
@@ -468,7 +494,8 @@ const CrewCrews = (props) => {
             to: moment(maxDate).format(),
             from: moment(minDate).format()
         })
-        setLocalCrewJobs(null);
+        //setLocalCrewJobs(null);
+        setLocalCrewJobsRefetch(true)
 
     }
 
@@ -496,6 +523,8 @@ const CrewCrews = (props) => {
     //         setListHeight(370);
     //     }
     // }
+
+    const getRand = React.useMemo(() => Math.floor((Math.random() * 100) + 1),[localCrewJobs, localCrewJobsRefetch]);
 
     return(
         <>
@@ -562,7 +591,7 @@ const CrewCrews = (props) => {
                 <div>{ getShowingSpan() }
                         
                     </div>
-                <List style={{maxHeight: `${listHeight}px`}} className={classes.jobList}> 
+                <List key={'joblist'+ getRand} style={{maxHeight: `${listHeight}px`}} className={classes.jobList}> 
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable"
                             renderClone={(provided, snapshot, rubric) => (
@@ -571,7 +600,7 @@ const CrewCrews = (props) => {
                                 {...provided.dragHandleProps}
                                 ref={provided.innerRef}
                             >
-                                <ListItem key={localCrewJobs[rubric.source.index].id} 
+                                <ListItem key={localCrewJobs[rubric.source.index].id + getRand} 
                                                 role={undefined} dense button 
                                                 className={classes.nonSelectedRow}
                                                 >
@@ -590,13 +619,13 @@ const CrewCrews = (props) => {
                             {localCrewJobs && localCrewJobs.map((row, index) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
                                 return (
-                                <Draggable key={row.id + index+ 'draggable'} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
+                                <Draggable key={row.id + index+ 'draggable'+ getRand} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
                                 {(provided, snapshot) => { 
                                     const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
                                     const datePassed = date && (new Date(date) < new Date());
                                     const selected = selectedJob?.id === row.id;
                                     return (
-                                    <ListItem key={row.id + index} 
+                                    <ListItem key={row.id + index+ getRand} 
                                                 role={undefined} dense button 
                                                 onClick={event => handleSelectJob(event, row)}
                                                 onContextMenu={event => handleRightClick(event, row.task_id)}
@@ -693,7 +722,7 @@ const CrewCrews = (props) => {
                                 return(fil_mem.id != selectedCrew.id)
                             }).map((crew, i)=>(
                             <ListItem className={classes.member_list_item} 
-                                        key={`crew_members+${i}`} button
+                                        key={`crew_members+${i}`+ getRand} button
                                         onMouseUp={(event)=>handleSwapJob(event, crew, selectedCrew.id)}>
                                 <ListItemText primary={crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id} />
                             </ListItem>
@@ -721,7 +750,7 @@ const CrewCrews = (props) => {
                                 const datePassed = date && (new Date(date) < new Date());
                                 const selected = selectedJob?.id === row.id;
                                 return (
-                                <ListItem key={row.id + index} 
+                                <ListItem key={row.id + index+ getRand} 
                                             role={undefined} dense button 
                                             onClick={event => handleSelectJob(event, row)}
                                             onContextMenu={event => handleRightClick(event, row.task_id)}

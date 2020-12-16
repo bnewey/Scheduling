@@ -30,6 +30,7 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
 const TaskListMain = (props) => {
     //STATE
     const [taskListTasks, setTaskListTasks] = React.useState(null);
+    const [taskListTasksRefetch, setTaskListTasksRefetch] = React.useState(false);
     const [selectedTasks, setSelectedTasks] = useState([]);
     const [table_info ,setTableInfo] = useState(null);
     
@@ -37,26 +38,37 @@ const TaskListMain = (props) => {
 
     
     //PROPS
-    const { isPriorityOpen, setIsPriorityOpen} = props;
+    const { isPriorityOpen, setIsPriorityOpen, woiData, setWoiData} = props;
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,
-         taskListTasksSaved, setTaskListTasksSaved} = useContext(TaskContext);
+         taskListTasksSaved, setTaskListTasksSaved, refreshView } = useContext(TaskContext);
 
 
     //CSS
     const classes = useStyles({sorterState, sorters});
 
+    //Refresh
+    useEffect(()=>{
+        if(refreshView && refreshView == "taskList"){
+            setTaskListTasksRefetch(true)
+        }
+    },[refreshView])
+
     //TaskListTasks
     useEffect( () =>{ 
         //Gets data only on initial component mount
         if(taskLists == null){
-            setTaskListTasks(null);
+            //setTaskListTasks(null);
+            setTaskListTasksRefetch(true);
         }
-        if(taskLists && taskListToMap && taskListToMap.id && taskListTasks == null && filterInOrOut != null && filterAndOr != null  ) { 
+        if(taskLists && taskListToMap && taskListToMap.id && (taskListTasks == null || taskListTasksRefetch == true) && filterInOrOut != null && filterAndOr != null   ) { 
+            if(taskListTasksRefetch == true){
+                setTaskListTasksRefetch(false);
+            }
             TaskLists.getTaskList(taskListToMap.id)
             .then( (data) => {
                 if(!Array.isArray(data)){
@@ -135,6 +147,7 @@ const TaskListMain = (props) => {
                 if(Array.isArray(tmpData)){
                     setTaskListTasks(tmpData);
                 }
+                setWoiData(null);
                 
             })
             .catch( error => {
@@ -146,7 +159,25 @@ const TaskListMain = (props) => {
             if(taskLists){
             }
         }
-    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr]);
+    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch]);
+
+    //WOIDATA 
+    useEffect(()=>{
+        // if(taskListTasks == null){
+        //     setWoiData(null);
+        // }
+        if(woiData == null && taskListToMap){
+            TaskLists.getAllSignScbdWOIFromTL(taskListToMap.id)
+            .then((data)=>{
+                console.log("woi data", data);
+                setWoiData(data);
+            })
+            .catch((error)=>{
+                console.error("Failed to get Sign WOI Data", error);
+                cogoToast.error("Internal Server Error");
+            })
+        }
+    },[woiData, taskListToMap])
 
     //Save and/or Fetch sorters to local storage
     useEffect(() => {
@@ -222,9 +253,7 @@ const TaskListMain = (props) => {
                     {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
                     {text: "Description", field: "description", width: '10%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
-                    {text: "Art", field: "artwork", width: '5%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text'},
-                    {text: "Signs", field: "sign", width: '5%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text'},
-                    {text: "Drill", field: "drilling", width: '5%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "Status", field: "woi_status_check", width: '15%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text'},
                     {text: "d_date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
                     {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text'}, 
                     {text: "i_date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
@@ -309,7 +338,8 @@ const TaskListMain = (props) => {
             <TaskListToolbar taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap} 
                             taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks} 
                             isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
-                            priorityList={priorityList} setPriorityList={setPriorityList} setSelectedIds={setSelectedIds}/>
+                            priorityList={priorityList} setPriorityList={setPriorityList} setSelectedIds={setSelectedIds}
+                            taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
             <Grid container >  
                 <Grid item xs={2} >
                     <TaskListSidebar taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
@@ -317,7 +347,8 @@ const TaskListMain = (props) => {
                                  isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
                                   priorityList={priorityList} setPriorityList={setPriorityList}
                                   selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setSelectedIds={setSelectedIds}
-                                  handleChangeTaskView={handleChangeTaskView}  setTableInfo={setTableInfo}/>
+                                  handleChangeTaskView={handleChangeTaskView}  setTableInfo={setTableInfo}
+                                  taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
                 </Grid>
                 <Grid item xs={10} >
                    
@@ -380,7 +411,8 @@ const TaskListMain = (props) => {
                                 setModalTaskId={setModalTaskId}
                                 table_info={table_info}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
-                                taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}/>
+                                taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
+                                woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
                                 </List>
                             {/* </TableContainer> */}
                         </>

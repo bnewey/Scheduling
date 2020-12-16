@@ -50,12 +50,12 @@ const MapSiderbarCrewJobs = (props) =>{
   const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
         setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, expanded, setExpanded, setActiveVehicle,
         expandedAnimDone, sorters, crewJobs, setCrewJobs ,showCompletedJobs,setShowCompletedJobs, crewJobDateRange, setCrewJobDateRange,
-        allCrews, setAllCrews, localCrewJobs, setLocalCrewJobs, setShouldResetCrewState } = props;
+        allCrews, setAllCrews, unfilteredJobs, setUnfilteredJobs, setShouldResetCrewState, crewJobsRefetch , setCrewJobsRefetch } = props;
   
   const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved,crewToMap, setCrewToMap} = useContext(TaskContext);
 
   const [crewExpanded, setCrewExpanded] = useState('activeJobPanel');
-  const [unfilteredJobs, setUnfilteredJobs] = useState(null);
+  
   //Swap Jobs
   const [jobAnchorEl, setJobAnchorEl] = React.useState(null);
   const [swapJobId, setSwapJobId] = useState(null); 
@@ -65,43 +65,6 @@ const MapSiderbarCrewJobs = (props) =>{
   //CSS
   const classes = useStyles();
   //FUNCTIONS
-
-  useEffect(()=>{
-    if(crewToMap && localCrewJobs == null){
-        Crew.getCrewJobsByCrew(crewToMap.id)
-        .then((data)=>{
-            if(data){
-                //filter using to and from dates
-                var updateData = data.filter((j)=>j.completed == 0)
-                if(crewJobDateRange){
-                    updateData = updateData.filter((job,i)=>{
-                        var date;
-                        if(job.job_type == "install"){
-                            date = Util.convertISODateToMySqlDate(job.sch_install_date) || null;
-                        }
-                        if(job.job_type == "drill"){
-                            date = Util.convertISODateToMySqlDate(job.drill_date) || null;
-                        }
-
-                        if(date != null){
-                            return moment(date).isAfter( moment(Util.convertISODateToMySqlDate(crewJobDateRange.from)).subtract(1, 'days')) && moment(date).isBefore( moment(Util.convertISODateToMySqlDate(crewJobDateRange.to)).add(1,'days'))
-                        }else{
-                            //Date not assigned
-                            return true
-                        }
-                    })
-                }
-                setUnfilteredJobs([...data]);
-                setLocalCrewJobs( updateData);
-            }
-        })
-        .catch((error)=>{
-            console.error("Error getting localCrewJobs", error);
-            cogoToast.error("Failed to get crew jobs");
-        })
-    }
-
-  },[ localCrewJobs, crewToMap])
 
   //Swap Popover for Jobs
   const handleOpenSwapPopover = (event, job) =>{
@@ -125,7 +88,8 @@ const MapSiderbarCrewJobs = (props) =>{
       
       Crew.updateCrewJob(crew.id, swapJobId, old_crew_id)
       .then((data)=>{
-          setLocalCrewJobs(null);
+          //setCrewJobs(null);
+          setCrewJobsRefetch(true);
           setShouldResetCrewState(true);
           setCrewToMap({...crewToMap});
       })
@@ -175,7 +139,8 @@ const MapSiderbarCrewJobs = (props) =>{
       to: to ? new Date(to) : crewJobDateRange.to,
       from: from ? new Date(from) : crewJobDateRange.from
     })
-    setLocalCrewJobs(null);
+    setCrewJobs(null);
+    //setCrewJobsRefetch(true);
   }
 
   const handleChangePanel = (panel) => (event, isExpanded) => {
@@ -213,15 +178,16 @@ const MapSiderbarCrewJobs = (props) =>{
           to: moment(maxDate).format(),
           from: moment(minDate).format()
       })
-      setLocalCrewJobs(null);
+      //setCrewJobsRefetch(true);
+      setCrewJobs(null);
 
   }
 
   const getShowingSpan = () =>{
-      if(!localCrewJobs){
+      if(!crewJobs){
           return "";
       }
-      var jobList = [...localCrewJobs];
+      var jobList = [...crewJobs];
       var allJobList = unfilteredJobs?.filter((j)=>j.completed ==0);
       if(!jobList || !allJobList){
           return ""
@@ -308,7 +274,7 @@ const MapSiderbarCrewJobs = (props) =>{
       }
   
       const items = reorder(
-      localCrewJobs,
+      crewJobs,
       result.source.index,
       result.destination.index
       );
@@ -327,7 +293,8 @@ const MapSiderbarCrewJobs = (props) =>{
               throw new Error("Could not reorder crew" + crewToMap.id);
           }
           cogoToast.success(`Reordered Crew Jobs`, {hideAfter: 4});
-          setLocalCrewJobs(null);
+          //setCrewJobs(null);
+          setCrewJobsRefetch(true);
           setCrewToMap({...crewToMap});
       })
       .catch( error => {
@@ -338,10 +305,14 @@ const MapSiderbarCrewJobs = (props) =>{
   }
   // END DND
 
+  //For generating keys, so that the list will rerender on crewJobs and crewJobsRefetch
+  const getRand = React.useMemo(() => Math.floor((Math.random() * 100) + 1),[crewJobs, crewJobsRefetch]);
+
 
   // const handleChangeShowComp = (event)=>{
   //   setShowCompletedJobs(event.target.checked);
-  //   setCrewJobs(null);
+  //   //setCrewJobs(null);
+        //setCrewJobsRefetch(true)
   //   event.stopPropagation();
   // }
 
@@ -407,7 +378,7 @@ const MapSiderbarCrewJobs = (props) =>{
                 <div className={classes.showingDiv}>{ getShowingSpan() }
                         
                     </div>
-                <List style={{maxHeight: `${listHeight}px`}} className={classes.jobList}> 
+                <List key={'joblist'+ getRand} style={{maxHeight: `${listHeight}px`}} className={classes.jobList}> 
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable"
                             renderClone={(provided, snapshot, rubric) => (
@@ -416,12 +387,12 @@ const MapSiderbarCrewJobs = (props) =>{
                                 {...provided.dragHandleProps}
                                 ref={provided.innerRef}
                             >
-                                <ListItem key={localCrewJobs[rubric.source.index].id} 
+                                <ListItem key={crewJobs[rubric.source.index].id + getRand} 
                                                 role={undefined} dense button 
                                                 className={classes.nonSelectedRow}
                                                 >
                                     <ListItemText>
-                                            {localCrewJobs[rubric.source.index].id} | {localCrewJobs[rubric.source.index].t_name} 
+                                            {crewJobs[rubric.source.index].id} | {crewJobs[rubric.source.index].t_name} 
                                     </ListItemText>
                                 </ListItem>
                             </div>
@@ -432,16 +403,16 @@ const MapSiderbarCrewJobs = (props) =>{
                                 ref={provided.innerRef}
                                 style={getListStyle(snapshot.isDraggingOver)}
                             >
-                            {localCrewJobs && localCrewJobs.map((row, index) => {
+                            {crewJobs && crewJobs.map((row, index) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
                                 return (
-                                <Draggable key={row.id + index+ 'draggable'} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
+                                <Draggable key={row.id + index+ 'draggable' + getRand} draggableId={row.id.toString()} index={index} isDragDisabled={false}>
                                 {(provided, snapshot) => { 
                                     const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
                                     const datePassed = date && (new Date(date) < new Date());
                                     const selected = activeMarker?.item?.id === row.id;
                                     return (
-                                    <ListItem key={row.id + index} 
+                                    <ListItem key={row.id + index + getRand} 
                                                 role={undefined} dense button 
                                                 // onClick={event => handleSelectJob(event, row)}
                                                 onClick={event => handleToggle(row.id, event)}
@@ -539,7 +510,7 @@ const MapSiderbarCrewJobs = (props) =>{
                                 return(fil_mem.id != crewToMap.id)
                             }).map((crew, i)=>(
                             <ListItem className={classes.member_list_item} 
-                                        key={`crew_members+${i}`} button
+                                        key={`crew_members+${i}`+ getRand} button
                                         onMouseUp={(event)=>handleSwapJob(event, crew, crewToMap.id)}>
                                 <ListItemText primary={crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id} />
                             </ListItem>

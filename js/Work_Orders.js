@@ -147,7 +147,6 @@ async function getAllWorkOrderSignArtItems(id){
 
 }
 
-
 async function reorderWOI(woi_array, work_order_id){
     const route = '/scheduling/workOrders/reorderWOI';
     try{

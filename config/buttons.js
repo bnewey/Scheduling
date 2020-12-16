@@ -18,6 +18,10 @@ const navButtons = [
         path: "entities",
     },
     {
+        label: "Signs",
+        path: "signs",
+    },
+    {
         label: "WO Table",
         path: "work_orders_table"
     },

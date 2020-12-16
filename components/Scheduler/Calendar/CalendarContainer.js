@@ -31,14 +31,23 @@ const CalendarContainer = (props) => {
     //const {} = props;
 
     const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved, filterInOrOut, filterAndOr, taskListToMap, filters,
-        setModalTaskId, setModalOpen } = useContext(TaskContext);
+        setModalTaskId, setModalOpen, refreshView } = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
    
     const [calendarRows, setCalendarRows] = useState(null);
+    const [calendarRowsRefetch, setCalendarRowsRefetch] = useState(false);
     const [googleCalendar, setGoogleCalendar] = useState(null);
     const [groups, setGroups] = useState(null);
     const [items, setItems] = useState(null);
+
+    //Refresh state for components outside scope
+    useEffect(()=>{
+        if(refreshView && refreshView == "calendar"){
+            setCalendarRowsRefetch(true)
+            setShouldResetCrewState(true)
+        }
+    },[refreshView])
 
 
     const [timeStart, setTimeStart] = useState(moment()
@@ -177,73 +186,79 @@ const CalendarContainer = (props) => {
 
     //Filter
     useEffect( () =>{ //useEffect for inputText
-        if(calendarRows == null && filterInOrOut != null && filterAndOr != null){
+        if((calendarRows == null || calendarRowsRefetch == true)&& filterInOrOut != null && filterAndOr != null){
             if(taskLists && taskListToMap && taskListToMap.id ) { 
-              TaskLists.getTaskList(taskListToMap.id)
-              .then( (data) => {
-                  if(!Array.isArray(data)){
-                      console.error("Bad tasklist data",data);
-                      return;
-                  }
-                  var tmpData = [];
-  
-                  if(filters && filters.length > 0){
-                    //If more than one property is set, we need to filter seperately
-                    let properties = new Set([...filters].map((v,i)=>v.property));
+
+            if(calendarRowsRefetch == true){
+                setCalendarRowsRefetch(false);
+            }
+
+            TaskLists.getTaskList(taskListToMap.id)
+            .then( (data) => {
+                if(!Array.isArray(data)){
+                    console.error("Bad tasklist data",data);
+                    return;
+                }
+                var tmpData = [];
+
+                if(filters && filters.length > 0){
+                //If more than one property is set, we need to filter seperately
+                let properties = new Set([...filters].map((v,i)=>v.property));
+                
+                properties.forEach((index,property)=>{
                     
-                    properties.forEach((index,property)=>{
-                      
-                      let tmpFilter = filters.filter((v,i)=> v.property == property);
-                      let tmpTmpData;
-  
-                      //On or use taskListTasksSaved to filter from to add to 
-                      if((filterAndOr == "or" && filterInOrOut == "in") || (filterAndOr == "and" && filterInOrOut == "out") ){
-                          if(tmpFilter.length > 1){
-                              //Always use 'or' on same property
-                              tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                          }
-                          if(tmpFilter.length <= 1){
-                              tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                              //console.log("MapContainer tmpData in loop", tmpData);
-                          }
-                          //Add to our big array
-                          tmpData.splice(tmpData.length, 0, ...tmpTmpData);
-                          //Remove duplicates
-                          tmpData.splice(0, tmpData.length, ...(new Set(tmpData)));
-                      }
-  
-                      //On and use tmpData to filter from
-                      if((filterAndOr == "and" && filterInOrOut == "in") || (filterAndOr == "or" && filterInOrOut == "out")){
-                          if(tmpData.length <= 0){
-                            tmpData = [...data];
-                          }  
-                          if(tmpFilter.length > 1){
-                              //Always use 'or' on same property
-                              tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                          }
-                          if(tmpFilter.length <= 1){
-                              tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                              console.log("MapContainer tmpData in loop", tmpData);
-                          }
-                      }
-                      
-                      console.log("TaskListFilter each loop, ",tmpData);
-                    })              
-                  }else{
-                    console.log("else on filters && filters.length > 0")
-                  }
-                  
-                  setTaskListTasksSaved(data);
-                  
-                  //No filters 
-                  if(filters && !filters.length){
-                    //no change to tmpData
-                    tmpData = [...data];
-                  }
-                  //Set TaskListTasks
-                  if(Array.isArray(tmpData)){
-                      setCalendarRows(tmpData);
-                  }
+                    let tmpFilter = filters.filter((v,i)=> v.property == property);
+                    let tmpTmpData;
+
+                    //On or use taskListTasksSaved to filter from to add to 
+                    if((filterAndOr == "or" && filterInOrOut == "in") || (filterAndOr == "and" && filterInOrOut == "out") ){
+                        if(tmpFilter.length > 1){
+                            //Always use 'or' on same property
+                            tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                        }
+                        if(tmpFilter.length <= 1){
+                            tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                            //console.log("MapContainer tmpData in loop", tmpData);
+                        }
+                        //Add to our big array
+                        tmpData.splice(tmpData.length, 0, ...tmpTmpData);
+                        //Remove duplicates
+                        tmpData.splice(0, tmpData.length, ...(new Set(tmpData)));
+                    }
+
+                    //On and use tmpData to filter from
+                    if((filterAndOr == "and" && filterInOrOut == "in") || (filterAndOr == "or" && filterInOrOut == "out")){
+                        if(tmpData.length <= 0){
+                        tmpData = [...data];
+                        }  
+                        if(tmpFilter.length > 1){
+                            //Always use 'or' on same property
+                            tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                        }
+                        if(tmpFilter.length <= 1){
+                            tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
+                            console.log("MapContainer tmpData in loop", tmpData);
+                        }
+                    }
+                    
+                    console.log("TaskListFilter each loop, ",tmpData);
+                })              
+                }else{
+                console.log("else on filters && filters.length > 0")
+                }
+                
+                setTaskListTasksSaved(data);
+                
+                //No filters 
+                if(filters && !filters.length){
+                //no change to tmpData
+                tmpData = [...data];
+                }
+                //Set TaskListTasks
+                if(Array.isArray(tmpData)){
+                    setCalendarRows(tmpData);
+                }
+                
   
               })
               .catch( error => {
@@ -260,7 +275,7 @@ const CalendarContainer = (props) => {
         
         return () => { //clean up
         }
-      },[calendarRows,filterInOrOut, filterAndOr,taskLists, taskListToMap]);
+      },[calendarRows,calendarRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap]);
     //end of Filter
 
     const handleTimeChange = (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) =>{
@@ -415,14 +430,16 @@ const CalendarContainer = (props) => {
         Promise.all([Tasks.updateMultipleTaskDates([id], date, type),  getFunction(what_to_run)  ])
         .then((values)=>{
             console.log(values);
-            setCalendarRows(null);
+            //setCalendarRows(null);
+            setCalendarRowsRefetch(true);
             setShouldResetCrewState(true);
 
         })
         .catch((error)=>{
             console.error("Fail to move item", error)
             cogoToast.error("Failed to moved item");
-            setCalendarRows(null);
+            //setCalendarRows(null);
+            setCalendarRowsRefetch(true);
             setShouldResetCrewState(true);
         })
     }

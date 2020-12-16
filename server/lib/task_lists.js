@@ -375,4 +375,38 @@ router.post('/setPriorityTaskList', async (req,res) => {
     }
 });
 
+
+router.post('/getAllSignScbdWOIFromTL', async (req,res) => {
+
+    var tl_id;
+    if(req.body){
+        if(req.body.tl_id != null){
+            tl_id = req.body.tl_id;
+        }  
+    }
+    logger.verbose(tl_id);    
+
+
+    const sql = 'SELECT DISTINCT woi.record_id, woi.work_order, woi.item_type, woi.user_entered, date_format(woi.date_entered, \'%m-%d-%Y\') as date_entered, woi.quantity, woi.part_number, woi.size, woi.description, ' +
+        ' woi.price, date_format(woi.receive_date, \'%m-%d-%Y\') as receive_date , woi.receive_by, woi.packing_slip, woi.contact, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim , date_format(woi.scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
+        ' woi.mount, woi.sign_built, woi.copy_received, woi.sent_for_approval, woi.final_copy_approved, woi.artwork_completed, woi.sign_popped_and_boxed, woi.roy, woi.trim_size, woi.trim_corners, ' +
+        ' woi.date_offset, date_format(woi.sign_due_date, \'%m-%d-%Y\') as sign_due_date , woi.ordernum, woi.vendor ' + 
+        ' FROM task_list_items tli ' +
+        ' LEFT JOIN tasks t ON t.id = tli.task_id ' +
+        ' LEFT JOIN work_orders_items woi ON woi.work_order = t.table_id AND woi.scoreboard_or_sign <> 0 ' +
+        ' WHERE tli.task_list_id =  ? ' +
+        ' LIMIT 10000';
+
+    try{
+        const results = await database.query(sql, [tl_id]);
+        logger.info("Got Task List WOI Data");
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Task List WOI Data: " + error);
+        res.sendStatus(400);
+    }
+});
+
 module.exports = router;

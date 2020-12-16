@@ -15,6 +15,7 @@ const CrewContainer = (props) => {
 
     //const {} = props;
     const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs, memberJobs,setMemberJobs, shouldResetCrewState, setShouldResetCrewState} = useContext(CrewContext);
+    const {refreshView} = useContext(TaskContext);
     const classes = useStyles();
 
     const [crewMemberOpen, setcrewMemberOpen] = useState(true);
@@ -22,6 +23,8 @@ const CrewContainer = (props) => {
     
     //Functional State
     const [selectedPage, setSelectedPage] = React.useState(1);
+
+    
 
 
     const handleListClick = (event, page) => {

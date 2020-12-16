@@ -49,8 +49,8 @@ const CustomMap = compose(
         //useEffect below sets marker_ids[0] to activeMarker
       }
     },
-    onMapClick: ()=> (event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, 
-        activeMarker, setActiveMarker, setCrewMarkers, setTaskMarkers )=> {
+    onMapClick: ()=> (event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, setMapRowsRefetch, 
+        activeMarker, setActiveMarker, setCrewMarkers, setCrewMarkersRefetch, setTaskMarkers )=> {
       if(showingInfoWindow && event.placeId){
         setShowingInfoWindow(false);
       }
@@ -62,8 +62,8 @@ const CustomMap = compose(
             .then((data)=>{
               cogoToast.success("Remapped Marker")
               setMarkerToRemap(null);
-              setMapRows(null);
-
+              //setMapRows(null);
+              setMapRowsRefetch(true);
               //Refresh activeMarker with new coords
               if(activeMarker?.item){
                 let refreshedMarker = {...activeMarker.item};
@@ -78,7 +78,8 @@ const CustomMap = compose(
                   setTaskMarkers(null);
               }
               if(activeMarker?.type == "crew"){
-                  setCrewMarkers(null);
+                  //setCrewMarkers(null);
+                  setCrewMarkersRefetch(true);
               }
             })
             .catch((error)=>{
@@ -114,8 +115,8 @@ const CustomMap = compose(
 )(props =>{
 
     const googleMap = React.useRef(null);
-    const {taskMarkers, setTaskMarkers, vehicleMarkers, crewMarkers, setCrewMarkers,visibleItems, resetBounds, activeMarker, setActiveMarker,
-        setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded, setMapRows,
+    const {taskMarkers, setTaskMarkers, vehicleMarkers, crewMarkers, setCrewMarkers, setCrewMarkersRefetch,visibleItems, resetBounds, activeMarker, setActiveMarker,
+        setInfoWeather, infoWeather, showingInfoWindow, setShowingInfoWindow, bouncieAuthNeeded, setBouncieAuthNeeded, setMapRows, setMapRowsRefetch,
         mapRows, vehicleRows, radarControl, setRadarControl, visualTimestamp, setVisualTimestamp, radarOpacity, radarSpeed, setTimestamps, timestamps,
         multipleMarkersOneLocation,setMultipleMarkersOneLocation} = props;
 
@@ -308,8 +309,8 @@ const CustomMap = compose(
         defaultZoom={7} 
         ref={googleMap}
         defaultCenter={{ lat: 34.731, lng: -94.3749 }}
-        onClick={event => props.onMapClick(event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, 
-            activeMarker, setActiveMarker, setCrewMarkers, setTaskMarkers)}
+        onClick={event => props.onMapClick(event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, setMapRowsRefetch,
+            activeMarker, setActiveMarker, setCrewMarkers,setCrewMarkersRefetch, setTaskMarkers)}
     >
         <MarkerClusterer
         onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap)}

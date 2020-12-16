@@ -102,6 +102,8 @@ const CrewContainer = function(props) {
     }
     },[ allCrews]);
 
+    
+
     //Reset state effect
     useEffect(()=>{
         if(shouldResetCrewState){

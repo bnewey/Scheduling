@@ -27,7 +27,7 @@ const TaskListToolbar = (props) => {
     const [idToActivateOnRefreshTL, setIdToActivateOnRefreshTL] = React.useState(null);
     //PROPS
     const { isPriorityOpen, setIsPriorityOpen,
-                 priorityList, setPriorityList} = props;
+                 priorityList, setPriorityList, taskListTasksRefetch, setTaskListTasksRefetch} = props;
 
     const {taskListTasks,setTaskListTasks, taskLists, setTaskLists, setTabValue,
         taskListToMap, setTaskListToMap} = useContext(TaskContext);
@@ -76,7 +76,8 @@ const TaskListToolbar = (props) => {
             return;
         }
         setTaskListToMap(event.target.value);
-        setTaskListTasks(null);
+        setTaskListTasksRefetch(true)
+        //setTaskListTasks(null);
     };
 
     const handleDelete = (event, id) => {
@@ -116,7 +117,8 @@ const TaskListToolbar = (props) => {
         if(!priorityOpen){
             let priority_list = taskLists.filter((list)=> list.is_priority)[0];
             setTaskListToMap(priority_list);
-            setTaskListTasks(null);
+            //setTaskListTasks(null);
+            setTaskListTasksRefetch(true)
         }
 
     };

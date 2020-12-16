@@ -6,15 +6,26 @@ const dirMap = {
 };
 
 const doSort = (A, B, property, direction = 'ASC') => {
-    var a = A[ property ];
-    var b = B[ property ];
+    console.log("Direction split", direction);
+    var a;
+    var b;
+    if(property){ // its an object, were sorting an array of objects
+        a = A[ property ];
+        b = B[ property ];
+    }else{ // not an object, were sorting an array of single items
+        a = A;
+        b = B;
+    }
+    
 
     //Fix for if value is null
     if(a == null){
-        a = "";
+        return dirMap.gt[ direction.toLowerCase() ];
+        //a = "";
     }
     if(b == null){
-        b = "";
+        return dirMap.lt[ direction.toLowerCase() ];
+        //b = "";
     }
 
     //Compare a to b

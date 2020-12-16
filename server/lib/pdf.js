@@ -27,8 +27,6 @@ router.post('/createWOPdf', async (req,res) => {
         orientation: 'landscape'
     };
 
-    
-
     pdf.create(woTemplate(data), options).toFile(`${process.env.PWD}/public/static/work_orders.pdf`, (err)=> {
         logger.info(process.env.PWD);
         if(err){
@@ -312,19 +310,19 @@ router.post('/createCrewJobPdf', async (req,res) => {
         orientation: 'landscape'
     };
 
-    
-
     pdf.create(crewJobsTemplate(crew, jobs), options).toStream(function(err, stream){
         if(err){
             res.sendStatus(400);
         }
         //if(Buffer.isBuffer(stream) ){
             //res.send(stream);
+        res.setHeader('Content-Disposition', 'attachment; filename=' + 'test123.pdf');
         res.set('Content-type', 'application/pdf');
         stream.pipe(res)
         //}else{
         //    res.sendStatus(400);
         //}
+
     })
 
 });

@@ -7,6 +7,7 @@ import StoppedVehicleIcon from '@material-ui/icons/Stop';
 import MapSidebar from './MapSidebar/MapSidebar';
 import CustomMap from './Map';
 import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
+import moment from 'moment';
 
 const fetch = require("isomorphic-fetch");
 const { compose, withProps, withHandlers } = require("recompose");
@@ -36,6 +37,7 @@ import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import {createFilter} from '../../../js/Filter';
 import {createSorter} from '../../../js/Sort';
 import { use } from 'passport';
+import { CrewContext } from '../Crew/CrewContextContainer';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -56,7 +58,8 @@ const MapContainer = (props) => {
     //const {} = props;
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
-          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved} = useContext(TaskContext);
+          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, refreshView} = useContext(TaskContext);
+    const { crewJobDateRange, setShouldResetCrewState} = useContext(CrewContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
     const markerTypes = ["task", "vehicle", "crew"];
@@ -64,6 +67,7 @@ const MapContainer = (props) => {
     const [bounds, setBounds] = useState(null);
     
     const [mapRows, setMapRows] = useState(null); 
+    const [mapRowsRefetch, setMapRowsRefetch] = useState(false);
     const [resetBounds, setResetBounds] = React.useState(true);
     const [markedRows, setMarkedRows] = useState([]);
     const [noMarkerRows, setNoMarkerRows] = useState(null);
@@ -71,22 +75,39 @@ const MapContainer = (props) => {
     
     const [infoWeather, setInfoWeather] = useState(null);
 
-    const [crewJobs, setCrewJobs] = useState(null);
 
+    //Vehicle
     const [vehicleRows, setVehicleRows] = useState(null);
     const [vehicleNeedsRefresh, setVehicleNeedsRefresh] = useState(true);
     const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
     const [visibleItems, setVisibleItems] = React.useState(() => ['tasks' ,'vehicles']);
 
+    //Crew
+    //const [localCrewJobs, setLocalCrewJobs] = useState(null);
+    const [crewJobs, setCrewJobs] = useState(null);
+    const [crewJobsRefetch, setCrewJobsRefetch] = useState(false);
+    const [unfilteredJobs, setUnfilteredJobs] = useState(null);
+    const [showCompletedJobs, setShowCompletedJobs] = React.useState(false);
+
+
     const [mapHeight,setMapHeight] = useState('400px');
 
+    //Radar
     const [radarControl, setRadarControl] = useState(null);
     const [timestamps,setTimestamps] =React.useState([]);
     const [radarOpacity, setRadarOpacity] = React.useState(.5);
     const [radarSpeed, setRadarSpeed] = React.useState(400);
     const [visualTimestamp, setVisualTimestamp] = useState(null);
 
-    const [showCompletedJobs, setShowCompletedJobs] = React.useState(false);
+    //Refresh state for components outside scope
+    useEffect(()=>{
+      if(refreshView && refreshView == "map"){
+          setMapRowsRefetch(true);
+          //setShouldResetCrewState(true);
+          setCrewJobsRefetch(true);
+          //setUnfilteredJobs(null);
+      }
+    },[refreshView])
 
     //useEffect for vehicleRows
     useEffect(()=>{
@@ -153,8 +174,12 @@ const MapContainer = (props) => {
 
     //useEffect for mapRows
     useEffect( () =>{ 
-      if(mapRows == null && filterInOrOut != null && filterAndOr != null){
+      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
+            if(mapRowsRefetch == true){
+              setMapRowsRefetch(false);
+            }
+
             TaskLists.getTaskList(taskListToMap.id)
             .then( (data) => {
                 if(!Array.isArray(data)){
@@ -253,7 +278,7 @@ const MapContainer = (props) => {
 
       return () => { //clean up
       }
-    },[mapRows,filterInOrOut, filterAndOr,taskLists, taskListToMap]);
+    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap]);
 
     //Sort
     useEffect(()=>{
@@ -324,27 +349,45 @@ const MapContainer = (props) => {
     }, [noMarkerRows, mapRows])
 
     useEffect(()=>{
-      if(crewJobs == null && crewToMap){
-        Crew.getCrewJobsByCrew(crewToMap.id)
-            .then((data)=>{
-                if(data){
-                  var tmpData = [...data];
-                  
-                  if(!showCompletedJobs){
-                    console.log("Filtering out completed")
-                    tmpData = tmpData.filter((item)=> item.completed==0)
+      if(crewToMap && (crewJobs == null || crewJobsRefetch == true)){
+          if(crewJobsRefetch == true){
+            setCrewJobsRefetch(false);
+          }
+
+          Crew.getCrewJobsByCrew(crewToMap.id)
+          .then((data)=>{
+              if(data){
+                  //filter using to and from dates
+                  var updateData = data.filter((j)=>j.completed == 0)
+                  if(crewJobDateRange){
+                      updateData = updateData.filter((job,i)=>{
+                          var date;
+                          if(job.job_type == "install"){
+                              date = Util.convertISODateToMySqlDate(job.sch_install_date) || null;
+                          }
+                          if(job.job_type == "drill"){
+                              date = Util.convertISODateToMySqlDate(job.drill_date) || null;
+                          }
+  
+                          if(date != null){
+                              return moment(date).isAfter( moment(Util.convertISODateToMySqlDate(crewJobDateRange.from)).subtract(1, 'days')) && moment(date).isBefore( moment(Util.convertISODateToMySqlDate(crewJobDateRange.to)).add(1,'days'))
+                          }else{
+                              //Date not assigned
+                              return true
+                          }
+                      })
                   }
-                  
-                  console.log("Data",tmpData);
-                  setCrewJobs( tmpData);
-                }
-            })
-            .catch((error)=>{
-                console.error("Error getting crewJobs", error);
-                cogoToast.error("Failed to get crew jobs");
-            })
+                  setUnfilteredJobs([...data]);
+                  setCrewJobs( updateData);
+              }
+          })
+          .catch((error)=>{
+              console.error("Error getting crewJobs", error);
+              cogoToast.error("Failed to get crew jobs");
+          })
       }
-    },[crewJobs, crewToMap])
+  
+    },[ crewJobs, crewJobsRefetch, crewToMap])
     
     const updateActiveMarker = (id, type) => (props, marker, e) =>{
       var item;
@@ -455,7 +498,10 @@ const MapContainer = (props) => {
             
             <Grid item xs={12} md={8}>
                 <CustomMap taskMarkers={markedRows} setTaskMarkers={setMarkedRows} vehicleMarkers={vehicleRows}
-                     crewMarkers={crewJobs} setCrewMarkers={setCrewJobs} visibleItems={visibleItems} 
+                     crewMarkers={crewJobs} setCrewMarkers={setCrewJobs} 
+                     setCrewMarkersRefetch={setCrewJobsRefetch}
+                     crewMarkersRefetch={crewJobsRefetch} 
+                     visibleItems={visibleItems} 
                       updateActiveMarker={updateActiveMarker} handleFindVehicleIcon={handleFindVehicleIcon}
                       handleFindCrewIcon={handleFindCrewIcon}
                       resetBounds={resetBounds}
@@ -465,6 +511,8 @@ const MapContainer = (props) => {
                       showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}
                       bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
                       setMapRows={setMapRows} mapRows={mapRows}
+                      
+                      setMapRowsRefetch={setMapRowsRefetch}
                       visualTimestamp={visualTimestamp} setVisualTimestamp={setVisualTimestamp}
                       radarControl={radarControl} setRadarControl={setRadarControl}
                       radarOpacity={radarOpacity} setRadarOpacity={setRadarOpacity}
@@ -474,6 +522,7 @@ const MapContainer = (props) => {
             </Grid>
             <Grid item xs={12} md={4}>
               <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
+                          setMapRowsRefetch={setMapRowsRefetch}
                           markedRows={markedRows} setMarkedRows={setMarkedRows}
                           vehicleRows={vehicleRows} setVehicleRows={setVehicleRows}
                           activeMarker={activeMarker} setActiveMarker={setActiveMarker}
@@ -491,6 +540,9 @@ const MapContainer = (props) => {
                           multipleMarkersOneLocation={multipleMarkersOneLocation} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}
                           sorters={sorters} setSorters={setSorters}
                           crewJobs={crewJobs} setCrewJobs={setCrewJobs}
+                          crewJobsRefetch={crewJobsRefetch}
+                          setCrewJobsRefetch={setCrewJobsRefetch}
+                          unfilteredJobs={unfilteredJobs} setUnfilteredJobs={setUnfilteredJobs}
                           crewToMap={crewToMap} setCrewToMap={setCrewToMap}
                           showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs}
                            />

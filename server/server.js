@@ -32,6 +32,7 @@ const handle = nextApp.getRequestHandler();
 const tasks = require('./lib/tasks.js');
 const workOrders = require('./lib/work_orders.js');
 const workOrderDetail = require('./lib/work_order_detail.js');
+const signs = require('./lib/signs.js');
 const taskLists = require('./lib/task_lists.js');
 const pdf = require('./lib/pdf.js');
 const crew = require('./lib/crew.js');
@@ -68,6 +69,7 @@ nextApp
     app.use('/scheduling/tasks', tasks);
     app.use('/scheduling/workOrders', workOrders);
     app.use('/scheduling/workOrderDetail', workOrderDetail);
+    app.use('/scheduling/signs', signs);
     app.use('/scheduling/taskLists', taskLists);
     app.use('/scheduling/pdf', pdf);
     app.use('/scheduling/email', emailRouter);

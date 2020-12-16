@@ -12,6 +12,8 @@ const TaskListContainer = function(props) {
     
     const [isPriorityOpen, setIsPriorityOpen] = useState(false);
     const [priorityList, setPriorityList] = useState(null);
+    const [woiData, setWoiData] = useState(null)
+
 
     //Sets PriorityList so that we can easily show
     useEffect(()=>{
@@ -26,7 +28,7 @@ const TaskListContainer = function(props) {
                     setModalTaskId={setModalTaskId}
                     taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
                     isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
-                    priorityList={priorityList} setPriorityList={setPriorityList}/>
+                    priorityList={priorityList} setPriorityList={setPriorityList} woiData={woiData} setWoiData={setWoiData}/>
     </div>
     );
 }

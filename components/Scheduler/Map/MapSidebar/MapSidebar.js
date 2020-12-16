@@ -41,9 +41,6 @@ const MapSidebar = (props) => {
     const panelRef = useRef(null);
     const vehiclePanelRef = useRef(null);
     const crewPanelRef = useRef(null);
-
-    const [localCrewJobs, setLocalCrewJobs] = useState(null);
-
     
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
@@ -58,8 +55,9 @@ const MapSidebar = (props) => {
             visualTimestamp, setVisualTimestamp,
             radarControl, setRadarControl, radarOpacity, setRadarOpacity,
             radarSpeed, setRadarSpeed, timestamps, setTimestamps,
-            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters, crewJobs, setCrewJobs, crewToMap, setCrewToMap,
-            showCompletedJobs, setShowCompletedJobs} = props;
+            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters, crewJobs, setCrewJobs, unfilteredJobs,
+            setUnfilteredJobs,crewToMap, setCrewToMap,
+            showCompletedJobs, setShowCompletedJobs, setMapRowsRefetch, crewJobsRefetch, setCrewJobsRefetch} = props;
 
     //Ref to check if same vehicle is active so we dont keep expanding vehicle panel on vehicle refetch
     const activeVehicleRef = useRef(null);
@@ -189,8 +187,8 @@ const MapSidebar = (props) => {
 
     const handleChangeCrewToMap = (event)=>{
         if(event.target.value === ""){
-            setCrewJobs(null);
-            setLocalCrewJobs(null);
+            //setCrewJobs(null);
+            setCrewJobsRefetch(true);
             setCrewToMap(null);
             if(activeMarker?.type === "crew"){
                 setActiveMarker(null);
@@ -200,8 +198,8 @@ const MapSidebar = (props) => {
             console.log("event.target.value", event.target.value)
             var crew = allCrews.find((item)=> item.id == event.target.value);
             setCrewToMap(crew);
-            setCrewJobs(null);
-            setLocalCrewJobs(null)
+            //setCrewJobs(null);
+            setCrewJobsRefetch(true)
         }
         event.stopPropagation();
     }
@@ -287,7 +285,9 @@ const MapSidebar = (props) => {
                         {<MapSidebarCrewJobs {...props} panelRef={crewPanelRef} expanded={expanded} 
                                         expandedAnimDone={expandedAnimDone} showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs}
                                         crewJobDateRange={crewJobDateRange} setCrewJobDateRange={setCrewJobDateRange}
-                                        allCrews={allCrews} setAllCrews={setAllCrews} localCrewJobs={localCrewJobs} setLocalCrewJobs={setLocalCrewJobs}
+                                        allCrews={allCrews} setAllCrews={setAllCrews} crewJobs={crewJobs} setCrewJobs={setCrewJobs} 
+                                        crewJobsRefetch={crewJobsRefetch} setCrewJobsRefetch={setCrewJobsRefetch}
+                                        unfilteredJobs={unfilteredJobs} setUnfilteredJobs={setUnfilteredJobs}
                                         setShouldResetCrewState={setShouldResetCrewState} /> }
                     </Scrollbars>
                 </AccordionDetails>

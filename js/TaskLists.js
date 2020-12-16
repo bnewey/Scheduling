@@ -247,6 +247,24 @@ async function setPriorityTaskList(task_list_id, task_list_name){
     }
 }
 
+async function getAllSignScbdWOIFromTL(id){
+    const route = '/scheduling/taskLists/getAllSignScbdWOIFromTL';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({tl_id: id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
 
 
 module.exports = {
@@ -263,4 +281,5 @@ module.exports = {
     removeMultipleFromList:removeMultipleFromList,
     reorderTaskList: reorderTaskList,
     setPriorityTaskList: setPriorityTaskList,
+    getAllSignScbdWOIFromTL,
 };

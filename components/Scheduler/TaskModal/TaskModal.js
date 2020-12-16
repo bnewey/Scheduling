@@ -42,7 +42,7 @@ import { TaskContext } from '../TaskContainer.js';
 export default function TaskModal(props){
 
     const {modalOpen, setModalOpen, modalTaskId, setModalTaskId} = props;
-    const {taskLists, setTaskLists, setRows} = useContext(TaskContext);
+    const {taskLists, setTaskLists, setRows, setRefreshView, tabValue} = useContext(TaskContext);
 
     const classes = useStyles();
 
@@ -102,6 +102,29 @@ export default function TaskModal(props){
 
     
     const handleClose = () => {
+        //Refreshes based on which tab is currently active
+        var viewToRefresh;
+        switch(tabValue){
+            case 0:
+                viewToRefresh = "calendar"
+                break;
+            case 1:
+                viewToRefresh = "taskList"
+                break;
+            case 2:
+                viewToRefresh = "map"
+                break;
+            case 3:
+                viewToRefresh = "crew"
+                break;
+            case 4:
+                viewToRefresh = "allTasks"
+                break;
+        }
+        if(viewToRefresh){
+            setRefreshView(viewToRefresh);
+        }
+
         setModalOpen(false);
         setModalTask(null);
         setModalTaskId(null);

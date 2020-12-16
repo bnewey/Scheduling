@@ -59,7 +59,27 @@ const TaskContainer = function(props) {
   
   const classes = useStyles();
   
+  const [refreshView, setRefreshView] = React.useState(null);
 
+  useEffect(()=>{
+    //This is to refresh view for taskModal after making changes
+    //, when we dont have direct access to state that needs to be refetched
+    if(refreshView){
+      // switch(refreshView){
+      //   case 'calendar':
+      //     break;
+      //   case 'taskList':
+      //     break;
+      //   case 'map':
+      //     break;
+      //   case 'crew':
+      //     break;
+      //   case 'allTasks':
+      //     break;
+      // } 
+      setRefreshView(null);
+    }
+  },[refreshView])
 
   //Tasks/MapRows
   useEffect( () =>{
@@ -156,15 +176,15 @@ const TaskContainer = function(props) {
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
-                             sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved, user} } >
+                             sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved, user, refreshView, setRefreshView} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >
             <div>
-                <CalendarContainer />
+                 <CalendarContainer />
             </div>
             <div >
-                <TaskListContainer />
+              <TaskListContainer />
             </div>
 
             <div style={{minHeight: '600px'}}>
@@ -173,7 +193,7 @@ const TaskContainer = function(props) {
 
             <div>
               <CrewContainer />
-            </div>
+            </div> 
 
             <div>
               <EnhancedTable rows={rows} setRows={setRows} filterConfig={filterConfig} setFilterConfig={setFilterConfig}/>
@@ -185,7 +205,7 @@ const TaskContainer = function(props) {
         
         
         <TaskModal modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                  modalTaskId={modalTaskId} setModalTaskId={setModalTaskId}/>
+                  modalTaskId={modalTaskId} setModalTaskId={setModalTaskId} />
       
       
         {/* HelpModal initialPage={"tasks"} initialTab={tabValue} />*/}

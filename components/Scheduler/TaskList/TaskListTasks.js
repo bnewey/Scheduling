@@ -3,13 +3,14 @@ import React, {useRef, useState, useEffect, useContext, useCallback, useLayoutEf
 import {makeStyles, List as MUIList, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Checkbox, IconButton, CircularProgress, 
   Popover, ListSubheader,Tooltip} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
+import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import useWindowSize from '../../UI/useWindowSize';
-
+import WoiStatusCheck from './components/WoiStatusCheck'
 import TaskLists from '../../../js/TaskLists';
 import Tasks from '../../../js/Tasks';
 import cogoToast from 'cogo-toast';
@@ -39,7 +40,7 @@ const TaskListTasks = (props) =>{
     //PROPS
     const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, table_info,
               priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved, setTaskListTasksSaved,
-              sorters, filters} = props;
+              sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch} = props;
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
@@ -47,6 +48,10 @@ const TaskListTasks = (props) =>{
     //Popover Add/swap crew
     const [addSwapCrewAnchorEl, setAddSwapCrewAnchorEl] = React.useState(null);
     const [addSwapCrewJob, setAddSwapCrewJob] = useState(null);
+
+    //Popover Add/swap crew
+    const [woiStatusAnchorEl, setWoiStatusAnchorEl] = React.useState(null);
+    const [woiStatusRows, setWoiStatusRows] = useState([]);
 
     const targetRef = React.useRef();
     const [dimensions, setDimensions] = useState({ width:1500, height: 650 });
@@ -164,7 +169,8 @@ const TaskListTasks = (props) =>{
                   throw new Error("Could not reorder tasklist" + taskListToMap.id);
                 }
                 cogoToast.success(`Reordered Task List`, {hideAfter: 4});
-                setTaskListTasks(null);
+                //setTaskListTasks(null);
+                setTaskListTasksRefetch(true);
                 
             })
         .catch( error => {
@@ -254,7 +260,8 @@ const TaskListTasks = (props) =>{
               Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id)
                       .then((data)=>{
                           setShouldResetCrewState(true);
-                          setTaskListTasks(null);
+                          //setTaskListTasks(null);
+                          setTaskListTasksRefetch(true)
                       })
                       .catch((error)=>{
                           console.error(error);
@@ -292,7 +299,8 @@ const TaskListTasks = (props) =>{
                 .then((response)=>{
                     if(response){
                         cogoToast.success("Created and added to crew");
-                        setTaskListTasks(null);
+                        //setTaskListTasks(null);
+                        setTaskListTasksRefetch(true);
                         setShouldResetCrewState(true);
                     }
                 })
@@ -327,6 +335,25 @@ const TaskListTasks = (props) =>{
         
     },[addSwapCrewJob])
     //// END OF Add/Swap Popover for crews
+
+    const woistatusPopoverOpen = Boolean(woiStatusAnchorEl);
+    const woiStatusPopoverId = open ? 'status-popover' : undefined;
+
+    const handleOpenWoiStatusPopover = (event, statusRows) =>{
+      if(!statusRows){
+        console.warn("No status rows in popover");
+        return;
+      }
+      setWoiStatusRows(statusRows);
+      setWoiStatusAnchorEl(event.currentTarget);
+      
+      event.stopPropagation();
+    }
+    const handleWoiStatusPopoverClose = () => {
+        setWoiStatusAnchorEl(null);
+        
+    };
+    
 
     const isSelected = useCallback((record_id) => selectedTasks.indexOf(record_id) !== -1,[taskListTasks, selectedTasks]);
 
@@ -366,7 +393,8 @@ const TaskListTasks = (props) =>{
       Tasks.updateTask(updateTask)
       .then((data)=>{
         cogoToast.success(`Updated ${fieldId}`)
-        setTaskListTasks(null);
+        //setTaskListTasks(null);
+        setTaskListTasksRefetch(true);
       })
       .catch((error)=>{
         console.error("Failed to update task", error);
@@ -452,6 +480,13 @@ const TaskListTasks = (props) =>{
                   </MuiPickersUtilsProvider></div>
                   break;
         }
+        case 'woi_status_check':{
+          return_value = <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 
+
+                          fieldId={fieldId} value={value} type={type} task={task} 
+                          data={woiData?.filter((item)=>item.work_order == task.table_id)}/>
+          break;
+        }
         default:{
           
         }
@@ -461,19 +496,22 @@ const TaskListTasks = (props) =>{
         return <>&nbsp;</>;
       }
       return return_value
-    },[taskListTasks])
+    },[taskListTasks, woiData])
 
 
     return(
         <React.Fragment>
         { taskListTasks && taskListTasksSaved ? <>
         <div ref={targetRef}>
-          <TaskListTasksRows taskListTasks={taskListTasks} taskListTasksSaved={taskListTasksSaved} classes={classes} isSelected={isSelected} 
+          <TaskListTasksRows taskListTasks={taskListTasks} taskListTasksSaved={taskListTasksSaved} taskListTasksRefetch={taskListTasksRefetch}
+           classes={classes} isSelected={isSelected} 
                 handleRightClick={handleRightClick} handleClick={handleClick} taskListToMap={taskListToMap} getItemStyle={getItemStyle}
           table_info={table_info} handleSpecialTableValues={handleSpecialTableValues} addSwapCrewAnchorEl={addSwapCrewAnchorEl} 
           addSwapCrewJob={addSwapCrewJob} addSwapCrewPopoverId={addSwapCrewPopoverId} addSwapCrewPopoverOpen={addSwapCrewPopoverOpen}
           handleAddMemberPopoverClose={handleAddMemberPopoverClose} allCrews={allCrews} handleAddSwapCrew={handleAddSwapCrew}
-          onDragEnd={onDragEnd} selectedTasks={selectedTasks} dimensions={dimensions}/>
+          onDragEnd={onDragEnd} selectedTasks={selectedTasks} dimensions={dimensions}
+          woiStatusAnchorEl={woiStatusAnchorEl} woiStatusPopoverId={woiStatusPopoverId} woiStatusRows={woiStatusRows}
+           woistatusPopoverOpen={woistatusPopoverOpen} handleWoiStatusPopoverClose={handleWoiStatusPopoverClose} woiData={woiData}/>
           </div> </>
      : <></>}
         </React.Fragment>
@@ -482,9 +520,11 @@ const TaskListTasks = (props) =>{
 }
 export default TaskListTasks;
 
-const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classes, isSelected, handleRightClick, handleClick, taskListToMap, getItemStyle,
+const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskListTasksRefetch, classes, isSelected, 
+  handleRightClick, handleClick, taskListToMap, getItemStyle,
   table_info, handleSpecialTableValues, addSwapCrewAnchorEl, addSwapCrewJob, addSwapCrewPopoverId, addSwapCrewPopoverOpen,
-  handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks, dimensions})=>{
+  handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks, dimensions,
+  woiStatusAnchorEl, woiStatusPopoverId, woiStatusRows, woistatusPopoverOpen, handleWoiStatusPopoverClose, woiData})=>{
 
   const getListStyle =  isDraggingOver => ({
     background: isDraggingOver ? "lightblue" : "rgba(0,0,0,0)",
@@ -493,6 +533,9 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
   });
 
   const grid = 8;
+
+  //For generating keys, so that the list will rerender on crewJobs and crewJobsRefetch
+  const getRand = React.useMemo(() => Math.floor((Math.random() * 100) + 1),[taskListTasks, taskListTasksRefetch]);
 
   const getRowRender = (tasks) => ({ index, style }) => {
     const row = tasks[index];
@@ -509,12 +552,12 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
     const isItemCompleted = row.completed_wo == 1;
 
     return (
-      <Draggable key={row.t_id + 321321} 
+      <Draggable key={row.t_id + getRand} 
                   draggableId={(row.priority_order-1).toString()} 
                   index={index} 
                   isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }>
         {(provided, snapshot) => (
-          <div key={taskListTasksSaved[index].t_id + 321321} 
+          <div key={taskListTasksSaved[index]?.t_id + 321321 } 
                     role={undefined} dense button 
                     onContextMenu={event => handleRightClick(event, row.t_id)}
                     onMouseUp={event => handleClick(event, row.t_id)}
@@ -542,16 +585,15 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
           {table_info.map((item, i)=>{
             var value = row[item.field];
             
-            return( <Tooltip key={item.field+i+'key'} title={value} enterDelay={800}>
+            return( 
             <div id={labelId}
                           key={item.field + i}
                           className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
                           style={{flex: `0 0 ${item.width}`}}
                           classes={item.style ?  {primary: classes[item.style]} : {}}>
                            <span> { handleSpecialTableValues(item.field, value, item.type,row)}</span>
-                    {/* { item.field != "completed_wo" ? value : (value == 0 ? 'NC' : 'Comp') }  */}
             </div>
-            </Tooltip>
+            
           )})}
           { taskListToMap 
           ? 
@@ -600,6 +642,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
               : taskListTasks.length;
             return(
               <List
+              key={`taskList` + getRand}
               height={dimensions?.height - 20}
               rowCount={itemCount}
               rowHeight={26}
@@ -658,6 +701,31 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved, classe
                       ))}
             </MUIList>
         </Popover> 
+        {woiData && <Popover
+            id={woiStatusPopoverId}
+            open={woistatusPopoverOpen}
+            anchorEl={woiStatusAnchorEl}
+            onClose={handleWoiStatusPopoverClose}
+            anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+            }}
+            transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+            }}
+            className={classes.popover}
+            classes={{paper: classes.popoverPaper}}
+        >
+           <div className={classes.woiPopoverContainer}>
+             <div className={classes.closeButton} onClick={event => handleWoiStatusPopoverClose()}><CloseIcon/><span>Close</span></div>  
+            { woiStatusRows.map((item,i)=> <div className={classes.woiPopoverDiv}>
+          <span className={classes.woiPopoverSpanTitle}>{i+1}. {item.title}</span>
+            <span className={classes.woiPopoverSpanDescription}>{item.description}</span></div>
+            )
+
+            } 
+           </div> </Popover>  }
         </>
       : <div>
           <CircularProgress style={{marginLeft: "47%"}}/>
@@ -928,9 +996,11 @@ const useStyles = makeStyles(theme => ({
     }
   },
   popoverPaper:{
-    width: '146px',
+    width: '500px',
     borderRadius: '10px',
     backgroundColor: '#6f6f6f',
+    maxHeight: '600px',
+    overflowY: 'scroll',
   },
   crew_list_item:{
     backgroundColor: '#f9ebca',
@@ -954,6 +1024,37 @@ const useStyles = makeStyles(theme => ({
         padding: '1px 0px 0px 0px',
         backgroundColor: '#f5fdff',
     }
-  } 
+  },
+  woiPopoverContainer:{
+    padding: 13,
+    background: '#fff'
+  },
+  woiPopoverDiv:{
+    display: 'flex',
+    flexDiection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'start',
+  },
+  woiPopoverSpanTitle:{
+    fontFamily: 'sans-serif',
+    color: '#000',
+    flexBasis: '33%',
+    fontWeight: '600'
+  },
+  woiPopoverSpanDescription:{
+    fontFamily: 'sans-serif',
+    color: '#333',
+    flexBasis: '66%',
+  },
+  closeButton:{
+    cursor: 'pointer',
+    '&:hover':{
+      textDecoration: 'underline'
+    },
+    display: 'flex',
+    justifyContent: 'start',
+    alignItems: 'center',
+    marginBottom: '5px',
+  }
 
 }));

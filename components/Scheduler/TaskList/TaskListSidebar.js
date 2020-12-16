@@ -32,7 +32,7 @@ const TaskListSidebar = (props) => {
 
     //PROPS
     const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
-        selectedTasks, setSelectedTasks, setSelectedIds, setTableInfo, handleChangeTaskView} = props;
+        selectedTasks, setSelectedTasks, setSelectedIds, setTableInfo, handleChangeTaskView, taskListTasksRefetch, setTaskListTasksRefetch} = props;
 
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
@@ -61,6 +61,7 @@ const TaskListSidebar = (props) => {
                 const filtered_rows = taskListTasks.filter((task, i)=> (    !(selectedTasks.includes(task.t_id))   ));
                 //Set Tasks to all but ones weve deleted
                 setTaskListTasks(filtered_rows);
+                setWoiData(null);
                 setTaskListToMap(priorityList);
                 //Set selected ids in table view to all but ones weve deleted
                 setSelectedIds(filtered_rows.map((task,i)=> {return task.t_id}));
@@ -107,7 +108,8 @@ const TaskListSidebar = (props) => {
                     throw new Error("Could not reorder tasklist" + taskListToMap.id);
                     }
                     cogoToast.success(`Reordered Task List by Install Date`, {hideAfter: 4});
-                    setTaskListTasks(null);
+                    //setTaskListTasks(null);
+                    setTaskListTasksRefetch(true);
                     //Set sorters back to priority
                     setSorters([{property: 'priority_order', 
                         direction: "ASC"}]);
@@ -153,7 +155,8 @@ const TaskListSidebar = (props) => {
         //TODO: add task_list_id to filters objects that are saved, so we can remember filters on tl switches
         // implement if we add more task_list switching functionality
         setFilters([]);
-        setTaskListTasks(null);
+        //setTaskListTasks(null);
+        setTaskListTasksRefetch(true);
         setSelectedTasks([]);
         setTaskListToMap(taskList);
     }
@@ -202,7 +205,8 @@ const TaskListSidebar = (props) => {
                       </div></>
                          :<></>}
                     { selectedTasks && selectedTasks.length > 0 ? <>
-                    <TaskListMoveTasks  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setTaskListTasks={setTaskListTasks}/>
+                    <TaskListMoveTasks  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setTaskListTasks={setTaskListTasks}
+                             setTaskListTasksRefetch={setTaskListTasksRefetch}/>
                         </> : <></>}
                     {/* <div className={classes.singleLineDiv}>
                     <span
@@ -219,7 +223,7 @@ const TaskListSidebar = (props) => {
                 <div className={classes.priority_info_heading}>
                     <span>Crew</span>
                 </div>
-                <TaskListAddCrewDialog taskListTasks={taskListTasks} selectedTasks={selectedTasks} onClose={()=>{setTaskListTasks(null);}} setSelectedTasks={setSelectedTasks}/>
+                <TaskListAddCrewDialog taskListTasks={taskListTasks} selectedTasks={selectedTasks} onClose={()=>{setTaskListTasks(null); setWoiData(null);}} setSelectedTasks={setSelectedTasks}/>
 
                 <div className={classes.priority_info_heading}>
                     <span>Other TaskLists</span>

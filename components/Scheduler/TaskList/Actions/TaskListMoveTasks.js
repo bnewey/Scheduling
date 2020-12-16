@@ -11,7 +11,7 @@ import cogoToast from 'cogo-toast';
 const TaskListActionAdd = (props) => {
  
     //PROPS
-    const { selectedTasks, setSelectedTasks, setTaskListTasks} = props;
+    const { selectedTasks, setSelectedTasks, setTaskListTasks, setTaskListTasksRefetch} = props;
     const {taskLists, setTaskLists, taskListToMap, setTaskListToMap } = useContext(TaskContext);
 
     //STATE
@@ -48,7 +48,8 @@ const TaskListActionAdd = (props) => {
                         cogoToast.success("Successfully moved tasks");
                         setSelectedTasks([]);
                         handleDialogClose()
-                        setTaskListTasks(null);
+                        //setTaskListTasks(null);
+                        setTaskListTasksRefetch(true);
                     }
                 })
                 .catch((error)=>{
