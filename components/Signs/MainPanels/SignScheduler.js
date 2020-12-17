@@ -22,6 +22,7 @@ import cogoToast from 'cogo-toast';
 // import AddEditFPOrder from '../AddEditFPOrder/AddEditFPOrder'
 // import WorkOrderDetail from '../../../js/WorkOrderDetail';
 import Util from  '../../../js/Util';
+import Work_Orders from '../../../js/Work_Orders';
 import { ListContext } from '../SignContainer';
 import Router from 'next/router'
 import moment from 'moment';
@@ -30,8 +31,10 @@ import moment from 'moment';
 const SignSchedulerList = function(props) {
   const {user} = props;
 
-  const { signs, setSigns, currentView, setCurrentView, views    } = useContext(ListContext);
+  const { signs, setSigns, setSignRefetch, currentView, setCurrentView, views    } = useContext(ListContext);
   const classes = useStyles();
+
+  
 
 
   //Set active worker to a tmp value for add otherwise activeworker will be set to edit
@@ -64,30 +67,7 @@ const SignSchedulerList = function(props) {
 
     Router.push('/scheduling/work_orders')
   }
-
-
-  const handleUpdateFPI = (value, fpi, table_to_update)=>{
-    // console.log("Value in update", value);
-    // console.log("FPI", fpi)
-    // if(!value || !fpi){
-    //     cogoToast.error("Bad value");
-    //     console.error("Bad value in handleUpdateFPI");
-    //     return;
-    // }
-    // var updateFPI = {...fpi};
-    // updateFPI[table_to_update] = Util.convertISODateToMySqlDate(value);
-    // console.log("Update", updateFPI);
-    // WorkOrderDetail.updateFPOrderItem(updateFPI)
-    // .then((data)=>{
-    //     if(data){
-    //         setSigns(null);
-    //     }
-    // })
-    // .catch((error)=>{
-    //     cogoToast.error("Failed to update est arrival date");
-    //     console.error("Failed to update est arrival date", error)
-    // })
-  }   
+ 
   
   const columns = [
     {id: 'install_date', label: 'Install Date', type: 'date',align: 'center' },
@@ -102,21 +82,46 @@ const SignSchedulerList = function(props) {
     },
     { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left'},
     { id: 'description', label: 'Description', minWidth: 300, align: 'left'},
+    { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center'},
+    {
+      id: 'sign_built',
+      label: 'Built',
+      minWidth: 50,
+      align: 'center',
+      type: 'date',
+      format: (value,row)=> {return(
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <DatePicker     format="MM/dd/yyyy" showTodayButton
+                            clearable
+                            inputVariant="outlined"
+                            variant="modal" 
+                            maxDate={new Date('01-01-2100')}
+                            minDate={new Date('01-01-1970')}
+                            className={classes.datePicker}
+                            value={value} 
+                            onChange={value => handleUpdateDate(value, row, "sign_built")} />
+        </MuiPickersUtilsProvider>)}
+    },
+    {
+      id: 'sign_popped_and_boxed',
+      label: 'Finished',
+      minWidth: 50,
+      align: 'center',
+      type: 'date',
+      format: (value,row)=> {return(
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <DatePicker     format="MM/dd/yyyy" showTodayButton
+                          clearable
+                          inputVariant="outlined"
+                          variant="modal" 
+                          maxDate={new Date('01-01-2100')}
+                          minDate={new Date('01-01-1970')}
+                          className={classes.datePicker}
+                          value={value} 
+                          onChange={value => handleUpdateDate(value, row, "sign_popped_and_boxed")} />
+      </MuiPickersUtilsProvider>)}
+    },
     
-    // {id: 'arrival_estimate', label: 'Est Arrival', type: 'date',align: 'center' ,
-    //           format: (value,row)=> {return(
-    //             <MuiPickersUtilsProvider utils={DateFnsUtils}>
-    //               <DatePicker     format="MM/dd/yyyy" showTodayButton
-    //                               clearable
-    //                               inputVariant="outlined"
-    //                               variant="inline" 
-    //                               maxDate={new Date('01-01-2100')}
-    //                               minDate={new Date('01-01-1970')}
-    //                               className={classes.datePicker}
-    //                               value={value} 
-    //                               onChange={value => handleUpdateFPI(value, row, "arrival_estimate")} />
-    //           </MuiPickersUtilsProvider>
-    // )}},
   ];
 
   const StyledTableRow = withStyles((theme) => ({
@@ -140,6 +145,32 @@ const SignSchedulerList = function(props) {
     },
   }))(TableRow);
 
+  const checkAllLastColumns = (columns, lastRow, row, columnIndex) =>{
+    return (columns.slice(0, columnIndex+1).every((column)=> {
+      return  (lastRow && column && lastRow[column.id] == row[column.id])
+    }))
+
+  }
+
+  const handleUpdateDate = (value, row, field) =>{
+    if(!row || !field){
+      console.error("Bad row/field in handleUpdateDate")
+      return;
+    }
+
+    var updateRow = {...row};
+    updateRow[field] = Util.convertISODateToMySqlDate(value);
+
+    Work_Orders.updateWorkOrderItem(updateRow)
+    .then((data)=>{
+      cogoToast.success("Updated "+ field);
+      setSignRefetch(true);
+    })
+    .catch((error)=>{
+      console.error("failed to update "+ field, error)
+      cogoToast.error("Failed to update "+ field);
+    })
+  }
   
 
   return (
@@ -162,11 +193,22 @@ const SignSchedulerList = function(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {signs?.map((row) => {
+                {signs?.map((row,i) => {
+                  const lastRow = i > 0 ? signs[i-1] : null;
                   return (
                     <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
-                      {columns.map((column) => {
-                        const value = row[column.id];
+                      {columns.map((column,colI) => {
+                        var value;
+                        //This hides repeat values in table for easier viewing
+                        if(column.id !== "description" && checkAllLastColumns(columns, lastRow, row, colI)){
+                          value = null;
+                        }else{
+                          if(column.id === "install_date" && row[column.id] == null){
+                            value = "****";
+                          }else{
+                            value = row[column.id];
+                          }
+                        }
                         return (
                           <TableCell className={classes.tableCell} 
                                     key={column.id}

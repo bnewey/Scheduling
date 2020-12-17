@@ -11,7 +11,7 @@ const database = require('./db');
 
 router.post('/getAllSignsForScheduler', async (req,res) => {
 
-    const sql = ' SELECT woi.*, date_format(t.sch_install_date, \'%Y-%m-%d\') AS install_date, wo.type, eac.state, enc.name AS product_to ' + 
+    const sql = ' SELECT woi.*, IFNULL( date_format(t.sch_install_date, \'%Y-%m-%d\') , NULL) AS install_date, wo.type, eac.state, enc.name AS product_to ' + 
     ' FROM work_orders_items woi ' +
     ' LEFT JOIN work_orders wo ON wo.record_id = woi.work_order ' + 
     ' LEFT JOIN tasks t ON wo.record_id = t.table_id ' +

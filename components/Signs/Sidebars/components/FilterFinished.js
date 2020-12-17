@@ -13,42 +13,42 @@ import { ListContext } from '../../SignContainer';
 import { AirlineSeatLegroomNormalOutlined } from '@material-ui/icons';
 
 
-const FilterArrivalState = function(props) {
+const FilterFinished = function(props) {
     const {user} = props;
   
-    const { purchaseOrders, setPurchaseOrders, arrivedState, setArrivedState} = useContext(ListContext);
+    const { signs, setSigns, setSignRefetch,finishedState, setFinishedState } = useContext(ListContext);
     const classes = useStyles();
 
      //Save and/or Fetch searchTable to local storage
     useEffect(() => {
-    if(arrivedState == null){
-      var tmp = window.localStorage.getItem('arrivedState');
+    if(finishedState == null){
+      var tmp = window.localStorage.getItem('finishedState');
       var tmpParsed;
       if(tmp){
         tmpParsed = JSON.parse(tmp);
       }
       if(tmpParsed){
-        setArrivedState(tmpParsed);
+        setFinishedState(tmpParsed);
       }else{
-        setArrivedState({arrived: 'all'});
+        setFinishedState({finished: 'all'});
       }
     }
-    if(arrivedState){
-      window.localStorage.setItem('arrivedState', JSON.stringify(arrivedState));
+    if(finishedState){
+      window.localStorage.setItem('finishedState', JSON.stringify(finishedState));
     }
     
-  }, [arrivedState]);
+  }, [finishedState]);
     
     const handleChange =( value, field)=>{
         if(!value || value == null){
             console.error("bad value in handleChange");
             return;
         }
-        var tmpState = {...arrivedState};
+        var tmpState = {...finishedState};
         tmpState[field] = value; 
 
-        setArrivedState(tmpState);
-        setPurchaseOrders(null);
+        setFinishedState(tmpState);
+        setSignRefetch(true);
     }
 
 
@@ -58,13 +58,13 @@ const FilterArrivalState = function(props) {
             <div className={classes.rowDiv}>
             <span className={classes.label}>Arrived:</span>
                 <span className={classes.value}>
-                    {arrivedState &&
+                    {finishedState &&
                     <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>
                         <RadioGroup row 
                                     aria-label="ArrivedStatus" 
                                     name="ArrivedStatus" 
-                                    value={arrivedState?.arrived} 
-                                    onChange={event => handleChange(event?.target?.value, "arrived")}
+                                    value={finishedState?.finished} 
+                                    onChange={event => handleChange(event?.target?.value, "finished")}
                                     classes={{root: classes.radioGroup}}>
                                         <FormControlLabel value={"all"} control={<Radio  classes={{checked: classes.radio }}/>} label="All" />   
                                         <FormControlLabel value={"yes"} control={<Radio  classes={{checked: classes.radio }}/>} label="Yes" />
@@ -77,7 +77,7 @@ const FilterArrivalState = function(props) {
     </>)
 }
 
-export default FilterArrivalState;
+export default FilterFinished;
 
 
 

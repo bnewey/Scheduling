@@ -41,7 +41,7 @@ const SignContainer = function(props) {
   //         to: Util.convertISODateToMySqlDate(today),
   //         from: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()-270)))
   // });
-  //const [arrivedState, setArrivedState] = useState(null);
+  const [finishedState, setFinishedState] = useState(null);
 
   //views used through whole app, 
   //child views with parent run parent's onClose() function
@@ -95,7 +95,10 @@ const SignContainer = function(props) {
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
     if(signs == null || signRefetch == true) {
-      
+      if(signRefetch == true){
+        setSignRefetch(false);
+      }
+
       Signs.getAllSignsForScheduler()
       .then( data => { 
 
@@ -134,10 +137,25 @@ const SignContainer = function(props) {
         //Set Filters
         setSignsSaved(setSignsData);
         //filter out here
-        
-        setSigns(setSignsData);
-        if(signRefetch){
-          setSignRefetch(false);
+
+        if(finishedState){
+
+          var finished = finishedState.finished;
+          if( finished){
+              var tmpSigns = [...setSignsData];
+              if(finished == "yes"){
+                  tmpSigns = tmpSigns.filter((v,i)=> v.sign_popped_and_boxed )
+              }
+              if(finished == "no"){
+                tmpSigns = tmpSigns.filter((v,i)=> !v.sign_popped_and_boxed)
+              }
+              if(finished == "all"){
+                //no need to filter
+              }
+              setSigns(tmpSigns)
+          }
+        }else{
+          setSigns(setSignsData);
         }
 
       })
@@ -147,7 +165,7 @@ const SignContainer = function(props) {
       })
     }
 
-  },[signs, signRefetch]);
+  },[signs, signRefetch, finishedState]);
 
   //Save and/or Fetch filters to local storage
   useEffect(() => {
@@ -280,8 +298,8 @@ const SignContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{signs, setSigns, currentView, setCurrentView, views, signsSaved, setSignsSaved,filters, setFilters,
-      filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr} } >
+      <ListContext.Provider value={{signs, setSigns, setSignRefetch,currentView, setCurrentView, views, signsSaved, setSignsSaved,filters, setFilters,
+      filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState} } >
       
         <div className={classes.containerDiv}>
         

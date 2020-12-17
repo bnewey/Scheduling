@@ -41,7 +41,7 @@ db.query = function(sql, params) {
                 reject(error);
                 return;
             }     
-
+            //console.log(sql, params);
             var parsed = JSON.parse(JSON.stringify(results));
             if(parsed){
                 resolve(parsed);

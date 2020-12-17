@@ -23,6 +23,7 @@ import {
 
 import { TaskContext } from '../../TaskContainer';
 import WoiStatusCheck from '../../TaskList/components/WoiStatusCheck';
+import { set } from 'lodash';
 
 const vendors  = []
 
@@ -119,10 +120,8 @@ const TaskModalWOSignArtItems = (props) =>{
         })
         
     }
-
     const woistatusPopoverOpen = Boolean(woiStatusAnchorEl);
     const woiStatusPopoverId = open ? 'status-popover' : undefined;
-
     const handleOpenWoiStatusPopover = (event, statusRows) =>{
       if(!statusRows){
         console.warn("No status rows in popover");
@@ -137,7 +136,7 @@ const TaskModalWOSignArtItems = (props) =>{
         setWoiStatusAnchorEl(null);
         
     };
-    
+
 
     return(
         

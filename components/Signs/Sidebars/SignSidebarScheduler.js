@@ -4,6 +4,8 @@ import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-
 import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
 
+import FilterFinished from './components/FilterFinished'
+
 import Util from  '../../../js/Util';
 import { ListContext } from '../SignContainer';
 // import FilterArrivalState from './components/FilterArrivalState';
@@ -44,7 +46,7 @@ const SignSidebarScheduler = function(props) {
         <div className={classes.dateRangeDiv}>
           { !searchOpen && 
             <div>
-                {/* <FilterArrivalState /> */}
+                { <FilterFinished /> }
             </div>
           }
 
