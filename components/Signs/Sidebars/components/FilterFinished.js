@@ -56,7 +56,7 @@ const FilterFinished = function(props) {
         <div className={classes.toolDiv}>
             <div className={classes.labelDiv}><span className={classes.labelSpan}>Filters </span></div>
             <div className={classes.rowDiv}>
-            <span className={classes.label}>Arrived:</span>
+            <span className={classes.label}>Finished:</span>
                 <span className={classes.value}>
                     {finishedState &&
                     <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>

@@ -200,10 +200,11 @@ const SignSchedulerList = function(props) {
                       {columns.map((column,colI) => {
                         var value;
                         //This hides repeat values in table for easier viewing
-                        if(column.id !== "description" && checkAllLastColumns(columns, lastRow, row, colI)){
+                        if(column.id !== "description"  && column.id !== "quantity" && column.id !== "sign_built" && 
+                                column.id !== "sign_popped_and_boxed" &&   checkAllLastColumns(columns, lastRow, row, colI)){
                           value = null;
                         }else{
-                          if(column.id === "install_date" && row[column.id] == null){
+                          if((column.id === "install_date") && row[column.id] == null){
                             value = "****";
                           }else{
                             value = row[column.id];
