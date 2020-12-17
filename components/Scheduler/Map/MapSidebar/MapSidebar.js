@@ -187,7 +187,6 @@ const MapSidebar = (props) => {
 
     const handleChangeCrewToMap = (event)=>{
         if(event.target.value === ""){
-            //setCrewJobs(null);
             setCrewJobsRefetch(true);
             setCrewToMap(null);
             if(activeMarker?.type === "crew"){
@@ -198,7 +197,6 @@ const MapSidebar = (props) => {
             console.log("event.target.value", event.target.value)
             var crew = allCrews.find((item)=> item.id == event.target.value);
             setCrewToMap(crew);
-            //setCrewJobs(null);
             setCrewJobsRefetch(true)
         }
         event.stopPropagation();

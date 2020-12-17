@@ -1,9 +1,10 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Switch, FormControlLabel, List, ListItem, ListItemText,ListItemIcon, Modal, Backdrop, Fade, Grid, 
-    TextField, FormControl, InputLabel, MenuItem, Select, IconButton,
+    TextField, FormControl, InputLabel, MenuItem, Select, IconButton,Popover,
     ButtonGroup, Button, CircularProgress, Avatar} from '@material-ui/core';
 import BulletIcon from '@material-ui/icons/Crop75';
+import CloseIcon from '@material-ui/icons/Close';
 import RemoveIcon from '@material-ui/icons/Remove';
 import ClearIcon from '@material-ui/icons/Clear';
 import PersonalVideoIcon from '@material-ui/icons/PersonalVideo';
@@ -21,11 +22,12 @@ import {
   } from '@material-ui/pickers';
 
 import { TaskContext } from '../../TaskContainer';
+import WoiStatusCheck from '../../TaskList/components/WoiStatusCheck';
 
 const vendors  = []
 
 const TaskModalWOSignArtItems = (props) =>{
-    const {taskId} = props;
+    const {taskId, modalTask} = props;
     //const {} = useContext(TaskContext);
 
     //css
@@ -34,6 +36,10 @@ const TaskModalWOSignArtItems = (props) =>{
     //State Variables
     const [signItems, setSignItems] = useState(null);
     const [showDates, setShowDates] = useState(false);
+
+    //Popover WOI Status
+    const [woiStatusAnchorEl, setWoiStatusAnchorEl] = React.useState(null);
+    const [woiStatusRows, setWoiStatusRows] = useState([]);
 
     const [itemObject, setItemObject] = useState(null);
 
@@ -113,6 +119,24 @@ const TaskModalWOSignArtItems = (props) =>{
         })
         
     }
+
+    const woistatusPopoverOpen = Boolean(woiStatusAnchorEl);
+    const woiStatusPopoverId = open ? 'status-popover' : undefined;
+
+    const handleOpenWoiStatusPopover = (event, statusRows) =>{
+      if(!statusRows){
+        console.warn("No status rows in popover");
+        return;
+      }
+      setWoiStatusRows(statusRows);
+      setWoiStatusAnchorEl(event.currentTarget);
+      
+      event.stopPropagation();
+    }
+    const handleWoiStatusPopoverClose = () => {
+        setWoiStatusAnchorEl(null);
+        
+    };
     
 
     return(
@@ -122,11 +146,55 @@ const TaskModalWOSignArtItems = (props) =>{
             ?
             <Grid item xs={12} className={classes.paper}>
                <div className={classes.root}>
-                    <p className={classes.taskTitle}>Work Order Items </p> 
-                    <FormControlLabel
-                        control={<Switch checked={showDates} onChange={handleChangeShowDates} />}
-                        label="Show Comp Dates"
-                        />
+                   <div className={classes.headDiv}>
+                        <span className={classes.taskTitle}>Work Order Items </span> 
+                        <FormControlLabel
+                            control={<Switch checked={showDates} onChange={handleChangeShowDates} />}
+                            label="Show Comp Dates"
+                            />
+                        {/* STATUS POPOVER */}
+                        <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 
+                        task={modalTask} 
+                        data={signItems?.filter((sign)=> sign.scoreboard_or_sign != 0)?.filter((item)=>item.work_order == modalTask.table_id)}/>
+                        {signItems && <Popover
+                            id={woiStatusPopoverId}
+                            open={woistatusPopoverOpen}
+                            anchorEl={woiStatusAnchorEl}
+                            onClose={handleWoiStatusPopoverClose}
+                            anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                            }}
+                            className={classes.popover}
+                            classes={{paper: classes.popoverPaperWoi}}
+                        >
+                        <div className={classes.woiPopoverContainer}>
+                            <div className={classes.closeButton} onClick={event => handleWoiStatusPopoverClose()}><CloseIcon/><span>Close</span></div>
+                            
+                            <div className={classes.woiPopoverHeadDiv}>
+                                <span className={classes.woiPopoverSpanTitleHead}>WARNING</span>
+                                <span className={classes.woiPopoverSpanDescriptionHead}>INFO</span>
+                                <span className={classes.woiPopoverSpanSignHead}>SIGN</span>
+                                <span className={classes.woiPopoverSpanDateHead}>DATE</span>
+                            </div>  
+                            { woiStatusRows.map((item,i)=> 
+                            <div className={classes.woiPopoverDiv}>
+                            <span className={classes.woiPopoverSpanTitle}>{i+1}. {item.title}</span>
+                            <span className={classes.woiPopoverSpanDescription}>{item.description}</span>
+                            <span className={classes.woiPopoverSpanSign}>{item.sign}</span>
+                            <span className={classes.woiPopoverSpanDate}>{item.date}</span>
+                            </div>
+                            )
+
+                            } 
+                        </div> </Popover>  }
+                        {/* END STATUS POPOVER */}
+                    </div>
+
                     <List component="nav" aria-label="main mailbox folders" className={classes.list}>
 
                         {itemObject.in_house.length > 0 &&  <ListItem className={classes.list_head_item}>
@@ -138,9 +206,7 @@ const TaskModalWOSignArtItems = (props) =>{
                                         <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
                                             Vendor
                                         </Grid>
-                                        <Grid item xs={2} style={{textAlign: 'center', backgroundColor: '#1f2b3a', borderRadius:'4px'}}>
-                                            Arrival Date
-                                        </Grid>
+                                        
                                     </Grid>
                                 </ListItemText>
                             </ListItem>}
@@ -188,8 +254,8 @@ const TaskModalWOSignArtItems = (props) =>{
                                                 </select> 
                                             </div>                                       
                                         </Grid>
-                                        <Grid item xs={2} className={classes.dateGrid}>
-                                            <div className={classes.dateDiv}>  
+                                        <Grid item xs={2} >
+                                            {/* <div className={classes.dateDiv}>  
                                                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                                                     <DatePicker clearable showTodayButton className={classes.datePicker} inputVariant="outlined"
                                                                     value={item.scoreboard_arrival_date} 
@@ -197,7 +263,7 @@ const TaskModalWOSignArtItems = (props) =>{
                                                                     onChange={value => handleUpdateArrivalDate(value, item)} 
                                                                     />
                                                 </MuiPickersUtilsProvider>
-                                            </div>
+                                            </div> */}
                                         </Grid>
                                     </Grid>
 
@@ -374,6 +440,12 @@ const useStyles = makeStyles(theme => ({
       padding: '1% 3% !important',
       position: 'relative'
     },
+    headDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     list:{
         padding: '0px',
     },
@@ -461,5 +533,71 @@ const useStyles = makeStyles(theme => ({
             padding: '4px 0px',
             backgroundColor: '#effeff',
         }
-    }
+    },
+    popoverPaperWoi:{
+        width: '600px',
+        borderRadius: '10px',
+        backgroundColor: '#6f6f6f',
+        maxHeight: '600px',
+        overflowY: 'auto',
+    },
+    woiPopoverContainer:{
+        padding: 13,
+        background: '#fff'
+    },
+    woiPopoverHeadDiv:{
+        display: 'flex',
+        flexDiection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: '1px solid #cecece',
+        textAlign: 'center'
+    },
+    woiPopoverDiv:{
+        display: 'flex',
+        flexDiection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: '1px solid #cecece',
+    },
+    woiPopoverSpanTitle:{
+        fontFamily: 'sans-serif',
+        color: '#000',
+        flexBasis: '20%',
+        fontWeight: '600',
+    
+    },
+    woiPopoverSpanDescription:{
+        fontFamily: 'sans-serif',
+        color: '#333',
+        flexBasis: '25%'
+    },
+    woiPopoverSpanSign:{
+        flexBasis: '28%'
+    },
+    woiPopoverSpanDate:{
+        flexBasis: '12%'
+    },
+    closeButton:{
+        cursor: 'pointer',
+        '&:hover':{
+            textDecoration: 'underline'
+        },
+        display: 'flex',
+        justifyContent: 'start',
+        alignItems: 'center',
+        marginBottom: '5px',
+    },
+    woiPopoverSpanTitleHead:{
+        flexBasis: '20%',
+    },
+    woiPopoverSpanDescriptionHead:{
+        flexBasis: '25%'
+    },
+    woiPopoverSpanSignHead:{
+        flexBasis: '28%'
+    },
+    woiPopoverSpanDateHead:{
+        flexBasis: '12%'
+    },
   }));

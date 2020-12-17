@@ -34,6 +34,7 @@ import TaskModalCrew from './TaskModalSections/TaskModalCrew';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import { TaskContext } from '../TaskContainer.js';
+import WoiStatusCheck from '../TaskList/components/WoiStatusCheck.js';
 
 //ALERT ////
 // This component is in TaskContainer, TaskList, and MapContainer -
@@ -286,87 +287,13 @@ export default function TaskModal(props){
                     <hr className={classes.hr}/>
                 
                     
-                <TaskModalWOSignArtItems taskId={modalTask.table_id}/>
+                <TaskModalWOSignArtItems modalTask={modalTask} taskId={modalTask.table_id}/>
                         
                 </Grid>
                 <Grid item xs={3} className={classes.paper}>
                     
                 
-                <div className={classes.drill_sign_art_div}>
-                
-                    <div>
-                    <FormControl variant="outlined" className={classes.inputField}>       
-                        <div className={classes.avatar_and_label_div}>
-                            <Avatar src="/static/drilling-icon.png" className={classes.avatar}/>
-                            <span id="drilling-input-label">
-                            Drilling
-                            </span>
-                        </div>
-                        <div>
-                            <select
-                            labelId="drilling-input-label"
-                            id="drilling-input"
-                            className={classes.selectBox}
-                            value={modalTask.drilling}
-                            onChange={value => handleInputOnChange(value, true, "select", "drilling")}
-                            >
-                            <option value={null}>N/A</option>
-                            <option value={'Drill'}>Drill</option>
-                            <option value={'Need Locate'}>Need Locate</option>
-                            <option value={'Located'}>Located</option>
-                            <option value={'Finished'}>Finished</option>  
-                            </select>
-                        </div>
-                    </FormControl>
-                    </div>
-                    <div>
-                    <FormControl variant="outlined" className={classes.inputField}>
-                        <div className={classes.avatar_and_label_div}>  
-                            <Avatar src="/static/sign-build-icon.png" className={classes.avatar}/>
-                            <span id="sign-input-label">
-                            Sign
-                            </span>
-                        </div>
-                        <div>
-                            <select
-                            labelId="sign-input-label"
-                            id="sign-input"
-                            value={modalTask.sign}
-                            onChange={value => handleInputOnChange(value, true, "select", "sign")}
-                            >
-                            <option value={null}>N/A</option>
-                            <option value={'Build'}>Build</option>
-                            <option value={'Finished'}>Finished</option>
-                            </select>
-                        </div>
-                    </FormControl>
-                    </div>
-                    <div>
-                    <FormControl variant="outlined" className={classes.inputField}>
-                        <div className={classes.avatar_and_label_div}>
-                            <Avatar src="/static/art-icon.png" className={classes.avatar}/>
-                            <span id="artwork-input-label">
-                            Artwork
-                            </span>
-                        </div>
-                        <div>
-                            <select
-                            labelId="artwork-input-label"
-                            id="artwork-input"
-                            value={modalTask.artwork}
-                            onChange={value => handleInputOnChange(value, true, "select", "artwork")}
-                            >
-                            <option value={null}>N/A</option>
-                            <option value={'Need Art'}>Need Art</option>
-                            <option value={'Out for approval'}>Out for approval</option>
-                            <option value={'Approved'}>Approved</option>
-                            <option value={'Finished'}>Finished</option>
-                            </select>
-                        </div>
-                    </FormControl>
-                    </div>
-                </div>
-                <br/>
+
                 <p className={classes.taskTitle}>Drill Date</p>
                 <div>
                     <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker clearable showTodayButton  format="MM/dd/yyyy" className={classes.inputDate} inputVariant="outlined"  value={modalTask.drill_date} onChange={value => handleInputOnChange(value, true, "datetime", "drill_date")} /></MuiPickersUtilsProvider>
@@ -612,7 +539,7 @@ const useStyles = makeStyles(theme => ({
         alignSelf:'center',
         backgroundColor: '#cbe8e4',
     },
-    drill_sign_art_div:{
+    statusList:{
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',

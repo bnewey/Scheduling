@@ -49,7 +49,7 @@ const TaskListTasks = (props) =>{
     const [addSwapCrewAnchorEl, setAddSwapCrewAnchorEl] = React.useState(null);
     const [addSwapCrewJob, setAddSwapCrewJob] = useState(null);
 
-    //Popover Add/swap crew
+    //Popover WOI Status
     const [woiStatusAnchorEl, setWoiStatusAnchorEl] = React.useState(null);
     const [woiStatusRows, setWoiStatusRows] = useState([]);
 
@@ -483,7 +483,7 @@ const TaskListTasks = (props) =>{
         case 'woi_status_check':{
           return_value = <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 
 
-                          fieldId={fieldId} value={value} type={type} task={task} 
+                          task={task} 
                           data={woiData?.filter((item)=>item.work_order == task.table_id)}/>
           break;
         }
@@ -714,13 +714,24 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
             horizontal: 'center',
             }}
             className={classes.popover}
-            classes={{paper: classes.popoverPaper}}
+            classes={{paper: classes.popoverPaperWoi}}
         >
            <div className={classes.woiPopoverContainer}>
-             <div className={classes.closeButton} onClick={event => handleWoiStatusPopoverClose()}><CloseIcon/><span>Close</span></div>  
-            { woiStatusRows.map((item,i)=> <div className={classes.woiPopoverDiv}>
-          <span className={classes.woiPopoverSpanTitle}>{i+1}. {item.title}</span>
-            <span className={classes.woiPopoverSpanDescription}>{item.description}</span></div>
+             <div className={classes.closeButton} onClick={event => handleWoiStatusPopoverClose()}><CloseIcon/><span>Close</span></div>
+              
+              <div className={classes.woiPopoverHeadDiv}>
+                <span className={classes.woiPopoverSpanTitleHead}>WARNING</span>
+                <span className={classes.woiPopoverSpanDescriptionHead}>INFO</span>
+                <span className={classes.woiPopoverSpanSignHead}>SIGN</span>
+                <span className={classes.woiPopoverSpanDateHead}>DATE</span>
+              </div>  
+            { woiStatusRows.map((item,i)=> 
+            <div className={classes.woiPopoverDiv}>
+              <span className={classes.woiPopoverSpanTitle}>{i+1}. {item.title}</span>
+              <span className={classes.woiPopoverSpanDescription}>{item.description}</span>
+              <span className={classes.woiPopoverSpanSign}>{item.sign}</span>
+              <span className={classes.woiPopoverSpanDate}>{item.date}</span>
+            </div>
             )
 
             } 
@@ -994,12 +1005,19 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: '#b1b1b159',
     }
   },
-  popoverPaper:{
-    width: '500px',
+  popoverPaperWoi:{
+    width: '600px',
     borderRadius: '10px',
     backgroundColor: '#6f6f6f',
     maxHeight: '600px',
-    overflowY: 'scroll',
+    overflowY: 'auto',
+  },
+  popoverPaper:{
+    width: '200px',
+    borderRadius: '10px',
+    backgroundColor: '#6f6f6f',
+    maxHeight: '600px',
+    overflowY: 'auto',
   },
   crew_list_item:{
     backgroundColor: '#f9ebca',
@@ -1028,22 +1046,38 @@ const useStyles = makeStyles(theme => ({
     padding: 13,
     background: '#fff'
   },
+  woiPopoverHeadDiv:{
+    display: 'flex',
+    flexDiection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottom: '1px solid #cecece',
+    textAlign: 'center'
+  },
   woiPopoverDiv:{
     display: 'flex',
     flexDiection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'start',
+    alignItems: 'center',
+    borderBottom: '1px solid #cecece',
   },
   woiPopoverSpanTitle:{
     fontFamily: 'sans-serif',
     color: '#000',
-    flexBasis: '33%',
-    fontWeight: '600'
+    flexBasis: '20%',
+    fontWeight: '600',
+    
   },
   woiPopoverSpanDescription:{
     fontFamily: 'sans-serif',
     color: '#333',
-    flexBasis: '66%',
+    flexBasis: '25%'
+  },
+  woiPopoverSpanSign:{
+    flexBasis: '28%'
+  },
+  woiPopoverSpanDate:{
+    flexBasis: '12%'
   },
   closeButton:{
     cursor: 'pointer',
@@ -1054,6 +1088,19 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'start',
     alignItems: 'center',
     marginBottom: '5px',
-  }
+  },
+  woiPopoverSpanTitleHead:{
+    flexBasis: '20%',
+  },
+  woiPopoverSpanDescriptionHead:{
+    flexBasis: '25%'
+  },
+  woiPopoverSpanSignHead:{
+    flexBasis: '28%'
+  },
+  woiPopoverSpanDateHead:{
+    flexBasis: '12%'
+  },
+  
 
 }));
