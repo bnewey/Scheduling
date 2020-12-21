@@ -147,6 +147,26 @@ async function createCrewJobPdf(crew, jobs){
 
 }
 
+async function createSignSchedulePdf( signs){
+    const route = '/scheduling/pdf/createSignSchedulePdf';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'blob',
+                body: JSON.stringify({ signs})
+            });
+            //console.log('data', data);
+        return( await data.blob());
+    }catch(error){
+        throw error;
+    }
+
+}
+
 module.exports = {
     createWOPdf: createWOPdf,
     createTLPdf:createTLPdf,
@@ -155,5 +175,6 @@ module.exports = {
     createWorkOrderPdf,
     createFairPlayOrderPdf,
     createCrewJobPdf,
+    createSignSchedulePdf,
     
 };

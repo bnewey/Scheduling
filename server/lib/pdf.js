@@ -4,7 +4,8 @@ const pdf = require('html-pdf');
 const fs = require('fs');
 const woTemplate = require(`../documents/work_order_template`);
 const taskListTemplate = require(`../documents/task_list_template`);
-const crewJobsTemplate = require(`../documents/crew_jobs_template`)
+const crewJobsTemplate = require(`../documents/crew_jobs_template`);
+const signScheduleTemplate = require(`../documents/sign_schedule_template`);
 
 const moment = require('moment');
 
@@ -87,7 +88,6 @@ router.post('/createPackingSlipPdf', async (req,res) => {
         doc.text(psObject.city + ', ' + psObject.state + ' ' + psObject.zip, 30);
 
         doc.text(psObject.job_reference, 30, 250);
-
 
         doc.fontSize(12).text(psObject.work_order, 45, 325);
         doc.fontSize(10).text(psObject.po_number, 155, 325);
@@ -326,5 +326,29 @@ router.post('/createCrewJobPdf', async (req,res) => {
     })
 
 });
+
+router.post('/createSignSchedulePdf', async (req,res) => {
+    if( !req.body.signs){
+        res.sendStatus(400);
+    }
+    var signs = req.body.signs;
+
+    const options = {
+        orientation: 'landscape'
+    };
+
+    pdf.create(signScheduleTemplate( signs), options).toStream(function(err, stream){
+        if(err){
+            res.sendStatus(400);
+        }
+       
+        res.set('Content-type', 'application/pdf');
+        stream.pipe(res)
+
+    })
+
+});
+
+
 
 module.exports = router;

@@ -106,7 +106,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center',
     }, 
     labelSpan:{
-        marginRight: '10px',
+        marginRight: '0px',
         fontSize: '13px',
         fontFamily: 'sans-serif',
         fontWeight:'600',

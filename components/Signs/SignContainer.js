@@ -94,7 +94,7 @@ const SignContainer = function(props) {
   //Sign Rows
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
-    if(signs == null || signRefetch == true) {
+    if((signs == null || signRefetch == true) && finishedState) {
       if(signRefetch == true){
         setSignRefetch(false);
       }

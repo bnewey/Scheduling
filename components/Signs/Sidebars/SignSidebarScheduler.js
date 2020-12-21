@@ -5,6 +5,7 @@ import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
 
 import FilterFinished from './components/FilterFinished'
+import SignsPdf from './components/SignsPdf';
 
 import Util from  '../../../js/Util';
 import { ListContext } from '../SignContainer';
@@ -45,9 +46,21 @@ const SignSidebarScheduler = function(props) {
         </div>
         <div className={classes.dateRangeDiv}>
           { !searchOpen && 
+          <>
             <div>
                 { <FilterFinished /> }
             </div>
+          </>
+          }
+
+        </div>
+        <div className={classes.dateRangeDiv}>
+          { !searchOpen && 
+          <>
+            <div>
+                {<SignsPdf/>}
+            </div>
+          </>
           }
 
         </div>

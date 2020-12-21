@@ -82,7 +82,6 @@ const SignSchedulerList = function(props) {
     },
     { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left'},
     { id: 'description', label: 'Description', minWidth: 300, align: 'left'},
-    { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center'},
     {
       id: 'sign_built',
       label: 'Built',
@@ -121,6 +120,8 @@ const SignSchedulerList = function(props) {
                           onChange={value => handleUpdateDate(value, row, "sign_popped_and_boxed")} />
       </MuiPickersUtilsProvider>)}
     },
+    { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center'},
+
     
   ];
 
