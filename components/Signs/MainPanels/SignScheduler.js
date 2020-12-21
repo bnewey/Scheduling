@@ -68,7 +68,7 @@ const SignSchedulerList = function(props) {
 
     Router.push('/scheduling/work_orders')
   }
- 
+
   
   const columns = [
     {id: 'install_date', label: 'Install Date', type: 'date',align: 'center' },

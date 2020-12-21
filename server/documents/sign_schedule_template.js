@@ -13,8 +13,8 @@ module.exports = (signs) => {
       { id: 'work_order', label: 'WO#', align: 'center', size: 'tiny' },
       { id: 'product_to', label: 'Product Goes To', align: 'left', size: 'medium'},
       { id: 'description', label: 'Description', align: 'left', size: 'large'},
-      { id: 'sign_built', label: 'Built', align: 'center', type: 'date', size: 'small' },
-      { id: 'sign_popped_and_boxed',  label: 'Finished',  align: 'center', type: 'date',  size: 'small'},
+      { id: 'sign_built', label: 'Built', align: 'center', type: 'checkbox', size: 'small' },
+      { id: 'sign_popped_and_boxed',  label: 'Finished',  align: 'center', type: 'checkbox',  size: 'small'},
       { id: 'quantity', label: 'Qty', align: 'center', size: 'tiny'},
     ];
 
@@ -66,7 +66,12 @@ module.exports = (signs) => {
             if(column.type == 'date'){
               value = Util.convertISODateToMySqlDate(sign[column.id])
             }else{
-              value = sign[column.id];
+              if(column.type == "checkbox"){
+                value = sign[column.id] ? '[&nbsp;X&nbsp;]' : '[&nbsp;&nbsp;&nbsp;]';
+              }else{
+                value = sign[column.id];
+              }
+              
             }
           }
         }
