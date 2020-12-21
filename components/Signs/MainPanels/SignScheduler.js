@@ -160,7 +160,7 @@ const SignSchedulerList = function(props) {
     }
 
     var updateRow = {...row};
-    updateRow[field] = Util.convertISODateTimeToMySqlDateTime(value.toISOString());
+    updateRow[field] = value ? Util.convertISODateTimeToMySqlDateTime(value.toISOString()) : null;
 
     Work_Orders.updateWorkOrderItem(updateRow)
     .then((data)=>{
