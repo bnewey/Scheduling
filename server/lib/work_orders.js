@@ -418,8 +418,8 @@ router.post('/updateWorkOrderItem', async (req,res) => {
                 woi.model || null, woi.color || null, woi.trim  || null,
                 Util.convertISODateToMySqlDate(woi.scoreboard_arrival_date), woi.scoreboard_arrival_status || null,
                  woi.mount || null, woi.trim_size || null, woi.trim_corners || null,
-                woi.date_offset || 0, Util.convertISODateToMySqlDate(woi.sign_due_date), woi.vendor || null, woi.sign_built,
-                woi.sign_popped_and_boxed, woi.record_id]);
+                woi.date_offset || 0, Util.convertISODateToMySqlDate(woi.sign_due_date), woi.vendor || null, Util.convertISODateToMySqlDate(woi.sign_built),
+                Util.convertISODateToMySqlDate(woi.sign_popped_and_boxed), woi.record_id]);
         logger.info("Work Order Item  updated" +  woi.record_id);
         res.json(results);
 
