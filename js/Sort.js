@@ -6,7 +6,6 @@ const dirMap = {
 };
 
 const doSort = (A, B, property, direction = 'ASC') => {
-    console.log("Direction split", direction);
     var a;
     var b;
     if(property){ // its an object, were sorting an array of objects

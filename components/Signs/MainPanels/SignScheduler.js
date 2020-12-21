@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
+import {makeStyles, withStyles, CircularProgress, Grid, IconButton, Checkbox} from '@material-ui/core';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -8,6 +8,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -35,7 +37,6 @@ const SignSchedulerList = function(props) {
   const classes = useStyles();
 
   
-
 
   //Set active worker to a tmp value for add otherwise activeworker will be set to edit
   // useEffect(()=>{
@@ -89,17 +90,15 @@ const SignSchedulerList = function(props) {
       align: 'center',
       type: 'date',
       format: (value,row)=> {return(
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <DatePicker     format="MM/dd/yyyy" showTodayButton
-                            clearable
-                            inputVariant="outlined"
-                            variant="modal" 
-                            maxDate={new Date('01-01-2100')}
-                            minDate={new Date('01-01-1970')}
-                            className={classes.datePicker}
-                            value={value} 
-                            onChange={value => handleUpdateDate(value, row, "sign_built")} />
-        </MuiPickersUtilsProvider>)}
+        <Checkbox
+              className={classes.checkbox}
+              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+              checkedIcon={<CheckBoxIcon fontSize="small" />}
+              name="check_sign_popped_and_boxed"
+              checked={value != null}
+              onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
+          />
+        )}
     },
     {
       id: 'sign_popped_and_boxed',
@@ -108,17 +107,15 @@ const SignSchedulerList = function(props) {
       align: 'center',
       type: 'date',
       format: (value,row)=> {return(
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <DatePicker     format="MM/dd/yyyy" showTodayButton
-                          clearable
-                          inputVariant="outlined"
-                          variant="modal" 
-                          maxDate={new Date('01-01-2100')}
-                          minDate={new Date('01-01-1970')}
-                          className={classes.datePicker}
-                          value={value} 
-                          onChange={value => handleUpdateDate(value, row, "sign_popped_and_boxed")} />
-      </MuiPickersUtilsProvider>)}
+          <Checkbox
+          className={classes.checkbox}
+              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+              checkedIcon={<CheckBoxIcon fontSize="small" />}
+              name="check_sign_popped_and_boxed"
+              checked={value != null}
+              onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
+          />
+      )}
     },
     { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center'},
 
@@ -153,14 +150,21 @@ const SignSchedulerList = function(props) {
 
   }
 
-  const handleUpdateDate = (value, row, field) =>{
+  const handleUpdateDate = (event, row, field) =>{
     if(!row || !field){
       console.error("Bad row/field in handleUpdateDate")
       return;
     }
+    var updateValue;
+
+    if(event && event.target.checked ){
+      updateValue= moment().format(); //today
+    }else{
+      updateValue = null;
+    }
 
     var updateRow = {...row};
-    updateRow[field] = value ? Util.convertISODateTimeToMySqlDateTime(value.toISOString()) : null;
+    updateRow[field] = updateValue;
 
     Work_Orders.updateWorkOrderItem(updateRow)
     .then((data)=>{
@@ -216,7 +220,8 @@ const SignSchedulerList = function(props) {
                           <TableCell className={classes.tableCell} 
                                     key={column.id}
                                     align={column.align}
-                                    style={ topBorder ? { minWidth: column.minWidth, borderTop: '2px solid #999'  } : {minWidth: column.minWidth}}>
+                                    style={ topBorder ? { minWidth: column.minWidth, borderTop: '1px solid #888',  borderTopStyle: 'solid' } 
+                                                    : {minWidth: column.minWidth}}>
                             {column.format ? column.format(value, row) : value}
                           </TableCell>
                         );
@@ -291,5 +296,8 @@ const useStyles = makeStyles(theme => ({
         padding: '1px 0px 0px 0px',
         backgroundColor: '#f5fdff',
     }
-  } 
+  },
+  checkbox:{
+    padding: 0,
+  }
 }));

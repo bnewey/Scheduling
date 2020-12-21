@@ -9,7 +9,7 @@ module.exports = (signs) => {
     const columns = [
       { id: 'install_date', label: 'Install Date', type: 'date',align: 'center', size: 'small' },
       { id: 'type', label: 'WO Type', type: 'text',align: 'center', size: 'tiny' },
-      { id: 'state', label: 'Ship Group', align: 'center', size: 'tiny' },
+      { id: 'state', label: 'Ship Group', align: 'left', size: 'tiny' },
       { id: 'work_order', label: 'WO#', align: 'center', size: 'tiny' },
       { id: 'product_to', label: 'Product Goes To', align: 'left', size: 'medium'},
       { id: 'description', label: 'Description', align: 'left', size: 'large'},
@@ -40,7 +40,7 @@ module.exports = (signs) => {
         <table class="minimalistBlack">
           <thead><tr>`;
           columns.forEach((column, colI)=> {
-           rows+=`<th class="${column.size}">${column.label}</th>`
+           rows+=`<th class="${column.size}" style='text-align: ${column.align};'>${column.label}</th>`
           })
             rows+= `</tr>
           </thead>
@@ -70,7 +70,10 @@ module.exports = (signs) => {
             }
           }
         }
-        rows+= `<td class="${column.size}" ${topBorder ? "style='border-top: 1px solid #aaa;'" : ''}>${value != null ? value : ""}</td>`
+        rows+= `<td class="${column.size}" ${topBorder ? `style='border-top: 1px solid #aaa; text-align: ${column.align};'` :
+                     `style='text-align: ${column.align};'`}>
+                    ${value != null ? value : ""}
+                </td>`
       
         }) 
     });
@@ -178,7 +181,7 @@ var returnString = `
           <table class="minimalistBlack">
           <thead><tr>` ;
           columns.forEach((column, colI)=> {
-            returnString+=`<th class="${column.size}">${column.label}</th>`
+            returnString+=`<th class="${column.size}" style='text-align: ${column.align};'>${column.label}</th>`
           })
             returnString+=`</tr>
           </thead>
