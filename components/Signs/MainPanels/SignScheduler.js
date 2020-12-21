@@ -196,6 +196,7 @@ const SignSchedulerList = function(props) {
               <TableBody>
                 {signs?.map((row,i) => {
                   const lastRow = i > 0 ? signs[i-1] : null;
+                  var topBorder = lastRow && row[columns[0].id] != lastRow[columns[0].id];
                   return (
                     <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
                       {columns.map((column,colI) => {
@@ -215,7 +216,7 @@ const SignSchedulerList = function(props) {
                           <TableCell className={classes.tableCell} 
                                     key={column.id}
                                     align={column.align}
-                                    style={{ minWidth: column.minWidth }}>
+                                    style={ topBorder ? { minWidth: column.minWidth, borderTop: '2px solid #999'  } : {minWidth: column.minWidth}}>
                             {column.format ? column.format(value, row) : value}
                           </TableCell>
                         );

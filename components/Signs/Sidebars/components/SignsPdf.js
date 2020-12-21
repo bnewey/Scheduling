@@ -110,6 +110,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'flex-start',
+        whiteSpace: 'nowrap',
         color: '#5f5f5f',
         fontWeight: 600,
       },

@@ -25,9 +25,9 @@ module.exports = (signs) => {
     }
 
     signs.forEach((sign, i)=> {
-      var pageNumber =  1+(Math.floor((i+1)/50));
-      var maxPages = 1+(Math.floor((signs.length)/50))
-      if(i != 0 && i%50 === 0){
+      var pageNumber =  1+(Math.floor((i+1)/47));
+      var maxPages = 1+(Math.floor((signs.length)/47))
+      if(i != 0 && i%47 === 0){
         rows += `<tr></tr>
         </tbody>
         </table>
@@ -52,10 +52,12 @@ module.exports = (signs) => {
       rows +=`<tr>`
       columns.forEach((column, colI)=> {
 
+        var topBorder = lastRow && sign[columns[0].id] != lastRow[columns[0].id];
+        
         var value;
         //This hides repeat values in table for easier viewing
         if(column.id !== "description"  && column.id !== "quantity" && column.id !== "sign_built" && 
-                column.id !== "sign_popped_and_boxed" &&   checkAllLastColumns(columns, lastRow, sign, colI)){
+                column.id !== "sign_popped_and_boxed" &&   checkAllLastColumns(columns, lastRow, sign, colI) && i%47 !== 0){
           value = null;
         }else{
           if((column.id === "install_date") && sign[column.id] == null){
@@ -68,11 +70,11 @@ module.exports = (signs) => {
             }
           }
         }
-        rows+= `<td class="${column.size}">${value != null ? value : ""}</td>`
+        rows+= `<td class="${column.size}" ${topBorder ? "style='border-top: 1px solid #aaa;'" : ''}>${value != null ? value : ""}</td>`
       
         }) 
     });
-var maxPages = 1+(Math.floor((signs.length)/50))
+var maxPages = 1+(Math.floor((signs.length)/47))
 var returnString = `
     <!doctype html>
     <html>
@@ -96,7 +98,9 @@ var returnString = `
           table.minimalistBlack td:first-child{
             border-left: 1px solid #aaa;
           }
-          
+          table.minimalistBlack tbody tr:last-child {
+            border-bottom: 1px solid #aaa;
+          }
           
           table.minimalistBlack tbody td {
             font-size: 5px;
@@ -104,7 +108,7 @@ var returnString = `
 
           }
           table.minimalistBlack tbody tr {
-            height:.6em;
+            height:.7em;
 
           }
           table.minimalistBlack tr:nth-child(even) {
@@ -128,8 +132,10 @@ var returnString = `
             border-left: none;
           }
 
-          table.minimalistBlack tfoot td {
-            font-size: 5px;
+          table.minimalistBlack td {
+            font-family: sans-serif;
+            font-size:1em;
+            font-weight: bold;
           }
           .tiny{
             width: 15px;
