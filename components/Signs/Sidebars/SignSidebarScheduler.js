@@ -6,6 +6,7 @@ import cogoToast from 'cogo-toast';
 
 import FilterFinished from './components/FilterFinished'
 import SignsPdf from './components/SignsPdf';
+import SignsSortOrder from './components/SignsSortOrder';
 
 import Util from  '../../../js/Util';
 import { ListContext } from '../SignContainer';
@@ -59,6 +60,16 @@ const SignSidebarScheduler = function(props) {
           <>
             <div>
                 {<SignsPdf/>}
+            </div>
+          </>
+          }
+
+        </div>
+        <div className={classes.dateRangeDiv}>
+          { !searchOpen && 
+          <>
+            <div>
+                {<SignsSortOrder/>}
             </div>
           </>
           }

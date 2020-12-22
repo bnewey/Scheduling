@@ -51,6 +51,9 @@ const SignContainer = function(props) {
                       onClose: ()=> {setSignRefetch(true)}} ];
 
   const [currentView,setCurrentView] = useState(null);
+  const [keys, setKeys] = useState(null);
+  const [keyState, setKeyState] = useState(null);
+  const [columnState, setColumnState] = useState(null);
   // const [detailWOid,setDetailWOid] = useState(null);
 
   // const [editPOModalOpen, setEditPOModalOpen] = React.useState(false);
@@ -90,24 +93,74 @@ const SignContainer = function(props) {
     
   }, [currentView]);
 
+ 
+
+  const handleChangeSignFilterKeys = (view)=>{
+    if(!view){
+        return(null);
+    }
+    var viewArray =[];
+    switch(view){
+        case "Description":
+              viewArray = [{key: "description", direction: 'ASC'},
+              {key: "install_date", direction: 'ASC'},
+              {key: "type", direction: 'ASC'},
+              {key: "state", direction: 'ASC'},
+              {key: "work_order", direction: 'DESC'},]
+              break;
+        case "Install Date":
+        case 'default':
+        default:
+            viewArray = [{key: "install_date", direction: 'ASC'},
+            {key: "type", direction: 'ASC'},
+            {key: "state", direction: 'ASC'},
+            {key: "work_order", direction: 'DESC'},
+            {key: "description", direction: 'ASC'}]
+            break;
+        
+    }
+
+    return(viewArray)
+  }
+  
+   //Save and/or Fetch keys to local storage
+  useEffect(() => {
+    if(keyState == null){
+      var tmp = window.localStorage.getItem('signFilterKeys');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(tmpParsed){
+        setKeyState(tmpParsed);
+      }else{
+        setKeyState("default");
+      }
+    }
+    if(keyState){
+      window.localStorage.setItem('signFilterKeys', JSON.stringify(keyState));
+    }
+  }, [keyState]);
+
+  useEffect(()=>{
+    if(keyState){
+      setKeys(handleChangeSignFilterKeys(keyState))
+      setSignRefetch(true);
+    }
+  },[keyState])
+
   
   //Sign Rows
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
-    if((signs == null || signRefetch == true) && finishedState) {
+    if((signs == null || signRefetch == true) && finishedState && keys) {
       if(signRefetch == true){
         setSignRefetch(false);
       }
 
       Signs.getAllSignsForScheduler()
       .then( data => { 
-
-        var keys = [{key: "install_date", direction: 'ASC'},
-                    {key: "type", direction: 'ASC'},
-                    {key: "state", direction: 'ASC'},
-                    {key: "work_order", direction: 'DESC'},
-                    {key: "description", direction: 'ASC'}]
-     
+  
         const sortArray = (array, direction, value) =>{
           return array.sort(createSorter(...[{
             property: value, 
@@ -165,7 +218,7 @@ const SignContainer = function(props) {
       })
     }
 
-  },[signs, signRefetch, finishedState]);
+  },[signs, signRefetch, finishedState, keys]);
 
   //Save and/or Fetch filters to local storage
   useEffect(() => {
@@ -262,17 +315,17 @@ const SignContainer = function(props) {
   const getMainComponent = () =>{
     switch(currentView.value){
       case "signScheduler":
-        return <SignScheduler/>
+        return <SignScheduler keyState={keyState} setKeyState={setKeyState} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "allSigns":
-        return <SignScheduler />
+        return <SignScheduler keyState={keyState} setKeyState={setKeyState} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "searchSigns":
-        return <SignScheduler/>
+        return <SignScheduler keyState={keyState} setKeyState={setKeyState} columnState={columnState} setColumnState={setColumnState}/>
         break;
       default: 
         cogoToast.error("Bad view");
-        return <SignScheduler />;
+        return <SignScheduler keyState={keyState} setKeyState={setKeyState} columnState={columnState} setColumnState={setColumnState}/>;
         break;
     }
   }
@@ -299,7 +352,7 @@ const SignContainer = function(props) {
   return (
     <div className={classes.root}>
       <ListContext.Provider value={{signs, setSigns, setSignRefetch,currentView, setCurrentView, views, signsSaved, setSignsSaved,filters, setFilters,
-      filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState} } >
+      filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState, keyState, setKeyState, columnState, setColumnState} } >
       
         <div className={classes.containerDiv}>
         

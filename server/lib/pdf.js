@@ -332,12 +332,13 @@ router.post('/createSignSchedulePdf', async (req,res) => {
         res.sendStatus(400);
     }
     var signs = req.body.signs;
-
+    var column_type = req.body.column_type;
+    
     const options = {
         orientation: 'landscape'
     };
 
-    pdf.create(signScheduleTemplate( signs), options).toStream(function(err, stream){
+    pdf.create(signScheduleTemplate( signs, column_type), options).toStream(function(err, stream){
         if(err){
             res.sendStatus(400);
         }

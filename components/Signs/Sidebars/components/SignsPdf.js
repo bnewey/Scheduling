@@ -16,7 +16,7 @@ import { ListContext } from '../../SignContainer';
 const SignsPdf = function(props) {
     const {user} = props;
   
-    const { signs } = useContext(ListContext);
+    const { signs , columnState} = useContext(ListContext);
     const classes = useStyles();
 
      
@@ -24,7 +24,7 @@ const SignsPdf = function(props) {
 
         if(signs && Array.isArray(signs)){
 
-            Pdf.createSignSchedulePdf( signs)
+            Pdf.createSignSchedulePdf( signs, columnState)
             .then((data)=>{
             var fileURL = URL.createObjectURL(data);
             window.open(fileURL);

@@ -1,22 +1,39 @@
 const moment = require('moment');
 const Util = require('../../js/Util')
 
-module.exports = (signs) => {
+module.exports = (signs, column_type) => {
     const today = moment().format('MMM-DD-YYYY');
 
     var rows = "";
-
-    const columns = [
-      { id: 'install_date', label: 'Install Date', type: 'date',align: 'center', size: 'small' },
-      { id: 'type', label: 'WO Type', type: 'text',align: 'center', size: 'tiny' },
-      { id: 'state', label: 'Ship Group', align: 'left', size: 'tiny' },
-      { id: 'work_order', label: 'WO#', align: 'center', size: 'tiny' },
-      { id: 'product_to', label: 'Product Goes To', align: 'left', size: 'medium'},
-      { id: 'description', label: 'Description', align: 'left', size: 'large'},
-      { id: 'sign_built', label: 'Built', align: 'center', type: 'checkbox', size: 'small' },
-      { id: 'sign_popped_and_boxed',  label: 'Finished',  align: 'center', type: 'checkbox',  size: 'small'},
-      { id: 'quantity', label: 'Qty', align: 'center', size: 'tiny'},
-    ];
+    var columns
+    switch(column_type){
+      case "Description":
+        columns =[
+          { id: 'description', label: 'Description', align: 'left', size: 'large', hideRepeats: true},
+          {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', size: 'small' , hideRepeats: true},
+        { id: 'type', label: 'WO Type', type: 'text',align: 'center', size: 'tiny' , hideRepeats: true},
+        { id: 'state', label: 'Ship Group', align: 'left', size: 'tiny', hideRepeats: true },
+        { id: 'work_order', label: 'WO#', align: 'center', size: 'tiny', hideRepeats: true },
+        { id: 'product_to', label: 'Product Goes To', align: 'left', size: 'medium', hideRepeats: true},
+        { id: 'sign_built', label: 'Built', align: 'center', type: 'checkbox', size: 'small', hideRepeats: false },
+        { id: 'sign_popped_and_boxed',  label: 'Finished',  align: 'center', type: 'checkbox',  size: 'small', hideRepeats: false},
+        { id: 'quantity', label: 'Qty', align: 'center', size: 'tiny', hideRepeats: false},]
+        break;
+      case "Install Date":
+      default: 
+        columns = [
+          { id: 'install_date', label: 'Install Date', type: 'date',align: 'center', size: 'small' , hideRepeats: true},
+          { id: 'type', label: 'WO Type', type: 'text',align: 'center', size: 'tiny' , hideRepeats: true},
+          { id: 'state', label: 'Ship Group', align: 'left', size: 'tiny', hideRepeats: true },
+          { id: 'work_order', label: 'WO#', align: 'center', size: 'tiny', hideRepeats: true },
+          { id: 'product_to', label: 'Product Goes To', align: 'left', size: 'medium', hideRepeats: true},
+          { id: 'description', label: 'Description', align: 'left', size: 'large', hideRepeats: false},
+          { id: 'sign_built', label: 'Built', align: 'center', type: 'checkbox', size: 'small', hideRepeats: false },
+          { id: 'sign_popped_and_boxed',  label: 'Finished',  align: 'center', type: 'checkbox',  size: 'small', hideRepeats: false},
+          { id: 'quantity', label: 'Qty', align: 'center', size: 'tiny', hideRepeats: false},
+        ];
+        break;
+    }
 
     const checkAllLastColumns = (columns, lastRow, row, columnIndex) =>{
       return (columns.slice(0, columnIndex+1).every((column)=> {
@@ -56,8 +73,7 @@ module.exports = (signs) => {
         
         var value;
         //This hides repeat values in table for easier viewing
-        if(column.id !== "description"  && column.id !== "quantity" && column.id !== "sign_built" && 
-                column.id !== "sign_popped_and_boxed" &&   checkAllLastColumns(columns, lastRow, sign, colI) && i%47 !== 0){
+        if(column.hideRepeats &&  checkAllLastColumns(columns, lastRow, sign, colI) && i%47 !== 0){
           value = null;
         }else{
           if((column.id === "install_date") && sign[column.id] == null){

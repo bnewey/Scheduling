@@ -147,7 +147,7 @@ async function createCrewJobPdf(crew, jobs){
 
 }
 
-async function createSignSchedulePdf( signs){
+async function createSignSchedulePdf( signs, column_type){
     const route = '/scheduling/pdf/createSignSchedulePdf';
     try{
         var data = await fetch(route,
@@ -157,7 +157,7 @@ async function createSignSchedulePdf( signs){
                     'Content-Type': 'application/json'
                 },
                 responseType: 'blob',
-                body: JSON.stringify({ signs})
+                body: JSON.stringify({ signs, column_type})
             });
             //console.log('data', data);
         return( await data.blob());

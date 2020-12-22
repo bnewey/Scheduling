@@ -31,12 +31,177 @@ import moment from 'moment';
 
 
 const SignSchedulerList = function(props) {
-  const {user} = props;
+  const {user, keyState, setKeyState, columnState, setColumnState} = props;
 
   const { signs, setSigns, setSignRefetch, currentView, setCurrentView, views    } = useContext(ListContext);
   const classes = useStyles();
 
+  const [columns, setColumns] = useState(null);
+
+  useEffect(()=>{
+
+  },[columnState,columns]);
+
+
+  const handleChangeSignSchedulerView = (view)=>{
+    if(!view){
+        return(null);
+    }
+    var viewArray =[];
+    switch(view){
+        case "Description":
+              viewArray = [
+                { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: true},
+                {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', hideRepeats: true,
+                    format: (value,row)=>{  
+                      if(value == null){
+                        return("****");
+                      }
+                      return value;
+                    } },
+                {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
+                { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
+                {
+                  id: 'work_order',
+                  label: 'WO#',
+                  minWidth: 50,
+                  align: 'center',
+                  hideRepeats: true,
+                  format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>
+                },
+                { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
+                {
+                  id: 'sign_built',
+                  label: 'Built',
+                  minWidth: 50,
+                  align: 'center',
+                  type: 'date',
+                  hideRepeats: false,
+                  format: (value,row)=> {return(
+                    <Checkbox
+                          className={classes.checkbox}
+                          icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                          checkedIcon={<CheckBoxIcon fontSize="small" />}
+                          name="check_sign_popped_and_boxed"
+                          checked={value != null}
+                          onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
+                      />
+                    )}
+                },
+                {
+                  id: 'sign_popped_and_boxed',
+                  label: 'Finished',
+                  minWidth: 50,
+                  align: 'center',
+                  type: 'date',
+                  hideRepeats: false,
+                  format: (value,row)=> {return(
+                      <Checkbox
+                      className={classes.checkbox}
+                          icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                          checkedIcon={<CheckBoxIcon fontSize="small" />}
+                          name="check_sign_popped_and_boxed"
+                          checked={value != null}
+                          onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
+                      />
+                  )}
+                },
+                { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
+              ];
+              break;
+        case "Install Date":
+        case 'default':
+        default:
+            viewArray =[
+              {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', hideRepeats: true,
+                   format: (value,row)=>{  
+                    if(value == null){
+                      return("****");
+                    }
+                    return value;
+                   } },
+              {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
+              { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
+              {
+                id: 'work_order',
+                label: 'WO#',
+                minWidth: 50,
+                align: 'center',
+                hideRepeats: true,
+                format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>
+              },
+              { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
+              { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: false},
+              {
+                id: 'sign_built',
+                label: 'Built',
+                minWidth: 50,
+                align: 'center',
+                type: 'date',
+                hideRepeats: false,
+                format: (value,row)=> {return(
+                  <Checkbox
+                        className={classes.checkbox}
+                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                        checkedIcon={<CheckBoxIcon fontSize="small" />}
+                        name="check_sign_popped_and_boxed"
+                        checked={value != null}
+                        onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
+                    />
+                  )}
+              },
+              {
+                id: 'sign_popped_and_boxed',
+                label: 'Finished',
+                minWidth: 50,
+                align: 'center',
+                type: 'date',
+                hideRepeats: false,
+                format: (value,row)=> {return(
+                    <Checkbox
+                    className={classes.checkbox}
+                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                        checkedIcon={<CheckBoxIcon fontSize="small" />}
+                        name="check_sign_popped_and_boxed"
+                        checked={value != null}
+                        onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
+                    />
+                )}
+              },
+              { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
+            ];
+            break;
+        
+    }
+
+    return(viewArray)
+  }
   
+   //Save and/or Fetch columns to local storage
+  useEffect(() => {
+    if(columnState == null){
+      var tmp = window.localStorage.getItem('signColumns');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(tmpParsed){
+        setColumnState(tmpParsed);
+      }else{
+        setColumnState("default");
+      }
+    }
+    if(columnState){
+      window.localStorage.setItem('signColumns', JSON.stringify(columnState));
+    }
+  }, [columnState]);
+
+  useEffect(()=>{
+    if(columnState){
+      setColumns(handleChangeSignSchedulerView(columnState))
+    }
+  },[columnState])
+
 
   //Set active worker to a tmp value for add otherwise activeworker will be set to edit
   // useEffect(()=>{
@@ -69,58 +234,6 @@ const SignSchedulerList = function(props) {
     Router.push('/scheduling/work_orders')
   }
 
-  
-  const columns = [
-    {id: 'install_date', label: 'Install Date', type: 'date',align: 'center' },
-    {id: 'type', label: 'WO Type', type: 'text',align: 'center' },
-    { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' },
-    {
-      id: 'work_order',
-      label: 'WO#',
-      minWidth: 50,
-      align: 'center',
-      format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>
-    },
-    { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left'},
-    { id: 'description', label: 'Description', minWidth: 300, align: 'left'},
-    {
-      id: 'sign_built',
-      label: 'Built',
-      minWidth: 50,
-      align: 'center',
-      type: 'date',
-      format: (value,row)=> {return(
-        <Checkbox
-              className={classes.checkbox}
-              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-              checkedIcon={<CheckBoxIcon fontSize="small" />}
-              name="check_sign_popped_and_boxed"
-              checked={value != null}
-              onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
-          />
-        )}
-    },
-    {
-      id: 'sign_popped_and_boxed',
-      label: 'Finished',
-      minWidth: 50,
-      align: 'center',
-      type: 'date',
-      format: (value,row)=> {return(
-          <Checkbox
-          className={classes.checkbox}
-              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-              checkedIcon={<CheckBoxIcon fontSize="small" />}
-              name="check_sign_popped_and_boxed"
-              checked={value != null}
-              onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
-          />
-      )}
-    },
-    { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center'},
-
-    
-  ];
 
   const StyledTableRow = withStyles((theme) => ({
     root: {
@@ -178,13 +291,13 @@ const SignSchedulerList = function(props) {
   }
   
 
-  return (
+  return ( 
     <div className={classes.root}>
           <TableContainer className={classes.container}>
             <Table stickyHeader  size="small" aria-label="sticky table">
               <TableHead>
                 <TableRow>
-                  {columns.map((column) => (
+                  {Array.isArray(columns) && columns.map((column) => (
                     <TableCell
                     className={classes.tableCellHead}
                     classes={{stickyHeader: classes.stickyHeader}}
@@ -203,18 +316,13 @@ const SignSchedulerList = function(props) {
                   var topBorder = lastRow && row[columns[0].id] != lastRow[columns[0].id];
                   return (
                     <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
-                      {columns.map((column,colI) => {
+                      {columns && columns.map((column,colI) => {
                         var value;
                         //This hides repeat values in table for easier viewing
-                        if(column.id !== "description"  && column.id !== "quantity" && column.id !== "sign_built" && 
-                                column.id !== "sign_popped_and_boxed" &&   checkAllLastColumns(columns, lastRow, row, colI)){
+                        if(column.hideRepeats && checkAllLastColumns(columns, lastRow, row, colI)){
                           value = null;
                         }else{
-                          if((column.id === "install_date") && row[column.id] == null){
-                            value = "****";
-                          }else{
-                            value = row[column.id];
-                          }
+                          value = column.format ? column.format(row[column.id], row) : row[column.id];
                         }
                         return (
                           <TableCell className={classes.tableCell} 
@@ -222,7 +330,7 @@ const SignSchedulerList = function(props) {
                                     align={column.align}
                                     style={ topBorder ? { minWidth: column.minWidth, borderTop: '1px solid #888',  borderTopStyle: 'solid' } 
                                                     : {minWidth: column.minWidth}}>
-                            {column.format ? column.format(value, row) : value}
+                            {value}
                           </TableCell>
                         );
                       })}
@@ -232,16 +340,7 @@ const SignSchedulerList = function(props) {
               </TableBody>
             </Table>
           </TableContainer>
-          {/* <TablePagination
-            rowsPerPageOptions={[25, 50, 100]}
-            component="div"
-            count={signs ? signs.length : 0}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          /> */}
-    </div>
+    </div> 
   );
 }
 
