@@ -62,153 +62,154 @@ import MaterialTable, {MTableBodyRow, MTableCell} from "material-table";
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../../js/Util';
-import Pdf from  '../../../../../js/Pdf';
-import WorkOrderDetail from  '../../../../../js/WorkOrderDetail';
-import Work_Orders from  '../../../../../js/Work_Orders';
-import AddEditFPOrder from '../../../AddEditFPOrder/AddEditFPOrder'
-
+import Entities from  '../../../../../js/Entities';
 import { ListContext } from '../../../EntitiesContainer';
-import { DetailContext } from '../../../EntitiesContainer';
 
 
-const WOFairPlayOrders = function(props) {
-    const {user} = props;
+const EntAddresses = function(props) {
+  const {user} = props;
 
-    const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+  const { entities, setEntities,
+    currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+    editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
+    setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
+  const classes = useStyles();
 
-    const { workOrderItems, setWorkOrderItems, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,
-      setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
-        fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders} = useContext(DetailContext)
-
-    const classes = useStyles();
-
-    
-    
+  const [addresses, setAddresses] = React.useState(null)
 
 
-    //This will reset our state in case the view is reset
-    useEffect(()=>{
-    if(currentView){
-        setFPOrders(null);
+  //Entities address Data
+  useEffect( () =>{
+    if(addresses == null && activeEntity) {
+      
+      Entities.getEntAddresses(activeEntity.record_id)
+      .then( data => { setAddresses(data); })
+      .catch( error => {
+        console.warn(error);
+        cogoToast.error(`Error getting wois`, {hideAfter: 4});
+      })
     }
-    },[currentView])
+  },[addresses, activeEntity]);
 
-    //Get FairPlay orders
-    useEffect(()=>{
-        if(fpOrders == null && activeWorkOrder?.wo_record_id){
-            WorkOrderDetail.getFPOrders(activeWorkOrder.wo_record_id)
-            .then((data)=>{
-                if(data){
-                    setFPOrders(data);
-                }
-            })
-            .catch((error)=>{
-                cogoToast.error("Failed to get FP orders");
-                console.error("Failed to get Fp Orders", error)
-            })
-        }
-    },[fpOrders, activeWorkOrder])
-
-    
 
   const columns = [
-    { field: 'record_id', title: 'ID', minWidth: 20, align: 'center', editable: 'never' },
-    { field: 'order_date', title: 'Order Date', minWidth: 40, align: 'center', editable: 'never' },
-    { field: 'ship_to', title: 'Ship To', minWidth: 200, align: 'left',editable: 'never'},
-    { field: 'bill_to', title: 'Bill To', minWidth: 200, align: 'left',editable: 'never'},
-    { field: 'discount', title: 'Discount', minWidth: 20, align: 'center',editable: 'never'},
-    { field: 'sales_order_id', title: 'Sales Order #', minWidth: 45, align: 'center',editable: 'never'},
-    { field: 'special_instructions', title: 'Special Instr', minWidth: 200, align: 'left',editable: 'never'},
+
+    { field: 'name', title: 'Name', minWidth: 45, align: 'left',editable: 'never'},
+    { field: 'record_id', title: 'ID', minWidth: 20, align: 'center', editable: 'never' },    
+    { field: 'main', title: 'Main', minWidth: 20, align: 'center', editable: 'onUpdate',
+      render: rowData => rowData.main ? <CheckBoxIcon className={classes.checkboxIcon}/> : <></>,
+      editComponent: props => (<div className={classes.checkboxDiv}>
+        <Checkbox
+            icon={<CheckBoxOutlineBlankIcon  />}
+            checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
+            name="checkedMain"
+            checked={props.value ? true : false}
+            onChange={(event)=> props.onChange(event.target.checked ? 1 : 0)}
+        /></div>
+      )},
+    { field: 'shipping', title: 'Shipping', minWidth: 20, align: 'center', editable: 'onUpdate',
+    render: rowData => rowData.shipping ? <CheckBoxIcon className={classes.checkboxIcon}/> : <></>,
+    editComponent: props => (<div className={classes.checkboxDiv}>
+      <Checkbox
+          icon={<CheckBoxOutlineBlankIcon  />}
+          checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
+          name="checkedShipping"
+          checked={props.value ? true : false}
+          onChange={(event)=> props.onChange(event.target.checked ? 1 : 0)}
+      /></div>
+    )},
+    { field: 'billing', title: 'Billing', minWidth: 20, align: 'center', editable: 'onUpdate',
+    render: rowData => rowData.billing ? <CheckBoxIcon className={classes.checkboxIcon}/> : <></>,
+    editComponent: props => (<div className={classes.checkboxDiv}>
+      <Checkbox
+          icon={<CheckBoxOutlineBlankIcon  />}
+          checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
+          name="checkedbilling"
+          checked={props.value ? true : false}
+          onChange={(event)=> props.onChange(event.target.checked ? 1 : 0)}
+      /></div>
+    )},
+    { field: 'mailing', title: 'Mailing', minWidth: 20, align: 'center', editable: 'onUpdate',
+    render: rowData => rowData.mailing ? <CheckBoxIcon className={classes.checkboxIcon}/> : <></>,
+    editComponent: props => (<div className={classes.checkboxDiv}>
+      <Checkbox
+          icon={<CheckBoxOutlineBlankIcon  />}
+          checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
+          name="checkedMailing"
+          checked={props.value ? true : false}
+          onChange={(event)=> props.onChange(event.target.checked ? 1 : 0)}
+      /></div>
+    )},
     
+    /* actions column? */
   ];
 
 
-    const handleOpenEditModal = (row) => {
-      setFPOrderModalOpen(true);
-      setFPOrderModalMode("edit");
-      console.log("row to active fp", row)
-      setActiveFPOrder(row);
+    const handleUpdateEntityAddress = (newData, oldData) => {
+        return new Promise((resolve, reject)=>{
+            Entities.updateEntityAddress(newData)
+            .then((data)=>{
+              cogoToast.success("Updated Entity Address");
+              setAddresses(null);
+              resolve();
+            })
+            .catch((error)=>{
+              console.error("Failed to update Entity Address", error);
+              cogoToast.error("Failed to update Entity Address");
+              setAddresses(null);
+              reject();
+            })
+            
+        })
     }   
 
-    const handleCreateAndOpenPDF = (rowData) =>{
-
-      var row = rowData;
-      row.c_name = activeWorkOrder?.c_name || null;
-      var tmpUser = raineyUsers.find((u)=> u.user_id == row.user_entered);
-      if(tmpUser){
-        row.user_entered_name = tmpUser.name;
-      } 
-      WorkOrderDetail.getFPOrderItems( rowData.record_id )
-      .then( (fpOrderItems) => {
-          if(fpOrderItems && Array.isArray(fpOrderItems)){
-
-              Pdf.createFairPlayOrderPdf(row, fpOrderItems)
-              .then((data)=>{
-                var fileURL = URL.createObjectURL(data);
-                window.open(fileURL);
-              })
-              .catch((error)=>{
-                console.error("Failed to create and open pdf", error);
-              })
-          }                
-      })
-      .catch( error => {
-          console.error("Error getting fpOrderitem.",error);
-          cogoToast.error(`Error getting fpOrderitem. ` , {hideAfter: 4});
-      })
-
-      
-    }
-
-    const handleDeleteFPOrder = (row)=>{
+    const handleDeleteEntityAddress = (row)=>{
       if(!row.record_id){
-        cogoToast.error("Bad row in delete fairplay order");
-        console.error("Failed to delete fairplay order");
+        cogoToast.error("Bad row in delete entity address");
+        console.error("Failed to delete entity address");
         return;
       }
       const deleteSlip = ()=>{
-        WorkOrderDetail.deleteFPOrder(row.record_id)
+        Entities.deleteEntityAddress(row.record_id)
         .then((data)=>{
           if(data){
-            setFPOrders(null);
-            cogoToast.success("Deleted fairplay order");
+            setAddresses(null);
+            cogoToast.success("Deleted entity address");
           }
         })
         .catch((error)=>{
-            cogoToast.error("Failed to delete fairplay order")
-            console.error("Failed to delete fairplay order", error);
+            cogoToast.error("Failed to delete entity address")
+            console.error("Failed to delete entity address", error);
         })
       }
 
       confirmAlert({
         customUI: ({onClose}) => {
             return(
-                <ConfirmYesNo onYes={deleteSlip} onClose={onClose} customMessage={"Remove Fair Play Order?"}/>
+                <ConfirmYesNo onYes={deleteSlip} onClose={onClose} customMessage={"Remove entity address?"}/>
             );
         }
       })
 
     }
 
-
    return ( 
     <div className={classes.root}>
-        {activeWorkOrder ?
-        <div className={classes.container}> <>
-          <AddEditFPOrder  />
+        {activeEntity ?
+        <div className={classes.container}>
+
           <Grid container>
-                  <Grid item xs={12}>
+                  <Grid item xs={8}>
                     <div className={classes.woiDiv}>
-                    { fpOrders && fpOrders.length > 0 ?
+                    { addresses && addresses.length > 0 ?
                         <MaterialTable 
                             columns={columns}
                             style={{boxShadow: '0px 0px 8px 2px #909090', width: "inherit"}}
-                            data={fpOrders}
-                            title={"FairPlay Orders"}
-                            // editable={{
-                            //     onRowUpdate: (newData, oldData) => handleUpdateFPOrder(newData, oldData)
-                            // }}
+                            data={addresses}
+                            title={"Addresses"}
+                            editable={{
+                                onRowUpdate: (newData, oldData) => handleUpdateEntityAddress(newData, oldData)
+                            }}
                             icons={tableIcons}
                             options={{
                                 filtering: false,
@@ -228,7 +229,6 @@ const WOFairPlayOrders = function(props) {
                                   fontWeight: 600,
                                   color: '#444',
                                   padding: '5px',
-                                  zIndex: 0,
                                 },
                                 // actionsColumnIndex: -1,
                                 cellStyle: {
@@ -237,38 +237,31 @@ const WOFairPlayOrders = function(props) {
                                   whiteSpace: 'nowrap',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',
-                                  maxWidth: 250,
                                   borderLeft: '1px solid #c7c7c7' ,
+                                  padding: 0,
                                 },
                                 actionsCellStyle:{
-                                  background: '#ffefdd'
+                                  background: '#ffefdd',
+                                  
                                 },
                             }} 
                             actions={[
                               {
-                                icon: tableIcons.ViewPDF,
-                                tooltip: 'View PDF',
-                                onClick: (event, rowData) => handleCreateAndOpenPDF(rowData)
-                              },
-                              {
                                 icon: tableIcons.Delete,
-                                tooltip: 'Delete FP Order',
-                                onClick: (event, rowData) => handleDeleteFPOrder(rowData)
-                              },
-                              {
-                                icon: tableIcons.Edit,
-                                tooltip: 'Edit FP Order',
-                                onClick: (event, rowData) => handleOpenEditModal(rowData)
+                                tooltip: 'Delete Entity Address',
+                                onClick: (event, rowData) => handleDeleteEntityAddress(rowData)
                               },
                             ]}
                             
+                          
+                            
                         />
-                    : <span className={classes.infoSpan}>No Fair Play Orders</span>}
+                    : <span className={classes.infoSpan}>No Entity Addresses</span>}
 
                     </div>
                   </Grid>
             </Grid>
-           </>
+           
 
         </div>
         :<><CircularProgress/></>}
@@ -276,19 +269,16 @@ const WOFairPlayOrders = function(props) {
   );
 }
 
-export default WOFairPlayOrders
+export default EntAddresses
 
 
 const useStyles = makeStyles(theme => ({
   root:{
-    // border: '1px solid #339933',
     padding: '3%',
     minHeight: 730,
-    // background: '#d0d0d0',
   },
   container: {
     maxHeight: 650,
-    // backgroundColor: '#8a8a8a',
     padding: '2%',
     borderRadius: 3,
   },
@@ -417,5 +407,13 @@ const useStyles = makeStyles(theme => ({
   },
   tableStyle:{
     
+  },
+  checkboxDiv:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  checkboxIcon:{
+    color: '#00bd42',
   }
 }));

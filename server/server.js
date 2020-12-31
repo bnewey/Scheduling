@@ -38,6 +38,7 @@ const pdf = require('./lib/pdf.js');
 const crew = require('./lib/crew.js');
 const vehicles = require('./lib/vehicles.js');
 const calendar = require('./lib/calendar.js');
+const entities = require('./lib/entities.js');
 const settings = require('./lib/settings.js');
 const {emailRouter} = require('./lib/email');
 
@@ -74,6 +75,7 @@ nextApp
     app.use('/scheduling/pdf', pdf);
     app.use('/scheduling/email', emailRouter);
     app.use('/scheduling/crew', crew);
+    app.use('/scheduling/entities', entities);
     app.use('/scheduling/settings', settings);
     ///
 

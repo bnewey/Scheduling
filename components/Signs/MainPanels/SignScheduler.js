@@ -57,6 +57,12 @@ const SignSchedulerList = function(props) {
                       if(value == null){
                         return("****");
                       }
+                      // if(row.list_name === "Holds"){
+                      //   return("On Hold")
+                      // }
+                      // if(row.list_name === "Completed Tasks"){
+                      //   return("Completed")
+                      // }
                       return value;
                     } },
                 {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
@@ -118,6 +124,12 @@ const SignSchedulerList = function(props) {
                     if(value == null){
                       return("****");
                     }
+                    // if(row.list_name === "Holds"){
+                    //   return("On Hold")
+                    // }
+                    // if(row.list_name === "Completed Tasks"){
+                    //   return("Completed")
+                    // }
                     return value;
                    } },
               {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
@@ -398,5 +410,6 @@ const useStyles = makeStyles(theme => ({
   },
   checkbox:{
     padding: 0,
+    color: '#6a6a6a !important',
   }
 }));

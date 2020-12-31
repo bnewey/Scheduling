@@ -13,7 +13,7 @@ const Entities = function (props) {
 
     return (
         <MainLayout>
-              {/* <EntitiesContainer user={user}/> */}
+               <EntitiesContainer user={user}/> 
         </MainLayout>
     );
 }

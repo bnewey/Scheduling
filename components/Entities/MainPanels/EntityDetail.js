@@ -25,7 +25,7 @@ const EntityDetail = function(props) {
 
   const {entities, setEntities,
     currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
-    editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
+    editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
   const classes = useStyles();
 
   const {vendorTypes, setVendorTypes,
@@ -52,26 +52,26 @@ const EntityDetail = function(props) {
   //   // })
   // },[workOrderItems, activeEntity]);
 
-  const detail_table = [{value: 'c_name', displayName: 'Product To', type: 'text'},
-                        {value: 'a_name', displayName: 'Bill To', type: 'text'},
-                        {value: 'date', displayName: 'Date Entered', type: 'date',
-                        format: (value,row)=> Util.convertISODateToMySqlDate(value)},
-                        {value: 'requestor', displayName: 'Requestor', type: 'number',
-                          format: (value,row)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0]?.name  : value },
-                        {value: 'maker', displayName: 'maker', type: 'number',
-                          format: (value,row)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0]?.name  : value },
-                        {value: 'type', displayName: 'Type', type: 'text'},
-                        {value: 'job_reference', displayName: 'Job Reference', type: 'text'},
-                        {value: 'description', displayName: 'Description', type: 'text'},
-                        {value: 'notes', displayName: 'Notes', type: 'text'},
-                        {value: 'advertising_notes', displayName: 'Ad Notes', type: 'text'},
-                        {value: 'po_number', displayName: 'Purchase Order', type: 'number'},
-                        {value: 'requested_arrival_date', displayName: 'Date Desired', type: 'date',
-                        format: (value,row)=> Util.convertISODateToMySqlDate(value)},];
+  const detail_table = [
+    {value: 'name', displayName: 'Name', type: 'text'},
+    {value: 'county_or_parish', displayName: 'County or Parish', type: 'text'},
+    {value: 'entities_types', displayName: 'Entity Type', type: 'number'},
+    {value: 'class', displayName: 'Class', type: 'text'},
+    {value: 'other_organization', displayName: 'Other Organization', type: 'text'},
+    {value: 'phone', displayName: 'Phone', type: 'text'},
+    {value: 'fax', displayName: 'Fax', type: 'text'},
+    {value: 'website', displayName: 'Website', type: 'text'},
+    {value: 'other_organization', displayName: 'fax', type: 'text'},
+    {value: 'shipping_name', displayName: 'Default Shipping Address', type: 'text'},
+    {value: 'billing_name', displayName: 'Default Billing Address', type: 'text'},
+    {value: 'mailing_name', displayName: 'Default Mailing Address', type: 'text'},
+    {value: 'account_number', displayName: 'Account Number', type: 'text'},
+    {value: 'purchase_order_required', displayName: 'Purchase Order Required', type: 'text', format: (value,row)=> value ? "Yes" : "No"},
+    {value: 'prepayment_required', displayName: 'Prepayment Required', type: 'text', format: (value,row)=> value  ? "Yes" : "No"},
+    {value: 'notes', displayName: 'Notes', type: 'text'},
+  ];
 
    
-
-
    return ( 
     <div className={classes.root}>
         {activeEntity ?
@@ -156,7 +156,7 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'uppercase',
     fontSize: '10px',
     textAlign: 'right',
-    flexBasis: '20%',
+    flexBasis: '43%',
   },
   detailValue:{
     fontFamily: 'monospace',

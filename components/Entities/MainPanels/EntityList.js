@@ -64,37 +64,30 @@ const EntityList = function(props) {
     
   }, [rowsPerPage]);
 
-  const handleShowDetailView = (wo_id) =>{
-    if(!wo_id){
+  const handleShowDetailView = (entitiy_id) =>{
+    if(!entitiy_id){
       cogoToast.error("Failed to get work order");
       console.error("Bad id");
       return;
     }
-    setCurrentView(views && views.filter((view, i)=> view.value == "entityDetail")[0]);
-    setDetailEntityId(wo_id);
+    setCurrentView(views && views.find((view, i)=> view.value == "entityDetail"));
+    setDetailEntityId(entitiy_id);
 
   }
   
   const columns = [
-    { id: 'wo_record_id', label: 'WO#', minWidth: 20, align: 'center',
-      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableWOnumber}>{value}</span> },
-    { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
+    { id: 'record_id', label: 'Id', minWidth: 20, align: 'center',
+      format: (value, row)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableWOnumber}>{value}</span> },
     {
-      id: 'wo_type',
-      label: 'Type',
-      minWidth: 50,
-      align: 'left',
-    },
-    {
-      id: 'c_name',
-      label: 'Product Goes To',
+      id: 'name',
+      label: 'Name',
       minWidth: 250,
       align: 'left',
+      format: (value, row)=> <span onClick={()=>handleShowDetailView(row.record_id)} className={classes.clickableWOnumber}>{value}</span> 
     },
-    { id: 'sa_city', label: 'City', minWidth: 45, align: 'left' },
-    { id: 'sa_state', label: 'State', minWidth: 35, align: 'left' },
-    { id: 'description', label: 'Description', minWidth: 400, align: 'left' },
-    { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
+    { id: 'city', label: 'City', minWidth: 45, align: 'left' },
+    { id: 'county_or_parish', label: 'County or Parish', minWidth: 100, align: 'left' },
+    { id: 'state', label: 'State', minWidth: 35, align: 'left' },
   ];
 
   const StyledTableRow = withStyles((theme) => ({
@@ -140,15 +133,15 @@ const EntityList = function(props) {
           <TableBody>
             {entities && entities.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
               return (
-                <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
+                <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.id} >
                   {columns.map((column) => {
                     const value = row[column.id];
                     return (
                       <TableCell className={classes.tableCell} 
-                                key={column.id}
+                                key={`${column.id}${row.id}`}
                                  align={column.align}
                                  style={{ minWidth: column.minWidth }}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
+                        {column.format ? column.format(value, row) : value}
                       </TableCell>
                     );
                   })}
@@ -180,6 +173,8 @@ const useStyles = makeStyles(theme => ({
     // border: '1px solid #339933',
     padding: '1%',
     minHeight: '730px',
+    width: '70%',
+    marginLeft: '7%',
   },
   container: {
     maxHeight: 650,
@@ -210,6 +205,7 @@ const useStyles = makeStyles(theme => ({
   },
   clickableWOnumber:{
     cursor: 'pointer',
+    color: '#385595',
     textDecoration: 'underline',
     '&:hover':{
       color: '#ee3344',

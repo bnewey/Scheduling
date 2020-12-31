@@ -19,114 +19,138 @@ import {
 import Util from '../../../js/Util.js';
 
 import Settings from  '../../../js/Settings';
-import Work_Orders from  '../../../js/Work_Orders';
+import Entities from  '../../../js/Entities';
 import { ListContext } from '../EntitiesContainer';
-import EntitiesDrawer from './EntitiesDrawer.js';
 
 import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 
-const AddEditModal = function(props) {
+const AddEditEntity = function(props) {
     const {user, editModalMode} = props;
 
-    const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
-    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    const { entities, setEntities,
+        currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,setEntitiesRefetch,
+        editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
 
-    const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
 
     const saveRef = React.createRef();
     const classes = useStyles();
 
     const handleCloseModal = () => {
-        setEntityDrawerOpen(false);
-        setActiveWorkOrder(null);
-        setEditWOModalOpen(false);
+        setActiveEntity(null);
+        setEditEntModalOpen(false);
     };
 
-    const handleOpenEntityDraw = ()=>{
-        setEntityDrawerOpen(true);
-    }
+    const [defaultAddresses, setDefaultAddresses] = useState(null);
+    const [entityTypes, setEntityTypes] = useState(null);
+
+    useEffect(()=>{
+        if(activeEntity && defaultAddresses==null){
+            Entities.getEntAddresses(activeEntity.record_id)
+            .then((data)=>{
+                setDefaultAddresses(data);
+            })
+            .catch((error)=>{
+                console.error("Failed to get default addresses for entity addedit form")
+            })
+        }
+
+        if(entityTypes == null){
+            Entities.getEntityTypes()
+            .then((data)=>{
+                setEntityTypes(data);
+            })
+            .catch((error)=>{
+                console.error("Failed to get entity types for entity addedit form")
+            })
+        }
+    },[activeEntity])
+
+    
    
     const fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name', onClick: ()=>handleOpenEntityDraw()},
-        {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name', onClick: ()=>handleOpenEntityDraw()},
-        {field: 'date', label: 'Date Entered*', type: 'date', updateBy: 'state',required: true},
-        {field: 'requestor', label: 'Requestor', type: 'select-users', updateBy: 'ref'},
-        {field: 'maker', label: 'Maker', type: 'select-users', updateBy: 'ref'},
-        {field: 'type', label: 'Type*', type: 'select-type', updateBy: 'ref',required: true},
-        {field: 'job_reference', label: 'Job Reference', type: 'text', updateBy: 'ref'},
-        {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
+        {field: 'name', label: 'Name', type: 'text', updateBy: 'ref', multiline: false,required: true},
+        {field: 'county_or_parish', label: 'County or Parish', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'entities_types_id', label: 'Entity Type', type: 'select-entity-type', updateBy: 'ref',required: true},
+        {field: 'class', label: 'Class', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'other_organization', label: 'Other Organization', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'phone', label: 'Phone', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'fax', label: 'Fax', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'website', label: 'Website', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'shipping', label: 'Default Shipping Address', type: 'select-default-address', updateBy: 'ref'},
+        {field: 'billing', label: 'Default Billing Address', type: 'select-default-address', updateBy: 'ref'},
+        {field: 'mailing', label: 'Default Mailing Address', type: 'select-default-address', updateBy: 'ref'},
+        {field: 'account_number', label: 'Account Number', type: 'text', updateBy: 'ref'},
+        {field: 'purchase_order_required', label: 'Purchase Order Required', type: 'check', updateBy: 'ref'},
+        {field: 'prepayment_required', label: 'Prepayment Required', type: 'check', updateBy: 'ref'},
         {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'advertising_notes', label: 'Ad Notes', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'po_number', label: 'Purchase Order #', type: 'text', updateBy: 'ref'},
-        {field: 'requested_arrival_date', label: 'Desired Date', type: 'date', updateBy: 'state'},
-        {field: 'completed', label: 'Completed', type: 'check', updateBy: 'ref'},
-        {field: 'invoiced', label: 'Invoiced', type: 'check', updateBy: 'ref'},
     ];
 
-    const types = ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
 
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(editModalMode == "add"){
-            setActiveWorkOrder({});
+            setActiveEntity({});
         }
     },[editModalMode])
 
-        
 
-    const handleSave = (work_order, updateWorkOrder ,addOrEdit) => {
-        if(!work_order){
-            console.error("Bad work order")
+    const handleSave = (entity, updateEntity ,addOrEdit) => {
+        if(!entity){
+            console.error("Bad entity")
             return;
         }
- 
+
+        console.log("Entity", entity);
+        console.log("UpdateEntity", updateEntity);
+        
+        updateEntity["entities_id"] = activeEntity.record_id;
         
         //Add Id to this new object
         if(addOrEdit == "edit"){
-            updateWorkOrder["record_id"] = work_order.wo_record_id;
+            updateEntity["record_id"] = entity.record_id;
 
-            Work_Orders.updateWorkOrder( updateWorkOrder )
+            Entities.updateEntity( updateEntity )
             .then( (data) => {
                 //Refetch our data on save
-                cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
-                setWorkOrders(null);
-                setActiveWorkOrder(null);
+                cogoToast.success(`Entity ${entity.record_id} has been updated!`, {hideAfter: 4});
+                setEntitiesRefetch(null);
+                setActiveEntity(null);
                 handleCloseModal();
             })
             .catch( error => {
                 console.warn(error);
-                cogoToast.error(`Error updating work_order. ` , {hideAfter: 4});
+                cogoToast.error(`Error updating entity. ` , {hideAfter: 4});
             })
         }
         if(addOrEdit == "add"){
-            Work_Orders.addWorkOrder( updateWorkOrder )
+            Entities.addEntity( updateEntity )
             .then( (data) => {
                 //Get id of new workorder and set view to detail
                 if(data && data.insertId){
-                    setDetailWOid(data.insertId);
-                    setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
+                    setDetailEntityId(data.insertId);
+                    setCurrentView(views.filter((v)=>v.value == "entityDetail")[0]);
                 }
-                cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
-                setWorkOrders(null);
-                setActiveWorkOrder(null);
+                cogoToast.success(`Entity has been added!`, {hideAfter: 4});
+                setEntitiesRefetch(null);
+                setActiveEntity(null);
                 handleCloseModal();
             })
             .catch( error => {
                 console.warn(error);
-                cogoToast.error(`Error adding work_order. ` , {hideAfter: 4});
+                cogoToast.error(`Error adding entity. ` , {hideAfter: 4});
             })
         }
         
     };
 
     return(<>
-        { editWOModalOpen && <Modal
+        { editEntModalOpen && <Modal
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             className={classes.modal}
-            open={editWOModalOpen}
+            open={editEntModalOpen}
             onClose={handleCloseModal}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -134,13 +158,13 @@ const AddEditModal = function(props) {
             timeout: 500,
             }}
         >
-            <Fade in={editWOModalOpen}>
+            <Fade in={editEntModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            {detailWOid && activeWorkOrder ? `Edit WO#: ${activeWorkOrder.wo_record_id}` : 'Add Work Order'} 
+                            {detailEntityId && activeEntity ? `Edit Entity #: ${activeEntity.record_id}` : 'Add Entity'} 
                         </span>
                     </div>
                 
@@ -148,24 +172,21 @@ const AddEditModal = function(props) {
                     {/* BODY */}
                     
                     <Grid container >  
-                        <Grid item xs={entityDrawerOpen ? 7 : 12} className={classes.paperScroll}>
-                            {/*FORM*/ console.log("Job types in parent", types)}
+                        <Grid item xs={12} className={classes.paperScroll}>
+                            {/*FORM*/}
                             <FormBuilder 
                                 ref={saveRef}
                                 fields={fields} 
                                 mode={editModalMode} 
                                 classes={classes} 
-                                formObject={activeWorkOrder} 
-                                setFormObject={setActiveWorkOrder}
+                                formObject={activeEntity} 
+                                setFormObject={setActiveEntity}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                raineyUsers={raineyUsers} jobTypes={types} />
+                                entityTypes={entityTypes} defaultAddresses={defaultAddresses ? defaultAddresses : []}
+                                 />
                         </Grid>
-                        {entityDrawerOpen && 
-                            <Grid item xs={5} className={classes.paperScroll}>
-                                <EntitiesDrawer  
-                                     entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen} saveRef={saveRef}/>
-                            </Grid>}
+                        
                     </Grid>
                     
 
@@ -173,7 +194,7 @@ const AddEditModal = function(props) {
                     <Grid container >
                         <Grid item xs={12} className={classes.paper_footer}>
                         <ButtonGroup className={classes.buttonGroup}>
-                            <Button
+                                <Button
                                     onClick={() => handleCloseModal()}
                                     variant="contained"
                                     color="primary"
@@ -184,7 +205,7 @@ const AddEditModal = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
-                                    onClick={ () => { saveRef.current.handleSaveParent(activeWorkOrder) }}
+                                    onClick={ () => { saveRef.current.handleSaveParent(activeEntity) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -201,7 +222,7 @@ const AddEditModal = function(props) {
     </>) 
     }
 
-export default AddEditModal;
+export default AddEditEntity;
 
 const useStyles = makeStyles(theme => ({
     modal: {

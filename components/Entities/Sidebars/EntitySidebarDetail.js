@@ -9,7 +9,7 @@ import Util from  '../../../js/Util';
 import WorkOrderDetail from  '../../../js/WorkOrderDetail';
 
 import { ListContext } from '../EntitiesContainer';
-import { DetailContext } from '../EntitiesContainer';
+//import { DetailContext } from '../EntitiesContainer';
 
 import SidebarPages from './components/SidebarPages';
 //import CompInvTool from './components/CompInvTool';
@@ -22,57 +22,46 @@ const EntitySidebarDetail = function(props) {
 
   const { entities, setEntities,
     currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
-    editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities } = useContext(ListContext);
+    editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
+    setRecentEntities, entitiesRefetch, setEntitiesRefetch } = useContext(ListContext);
 
-  const {vendorTypes, setVendorTypes,
-    shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
-    fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders} = useContext(DetailContext);
+  //const {} = useContext(DetailContext);
   
   const classes = useStyles();
   
-  const handleOpenAddWOModal = () =>{
-    // setEditModalMode("edit");
-    // setEditWOModalOpen(true);
+  const handleOpenAddEntModal = () =>{
+     setEditModalMode("edit");
+     setEditEntModalOpen(true);
   }
-
-  // const handleOpenWOIModal = () =>{
-  //   setEditWOIModalMode("add")
-  //   setEditWOIModalOpen(true);
-  // }
-
-  // const handleOpenFPOrderModal = () =>{
-  //   setFPOrderModalMode("add");
-  //   setFPOrderModalOpen(true);
-  // }
 
 
   const sideBarTopButtons = () =>{
     switch(currentView.value){
-      case "allWorkOrders":
+      case "allEntities":
         return <Search />
         break
       case "search":
         return <Search />
         break;
-      // case "woFPOrder":
-      //   return(
-      //     <div className={classes.newButtonDiv} >
-      //       <Button className={classes.newButton} classes={{label: classes.newButtonLabel}} variant="outlined"
-      //           onClick={()=> handleOpenFPOrderModal()}>
-      //           <AddIcon className={classes.plusIcon}/>
-      //           <div>New Order</div>
-      //       </Button>
-      //     </div>
-      //   )
-      //   break;
       case "entityDetail":
         return (<>
           <div className={classes.newButtonDiv} >
               <Button className={classes.newButton} 
                     classes={{label: classes.newButtonLabel}} 
                     variant="outlined"
-                    onClick={event=> handleOpenAddWOModal()}>
+                    onClick={event=> handleOpenAddEntModal()}>
                       <EditIcon className={classes.editIcon}/><div>Edit Info</div>
+              </Button>
+          </div></>);
+        break;
+      case "entAddresses":
+        return (<>
+          <div className={classes.newButtonDiv} >
+              <Button className={classes.newButton} 
+                    classes={{label: classes.newButtonLabel}} 
+                    variant="outlined"
+                    >
+                      <AddIcon className={classes.plusIcon}/><div>New Address</div>
               </Button>
           </div></>);
         break;

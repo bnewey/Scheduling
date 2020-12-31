@@ -7,7 +7,7 @@ import Grow from '@material-ui/core/Grow';
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../js/Util';
-import Work_Orders from  '../../../../js/Work_Orders';
+import Entities from  '../../../../js/Entities';
 import { ListContext } from '../../EntitiesContainer';
 import dynamic from 'next/dynamic'
 
@@ -32,9 +32,11 @@ const Search = function(props) {
   const searchOpen = currentView && currentView.value == "search";
 
   const searchTableObject= [
-    {value: "wo.description", displayValue: 'Description'},
-    {value: "wo.record_id", displayValue: 'Work Order #'},
-    {value: "a.name", displayValue: 'Entity Name'},
+    {value: "name", displayValue: 'Name'},
+    {value: "record_id", displayValue: 'Id'},
+    {value: "city", displayValue: 'City'},
+    {value: "county_or_parish", displayValue: 'County or Parish'},
+    {value: "state", displayValue: 'State'},
   ];
 
   const classes = useStyles({searchOpen});
@@ -68,7 +70,7 @@ const Search = function(props) {
       if(tmpParsed){
         setSearchTable(tmpParsed);
       }else{
-        setSearchTable("a.name");
+        setSearchTable("name");
       }
     }
     if(searchTable){
@@ -103,7 +105,7 @@ const Search = function(props) {
         console.error("Bad search value or search table on search");
         reject();
       }
-      Work_Orders.searchAllWorkOrders(searchTable, searchValue)
+      Entities.searchAllEntities(searchTable, searchValue)
       .then((data)=>{
         if(data){
           //console.log(data);

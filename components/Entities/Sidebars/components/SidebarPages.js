@@ -19,12 +19,14 @@ import { ListContext } from '../../EntitiesContainer';
 const SidebarPages = function(props) {
     const {user} = props;
   
-    const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-      currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    const {entities, setEntities,
+        currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+        editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities,
+         setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
     const classes = useStyles();
 
     const pages = [
-        "woDetail", "woItems", "packingSlip", "woPdf", "pastWO", "woFPOrder"
+        "entityDetail", "entAddresses"
     ];
 
     const handleChangePage = (view) =>{
@@ -33,30 +35,12 @@ const SidebarPages = function(props) {
 
     const getIcon = (page)=>{
         switch(page){
-            case 'woDetail':{
+            case 'entityDetail':
                 return(<DetailIcon className={classes.icon}/>)
                 break;
-            }
-            case 'woItems':{
-                return(<ListIcon className={classes.icon}/>)
+            default: 
+                return(<DetailIcon className={classes.icon}/>)
                 break;
-            }
-            case 'packingSlip':{
-                return(<PackingSlipIcon className={classes.icon}/>);
-                break;
-            }
-            case 'woPdf':{
-                return(<PDFIcon className={classes.icon}/>);
-                break;
-            }
-            case 'pastWO':{
-                return(<PastIcon className={classes.icon}/>);
-                break;
-            }
-            case 'woFPOrder':{
-                return(<LocalShippingIcon className={classes.icon}/>);
-                break;
-            }
         }
     }
 
@@ -75,7 +59,7 @@ const SidebarPages = function(props) {
                         <ListItemText  >
                             <div className={classes.itemDiv}>
                                 <span className={classes.iconSpan}>{getIcon(page)}</span>
-                                <span className={classes.liText}>{view.displayName}</span>
+                                <span className={classes.liText}>{view?.displayName}</span>
                             </div>
                         </ListItemText>
                     </ListItem>

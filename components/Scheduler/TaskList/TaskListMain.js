@@ -246,19 +246,15 @@ const TaskListMain = (props) => {
                 viewArray = [
                     {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
                     {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
-                    {text: "Desired Date", field: "date_desired", width: '6%', maxWidth: 100, style: 'smallListItemText', type: 'date'},
-                    {text: "Order Date", field: "wo_date", width: '6%', maxWidth: 100, style: 'smallListItemText', type: 'date'},
-                    {text: "1st Game", field: "first_game", width: '6%', maxWidth: 100, type: 'date'},
-                    {text: "Name", field: "t_name", width: '11%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                    {text: "Name", field: "t_name", width: '20%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
                     {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
-                    {text: "Description", field: "description", width: '10%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                    {text: "Description", field: "description", width: '18%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
                     {text: "Status", field: "woi_status_check", width: '15%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text'},
                     {text: "d_date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
                     {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text'}, 
                     {text: "i_date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-                    {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}
-                    
+                    {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}           
                 ];
                 break;
         }

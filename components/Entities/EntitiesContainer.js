@@ -6,8 +6,8 @@ import cogoToast from 'cogo-toast';
 
 import Util from '../../js/Util';
 import Settings from '../../js/Settings';
-import Work_Orders from  '../../js/Work_Orders';
-import WorkOrderDetail from  '../../js/WorkOrderDetail';
+import Entities from '../../js/Entities';
+
 
 import EntityToolbar from './Toolbar/EntityToolbar';
 //Sidebars
@@ -17,11 +17,11 @@ import EntitySidebarDetail from './Sidebars/EntitySidebarDetail';
 //Main Panels
 import EntityList from './MainPanels/EntityList';
 import EntityDetail from './MainPanels/EntityDetail';
+import EntDetailAddresses from './MainPanels/DetailSubPanels/Addresses/EntDetailAddresses'
 
-import EntityFairPlayOrders from './MainPanels/DetailSubPanels/FairPlayOrders/EntityFairPlayOrders'
 
 //Extras
-import AddEditModal from './AddEditWorkOrder/AddEditModal'
+import AddEditModal from './AddEditEntity/AddEditModal'
 
 
 export const ListContext = createContext(null);
@@ -33,7 +33,7 @@ const EntitiesContainer = function(props) {
   const {user} = props;
 
   const [entities, setEntities] = useState(null);
-
+  const [entitiesRefetch, setEntitiesRefetch] = useState(false);
 
   //views used through whole app, 
   //child views with parent run parent's onClose() function
@@ -41,15 +41,16 @@ const EntitiesContainer = function(props) {
                   {value: 'search', displayName: 'Search', closeToView: 'allEntities',
                       onClose: ()=> {setEntities(null)}} ,
                   {value: "entityDetail", displayName: 'Entity Detail', closeToView: 'allEntities', 
-                      onClose: ()=>{setEntities(null);setActiveEntity(null); setDetailEntityId(null); setShipToOptionsWOI(null)}}, 
-                  { value: "entityFPOrder", displayName: 'FairPlay Order', closeToView: 'allEntities',
-                        parent: 'entityDetail'}];
+                      onClose: ()=>{setEntities(null);setActiveEntity(null); setDetailEntityId(null);}}, 
+                  { value: "entAddresses", displayName: 'Addresses', closeToView: 'allEntities',
+                    parent: 'entityDetail'},
+                ];
 
   const [currentView,setCurrentView] = useState(null);
   const [detailEntityId,setDetailEntityId] = useState(null);
   const [activeEntity, setActiveEntity] = useState(null);
 
-  const [editWOModalOpen, setEditWOModalOpen] = React.useState(false);
+  const [editEntModalOpen, setEditEntModalOpen] = React.useState(false);
   const [editModalMode, setEditModalMode] = React.useState(null);
 
   const [recentEntities, setRecentEntities] = React.useState(null);
@@ -57,14 +58,14 @@ const EntitiesContainer = function(props) {
   const [raineyUsers, setRaineyUsers] = useState(null);
   //Detail Context States
       //Detail - WOI
-      const [vendorTypes, setVendorTypes] = React.useState(null);
-      const [shipToOptionsWOI,setShipToOptionsWOI] = React.useState(null);
-      //
-      //Detail - FairPlay Order
-      const [fpOrders, setFPOrders] = React.useState(null);
-      const [fpOrderModalMode,setFPOrderModalMode] = React.useState("add");
-      const [activeFPOrder, setActiveFPOrder] =React.useState(null);
-      const [fpOrderModalOpen, setFPOrderModalOpen] = React.useState(false);
+      // const [vendorTypes, setVendorTypes] = React.useState(null);
+      // const [shipToOptionsWOI,setShipToOptionsWOI] = React.useState(null);
+      // //
+      // //Detail - FairPlay Order
+      // const [fpOrders, setFPOrders] = React.useState(null);
+      // const [fpOrderModalMode,setFPOrderModalMode] = React.useState("add");
+      // const [activeFPOrder, setActiveFPOrder] =React.useState(null);
+      // const [fpOrderModalOpen, setFPOrderModalOpen] = React.useState(false);
   //
   
   const classes = useStyles();
@@ -78,7 +79,8 @@ const EntitiesContainer = function(props) {
         tmpParsed = JSON.parse(tmp);
       }
       if(tmpParsed){
-        var view = views.filter((v)=> v.value == tmpParsed)[0]
+        var view = views.filter((v)=> v.value == tmpParsed)[0];
+        console.log("View", view);
         setCurrentView(view || views[0]);
       }else{
         setCurrentView(views[0]);
@@ -94,8 +96,11 @@ const EntitiesContainer = function(props) {
   //OrderRows
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
-    if(entities == null ) {
-      
+    if(entities == null || entitiesRefetch == true ) {
+      if(entitiesRefetch == true){
+        setEntitiesRefetch(false);
+
+      }
       Entities.getAllEntities()
       .then( data => {   
         setEntities(data);
@@ -106,12 +111,12 @@ const EntitiesContainer = function(props) {
       })
     }
 
-  },[entities]);
+  },[entities, entitiesRefetch]);
 
   //Work Order for detail views
   useEffect(()=>{
     if(detailEntityId && activeEntity == null){
-      Work_Orders.getWorkOrderById(detailEntityId)
+      Entities.getEntityById(detailEntityId)
       .then((data)=>{
         if(data){
           setActiveEntity(data[0]);
@@ -146,18 +151,7 @@ const EntitiesContainer = function(props) {
     
   }, [detailEntityId, currentView]);
 
-  useEffect(()=>{
-    if(raineyUsers == null){
-      Settings.getRaineyUsers()
-      .then((data)=>{
-        setRaineyUsers(data);
-      })
-      .catch((error)=>{
-        cogoToast.error("Failed to get rainey users");
-        console.error("failed to get rainey users", error)
-      })
-    }
-  },[raineyUsers])
+
 
   //Save and/or Fetch recentEntities to local storage
   useEffect(() => {
@@ -195,35 +189,6 @@ const EntitiesContainer = function(props) {
     }
   },[activeEntity])
 
-  useEffect(()=>{
-    if(vendorTypes == null){
-      WorkOrderDetail.getVendorTypes()
-      .then((data)=>{
-        if(data){
-          setVendorTypes(data);
-        }
-      })
-      .catch((error)=>{
-        cogoToast.error("Failed to get vendor types");
-        console.error("Failed to get vendor types", error);
-      })
-    }
-  },[vendorTypes])
-
-  useEffect(()=>{
-    if(shipToOptionsWOI == null && activeEntity && activeEntity.record_id){
-      WorkOrderDetail.getShipToWOIOptions(activeEntity.record_id)
-      .then((data)=>{
-        if(data){
-          setShipToOptionsWOI(data);
-        }
-      })
-      .catch((error)=>{
-        cogoToast.error("Failed to get shipToOptionsWOI ");
-        console.error("Failed to get shipToOptionsWOI", error);
-      })
-    }
-  },[shipToOptionsWOI, activeEntity])
     
 
   const getMainComponent = () =>{
@@ -237,9 +202,8 @@ const EntitiesContainer = function(props) {
       case "entityDetail":
         return <EntityDetail />
         break;
-      case "entityFPOrder":
-        return <EntityFairPlayOrders />
-        break;
+      case "entAddresses":
+        return <EntDetailAddresses />
       default: 
         cogoToast.error("Bad view");
         return <EntityList />;
@@ -256,11 +220,10 @@ const EntitiesContainer = function(props) {
         return <EntitySidebarList />
         break;
       case "entityDetail":
+      case "entAddresses":
         return <EntitySidebarDetail />
         break;
-      case "entityFPOrder":
-        return <EntitySidebarDetail />
-        break;
+        
       default: 
         cogoToast.error("Bad view");
         return <EntitySidebarList />;
@@ -273,10 +236,9 @@ const EntitiesContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{entities, setEntities,
           currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
-          editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} } >
-      <DetailContext.Provider value={{ vendorTypes, setVendorTypes,
-                     shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
-                     fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders}} >
+          editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
+          setRecentEntities, entitiesRefetch, setEntitiesRefetch} } >
+      <DetailContext.Provider value={{  }} >
         <div className={classes.containerDiv}>
         
         <Grid container>

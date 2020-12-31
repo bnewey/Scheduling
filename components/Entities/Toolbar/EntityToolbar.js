@@ -25,7 +25,8 @@ const EntityToolbar = function(props) {
   
   const { entities, setEntities,
     currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
-    editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
+    editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities,
+     setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "allEntities";
 
@@ -41,10 +42,13 @@ const EntityToolbar = function(props) {
         return <Search />
         break;
       case "entityDetail":
+      case "entAddresses":
         return (<Grid item className={classes.woDetailToolbarDiv} xs={ 5}>
-                  <span className={classes.woLabelSpan}>WO#:{detailWOid}</span><span className={classes.woLabelSpan}>{activeEntity && activeEntity.c_name}</span>
+                  <span className={classes.woLabelSpan}>WO#:{detailEntityId}</span><span className={classes.woLabelSpan}>{activeEntity && activeEntity.c_name}</span>
                 </Grid>);
         break;
+      
+        
       default: 
         cogoToast.error("Bad view");
         return <></>;

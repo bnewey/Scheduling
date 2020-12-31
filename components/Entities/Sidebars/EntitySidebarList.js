@@ -22,25 +22,18 @@ const EntitySidebarList = function(props) {
 
 
 
-  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, setCurrentView, 
-      editWOModalOpen, setEditWOModalOpen, setEditModalMode} = useContext(ListContext);
+  const { entities,setEntities, currentView, setCurrentView, 
+    editEntModalOpen, setEditEntModalOpen, setEditModalMode} = useContext(ListContext);
   
   const classes = useStyles();
  
   
-  const changeDateRange = (to, from) =>{
-    setDateRowRange({
-      to: to ? new Date(to) : rowDateRange.to,
-      from: from ? new Date(from) : rowDateRange.from
-    })
-    setWorkOrders(null);
-  }
 
   const searchOpen = currentView && currentView.value == "search";
 
-  const handleOpenAddWOModal = () =>{
+  const handleOpenAddEntModal = () =>{
     setEditModalMode("add");
-    setEditWOModalOpen(true);
+    setEditEntModalOpen(true);
   }
   
   return (
@@ -49,56 +42,13 @@ const EntitySidebarList = function(props) {
             <Button className={classes.newButton} 
                     classes={{label: classes.newButtonLabel}} 
                     variant="outlined"
-                    onClick={event=> handleOpenAddWOModal()}>
+                    onClick={event=> handleOpenAddEntModal()}>
               <AddIcon className={classes.plusIcon}/>
-              <div>New Order</div>
+              <div>New Entity</div>
             </Button>
         </div>
-        <div className={classes.dateRangeDiv}>
-        { !searchOpen && <div>
-            <div className={classes.labelDiv}><span className={classes.dateRangeSpan}>Date Range</span></div>
-            <div className={classes.inputDiv}>
-              <span className={classes.inputSpan}>FROM:</span>
-              <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <DatePicker    clearable
-                                  showTodayButton
-                                  format="MM/dd/yyyy"
-                                  inputVariant="outlined"
-                                  variant="inline" 
-                                  maxDate={new Date('01-01-2100')}
-                                  minDate={new Date('01-01-1970')}
-                                  className={classes.inputField}
-                                  value={rowDateRange.from} 
-                                  onChange={value => changeDateRange(null, value)} />
-              </MuiPickersUtilsProvider>
-            </div>
-            <div className={classes.inputDiv}>
-              <span className={classes.inputSpan}>TO:</span>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <DatePicker    clearable
-                                showTodayButton
-                                format="MM/dd/yyyy"
-                                inputVariant="outlined"
-                                variant="inline" 
-                                maxDate={new Date('01-01-2100')}
-                                  minDate={new Date('01-01-1970')}
-                                className={classes.inputField}
-                                value={rowDateRange.to} 
-                                onChange={value => changeDateRange(value, null)} />
-            </MuiPickersUtilsProvider>
-            </div>
-            <div className={classes.warningDiv}>
-            {workOrders && workOrders.length >= 2000 ? <span className={classes.inlineErrorText}>The data has been limited to 2000 items, please select a smaller date range</span> : <></>}
-            </div>
 
             
-        </div>}
-          { !searchOpen && 
-            <div>
-                {/* <FilterCompInv/> */}
-            </div>
-          }
-        </div>
           <div className={classes.dateRangeDiv}>
             
             {/* <RecentWO /> */}

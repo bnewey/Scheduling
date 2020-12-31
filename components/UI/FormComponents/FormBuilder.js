@@ -40,6 +40,8 @@ const FormBuilder = forwardRef((props, ref) => {
             item_type_radio_options, //specific data for woi item_type
             scbd_or_sign_radio_options, //specific data for woi scoreboard_or_sign
             jobTypes, //specific data for woi job types, for some reason only works when referenced as props.jobTypes (its not camelcase)
+            entityTypes,
+            defaultAddresses,
             shipToOptionsWOI, //specific data for woi ship_to
             vendorTypes, //specific data for woi vendor
             raineyUsers //specific data for all select-users
@@ -221,7 +223,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToOptionsWOI={shipToOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
-                    dataGetterFunc={field.dataGetterFunc}/>
+                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes}/>
                 </div>)
             })}</>
         : <></>}
@@ -234,7 +236,7 @@ export default FormBuilder;
 
 const GetInputByType = function(props){
     const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
-        shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object} = props;
+        shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes} = props;
 
     if(!field || field.type == null){
         console.error("Bad field");
@@ -325,6 +327,55 @@ const GetInputByType = function(props){
                 </Select></div>
             )
             break;
+            case 'select-entity-type':
+                return(
+                    <div className={classes.inputValueSelect}>
+                        <Select
+                    error={error}
+                        id={field.field}
+                        value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {props.entityTypes ? entityTypes.map((type)=>{
+                            return (
+                                <option value={type.record_id}>
+                                    {type.name}
+                                </option>
+                            )
+                        }) :  <></>}
+                    </Select></div>
+                )
+                break;
+            case 'select-default-address':
+                return(
+                    <div className={classes.inputValueSelect}>
+                        <Select
+                    error={error}
+                        id={field.field}
+                        value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {props.defaultAddresses ? defaultAddresses.map((type)=>{
+                            
+                            return (
+                                <option value={type}>
+                                    {type}
+                                </option>
+                            )
+                        }) :  <></>}
+                    </Select></div>
+                )
+                break;   
         case 'select-vendor':
             return(<div className={classes.inputValueSelect}>
                 <Select
