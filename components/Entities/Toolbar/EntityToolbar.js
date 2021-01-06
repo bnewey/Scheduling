@@ -43,6 +43,7 @@ const EntityToolbar = function(props) {
         break;
       case "entityDetail":
       case "entAddresses":
+      case "entContacts":
         return (<Grid item className={classes.woDetailToolbarDiv} xs={ 5}>
                   <span className={classes.woLabelSpan}>WO#:{detailEntityId}</span><span className={classes.woLabelSpan}>{activeEntity && activeEntity.c_name}</span>
                 </Grid>);

@@ -16,146 +16,145 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
-import Util from '../../../js/Util.js';
+import Util from '../../../../../../js/Util.js';
 
-import Settings from  '../../../js/Settings';
-import Entities from  '../../../js/Entities';
-import { ListContext } from '../EntitiesContainer';
+import Settings from  '../../../../../../js/Settings';
+import Entities from  '../../../../../../js/Entities';
+import { ListContext } from '../../../../EntitiesContainer';
 
-import FormBuilder from '../../UI/FormComponents/FormBuilder';
+import FormBuilder from '../../../../../UI/FormComponents/FormBuilder';
 
 
-const AddEditEntity = function(props) {
-    const {user, editModalMode} = props;
+const AddEditEntityContact = function(props) {
+    const {detailEntContactId,setDetailEntContactId, activeContact, setActiveContact,editContactModalOpen, setEditContactModalOpen,
+        editContactModalMode, setEditContactModalMode, setContacts} = props;
 
     const { entities, setEntities,
-        currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,setEntitiesRefetch,
-        editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
+        currentView, setCurrentView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
+    
+    const [defaultAddresses, setDefaultAddresses] = useState(null);
+    const [entContactTitles, setEntContactTitles] = useState(null);
 
+    useEffect(()=>{
+        if(detailEntContactId){
+            console.log("Getting address data");
+            Entities.getEntContactById(detailEntContactId)
+            .then((data)=>{
+                setActiveContact(data[0]);
+            })
+            .catch((data)=>{
+                console.error("Failed to get address");
+                cogoToast.error("Failed to get address data");
+            })
+        }
+    },[detailEntContactId])
+
+    useEffect(()=>{
+        if(activeEntity && defaultAddresses==null){
+            console.log("active entity", activeEntity)
+            Entities.getDefaultAddresses(activeEntity.record_id)
+            .then((data)=>{
+                setDefaultAddresses(data);
+            })
+            .catch((error)=>{
+                console.error("Failed to get default addresses for contact addedit form")
+            })
+        }
+
+        if(activeEntity && activeContact && entContactTitles==null){
+            console.log("active entity", activeEntity)
+            Entities.getEntContactTitles(activeEntity.record_id, activeContact.record_id)
+            .then((data)=>{
+                setEntContactTitles(data);
+            })
+            .catch((error)=>{
+                console.error("Failed to get contact titles for contact addedit form")
+            })
+        }
+    },[activeEntity, activeContact])
+    
 
     const saveRef = React.createRef();
     const classes = useStyles();
 
     const handleCloseModal = () => {
-        setActiveEntity(null);
-        setEditEntModalOpen(false);
-        setDefaultAddresses(null);
-        setEntityTypes(null);
+        setActiveContact(null);
+        setEditContactModalOpen(false);
+        setDetailEntContactId(null);
     };
-
-    const [defaultAddresses, setDefaultAddresses] = useState(null);
-    const [entityTypes, setEntityTypes] = useState(null);
-
-    useEffect(()=>{
-        if(activeEntity && defaultAddresses==null){
-            console.log("active entity CONTACT", activeEntity);
-
-            Entities.getDefaultContacts(activeEntity.record_id)
-            .then((data)=>{
-                console.log("Entity Default Contacts", data);
-                setDefaultAddresses(data);
-            })
-            .catch((error)=>{
-                console.error("Failed to get default addresses for entity addedit form")
-            })
-        }
-
-        if(entityTypes == null){
-            Entities.getEntityTypes()
-            .then((data)=>{
-                setEntityTypes(data);
-            })
-            .catch((error)=>{
-                console.error("Failed to get entity types for entity addedit form")
-            })
-        }
-    },[activeEntity])
 
     
    
     const fields = [
         //type: select must be hyphenated ex select-type
         {field: 'name', label: 'Name', type: 'text', updateBy: 'ref', multiline: false,required: true},
-        {field: 'county_or_parish', label: 'County or Parish', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'entities_types_id', label: 'Entity Type', type: 'select-entity-type', updateBy: 'ref',required: true},
-        {field: 'class', label: 'Class', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'other_organization', label: 'Other Organization', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'phone', label: 'Phone', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'fax', label: 'Fax', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'website', label: 'Website', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'work_phone', label: 'Work Phone', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'home_phone', label: 'Home Phone', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'cell', label: 'Cell', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'fax', label: 'fax', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'email', label: 'Email', type: 'text', updateBy: 'ref', multiline: false},
         {field: 'shipping', label: 'Default Shipping Address', type: 'select-default-address', updateBy: 'ref'},
         {field: 'billing', label: 'Default Billing Address', type: 'select-default-address', updateBy: 'ref'},
         {field: 'mailing', label: 'Default Mailing Address', type: 'select-default-address', updateBy: 'ref'},
-        {field: 'account_number', label: 'Account Number', type: 'text', updateBy: 'ref'},
-        {field: 'purchase_order_required', label: 'Purchase Order Required', type: 'check', updateBy: 'ref'},
-        {field: 'prepayment_required', label: 'Prepayment Required', type: 'check', updateBy: 'ref'},
-        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
+        {field: 'titles', label: 'Titles', type: 'entity-titles', updateBy: 'ref'}
     ];
-
 
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
-        if(editModalMode == "add"){
-            setActiveEntity({});
+        if(editContactModalMode == "add"){
+            setActiveContact({});
         }
-    },[editModalMode])
+    },[editContactModalMode])
 
 
-    const handleSave = (entity, updateEntity ,addOrEdit) => {
-        if(!entity){
-            console.error("Bad entity")
+    const handleSave = (contact, updateContact ,addOrEdit) => {
+        if(!contact){
+            console.error("Bad contact")
             return;
         }
 
-        console.log("Entity", entity);
-        console.log("UpdateEntity", updateEntity);
-        
-        updateEntity["entities_id"] = activeEntity.record_id;
+        updateContact["entities_id"] = activeEntity.record_id;
         
         //Add Id to this new object
         if(addOrEdit == "edit"){
-            updateEntity["record_id"] = entity.record_id;
+            updateContact["record_id"] = contact.record_id;
 
-            Entities.updateEntity( updateEntity )
+            Entities.updateEntityContact( updateContact )
             .then( (data) => {
                 //Refetch our data on save
-                cogoToast.success(`Entity ${entity.record_id} has been updated!`, {hideAfter: 4});
-                setEntitiesRefetch(null);
-                setActiveEntity(null);
+                cogoToast.success(`Contact ${contact.record_id} has been updated!`, {hideAfter: 4});
+                setContacts(null);
+                setActiveContact(null);
                 handleCloseModal();
             })
             .catch( error => {
                 console.warn(error);
-                cogoToast.error(`Error updating entity. ` , {hideAfter: 4});
+                cogoToast.error(`Error updating contact. ` , {hideAfter: 4});
             })
         }
         if(addOrEdit == "add"){
-            Entities.addEntity( updateEntity )
+            Entities.addEntityContact( updateContact )
             .then( (data) => {
-                //Get id of new workorder and set view to detail
-                if(data && data.insertId){
-                    setDetailEntityId(data.insertId);
-                    setCurrentView(views.filter((v)=>v.value == "entityDetail")[0]);
-                }
-                cogoToast.success(`Entity has been added!`, {hideAfter: 4});
-                setEntitiesRefetch(null);
-                setActiveEntity(null);
+              
+                cogoToast.success(`Contact has been added!`, {hideAfter: 4});
+                setContacts(null);
+                setActiveContact(null);
                 handleCloseModal();
             })
             .catch( error => {
                 console.warn(error);
-                cogoToast.error(`Error adding entity. ` , {hideAfter: 4});
+                cogoToast.error(`Error adding contact. ` , {hideAfter: 4});
             })
         }
         
     };
 
     return(<>
-        { editEntModalOpen && <Modal
+        { editContactModalOpen && <Modal
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             className={classes.modal}
-            open={editEntModalOpen}
+            open={editContactModalOpen}
             onClose={handleCloseModal}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -163,33 +162,33 @@ const AddEditEntity = function(props) {
             timeout: 500,
             }}
         >
-            <Fade in={editEntModalOpen}>
+            <Fade in={editContactModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            {detailEntityId && activeEntity ? `Edit Entity #: ${activeEntity.record_id}` : 'Add Entity'} 
+                            {detailEntContactId && activeContact ? `Edit Contact #: ${activeContact.record_id}` : 'Add Contact'} 
                         </span>
                     </div>
                 
 
                     {/* BODY */}
-                    
                     <Grid container >  
                         <Grid item xs={12} className={classes.paperScroll}>
                             {/*FORM*/}
-                            <FormBuilder 
+                            {activeContact && defaultAddresses && <FormBuilder 
                                 ref={saveRef}
                                 fields={fields} 
-                                mode={editModalMode} 
+                                mode={editContactModalMode} 
                                 classes={classes} 
-                                formObject={activeEntity} 
-                                setFormObject={setActiveEntity}
+                                formObject={activeContact} 
+                                setFormObject={setActiveContact}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                entityTypes={entityTypes} defaultAddresses={defaultAddresses}
-                                 />
+                                defaultAddresses={defaultAddresses}
+                                entContactTitles={entContactTitles}
+                                 />}
                         </Grid>
                         
                     </Grid>
@@ -210,7 +209,7 @@ const AddEditEntity = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
-                                    onClick={ () => { saveRef.current.handleSaveParent(activeEntity) }}
+                                    onClick={ () => { saveRef.current.handleSaveParent(activeContact) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -227,7 +226,7 @@ const AddEditEntity = function(props) {
     </>) 
     }
 
-export default AddEditEntity;
+export default AddEditEntityContact;
 
 const useStyles = makeStyles(theme => ({
     modal: {
@@ -365,5 +364,25 @@ const useStyles = makeStyles(theme => ({
     },
     errorSpan:{
         color: '#bb4444',
+    },
+    titleDiv:{
+        width: '40%',
+    },
+    titleRowDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: '1px solid #bbb',
+        padding: '2px 0px',
+    },
+    titleSpan:{
+        fontFamily: 'sans-serif',
+    },
+    titleButtonSpan:{
+        fontFamily: 'sans-serif',
+        cursor: 'pointer',
+        textDecoration: 'underline',
+        marginLeft: 15,
     }
 }));

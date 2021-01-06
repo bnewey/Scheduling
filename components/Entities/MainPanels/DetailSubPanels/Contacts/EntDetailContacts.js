@@ -64,10 +64,10 @@ import cogoToast from 'cogo-toast';
 import Util from  '../../../../../js/Util';
 import Entities from  '../../../../../js/Entities';
 import { DetailContext, ListContext } from '../../../EntitiesContainer';
-import AddEditEntityAddress from './AddEditEntityAddress/AddEditModal';
+import AddEditEntityContacts from './AddEditEntityContacts/AddEditModal';
 
 
-const EntAddresses = function(props) {
+const EntContacts = function(props) {
   const {user} = props;
 
   const { entities, setEntities,
@@ -75,118 +75,48 @@ const EntAddresses = function(props) {
     editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
     setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
 
-  const {detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,
-      editAddressModalMode, setEditAddressModalMode} = useContext(DetailContext);
+  const {detailEntContactId,setDetailEntContactId, activeContact, setActiveContact,editContactModalOpen, setEditContactModalOpen,
+      editContactModalMode, setEditContactModalMode,} = useContext(DetailContext);
   const classes = useStyles();
 
-  const [addresses, setAddresses] = React.useState(null);
+  const [contacts, setContacts] = React.useState(null);
 
   
 
   //Entities address Data
   useEffect( () =>{
-    if(addresses == null && activeEntity) {
-      
-      Entities.getEntAddresses(activeEntity.record_id)
-      .then( data => { setAddresses(data); })
+    if(contacts == null && activeEntity) {
+      Entities.getEntContacts(activeEntity.record_id)
+      .then( data => { setContacts(data); })
       .catch( error => {
         console.warn(error);
         cogoToast.error(`Error getting wois`, {hideAfter: 4});
       })
     }
-  },[addresses, activeEntity]);
+  },[contacts, activeEntity]);
 
 
   const columns = [
 
     { field: 'name', title: 'Name', minWidth: 45, align: 'center',editable: 'never'},
     { field: 'record_id', title: 'ID', minWidth: 20, align: 'center', editable: 'never' },    
-    { field: 'main', title: 'Main', minWidth: 20, align: 'center', editable: 'onUpdate',
-      render: rowData => <div className={classes.checkboxDiv}>
-      <Checkbox
-          icon={<CheckBoxOutlineBlankIcon  />}
-          checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
-          name="checkedMain"
-          checked={rowData.main == 1? true : false}
-          onChange={(event)=> { handleUpdateAddress('main', event.target.checked ? 1 : 0, rowData) }}
-      /></div> 
-      },
-    { field: 'shipping', title: 'Shipping', minWidth: 20, align: 'center', editable: 'onUpdate',
-    render: rowData => <div className={classes.checkboxDiv}>
-    <Checkbox
-        icon={<CheckBoxOutlineBlankIcon  />}
-        checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
-        name="checkedshipping"
-        checked={rowData.shipping == 1 ? true : false}
-        onChange={(event)=> { handleUpdateAddress('shipping', event.target.checked ? 1 : 0, rowData) }}
-    /></div> ,
-    },
-    { field: 'billing', title: 'Billing', minWidth: 20, align: 'center', editable: 'onUpdate',
-    render: rowData => <div className={classes.checkboxDiv}>
-    <Checkbox
-        icon={<CheckBoxOutlineBlankIcon  />}
-        checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
-        name="checkedbilling"
-        checked={rowData.billing== 1 ? true : false}
-        onChange={(event)=> { handleUpdateAddress('billing', event.target.checked ? 1 : 0, rowData) }}
-    /></div> ,
-    },
-    { field: 'mailing', title: 'Mailing', minWidth: 20, align: 'center', editable: 'onUpdate',
-    render: rowData => <div className={classes.checkboxDiv}>
-    <Checkbox
-        icon={<CheckBoxOutlineBlankIcon  />}
-        checkedIcon={<CheckBoxIcon className={classes.checkboxIcon}  />}
-        name="checkedmailing"
-        checked={rowData.mailing == 1 ? true : false}
-        onChange={(event)=> { handleUpdateAddress('mailing', event.target.checked ? 1 : 0, rowData) }}
-    /></div> ,
-    },
+    { field: 'titles', title: 'Titles', minWidth: 240, align: 'center', editable: 'never' },    
     
     /* actions column? */
   ];
 
-  const handleUpdateAddress = async(field, value, rowData) => {
-    if(!field || !rowData){
-      console.error("Bad field or rowData in handleUpdateAddress");
-      return;
-    }
 
-    var updateRow = {...rowData};
-    updateRow[field] = value;
-    
-    await handleUpdateEntityAddress(updateRow);
-  }
-
-
-    const handleUpdateEntityAddress = (newData, oldData) => {
-        return new Promise((resolve, reject)=>{
-            Entities.updateEntityAddress(newData)
-            .then((data)=>{
-              cogoToast.success("Updated Entity Address");
-              setAddresses(null);
-              resolve();
-            })
-            .catch((error)=>{
-              console.error("Failed to update Entity Address", error);
-              cogoToast.error("Failed to update Entity Address");
-              setAddresses(null);
-              reject();
-            })
-            
-        })
-    }   
-
-    const handleDeleteEntityAddress = (row)=>{
+    const handleDeleteEntityContact = (row)=>{
       if(!row.record_id){
         cogoToast.error("Bad row in delete entity address");
         console.error("Failed to delete entity address");
         return;
       }
       const deleteSlip = ()=>{
-        Entities.deleteEntityAddress(row.record_id)
+        Entities.deleteEntityContact(row.record_id)
         .then((data)=>{
           if(data){
-            setAddresses(null);
+            setContacts(null);
             cogoToast.success("Deleted entity address");
           }
         })
@@ -211,27 +141,27 @@ const EntAddresses = function(props) {
       console.error("Bad id to edit")
       cogoToast.error("Internal Server Error");
     }
-    setEditAddressModalOpen(true);
-    setEditAddressModalMode("edit");
-    setDetailEntAddressId(rowData.record_id);
+    setEditContactModalOpen(true);
+    setEditContactModalMode("edit");
+    setDetailEntContactId(rowData.record_id);
   }
 
    return ( 
     <div className={classes.root}>
         {activeEntity ?
         <div className={classes.container}>
-          {editAddressModalOpen && <AddEditEntityAddress setAddresses={setAddresses} activeAddress={activeAddress} setActiveAddress={setActiveAddress} editAddressModalOpen={editAddressModalOpen} 
-          setEditAddressModalOpen={setEditAddressModalOpen} editAddressModalMode={editAddressModalMode} setEditAddressModalMode={setEditAddressModalMode}
-          detailEntAddressId={detailEntAddressId} setDetailEntAddressId={setDetailEntAddressId}/>}
+          {editContactModalOpen && <AddEditEntityContacts setContacts={setContacts} activeContact={activeContact} setActiveContact={setActiveContact} editContactModalOpen={editContactModalOpen} 
+          setEditContactModalOpen={setEditContactModalOpen} editContactModalMode={editContactModalMode} setEditContactModalMode={setEditContactModalMode}
+          detailEntContactId={detailEntContactId} setDetailEntContactId={setDetailEntContactId}/>}
           <Grid container>
                   <Grid item xs={8}>
                     <div className={classes.woiDiv}>
-                    { addresses && addresses.length > 0 ?
+                    { contacts && contacts.length > 0 ?
                         <MaterialTable 
                             columns={columns}
                             style={{boxShadow: '0px 0px 8px 2px #909090', width: "inherit"}}
-                            data={addresses}
-                            title={"Addresses"}
+                            data={contacts}
+                            title={"Contactes"}
                             editable={{
                                 /* open edit modal here */
                             }}
@@ -274,12 +204,12 @@ const EntAddresses = function(props) {
                             actions={[
                               {
                                 icon: tableIcons.Delete,
-                                tooltip: 'Delete Entity Address',
-                                onClick: (event, rowData) => handleDeleteEntityAddress(rowData)
+                                tooltip: 'Delete Entity Contact',
+                                onClick: (event, rowData) => handleDeleteEntityContact(rowData)
                               },
                               {
                                 icon: tableIcons.Edit,
-                                tooltip: 'Edit Entity Address',
+                                tooltip: 'Edit Entity Contact',
                                 onClick: (event, rowData) => handleOpenEditModal(rowData)
                               },
                             ]}
@@ -287,7 +217,7 @@ const EntAddresses = function(props) {
                           
                             
                         />
-                    : <span className={classes.infoSpan}>No Entity Addresses</span>}
+                    : <span className={classes.infoSpan}>No Entity Contacts</span>}
 
                     </div>
                   </Grid>
@@ -300,7 +230,7 @@ const EntAddresses = function(props) {
   );
 }
 
-export default EntAddresses
+export default EntContacts
 
 
 const useStyles = makeStyles(theme => ({

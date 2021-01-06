@@ -18,7 +18,7 @@ import EntitySidebarDetail from './Sidebars/EntitySidebarDetail';
 import EntityList from './MainPanels/EntityList';
 import EntityDetail from './MainPanels/EntityDetail';
 import EntDetailAddresses from './MainPanels/DetailSubPanels/Addresses/EntDetailAddresses'
-
+import EntDetailContacts from './MainPanels/DetailSubPanels/Contacts/EntDetailContacts'
 
 //Extras
 import AddEditModal from './AddEditEntity/AddEditModal'
@@ -44,6 +44,8 @@ const EntitiesContainer = function(props) {
                       onClose: ()=>{setEntities(null);setActiveEntity(null); setDetailEntityId(null);}}, 
                   { value: "entAddresses", displayName: 'Addresses', closeToView: 'allEntities',
                     parent: 'entityDetail'},
+                  { value: "entContacts", displayName: 'Contacts', closeToView: 'allEntities',
+                    parent: 'entityDetail'},
                 ];
 
   const [currentView,setCurrentView] = useState(null);
@@ -57,15 +59,16 @@ const EntitiesContainer = function(props) {
   
   const [raineyUsers, setRaineyUsers] = useState(null);
   //Detail Context States
-      //Detail - WOI
-      // const [vendorTypes, setVendorTypes] = React.useState(null);
-      // const [shipToOptionsWOI,setShipToOptionsWOI] = React.useState(null);
-      // //
-      // //Detail - FairPlay Order
-      // const [fpOrders, setFPOrders] = React.useState(null);
-      // const [fpOrderModalMode,setFPOrderModalMode] = React.useState("add");
-      // const [activeFPOrder, setActiveFPOrder] =React.useState(null);
-      // const [fpOrderModalOpen, setFPOrderModalOpen] = React.useState(false);
+      //Detail Addresses
+      const [detailEntAddressId,setDetailEntAddressId] = useState(null);
+      const [activeAddress, setActiveAddress] = useState(null);
+      const [editAddressModalOpen, setEditAddressModalOpen] = React.useState(false);
+      const [editAddressModalMode, setEditAddressModalMode] = React.useState(null);
+      //Detail Contacts
+      const [detailEntContactId,setDetailEntContactId] = useState(null);
+      const [activeContact, setActiveContact] = useState(null);
+      const [editContactModalOpen, setEditContactModalOpen] = React.useState(false);
+      const [editContactModalMode, setEditContactModalMode] = React.useState(null);
   //
   
   const classes = useStyles();
@@ -204,6 +207,8 @@ const EntitiesContainer = function(props) {
         break;
       case "entAddresses":
         return <EntDetailAddresses />
+      case "entContacts":
+        return <EntDetailContacts/>
       default: 
         cogoToast.error("Bad view");
         return <EntityList />;
@@ -221,6 +226,7 @@ const EntitiesContainer = function(props) {
         break;
       case "entityDetail":
       case "entAddresses":
+      case "entContacts":
         return <EntitySidebarDetail />
         break;
         
@@ -238,7 +244,9 @@ const EntitiesContainer = function(props) {
           currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
           editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
           setRecentEntities, entitiesRefetch, setEntitiesRefetch} } >
-      <DetailContext.Provider value={{  }} >
+      <DetailContext.Provider value={{ detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,
+        editAddressModalMode, setEditAddressModalMode,detailEntContactId,setDetailEntContactId,activeContact, setActiveContact,editContactModalOpen,
+        setEditContactModalOpen,editContactModalMode, setEditContactModalMode  }} >
         <div className={classes.containerDiv}>
         
         <Grid container>
@@ -264,7 +272,7 @@ const EntitiesContainer = function(props) {
         
 
         </div>
-        <AddEditModal editModalMode={editModalMode}/>
+        { editEntModalOpen && <AddEditModal editModalMode={editModalMode}/> }
       </DetailContext.Provider>
       </ListContext.Provider>
     </div>

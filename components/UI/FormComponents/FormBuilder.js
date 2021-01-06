@@ -25,7 +25,7 @@ import {
 import Util from '../../../js/Util.js';
 
 import Settings from  '../../../js/Settings';
-import Work_Orders from  '../../../js/Work_Orders';
+import Entities from  '../../../js/Entities';
 import { ListContext } from '../../../components/WorkOrders/WOContainer';
 import { DetailContext } from '../../../components/WorkOrders/WOContainer';
 
@@ -42,6 +42,7 @@ const FormBuilder = forwardRef((props, ref) => {
             jobTypes, //specific data for woi job types, for some reason only works when referenced as props.jobTypes (its not camelcase)
             entityTypes,
             defaultAddresses,
+            entContactTitles,//specific date for entities contacts title
             shipToOptionsWOI, //specific data for woi ship_to
             vendorTypes, //specific data for woi vendor
             raineyUsers //specific data for all select-users
@@ -112,6 +113,10 @@ const FormBuilder = forwardRef((props, ref) => {
             tmpObject[key[0]] = value[0];
             tmpObject[key[1]] = value[1];
         }
+        if(type === "entity-titles"){
+            console.log("Entity-Titles inputChange")
+            tmpObject[key] = value;
+        }
 
         setFormObject(tmpObject);
         setShouldUpdate(should);
@@ -169,6 +174,43 @@ const FormBuilder = forwardRef((props, ref) => {
                         //         console.log("TEST",textValueObject[field.field]);
                         //         updateItem[field.field] = textValueObject[field.field];
                         //     break;
+                        case 'entity-titles':
+                            console.log('entity_titles value', itemToSave[field.field])
+                            itemToSave[field.field]?.forEach((title)=>{
+                                //Remove titles if false
+                                if(title.title_change && title.title_change == "remove"){
+                                    console.log("CHecking after false")
+                                    if(title?.title_attached != 0){
+                                        //Delete from entities_contacts_titles
+                                        Entities.deleteContactTitle(title.title_attached)
+                                        .then((data)=>{
+                                            console.log("Deleted title", title.title_attached)
+                                        })
+                                        .catch((error)=>{
+                                            console.error("Failed to delete contact title")
+                                            cogoToast.error("Internal Server Error");
+                                        })
+                                    }
+                                }
+                                if(title.title_change && title.title_change == "add"){
+                                    console.log("CHecking after true")
+                                    //check against original DB data to see if we really need to add
+                                    var updatedTitle = {...title};
+                                    updatedTitle["contact_id"] = itemToSave["record_id"];
+                                    if(title?.title_attached == 0){
+                                        //Add to entities_contacts_titles
+                                        Entities.addContactTitle( updatedTitle )
+                                        .then((data)=>{
+                                            console.log("Added title")
+                                        })
+                                        .catch((error)=>{
+                                            console.error("Failed to delete contact title")
+                                            cogoToast.error("Internal Server Error");
+                                        })
+                                    }
+                                }
+                            })
+                            break;
                         default:
                             //Others are updated with itemToSave (formObject) state variable
                             if(itemToSave[field.field])
@@ -223,7 +265,8 @@ const FormBuilder = forwardRef((props, ref) => {
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToOptionsWOI={shipToOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
-                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes}/>
+                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} defaultAddresses={defaultAddresses}
+                     entContactTitles={entContactTitles}/>
                 </div>)
             })}</>
         : <></>}
@@ -236,7 +279,8 @@ export default FormBuilder;
 
 const GetInputByType = function(props){
     const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
-        shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes} = props;
+        shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
+        entContactTitles} = props;
 
     if(!field || field.type == null){
         console.error("Bad field");
@@ -341,7 +385,7 @@ const GetInputByType = function(props){
                         <option value={0}>
                             Select
                         </option>
-                        {props.entityTypes ? entityTypes.map((type)=>{
+                        {entityTypes ? entityTypes.map((type)=>{
                             return (
                                 <option value={type.record_id}>
                                     {type.name}
@@ -365,11 +409,11 @@ const GetInputByType = function(props){
                         <option value={0}>
                             Select
                         </option>
-                        {props.defaultAddresses ? defaultAddresses.map((type)=>{
+                        {Array.isArray(defaultAddresses) ? defaultAddresses.map((type)=>{
                             
                             return (
-                                <option value={type}>
-                                    {type}
+                                <option value={type.record_id}>
+                                    {type.name}
                                 </option>
                             )
                         }) :  <></>}
@@ -479,6 +523,37 @@ const GetInputByType = function(props){
                 </FormControl>
             )
             break;
+            case 'entity-titles':
+                //titles chooses formObject data if its been altered so we can save, else it uses DB drawn data: entContactTitles
+                var titles = formObject[field.field] || (entContactTitles && [...entContactTitles]);
+
+                const handleChangeTitleState = (idToChange, value) =>{
+                    var updateTitles = [...titles].map((item)=>{
+                        if(idToChange == item.record_id){
+                            console.log("Found");
+                            item["title_change"] = value;
+                        }
+                        return item
+                    })
+                    handleInputOnChange(updateTitles, true, field.type, field.field);
+                }
+                return(
+                    <div className={classes.inputValueSelect}>
+                        <div className={classes.titleDiv}>
+                        {Array.isArray(titles) ? titles.map((title,i)=>{
+                            
+                            return (
+                                <div key={title.record_id} className={classes.titleRowDiv}>
+                                    <span className={classes.titleSpan}>{title.name}</span>
+                                    { (title.title_change && title.title_change == "add" ) || (title.title_attached && title.title_change != "remove")  ?
+                                                    <span onClick={event=> handleChangeTitleState(title.record_id, "remove")} className={classes.titleButtonSpan}> Remove </span> : 
+                                                    <span onClick={event=> handleChangeTitleState(title.record_id, "add")} className={classes.titleButtonSpan}> Add </span>}
+                                </div>
+                            )
+                        }) :  <></>}
+                    </div></div>
+                )
+                break;   
         case 'auto':
             //Auto State
             //const [value, setValue] = useState(formObject[field.field])

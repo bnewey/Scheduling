@@ -34,23 +34,6 @@ const EntityDetail = function(props) {
   
 
   
-  // //WOI
-  // useEffect( () =>{
-  //   //Gets data only on initial component mount or when rows is set to null
-  //   if(workOrderItems == null && activeEntity) {
-  //     Work_Orders.getAllWorkOrderSignArtItems(activeEntity.wo_record_id)
-  //     .then( data => { setWorkOrderItems(data); })
-  //     .catch( error => {
-  //       console.warn(error);
-  //       cogoToast.error(`Error getting wois`, {hideAfter: 4});
-  //     })
-  //   }
-  //   // return(()=>{
-  //   //   if(workOrderItems){
-  //   //     setWorkOrderItems(null);
-  //   //   }
-  //   // })
-  // },[workOrderItems, activeEntity]);
 
   const detail_table = [
     {value: 'name', displayName: 'Name', type: 'text'},

@@ -50,7 +50,6 @@ const TaskListMain = (props) => {
 
     //CSS
     const classes = useStyles({sorterState, sorters});
-
     //Refresh
     useEffect(()=>{
         if(refreshView && refreshView == "taskList"){

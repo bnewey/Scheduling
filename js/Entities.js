@@ -117,7 +117,26 @@ async function deleteEntity(ent_id){
 
 }
 
-async function getDefaultAddresses(){
+async function getDefaultContacts(ent_id){
+    const route = '/scheduling/entities/getDefaultContacts';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function getDefaultAddresses(ent_id){
     const route = '/scheduling/entities/getDefaultAddresses';
     try{
         var data = await fetch(route,
@@ -126,7 +145,7 @@ async function getDefaultAddresses(){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({ent_id})
             });
         var list = await data.json();
         return(list);
@@ -165,6 +184,24 @@ async function getEntAddresses(ent_id){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ent_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function getEntAddressById(ent_add_id){
+    const route = '/scheduling/entities/getEntAddressById';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_add_id})
             });
         var list = await data.json();
         return(list);
@@ -229,8 +266,150 @@ async function deleteEntityAddress(ent_add_id){
     }
 }
 
+async function getEntContacts(ent_id){
+    const route = '/scheduling/entities/getEntContacts';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
 
+async function getEntContactById(ent_cont_id){
+    const route = '/scheduling/entities/getEntContactById';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_cont_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
 
+async function updateEntityContact(ent_cont){
+    const route = '/scheduling/entities/updateEntityContact';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_cont})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function addEntityContact(ent_cont){
+    const route = '/scheduling/entities/addEntityContact';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_cont})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function deleteEntityContact(ent_cont_id){
+    const route = '/scheduling/entities/deleteEntityContact';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_cont_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function getEntContactTitles(ent_id, cont_id){
+    const route = '/scheduling/entities/getEntContactTitles';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_id, cont_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function deleteContactTitle(title_id){
+    const route = '/scheduling/entities/deleteContactTitle';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({title_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+async function addContactTitle(title_data){
+    const route = '/scheduling/entities/addContactTitle';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({title_data})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
 
 
 
@@ -242,10 +421,20 @@ module.exports = {
     updateEntity,
     addEntity,
     deleteEntity,
+    getDefaultContacts,
     getDefaultAddresses,
     getEntityTypes,
     getEntAddresses,
+    getEntAddressById,
     updateEntityAddress,
     addEntityAddress,
     deleteEntityAddress,
+    getEntContacts,
+    getEntContactById,
+    updateEntityContact,
+    addEntityContact,
+    deleteEntityContact,
+    getEntContactTitles,
+    deleteContactTitle,
+    addContactTitle
 };

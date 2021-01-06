@@ -16,146 +16,122 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
-import Util from '../../../js/Util.js';
+import Util from '../../../../../../js/Util.js';
 
-import Settings from  '../../../js/Settings';
-import Entities from  '../../../js/Entities';
-import { ListContext } from '../EntitiesContainer';
+import Settings from  '../../../../../../js/Settings';
+import Entities from  '../../../../../../js/Entities';
+import { ListContext } from '../../../../EntitiesContainer';
 
-import FormBuilder from '../../UI/FormComponents/FormBuilder';
+import FormBuilder from '../../../../../UI/FormComponents/FormBuilder';
 
 
-const AddEditEntity = function(props) {
-    const {user, editModalMode} = props;
+const AddEditEntityAddress = function(props) {
+    const {setAddresses,user, activeAddress, setActiveAddress, editAddressModalOpen,  setEditAddressModalOpen,
+         editAddressModalMode,setEditAddressModalMode , detailEntAddressId,setDetailEntAddressId} = props;
 
     const { entities, setEntities,
-        currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,setEntitiesRefetch,
-        editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
+        currentView, setCurrentView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
 
+    useEffect(()=>{
+        if(detailEntAddressId){
+            console.log("Getting address data");
+            Entities.getEntAddressById(detailEntAddressId)
+            .then((data)=>{
+                setActiveAddress(data[0]);
+            })
+            .catch((data)=>{
+                console.error("Failed to get address");
+                cogoToast.error("Failed to get address data");
+            })
+        }
+    },[detailEntAddressId])
+    
 
     const saveRef = React.createRef();
     const classes = useStyles();
 
     const handleCloseModal = () => {
-        setActiveEntity(null);
-        setEditEntModalOpen(false);
-        setDefaultAddresses(null);
-        setEntityTypes(null);
+        setActiveAddress(null);
+        setEditAddressModalOpen(false);
+        setDetailEntAddressId(null);
     };
-
-    const [defaultAddresses, setDefaultAddresses] = useState(null);
-    const [entityTypes, setEntityTypes] = useState(null);
-
-    useEffect(()=>{
-        if(activeEntity && defaultAddresses==null){
-            console.log("active entity CONTACT", activeEntity);
-
-            Entities.getDefaultContacts(activeEntity.record_id)
-            .then((data)=>{
-                console.log("Entity Default Contacts", data);
-                setDefaultAddresses(data);
-            })
-            .catch((error)=>{
-                console.error("Failed to get default addresses for entity addedit form")
-            })
-        }
-
-        if(entityTypes == null){
-            Entities.getEntityTypes()
-            .then((data)=>{
-                setEntityTypes(data);
-            })
-            .catch((error)=>{
-                console.error("Failed to get entity types for entity addedit form")
-            })
-        }
-    },[activeEntity])
 
     
    
     const fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'name', label: 'Name', type: 'text', updateBy: 'ref', multiline: false,required: true},
-        {field: 'county_or_parish', label: 'County or Parish', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'entities_types_id', label: 'Entity Type', type: 'select-entity-type', updateBy: 'ref',required: true},
-        {field: 'class', label: 'Class', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'other_organization', label: 'Other Organization', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'phone', label: 'Phone', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'fax', label: 'Fax', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'website', label: 'Website', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'shipping', label: 'Default Shipping Address', type: 'select-default-address', updateBy: 'ref'},
-        {field: 'billing', label: 'Default Billing Address', type: 'select-default-address', updateBy: 'ref'},
-        {field: 'mailing', label: 'Default Mailing Address', type: 'select-default-address', updateBy: 'ref'},
-        {field: 'account_number', label: 'Account Number', type: 'text', updateBy: 'ref'},
-        {field: 'purchase_order_required', label: 'Purchase Order Required', type: 'check', updateBy: 'ref'},
-        {field: 'prepayment_required', label: 'Prepayment Required', type: 'check', updateBy: 'ref'},
-        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
+        {field: 'name', label: 'Name to Identify', type: 'text', updateBy: 'ref', multiline: false,required: true},
+        {field: 'to_name', label: 'To Name', type: 'text', updateBy: 'ref', multiline: false,required: true},
+        {field: 'address', label: 'Address', type: 'text', updateBy: 'ref', multiline: false,required: true},
+        {field: 'address2', label: 'Address2', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'city', label: 'City', type: 'text', updateBy: 'ref', multiline: false,required: true},
+        {field: 'state', label: 'State (ABRV)', type: 'text', updateBy: 'ref', multiline: false,required: true},
+        {field: 'zip', label: 'Zip', type: 'text', updateBy: 'ref', multiline: false,required: true},
+        {field: 'residence', label: 'Residence', type: 'check', updateBy: 'ref'},
+        {field: 'lat', label: 'Latitude', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'lng', label: 'Longitude', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'geocoded', label: 'Geocoded', type: 'check', updateBy: 'ref'},
     ];
-
 
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
-        if(editModalMode == "add"){
-            setActiveEntity({});
+        if(editAddressModalMode == "add"){
+            setActiveAddress({});
         }
-    },[editModalMode])
+    },[editAddressModalMode])
 
 
-    const handleSave = (entity, updateEntity ,addOrEdit) => {
-        if(!entity){
-            console.error("Bad entity")
+    const handleSave = (address, updateAddress ,addOrEdit) => {
+        if(!address){
+            console.error("Bad address")
             return;
         }
 
-        console.log("Entity", entity);
-        console.log("UpdateEntity", updateEntity);
+        console.log("Address", address);
+        console.log("UpdateAddress", updateAddress);
         
-        updateEntity["entities_id"] = activeEntity.record_id;
+        updateAddress["entities_id"] = activeEntity.record_id;
         
         //Add Id to this new object
         if(addOrEdit == "edit"){
-            updateEntity["record_id"] = entity.record_id;
+            updateAddress["record_id"] = address.record_id;
 
-            Entities.updateEntity( updateEntity )
+            Entities.updateEntityAddress( updateAddress )
             .then( (data) => {
                 //Refetch our data on save
-                cogoToast.success(`Entity ${entity.record_id} has been updated!`, {hideAfter: 4});
-                setEntitiesRefetch(null);
-                setActiveEntity(null);
+                cogoToast.success(`Address ${address.record_id} has been updated!`, {hideAfter: 4});
+                setAddresses(null);
+                setActiveAddress(null);
                 handleCloseModal();
             })
             .catch( error => {
                 console.warn(error);
-                cogoToast.error(`Error updating entity. ` , {hideAfter: 4});
+                cogoToast.error(`Error updating address. ` , {hideAfter: 4});
             })
         }
         if(addOrEdit == "add"){
-            Entities.addEntity( updateEntity )
+            Entities.addEntityAddress( updateAddress )
             .then( (data) => {
-                //Get id of new workorder and set view to detail
-                if(data && data.insertId){
-                    setDetailEntityId(data.insertId);
-                    setCurrentView(views.filter((v)=>v.value == "entityDetail")[0]);
-                }
-                cogoToast.success(`Entity has been added!`, {hideAfter: 4});
-                setEntitiesRefetch(null);
-                setActiveEntity(null);
+              
+                cogoToast.success(`Address has been added!`, {hideAfter: 4});
+                setAddresses(null);
+                setActiveAddress(null);
                 handleCloseModal();
             })
             .catch( error => {
                 console.warn(error);
-                cogoToast.error(`Error adding entity. ` , {hideAfter: 4});
+                cogoToast.error(`Error adding address. ` , {hideAfter: 4});
             })
         }
         
     };
 
     return(<>
-        { editEntModalOpen && <Modal
+        { editAddressModalOpen && <Modal
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             className={classes.modal}
-            open={editEntModalOpen}
+            open={editAddressModalOpen}
             onClose={handleCloseModal}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -163,13 +139,13 @@ const AddEditEntity = function(props) {
             timeout: 500,
             }}
         >
-            <Fade in={editEntModalOpen}>
+            <Fade in={editAddressModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            {detailEntityId && activeEntity ? `Edit Entity #: ${activeEntity.record_id}` : 'Add Entity'} 
+                            {detailEntAddressId && activeAddress ? `Edit Address #: ${activeAddress.record_id}` : 'Add Address'} 
                         </span>
                     </div>
                 
@@ -179,17 +155,16 @@ const AddEditEntity = function(props) {
                     <Grid container >  
                         <Grid item xs={12} className={classes.paperScroll}>
                             {/*FORM*/}
-                            <FormBuilder 
+                            {activeAddress && <FormBuilder 
                                 ref={saveRef}
                                 fields={fields} 
-                                mode={editModalMode} 
+                                mode={editAddressModalMode} 
                                 classes={classes} 
-                                formObject={activeEntity} 
-                                setFormObject={setActiveEntity}
+                                formObject={activeAddress} 
+                                setFormObject={setActiveAddress}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                entityTypes={entityTypes} defaultAddresses={defaultAddresses}
-                                 />
+                                 />}
                         </Grid>
                         
                     </Grid>
@@ -210,7 +185,7 @@ const AddEditEntity = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
-                                    onClick={ () => { saveRef.current.handleSaveParent(activeEntity) }}
+                                    onClick={ () => { saveRef.current.handleSaveParent(activeAddress) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -227,7 +202,7 @@ const AddEditEntity = function(props) {
     </>) 
     }
 
-export default AddEditEntity;
+export default AddEditEntityAddress;
 
 const useStyles = makeStyles(theme => ({
     modal: {

@@ -67,8 +67,12 @@ router.post('/getEntityById', async (req,res) => {
         ent_id = req.body.ent_id;
     }
 
-    const sql = ' SELECT e.*, et.name AS entities_types FROM entities e ' +
+    const sql = ' SELECT e.*, et.name AS entities_types,ec_shipping.name AS shipping_name,  ' + 
+    ' ec_billing.name AS billing_name, ec_mailing.name AS mailing_name FROM entities e ' +
     ' LEFT JOIN entities_types et ON e.entities_types_id = et.record_id ' + 
+    ' LEFT JOIN entities_contacts ec_shipping ON e.shipping = ec_shipping.record_id ' +
+    ' LEFT JOIN entities_contacts ec_billing ON e.billing = ec_billing.record_id ' +
+    ' LEFT JOIN entities_contacts ec_mailing ON e.mailing = ec_mailing.record_id ' +
     ' WHERE e.record_id = ? ';
 
     try{
@@ -152,14 +156,16 @@ router.post('/deleteEntity', async (req,res) => {
     if(req.body){
         ent_id = req.body.ent_id;
     }
-    if(!ent_id){
-        logger.error("Bad ent_id param in deleteEntity");
-        res.sendStatus(400);
-    }
+    
 
-    const sql = ' DELETE FROM entities_address WHERE record_id = ? LIMIT 1 ';
+    const sql = ' DELETE FROM entities_addresses WHERE record_id = ? LIMIT 1 ';
 
     try{
+        if(!ent_id){
+            logger.error("Bad ent_id param in deleteEntity");
+            throw "Bad ent_id param in deleteEntity"
+        }
+
         const results = await database.query(sql, [ent_id]);
 
         logger.info("Deleted Entities " + ent_id);
@@ -168,6 +174,59 @@ router.post('/deleteEntity', async (req,res) => {
     }
     catch(error){
         logger.error("Entities deleteEntity " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getDefaultContacts', async (req,res) => {
+    var ent_id;
+
+    if(req.body){
+        ent_id = req.body.ent_id;
+    }
+    
+
+    const sql = ' SELECT * FROM entities_contacts WHERE entities_id = ?';
+
+    try{
+        if(!ent_id){
+            logger.error("Bad ent_id param in getDefaultContacts");
+            throw "Bad ent_id param in getDefaultContacts";
+        }
+        const results = await database.query(sql, [ent_id]);
+
+        logger.info("Got Default Contacts " + ent_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities getDefaultContacts " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getDefaultAddresses', async (req,res) => {
+    var ent_id;
+
+    if(req.body){
+        ent_id = req.body.ent_id;
+    }
+    if(!ent_id){
+        logger.error("Bad ent_id param in getDefaultAddresses");
+        res.sendStatus(400);
+    }
+
+    const sql = ' SELECT * FROM entities_addresses WHERE entities_id = ?  ';
+
+    try{
+        const results = await database.query(sql, [ent_id]);
+
+        logger.info("Got Default Addresses for Entity " + ent_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities getDefaultAddresses " + error);
         res.sendStatus(400);
     }
 });
@@ -201,12 +260,33 @@ router.post('/getEntAddresses', async (req,res) => {
 
     try{
         const results = await database.query(sql, [ent_id]);
-        logger.info("Got Entities Addresses for id" + ent_id);
+        logger.info("Got Entities Addresses for id " + ent_id);
         res.json(results);
 
     }
     catch(error){
         logger.error("Entities getEntAddresses " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getEntAddressById', async (req,res) => {
+    var ent_add_id;
+
+    if(req.body){
+        ent_add_id = req.body.ent_add_id;
+    }
+
+    const sql = ' SELECT * from entities_addresses WHERE record_id = ? ';
+
+    try{
+        const results = await database.query(sql, [ent_add_id]);
+        logger.info("Got Entities Address By id" + ent_add_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities getEntAddressById " + error);
         res.sendStatus(400);
     }
 });
@@ -262,7 +342,8 @@ router.post('/addEntityAddress', async (req,res) => {
     const sql_resetmain = ' UPDATE entities_addresses SET main = 0 WHERE entities_id = ? ';
     const sql = ' INSERT INTO entities_addresses (main, shipping, billing, mailing, entities_id, name, to_name, address, address2, city, ' + 
     ' state, zip, residence, lat, lng, geocoded, task ) ' + 
-    ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,IFNULL(? ,0),IFNULL(? ,0),IFNULL(? ,0),?) ';
+    ' VALUES (IFNULL(?, DEFAULT(main)),IFNULL(?, DEFAULT(shipping)),IFNULL(?, DEFAULT(billing)),IFNULL(?, DEFAULT(mailing)) ' + 
+    ',?,?,?,?,?,?,?,?,?,IFNULL(? ,0),IFNULL(? ,0),IFNULL(? ,0),IFNULL(?, DEFAULT(task))) ';
 
     try{
         if(ent_add.main == 1){
@@ -294,7 +375,7 @@ router.post('/deleteEntityAddress', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' DELETE FROM entities_address WHERE record_id = ? LIMIT 1 ';
+    const sql = ' DELETE FROM entities_addresses WHERE record_id = ? LIMIT 1 ';
 
     try{
         const results = await database.query(sql, [ent_add_id]);
@@ -305,6 +386,206 @@ router.post('/deleteEntityAddress', async (req,res) => {
     }
     catch(error){
         logger.error("Entities deleteEntityAddress " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getEntContacts', async (req,res) => {
+    var ent_id;
+
+    if(req.body){
+        ent_id = req.body.ent_id;
+    }
+
+    const sql = ' SELECT ec.*, ' +
+        '( SELECT group_concat(ett.name) FROM entities_contacts_titles ect  ' + 
+            'LEFT JOIN entities_types_titles ett ON ect.title = ett.record_id WHERE ect.contact = ec.record_id ' + 
+         ' ) AS titles from entities_contacts ec ' +
+        ' WHERE ec.entities_id = ? ' ;
+
+       
+
+    try{
+        const results = await database.query(sql, [ent_id]);
+        logger.info("Got Entities Contacts for id " + ent_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities getEntContacts " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getEntContactById', async (req,res) => {
+    var ent_cont_id;
+
+    if(req.body){
+        ent_cont_id = req.body.ent_cont_id;
+    }
+
+    const sql = ' SELECT * from entities_contacts WHERE record_id = ? ';
+
+    try{
+        const results = await database.query(sql, [ent_cont_id]);
+        logger.info("Got Entities Contacts By id" + ent_cont_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities getEntContactById " + error);
+        res.sendStatus(400);
+    }
+});
+
+
+router.post('/updateEntityContact', async (req,res) => {
+    var ent_cont;
+
+    if(req.body){
+        ent_cont = req.body.ent_cont;
+    }
+    if(!ent_cont){
+        logger.error("Bad ent_cont param in updateEntity");
+        res.sendStatus(400);
+    }
+
+    const sql = ' UPDATE entities_contacts SET name = ?, work_phone =?, home_phone=?, cell=?,fax=?,email=?, title=?, shipping=?, billing=?, ' +
+    ' mailing=?, cc_type=?, cc_num=?, cc_exp_date=?, cc_name=?, cc_address=?, cc_city=?, cc_state=?, cc_zip=? ' +
+    ' WHERE record_id = ? ';
+
+    try{
+        const results = await database.query(sql, [ent_cont.name, ent_cont.work_phone, ent_cont.home_phone, ent_cont.cell, ent_cont.fax, ent_cont.email, ent_cont.title, ent_cont.shipping, ent_cont.billing, ent_cont.mailing, ent_cont.cc_type, ent_cont.
+            cc_num, ent_cont.cc_exp_date, ent_cont.cc_name, ent_cont.cc_address, ent_cont.cc_city, ent_cont.cc_state, ent_cont.cc_zip, ent_cont.record_id]);
+
+        logger.info("Updated Entities Contact " + ent_cont.record_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities updateEntityContact " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/addEntityContact', async (req,res) => {
+    var ent_cont;
+
+    if(req.body){
+        ent_cont = req.body.ent_cont;
+    }
+    if(!ent_cont){
+        logger.error("Bad ent_cont param in addEntity");
+        res.sendStatus(400);
+    }
+   
+    const sql = ' INSERT INTO entities_contacts (entities_id, name, work_phone, home_phone, cell, fax, email, title, shipping, billing, mailing, cc_type, ' +
+      '  cc_num, cc_exp_date, cc_name, cc_address, cc_city, cc_state, cc_zip ) ' + 
+    ' VALUES (?,?,?,?,?,?,?,?,IFNULL(?, DEFAULT(shipping)),IFNULL(?, DEFAULT(billing)),IFNULL(?, DEFAULT(mailing)),?,?,?,?,?,?,?,?) ';
+
+    try{
+   
+        const results = await database.query(sql, [ent_cont.entities_id,ent_cont.name, ent_cont.work_phone, ent_cont.home_phone, ent_cont.cell, ent_cont.fax, ent_cont.email, ent_cont.title, ent_cont.shipping, ent_cont.billing, ent_cont.mailing, ent_cont.cc_type, ent_cont.
+            cc_num, ent_cont.cc_exp_date, ent_cont.cc_name, ent_cont.cc_address, ent_cont.cc_city, ent_cont.cc_state, ent_cont.cc_zip]);                 
+
+        logger.info("Added Entity Contact");
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities addEntityContact " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/deleteEntityContact', async (req,res) => {
+    var ent_cont_id;
+
+    if(req.body){
+        ent_cont_id = req.body.ent_cont_id;
+    }
+    if(!ent_cont_id){
+        logger.error("Bad ent_cont_id param in deleteEntityContact");
+        res.sendStatus(400);
+    }
+
+    const sql = ' DELETE FROM entities_contacts WHERE record_id = ? LIMIT 1 ';
+
+    try{
+        const results = await database.query(sql, [ent_cont_id]);
+
+        logger.info("Deleted Entities Contact " + ent_cont_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities deleteEntityContact " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/getEntContactTitles', async (req,res) => {
+    var ent_id, cont_id;
+
+    if(req.body){
+        ent_id = req.body.ent_id;
+        cont_id = req.body.cont_id;
+    }
+
+    const sql = ' SELECT ett.*, IFNULL(ect.record_id, 0) AS title_attached FROM entities_types_titles ett ' +
+        ' LEFT JOIN entities_contacts_titles ect ON ect.title = ett.record_id AND ect.contact = ? ' +
+        ' WHERE ett.entities_types_id = (SELECT e.entities_types_id FROM entities e WHERE record_id = ? ) ';
+
+    try{
+        const results = await database.query(sql, [cont_id,ent_id,cont_id,ent_id]);
+        logger.info("Got Entities Contacts By id" + ent_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities getEntContactTitles " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/deleteContactTitle', async (req,res) => {
+    var title_id;
+
+    if(req.body){
+        title_id = req.body.title_id;
+    }
+
+    const sql = ' DELETE FROM entities_contacts_titles WHERE record_id = ? LIMIT 1 ';
+
+    try{
+        const results = await database.query(sql, [title_id]);
+        logger.info("Deleted Contacts Title By id" + title_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities deleteContactTitle " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/addContactTitle', async (req,res) => {
+    var title_data;
+
+    if(req.body){
+        title_data = req.body.title_data;
+    }
+
+    const sql = ' INSERT INTO entities_contacts_titles (contact, title, old_title) VALUES (?,?, IFNULL(?, DEFAULT(old_title))) ';
+
+    try{
+        const results = await database.query(sql, [title_data.contact_id, title_data.record_id, null]);
+        logger.info("Added Contacts Title " + title_data);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities addContactTitle " + error);
         res.sendStatus(400);
     }
 });

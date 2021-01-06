@@ -9,7 +9,7 @@ import Util from  '../../../js/Util';
 import WorkOrderDetail from  '../../../js/WorkOrderDetail';
 
 import { ListContext } from '../EntitiesContainer';
-//import { DetailContext } from '../EntitiesContainer';
+import { DetailContext } from '../EntitiesContainer';
 
 import SidebarPages from './components/SidebarPages';
 //import CompInvTool from './components/CompInvTool';
@@ -25,6 +25,9 @@ const EntitySidebarDetail = function(props) {
     editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
     setRecentEntities, entitiesRefetch, setEntitiesRefetch } = useContext(ListContext);
 
+    const {detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,
+      editAddressModalMode, setEditAddressModalMode, setEditContactModalMode, setEditContactModalOpen} = useContext(DetailContext);
+
   //const {} = useContext(DetailContext);
   
   const classes = useStyles();
@@ -33,6 +36,17 @@ const EntitySidebarDetail = function(props) {
      setEditModalMode("edit");
      setEditEntModalOpen(true);
   }
+
+  const handleOpenAddEntAddressModal = ()=>{
+    setEditAddressModalMode("add");
+    setEditAddressModalOpen(true);
+  }
+
+  const handleOpenAddEntContactModal = ()=>{
+    setEditContactModalMode("add");
+    setEditContactModalOpen(true);
+  }
+  
 
 
   const sideBarTopButtons = () =>{
@@ -60,13 +74,26 @@ const EntitySidebarDetail = function(props) {
               <Button className={classes.newButton} 
                     classes={{label: classes.newButtonLabel}} 
                     variant="outlined"
+                    onClick={event=> handleOpenAddEntAddressModal()}
                     >
                       <AddIcon className={classes.plusIcon}/><div>New Address</div>
               </Button>
           </div></>);
         break;
+      case "entContacts":
+        return (<>
+          <div className={classes.newButtonDiv} >
+              <Button className={classes.newButton} 
+                    classes={{label: classes.newButtonLabel}} 
+                    variant="outlined"
+                    onClick={event=> handleOpenAddEntContactModal()}
+                    >
+                      <AddIcon className={classes.plusIcon}/><div>New Contact</div>
+              </Button>
+          </div></>);
+        break;
       default: 
-        cogoToast.error("Bad view");
+        
         return <></>;
         break;
     }
