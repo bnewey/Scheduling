@@ -188,10 +188,8 @@ const EntitiesContainer = function(props) {
             updateArray.shift();
         }
         if( updateArray.length == 0 || ( updateArray.length > 0 && updateArray[updateArray.length-1]?.record_id != activeEntity.record_id) ){
-          setRecentEntities([...updateArray, { record_id: activeEntity.record_id, c_name: activeEntity.c_name }])
+          setRecentEntities([...updateArray, { record_id: activeEntity.record_id, name: activeEntity.name }])
         }
-        
-
     }
   },[activeEntity])
 

@@ -3,6 +3,7 @@ import React, {useRef, useState, useEffect, useContext, useCallback} from 'react
 import {makeStyles, Tooltip} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import WarningIcon from '@material-ui/icons/Warning';
+import TimeIcon from '@material-ui/icons/Update';
 
 import { TaskContext } from '../../TaskContainer';
 import cogoToast from 'cogo-toast';
@@ -106,6 +107,20 @@ const WoiStatusCheck = (props) => {
         }
     }
 
+    const GetSpecialIconIndicators = ({statusList}) =>{
+        var icons = <></>
+
+        if(!statusList){
+            return icons;
+        }
+        statusList.forEach((item)=>{
+            if(item.title === "Arrival Date"){
+                icons = <TimeIcon className={classes.timeIcon}/>
+            }
+        })
+        return <>{icons}</>;
+    }
+
     return(
         <div className={classes.root}>
             { isLoadingState == true ?  <>Checking...</> :
@@ -117,7 +132,7 @@ const WoiStatusCheck = (props) => {
                   {statusList?.length > 0 ? 
                         <div onMouseUp={event => handelOpenStatusPanel(event)}
                             className={classes.openPanelSpan}>
-                         ({statusList.length}) Warnings <WarningIcon className={classes.warningIcon}/>
+                         <WarningIcon className={classes.warningIcon} />&nbsp;({statusList.length}) Warnings &nbsp; <GetSpecialIconIndicators statusList={statusList}/>
                         </div> : <></>}
                   
                 </div> 
@@ -149,5 +164,10 @@ const useStyles = makeStyles(theme => ({
         width: '.6em',
         height: '.6em',
         color: '#ff6900',
+    },
+    timeIcon:{
+        width: '.9em',
+        height: '.9em',
+        color: '#333',
     }
   }));

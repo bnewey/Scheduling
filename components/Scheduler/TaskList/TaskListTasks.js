@@ -424,37 +424,57 @@ const TaskListTasks = (props) =>{
 
       switch(fieldId){
         case 'install_crew':{
-          
-          if(task.install_crew_leader != null){
-            return_value = <div className={classes.popOverDiv} 
-                                onMouseUp={event => handleOpenAddMemberPopover(event, task.install_job_id, task.install_crew, "install", task.t_id)}>
-                            {task.install_crew_leader}
-                          </div>;
-          }else{
-            return_value = <div className={classes.popOverDiv} 
-                            onMouseUp={event => handleOpenAddMemberPopover(event, task.install_job_id, task.install_crew, "install", task.t_id)}>
-                              { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+          if(!task.drill_job_completed){
+            if(task.install_crew_leader != null){
+              return_value = <div className={classes.popOverDiv} 
+                                  onMouseUp={event => handleOpenAddMemberPopover(event, task.install_job_id, task.install_crew, "install", task.t_id)}>
+                              {task.install_crew_leader}
                             </div>;
+            }else{
+              return_value = <div className={classes.popOverDiv} 
+                              onMouseUp={event => handleOpenAddMemberPopover(event, task.install_job_id, task.install_crew, "install", task.t_id)}>
+                                { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+                              </div>;
+            }
+            break;
+          }else{
+            if(task.install_crew_leader != null){
+              return_value = <span>{task.install_crew_leader}</span>;
+            }else{
+              return_value = <span>{ value ? 'Crew ' + value.toString() : <>&nbsp;</> }</span>;
+            }
+            break;
           }
-          break;
         }
         case 'drill_crew':{
-          if(task.drill_crew_leader != null){
-            return_value = <div className={classes.popOverDiv} 
-                            onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew, "drill", task.t_id)}>
-                              {task.drill_crew_leader}
-                            </div>;
+          if(!task.drill_job_completed){
+            if(task.drill_crew_leader != null){
+              return_value = <div className={classes.popOverDiv} 
+                              onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew, "drill", task.t_id)}>
+                                {task.drill_crew_leader}
+                              </div>;
+            }else{
+              return_value = <div className={classes.popOverDiv} 
+                              onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew,"drill", task.t_id)}>
+                                { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+                              </div>;
+            }
+            break;
           }else{
-            return_value = <div className={classes.popOverDiv} 
-                            onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew,"drill", task.t_id)}>
-                              { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
-                            </div>;
+            if(task.drill_crew_leader != null){
+              return_value = <span> {task.drill_crew_leader} </span>;
+            }else{
+              return_value = <span>
+                                { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+                              </span>;
+            }
+            break;
           }
-          break;
         }
         case 'drill_date':{
-          return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <DatePicker     format="MM/dd/yyyy" showTodayButton
+          if(!task.drill_job_completed){
+            return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
+                  <DatePicker     format="MM/dd/yyyy" showTodayButton
                           clearable
                           inputVariant="outlined"
                           variant="modal" 
@@ -465,20 +485,30 @@ const TaskListTasks = (props) =>{
                           onChange={value => handleUpdateTaskDate(value, task, "drill_date")} />
                   </MuiPickersUtilsProvider></div>
             break;
+          }else{
+            return_value = <span>Completed</span>
+            break;
+          }
+          
         }
         case 'sch_install_date':{
-          return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <DatePicker     format="MM/dd/yyyy" showTodayButton
-                          clearable
-                          inputVariant="outlined"
-                          variant="modal" 
-                          maxDate={new Date('01-01-2100')}
-                          minDate={new Date('01-01-1970')}
-                          className={classes.datePicker}
-                          value={value} 
-                          onChange={value => handleUpdateTaskDate(value, task, "sch_install_date")} />
-                  </MuiPickersUtilsProvider></div>
-                  break;
+          if(!task.drill_job_completed){
+            return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <DatePicker     format="MM/dd/yyyy" showTodayButton
+                            clearable
+                            inputVariant="outlined"
+                            variant="modal" 
+                            maxDate={new Date('01-01-2100')}
+                            minDate={new Date('01-01-1970')}
+                            className={classes.datePicker}
+                            value={value} 
+                            onChange={value => handleUpdateTaskDate(value, task, "sch_install_date")} />
+                    </MuiPickersUtilsProvider></div>
+                    break;
+          }else{
+            return_value = <span>Completed</span>
+            break;
+          }
         }
         case 'woi_status_check':{
           return_value = <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 
@@ -953,7 +983,7 @@ const useStyles = makeStyles(theme => ({
     flex: '0 0 11%',
     textAlign: 'center',
     margin: '0px',
-    padding: '4px 0 4px 0',
+    //padding: '4px 0 4px 0',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',

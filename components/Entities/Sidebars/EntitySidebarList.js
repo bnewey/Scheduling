@@ -14,7 +14,7 @@ import {
     DateTimePicker,
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
-//import RecentWO from './components/RecentWO';
+import RecentEnt from './components/RecentEnt';
 //import FilterCompInv from './components/FilterCompInv';
 
 const EntitySidebarList = function(props) {
@@ -51,7 +51,7 @@ const EntitySidebarList = function(props) {
             
           <div className={classes.dateRangeDiv}>
             
-            {/* <RecentWO /> */}
+             <RecentEnt /> 
           </div>
     </div>
   );

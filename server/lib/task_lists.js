@@ -39,8 +39,10 @@ router.post('/getTaskList', async (req,res) => {
         ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date,' + 
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
         ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, mad.member_name AS drill_crew_leader , '  +
+        ' cjd.completed AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
         ' date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
+        ' cji.completed AS install_job_completed,  date_format(cji.completed_date, \'%Y-%m-%d %H:%i:%S\') as install_job_completed_date, ' +
         ' date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id ' +
         ' FROM task_list_items tli ' +
