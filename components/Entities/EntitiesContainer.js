@@ -19,6 +19,7 @@ import EntityList from './MainPanels/EntityList';
 import EntityDetail from './MainPanels/EntityDetail';
 import EntDetailAddresses from './MainPanels/DetailSubPanels/Addresses/EntDetailAddresses'
 import EntDetailContacts from './MainPanels/DetailSubPanels/Contacts/EntDetailContacts'
+import EntWOs from './MainPanels/DetailSubPanels/EntWOs/EntWOs.js'
 
 //Extras
 import AddEditModal from './AddEditEntity/AddEditModal'
@@ -45,6 +46,8 @@ const EntitiesContainer = function(props) {
                   { value: "entAddresses", displayName: 'Addresses', closeToView: 'allEntities',
                     parent: 'entityDetail'},
                   { value: "entContacts", displayName: 'Contacts', closeToView: 'allEntities',
+                    parent: 'entityDetail'},
+                  { value: "entWOs", displayName: 'Related Work Orders', closeToView: 'allEntities',
                     parent: 'entityDetail'},
                 ];
 
@@ -207,8 +210,13 @@ const EntitiesContainer = function(props) {
         break;
       case "entAddresses":
         return <EntDetailAddresses />
+        break;
       case "entContacts":
         return <EntDetailContacts/>
+        break;
+      case "entWOs":
+        return <EntWOs/>
+        break;
       default: 
         cogoToast.error("Bad view");
         return <EntityList />;
@@ -226,6 +234,7 @@ const EntitiesContainer = function(props) {
         break;
       case "entityDetail":
       case "entAddresses":
+      case "entWOs":
       case "entContacts":
         return <EntitySidebarDetail />
         break;

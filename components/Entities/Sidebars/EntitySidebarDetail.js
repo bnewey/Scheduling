@@ -92,6 +92,9 @@ const EntitySidebarDetail = function(props) {
               </Button>
           </div></>);
         break;
+      case "entWOs":
+        return <></>;
+        break;
       default: 
         
         return <></>;

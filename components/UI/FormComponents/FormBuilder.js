@@ -175,41 +175,61 @@ const FormBuilder = forwardRef((props, ref) => {
                         //         updateItem[field.field] = textValueObject[field.field];
                         //     break;
                         case 'entity-titles':
-                            console.log('entity_titles value', itemToSave[field.field])
-                            itemToSave[field.field]?.forEach((title)=>{
-                                //Remove titles if false
-                                if(title.title_change && title.title_change == "remove"){
-                                    console.log("CHecking after false")
-                                    if(title?.title_attached != 0){
-                                        //Delete from entities_contacts_titles
-                                        Entities.deleteContactTitle(title.title_attached)
-                                        .then((data)=>{
-                                            console.log("Deleted title", title.title_attached)
-                                        })
-                                        .catch((error)=>{
-                                            console.error("Failed to delete contact title")
-                                            cogoToast.error("Internal Server Error");
-                                        })
+                            const saveEntity = (data, callback) => {
+                                
+                                itemToSave[field.field]?.forEach((title)=>{
+                                    //Remove titles if false
+                                    if(title.title_change && title.title_change == "remove"){
+                                        if(title?.title_attached != 0){
+                                            //Delete from entities_contacts_titles
+                                            Entities.deleteContactTitle(title.title_attached)
+                                            .then((data)=>{
+                                                console.log("Deleted title", title.title_attached)
+                                                if(callback){
+                                                    callback()
+                                                }
+                                            })
+                                            .catch((error)=>{
+                                                console.error("Failed to delete contact title")
+                                                cogoToast.error("Internal Server Error");
+                                                if(callback){
+                                                    callback()
+                                                }
+                                            })
+                                        }
                                     }
-                                }
-                                if(title.title_change && title.title_change == "add"){
-                                    console.log("CHecking after true")
-                                    //check against original DB data to see if we really need to add
-                                    var updatedTitle = {...title};
-                                    updatedTitle["contact_id"] = itemToSave["record_id"];
-                                    if(title?.title_attached == 0){
-                                        //Add to entities_contacts_titles
-                                        Entities.addContactTitle( updatedTitle )
-                                        .then((data)=>{
-                                            console.log("Added title")
-                                        })
-                                        .catch((error)=>{
-                                            console.error("Failed to delete contact title")
-                                            cogoToast.error("Internal Server Error");
-                                        })
+                                    if(title.title_change && title.title_change == "add"){
+                                        //check against original DB data to see if we really need to add
+                                        var updatedTitle = {...title};
+                                        if(addOrEdit == "add"){
+                                            updatedTitle["contact_id"] = data.insertId;
+                                        }else{
+                                            updatedTitle["contact_id"] = itemToSave["record_id"];
+                                        }
+                                        
+                                        if(title?.title_attached == 0){
+                                            //Add to entities_contacts_titles
+                                            Entities.addContactTitle( updatedTitle )
+                                            .then((data)=>{
+                                                if(callback){
+                                                    callback()
+                                                }
+                                            })
+                                            .catch((error)=>{
+                                                console.error("Failed to delete contact title")
+                                                cogoToast.error("Internal Server Error");
+                                                if(callback){
+                                                    callback()
+                                                }
+                                            })
+                                        }
                                     }
-                                }
-                            })
+                             
+                                })
+                            }
+                            //saving the save function so that we can run after entity contact is inserted so we can get contact_id
+                            updateItem["postSaveFunction"] = saveEntity;
+                            
                             break;
                         default:
                             //Others are updated with itemToSave (formObject) state variable
@@ -232,11 +252,18 @@ const FormBuilder = forwardRef((props, ref) => {
                     return;
                 }
 
-                console.log("Update", updateItem);
-                
                 //Run given handlSave
                 if(handleSave){
-                    handleSave(itemToSave, updateItem, addOrEdit);
+                    handleSave(itemToSave, updateItem, addOrEdit)
+                    .then((data)=>{
+                        if(updateItem.postSaveFunction){
+                            updateItem.postSaveFunction(data.data,data?.callback);
+                        }
+                    })
+                    .catch((error)=>{
+                        console.log("Failed to save in FormBuilder", error);
+                        cogoToast.error("Internal server error");
+                    })
                 }
 
             }else{
@@ -413,7 +440,7 @@ const GetInputByType = function(props){
                             
                             return (
                                 <option value={type.record_id}>
-                                    {type.name}
+                                    {type.name} - {type.main ? "*Main " : ""}{type.shipping ? "*Shipping " : ""}{type.billing ? "*Billing " : ""}{type.mailing ? "*Mailing " : ""}
                                 </option>
                             )
                         }) :  <></>}

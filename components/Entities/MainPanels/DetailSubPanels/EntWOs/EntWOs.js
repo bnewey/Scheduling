@@ -9,31 +9,48 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 
-
+import Router from 'next/router'
 
 import cogoToast from 'cogo-toast';
 
 
-import Util from  '../../../js/Util';
-import { ListContext } from '../EntitiesContainer';
+import Util from  '../../../../../js/Util';
+import Entities from '../../../../../js/Entities';
+import { ListContext } from '../../../EntitiesContainer';
 
 
-const EntityList = function(props) {
+const EntWOs = function(props) {
   const {user} = props;
 
   const { entities, setEntities,
     currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
-    editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
+    editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
+    setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
   const classes = useStyles();
 
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(null);
+  const [relatedWorkOrders, setRelatedWorkOrders] = React.useState(null);
 
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
 
 
   useEffect(()=>{
-    setPage(0);
-  },[entities])
+    if( relatedWorkOrders == null && detailEntityId){
+        Entities.getEntRelatedWorkOrders(detailEntityId)
+        .then((data)=>{
+            if(data){
+                setRelatedWorkOrders(data);
+                setPage(0);
+            }
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to get work orders for entity");
+            console.warn("detailEntityId maybe bad", detailEntityId)
+            console.error("Failed to get work orders for entity", error);
+        })
+    }
+
+  },[relatedWorkOrders, detailEntityId])
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -44,50 +61,33 @@ const EntityList = function(props) {
     setPage(0);
   };
 
-  //Save and/or Fetch rowsPerPage to local storage
-  useEffect(() => {
-    if(rowsPerPage == null){
-      var tmp = window.localStorage.getItem('rowsPerPage');
-      var tmpParsed;
-      if(tmp){
-        tmpParsed = JSON.parse(tmp);
-      }
-      if(!isNaN(tmpParsed) && tmpParsed != null){
-        setRowsPerPage(tmpParsed);
-      }else{
-        setRowsPerPage(25);
-      }
-    }
-    if(!isNaN(rowsPerPage) && rowsPerPage != null){
-      window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
-    }
-    
-  }, [rowsPerPage]);
 
-  const handleShowDetailView = (entitiy_id) =>{
-    if(!entitiy_id){
+  const handleShowDetailView = (wo_id) =>{
+    if(!wo_id){
       cogoToast.error("Failed to get work order");
       console.error("Bad id");
       return;
     }
-    setCurrentView(views && views.find((view, i)=> view.value == "entityDetail"));
-    setDetailEntityId(entitiy_id);
+    //set detailWOIid in local data
+    window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
+  
+    //set detail view in local data
+    window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
+ 
+    Router.push('/scheduling/work_orders')
 
   }
   
   const columns = [
-    { id: 'record_id', label: 'Id', minWidth: 20, align: 'center',
-      format: (value, row)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableWOnumber}>{value}</span> },
-    {
-      id: 'name',
-      label: 'Name',
-      minWidth: 250,
-      align: 'left',
-      format: (value, row)=> <span onClick={()=>handleShowDetailView(row.record_id)} className={classes.clickableWOnumber}>{value}</span> 
-    },
-    { id: 'city', label: 'City', minWidth: 45, align: 'left' },
-    { id: 'county_or_parish', label: 'County or Parish', minWidth: 100, align: 'left' },
-    { id: 'state', label: 'State', minWidth: 35, align: 'left' },
+    { id: 'wo_record_id', label: 'WO#', minWidth: 20, align: 'center',
+      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableWOnumber}>{value}</span> },
+    { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
+    { id: 'wo_type', label: 'Type', minWidth: 50, align: 'left',},
+    { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
+    { id: 'sa_city', label: 'City', minWidth: 45, align: 'left' },
+    { id: 'sa_state', label: 'State', minWidth: 35, align: 'left' },
+    { id: 'description', label: 'Description', minWidth: 400, align: 'left' },
+    { id: 'c_name', label: 'Product Goes To', minWidth: 250, align: 'left'  },
   ];
 
   const StyledTableRow = withStyles((theme) => ({
@@ -110,10 +110,12 @@ const EntityList = function(props) {
       }
     },
   }))(TableRow);
+  
 
   return (
     <div className={classes.root}>
-        <TableContainer className={classes.container}>
+        {relatedWorkOrders ? <><TableContainer className={classes.container}>
+        
         <Table stickyHeader  size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -131,17 +133,17 @@ const EntityList = function(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {entities && entities.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+            { relatedWorkOrders?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
               return (
-                <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.id} >
+                <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
                   {columns.map((column) => {
                     const value = row[column.id];
                     return (
                       <TableCell className={classes.tableCell} 
-                                key={`${column.id}${row.id}`}
+                                key={column.id}
                                  align={column.align}
                                  style={{ minWidth: column.minWidth }}>
-                        {column.format ? column.format(value, row) : value}
+                        {column.format && typeof value === 'number' ? column.format(value) : value}
                       </TableCell>
                     );
                   })}
@@ -150,21 +152,24 @@ const EntityList = function(props) {
             })}
           </TableBody>
         </Table>
+        
       </TableContainer>
+      
       <TablePagination
         rowsPerPageOptions={[25, 50, 100]}
         component="div"
-        count={entities ? entities.length : 0}
+        count={relatedWorkOrders ? relatedWorkOrders.length : 0}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
+      /></>
+      : <div className={classes.infoDiv}><span className={classes.infoSpan}>No Past Work Orders</span></div>}
     </div>
   );
 }
 
-export default EntityList
+export default EntWOs
 
 
 
@@ -173,8 +178,6 @@ const useStyles = makeStyles(theme => ({
     // border: '1px solid #339933',
     padding: '1%',
     minHeight: '730px',
-    width: '70%',
-    marginLeft: '1%',
   },
   container: {
     maxHeight: 650,
@@ -205,10 +208,20 @@ const useStyles = makeStyles(theme => ({
   },
   clickableWOnumber:{
     cursor: 'pointer',
-    color: '#385595',
     textDecoration: 'underline',
     '&:hover':{
       color: '#ee3344',
     }
   },
+  infoSpan:{
+    fontSize: '20px'
+  },
+  infoDiv:{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    width: '-webkit-fill-available',
+  }
 }));

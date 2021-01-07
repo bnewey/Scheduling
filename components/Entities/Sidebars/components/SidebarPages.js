@@ -26,7 +26,7 @@ const SidebarPages = function(props) {
     const classes = useStyles();
 
     const pages = [
-        "entityDetail", "entContacts", "entAddresses",
+        "entityDetail", "entContacts", "entAddresses", "entWOs"
     ];
 
     const handleChangePage = (view) =>{

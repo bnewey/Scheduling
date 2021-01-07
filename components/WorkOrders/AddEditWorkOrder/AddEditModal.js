@@ -77,48 +77,54 @@ const AddEditModal = function(props) {
         
 
     const handleSave = (work_order, updateWorkOrder ,addOrEdit) => {
-        if(!work_order){
-            console.error("Bad work order")
-            return;
-        }
- 
-        
-        //Add Id to this new object
-        if(addOrEdit == "edit"){
-            updateWorkOrder["record_id"] = work_order.wo_record_id;
+        return new Promise((resolve, reject)=>{
+            if(!work_order){
+                console.error("Bad work order")
+                reject("Bad work order");
+            }
+    
+            
+            //Add Id to this new object
+            if(addOrEdit == "edit"){
+                updateWorkOrder["record_id"] = work_order.wo_record_id;
 
-            Work_Orders.updateWorkOrder( updateWorkOrder )
-            .then( (data) => {
-                //Refetch our data on save
-                cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
-                setWorkOrders(null);
-                setActiveWorkOrder(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error updating work_order. ` , {hideAfter: 4});
-            })
-        }
-        if(addOrEdit == "add"){
-            Work_Orders.addWorkOrder( updateWorkOrder )
-            .then( (data) => {
-                //Get id of new workorder and set view to detail
-                if(data && data.insertId){
-                    setDetailWOid(data.insertId);
-                    setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
-                }
-                cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
-                setWorkOrders(null);
-                setActiveWorkOrder(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error adding work_order. ` , {hideAfter: 4});
-            })
-        }
-        
+                Work_Orders.updateWorkOrder( updateWorkOrder )
+                .then( (data) => {
+                    //Refetch our data on save
+                    cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
+                    setWorkOrders(null);
+                    setActiveWorkOrder(null);
+                    handleCloseModal();
+                    resolve(data)
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error updating work_order. ` , {hideAfter: 4});
+                    reject(error)
+                })
+            }
+            if(addOrEdit == "add"){
+                Work_Orders.addWorkOrder( updateWorkOrder )
+                .then( (data) => {
+                    //Get id of new workorder and set view to detail
+                    if(data && data.insertId){
+                        setDetailWOid(data.insertId);
+                        setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
+                    }
+                    cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
+                    setWorkOrders(null);
+                    setActiveWorkOrder(null);
+                    handleCloseModal();
+                    resolve(data)
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error adding work_order. ` , {hideAfter: 4});
+                    reject(error)
+                })
+            }
+            reject("No ending in handleSave in AddEditModal WO")
+        })
     };
 
     return(<>

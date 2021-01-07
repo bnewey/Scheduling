@@ -142,68 +142,83 @@ const AddEditFPOrder = function(props) {
 
 
     const handleSave = (fpOrder, updateItem,addOrEdit) => {
-        if(!fpOrder){
-            console.error("Bad work order item")
-            return;
-        }
-        
+        return new Promise((resolve, reject)=>{
+            if(!fpOrder){
+                console.error("Bad work order item")
+                reject("Bad fpOrder");
+            }
             
-        //Add Id to this new object
-        if(addOrEdit == "edit"){
-            updateItem["record_id"] = fpOrder.record_id;
+                
+            //Add Id to this new object
+            if(addOrEdit == "edit"){
+                updateItem["record_id"] = fpOrder.record_id;
 
-            WorkOrderDetail.updateFPOrder( updateItem )
-            .then( (data) => {
-                //Refetch our data on save
-                cogoToast.success(`Work Order Item ${fpOrder.record_id} has been updated!`, {hideAfter: 4});
-                setFPOrders(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.error("Error updating fpOrder.",error);
-                cogoToast.error(`Error updating fpOrder. ` , {hideAfter: 4});
-            })
-        }
-        if(addOrEdit == "add"){
-            updateItem["work_order"] = activeWorkOrder.wo_record_id;
-            WorkOrderDetail.addNewFPOrder( updateItem )
-            .then( (data) => {
-                //Get id of new workorder item 
-                if(data && data.insertId){
+                WorkOrderDetail.updateFPOrder( updateItem )
+                .then( (data) => {
+                    //Refetch our data on save
+                    cogoToast.success(`Work Order Item ${fpOrder.record_id} has been updated!`, {hideAfter: 4});
+                    setFPOrders(null);
+                    handleCloseModal();
+                    resolve(data);
+                })
+                .catch( error => {
+                    console.error("Error updating fpOrder.",error);
+                    cogoToast.error(`Error updating fpOrder. ` , {hideAfter: 4});
+                    reject(error);
+                })
+            }
+            if(addOrEdit == "add"){
+                updateItem["work_order"] = activeWorkOrder.wo_record_id;
+                WorkOrderDetail.addNewFPOrder( updateItem )
+                .then( (data) => {
+                    //Get id of new workorder item 
+                    if(data && data.insertId){
 
-                    
-                    //record_id exists so we can add item immediately
-                    if(fpOrderItems && Array.isArray(fpOrderItems)){
-                        var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
+                        
+                        //record_id exists so we can add item immediately
+                        if(fpOrderItems && Array.isArray(fpOrderItems)){
+                            var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
 
-                        WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
-                        .then((data)=>{
-                            if(data){
-                                //refetch
-                                setFPOrders(null);
-                                setFPOrderItems(null);
-                            }
-                        })
-                        .catch((error)=>{
-                            cogoToast.error("Failed to add item");
-                            console.error("Failed to add item", error)
-                        })
+                            WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
+                            .then((data)=>{
+                                if(data){
+                                    //refetch
+                                    setFPOrders(null);
+                                    setFPOrderItems(null);
+                                    cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
+                                    handleCloseModal();
+                                    resolve(data)
+                                }
+                            })
+                            .catch((error)=>{
+                                cogoToast.error("Failed to add item");
+                                console.error("Failed to add item", error)
+                                handleCloseModal();
+                                reject(error)
+                            })
+                        }else{
+                            setFPOrders(null);
+                            setFPOrderItems(null);
+                            handleCloseModal();
+                            resolve(data)
+                        }
+                        
+                        
                     }else{
-                        setFPOrders(null);
-                        setFPOrderItems(null);
+                        cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
+                        handleCloseModal();
+                        resolve(data);
                     }
                     
-                    
-                }
-                cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error adding fpOrder. ` , {hideAfter: 4});
-            })
-        }
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error adding fpOrder. ` , {hideAfter: 4});
+                    reject(error);
+                })
+            }
             
+        })
         
         
     };

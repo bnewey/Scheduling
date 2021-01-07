@@ -108,45 +108,56 @@ const AddEditEntityContact = function(props) {
 
 
     const handleSave = (contact, updateContact ,addOrEdit) => {
-        if(!contact){
-            console.error("Bad contact")
-            return;
-        }
+        return new Promise((resolve, reject)=>{
+            if(!contact){
+                console.error("Bad contact")
+                reject();
+            }
 
-        updateContact["entities_id"] = activeEntity.record_id;
-        
-        //Add Id to this new object
-        if(addOrEdit == "edit"){
-            updateContact["record_id"] = contact.record_id;
+            updateContact["entities_id"] = activeEntity.record_id;
+            
+            //Add Id to this new object
+            if(addOrEdit == "edit"){
+                updateContact["record_id"] = contact.record_id;
 
-            Entities.updateEntityContact( updateContact )
-            .then( (data) => {
-                //Refetch our data on save
-                cogoToast.success(`Contact ${contact.record_id} has been updated!`, {hideAfter: 4});
-                setContacts(null);
-                setActiveContact(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error updating contact. ` , {hideAfter: 4});
-            })
-        }
-        if(addOrEdit == "add"){
-            Entities.addEntityContact( updateContact )
-            .then( (data) => {
-              
-                cogoToast.success(`Contact has been added!`, {hideAfter: 4});
-                setContacts(null);
-                setActiveContact(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error adding contact. ` , {hideAfter: 4});
-            })
-        }
-        
+                Entities.updateEntityContact( updateContact )
+                .then( (data) => {
+                    //Refetch our data on save
+                    cogoToast.success(`Contact ${contact.record_id} has been updated!`, {hideAfter: 4});
+                    const callback = ()=>{
+                        setContacts(null);
+                        setActiveContact(null);
+                        handleCloseModal();
+                        console.log("IT RAN!!!!!!!!!")
+                    }
+                    resolve({data, callback});
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error updating contact. ` , {hideAfter: 4});
+                    reject(error)
+                })
+            }
+            if(addOrEdit == "add"){
+                Entities.addEntityContact( updateContact )
+                .then( (data) => {
+                
+                    cogoToast.success(`Contact has been added!`, {hideAfter: 4});
+                    const callback = ()=>{
+                        setContacts(null);
+                        setActiveContact(null);
+                        handleCloseModal();
+                        console.log("IT RAN!!!!!!!!!")
+                    }
+                    resolve({data, callback});
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error adding contact. ` , {hideAfter: 4});
+                    reject(error)
+                })
+            }
+        })
     };
 
     return(<>
@@ -384,5 +395,8 @@ const useStyles = makeStyles(theme => ({
         cursor: 'pointer',
         textDecoration: 'underline',
         marginLeft: 15,
+    },
+    addressTypeSpan:{
+        background: '#ffdf00cc'
     }
 }));

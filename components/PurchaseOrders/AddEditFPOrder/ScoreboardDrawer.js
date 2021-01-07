@@ -41,103 +41,110 @@ const ScoreboardDrawer = function(props) {
     },[scbdDrawerOpen])
      
     const handleSave = (fpoItem, updateFPOItem, scbdAddOrEdit) => {
-        if(!fpoItem){
-            console.error("Bad work order item")
-            return;
-        }
-       
-                
-        //Add Id to this new object
-        if(scbdMode == "edit"){
-            updateFPOItem["record_id"] = fpoItem.record_id;
-            //edit and refetch
-            if(fpOrderModalMode =="edit"){
-                WorkOrderDetail.updateFPOrderItem(updateFPOItem)
-                .then((data)=>{
-                    if(data){
-                        //refetch
-                        setFPOrderItems(null);
-                        handleCloseScbdDrawer();
-                    }
-                })
-                .catch((error)=>{
-                    cogoToast.error("Failed to update existing item");
-                    console.error("Failed to update existing item", error)
-                })
+        return new Promise((resolve, reject)=>{
+            if(!fpoItem){
+                console.error("Bad work order item")
+                reject("Bad fpOItem");
             }
-            //set items to state and we will add items with FP order later
-            if(fpOrderModalMode == "add"){
-                if(!activeFPOrderItem.tmp_record_id){
-                    console.warn("No tmp_record_id for activeFPOrderItem.")
+        
+                    
+            //Add Id to this new object
+            if(scbdMode == "edit"){
+                updateFPOItem["record_id"] = fpoItem.record_id;
+                //edit and refetch
+                if(fpOrderModalMode =="edit"){
+                    WorkOrderDetail.updateFPOrderItem(updateFPOItem)
+                    .then((data)=>{
+                        if(data){
+                            //refetch
+                            setFPOrderItems(null);
+                            handleCloseScbdDrawer();
+                            resolve(data);
+                        }
+                    })
+                    .catch((error)=>{
+                        cogoToast.error("Failed to update existing item");
+                        console.error("Failed to update existing item", error)
+                        reject(error)
+                    })
                 }
-                
-                var index;
-                var items = fpOrderItems ? [...fpOrderItems] : [];
-                var itemToUpdate = items.find((item,i)=> { 
-                    if(item.tmp_record_id == activeFPOrderItem.tmp_record_id){
-                        index = i;
-                        return true;
-                    }else{
-                        return false;
+                //set items to state and we will add items with FP order later
+                if(fpOrderModalMode == "add"){
+                    if(!activeFPOrderItem.tmp_record_id){
+                        console.warn("No tmp_record_id for activeFPOrderItem.")
                     }
                     
-                })
+                    var index;
+                    var items = fpOrderItems ? [...fpOrderItems] : [];
+                    var itemToUpdate = items.find((item,i)=> { 
+                        if(item.tmp_record_id == activeFPOrderItem.tmp_record_id){
+                            index = i;
+                            return true;
+                        }else{
+                            return false;
+                        }
+                        
+                    })
 
-                if(updateFPOItem){
-                    items.splice(index, 1, updateFPOItem);
-                }
-
-                //set items and we will save these on FP order save
-                setFPOrderItems(items);
-                handleCloseScbdDrawer();
-            }
-            
-            
-        }
-        if(scbdMode == "add"){
-
-            if(fpOrderModalMode =="edit"){
-                updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
-
-                item["item_type"] = 3; //billing item
-                item["scoreboard_or_sign"] = 1; //scbd
-                item["scoreboard_arrival_date"] = item.arrival_date;
-                item["vendor"] = 1; //fairplay
-                item["user_entered"] = updateItem.user_entered;
-                item["date_entered"] = updateItem.date_entered;
-                item["quantity"] = item.model_quantity;
-                item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
-                //record_id exists so we can add item immediately
-                WorkOrderDetail.addNewFPOrderItem(updateFPOItem)
-                .then((data)=>{
-                    if(data){
-                        //refetch
-                        setFPOrderItems(null);
-                        handleCloseScbdDrawer();
+                    if(updateFPOItem){
+                        items.splice(index, 1, updateFPOItem);
                     }
-                })
-                .catch((error)=>{
-                    cogoToast.error("Failed to add item");
-                    console.error("Failed to add item", error)
-                })
 
+                    //set items and we will save these on FP order save
+                    setFPOrderItems(items);
+                    handleCloseScbdDrawer();
+                    resolve()
+                }
+                
+                
             }
-            if(fpOrderModalMode =="add"){
-                //Give random id so that we can identify when editing item before its into DB
-                updateFPOItem["tmp_record_id"] = Math.floor((Math.random() * 10000) + 1);
-                //add later
+            if(scbdMode == "add"){
+
+                if(fpOrderModalMode =="edit"){
+                    updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
+
+                    item["item_type"] = 3; //billing item
+                    item["scoreboard_or_sign"] = 1; //scbd
+                    item["scoreboard_arrival_date"] = item.arrival_date;
+                    item["vendor"] = 1; //fairplay
+                    item["user_entered"] = updateItem.user_entered;
+                    item["date_entered"] = updateItem.date_entered;
+                    item["quantity"] = item.model_quantity;
+                    item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
+                    //record_id exists so we can add item immediately
+                    WorkOrderDetail.addNewFPOrderItem(updateFPOItem)
+                    .then((data)=>{
+                        if(data){
+                            //refetch
+                            setFPOrderItems(null);
+                            handleCloseScbdDrawer();
+                            resolve(data)
+                        }
+                    })
+                    .catch((error)=>{
+                        cogoToast.error("Failed to add item");
+                        console.error("Failed to add item", error)
+                        reject(error)
+                    })
+
+                }
+                if(fpOrderModalMode =="add"){
+                    //Give random id so that we can identify when editing item before its into DB
+                    updateFPOItem["tmp_record_id"] = Math.floor((Math.random() * 10000) + 1);
+                    //add later
 
 
-                //set items and we will save these on FP order save
-                //setFPOrderItems(items);
-                // handleCloseScbdDrawer();
-                var items = fpOrderItems ? [...fpOrderItems, updateFPOItem] : [updateFPOItem];
-                setFPOrderItems(items);
-                handleCloseScbdDrawer();
-
+                    //set items and we will save these on FP order save
+                    //setFPOrderItems(items);
+                    // handleCloseScbdDrawer();
+                    var items = fpOrderItems ? [...fpOrderItems, updateFPOItem] : [updateFPOItem];
+                    setFPOrderItems(items);
+                    handleCloseScbdDrawer();
+                    resolve()
+                }
+                
             }
-            
-        }
+        })
         
     };
 

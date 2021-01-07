@@ -411,6 +411,24 @@ async function addContactTitle(title_data){
     }
 }
 
+async function getEntRelatedWorkOrders(ent_id){
+    const route = '/scheduling/entities/getEntRelatedWorkOrders';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 
 
 
@@ -436,5 +454,6 @@ module.exports = {
     deleteEntityContact,
     getEntContactTitles,
     deleteContactTitle,
-    addContactTitle
+    addContactTitle,
+    getEntRelatedWorkOrders
 };

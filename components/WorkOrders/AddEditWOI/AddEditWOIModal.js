@@ -130,39 +130,45 @@ const AddEditWOIModal = function(props) {
 
 
     const handleSave = (woi, updateItem, addOrEdit) => {
-        
-        //Add Id to this new object
-        if(addOrEdit == "edit"){
-            updateItem["record_id"] = woi.record_id;
+        return new Promise((resolve, reject)=>{
+            //Add Id to this new object
+            if(addOrEdit == "edit"){
+                updateItem["record_id"] = woi.record_id;
 
-            Work_Orders.updateWorkOrderItem( updateItem )
-            .then( (data) => {
-                //Refetch our data on save
-                cogoToast.success(`Work Order Item ${woi.record_id} has been updated!`, {hideAfter: 4});
-                setWorkOrderItems(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.error("Error updating woi.",error);
-                cogoToast.error(`Error updating woi. ` , {hideAfter: 4});
-            })
-        }
-        if(addOrEdit == "add"){
-            updateItem["work_order"] = activeWorkOrder.wo_record_id;
-            Work_Orders.addWorkOrderItem( updateItem )
-            .then( (data) => {
-                //Get id of new workorder item 
-                if(data && data.insertId){
+                Work_Orders.updateWorkOrderItem( updateItem )
+                .then( (data) => {
+                    //Refetch our data on save
+                    cogoToast.success(`Work Order Item ${woi.record_id} has been updated!`, {hideAfter: 4});
                     setWorkOrderItems(null);
-                }
-                cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error adding woi. ` , {hideAfter: 4});
-            })
-        }
+                    handleCloseModal();
+                    resolve(data)
+                })
+                .catch( error => {
+                    console.error("Error updating woi.",error);
+                    cogoToast.error(`Error updating woi. ` , {hideAfter: 4});
+                    reject(error)
+                })
+            }
+            if(addOrEdit == "add"){
+                updateItem["work_order"] = activeWorkOrder.wo_record_id;
+                Work_Orders.addWorkOrderItem( updateItem )
+                .then( (data) => {
+                    //Get id of new workorder item 
+                    if(data && data.insertId){
+                        setWorkOrderItems(null);
+                    }
+                    cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
+                    handleCloseModal();
+                    resolve(data);
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error adding woi. ` , {hideAfter: 4});
+                    reject(error)
+                })
+            }
+            reject("No ending in handleSave in AddEditWOI MODAL")
+        })
     }
         
     

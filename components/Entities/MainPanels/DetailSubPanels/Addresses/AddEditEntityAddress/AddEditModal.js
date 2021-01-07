@@ -82,48 +82,53 @@ const AddEditEntityAddress = function(props) {
 
 
     const handleSave = (address, updateAddress ,addOrEdit) => {
-        if(!address){
-            console.error("Bad address")
-            return;
-        }
+        return new Promise((resolve, reject)=>{
+            if(!address){
+                console.error("Bad address")
+                reject("Bad address");
+            }
 
-        console.log("Address", address);
-        console.log("UpdateAddress", updateAddress);
-        
-        updateAddress["entities_id"] = activeEntity.record_id;
-        
-        //Add Id to this new object
-        if(addOrEdit == "edit"){
-            updateAddress["record_id"] = address.record_id;
+            console.log("Address", address);
+            console.log("UpdateAddress", updateAddress);
+            
+            updateAddress["entities_id"] = activeEntity.record_id;
+            
+            //Add Id to this new object
+            if(addOrEdit == "edit"){
+                updateAddress["record_id"] = address.record_id;
 
-            Entities.updateEntityAddress( updateAddress )
-            .then( (data) => {
-                //Refetch our data on save
-                cogoToast.success(`Address ${address.record_id} has been updated!`, {hideAfter: 4});
-                setAddresses(null);
-                setActiveAddress(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error updating address. ` , {hideAfter: 4});
-            })
-        }
-        if(addOrEdit == "add"){
-            Entities.addEntityAddress( updateAddress )
-            .then( (data) => {
-              
-                cogoToast.success(`Address has been added!`, {hideAfter: 4});
-                setAddresses(null);
-                setActiveAddress(null);
-                handleCloseModal();
-            })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error adding address. ` , {hideAfter: 4});
-            })
-        }
-        
+                Entities.updateEntityAddress( updateAddress )
+                .then( (data) => {
+                    //Refetch our data on save
+                    cogoToast.success(`Address ${address.record_id} has been updated!`, {hideAfter: 4});
+                    setAddresses(null);
+                    setActiveAddress(null);
+                    handleCloseModal();
+                    resolve(data);
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error updating address. ` , {hideAfter: 4});
+                    reject(error);
+                })
+            }
+            if(addOrEdit == "add"){
+                Entities.addEntityAddress( updateAddress )
+                .then( (data) => {
+                
+                    cogoToast.success(`Address has been added!`, {hideAfter: 4});
+                    setAddresses(null);
+                    setActiveAddress(null);
+                    handleCloseModal();
+                    resolve(data);
+                })
+                .catch( error => {
+                    console.warn(error);
+                    cogoToast.error(`Error adding address. ` , {hideAfter: 4});
+                    reject(error);
+                })
+            }
+        })
     };
 
     return(<>

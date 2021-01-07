@@ -158,7 +158,7 @@ router.post('/deleteEntity', async (req,res) => {
     }
     
 
-    const sql = ' DELETE FROM entities_addresses WHERE record_id = ? LIMIT 1 ';
+    const sql = ' DELETE FROM entities WHERE record_id = ? LIMIT 1 ';
 
     try{
         if(!ent_id){
@@ -590,6 +590,33 @@ router.post('/addContactTitle', async (req,res) => {
     }
 });
 
+router.post('/getEntRelatedWorkOrders', async (req,res) => {
+    var ent_id = {};
+    if(req.body){
+        ent_id = req.body.ent_id;
+    }
+
+    const sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
+    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
+    ' FROM work_orders wo ' +
+    ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
+    ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' +
+    ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
+    ' WHERE wo.customer_id = ? OR wo.account_id = ?' + 
+    ' ORDER BY wo.record_id DESC ' +
+    ' limit 2000 ';
+    try{
+        const results = await database.query(sql, [ent_id, ent_id]);
+        logger.info("Got Related Work Orders for Entity " + ent_id);
+
+        res.json(results);
+    }
+    catch(error){
+        logger.error("Entities getEntRelatedWorkOrders: " + error);
+        res.sendStatus(400);
+    }
+});
 
 
 module.exports = router;
