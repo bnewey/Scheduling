@@ -143,7 +143,6 @@ const WoiStatusCheck = (props) => {
     );
 
 } 
-
 export default WoiStatusCheck;
 
 const useStyles = makeStyles(theme => ({
