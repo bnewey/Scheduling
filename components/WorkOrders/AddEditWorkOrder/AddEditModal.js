@@ -66,7 +66,7 @@ const AddEditModal = function(props) {
     ];
 
     //This is currently hardcoded in formbuilder
-    const types = ["Install", "Install (Drill)", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
+    const types = ["Install", "Install (Drill)", "Delivery", "Parts (Mfg.)", "Parts (Service)", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
 
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{

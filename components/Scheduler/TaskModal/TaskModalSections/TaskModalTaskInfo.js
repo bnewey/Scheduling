@@ -130,8 +130,10 @@ const TaskModalTaskInfo = (props) => {
                     <MenuItem value={'Delivery'}>Delivery</MenuItem>
                     <MenuItem value={'Field'}>Field</MenuItem>
                     <MenuItem value={'Install'}>Install</MenuItem>
+                    <MenuItem value={'Install (Drill)'}>Install (Drill)</MenuItem>
                     <MenuItem value={'Loaner'}>Loaner</MenuItem>
-                    <MenuItem value={'Parts'}>Parts</MenuItem>
+                    <MenuItem value={'Parts (Mfg.)'}>Parts (Mfg.)</MenuItem>
+                    <MenuItem value={'Parts (Service)'}>Parts (Service)</MenuItem>
                     <MenuItem value={'Pickup'}>Pickup</MenuItem>
                     <MenuItem value={'Shipment'}>Shipment</MenuItem>
                     </Select>

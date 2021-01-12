@@ -217,29 +217,7 @@ const TaskListMain = (props) => {
         }
         var viewArray =[];
         switch(view){
-            case "date":
-                viewArray = [
-                    {text: "Desired Date", field: "date_desired", width: '9%', style: 'boldListItemText', type: 'date'},
-                    {text: "1st Game", field: "first_game", width: '9%', type: 'date'},
-                    {text: "install_date", field: "sch_install_date", width: '9%', type: 'date'},
-                    {text: "drill_date", field: "drill_date", width: '9%', type: 'date'},
-                    {text: "Name", field: "t_name", width: '48%', style: 'boldListItemText', type: 'text'},
-                    {text: "Type", field: "type", width: '16%', type: 'text'}
-                ];
-                break;
-            case 'default':
-                viewArray =[
-                    {text: "Order", field: "priority_order", width: '8%',style: 'smallListItemText', type: 'number'},
-                    {text: "WO #", field: "table_id", width: '7%', type: 'number'},
-                    {text: "Desired Date", field: "date_desired", width: '10%', style: 'boldListItemText', type: 'date'},
-                    {text: "1st Game", field: "first_game", width: '10%', type: 'date'},
-                    {text: "install_date", field: "sch_install_date", width: '10%', type: 'date'},
-                    {text: "Name", field: "t_name", width: '20%', style: 'boldListItemText', type: 'text'},
-                    {text: "Type", field: "type", width: '8%', type: 'text'},
-                    {text: "Description", field: "description", width: '19%', style: 'smallListItemText', type: 'text'},
-                    {text: "Drill Status", field: "drilling", width: '8%', type: 'text'}
-                ]
-                break;
+            case "default":
             case "noDrill":
                 viewArray = [
                     {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
@@ -476,7 +454,7 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'nowrap',
         justifyContent: 'space-around',
         padding: '3px',
-        paddingRight: '4% !important',
+        paddingRight: '1% !important',
         
     },
     liContainer: {

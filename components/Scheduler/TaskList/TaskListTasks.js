@@ -8,6 +8,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import Router from 'next/router'
+import moment from 'moment';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import useWindowSize from '../../UI/useWindowSize';
@@ -432,7 +433,8 @@ const TaskListTasks = (props) =>{
       //Handle date types first
       if(type=="date"){
 
-        return_value = Util.convertISODateToMySqlDate(return_value);
+        //return_value = Util.convertISODateToMySqlDate(return_value);
+        return_value = moment(value).format("MM/DD/YYYY")
       }
 
       switch(fieldId){
@@ -645,12 +647,12 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
           { taskListToMap 
           ? 
           <>            
-                <React.Fragment>
+                {/* <React.Fragment>
                   <IconButton edge="end" aria-label="edit" onClick={event => handleRightClick(event, row.t_id)}>
                   <EditIcon />
                   </IconButton>
                 </React.Fragment>
-            &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp; */}
           </>
           : <></>}
         </div>

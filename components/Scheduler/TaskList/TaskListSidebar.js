@@ -7,6 +7,7 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import ListIcon from '@material-ui/icons/FormatListBulletedSharp';
 import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import TaskLists from '../../../js/TaskLists';
 import TaskListTasksEdit from './TaskListTasksEdit';
@@ -14,6 +15,7 @@ import TaskListActionAdd from './TaskListActionAdd';
 import TaskListDateDialog from './TaskListDateDialog';
 import {createSorter} from '../../../js/Sort';
 import Util from '../../../js/Util';
+import Settings from '../../../js/Settings';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
@@ -30,18 +32,54 @@ const TaskListSidebar = (props) => {
     const [editList, setEditList] = React.useState(null);
     const [pdfLoaded,setPDFLoaded] = React.useState(false);
 
+    const [quickFilters, setQuickFilters] = React.useState(null);
+
     //PROPS
     const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
         selectedTasks, setSelectedTasks, setSelectedIds, setTableInfo, handleChangeTaskView, taskListTasksRefetch, setTaskListTasksRefetch} = props;
 
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen, setSorters, setFilters} = useContext(TaskContext);
+        modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr , setFilterAndOr} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
     //CSS
     const classes = useStyles();
+
+    useEffect(()=>{
+        if(quickFilters == null && user){
+            var user_id = user?.id;
+            Settings.getTaskUserFilters(user_id)
+            .then((data)=>{
+                if(data){
+                    var savedFilters = data?.map((item)=>{
+                        item.filter_json = JSON.parse(item.filter_json);
+                        return item;
+                    })
+                    console.log("taskUSerfilters", savedFilters);
+                    setQuickFilters(savedFilters);
+                }
+            })
+            .catch((error)=>{
+                console.error("Failed to get user filters");
+                cogoToast.error("Failed to get user filters");
+            })
+        }
+        
+    },[quickFilters, user])
+
+    const handleApplySavedFilter = (event, item) =>{
+        if(!item){
+            console.error("Bad filter in handleApplySavedFilter ");
+            return;
+        }
+        setFilters(item.filter_json);
+        setFilterInOrOut(item.in_out == 0 ? "in" : (item.in_out == 1 ? "out": null ) );
+        setFilterAndOr(item.and_or == 0 ? "and" : (item.and_or == 1 ? "or": null ));
+        cogoToast.success(`Filtering by ${item.name}`)
+
+    }
 
 
     const handleEditClickOpen = (event, list) => {
@@ -244,6 +282,28 @@ const TaskListSidebar = (props) => {
                         </div>
                     </div>
                 <div className={classes.priority_info_heading}>
+                    <span>Quick Filters</span>
+                </div>
+                    <div className={classes.singleLineDiv}>
+                        <div className={classes.otherTaskListsDiv}>
+                            {
+                                quickFilters && quickFilters.map((filter, index)=>{
+                                    const isSelected = filters === filter.filter_json && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and"); 
+                                        return(
+                                        <div key={filter.id} dense button
+                                            onClick={event => handleApplySavedFilter(event, filter)}
+                                            className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
+                                        >
+                                            <span  className={classes.fieldListItemText}>
+                                                {filter.name}
+                                            </span>
+                                        </div>
+                                        );
+                                })
+                            }
+                        </div>
+                    </div>
+                <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>
                     <div className={classes.singleLineDiv}>
@@ -267,20 +327,7 @@ const TaskListSidebar = (props) => {
                                 Service Dept
                             </span>
                     </div>
-                    <div className={classes.singleLineDiv}>
-                            <span
-                                className={classes.text_button} 
-                                onClick={event =>  handleChangeTaskView("date")}>
-                                Dates
-                            </span>
-                    </div>
-                    <div className={classes.singleLineDiv}>
-                            <span
-                                className={classes.text_button} 
-                                onClick={event =>  handleChangeTaskView("default")}>
-                                Simple
-                            </span>
-                    </div>
+                    
 
                 <div className={classes.priority_info_heading}>
                     <span>PDF</span>
@@ -432,5 +479,35 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-    }
+    },
+    fieldListItem:{
+        cursor: 'pointer',
+        fontSize: '12px',
+        color: '#677fb3',
+        margin: '0% 3% 0% 0%',
+        '&:hover':{
+            color: '#697fb1',
+            textDecoration: 'underline',
+        }
+        
+    },
+    fieldListItemSelected:{
+        cursor: 'pointer',
+        fontSize: '12px',
+        color: '#222',
+        margin: '0% 3% 0% 0%',
+        background: '#70aaff70',
+        padding: '0px 3px',
+        borderRadius: 2,
+        '&:hover':{
+            color: '#697fb1',
+            textDecoration: 'underline',
+
+        },
+    },
+    fieldListItemText:{
+        '& span':{
+            fontWeight: '600'
+        }
+    },
   }));
