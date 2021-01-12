@@ -387,14 +387,14 @@ const GetInputByType = function(props){
                     <option value={0}>
                         Select
                     </option>
-                    {["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"] ? ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"].map((type)=>{
+                    { ["Install", "Install (Drill)", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"].map((type)=>{
                         
                         return (
                             <option value={type}>
                                 {type}
                             </option>
                         )
-                    }) :  <></>}
+                    })}
                 </Select></div>
             )
             break;

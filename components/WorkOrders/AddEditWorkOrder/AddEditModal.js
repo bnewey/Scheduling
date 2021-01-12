@@ -65,7 +65,8 @@ const AddEditModal = function(props) {
         {field: 'invoiced', label: 'Invoiced', type: 'check', updateBy: 'ref'},
     ];
 
-    const types = ["Install", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
+    //This is currently hardcoded in formbuilder
+    const types = ["Install", "Install (Drill)", "Delivery", "Parts", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
 
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{

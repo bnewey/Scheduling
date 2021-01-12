@@ -411,7 +411,7 @@ const TaskListTasks = (props) =>{
       window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
       
       //set detail view in local data
-      window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
+      window.localStorage.setItem('currentView', JSON.stringify("woPdf"));
   
       Router.push('/scheduling/work_orders')
     }
