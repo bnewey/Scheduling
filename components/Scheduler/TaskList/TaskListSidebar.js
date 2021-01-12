@@ -256,6 +256,20 @@ const TaskListSidebar = (props) => {
                     <div className={classes.singleLineDiv}>
                             <span
                                 className={classes.text_button} 
+                                onClick={event => handleChangeTaskView("noDrill")}>
+                                Compact(No Drill)
+                            </span>
+                    </div>
+                    <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
+                                onClick={event => handleChangeTaskView("serviceDept")}>
+                                Service Dept
+                            </span>
+                    </div>
+                    <div className={classes.singleLineDiv}>
+                            <span
+                                className={classes.text_button} 
                                 onClick={event =>  handleChangeTaskView("date")}>
                                 Dates
                             </span>

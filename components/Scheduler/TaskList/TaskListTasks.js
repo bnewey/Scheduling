@@ -7,6 +7,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
+import Router from 'next/router'
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import useWindowSize from '../../UI/useWindowSize';
@@ -403,6 +404,18 @@ const TaskListTasks = (props) =>{
 
     },[taskListTasks])
 
+    const handleGoToWorkOrderId = (wo_id) =>{
+      console.log("woi", wo_id);
+      
+      //set detailWOIid in local data
+      window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
+      
+      //set detail view in local data
+      window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
+  
+      Router.push('/scheduling/work_orders')
+    }
+
 
     const handleSpecialTableValues = useCallback((fieldId, value, type, task) =>{
       if(fieldId == null || task == null){
@@ -517,6 +530,10 @@ const TaskListTasks = (props) =>{
                           data={woiData?.filter((item)=>item.work_order == task.table_id)}/>
           break;
         }
+        case 'table_id':
+          return_value = <span onClick={()=>handleGoToWorkOrderId(value)} className={classes.clickableWOnumber}>{value}</span>
+        
+          break;
         default:{
           
         }
@@ -590,7 +607,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
           <div key={taskListTasksSaved[index]?.t_id + 321321 } 
                     role={undefined} dense button 
                     onContextMenu={event => handleRightClick(event, row.t_id)}
-                    onMouseUp={event => handleClick(event, row.t_id)}
+                    //onMouseUp={event => handleClick(event, row.t_id)}
                     className={ index % 2 == 0 ? 
                               (isItemCompleted ? ( isItemSelected ? classes.selectedRowComp : classes.nonSelectedRowComp ):( isItemSelected ? classes.selectedRow : classes.nonSelectedRow ) )
                               : 
@@ -609,7 +626,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                     >
           { taskListToMap 
           ? <div className={classes.checkBoxDiv}>
-              <Checkbox checked={isItemSelected} className={classes.tli_checkbox}/>
+              <Checkbox checked={isItemSelected} className={classes.tli_checkbox} onClick={event => handleClick(event, row.t_id)}/>
             </div> 
           : <></>}
           {table_info.map((item, i)=>{
@@ -1130,6 +1147,13 @@ const useStyles = makeStyles(theme => ({
   },
   woiPopoverSpanDateHead:{
     flexBasis: '12%'
+  },
+  clickableWOnumber:{
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    '&:hover':{
+      color: '#ee3344',
+    }
   },
   
 

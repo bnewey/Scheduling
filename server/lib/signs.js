@@ -13,6 +13,10 @@ router.post('/getAllSignsForScheduler', async (req,res) => {
 
     const sql = ' SELECT woi.*, date_format(woi.sign_built, \'%Y-%m-%d %H:%i:%S\') AS sign_built, ' + 
     'date_format(woi.sign_popped_and_boxed, \'%Y-%m-%d %H:%i:%S\') AS sign_popped_and_boxed,  ' + 
+    'date_format(woi.copy_received, \'%Y-%m-%d %H:%i:%S\') AS copy_received,  ' + 
+    'date_format(woi.sent_for_approval, \'%Y-%m-%d %H:%i:%S\') AS sent_for_approval,  ' + 
+    'date_format(woi.final_copy_approved, \'%Y-%m-%d %H:%i:%S\') AS final_copy_approved,  ' + 
+    'date_format(woi.artwork_completed, \'%Y-%m-%d %H:%i:%S\') AS artwork_completed,  ' + 
     ' IFNULL( date_format(t.sch_install_date, \'%Y-%m-%d\') , NULL) AS install_date, wo.type, eac.state, enc.name AS product_to, ' +
     ' tl.list_name ' +  
     ' FROM work_orders_items woi ' +

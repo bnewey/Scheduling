@@ -65,24 +65,12 @@ const SignSchedulerList = function(props) {
                       // }
                       return value;
                     } },
-                {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
+                { id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
                 { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
-                {
-                  id: 'work_order',
-                  label: 'WO#',
-                  minWidth: 50,
-                  align: 'center',
-                  hideRepeats: true,
-                  format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>
-                },
+                { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
+                  format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span> },
                 { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
-                {
-                  id: 'sign_built',
-                  label: 'Built',
-                  minWidth: 50,
-                  align: 'center',
-                  type: 'date',
-                  hideRepeats: false,
+                { id: 'sign_built', label: 'Built', minWidth: 50,  align: 'center', type: 'date', hideRepeats: false,
                   format: (value,row)=> {return(
                     <Checkbox
                           className={classes.checkbox}
@@ -91,16 +79,8 @@ const SignSchedulerList = function(props) {
                           name="check_sign_popped_and_boxed"
                           checked={value != null}
                           onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
-                      />
-                    )}
-                },
-                {
-                  id: 'sign_popped_and_boxed',
-                  label: 'Finished',
-                  minWidth: 50,
-                  align: 'center',
-                  type: 'date',
-                  hideRepeats: false,
+                      /> )}},
+                { id: 'sign_popped_and_boxed', label: 'Finished', minWidth: 50, align: 'center',  type: 'date',  hideRepeats: false,
                   format: (value,row)=> {return(
                       <Checkbox
                       className={classes.checkbox}
@@ -109,12 +89,94 @@ const SignSchedulerList = function(props) {
                           name="check_sign_popped_and_boxed"
                           checked={value != null}
                           onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
-                      />
-                  )}
-                },
+                      />)}},
                 { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
               ];
               break;
+              case "Signs + Artwork":
+                viewArray =[
+                  {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', hideRepeats: true,
+                       format: (value,row)=>{  
+                        if(value == null){
+                          return("****");
+                        }
+                        // if(row.list_name === "Holds"){
+                        //   return("On Hold")
+                        // }
+                        // if(row.list_name === "Completed Tasks"){
+                        //   return("Completed")
+                        // }
+                        return value;
+                       } },
+                  {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
+                  { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
+                  { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
+                    format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>},
+                  { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
+                  { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: false},
+                  { id: 'sign_built', label: 'Built', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                    format: (value,row)=> {return(
+                      <Checkbox
+                            className={classes.checkbox}
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="check_sign_popped_and_boxed"
+                            checked={value != null}
+                            onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
+                        />)}},
+                  { id: 'copy_received', label: 'Copy Rcvd', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                    format: (value,row)=> {return(
+                      <Checkbox
+                            className={classes.checkbox}
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="check_copy_receieved"
+                            checked={value != null}
+                            onChange={(event)=> handleUpdateDate(event, row, "copy_received")}
+                        />)}},
+                  { id: 'sent_for_approval', label: 'Sent For Appv', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                    format: (value,row)=> {return(
+                      <Checkbox
+                            className={classes.checkbox}
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="check_sent_for_approval"
+                            checked={value != null}
+                            onChange={(event)=> handleUpdateDate(event, row, "sent_for_approval")}
+                        />)}},
+                  { id: 'final_copy_approved', label: 'Final Copy Aprv', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                    format: (value,row)=> {return(
+                      <Checkbox
+                            className={classes.checkbox}
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="check_final_copy_approved"
+                            checked={value != null}
+                            onChange={(event)=> handleUpdateDate(event, row, "final_copy_approved")}
+                        />)}},
+                  { id: 'artwork_completed', label: 'Art Complete', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                    format: (value,row)=> {return(
+                      <Checkbox
+                            className={classes.checkbox}
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="check_artwork_completed"
+                            checked={value != null}
+                            onChange={(event)=> handleUpdateDate(event, row, "artwork_completed")}
+                        />)}},
+                  { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                    format: (value,row)=> {return(
+                        <Checkbox
+                        className={classes.checkbox}
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="check_sign_popped_and_boxed"
+                            checked={value != null}
+                            onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
+                        />)}},
+                  { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
+                ];
+                break;
         case "Install Date":
         case 'default':
         default:
@@ -134,23 +196,11 @@ const SignSchedulerList = function(props) {
                    } },
               {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
               { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
-              {
-                id: 'work_order',
-                label: 'WO#',
-                minWidth: 50,
-                align: 'center',
-                hideRepeats: true,
-                format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>
-              },
+              { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
+                format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>},
               { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
               { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: false},
-              {
-                id: 'sign_built',
-                label: 'Built',
-                minWidth: 50,
-                align: 'center',
-                type: 'date',
-                hideRepeats: false,
+              { id: 'sign_built', label: 'Built', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
                 format: (value,row)=> {return(
                   <Checkbox
                         className={classes.checkbox}
@@ -159,16 +209,8 @@ const SignSchedulerList = function(props) {
                         name="check_sign_popped_and_boxed"
                         checked={value != null}
                         onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
-                    />
-                  )}
-              },
-              {
-                id: 'sign_popped_and_boxed',
-                label: 'Finished',
-                minWidth: 50,
-                align: 'center',
-                type: 'date',
-                hideRepeats: false,
+                    />)}},
+              { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
                 format: (value,row)=> {return(
                     <Checkbox
                     className={classes.checkbox}
@@ -177,9 +219,7 @@ const SignSchedulerList = function(props) {
                         name="check_sign_popped_and_boxed"
                         checked={value != null}
                         onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
-                    />
-                )}
-              },
+                    />)}},
               { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
             ];
             break;

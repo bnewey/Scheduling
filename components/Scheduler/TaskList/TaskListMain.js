@@ -240,6 +240,33 @@ const TaskListMain = (props) => {
                     {text: "Drill Status", field: "drilling", width: '8%', type: 'text'}
                 ]
                 break;
+            case "noDrill":
+                viewArray = [
+                    {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+                    {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
+                    {text: "Name", field: "t_name", width: '26%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                    {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+                    {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+                    {text: "Description", field: "description", width: '18%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                    {text: "Status", field: "woi_status_check", width: '17%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+                    {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}           
+                ];
+                break;
+            case "serviceDept":
+                viewArray = [
+                    {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+                    {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
+                    {text: "WO Created", field: "date_entered", width: '8%', style: 'smallListItemText', type: 'date'},
+                    {text: "Desired Date", field: "date_desired", width: '8%', style: 'smallListItemText', type: 'date'},
+                    {text: "Name", field: "t_name", width: '26%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                    {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+                    {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+                    {text: "Description", field: "description", width: '19%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                    {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+                    {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}           
+                ];
+                break;
             case "compact":
             default:
                 viewArray = [

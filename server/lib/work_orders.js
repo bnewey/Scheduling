@@ -408,7 +408,8 @@ router.post('/updateWorkOrderItem', async (req,res) => {
     ' part_number = ?, size = ?, description = ?, price = IFNULL(? ,DEFAULT(price)), receive_date =?, ' +
     ' receive_by =?, contact = IFNULL(? ,DEFAULT(contact)), scoreboard_or_sign= IFNULL(? ,DEFAULT(scoreboard_or_sign)), model=?,color=? ,' +
     ' trim=?,scoreboard_arrival_date=?,scoreboard_arrival_status=?, mount=?, ' + 
-    ' trim_size=?, trim_corners=?, date_offset= IFNULL(? ,DEFAULT(date_offset)), sign_due_date=?, vendor=?, sign_built=?, sign_popped_and_boxed=? ' +
+    ' trim_size=?, trim_corners=?, date_offset= IFNULL(? ,DEFAULT(date_offset)), sign_due_date=?, vendor=?, sign_built=?, sign_popped_and_boxed=?, ' +
+    ' copy_received=?,sent_for_approval=?,final_copy_approved=?,artwork_completed=? ' +
     '  WHERE record_id = ? ';
 
     try{ //Util.convertISODateToMySqlDate(wo.date)
@@ -419,7 +420,9 @@ router.post('/updateWorkOrderItem', async (req,res) => {
                 Util.convertISODateToMySqlDate(woi.scoreboard_arrival_date), woi.scoreboard_arrival_status || null,
                  woi.mount || null, woi.trim_size || null, woi.trim_corners || null,
                 woi.date_offset || 0, Util.convertISODateToMySqlDate(woi.sign_due_date), woi.vendor || null, Util.convertISODateToMySqlDate(woi.sign_built),
-                Util.convertISODateToMySqlDate(woi.sign_popped_and_boxed), woi.record_id]);
+                Util.convertISODateToMySqlDate(woi.sign_popped_and_boxed),Util.convertISODateToMySqlDate(woi.copy_received),
+                Util.convertISODateToMySqlDate(woi.sent_for_approval), Util.convertISODateToMySqlDate(woi.final_copy_approved),
+                Util.convertISODateToMySqlDate(woi.artwork_completed), woi.record_id]);
         logger.info("Work Order Item  updated" +  woi.record_id);
         res.json(results);
 
