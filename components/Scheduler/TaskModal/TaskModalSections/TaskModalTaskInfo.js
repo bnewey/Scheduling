@@ -114,30 +114,9 @@ const TaskModalTaskInfo = (props) => {
             <FormControl fullWidth>
                 <TextField className={classes.inputFieldMatUi} variant="outlined" id="input-name" label="Name:" inputRef={ref_object.t_name}  defaultValue={modalTask.t_name} onChange={handleShouldUpdate(true)}/>
                 <Grid container className={classes.lowerGrid}>
-                <Grid item xs={6} >
-                <FormControl variant="outlined" className={classes.inputFieldMatUi}>
-                    <InputLabel id="status-input-label">
-                    Work Type
-                    </InputLabel>
-                    <Select
-                    labelId="task-type-input-label"
-                    id="task-type-input"
-                    value={modalTask.type}
-                    onChange={value => handleInputOnChange(value, true, "select", "type")}
-                    >
-                    <MenuItem value={null}>N/A</MenuItem>
-                    <MenuItem value={'Bench'}>Bench</MenuItem>
-                    <MenuItem value={'Delivery'}>Delivery</MenuItem>
-                    <MenuItem value={'Field'}>Field</MenuItem>
-                    <MenuItem value={'Install'}>Install</MenuItem>
-                    <MenuItem value={'Install (Drill)'}>Install (Drill)</MenuItem>
-                    <MenuItem value={'Loaner'}>Loaner</MenuItem>
-                    <MenuItem value={'Parts (Mfg.)'}>Parts (Mfg.)</MenuItem>
-                    <MenuItem value={'Parts (Service)'}>Parts (Service)</MenuItem>
-                    <MenuItem value={'Pickup'}>Pickup</MenuItem>
-                    <MenuItem value={'Shipment'}>Shipment</MenuItem>
-                    </Select>
-                </FormControl></Grid>
+                    <Grid item xs={6} className={classes.text_info_grid}>
+                        <Typography variant="body1" component="span" className={classes.text_info}>&nbsp;{modalTask.type} (Not Editable Here)</Typography>
+                    </Grid>
                 <Grid item xs={6} ><TextField className={classes.inputFieldMatUi} type="number" variant="outlined" id="input-hours" label="Hours" inputRef={ref_object.hours_estimate} defaultValue={modalTask.hours_estimate} onChange={handleShouldUpdate(true)} /></Grid>
             </Grid>
                 <TextField className={classes.inputFieldMatUi} multiline rows="2" variant="outlined" id="input-description" label="Sign/Product Description:" inputRef={ref_object.description} defaultValue={modalTask.description} onChange={handleShouldUpdate(true)}/>

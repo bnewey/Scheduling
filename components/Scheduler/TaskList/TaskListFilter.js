@@ -32,13 +32,15 @@ const TaskListFilter = (props) => {
     //PROPS
     const { filteredItems, setFilteredItems } = props;
 
-    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters, user} = useContext(TaskContext);
+    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,
+        setRefreshView,tabValue, user} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
     const [openCategory, setCategory] = useState(null);
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedField, setSelectedField] = useState(null);
+    const [taskListFiltersEdited, setTaskListFiltersEdited] = useState(false);
     const [tableConfig, setTableInfo] = useState([
         {text: "Type", field: "type", type: 'text'},
         {text: "Completed", field: "completed_wo",  type: 'number'}, 
@@ -204,6 +206,31 @@ const TaskListFilter = (props) => {
     };
 
     const handleModalClose = () => {
+        if(taskListFiltersEdited){
+            //Refreshes based on which tab is currently active
+            //only using taskList bc thats the only page with quick filter access for now
+            var viewToRefresh;
+            switch(tabValue){
+                // case 0:
+                //     viewToRefresh = "calendar"
+                //     break;
+                case 1:
+                    viewToRefresh = "taskList"
+                    break;
+                // case 2:
+                //     viewToRefresh = "map"
+                //     break;
+                // case 3:
+                //     viewToRefresh = "crew"
+                //     break;
+                // case 4:
+                //     viewToRefresh = "allTasks"
+                //     break;
+            }
+            if(viewToRefresh){
+                setRefreshView(viewToRefresh);
+            }
+        }
         setFilterModalOpen(false);
     };
 
@@ -422,6 +449,7 @@ const TaskListFilter = (props) => {
             Settings.removedSavedFilter(item.id)
             .then((data)=>{
                 setTaskUserFilters(null);
+                setTaskListFiltersEdited(true);
             })
             .catch((error)=>{
                 cogoToast.error("Failed to remove saved filter");
@@ -668,7 +696,8 @@ const TaskListFilter = (props) => {
                             {  openCategory && openCategory == "saved_filters" &&
                                 <Collapse in={openCategory && openCategory === "saved_filters"} timeout="auto" unmountOnExit>
                                 <List component="div" className={classes.fieldList} >
-                                    <TaskListFilterSaveDialog  taskUserFilters={taskUserFilters}  setTaskUserFilters={setTaskUserFilters}/>
+                                    <TaskListFilterSaveDialog  taskUserFilters={taskUserFilters}  setTaskUserFilters={setTaskUserFilters}
+                                        setTaskListFiltersEdited={setTaskListFiltersEdited}/>
                                     
                                     {taskUserFilters && taskUserFilters.map((item,i)=>{
                                         const isSelected = selectedField === item; 

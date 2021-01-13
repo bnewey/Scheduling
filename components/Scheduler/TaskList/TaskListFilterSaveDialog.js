@@ -12,7 +12,7 @@ import cogoToast from 'cogo-toast';
 const TaskListFilterSaveDialog = React.memo(  (props) => {
  
     //PROPS
-    const { taskUserFilters, setTaskUserFilters } = props;
+    const { taskUserFilters, setTaskUserFilters, setTaskListFiltersEdited } = props;
     const { filters, user, filterInOrOut, filterAndOr } = useContext(TaskContext);
 
     //STATE
@@ -44,7 +44,7 @@ const TaskListFilterSaveDialog = React.memo(  (props) => {
                 
                 //refetch tasklists
                 setTaskUserFilters(null);
-                
+                setTaskListFiltersEdited(true);
                 handleAddClose();
                 cogoToast.success(`Added new Saved Task Filter`, {hideAfter: 4});
             })

@@ -8,7 +8,8 @@ const doFilter = (item, filter, outOrIn) => {
     if (!(tmpValue instanceof RegExp)) {
       tmpValue = new RegExp(tmpValue.toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_'), 'i');
     }
-    var tmpp = tmpValue.test( (item[ filter.property ] != null ? (item[ filter.property ]).toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') :  "nonassignedValue"));
+    var tmpp = tmpValue.test( (item[ filter.property ] != null ? (item[ filter.property ]).toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') :  "nonassignedValue"))
+              && item[filter.property].length === value.length;
 
     if(outOrIn == "in"){
       return(!!tmpp);

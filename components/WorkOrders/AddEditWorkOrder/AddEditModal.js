@@ -124,7 +124,6 @@ const AddEditModal = function(props) {
                     reject(error)
                 })
             }
-            reject("No ending in handleSave in AddEditModal WO")
         })
     };
 

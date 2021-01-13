@@ -262,7 +262,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     })
                     .catch((error)=>{
                         console.log("Failed to save in FormBuilder", error);
-                        cogoToast.error("Internal server error");
+                        cogoToast.info(error);
                     })
                 }
 

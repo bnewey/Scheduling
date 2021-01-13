@@ -139,7 +139,6 @@ const ScoreboardDrawer = function(props) {
                 }
                 
             }
-            reject("No ending in scoreboard drawer save")
         })
     };
 

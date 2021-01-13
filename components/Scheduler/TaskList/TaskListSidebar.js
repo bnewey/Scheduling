@@ -40,12 +40,20 @@ const TaskListSidebar = (props) => {
 
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
-        modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr , setFilterAndOr} = useContext(TaskContext);
+        modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr ,
+        refreshView, setFilterAndOr} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
     //CSS
     const classes = useStyles();
+
+    //Refresh
+    useEffect(()=>{
+        if(refreshView && refreshView == "taskList"){
+            setQuickFilters(null)
+        }
+    },[refreshView])
 
     useEffect(()=>{
         if(quickFilters == null && user){
@@ -344,7 +352,6 @@ const TaskListSidebar = (props) => {
                     <span className={classes.text_button}  >
                             <a href={"./static/task_list.pdf"}
                         target="_blank" >Open PDF</a>
-                        
                     </span>
                 </div>
                 : <></>}

@@ -439,7 +439,7 @@ const TaskListTasks = (props) =>{
 
       switch(fieldId){
         case 'install_crew':{
-          if(!task.drill_job_completed){
+          if(!task.install_job_completed){
             if(task.install_crew_leader != null){
               return_value = <div className={classes.popOverDiv} 
                                   onMouseUp={event => handleOpenAddMemberPopover(event, task.install_job_id, task.install_crew, "install", task.t_id)}>
@@ -462,52 +462,62 @@ const TaskListTasks = (props) =>{
           }
         }
         case 'drill_crew':{
-          if(!task.drill_job_completed){
-            if(task.drill_crew_leader != null){
-              return_value = <div className={classes.popOverDiv} 
-                              onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew, "drill", task.t_id)}>
-                                {task.drill_crew_leader}
-                              </div>;
+          if(task.type === "Install (Drill)"){
+            if(!task.drill_job_completed){
+              if(task.drill_crew_leader != null){
+                return_value = <div className={classes.popOverDiv} 
+                                onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew, "drill", task.t_id)}>
+                                  {task.drill_crew_leader}
+                                </div>;
+              }else{
+                return_value = <div className={classes.popOverDiv} 
+                                onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew,"drill", task.t_id)}>
+                                  { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+                                </div>;
+              }
+              break;
             }else{
-              return_value = <div className={classes.popOverDiv} 
-                              onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew,"drill", task.t_id)}>
-                                { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
-                              </div>;
+              if(task.drill_crew_leader != null){
+                return_value = <span> {task.drill_crew_leader} </span>;
+              }else{
+                return_value = <span>
+                                  { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+                                </span>;
+              }
+              break;
             }
-            break;
           }else{
-            if(task.drill_crew_leader != null){
-              return_value = <span> {task.drill_crew_leader} </span>;
-            }else{
-              return_value = <span>
-                                { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
-                              </span>;
-            }
+            return_value = <></>;
             break;
           }
         }
         case 'drill_date':{
-          if(!task.drill_job_completed){
-            return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <DatePicker     format="MM/dd/yyyy" showTodayButton
-                          clearable
-                          inputVariant="outlined"
-                          variant="modal" 
-                          maxDate={new Date('01-01-2100')}
-                          minDate={new Date('01-01-1970')}
-                          className={classes.datePicker}
-                          value={value} 
-                          onChange={value => handleUpdateTaskDate(value, task, "drill_date")} />
-                  </MuiPickersUtilsProvider></div>
-            break;
+          if(task.type === "Install (Drill)"){
+            if(!task.drill_job_completed){
+              return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <DatePicker     format="MM/dd/yyyy" showTodayButton
+                            clearable
+                            inputVariant="outlined"
+                            variant="modal" 
+                            maxDate={new Date('01-01-2100')}
+                            minDate={new Date('01-01-1970')}
+                            className={classes.datePicker}
+                            value={value} 
+                            onChange={value => handleUpdateTaskDate(value, task, "drill_date")} />
+                    </MuiPickersUtilsProvider></div>
+              break;
+            }else{
+              return_value = <span>Completed</span>
+              break;
+            }
           }else{
-            return_value = <span>Completed</span>
+            return_value = <></>;
             break;
           }
           
         }
         case 'sch_install_date':{
-          if(!task.drill_job_completed){
+          if(!task.install_job_completed){
             return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
               <DatePicker     format="MM/dd/yyyy" showTodayButton
                             clearable
