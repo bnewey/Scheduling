@@ -19,7 +19,7 @@ router.post('/getAllWorkOrders', async (req,res) => {
     ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-    ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' +
+    ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' + //needs to come from entities_contacts 
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
     ' WHERE date >= ? AND date <= ? ' + 
     ' ORDER BY wo.record_id DESC ' +

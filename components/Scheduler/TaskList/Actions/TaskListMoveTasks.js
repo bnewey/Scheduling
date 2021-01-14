@@ -6,33 +6,25 @@ import AddIcon from '@material-ui/icons/Add';
 import TaskLists from '../../../../js/TaskLists';
 import { TaskContext } from '../../TaskContainer';
 import cogoToast from 'cogo-toast';
+import {PlaylistAddCheck, PanTool, Reorder } from '@material-ui/icons';
 
 
 const TaskListActionAdd = (props) => {
  
     //PROPS
-    const { selectedTasks, setSelectedTasks, setTaskListTasks, setTaskListTasksRefetch} = props;
+    const { selectedTasks, setSelectedTasks, setTaskListTasks, setTaskListTasksRefetch,parentClasses} = props;
     const {taskLists, setTaskLists, taskListToMap, setTaskListToMap } = useContext(TaskContext);
 
     //STATE
-    const [dialogOpen, setDialogOpen] = React.useState(false);
-    const [selectedTaskList, setSelectedTaskList] = React.useState(null);
 
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
 
-    const handleMoveDialogOpen = (event) => {
-        setDialogOpen(true);   
-    };
+   
 
-    const handleDialogClose = () => {
-        setSelectedTaskList(null);
-        setDialogOpen(false);
-    };    
-
-    const handleMoveItems = (event, selectedTasks) =>{
+    const handleMoveItems = (event, selectedTasks, selectedTaskList) =>{
         if(!selectedTasks || selectedTasks.length == 0 || !selectedTaskList || !taskListToMap){
             console.error("Failed to handleMoveItems, bad params")
             cogoToast.error("Failed to move items");
@@ -41,13 +33,13 @@ const TaskListActionAdd = (props) => {
 
         TaskLists.addMultipleTasksToList(selectedTasks, selectedTaskList.id)
         .then((response)=>{
-            if(response){
+            console.log("response", response)
+            if(response === true){
                 TaskLists.removeMultipleFromList(selectedTasks, taskListToMap.id)
                 .then((data)=>{
                     if(data){
                         cogoToast.success("Successfully moved tasks");
                         setSelectedTasks([]);
-                        handleDialogClose()
                         //setTaskListTasks(null);
                         setTaskListTasksRefetch(true);
                     }
@@ -65,64 +57,54 @@ const TaskListActionAdd = (props) => {
         
     };
 
-    const handleChangeSelectedTaskList = event => {
-        if(event.target.value === null){
-            console.warn("Bad tl in handleChangeSelectedTaskLIst")
-            return;
+    const getIcon = (list_name) =>{
+        var return_value;
+        switch(list_name){
+            case "Completed Tasks":
+                return_value = <PlaylistAddCheck className={parentClasses.icon}/>
+                break;
+            case "Holds":
+                return_value = <PanTool className={parentClasses.icon}/>
+                break;
+            case "Main List":
+                return_value = <Reorder className={parentClasses.icon}/>
+                break;
+            default:
+                return_value = <Reorder className={parentClasses.icon}/>
+                break;
         }
-        setSelectedTaskList(event.target.value);
-    };
+        return return_value;
+    }
+
 
 
     
     return(
         <React.Fragment>
-            <div className={classes.singleLineDiv}>
-                            <span
-                                className={classes.text_button} 
-                                onClick={event => handleMoveDialogOpen(event)}>
-                                Move Selected Tasks to List
-                            </span>
-            </div>
+                    <div className={parentClasses.priority_action_heading}>
+                    <span>Move</span>
+                    </div>
+                    { taskLists?.map((list)=>{
+                        if(list.id === taskListToMap.id){
+                            return (<></>);
+                        }
+                        return(
+                            <div className={parentClasses.singleLineDiv}>
+                                <div className={parentClasses.singleItem}>
+                                    {getIcon(list.list_name)}
+                                    <span
+                                        key={list.id}
+                                        className={parentClasses.text_button} 
+                                        onClick={event => handleMoveItems(event, selectedTasks, list)}>
+                                        Move Selected to {list.list_name}
+                                    </span>
+                                    </div>
+                            </div>
+
+                        )
+                    })}
+                            
             
-            { dialogOpen && taskListToMap && taskLists ? 
-            
-            <Dialog PaperProps={{className: classes.dialog}} open={handleMoveDialogOpen} onClose={handleDialogClose}>
-            <DialogTitle className={classes.title}>Move Items</DialogTitle>
-                <DialogContent className={classes.content}>
-                        <FormControl variant="outlined" className={classes.inputField}>
-                            <InputLabel id="task-list-label">
-                            Select TaskList to move items
-                            </InputLabel>
-                            <Select
-                            labelId="task-list-label"
-                            id="task-list-input"
-                            onChange={handleChangeSelectedTaskList}
-                            value={selectedTaskList}
-                            >
-                            <MenuItem value={null}>Choose a Task List..</MenuItem>
-                            {taskLists.filter((v)=>v.id != taskListToMap.id).map((list,i)=> (
-                                <MenuItem value={list} key={"task-List-"+i}>{list.list_name}</MenuItem>))                    
-                            }   
-                            </Select>
-                        </FormControl>
-            <DialogActions>
-                <Button onMouseDown={handleDialogClose} color="primary">
-                    Cancel
-                </Button>
-                 <Button
-                    onMouseDown={event => handleMoveItems(event, selectedTasks, selectedTaskList)}
-                    variant="contained"
-                    color="secondary"
-                    size="medium"
-                    className={classes.saveButton} >
-                    Move
-                    </Button>
-                    
-             </DialogActions> 
-            </DialogContent>
-            </Dialog>
-            :<></>}
         </React.Fragment>
       
     );
@@ -214,17 +196,5 @@ const useStyles = makeStyles(theme => ({
     icon_small:{
         verticalAlign: 'text-bottom'
     },
-    singleLineDiv:{
-        display: 'block',
-    },
-    text_button:{
-        cursor: 'pointer',
-        fontSize: '12px',
-        color: '#677fb3',
-        margin: '0% 3% 0% 0%',
-        '&:hover':{
-            color: '#697fb1',
-            textDecoration: 'underline',
-        }
-    },
+
   }));

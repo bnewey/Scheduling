@@ -8,6 +8,8 @@ import ConfirmYesNo from '../../UI/ConfirmYesNo';
 import ListIcon from '@material-ui/icons/FormatListBulletedSharp';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import {PlaylistAddCheck, PanTool, Reorder,DateRange,Update,Clear , FilterList, ViewColumn, PictureAsPdf} from '@material-ui/icons';
+
 
 import TaskLists from '../../../js/TaskLists';
 import TaskListTasksEdit from './TaskListTasksEdit';
@@ -215,24 +217,29 @@ const TaskListSidebar = (props) => {
                 <span>SIDEBAR</span>
             </div>
             <div className={classes.priority_info_div}>   
-                <div className={classes.priority_info_heading}>
+                {/* <div className={classes.priority_detail_heading}>
                     <span>List Info</span>
                 </div>
                  <div>
                     {priorityList ? <div className={classes.priority_text_div}><span className={classes.priority_text_label}>Last Updated: </span><span className={classes.priority_text_grey}>{Util.convertISODateTimeToMySqlDateTime(priorityList.date_entered)}</span></div> : <></>}
-                </div>
-                <div className={classes.priority_info_heading}>
+                </div> */}
+                <div className={classes.priority_action_heading}>
                     <span>Actions</span>
                 </div>
                 {taskListToMap ? 
                 <>
-                    <TaskListDateDialog  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}/>
+                    <TaskListDateDialog  selectedTasks={selectedTasks} 
+                                         setSelectedTasks={setSelectedTasks}
+                                         parentClasses={classes}/>
                     <div className={classes.singleLineDiv}>
+                        <div className={classes.singleItem}>
+                             <Update className={classes.icon} />
                             <span
                                 className={classes.text_button} 
                                 onClick={event => handlePrioritizeByInstallDate(event, taskListToMap)}>
                                 RePrioritize by Install Date
                             </span>
+                        </div>
                     </div>
                     { selectedTasks && selectedTasks.length > 0 ? <>
                          {/* <div className={classes.singleLineDiv}>
@@ -243,16 +250,22 @@ const TaskListSidebar = (props) => {
                             </span>
                          </div> */}
                          <div className={classes.singleLineDiv}>
-                         <span
-                             className={classes.text_button} 
-                             onClick={event => setSelectedTasks([])}>
-                             Clear Selected
-                         </span>
-                      </div></>
+                         <div className={classes.singleItem}>
+                             <Clear className={classes.icon} />
+                            <span
+                                className={classes.text_button} 
+                                onClick={event => setSelectedTasks([])}>
+                                Clear Selected
+                            </span>
+                        </div>
+                        </div></>
                          :<></>}
                     { selectedTasks && selectedTasks.length > 0 ? <>
-                    <TaskListMoveTasks  selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setTaskListTasks={setTaskListTasks}
-                             setTaskListTasksRefetch={setTaskListTasksRefetch}/>
+                    <TaskListMoveTasks  selectedTasks={selectedTasks} 
+                                        setSelectedTasks={setSelectedTasks} 
+                                        setTaskListTasks={setTaskListTasks}
+                                        setTaskListTasksRefetch={setTaskListTasksRefetch}
+                                        parentClasses={classes}/>
                         </> : <></>}
                     {/* <div className={classes.singleLineDiv}>
                     <span
@@ -266,74 +279,110 @@ const TaskListSidebar = (props) => {
                 }
 
 
-                <div className={classes.priority_info_heading}>
+                <div className={classes.priority_action_heading}>
                     <span>Crew</span>
                 </div>
-                <TaskListAddCrewDialog taskListTasks={taskListTasks} selectedTasks={selectedTasks} onClose={()=>{setTaskListTasks(null); setWoiData(null);}} setSelectedTasks={setSelectedTasks}/>
+                <TaskListAddCrewDialog taskListTasks={taskListTasks} 
+                                       selectedTasks={selectedTasks} 
+                                       onClose={()=>{setTaskListTasks(null); setWoiData(null);}} 
+                                       setSelectedTasks={setSelectedTasks}
+                                       parentClasses={classes}/>
 
                 <div className={classes.priority_info_heading}>
                     <span>Other TaskLists</span>
                 </div>
-                    <div className={classes.singleLineDiv}>
-                        <div className={classes.otherTaskListsDiv}>
-                            {
-                                taskLists && taskListToMap && taskLists.filter((v,i)=> (v.id != taskListToMap.id)).map((tl, index)=>{
-                                    return(
-                                        <span
-                                            className={classes.text_button} 
-                                            onClick={event => handleChangeTaskListToMap(event, tl)}>
-                                            {tl.list_name}
-                                        </span>
-                                    )
-                                })
+                {
+                    taskLists && taskListToMap && taskLists.filter((v,i)=> (v.id != taskListToMap.id)).map((tl, index)=>{
+                        const getIcon = (list_name) =>{
+                            var return_value;
+                            switch(list_name){
+                                case "Completed Tasks":
+                                    return_value = <PlaylistAddCheck className={classes.icon}/>
+                                    break;
+                                case "Holds":
+                                    return_value = <PanTool className={classes.icon}/>
+                                    break;
+                                case "Main List":
+                                    return_value = <Reorder className={classes.icon}/>
+                                    break;
+                                default:
+                                    return_value = <Reorder className={classes.icon}/>
+                                    break;
                             }
-                        </div>
-                    </div>
+                            return return_value;
+                        }
+
+                        return(
+                            <div className={classes.singleLineDiv}>
+                                <div className={classes.singleItem}>
+                                    {getIcon(tl.list_name)}
+                                    <span
+                                        className={classes.text_button} 
+                                        onClick={event => handleChangeTaskListToMap(event, tl)}>
+                                        {tl.list_name}
+                                    </span>
+                                 </div>
+                            </div>
+
+                        )
+                    })
+                }
                 <div className={classes.priority_info_heading}>
                     <span>Quick Filters</span>
                 </div>
-                    <div className={classes.singleLineDiv}>
-                        <div className={classes.otherTaskListsDiv}>
-                            {
-                                quickFilters && quickFilters.map((filter, index)=>{
-                                    const isSelected = filters === filter.filter_json && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and"); 
-                                        return(
-                                        <div key={filter.id} dense button
-                                            onClick={event => handleApplySavedFilter(event, filter)}
-                                            className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
-                                        >
-                                            <span  className={classes.fieldListItemText}>
-                                                {filter.name}
-                                            </span>
-                                        </div>
-                                        );
-                                })
-                            }
-                        </div>
-                    </div>
+                {
+                    quickFilters && quickFilters.map((filter, index)=>{
+                        const isSelected = filters === filter.filter_json && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and"); 
+                            return(
+                            <div className={classes.singleLineDiv}>
+                                <div className={classes.singleItem}>
+                                    <FilterList className={classes.icon} />
+                                    <div key={filter.id} dense button
+                                        onClick={event => handleApplySavedFilter(event, filter)}
+                                        className={isSelected ? classes.text_button_selected : classes.text_button}
+                                    >
+                                    <span  className={classes.text_button}>
+                                        {filter.name}
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            );
+                    })
+                }
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>
                     <div className={classes.singleLineDiv}>
+                        <div className={classes.singleItem}>
+                             <ViewColumn className={classes.icon} />
                             <span
                                 className={classes.text_button} 
                                 onClick={event => handleChangeTaskView("compact")}>
                                 Compact
                             </span>
+                        </div>
                     </div>
                     <div className={classes.singleLineDiv}>
+                        <div className={classes.singleItem}>
+                             <ViewColumn className={classes.icon} />
                             <span
                                 className={classes.text_button} 
                                 onClick={event => handleChangeTaskView("noDrill")}>
                                 Compact(No Drill)
                             </span>
+                        </div>
                     </div>
                     <div className={classes.singleLineDiv}>
+                        <div className={classes.singleItem}>
+                             <ViewColumn className={classes.icon} />
                             <span
                                 className={classes.text_button} 
                                 onClick={event => handleChangeTaskView("serviceDept")}>
                                 Service Dept
                             </span>
+                        </div>
                     </div>
                     
 
@@ -341,18 +390,24 @@ const TaskListSidebar = (props) => {
                     <span>PDF</span>
                 </div>
                 <div className={classes.singleLineDiv}>
-                    <span
-                        className={classes.text_button} 
-                        onClick={event =>  handleCreateAndOpenPDF(event)}>
-                        Create PDF
-                    </span>
+                    <div className={classes.singleItem}>
+                        <PictureAsPdf className={classes.icon} />
+                        <span
+                            className={classes.text_button} 
+                            onClick={event =>  handleCreateAndOpenPDF(event)}>
+                            Create PDF
+                        </span>
+                    </div>
                 </div>
                 { pdfLoaded ? 
                 <div className={classes.singleLineDiv}>
-                    <span className={classes.text_button}  >
-                            <a href={"./static/task_list.pdf"}
-                        target="_blank" >Open PDF</a>
-                    </span>
+                    <div className={classes.singleItem}>
+                             <PictureAsPdf className={classes.icon} />
+                            <span className={classes.text_button}  >
+                                    <a href={"./static/task_list.pdf"}
+                                target="_blank" >Open PDF</a>
+                            </span>
+                        </div>
                 </div>
                 : <></>}
             </div>
@@ -385,7 +440,25 @@ const useStyles = makeStyles(theme => ({
         }
     },
     singleLineDiv:{
-        display: 'block',
+        display: 'flex',
+        justifyContent:'center',
+        borderBottom: '1px solid #d8d8d8',
+        width: '100%',
+        background: '#fff',
+    },
+    singleItem:{
+        width: '90%',
+        display: 'flex',
+        justifyContent:'space-between',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    icon:{
+        flexBasis: '10%',
+        marginRight: '5px',
+        width: '.8em',
+        height:'.8em',
+        color: '#959595'
     },
     head_div:{
         backgroundColor: '#fca437',
@@ -444,10 +517,13 @@ const useStyles = makeStyles(theme => ({
         color: '#767676',
     },
     text_button:{
+        flexBasis: '80%',
+        textAlign: 'left',
         cursor: 'pointer',
         fontSize: '12px',
         color: '#677fb3',
         margin: '0% 3% 0% 0%',
+        whiteSpace: 'normal',
         '&:hover':{
             color: '#697fb1',
             textDecoration: 'underline',
@@ -463,7 +539,7 @@ const useStyles = makeStyles(theme => ({
         padding: '7px 12px',
         margin: '0px 5px',
         border: '2px solid #adb0b0',
-        borderRadius: '3px',
+        borderRadius: 'px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
@@ -479,7 +555,31 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center',
         backgroundColor: '#66afa5a6',
         color: '#fff',
-        borderRadius: '8px',
+        borderRadius: '2px',
+    },
+    priority_detail_heading:{
+        '& span':{
+            fontSize: '14px',
+        },
+        marginTop: '4%',
+        display: 'block',
+        width: '100%',
+        textAlign: 'center',
+        backgroundColor: '#22407669',
+        color: '#fff',
+        borderRadius: '2px',
+    },
+    priority_action_heading:{
+        '& span':{
+            fontSize: '14px',
+        },
+        marginTop: '4%',
+        display: 'block',
+        width: '100%',
+        textAlign: 'center',
+        backgroundColor: '#fe6e08b8',
+        color: '#fff',
+        borderRadius: '2px',
     },
     otherTaskListsDiv:{
         display: 'flex',
@@ -487,18 +587,7 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    fieldListItem:{
-        cursor: 'pointer',
-        fontSize: '12px',
-        color: '#677fb3',
-        margin: '0% 3% 0% 0%',
-        '&:hover':{
-            color: '#697fb1',
-            textDecoration: 'underline',
-        }
-        
-    },
-    fieldListItemSelected:{
+    text_button_selected:{
         cursor: 'pointer',
         fontSize: '12px',
         color: '#222',

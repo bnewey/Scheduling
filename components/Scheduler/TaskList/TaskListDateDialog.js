@@ -3,6 +3,7 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Dialog, DialogActions,
          DialogContent, DialogTitle, Grid, TextField} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 import Tasks from '../../../js/Tasks';
 import Util from '../../../js/Util';
@@ -25,7 +26,7 @@ import {
 const TaskListDateDialog = (props) => {
  
     //PROPS
-    const { selectedTasks,setSelectedTasks} = props;
+    const { selectedTasks,setSelectedTasks, parentClasses} = props;
     const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved } = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
@@ -146,12 +147,15 @@ const TaskListDateDialog = (props) => {
     return(
         <React.Fragment>
             { selectedTasks && selectedTasks.length > 0 ?
-                         <div className={classes.singleLineDiv}>
+                         <div className={parentClasses.singleLineDiv}>
+                             <div className={parentClasses.singleItem}>
+                             <DateRangeIcon className={parentClasses.icon} />
                             <span
-                                className={classes.text_button} 
+                                className={parentClasses.text_button} 
                                 onClick={event => handleOpenDateDialog(event)}>
                                 Set Date for Multiple
                             </span>
+                            </div>
                          </div>
             :<></>}
             
@@ -321,15 +325,7 @@ const useStyles = makeStyles(theme => ({
     uncheckedType:{
 
     },
-    text_button:{
-        cursor: 'pointer',
-        fontSize: '12px',
-        color: '#677fb3',
-        margin: '0% 3% 0% 0%',
-        '&:hover':{
-            color: '#697fb1',
-            textDecoration: 'underline',
-        }
-    },
+
+    
     
   }));

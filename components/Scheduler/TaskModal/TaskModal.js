@@ -255,9 +255,8 @@ export default function TaskModal(props){
             { modalTask ? /* If modalTask is not loaded, load the circularprogrss instead */
             <div className={classes.container}>
             <div className={classes.modalTitleDiv}>
-                <span id="transition-modal-title" className={classes.modalTitle}>
-                    Edit Task Id: {modalTask.t_id}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WO#: {modalTask.table_id}
-                </span>
+                <span id="transition-modal-title" className={classes.modalTitle}>WO: {modalTask.table_id}</span>
+                <span id="transition-modal-title" className={classes.modalTitle}>Task: {modalTask.t_id}</span>
             </div>
             <Grid container >  
                 <Grid item xs={9} className={classes.paperScroll}>
@@ -430,8 +429,13 @@ const useStyles = makeStyles(theme => ({
     modalTitleDiv:{
         backgroundColor: '#5b7087',
         padding: '5px 0px 5px 0px',
+        display:"flex",
+        flexDirection: 'row',
+        justifyContent: 'start',
+        alignItems: 'center',
     },
     modalTitle: {
+        padding: '0px 25px',
         fontSize: '18px',
         fontWeight: '300',
         color: '#fff',

@@ -405,8 +405,10 @@ const TaskListTasks = (props) =>{
 
     },[taskListTasks])
 
-    const handleGoToWorkOrderId = (wo_id) =>{
+    const handleGoToWorkOrderId = (wo_id, event) =>{
       console.log("woi", wo_id);
+      //Disable Default context menu
+      event.preventDefault();
       
       //set detailWOIid in local data
       window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
@@ -543,7 +545,10 @@ const TaskListTasks = (props) =>{
           break;
         }
         case 'table_id':
-          return_value = <span onClick={()=>handleGoToWorkOrderId(value)} className={classes.clickableWOnumber}>{value}</span>
+          return_value = <span onContextMenu={(event)=>handleGoToWorkOrderId(value,event)} 
+                                className={classes.clickableWOnumber}
+                                onClick={event => handleRightClick(event, task.t_id)}>
+                                  {value}</span>
         
           break;
         default:{
@@ -618,7 +623,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
         {(provided, snapshot) => (
           <div key={taskListTasksSaved[index]?.t_id + 321321 } 
                     role={undefined} dense button 
-                    onContextMenu={event => handleRightClick(event, row.t_id)}
+                    
                     //onMouseUp={event => handleClick(event, row.t_id)}
                     className={ index % 2 == 0 ? 
                               (isItemCompleted ? ( isItemSelected ? classes.selectedRowComp : classes.nonSelectedRowComp ):( isItemSelected ? classes.selectedRow : classes.nonSelectedRow ) )

@@ -3,6 +3,7 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Dialog, DialogActions,
          DialogContent, DialogTitle, Grid, TextField} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import People from '@material-ui/icons/GroupAdd'
 
 import Crew from '../../../js/Crew';
 import Util from '../../../js/Util';
@@ -22,7 +23,7 @@ import { CrewContext } from '../Crew/CrewContextContainer';
 const TaskListAddCrewDialog = (props) => {
  
     //PROPS
-    const { selectedTasks, onClose} = props;
+    const { selectedTasks, onClose ,parentClasses} = props;
     const { taskLists, setTaskLists, taskListTasksSaved } = useContext(TaskContext);
     const { allCrews, crewMembers, setShouldResetCrewState } = useContext(CrewContext);
 
@@ -185,12 +186,15 @@ const TaskListAddCrewDialog = (props) => {
     return(
         <React.Fragment>
             { selectedTasks && selectedTasks.length > 0 ?
-                         <div className={classes.singleLineDiv}>
-                            <span
-                                className={classes.text_button} 
-                                onClick={event => handleOpenCrewDialog(event)}>
-                                Add Selected to Crew
-                            </span>
+                         <div className={parentClasses?.singleLineDiv}>
+                             <div className={parentClasses?.singleItem}>
+                             <People className={parentClasses?.icon} />
+                                <span
+                                    className={parentClasses?.text_button} 
+                                    onClick={event => handleOpenCrewDialog(event)}>
+                                    Add Selected to Crew
+                                </span>
+                            </div>
                          </div>
             :<></>}
             
@@ -377,15 +381,6 @@ const useStyles = makeStyles(theme => ({
     uncheckedType:{
 
     },
-    text_button:{
-        cursor: 'pointer',
-        fontSize: '12px',
-        color: '#677fb3',
-        margin: '0% 3% 0% 0%',
-        '&:hover':{
-            color: '#697fb1',
-            textDecoration: 'underline',
-        }
-    },
+   
     
   }));
