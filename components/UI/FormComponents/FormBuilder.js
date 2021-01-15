@@ -148,7 +148,9 @@ const FormBuilder = forwardRef((props, ref) => {
                 //Create Object with our text input values using ref_object
                 const objectMap = (obj, fn) =>
                 Object.fromEntries(      Object.entries(obj).map( ([k, v], i) => [k, fn(v, k, i)]  )        );
-                var textValueObject = objectMap(ref_object, v => v.current ? v.current.value ? v.current.value : null : null );
+                var textValueObject = objectMap(ref_object, v => v.current ? v.current.value || v.current.value === "" ? v.current.value : null : null );
+
+                console.log("textValueObject", textValueObject);
 
                 var updateItem = {...itemToSave};
 
@@ -159,8 +161,8 @@ const FormBuilder = forwardRef((props, ref) => {
                     switch(type){
                         case 'number':
                         case 'text':
-                            //Get updated values with textValueObject bc text values use ref
-                            if(textValueObject[field.field])
+                            //Get updated values with textValueObject bc text values use ref, check against "" bc ""==false
+                            if(textValueObject[field.field] || textValueObject[field.field]=== "")
                                 updateItem[field.field] = textValueObject[field.field];
                             break;
                         case 'date':
@@ -252,6 +254,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     return;
                 }
 
+                console.log("updateItem", updateItem);
                 //Run given handlSave
                 if(handleSave){
                     handleSave(itemToSave, updateItem, addOrEdit)

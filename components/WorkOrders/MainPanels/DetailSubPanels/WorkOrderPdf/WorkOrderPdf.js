@@ -28,7 +28,7 @@ const WorkOrderPdf = function(props) {
     
    
     useEffect(()=>{
-        if(loading == true && loaded == false && activeWorkOrder){
+        if(loading == true && loaded == false && activeWorkOrder && raineyUsers){
             Promise.all([Work_Orders.getAllWorkOrderSignArtItems(activeWorkOrder.wo_record_id), 
                 Work_Orders.getWorkOrderByIdForPDF(activeWorkOrder.wo_record_id)])
             .then( values => {
@@ -62,7 +62,7 @@ const WorkOrderPdf = function(props) {
                 cogoToast.error(`Error getting wois`, {hideAfter: 4});
             })
         } 
-    },[loading, loaded, activeWorkOrder])
+    },[loading, loaded, activeWorkOrder, raineyUsers])
     
     const handleNextPage = () =>{
       setPageNumber(pageNumber + 1);

@@ -8,7 +8,8 @@ import {makeStyles, Modal, Backdrop, Fade, Grid, TextField, FormControl, InputLa
     ButtonGroup, Button, CircularProgress, Avatar} from '@material-ui/core';
 
 import SaveIcon from '@material-ui/icons/Save';
-import TrashIcon from '@material-ui/icons/Delete';
+import Move from '@material-ui/icons/Check';
+import ListIcon from '@material-ui/icons/ListAltSharp';
 import AddIcon from '@material-ui/icons/Add';
 
 import cogoToast from 'cogo-toast';
@@ -23,7 +24,7 @@ import {
 
 import Util from '../../../js/Util.js';
 import Tasks from '../../../js/Tasks';
-import TaskList from '../../../js/TaskLists';
+import TaskLists from '../../../js/TaskLists';
 
 import TaskModalTaskInfo from './TaskModalSections/TaskModalTaskInfo';
 import TaskModalAddressInfo from './TaskModalSections/TaskModalAddressInfo';
@@ -43,7 +44,7 @@ import WoiStatusCheck from '../TaskList/components/WoiStatusCheck.js';
 export default function TaskModal(props){
 
     const {modalOpen, setModalOpen, modalTaskId, setModalTaskId} = props;
-    const {taskLists, setTaskLists, setRows, setRefreshView, tabValue} = useContext(TaskContext);
+    const {taskLists, setTaskLists, setRows, setRefreshView, tabValue, taskListToMap} = useContext(TaskContext);
 
     const classes = useStyles();
 
@@ -236,6 +237,39 @@ export default function TaskModal(props){
         handleClose();
     };
 
+    const handleMoveItems = (event, modalTask, tl_id) =>{
+        if(!modalTask?.t_id || !taskListToMap){
+            console.error("Failed to handleMoveItem, bad params")
+            cogoToast.error("Failed to move item");
+            return;
+        }
+
+        TaskLists.addMultipleTasksToList([modalTask.t_id], tl_id)
+        .then((response)=>{
+            console.log("response", response)
+            if(response === true){
+                TaskLists.removeMultipleFromList([modalTask.t_id], taskListToMap.id)
+                .then((data)=>{
+                    if(data){
+                        cogoToast.success("Successfully moved task");
+                        //setTaskListTasks(null);
+                        setShouldReFetch(true);
+                    }
+                })
+                .catch((error)=>{
+                    cogoToast.error("Failed to remove items");
+                    console.error("Failed to remove items", error);
+                })
+            }
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to add items")
+            console.error("Failed to add items", error)
+        })
+        
+    };
+
+
     
 
     return(
@@ -339,6 +373,20 @@ export default function TaskModal(props){
                             </Select>
                         </FormControl>
                     </div> */}
+                    { modalTask?.task_list_id !== taskLists.find((list)=> list.list_name === "Completed Tasks")?.id && <Button
+                            onClick={event => handleMoveItems(event, modalTask, taskLists.find((list)=> list.list_name === "Completed Tasks")?.id)}
+                            variant="contained"
+                            color="secondary"
+                            size="large"
+                            className={classes.moveButton}><Move />Move To Completed
+                        </Button> }
+                    { modalTask?.task_list_id !== taskLists.find((list)=> list.list_name === "Main List")?.id && <Button
+                            onClick={event => handleMoveItems(event, modalTask, taskLists.find((list)=> list.list_name === "Main List")?.id)}
+                            variant="contained"
+                            color="secondary"
+                            size="large"
+                            className={classes.moveButton}><ListIcon />Move To Main List
+                        </Button> }
                     <ButtonGroup className={classes.buttonGroup}>
                     <Button
                             onClick={() => handleClose()}
@@ -350,14 +398,7 @@ export default function TaskModal(props){
                             Close
                         </Button></ButtonGroup>
                     <ButtonGroup className={classes.buttonGroup}>
-                        {/* <Button
-                            onClick={handleDelete(modalTask.t_id)}
-                            variant="contained"
-                            color="secondary"
-                            size="large"
-                            className={classes.deleteButton}
-                        ><TrashIcon />
-                        </Button> */}
+                         
                         
                         <Button
                             onClick={handleSave(modalTask)}
@@ -516,7 +557,7 @@ const useStyles = makeStyles(theme => ({
     saveButton:{
         backgroundColor: '#414d5a'
     },
-    deleteButton:{
+    moveButton:{
         backgroundColor: '#b7c3cd'
     },
     buttonGroup: {

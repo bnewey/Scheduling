@@ -388,14 +388,12 @@ const TaskListTasks = (props) =>{
       }
 
       var updateTask = {...task};
-      console.log("Fieldid", fieldId);
 
       updateTask[fieldId] = Util.convertISODateToMySqlDate(value);
       console.log("Update task", updateTask);
       Tasks.updateTask(updateTask)
       .then((data)=>{
         cogoToast.success(`Updated ${fieldId}`)
-        //setTaskListTasks(null);
         setTaskListTasksRefetch(true);
       })
       .catch((error)=>{
@@ -414,7 +412,7 @@ const TaskListTasks = (props) =>{
       window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
       
       //set detail view in local data
-      window.localStorage.setItem('currentView', JSON.stringify("woPdf"));
+      window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
   
       Router.push('/scheduling/work_orders')
     }
@@ -434,8 +432,6 @@ const TaskListTasks = (props) =>{
 
       //Handle date types first
       if(type=="date"){
-
-        //return_value = Util.convertISODateToMySqlDate(return_value);
         return_value = moment(value).format("MM/DD/YYYY")
       }
 

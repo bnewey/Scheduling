@@ -163,6 +163,35 @@ router.post('/addSavedTaskFilter', async (req,res) => {
   }
 });
 
+router.post('/overwriteSavedTaskFilter', async (req,res) => {
+  var filter_id, name, user_id, filterAndOr, filterInOrOut, filters;
+  if(req.body){
+    filter_id = req.body.filter_id;
+    name = req.body.name;
+    user_id = req.body.user_id;
+    filterAndOr = req.body.filterAndOr;
+    filterInOrOut = req.body.filterInOrOut;
+    filters = req.body.filters;
+  }
+  if(!filter_id, !name, !user_id, !filters){
+    logger.error("Bad params in addSavedTaskFilter")
+    res.sendStatus(400);
+  }
+
+  const sql = ' UPDATE task_user_filters SET user_id=?, and_or=?, in_out=?, filter_json=?, name=? ' +
+    ' WHERE id = ? ';
+  try{
+    const results = await database.query(sql, [user_id, filterAndOr, filterInOrOut, JSON.stringify(filters), name, filter_id ]);
+    logger.info("Overwrote task_user_filter ");
+    res.json(results);
+  }
+
+  catch(error){
+    logger.error("Settings (overwriteSavedTaskFilter): " + error);
+    res.sendStatus(400);
+  }
+});
+
 router.post('/removedSavedFilter', async (req,res) => {
   var filter_id;
   if(req.body){

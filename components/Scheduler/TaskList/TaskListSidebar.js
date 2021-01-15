@@ -516,19 +516,7 @@ const useStyles = makeStyles(theme => ({
         minWidth: '15%',
         color: '#767676',
     },
-    text_button:{
-        flexBasis: '80%',
-        textAlign: 'left',
-        cursor: 'pointer',
-        fontSize: '12px',
-        color: '#677fb3',
-        margin: '0% 3% 0% 0%',
-        whiteSpace: 'normal',
-        '&:hover':{
-            color: '#697fb1',
-            textDecoration: 'underline',
-        }
-    },
+    
     priority_info_div:{
         display: 'flex',
         flexWrap: 'nowrap',
@@ -587,11 +575,27 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    text_button:{
+        flexBasis: '80%',
+        textAlign: 'left',
+        cursor: 'pointer',
+        fontSize: '12px',
+        color: '#677fb3',
+        margin: '0% 3% 0% 0%',
+        whiteSpace: 'normal',
+        '&:hover':{
+            color: '#697fb1',
+            textDecoration: 'underline',
+        }
+    },
     text_button_selected:{
+        flexBasis: '80%',
+        textAlign: 'left',
         cursor: 'pointer',
         fontSize: '12px',
         color: '#222',
         margin: '0% 3% 0% 0%',
+        whiteSpace: 'normal',
         background: '#70aaff70',
         padding: '0px 3px',
         borderRadius: 2,

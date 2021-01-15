@@ -143,6 +143,28 @@ async function addSavedTaskFilter( name, user_id, filterAndOr, filterInOrOut, fi
     }
 }
 
+async function overwriteSavedTaskFilter( filter_id, name, user_id, filterAndOr, filterInOrOut, filters){
+    const route = '/scheduling/settings/overwriteSavedTaskFilter';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ filter_id, name, user_id, filterAndOr, filterInOrOut, filters })
+        });
+
+        if(!data.ok){
+            throw new Error("overwriteSavedTaskFilter returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function removedSavedFilter( filter_id){
     const route = '/scheduling/settings/removedSavedFilter';
     try{
@@ -174,5 +196,6 @@ module.exports = {
     getPastScoreboardParams,
     getTaskUserFilters,
     addSavedTaskFilter,
+    overwriteSavedTaskFilter,
     removedSavedFilter
 };

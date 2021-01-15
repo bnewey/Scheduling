@@ -386,7 +386,7 @@ router.post('/addWorkOrder', async (req,res) => {
 
     }
     catch(error){
-        logger.error("Failed to updateWorkOrder: " + error);
+        logger.error("Failed to addWorkOrder: " + error);
         res.sendStatus(400);
     }
 });

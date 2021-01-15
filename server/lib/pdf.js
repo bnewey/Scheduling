@@ -79,20 +79,23 @@ router.post('/createPackingSlipPdf', async (req,res) => {
     const makePdf = async() =>{
         const doc = new PDFDocument();
 
+        doc.font(`${process.env.PWD}/public/static/fonts/ARIALBD.ttf`);
         doc.image(`${process.env.PWD}/public/static/PDFS/packing_slip-1.png`, 0, 0, {width: 600, height: 800})
         
         // add your content to the document here, as usual
-        doc.fontSize(10).text(psObject.entity_name, 30, 160);
-        doc.text(psObject.contact_name, 60);
-        doc.text(psObject.address, 30);
-        doc.text(psObject.city + ', ' + psObject.state + ' ' + psObject.zip, 30);
+        doc.fontSize(10).text(psObject.entity_name, 31, 154);
+        doc.text(psObject.contact_name, 61, 169);
+        doc.text(psObject.address, 31,184);
+        doc.text(psObject.city + ', ' + psObject.state + ' ' + psObject.zip, 31, 198);
 
-        doc.text(psObject.job_reference, 30, 250);
+        doc.text(psObject.job_reference, 30, 255);
 
-        doc.fontSize(12).text(psObject.work_order, 45, 325);
-        doc.fontSize(10).text(psObject.po_number, 155, 325);
+        doc.fontSize(13).text(psObject.work_order, 45, 323);
+        doc.fontSize(10).text(psObject.po_number, 147, 325);
         doc.text( psObject.date_ordered ? moment(psObject.date_ordered).format('MM/DD/YY') : "", 230, 325);
         doc.text( psObject.ship_date ? moment(psObject.ship_date).format('MM/DD/YY') : "", 300, 325);
+
+        doc.font(`${process.env.PWD}/public/static/fonts/Arialnb.ttf`);
 
         doc.fontSize(8);
         woiArray.forEach((item,i)=>{
@@ -124,46 +127,50 @@ router.post('/createWorkOrderPdf', async (req,res) => {
     const makePdf = async() =>{
         const doc = new PDFDocument();
 
+        doc.font(`${process.env.PWD}/public/static/fonts/ARIALBD.ttf`);
+
         doc.image(`${process.env.PWD}/public/static/PDFS/work_order_pdf.png`, 0, 0, {width: 610, height: 790})
         
         // add your content to the document here, as usual
-        doc.fontSize(10).text(woObject.date ? moment(woObject.date).format('MM/DD/YYYY') : "", 340, 27 , {lineBreak: false});
-        doc.text(woObject.requested_arrival_date ? moment(woObject.requested_arrival_date).format('MM/DD/YYYY') : "", 475,27)
+        doc.fontSize(10).text(woObject.date ? moment(woObject.date).format('MM/DD/YYYY') : "", 340, 25 , {lineBreak: false});
+        doc.text(woObject.requested_arrival_date ? moment(woObject.requested_arrival_date).format('MM/DD/YYYY') : "", 475,25)
 
-        doc.fontSize(12).text(woObject.wo_record_id, 115, 42 , {lineBreak: false});
-        doc.fontSize(7).text(woObject.requestor_init, 167, 39 , {lineBreak: false});
-        doc.text(woObject.maker_init, 167, 50 , {lineBreak: false});
-        doc.fontSize(10).text(woObject.po_number, 190, 45 , {lineBreak: false});
-        doc.text(woObject.type, 340, 45 , {lineBreak: false});
+        doc.fontSize(16).text(woObject.wo_record_id, 110, 40 , {lineBreak: false});
+        doc.fontSize(8).text(woObject.requestor_init, 167, 38 , {lineBreak: false});
+        doc.text(woObject.maker_init, 167, 49 , {lineBreak: false});
+        doc.fontSize(11).text(woObject.po_number, 188, 44 , {lineBreak: false});
+        doc.text(woObject.type, 340, 43 , {lineBreak: false});
+
+        doc.font(`${process.env.PWD}/public/static/fonts/Arialnb.ttf`);
 
         //Ship To 
-        doc.text(woObject.c_address_to_name, 43, 73 , {lineBreak: false});
-        doc.text(woObject.c_address, 43, 93 , {lineBreak: false});
-        doc.text(woObject.c_residence ? 'X' : "", 293, 93 , {lineBreak: false});
-        doc.text(woObject.c_city, 43, 113 , {lineBreak: false});
-        doc.text(woObject.c_state, 205, 113 , {lineBreak: false});
-        doc.text(woObject.c_zip, 241, 113 , {lineBreak: false});
-        doc.text(woObject.c_contact_name, 43, 133 , {lineBreak: false});
-        doc.text(woObject.c_contact_title ? woObject.c_contact_title : "", 205, 133 , {lineBreak: false});
-        doc.text(woObject.c_work_phone, 43, 151 , {lineBreak: false});
-        doc.text(woObject.c_cell_phone, 135, 151 , {lineBreak: false});
-        doc.text(woObject.c_other_phone ? woObject.c_other_phone : '', 220, 151 , {lineBreak: false});
+        doc.text(woObject.c_address_to_name, 43, 71 , {lineBreak: false});
+        doc.text(woObject.c_address, 43, 91 , {lineBreak: false});
+        doc.text(woObject.c_residence ? 'X' : "", 293, 91 , {lineBreak: false});
+        doc.text(woObject.c_city, 43, 111 , {lineBreak: false});
+        doc.text(woObject.c_state, 205, 111 , {lineBreak: false});
+        doc.text(woObject.c_zip, 241, 111 , {lineBreak: false});
+        doc.text(woObject.c_contact_name, 43, 130 , {lineBreak: false});
+        doc.text(woObject.c_contact_title ? woObject.c_contact_title : "", 205, 130 , {lineBreak: false});
+        doc.text(woObject.c_work_phone, 43, 148 , {lineBreak: false});
+        doc.text(woObject.c_cell_phone, 135, 148 , {lineBreak: false});
+        doc.text(woObject.c_other_phone ? woObject.c_other_phone : '', 220, 148 , {lineBreak: false});
 
         //Bill To
-        doc.text(woObject.a_address_to_name, 328, 73 , {lineBreak: false});
-        doc.text(woObject.a_account_number, 510, 73 , {lineBreak: false});
-        doc.text(woObject.a_address, 328, 93 , {lineBreak: false});
-        doc.text(woObject.a_city, 328, 113 , {lineBreak: false});
-        doc.text(woObject.a_state, 470, 113 , {lineBreak: false});
-        doc.text(woObject.a_zip, 528, 113 , {lineBreak: false});
-        doc.text(woObject.a_contact_name, 328, 133 , {lineBreak: false});
-        doc.text(woObject.a_contact_title ? woObject.a_contact_title : "", 470, 133 , {lineBreak: false});
-        doc.text(woObject.a_work_phone, 328, 151 , {lineBreak: false});
-        doc.text(woObject.a_fax ? woObject.a_fax : "", 470, 151 , {lineBreak: false});
+        doc.text(woObject.a_address_to_name, 328, 71 , {lineBreak: false});
+        doc.text(woObject.a_account_number, 510, 71 , {lineBreak: false});
+        doc.text(woObject.a_address, 328, 91 , {lineBreak: false});
+        doc.text(woObject.a_city, 328, 111 , {lineBreak: false});
+        doc.text(woObject.a_state, 470, 111 , {lineBreak: false});
+        doc.text(woObject.a_zip, 528, 111 , {lineBreak: false});
+        doc.text(woObject.a_contact_name, 328, 130 , {lineBreak: false});
+        doc.text(woObject.a_contact_title ? woObject.a_contact_title : "", 470, 130 , {lineBreak: false});
+        doc.text(woObject.a_work_phone, 328, 148 , {lineBreak: false});
+        doc.text(woObject.a_fax ? woObject.a_fax : "", 470, 148 , {lineBreak: false});
         
-        doc.text(woObject.job_reference, 43, 170 , {lineBreak: false});
+        doc.text(woObject.job_reference, 43, 167 , {lineBreak: false});
 
-        doc.text(woObject.notes, 43, 630, {width: 230})
+        doc.fontSize(10).text(woObject.notes, 43, 627, {width: 227})
 
         //Work Order Items Sections
         var loaners=woiArray.filter((w)=>w.item_type == 2);
@@ -177,11 +184,11 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 if(i >= 8){
                     //new page?
                 }
-                doc.fontSize(10).text("X", 45 , (230 + i*13.7) , {lineBreak: false});
+                doc.fontSize(10).text("X", 45 , (228 + i*13.7) , {lineBreak: false});
                 doc.fontSize(8);
-                doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (232 + i*13.5), {lineBreak: false})
+                doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (230 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);
-                doc.text(item.description, 220, (232 + i*13.5), {lineBreak: false})
+                doc.text(item.description, 180, (230 + i*13.5), {lineBreak: false})
                 
             })
         }
@@ -193,11 +200,11 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 if(i >= 8){
                     //new page?
                 }
-                doc.fontSize(10).text("X", 66 , (230 + i*13.7), {lineBreak: false});
+                doc.fontSize(10).text("X", 66 , (228 + i*13.7), {lineBreak: false});
                 doc.fontSize(8);
-                doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (232 + i*13.5), {lineBreak: false})
+                doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (230 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);
-                doc.text(item.description, 220, (232 + i*13.5), {lineBreak: false})
+                doc.text(item.description, 180, (230 + i*13.5), {lineBreak: false})
                 
             })
         }
@@ -258,32 +265,33 @@ router.post('/createFairPlayOrderPdf', async (req,res) => {
         const doc = new PDFDocument();
 
         doc.image(`${process.env.PWD}/public/static/PDFS/FairPlayOrderPDF.png`, 0, 0, {width: 600, height: 800})
-        
+        doc.font(`${process.env.PWD}/public/static/fonts/Arialnb.ttf`);
+
         // add your content to the document here, as usual
-        doc.fontSize(10).text( fpOrder.order_date ? moment(fpOrder.order_date).format('MM/DD/YYYY') : "", 137, 157);
-        doc.text(fpOrder.user_entered_name, 405, 157);
-        doc.text(fpOrder.ship_to, 137, 192, {width: 125});
-        doc.text(fpOrder.bill_to, 405, 192, {width: 125});
-        doc.text(fpOrder.c_name, 137, 275, {width: 300});
-        doc.text(fpOrder.discount+'%', 405,298);
+        doc.fontSize(10).text( fpOrder.order_date ? moment(fpOrder.order_date).format('MM/DD/YYYY') : "", 137, 155);
+        doc.text(fpOrder.user_entered_name, 405, 155);
+        doc.text(fpOrder.ship_to, 137, 192, {width: 123});
+        doc.text(fpOrder.bill_to, 405, 192, {width: 110});
+        doc.text(fpOrder.c_name, 137, 273, {width: 300});
+        doc.text(fpOrder.discount+'%', 405,296);
 
         // doc.text(fpOrder.job_reference, 30, 250);
 
         doc.fontSize(8);
         if(orderItems && Array.isArray(orderItems)){
             orderItems.forEach((item,i)=>{
-                doc.text(item.model, 130 , (334.3 + i*74.7))
-                doc.text(item.model_quantity, 243, (334.3 + i*74.7))
-                doc.text(item.color, 320, (334.3 + i*74.7))
-                doc.text(item.trim, 444, (334.3 + i*74.7))
-                doc.text(item.controller, 130, (346.2 + i*74.7))
-                doc.text(item.controller_quantity, 243, (346.2 + i*74.7))
-                doc.text(item.ctrl_case, 320, (346.2 + i*74.7))
-                doc.text(item.horn, 444, (346.2 + i*74.7))
+                doc.text(item.model, 130 , (332.3 + i*74.7))
+                doc.text(item.model_quantity, 243, (332.3 + i*74.7))
+                doc.text(item.color, 320, (332.3 + i*74.7))
+                doc.text(item.trim, 444, (332.3 + i*74.7))
+                doc.text(item.controller, 130, (344.2 + i*74.7))
+                doc.text(item.controller_quantity, 243, (344.2 + i*74.7))
+                doc.text(item.ctrl_case, 320, (344.2 + i*74.7))
+                doc.text(item.horn, 444, (344.2 + i*74.7))
             })
         }
 
-        doc.fontSize(10).text(fpOrder.special_instructions, 103, 645, {width: 400});
+        doc.fontSize(10).text(fpOrder.special_instructions, 103, 643, {width: 400});
         
 
         doc.end();

@@ -438,6 +438,25 @@ const TaskListFilter = (props) => {
 
     }
 
+    const handleOverWriteSavedFilter = (event, item)=>{
+        if(!item || !user || !filterInOrOut || !filterAndOr){
+            console.error("Bad parameters in handleOverWriteSavedFilter filter save")
+            return;
+        }
+        Settings.overwriteSavedTaskFilter( item.id, item.name, user.id, filterAndOr == "and" ? 0 : 1, filterInOrOut == "in" ? 0 : 1, filters)
+            .then((response) => {
+                
+                //refetch task filters
+                setTaskUserFilters(null);
+                setTaskListFiltersEdited(true);
+                cogoToast.success(`Overwrote ${item.name}`, {hideAfter: 4});
+            })
+            .catch( error => {
+                cogoToast.error(`Error adding new saved task filter`, {hideAfter: 4});
+                console.error(error);
+        });
+    }
+
     const handleRemoveSavedFilter = (event, item)=>{
         if(!item){
             console.error("Bad item in removeSavedFilter");
@@ -710,6 +729,9 @@ const TaskListFilter = (props) => {
                                                     {item.name}
                                                 </ListItemText>
                                                 <ListItemSecondaryAction className={classes.secondary_div}>
+                                                    <IconButton className={classes.secondary_button} edge="end" aria-label="save" onClick={event => handleOverWriteSavedFilter(event, item)}>
+                                                    <SaveIcon />
+                                                    </IconButton> 
                                                     <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleRemoveSavedFilter(event, item)}>
                                                     <DeleteIcon />
                                                     </IconButton> 
