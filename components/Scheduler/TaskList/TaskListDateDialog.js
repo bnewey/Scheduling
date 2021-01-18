@@ -58,9 +58,9 @@ const TaskListDateDialog = (props) => {
 
     const handleChangeSelectedDate = (value)=>{
         if(!value){
-            return;
             cogoToast.error("Bad Date");
             console.error("handleChangeSelectedDate recieved bad value");
+            return;
         }
         setSelectedDate(value);
     }
@@ -72,7 +72,6 @@ const TaskListDateDialog = (props) => {
         }
         const conv_date = Util.convertISODateToMySqlDate(date);
 
-
         Tasks.updateMultipleTaskDates(selectedTasks, conv_date, date_type)
                 .then((reponse) => {
                     if(!reponse){
@@ -81,6 +80,8 @@ const TaskListDateDialog = (props) => {
                     //refetch tasklists
                     setTaskLists(null);
                     handleDateDialogClose();
+                    setSelectedTasks([]);
+
                     cogoToast.success(`Updated Multiple Dates`, {hideAfter: 4});
                 })
                 .catch( error => {
