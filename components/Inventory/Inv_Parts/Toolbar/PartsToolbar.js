@@ -10,7 +10,7 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../js/Util';
 import Work_Orders from  '../../../../js/Work_Orders';
-import { ListContext } from '../SignContainer';
+import { ListContext } from '../InvPartsContainer';
 
 import Search from './Components/Search';
 
@@ -19,25 +19,28 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
 
-const SignToolbar = function(props) {
+const PartsToolbar = function(props) {
   const {user} = props;
 
   
   const { signs, setSigns,  currentView, setCurrentView, views} = useContext(ListContext);
 
-  const backMode = currentView && currentView.value != "signScheduler";
+  const backMode = currentView && currentView.value != "partsList";
 
   const classes = useStyles({backMode});
   
   
   const toolBarMainGrid = () =>{
     switch(currentView.value){
-      case "signScheduler":
+      case "partsList":
         return <Search />
         break
-      case "searchSigns":
+      case "partsSearch":
         return <Search />
         break;
+      case "partsDetail":
+        return <></>
+          break;
       default: 
         cogoToast.error("Bad view");
         return <></>;
@@ -95,7 +98,7 @@ const SignToolbar = function(props) {
   );
 }
 
-export default SignToolbar
+export default PartsToolbar
 
 const useStyles = makeStyles(theme => ({
   root:{

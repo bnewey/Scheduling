@@ -8,8 +8,8 @@ import cogoToast from 'cogo-toast';
 import {createSorter} from '../../../../../js/Sort';
 
 import Util from  '../../../../../js/Util';
-import Signs from  '../../../../../js/Signs';
-import { ListContext } from '../../SignContainer';
+import Inventory from  '../../../../../js/Inventory';
+import { ListContext } from '../../InvPartsContainer';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -26,15 +26,13 @@ const Search = function(props) {
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { signs, setSigns, currentView, setCurrentView, views} = useContext(ListContext);
-  const searchOpen = currentView && currentView.value == "searchSigns";
+  const { parts, setParts, currentView, setCurrentView, views} = useContext(ListContext);
+  const searchOpen = currentView && currentView.value == "partsSearch";
 
   const searchTableObject= [
-    {value: "wo.type", displayValue: 'Type'},
-    {value: "eac.state", displayValue: 'State'},
-    {value: "woi.work_order", displayValue: 'WO#'},
-    {value: "enc.name", displayValue: 'Product To'},
-    {value: "woi.description", displayValue: 'Description'},
+    {value: "p.rainey_id", displayValue: 'Rainey P#'},
+    {value: "p.description", displayValue: 'Description'},
+    {value: "pt.type", displayValue: 'Type'},
   ];
 
   const classes = useStyles({searchOpen});
@@ -60,7 +58,7 @@ const Search = function(props) {
   //Save and/or Fetch searchTable to local storage
   useEffect(() => {
     if(searchTable == null){
-      var tmp = window.localStorage.getItem('searchSignTable');
+      var tmp = window.localStorage.getItem('searchInvPartsTable');
       var tmpParsed;
       if(tmp){
         tmpParsed = JSON.parse(tmp);
@@ -72,7 +70,7 @@ const Search = function(props) {
       }
     }
     if(searchTable){
-      window.localStorage.setItem('searchSignTable', JSON.stringify(searchTable));
+      window.localStorage.setItem('searchInvPartsTable', JSON.stringify(searchTable));
     }
     
   }, [searchTable]);
@@ -80,7 +78,7 @@ const Search = function(props) {
   //Save and/or Fetch searchHistory to local storage
   useEffect(() => {
     if(searchHistory == null){
-      var tmp = window.localStorage.getItem('searchSignHistory');
+      var tmp = window.localStorage.getItem('searchInvPartsHistory');
       var tmpParsed;
       if(tmp){
         tmpParsed = JSON.parse(tmp);
@@ -92,7 +90,7 @@ const Search = function(props) {
       }
     }
     if(Array.isArray(searchHistory)){
-      window.localStorage.setItem('searchSignHistory', JSON.stringify(searchHistory));
+      window.localStorage.setItem('searchInvPartsHistory', JSON.stringify(searchHistory));
     }
     
   }, [searchHistory]);
@@ -103,7 +101,7 @@ const Search = function(props) {
         console.error("Bad search value or search table on search");
         reject();
       }
-      Signs.searchAllSignItems(searchTable, searchValue)
+      Inventory.searchAllParts(searchTable, searchValue)
       .then((data)=>{
         if(data){
           //console.log(data);
@@ -123,42 +121,7 @@ const Search = function(props) {
             }
           }
 
-          // Start of Recursive Sorting the Sign items ///////////////////
-          var keys = [{key: "install_date", direction: 'ASC'},
-                    {key: "type", direction: 'ASC'},
-                    {key: "state", direction: 'ASC'},
-                    {key: "work_order", direction: 'DESC'},
-                    {key: "description", direction: 'ASC'}]
-          
-          const sortArray = (array, direction, value) =>{
-            return array.sort(createSorter(...[{
-              property: value, 
-              direction: direction
-            }]));
-          }
-        
-          const recursiveSort = (dataArray, key, i) => {
-            if(i >= keys.length-1){
-              //Base case to end on
-              return sortArray(dataArray, key.direction, key.key); 
-            }
-          
-            var splitArray = [];
-            sortArray( Array.from(new Set(dataArray.map((item)=>item[key.key]))),key.direction, null )
-              .forEach((value)=>{
-                var filteredArray = dataArray.filter((item)=> item[key.key] == value); //get items that match value
-                var tmptmp = recursiveSort(filteredArray, keys[i+1], i+1)
-                splitArray = [...splitArray, ...tmptmp];
-              })
-            return splitArray;
-            
-          }
-          //End of recursive sort  ///////////////////////////////
-
-          var signData = recursiveSort(data, keys[0], 0);
-          console.log("Final data", signData)
-          
-          setSigns(signData);
+          resolve(data);
         }
       })
       .catch((error)=>{
@@ -180,7 +143,7 @@ const Search = function(props) {
       try {
         var response = await search(searchTable, searchValue)    
 
-        setSigns(response);
+        setParts(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")
         console.error("Error", error);
@@ -190,11 +153,11 @@ const Search = function(props) {
 
   const handleSearchClick = async() =>{
     if(searchOpen == false){
-      setCurrentView( views.filter((view)=> view.value == "searchSigns")[0] )
+      setCurrentView( views.filter((view)=> view.value == "partsSearch")[0] )
       
     }else{
       //submit search
-      setSigns(await search(searchTable, searchValue));
+      setParts(await search(searchTable, searchValue));
     }
   }
 
@@ -249,14 +212,14 @@ const Search = function(props) {
                 handleChangeSearchValue(event, matchValue || value, reason)
                 if(matchValue){
                   setSearchTable(searchMatch.searchTable);
-                  setSigns(await search(searchMatch.searchTable, matchValue ));
+                  setParts(await search(searchMatch.searchTable, matchValue ));
                 }
               } }
               renderInput={(params) => {  searchRef.current = params.inputProps.ref.current; return (<TextField
                 
                 className={classes.input}                
-                placeholder="Search Sign Items"
-                inputProps={{ 'aria-label': 'search work orders', id: "sign_search_input", ref: searchRef, autoFocus: true}}
+                placeholder="Search Parts"
+                inputProps={{ 'aria-label': 'search parts', id: "parts_search_input", ref: searchRef, autoFocus: true}}
                 autoFocus={true}
                 {...params}
                 InputProps={{...params.InputProps, startAdornment: searchOpen ? selectSearchField() : "", classes: {underline: classes.underline}}}

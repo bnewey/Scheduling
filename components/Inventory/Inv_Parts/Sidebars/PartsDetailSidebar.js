@@ -2,85 +2,77 @@ import React, {useRef, useState, useEffect, createContext,useContext } from 'rea
 import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
 import cogoToast from 'cogo-toast';
 
-import FilterFinished from './components/FilterFinished'
-import SignsPdf from './components/SignsPdf';
-import SignsSortOrder from './components/SignsSortOrder';
-
 import Util from  '../../../../js/Util';
-import { ListContext } from '../SignContainer';
-// import FilterArrivalState from './components/FilterArrivalState';
+import WorkOrderDetail from  '../../../../js/WorkOrderDetail';
 
-import DateFnsUtils from '@date-io/date-fns';
-import {
-    DatePicker,
-    TimePicker,
-    DateTimePicker,
-    MuiPickersUtilsProvider,
-  } from '@material-ui/pickers';
+import { ListContext } from '../InvPartsContainer';
+//import { DetailContext } from '../WOContainer';
+
+import SidebarPages from './components/SidebarPages';
 
 
-const SignSidebarScheduler = function(props) {
+const PartsDetailSidebar = function(props) {
   const {user} = props;
 
 
 
-  const {  currentView } = useContext(ListContext);
+  const { parts,setParts,  currentView,setCurrentView, views, setEditPartModalMode, setEditPartModalOpen } = useContext(ListContext);
+
+  // const {} = useContext(DetailContext);
   
   const classes = useStyles();
- 
+  
+  const handleOpenAddEditPartModal = () =>{
+    setEditPartModalMode("edit");
+    setEditPartModalOpen(true);
+  }
 
-  const searchOpen = currentView && currentView.value == "searchSigns";
-
+  const sideBarTopButtons = () =>{
+    switch(currentView.value){
+      case "partsList":
+        return <Search />
+        break
+      case "partsSearch":
+        return <Search />
+        break;
+      case "partsDetail":
+        return (<>
+          <div className={classes.newButtonDiv} >
+              <Button className={classes.newButton} 
+                    classes={{label: classes.newButtonLabel}} 
+                    variant="outlined"
+                    onClick={event=> handleOpenAddEditPartModal()}>
+                      <EditIcon className={classes.editIcon}/><div>Edit Info</div>
+              </Button>
+          </div></>);
+        break;
+      default: 
+        cogoToast.error("Bad view");
+        return <></>;
+        break;
+    }
+  }
   
   return (
     <div className={classes.root}>
-        <div className={classes.newButtonDiv} >
-            {/* <Button className={classes.newButton} 
-                    classes={{label: classes.newButtonLabel}} 
-                    variant="outlined"
-                    onClick={event=> handleOpenAddEditFPModal()}>
-              <AddIcon className={classes.plusIcon}/>
-              <div>New Order</div>
-            </Button> */}
-        </div>
-        <div className={classes.dateRangeDiv}>
-          { !searchOpen && 
-          <>
-            <div>
-                { <FilterFinished /> }
+        {sideBarTopButtons()}
+        {/* { current view == allWorkOrders && <div className={classes.dateRangeDiv}>
+            <div className={classes.labelDiv}><span className={classes.dateRangeSpan}>Date Range</span></div>
+            <div className={classes.inputDiv}>
+              
             </div>
-          </>
-          }
-
+        </div>} */}
+        <div className={classes.pagesContainer}>
+          <SidebarPages />
         </div>
-        <div className={classes.dateRangeDiv}>
-          { !searchOpen && 
-          <>
-            <div>
-                {<SignsPdf/>}
-            </div>
-          </>
-          }
-
-        </div>
-        <div className={classes.dateRangeDiv}>
-          { !searchOpen && 
-          <>
-            <div>
-                {<SignsSortOrder/>}
-            </div>
-          </>
-          }
-
-        </div>
-          
     </div>
   );
 }
 
-export default SignSidebarScheduler
+export default PartsDetailSidebar
 
 const useStyles = makeStyles(theme => ({
     root:{
@@ -100,7 +92,6 @@ const useStyles = makeStyles(theme => ({
     },
     dateRangeDiv:{
       borderTop: '1px solid #d2cece',
-      borderBottom: '1px solid #d2cece',
       padding: '3%',
       width: '100%',
       backgroundColor: '#f9f9f9',
@@ -127,6 +118,11 @@ const useStyles = makeStyles(theme => ({
       fontSize: '30px',
       color: '#ce6a00',
     },
+    editIcon:{
+      fontSize: '30px',
+      color: '#25a12e',
+      marginRight: '5px',
+    },
     labelDiv:{
       textAlign: 'center',
     },  
@@ -141,6 +137,7 @@ const useStyles = makeStyles(theme => ({
       color: '#a55400'
     },
     dateRangeSpan:{
+      marginRight: '10px',
       fontSize: '13px',
       fontFamily: 'sans-serif',
       fontWeight:'600',
@@ -166,6 +163,12 @@ const useStyles = makeStyles(theme => ({
       textAlign: 'center',
       color: '#e91818',
       margin: '3px 10px'
+    },
+    pagesContainer:{
+      width: '100%',
+      padding: '8% 8%',
+      borderTop: '1px solid #d2cece',
+      borderBottom: '1px solid #d2cece',
     }
   
 }));

@@ -3,16 +3,18 @@ import {makeStyles, CircularProgress, Grid} from '@material-ui/core';
 
 
 import cogoToast from 'cogo-toast';
-import {createSorter} from '../../../js/Sort';
+import {createSorter} from '../../js/Sort';
 
-import Util from '../../../js/Util';
-import Settings from '../../../js/Settings';
+import Util from '../../js/Util';
+import Settings from '../../js/Settings';
+
+import InventoryTabs from './components/InventoryTabs';
 
 //Page Panels
 import InvPartsContainer from './Inv_Parts/InvPartsContainer';
-import InvSetsContainer from './Inv_Sets/InvSetsContainer';
-import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
-import InvOrdersInContainer from './Inv_OrdersIn/InvOrdersInContainer';
+//import InvSetsContainer from './Inv_Sets/InvSetsContainer';
+//import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
+//import InvOrdersInContainer from './Inv_OrdersIn/InvOrdersInContainer';
 import _ from 'lodash';
 
 
@@ -24,10 +26,10 @@ const InventoryContainer = function(props) {
   const {user} = props;
 
   //views used through whole inventory app, 
-  const views = [ { value: "invParts", displayName: "Inventory Parts",  },
-                  { value: "invSets", displayName: "Inventory Sets",  },
-                  { value: "invOrdersOut", displayName: "Inv Orders Out",  },
-                  { value: "invOrdersIn", displayName: "Inv Orders In",  },];
+  const views = [ { value: "invParts", displayName: "Inventory Parts", index: 0 },
+                  { value: "invSets", displayName: "Inventory Sets", index: 1 },
+                  { value: "invOrdersOut", displayName: "Inv Orders Out", index: 2},
+                  { value: "invOrdersIn", displayName: "Inv Orders In", index: 3},];
 
   const [currentView,setCurrentView] = useState(null);
 
@@ -59,7 +61,7 @@ const InventoryContainer = function(props) {
   const getInvPage = () =>{
     switch(currentView.value){
       case "invParts":
-        return <InvPartsContainer/>
+        return 
         break;
       case "invSets":
         return <InvSetsContainer/>
@@ -80,11 +82,21 @@ const InventoryContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <InventoryContext.Provider value={{currentView, setCurrentView} } >
+      <InventoryContext.Provider value={{currentView, setCurrentView, views} } >
       
         <div className={classes.containerDiv}>
-         {/* Page bar goes here */}
-         { currentView && getInvPage()}
+        
+        <InventoryTabs >
+              { /*currentView && getInvPage()*/}
+              <div><InvPartsContainer/></div>
+              <div><InvPartsContainer/></div>
+              <div><InvPartsContainer/></div>
+              <div><InvPartsContainer/></div>
+              {/* <InvSetsContainer/>
+              <InvOrdersOutContainer/>
+              <InvOrdersInContainer/> */}
+         </InventoryTabs>
+
         </div>
       </InventoryContext.Provider>
     </div>

@@ -40,6 +40,8 @@ const vehicles = require('./lib/vehicles.js');
 const calendar = require('./lib/calendar.js');
 const entities = require('./lib/entities.js');
 const settings = require('./lib/settings.js');
+const inventory = require('./lib/inventory.js');
+
 const {emailRouter} = require('./lib/email');
 
 
@@ -77,6 +79,7 @@ nextApp
     app.use('/scheduling/crew', crew);
     app.use('/scheduling/entities', entities);
     app.use('/scheduling/settings', settings);
+    app.use('/scheduling/inventory', inventory);
     ///
 
     //Session   ////

@@ -45,7 +45,8 @@ const FormBuilder = forwardRef((props, ref) => {
             entContactTitles,//specific date for entities contacts title
             shipToOptionsWOI, //specific data for woi ship_to
             vendorTypes, //specific data for woi vendor
-            raineyUsers //specific data for all select-users
+            raineyUsers, //specific data for all select-users
+            partTypes
         } = props;
         console.log("Props", props);
         
@@ -160,6 +161,9 @@ const FormBuilder = forwardRef((props, ref) => {
                     const type = field.type;
                     switch(type){
                         case 'number':
+                            if(textValueObject[field.field])
+                            updateItem[field.field] = textValueObject[field.field];
+                        break;
                         case 'text':
                             //Get updated values with textValueObject bc text values use ref, check against "" bc ""==false
                             if(textValueObject[field.field] || textValueObject[field.field]=== "")
@@ -259,13 +263,14 @@ const FormBuilder = forwardRef((props, ref) => {
                 if(handleSave){
                     handleSave(itemToSave, updateItem, addOrEdit)
                     .then((data)=>{
+                        console.log("Saved");
                         if(updateItem.postSaveFunction){
                             updateItem.postSaveFunction(data.data,data?.callback);
                         }
                     })
                     .catch((error)=>{
                         console.log("Failed to save in FormBuilder", error);
-                        cogoToast.info(error);
+                        cogoToast.info("Failed to save in FormBuilde");
                     })
                 }
 
@@ -295,7 +300,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToOptionsWOI={shipToOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
-                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} defaultAddresses={defaultAddresses}
+                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} partTypes={partTypes} defaultAddresses={defaultAddresses}
                      entContactTitles={entContactTitles}/>
                 </div>)
             })}</>
@@ -309,7 +314,7 @@ export default FormBuilder;
 
 const GetInputByType = function(props){
     const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
-        shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
+        shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, defaultAddresses,
         entContactTitles} = props;
 
     if(!field || field.type == null){
@@ -425,6 +430,30 @@ const GetInputByType = function(props){
                     </Select></div>
                 )
                 break;
+            case 'select-part-type':
+                return(
+                    <div className={classes.inputValueSelect}>
+                        <Select
+                    error={error}
+                        id={field.field}
+                        value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {partTypes ? partTypes.map((type)=>{
+                            return (
+                                <option value={type.id}>
+                                    {type.type}
+                                </option>
+                            )
+                        }) :  <></>}
+                    </Select></div>
+                )
+                break;
             case 'select-default-address':
                 return(
                     <div className={classes.inputValueSelect}>
@@ -497,16 +526,14 @@ const GetInputByType = function(props){
                 )
                 break;
         case 'check':
-            return(
-                <div className={classes.inputValue}>
+            return(<div className={classes.inputValue}>
                 <Checkbox
                     icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                     checkedIcon={<CheckBoxIcon fontSize="small" />}
                     name="checkedI"
                     checked={formObject && formObject[field.field] ? formObject[field.field] == 1 ? true : false : false}
                     onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
-                /></div>
-            )
+                /></div>)
             break;
         case 'entity':
             return(<div className={classes.inputValue}>{error && <span className={classes.errorSpan}>Entity Required</span> }
