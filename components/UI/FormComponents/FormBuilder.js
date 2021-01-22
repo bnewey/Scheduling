@@ -162,20 +162,18 @@ const FormBuilder = forwardRef((props, ref) => {
                         case 'number':
                         case 'text':
                             //Get updated values with textValueObject bc text values use ref, check against "" bc ""==false
-                            if(textValueObject[field.field] || textValueObject[field.field]=== "")
+                            if(textValueObject[field.field]){
                                 updateItem[field.field] = textValueObject[field.field];
+                            }
+                            if(textValueObject[field.field]=== ""){
+                                //set to null when clearing out text fields and saving
+                                updateItem[field.field] = null;
+                            }
                             break;
                         case 'date':
                             if(textValueObject[field.field])
                                 updateItem[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
                             break;
-                        // case 'auto':
-                        //     //Auto doesnt usually use ref but leaving in case we need to switch from state
-                        //     //Get updated values with textValueObject bc text values use ref
-                        //     if(textValueObject[field.field])
-                        //         console.log("TEST",textValueObject[field.field]);
-                        //         updateItem[field.field] = textValueObject[field.field];
-                        //     break;
                         case 'entity-titles':
                             const saveEntity = (data, callback) => {
                                 
