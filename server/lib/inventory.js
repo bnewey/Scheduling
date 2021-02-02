@@ -130,14 +130,19 @@ router.post('/updatePart', async (req,res) => {
             part = req.body.part;
         }  
     }
-    const sql = ' UPDATE inv__parts set description=?, inv_qty=?, cost_each=?, storage_location=IFNULL(?, DEFAULT(storage_location)), notes=?, part_type=?, reel_width=?, ' +
+    logger.info('part to update', [part]);
+    const sql = ' UPDATE inv__parts SET description=?, inv_qty=?, cost_each=?, storage_location=IFNULL(?, DEFAULT(storage_location)), ' +
+        ' notes=?, part_type=?, reel_width=?, ' +
         ' date_updated=?, obsolete=? ' +
         ' WHERE rainey_id = ? ';
 
+    
+
     try{
+        logger.info("Date updated", [Util.convertISODateTimeToMySqlDateTime(part.date_updated)])
         const results = await database.query(sql, [part.description, part.inv_qty, part.cost_each, part.storage_location, part.notes,
-            part.part_type, part.reel_width, part.date_updated, part.obsolete, part.rainey_id_id ]);
-        logger.info("Inventory Part updated", part.record_id);
+            part.part_type, part.reel_width, Util.convertISODateTimeToMySqlDateTime(part.date_updated), part.obsolete, part.rainey_id ]);
+        logger.info("Inventory Part updated " + part.rainey_id);
         res.json(results);
     }
     catch(error){
@@ -146,5 +151,30 @@ router.post('/updatePart', async (req,res) => {
     }
 });
 
+router.post('/deletePart', async (req,res) => {
+    var rainey_id;
+
+    if(req.body){
+        rainey_id = req.body.rainey_id;
+    }
+    if(!rainey_id){
+        logger.error("Bad rainey_id param in deletePart");
+        res.sendStatus(400);
+    }
+
+    const sql = ' DELETE FROM inv__parts WHERE rainey_id = ? LIMIT 1 ';
+
+    try{
+        const results = await database.query(sql, [rainey_id]);
+
+        logger.info("Deleted Part " + rainey_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities deleteEntityAddress " + error);
+        res.sendStatus(400);
+    }
+});
 
 module.exports = router;

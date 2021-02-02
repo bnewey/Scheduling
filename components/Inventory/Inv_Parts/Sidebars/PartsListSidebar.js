@@ -25,8 +25,6 @@ import RecentParts from './components/RecentParts';
 const PartsListSidebar = function(props) {
   const {user} = props;
 
-
-
   const {  currentView, setEditPartModalMode, setEditPartModalOpen  } = useContext(ListContext);
   
   const classes = useStyles(); 

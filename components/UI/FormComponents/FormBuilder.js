@@ -52,6 +52,7 @@ const FormBuilder = forwardRef((props, ref) => {
         
     const [shouldUpdate, setShouldUpdate] = useState(false);
     const [errorFields,setErrorFields] = useState([]);
+    const [validErrorFields,setValidErrorFields] = useState([]);
 
     //Building an object of refs to update text input values instead of having them tied to state and updating every character
     const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
@@ -95,7 +96,7 @@ const FormBuilder = forwardRef((props, ref) => {
         
         var tmpObject = {...formObject};
 
-        if(type === "date") {
+        if(type === "date" || type === "datetime") {
             tmpObject[key] = value ? Util.convertISODateTimeToMySqlDateTime(value) : value;
         }
         if(type.split('-')[0] === "select"){
@@ -173,6 +174,10 @@ const FormBuilder = forwardRef((props, ref) => {
                             if(textValueObject[field.field])
                                 updateItem[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
                             break;
+                        case 'datetime':
+                            if(textValueObject[field.field])
+                                updateItem[field.field] = Util.convertISODateTimeToMySqlDateTime(textValueObject[field.field]);
+                            break;
                         // case 'auto':
                         //     //Auto doesnt usually use ref but leaving in case we need to switch from state
                         //     //Get updated values with textValueObject bc text values use ref
@@ -182,7 +187,6 @@ const FormBuilder = forwardRef((props, ref) => {
                         //     break;
                         case 'entity-titles':
                             const saveEntity = (data, callback) => {
-                                
                                 itemToSave[field.field]?.forEach((title)=>{
                                     //Remove titles if false
                                     if(title.title_change && title.title_change == "remove"){
@@ -190,7 +194,6 @@ const FormBuilder = forwardRef((props, ref) => {
                                             //Delete from entities_contacts_titles
                                             Entities.deleteContactTitle(title.title_attached)
                                             .then((data)=>{
-                                                console.log("Deleted title", title.title_attached)
                                                 if(callback){
                                                     callback()
                                                 }
@@ -245,17 +248,50 @@ const FormBuilder = forwardRef((props, ref) => {
                     }
                 })
 
-                
-
                 //Validate Required Fields
                 var empty_required_fields = fields.
                         filter((v,i)=> v.required && !(v.hidden && v.hidden(formObject) )).
-                        filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined);;
+                        filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined || updateItem[item.field]=== "");;
                 if(empty_required_fields.length > 0){
-                    cogoToast.error("Required fields are blank");
+                    cogoToast.error("Required fields are blank", {hideAfter: 10});
                     setErrorFields(empty_required_fields);
                     console.error("Required fields are blank", empty_required_fields)
                     return;
+                }else{
+                    setErrorFields([]);
+                }
+
+                const validate_by_type = (field, index) =>{
+                    if(!field || !updateItem){
+                        //Return true so we dont add error on bad code
+                        console.error("Error in validation params; Bad field or updateItem")
+                        return true;
+                    }
+                    var type = field.type;
+                    var error = false;
+
+                    switch(type){
+                        case 'text':
+                            break;
+                        case 'number':
+                            //test against regexp for nondecimal or decimal 
+                            error = updateItem[field.field] && !(/^\d+$/.test(updateItem[field.field]) || /^\d+\.\d+$/.test(updateItem[field.field]));
+                            break;
+                    }
+                    return error;
+                }
+
+                //Validate Field Data
+                var fail_validation_fields = fields.
+                        filter((v,i)=> v.type && !(v.hidden && v.hidden(formObject) )).
+                        filter( validate_by_type );;
+                if(fail_validation_fields.length > 0){
+                    cogoToast.error("Validation data error on marked fields", {hideAfter: 10});
+                    setValidErrorFields(fail_validation_fields);
+                    console.error("Validation data error on marked fields", fail_validation_fields)
+                    return;
+                }else{
+                    setValidErrorFields([]);
                 }
 
                 console.log("updateItem", updateItem);
@@ -263,7 +299,6 @@ const FormBuilder = forwardRef((props, ref) => {
                 if(handleSave){
                     handleSave(itemToSave, updateItem, addOrEdit)
                     .then((data)=>{
-                        console.log("Saved");
                         if(updateItem.postSaveFunction){
                             updateItem.postSaveFunction(data.data,data?.callback);
                         }
@@ -296,7 +331,8 @@ const FormBuilder = forwardRef((props, ref) => {
                 return(
                 <div className={classes.inputDiv}>  
                     <span className={classes.inputLabel}>{field.label}</span>
-                    <GetInputByType field={field} formObject={formObject} errorFields={errorFields} handleShouldUpdate={handleShouldUpdate}
+                    <GetInputByType field={field} formObject={formObject} errorFields={errorFields} validErrorFields={validErrorFields}
+                     handleShouldUpdate={handleShouldUpdate}
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToOptionsWOI={shipToOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
@@ -313,7 +349,7 @@ const FormBuilder = forwardRef((props, ref) => {
 export default FormBuilder;
 
 const GetInputByType = function(props){
-    const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
+    const {field,dataGetterFunc , formObject, errorFields, validErrorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
         shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, defaultAddresses,
         entContactTitles} = props;
 
@@ -323,13 +359,14 @@ const GetInputByType = function(props){
     }
     
     var error = errorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
+    var valid_error = validErrorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
     
     switch(field.type){
         case 'text':
         case 'number':
             return(<div className={classes.inputValue}>
                 <TextField id={field.field} 
-                        error={error}
+                        error={error || valid_error}
                          variant="outlined"
                          multiline={field.multiline}
                          inputRef={ref_object[field.field]}
@@ -340,6 +377,7 @@ const GetInputByType = function(props){
             )
             break;
         case 'date':
+        case 'datetime':
             return(<div className={classes.inputValue}>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <KeyboardDatePicker className={classes.inputStyleDate} 
@@ -347,7 +385,7 @@ const GetInputByType = function(props){
                                 clearable
                                 error={error}
                                 inputVariant="outlined"  
-                                disableFuture={field.field == "date" }
+                                disableFuture={field.field == "date" || field.field == "datetime" }
                                 onChange={(value, value2)=> {
                                     handleInputOnChange(value, true, field.type, field.field)
                                     

@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect, useContext, useCallback} from 'react';
 import {makeStyles, withStyles, CircularProgress, Grid, IconButton, Checkbox} from '@material-ui/core';
 
 import Table from '@material-ui/core/Table';
@@ -30,6 +30,23 @@ import Router from 'next/router'
 import moment from 'moment';
 
 
+// function Autosave({data, handleSave}) {
+//   const debouncedSave = useCallback(
+//     debounce(async (newExperimentData) => {
+//       await saveExperimentDataToDb(newExperimentData);
+//     }, 1000),
+//     [],
+//   );
+
+//   useEffect(()=>{
+//     if(data){
+//       debouncedSave(data);
+//     }
+//   }, [data,debouncedSave])
+
+//   return null;
+// }
+
 const SignSchedulerList = function(props) {
   const {user, keyState, setKeyState, columnState, setColumnState} = props;
 
@@ -42,6 +59,9 @@ const SignSchedulerList = function(props) {
 
   },[columnState,columns]);
 
+ 
+
+  
 
   const handleChangeSignSchedulerView = (view)=>{
     if(!view){

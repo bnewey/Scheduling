@@ -41,8 +41,10 @@ const PartsDetail = function(props) {
                         { value: 'reel_width', displayName: 'Reel Width',   },
                         { value: 'date_entered', displayName: 'Date Entered', 
                             format: (value)=> moment(value).format("MM-DD-YYYY") },
+                        { value: 'date_updated', displayName: 'Date Updated', 
+                            format: (value)=> moment(value).format("MM-DD-YYYY HH:mm:ss") },
                         { value: 'obsolete', displayName: 'Obsolete',   },
-                      ]
+                    ]
    
 
    return ( 

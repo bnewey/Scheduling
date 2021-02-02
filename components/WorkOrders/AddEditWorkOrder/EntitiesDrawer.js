@@ -57,7 +57,7 @@ const EntitiesDrawer = function(props) {
         
         var tmpWorkOrder = {...activeWorkOrder};
 
-        if(type === "date") {
+        if(type === "date" || type === "datetime") {
             tmpWorkOrder[key] = Util.convertISODateTimeToMySqlDateTime(value);
         }
         if(type.split('-')[0] === "select"){

@@ -7,6 +7,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 
+import moment from 'moment';
 import cogoToast from 'cogo-toast';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
@@ -47,8 +48,8 @@ const AddEditModal = function(props) {
     const fields = [
         //type: select must be hyphenated ex select-type
         { field: 'description', label: 'Description', type: 'text',updateBy: 'ref', required:true }, 
-        { field: 'inv_qty', label: 'In Stock',  type: 'text',updateBy: 'ref',  },
-        { field: 'cost_each', label: 'Cost Each', type: 'text',updateBy: 'ref',  },
+        { field: 'inv_qty', label: 'In Stock',  type: 'number',updateBy: 'ref',  },
+        { field: 'cost_each', label: 'Cost Each', type: 'number',updateBy: 'ref',  },
         { field: 'part_type', label: 'Part Type', type: 'select-part-type', updateBy: 'ref'},
         { field: 'storage_location', label: 'Storage Location',  type: 'number',updateBy: 'ref',  },
         { field: 'notes', label: 'Notes',  type: 'text',updateBy: 'ref',}, 
@@ -80,25 +81,21 @@ const AddEditModal = function(props) {
         
 
     const handleSave = (part, updatePart ,addOrEdit) => {
-        console.log("Saving")
         return new Promise((resolve, reject)=>{
-            console.log("Saving")
             if(!part){
                 console.error("Bad work order")
                 reject("Bad work order");
             }
-            console.log("good part")
             
             //Add Id to this new object
             if(addOrEdit == "edit"){
-                console.log("edit")
                 updatePart["rainey_id"] = part.rainey_id;
+                updatePart["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
 
                 Inventory.updatePart( updatePart )
                 .then( (data) => {
-                    console.log("updated")
                     //Refetch our data on save
-                    cogoToast.success(`Work Order ${part.rainey_id} has been updated!`, {hideAfter: 4});
+                    cogoToast.success(`Part ${part.rainey_id} has been updated!`, {hideAfter: 4});
                     setPartsRefetch(true);
                     setActivePart(null);
                     handleCloseModal();
@@ -111,16 +108,14 @@ const AddEditModal = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                console.log("add")
                 Inventory.addNewPart( updatePart )
                 .then( (data) => {
-                    console.log("added")
                     //Get id of new workorder and set view to detail
                     if(data && data.insertId){
                         setDetailPartId(data.insertId);
                         setCurrentView(views.filter((v)=>v.value == "partDetail")[0]);
                     }
-                    cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
+                    cogoToast.success(`Part has been added!`, {hideAfter: 4});
                     setPartsRefetch(true);
                     setActivePart(null);
                     handleCloseModal();
@@ -147,6 +142,7 @@ const AddEditModal = function(props) {
                 setPartsRefetch(true);
                 handleCloseModal();
                 setCurrentView(views.filter((v)=>v.value == "partsList")[0]);
+                cogoToast.success("Deleted Part: " + part.rainey_id);
             })
             .catch((error)=>{
                 cogoToast.error("Failed to Delete part")

@@ -58,6 +58,7 @@ const InvPartsContainer = function(props) {
 
   const [currentView,setCurrentView] = useState(null);
   const [columnState, setColumnState] = useState(null);
+  const [sorters, setSorters] = useState(null);
 
   const [recentParts, setRecentParts] = React.useState(null);
   const [activePart, setActivePart] = React.useState(null);
@@ -93,22 +94,60 @@ const InvPartsContainer = function(props) {
   //Sign Rows
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
-    if((parts == null || partsRefetch == true) ) {
+    if(((parts == null || partsRefetch == true) && sorters != null) ) {
       if(partsRefetch == true){
         setPartsRefetch(false);
       }
 
       Inventory.getAllParts()
       .then( data => { 
-        setParts(data);
+        var tmpData = [...data];
+        //SORT after filters -------------------------------------------------------------------------
+        if(sorters && sorters.length > 0){
+          tmpData = tmpData.sort(createSorter(...sorters))
+        }
+        //--------------------------------------------------------------------------------------------
+        setParts(tmpData);
       })
       .catch( error => {
         console.warn(error);
         cogoToast.error(`Error getting parts`, {hideAfter: 4});
       })
     }
+  },[parts, partsRefetch, sorters]);
+  
+  //Save and/or Fetch sorters to local storage
+    useEffect(() => {
+        if(sorters == null){
+          var tmp = window.localStorage.getItem('invPartSorters');
+          var tmpParsed;
+          if(tmp){
+              tmpParsed = JSON.parse(tmp);
+          }
+          if(Array.isArray(tmpParsed)){
+              setSorters([...tmpParsed]);
+          }else{
+              setSorters([]);
+          }
+        }
+        if(Array.isArray(sorters)){
+            window.localStorage.setItem('invPartSorters', JSON.stringify(sorters));
+        }
 
-  },[parts, partsRefetch]);
+    }, [sorters]);
+
+    //Sort - when sort is updated after parts already exist
+    useEffect(()=>{
+        if (Array.isArray(sorters) && sorters.length) {
+            if (parts && parts.length) {
+                var tmpData = parts.sort(createSorter(...sorters))
+                var copyObject = [...tmpData];
+                setParts(copyObject);
+                cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
+            }
+        }
+    },[sorters]);
+
 
   //Save and/or Fetch detailPartId to local storage
   useEffect(() => {
@@ -235,7 +274,7 @@ const InvPartsContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{parts, setParts, setPartsRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailPartId,  setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
-         recentParts, setRecentParts} } >
+         recentParts, setRecentParts, sorters, setSorters} } >
       <DetailContext.Provider value={{}} >
         <div className={classes.containerDiv}>
         

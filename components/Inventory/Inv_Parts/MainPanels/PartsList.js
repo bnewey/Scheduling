@@ -1,66 +1,77 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect, useLayoutEffect,useContext} from 'react';
 import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
 
-import Table from '@material-ui/core/Table';
+//import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import { AutoSizer, Column, Table } from 'react-virtualized';
+
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
+
+import {createSorter} from '../../../../js/Sort';
 
 import moment from 'moment';
 
 import cogoToast from 'cogo-toast';
+import clsx from 'clsx';
 
 
 import Util from  '../../../../js/Util';
 import { ListContext } from '../InvPartsContainer';
 
+const styles = (theme) => ({
+  root: {
+    '&:nth-of-type(odd)': {
+      backgroundColor: "#e8e8e8",
+      '&:hover':{
+        backgroundColor: "#dcdcdc",
+      }
+    },
+    '&:nth-of-type(even)': {
+      backgroundColor: '#f7f7f7',
+      '&:hover':{
+        backgroundColor: "#dcdcdc",
+      }
+    },
+    border: '1px solid #111 !important',
+    '&:first-child':{
+      border: '2px solid #992222',
+    }
+   
+  },
+});
+
+export default function ReactVirtualizedTable() {
+
+  const targetRef = React.useRef();
+  const [dimensions, setDimensions] = useState({ width:1515, height: 700 });
+  //Gets size of our list container so that we can size our virtual list appropriately
+  useLayoutEffect(() => {
+    if (targetRef.current) {
+      
+      setDimensions({
+        width: targetRef.current.offsetWidth,
+        height: targetRef.current.offsetHeight
+      });
+    }
+  }, []);
+
+  return (
+      <VirtualizedTable  dimensions={dimensions} setDimensions={setDimensions} />
+  );
+}
 
 const PartsList = function(props) {
-  const {user} = props;
+  const {user, dimensions, rowHeight = 22, headerHeight = 30,} = props;
 
-  const { parts, setParts, currentView, setCurrentView, views,detailPartId , setDetailPartId} = useContext(ListContext);
+  const { parts, setParts, currentView, setCurrentView, views,detailPartId , setDetailPartId, sorters, setSorters} = useContext(ListContext);
   const classes = useStyles();
 
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(null);
-
-
-
-  useEffect(()=>{
-    setPage(0);
-  },[parts])
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
-  //Save and/or Fetch rowsPerPage to local storage
-  useEffect(() => {
-    if(rowsPerPage == null){
-      var tmp = window.localStorage.getItem('invPartsRowsPerPage');
-      var tmpParsed;
-      if(tmp){
-        tmpParsed = JSON.parse(tmp);
-      }
-      if(!isNaN(tmpParsed) && tmpParsed != null){
-        setRowsPerPage(tmpParsed);
-      }else{
-        setRowsPerPage(25);
-      }
-    }
-    if(!isNaN(rowsPerPage) && rowsPerPage != null){
-      window.localStorage.setItem('invPartsRowsPerPage', JSON.stringify(rowsPerPage));
-    }
-    
-  }, [rowsPerPage]);
 
   const handleShowDetailView = (part_id) =>{
     if(!part_id){
@@ -70,101 +81,131 @@ const PartsList = function(props) {
     }
     setCurrentView(views && views.filter((view, i)=> view.value == "partsDetail")[0]);
     setDetailPartId(part_id);
-
   }
   
   const columns = [
-    { id: 'rainey_id', label: 'Rainey PN', minWidth: 20, align: 'center',
+    { dataKey: 'rainey_id', label: 'Rainey PN', type: 'number', width: 90, align: 'center',
       format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickablePartnumber}>{value}</span> }, 
-    { id: 'description', label: 'Description', minWidth: 350, align: 'left' }, 
-    
-    { id: 'inv_qty', label: 'In Stock', minWidth: 50, align: 'center', },
-    { id: 'cost_each', label: 'Cost Each', minWidth: 50, align: 'right',
+    { dataKey: 'description', label: 'Description', type: 'text', width: 350, align: 'left' }, 
+    { dataKey: 'inv_qty', label: 'In Stock', type: 'number', width: 60, align: 'center', },
+    { dataKey: 'cost_each', label: 'Cost Each', type: 'number', width: 100, align: 'right',
       format: (value)=> `$ ${value.toFixed(6)}` },
-    { id: 'type', label: 'Type', minWidth: 60, align: 'center', },
-    { id: 'storage_location', label: 'Strg Location', minWidth: 50, align: 'center', },
-    { id: 'notes', label: 'Notes', minWidth: 200, align: 'left' }, 
-    { id: 'reel_width', label: 'Reel Width', minWidth: 50, align: 'center' },
-    { id: 'date_entered', label: 'Date Entered', minWidth: 80, align: 'center',
+    { dataKey: 'type', label: 'Type', width: 150,type: 'text', align: 'center', },
+    { dataKey: 'storage_location', label: 'Strg Location', type: 'number', width: 50, align: 'center', },
+    { dataKey: 'notes', label: 'Notes', width: 200,type: 'text', align: 'left' }, 
+    { dataKey: 'reel_width', label: 'Reel Width', type: 'text',width: 50, align: 'center' },
+    { dataKey: 'date_entered', label: 'Date Entered',type: 'date', width: 80, align: 'center',
         format: (value)=> moment(value).format("MM-DD-YYYY") },
-    { id: 'obsolete', label: 'Obsolete', minWidth: 50, align: 'center' },
+    { dataKey: 'obsolete', label: 'Obsolete',type: 'number', width: 40, align: 'center' },
   ];
 
-  const StyledTableRow = withStyles((theme) => ({
-    root: {
-      '&:nth-of-type(odd)': {
-        backgroundColor: "#e8e8e8",
-        '&:hover':{
-          backgroundColor: "#dcdcdc",
-        }
-      },
-      '&:nth-of-type(even)': {
-        backgroundColor: '#f7f7f7',
-        '&:hover':{
-          backgroundColor: "#dcdcdc",
-        }
-      },
-      border: '1px solid #111 !important',
-      '&:first-child':{
-        border: '2px solid #992222',
-      }
-    },
-  }))(TableRow);
+  const getRowClassName = ({ index }) => {
+    const { classes, onRowClick } = props;
 
+    return clsx(classes.tableRow, classes.flexContainer, {
+      [classes.tableRowHover]: index !== -1 && onRowClick != null,
+    });
+  };
+
+  const cellRenderer = ({ cellData, columnIndex }) => {
+    const column = columns[columnIndex];
+
+    return(
+        <TableCell className={classes.tableCell} 
+                    component="div"
+                    align={column.align}
+                    variant="body"
+                    style={{ minWidth: column.width, height: rowHeight }}>
+              {column.format  ? column.format(cellData) : cellData}
+        </TableCell>
+    )
+  };
+
+  const headerRenderer = ({ label, columnIndex }) => {
+    const column = columns[columnIndex];
+    const isSorted =  sorters && sorters[0] && sorters[0].property == column.dataKey;
+    const isASC = sorters && sorters[0] && sorters[0].direction === 'ASC';
+    return(
+    <TableCell
+      component="div"
+      variant="body"
+      className={clsx({ [classes.tableCellHeadSelected] : isSorted ,
+      [classes.tableCellHead]: !isSorted })}
+      classes={{stickyHeader: classes.stickyHeader}}
+      align={column.align}
+      style={{ minWidth: column.width,height: headerHeight  }}
+      onClick={event=>handleListSort(event, column)}
+      > 
+      <span>
+        <div>{label}</div>
+        {isSorted ?
+              <div>
+                  {isASC ? <ArrowDropDownIcon/> : <ArrowDropUpIcon/>}
+              </div> 
+              : <></>}
+      </span>
+    </TableCell>)
+  };
+
+  const handleListSort = (event, item) =>{
+    if(!item){
+        cogoToast.error("Bad field while trying to sort");
+        return;
+    }
+    //sort taskListItems according to item
+    //this sort can take multiple sorters but i dont think its necessary
+       // if it is, you will have to change the [0] to a dynamic index!
+    if(item.type == 'date' || item.type == 'datetime' || item.type == 'number' || item.type == 'text'){
+
+        setSorters([{
+            property: item.dataKey, 
+            direction: sorters && sorters[0] && sorters[0].property == item.dataKey ? 
+                    ( sorters[0].direction === 'DESC' ? "ASC" : sorters[0].direction === 'ASC' ? "DESC" : "ASC" ) : "ASC"
+        }]);
+        
+    }
+  }
+  console.log("Cols", columns)
   return (
     <div className={classes.root}>
         <TableContainer className={classes.container}>
-        <Table stickyHeader  size="small" aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                className={classes.tableCellHead}
-                classes={{stickyHeader: classes.stickyHeader}}
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {parts && parts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+        <Table stickyHeader
+            height={dimensions?.height - 20}
+            width={dimensions?.width}
+            rowHeight={rowHeight}
+            gridStyle={{
+              direction: 'inherit',
+            }}
+            headerHeight={headerHeight}
+            className={classes.table}
+            rowCount={parts ? parts.length : 0 }
+            rowGetter={({ index }) => parts ? parts[index] : null }
+            rowClassName={getRowClassName}
+          >
+            {columns.map(({ dataKey, ...other }, index) => {
               return (
-                <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell className={classes.tableCell} 
-                                key={column.id}
-                                 align={column.align}
-                                 style={{ minWidth: column.minWidth }}>
-                        {column.format  ? column.format(value) : value}
-                      </TableCell>
-                    );
-                  })}
-                </StyledTableRow>
+                <Column
+                  key={dataKey}
+                  headerRenderer={(headerProps) =>
+                    headerRenderer({
+                      ...headerProps,
+                      columnIndex: index,
+                    })
+                  }
+                  className={classes.flexContainer}
+                  cellRenderer={cellRenderer}
+                  dataKey={dataKey}
+                  {...other}
+                />
               );
             })}
-          </TableBody>
-        </Table>
+          </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[25, 50, 100]}
-        component="div"
-        count={parts ? parts.length : 0}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
     </div>
   );
 }
 
-export default PartsList
+const VirtualizedTable = withStyles(styles)(PartsList);
 
 
 
@@ -175,7 +216,7 @@ const useStyles = makeStyles(theme => ({
     minHeight: '730px',
   },
   container: {
-    maxHeight: 650,
+    //maxHeight: 650,
   },
   stickyHeader:{
     // background: 'linear-gradient(0deg, #a4dbe6, #cbf1f9)',
@@ -189,9 +230,9 @@ const useStyles = makeStyles(theme => ({
   },
   tableCell:{
     borderRight: '1px solid #c7c7c7' ,
-    '&:last-child' :{
-      borderRight: 'none' ,
-    },
+    // '&:last-child' :{
+    //   borderRight: 'none' ,
+    // },
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     maxWidth: '150px',
@@ -199,8 +240,46 @@ const useStyles = makeStyles(theme => ({
     padding: "4px 6px",
   },
   tableCellHead:{
-    
+      '& span':{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          '&:hover':{
+              textDecoration: 'underline',
+              color: '#444',
+              cursor: 'pointer',
+          },
+          '& .MuiSvgIcon-root':{
+              //position: 'absolute',
+              marginLeft: '1px',
+              //top: '20%',
+              fontSize: '1.5em',
+          }
+      },
+      padding: 0,
+      fontWeight: '600',
   },
+  tableCellHeadSelected:{
+    '& span':{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        '&:hover':{
+            textDecoration: 'underline',
+            color: '#444',
+            cursor: 'pointer',
+        },
+        '& .MuiSvgIcon-root':{
+            //position: 'absolute',
+            marginLeft: '1px',
+            //top: '20%',
+            fontSize: '1.5em',
+        }
+    },
+    fontWeight: '600',
+    padding: 0,
+    background: '#dbeaff',
+},
   clickablePartnumber:{
     cursor: 'pointer',
     textDecoration: 'underline',

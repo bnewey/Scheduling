@@ -118,6 +118,25 @@ async function updatePart(part){
 
 }
 
+async function deletePart(rainey_id){
+    const route = '/scheduling/inventory/deletePart';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({rainey_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 
 module.exports = {
     getAllParts,
@@ -126,5 +145,6 @@ module.exports = {
     getPartTypes,
     addNewPart,
     updatePart,
+    deletePart,
 
 };

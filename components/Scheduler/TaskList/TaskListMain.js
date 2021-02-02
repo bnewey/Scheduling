@@ -34,7 +34,7 @@ const TaskListMain = (props) => {
     const [selectedTasks, setSelectedTasks] = useState([]);
     const [table_info ,setTableInfo] = useState(null);
     
-    const [sorterState, setSorterState] = useState(0);
+    
 
     
     //PROPS
@@ -44,7 +44,7 @@ const TaskListMain = (props) => {
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
-         sorters, setSorters,
+         sorters, setSorters, sorterState, setSorterState,
          taskListTasksSaved, setTaskListTasksSaved, refreshView } = useContext(TaskContext);
 
 
@@ -296,7 +296,7 @@ const TaskListMain = (props) => {
         //sort taskListItems according to item
         //this sort can take multiple sorters but i dont think its necessary
            // if it is, you will have to change the [0] to a dynamic index!
-        if(item.type == 'date' || item.type == 'number' || item.type == 'text'){
+        if(item.type == 'date' || item.type == 'datetime' || item.type == 'number' || item.type == 'text'){
             switch(sorterState){
                 case 0:
                     setSorterState(1);
@@ -356,13 +356,8 @@ const TaskListMain = (props) => {
                         <TaskListFilter filteredItems={taskListTasks}  setFilteredItems={setTaskListTasks} />
                         {taskListTasks && table_info && taskListTasksSaved ? 
                         <>  
-                            {/* <TableContainer> */}
                                 <List >
-                                
-                                {/* <TableHead> */}
                                     <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
-                                        {/* <TableCell>&nbsp;</TableCell>
-                                        <TableCell>&nbsp;</TableCell> */}
                                         <div style={{flex: `0 0 2%`}}>&nbsp;</div>
                                     {table_info.map((item, i)=>{
                                         const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
@@ -386,23 +381,8 @@ const TaskListMain = (props) => {
                                                             </span>
                                         </ListItemText>
                                     )})}
-                                    {/* <TableCell>&nbsp;</TableCell> */}
                                     </ListItem>
-                                {/* </TableHead> */}
-                            {/* <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}> */}
                                 
-                                {/* <ListItemSecondaryAction>            
-                                        <React.Fragment>
-                                        <IconButton edge="end" aria-label="edit">
-                                        
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="delete">
-                                            
-                                        </IconButton> 
-                                        </React.Fragment>
-                                    &nbsp;&nbsp;&nbsp;
-                                </ListItemSecondaryAction> */}
-                            {/* </ListItem> */}
                             <TaskListTasks 
                                 selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
                                 taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
@@ -414,7 +394,6 @@ const TaskListMain = (props) => {
                                 taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
                                 woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
                                 </List>
-                            {/* </TableContainer> */}
                         </>
                         : <>
                         <div className={classes.HeadListItem} classes={{container: classes.liContainer}}>
