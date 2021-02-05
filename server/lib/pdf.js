@@ -7,6 +7,7 @@ const taskListTemplate = require(`../documents/task_list_template`);
 const crewJobsTemplate = require(`../documents/crew_jobs_template`);
 const signScheduleTemplate = require(`../documents/sign_schedule_template`);
 
+
 const moment = require('moment');
 
 const PDFDocument = require('pdfkit');
@@ -40,26 +41,49 @@ router.post('/createWOPdf', async (req,res) => {
 
 });
 
+// router.post('/createTLPdf', async (req,res) => {
+//     if(!req.body.data){
+//         res.sendStatus(400);
+//     }
+//     var data = req.body.data;
+
+//     const options = {
+//         orientation: 'landscape'
+//     };
+
+    
+
+//     pdf.create(taskListTemplate(data), options).toFile(`${process.env.PWD}/public/static/task_list.pdf`, (err)=> {
+//         logger.info(process.env.PWD);
+//         if(err){
+//             res.sendStatus(400);
+//             return Promise.reject();
+//         }
+//         res.sendStatus(200);
+//         return Promise.resolve();
+//     })
+
+// });
+
 router.post('/createTLPdf', async (req,res) => {
-    if(!req.body.data){
+    if( !req.body.data){
         res.sendStatus(400);
     }
+    
     var data = req.body.data;
-
+    var columns = req.body.columns;
     const options = {
         orientation: 'landscape'
     };
 
-    
-
-    pdf.create(taskListTemplate(data), options).toFile(`${process.env.PWD}/public/static/task_list.pdf`, (err)=> {
-        logger.info(process.env.PWD);
+    pdf.create(taskListTemplate( data, columns), options).toStream(function(err, stream){
         if(err){
             res.sendStatus(400);
-            return Promise.reject();
         }
-        res.sendStatus(200);
-        return Promise.resolve();
+       
+        res.set('Content-type', 'application/pdf');
+        stream.pipe(res)
+
     })
 
 });
@@ -139,6 +163,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         doc.fontSize(8).text(woObject.requestor_init, 167, 38 , {lineBreak: false});
         doc.text(woObject.maker_init, 167, 49 , {lineBreak: false});
         doc.fontSize(11).text(woObject.po_number, 188, 44 , {lineBreak: false});
+        doc.fontSize(11).text(woObject.purchase_order_required ? "X" : "", 257, 44 , {lineBreak: false});
         doc.text(woObject.type, 340, 43 , {lineBreak: false});
 
         doc.font(`${process.env.PWD}/public/static/fonts/Arialnb.ttf`);
@@ -340,13 +365,13 @@ router.post('/createSignSchedulePdf', async (req,res) => {
         res.sendStatus(400);
     }
     var signs = req.body.signs;
-    var column_type = req.body.column_type;
+    var columns = req.body.columns;
     
     const options = {
         orientation: 'landscape'
     };
 
-    pdf.create(signScheduleTemplate( signs, column_type), options).toStream(function(err, stream){
+    pdf.create(signScheduleTemplate( signs, columns), options).toStream(function(err, stream){
         if(err){
             res.sendStatus(400);
         }

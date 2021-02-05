@@ -32,7 +32,6 @@ const TaskListMain = (props) => {
     const [taskListTasks, setTaskListTasks] = React.useState(null);
     const [taskListTasksRefetch, setTaskListTasksRefetch] = React.useState(false);
     const [selectedTasks, setSelectedTasks] = useState([]);
-    const [table_info ,setTableInfo] = useState(null);
     
     const [sorterState, setSorterState] = useState(0);
 
@@ -45,7 +44,7 @@ const TaskListMain = (props) => {
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,
-         taskListTasksSaved, setTaskListTasksSaved, refreshView } = useContext(TaskContext);
+         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo } = useContext(TaskContext);
 
 
     //CSS
@@ -226,9 +225,9 @@ const TaskListMain = (props) => {
                     {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
                     {text: "Description", field: "description", width: '18%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
-                    {text: "Status", field: "woi_status_check", width: '17%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "Status", field: "woi_status_check", width: '17%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
                     {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-                    {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}           
+                    {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
                 ];
                 break;
             case "serviceDept":
@@ -242,7 +241,7 @@ const TaskListMain = (props) => {
                     {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
                     {text: "Description", field: "description", width: '19%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
                     {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-                    {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}           
+                    {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
                 ];
                 break;
             case "compact":
@@ -254,11 +253,11 @@ const TaskListMain = (props) => {
                     {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
                     {text: "Description", field: "description", width: '18%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
-                    {text: "Status", field: "woi_status_check", width: '15%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text'},
+                    {text: "Status", field: "woi_status_check", width: '15%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
                     {text: "d_date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
-                    {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text'}, 
+                    {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
                     {text: "i_date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-                    {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text'}           
+                    {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
                 ];
                 break;
         }
@@ -266,10 +265,10 @@ const TaskListMain = (props) => {
         setTableInfo(viewArray)
     }
 
-       //Save and/or Fetch table_info to local storage
+       //Save and/or Fetch tableInfo to local storage
        useEffect(() => {
-        if(table_info == null){
-          var tmp = window.localStorage.getItem('table_info');
+        if(tableInfo == null){
+          var tmp = window.localStorage.getItem('tableInfo');
           var tmpParsed;
           if(tmp){
             tmpParsed = JSON.parse(tmp);
@@ -280,11 +279,11 @@ const TaskListMain = (props) => {
             handleChangeTaskView("default");
           }
         }
-        if(Array.isArray(table_info)){
-          window.localStorage.setItem('table_info', JSON.stringify(table_info));
+        if(Array.isArray(tableInfo)){
+          window.localStorage.setItem('tableInfo', JSON.stringify(tableInfo));
         }
         
-      }, [table_info]);
+      }, [tableInfo]);
 
     
 
@@ -354,7 +353,7 @@ const TaskListMain = (props) => {
                    
                     <Paper className={classes.root}>
                         <TaskListFilter filteredItems={taskListTasks}  setFilteredItems={setTaskListTasks} />
-                        {taskListTasks && table_info && taskListTasksSaved ? 
+                        {taskListTasks && tableInfo && taskListTasksSaved ? 
                         <>  
                             {/* <TableContainer> */}
                                 <List >
@@ -364,7 +363,7 @@ const TaskListMain = (props) => {
                                         {/* <TableCell>&nbsp;</TableCell>
                                         <TableCell>&nbsp;</TableCell> */}
                                         <div style={{flex: `0 0 2%`}}>&nbsp;</div>
-                                    {table_info.map((item, i)=>{
+                                    {tableInfo.map((item, i)=>{
                                         const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
                                         const isASC = sorterState === 1;
                                         return(
@@ -409,7 +408,7 @@ const TaskListMain = (props) => {
                                 taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
                                 setModalOpen={setModalOpen} 
                                 setModalTaskId={setModalTaskId}
-                                table_info={table_info}
+                                tableInfo={tableInfo}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
                                 taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
                                 woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}/>

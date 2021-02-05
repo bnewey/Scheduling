@@ -1,39 +1,13 @@
 const moment = require('moment');
 const Util = require('../../js/Util')
 
-module.exports = (signs, column_type) => {
+module.exports = (signs, columns) => {
     const today = moment().format('MMM-DD-YYYY');
+    //Get total number of signs, sum of each quantity 
+    const numSigns = (signs.reduce((acc, current)=> { return {quantity: acc.quantity + current.quantity}} )).quantity
 
     var rows = "";
-    var columns
-    switch(column_type){
-      case "Description":
-        columns =[
-          { id: 'description', label: 'Description', align: 'left', size: 'large', hideRepeats: true},
-          {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', size: 'small' , hideRepeats: true},
-        { id: 'type', label: 'WO Type', type: 'text',align: 'center', size: 'tiny' , hideRepeats: true},
-        { id: 'state', label: 'Ship Group', align: 'left', size: 'tiny', hideRepeats: true },
-        { id: 'work_order', label: 'WO#', align: 'center', size: 'tiny', hideRepeats: true },
-        { id: 'product_to', label: 'Product Goes To', align: 'left', size: 'medium', hideRepeats: true},
-        { id: 'sign_built', label: 'Built', align: 'center', type: 'checkbox', size: 'small', hideRepeats: false },
-        { id: 'sign_popped_and_boxed',  label: 'Finished',  align: 'center', type: 'checkbox',  size: 'small', hideRepeats: false},
-        { id: 'quantity', label: 'Qty', align: 'center', size: 'tiny', hideRepeats: false},]
-        break;
-      case "Install Date":
-      default: 
-        columns = [
-          { id: 'install_date', label: 'Install Date', type: 'date',align: 'center', size: 'small' , hideRepeats: true},
-          { id: 'type', label: 'WO Type', type: 'text',align: 'center', size: 'tiny' , hideRepeats: true},
-          { id: 'state', label: 'Ship Group', align: 'left', size: 'tiny', hideRepeats: true },
-          { id: 'work_order', label: 'WO#', align: 'center', size: 'tiny', hideRepeats: true },
-          { id: 'product_to', label: 'Product Goes To', align: 'left', size: 'medium', hideRepeats: true},
-          { id: 'description', label: 'Description', align: 'left', size: 'large', hideRepeats: false},
-          { id: 'sign_built', label: 'Built', align: 'center', type: 'checkbox', size: 'small', hideRepeats: false },
-          { id: 'sign_popped_and_boxed',  label: 'Finished',  align: 'center', type: 'checkbox',  size: 'small', hideRepeats: false},
-          { id: 'quantity', label: 'Qty', align: 'center', size: 'tiny', hideRepeats: false},
-        ];
-        break;
-    }
+    var columns = columns.filter((col)=> !col.dontShowInPdf);
 
     const checkAllLastColumns = (columns, lastRow, row, columnIndex) =>{
       return (columns.slice(0, columnIndex+1).every((column)=> {
@@ -42,22 +16,22 @@ module.exports = (signs, column_type) => {
     }
 
     signs.forEach((sign, i)=> {
-      var pageNumber =  1+(Math.floor((i+1)/47));
-      var maxPages = 1+(Math.floor((signs.length)/47))
-      if(i != 0 && i%47 === 0){
+      var pageNumber =  1+(Math.floor((i+1)/46));
+      var maxPages = 1+(Math.floor((signs.length)/46))
+      if(i != 0 && i%46 === 0){
         rows += `<tr></tr>
         </tbody>
         </table>
         <div class="titleDiv">
         <span class="item">${today}</span>
          <span class="item">Open Job Status Sheet</span>
-         <span class="item">${signs.length} Sign(s)</span>
+         <span class="item">${numSigns} Sign(s)</span>
          <span class="item">(${pageNumber} of ${maxPages})</span>
          </div>
         <table class="minimalistBlack">
           <thead><tr>`;
           columns.forEach((column, colI)=> {
-           rows+=`<th class="${column.size}" style='text-align: ${column.align};'>${column.label}</th>`
+           rows+=`<th style='text-align: ${column.align}; width: ${column.minWidth}px'>${column.label}</th>`
           })
             rows+= `</tr>
           </thead>
@@ -73,16 +47,16 @@ module.exports = (signs, column_type) => {
         
         var value;
         //This hides repeat values in table for easier viewing
-        if(column.hideRepeats &&  checkAllLastColumns(columns, lastRow, sign, colI) && i%47 !== 0){
+        if(column.hideRepeats &&  checkAllLastColumns(columns, lastRow, sign, colI) && i%46 !== 0){
           value = null;
         }else{
           if((column.id === "install_date") && sign[column.id] == null){
             value = "****";
           }else{
-            if(column.type == 'date'){
+            if(column.pdfType != "checkbox" && column.type == 'date'){
               value = Util.convertISODateToMySqlDate(sign[column.id])
             }else{
-              if(column.type == "checkbox"){
+              if(column.pdfType == "checkbox" || column.type == "checkbox"){
                 value = sign[column.id] ? '[&nbsp;X&nbsp;]' : '[&nbsp;&nbsp;&nbsp;]';
               }else{
                 value = sign[column.id];
@@ -91,14 +65,14 @@ module.exports = (signs, column_type) => {
             }
           }
         }
-        rows+= `<td class="${column.size}" ${topBorder ? `style='border-top: 1px solid #aaa; text-align: ${column.align};'` :
-                     `style='text-align: ${column.align};'`}>
+        rows+= `<td ${topBorder ? `style='border-top: 1px solid #aaa; text-align: ${column.align}; width: ${column.minWidth}px;'` :
+                     `style='text-align: ${column.align}; width: ${column.minWidth}px;'`}>
                     ${value != null ? value : ""}
                 </td>`
       
         }) 
     });
-var maxPages = 1+(Math.floor((signs.length)/47))
+var maxPages = 1+(Math.floor((signs.length)/46))
 var returnString = `
     <!doctype html>
     <html>
@@ -196,13 +170,13 @@ var returnString = `
         <div class="titleDiv">
         <span class="item">${today}</span>
          <span class="item">Open Job Status Sheet</span>
-         <span class="item">${signs.length} Sign(s)</span>
+         <span class="item">${numSigns} Sign(s)</span>
          <span class="item">(1 of ${maxPages})</span>
          </div>
           <table class="minimalistBlack">
           <thead><tr>` ;
           columns.forEach((column, colI)=> {
-            returnString+=`<th class="${column.size}" style='text-align: ${column.align};'>${column.label}</th>`
+            returnString+=`<th style='text-align: ${column.align}; width: ${column.minWidth}px;'>${column.label}</th>`
           })
             returnString+=`</tr>
           </thead>

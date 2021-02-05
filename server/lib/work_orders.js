@@ -93,7 +93,7 @@ router.post('/getWorkOrderByIdForPDF', async (req,res) => {
     ' ecc.title AS c_contact_title, ' +
     //Billing Info
     ' ena.name AS a_entity_name, ena.account_number AS a_account_number, eaa.address AS a_address, eaa.state AS a_state, eaa.city AS a_city,eaa.zip AS a_zip, ' +
-    ' eaa.name AS a_address_name, eaa.to_name AS a_address_to_name, ' +
+    ' ena.purchase_order_required, eaa.name AS a_address_name, eaa.to_name AS a_address_to_name, ' +
     ' eca.name AS a_contact_name, eca.work_phone AS a_work_phone,  eca.fax AS a_fax, ' +
     ' eca.title AS a_contact_title ' + 
 

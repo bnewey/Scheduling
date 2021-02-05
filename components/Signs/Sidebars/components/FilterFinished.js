@@ -30,7 +30,7 @@ const FilterFinished = function(props) {
       if(tmpParsed){
         setFinishedState(tmpParsed);
       }else{
-        setFinishedState({finished: 'all'});
+        setFinishedState({finished: 'all', approved: 'all'});
       }
     }
     if(finishedState){
@@ -65,6 +65,24 @@ const FilterFinished = function(props) {
                                     name="ArrivedStatus" 
                                     value={finishedState?.finished} 
                                     onChange={event => handleChange(event?.target?.value, "finished")}
+                                    classes={{root: classes.radioGroup}}>
+                                        <FormControlLabel value={"all"} control={<Radio  classes={{checked: classes.radio }}/>} label="All" />   
+                                        <FormControlLabel value={"yes"} control={<Radio  classes={{checked: classes.radio }}/>} label="Yes" />
+                                        <FormControlLabel value={"no"} control={<Radio  classes={{checked: classes.radio }}/>} label="No" />
+                        </RadioGroup>
+                    </FormControl>}
+                </span>
+                </div>
+                <div className={classes.rowDiv}>
+                <span className={classes.label}>Art Approved:</span>
+                <span className={classes.value}>
+                    {finishedState &&
+                    <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>
+                        <RadioGroup row 
+                                    aria-label="ApprovedStatus" 
+                                    name="ApprovedStatus" 
+                                    value={finishedState?.approved} 
+                                    onChange={event => handleChange(event?.target?.value, "approved")}
                                     classes={{root: classes.radioGroup}}>
                                         <FormControlLabel value={"all"} control={<Radio  classes={{checked: classes.radio }}/>} label="All" />   
                                         <FormControlLabel value={"yes"} control={<Radio  classes={{checked: classes.radio }}/>} label="Yes" />

@@ -33,14 +33,9 @@ import moment from 'moment';
 const SignSchedulerList = function(props) {
   const {user, keyState, setKeyState, columnState, setColumnState} = props;
 
-  const { signs, setSigns, setSignRefetch, currentView, setCurrentView, views    } = useContext(ListContext);
+  const { signs, setSigns, setSignRefetch, currentView, setCurrentView, views , columns,setColumns   } = useContext(ListContext);
   const classes = useStyles();
 
-  const [columns, setColumns] = useState(null);
-
-  useEffect(()=>{
-
-  },[columnState,columns]);
 
 
   const handleChangeSignSchedulerView = (view)=>{
@@ -52,7 +47,7 @@ const SignSchedulerList = function(props) {
         case "Description":
               viewArray = [
                 { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: true},
-                {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', hideRepeats: true,
+                {id: 'install_date', label: 'Install Date',minWidth: 35, type: 'date',align: 'center', hideRepeats: true,
                     format: (value,row)=>{  
                       if(value == null){
                         return("****");
@@ -65,12 +60,12 @@ const SignSchedulerList = function(props) {
                       // }
                       return value;
                     } },
-                { id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
+                { id: 'type', label: 'WO Type',minWidth: 35, type: 'text',align: 'center', hideRepeats: true },
                 { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
                 { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
                   format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span> },
-                { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
-                { id: 'sign_built', label: 'Built', minWidth: 50,  align: 'center', type: 'date', hideRepeats: false,
+                { id: 'product_to', label: 'Product Goes To', minWidth: 150, align: 'left', hideRepeats: true},
+                { id: 'sign_built', label: 'Built', minWidth: 50,  align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                   format: (value,row)=> {return(
                     <Checkbox
                           className={classes.checkbox}
@@ -80,7 +75,7 @@ const SignSchedulerList = function(props) {
                           checked={value != null}
                           onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
                       /> )}},
-                { id: 'sign_popped_and_boxed', label: 'Finished', minWidth: 50, align: 'center',  type: 'date',  hideRepeats: false,
+                { id: 'sign_popped_and_boxed', label: 'Finished', minWidth: 50, align: 'center',  type: 'date',pdfType: 'checkbox',  hideRepeats: false,
                   format: (value,row)=> {return(
                       <Checkbox
                       className={classes.checkbox}
@@ -95,7 +90,7 @@ const SignSchedulerList = function(props) {
               break;
               case "Signs + Artwork":
                 viewArray =[
-                  {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', hideRepeats: true,
+                  {id: 'install_date', label: 'Install Date', minWidth: 35,type: 'date',align: 'center', hideRepeats: true,
                        format: (value,row)=>{  
                         if(value == null){
                           return("****");
@@ -108,13 +103,13 @@ const SignSchedulerList = function(props) {
                         // }
                         return value;
                        } },
-                  {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
-                  { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
-                  { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
+                  {id: 'type', label: 'WO Type',minWidth: 35, type: 'text',align: 'center', hideRepeats: true },
+                  { id: 'state', label: 'Ship Group', minWidth: 25, align: 'center' , hideRepeats: true},
+                  { id: 'work_order', label: 'WO#', minWidth: 40, align: 'center', hideRepeats: true,
                     format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>},
-                  { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
-                  { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: false},
-                  { id: 'sign_built', label: 'Built', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                  { id: 'product_to', label: 'Product Goes To', minWidth: 150, align: 'left', hideRepeats: true},
+                  { id: 'description', label: 'Description', minWidth: 200, align: 'left', hideRepeats: false},
+                  { id: 'sign_built', label: 'Built', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
                       <Checkbox
                             className={classes.checkbox}
@@ -124,7 +119,7 @@ const SignSchedulerList = function(props) {
                             checked={value != null}
                             onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
                         />)}},
-                  { id: 'copy_received', label: 'Copy Rcvd', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                  { id: 'copy_received', label: 'Copy Rcvd', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,dontShowInPdf: true,
                     format: (value,row)=> {return(
                       <Checkbox
                             className={classes.checkbox}
@@ -134,7 +129,7 @@ const SignSchedulerList = function(props) {
                             checked={value != null}
                             onChange={(event)=> handleUpdateDate(event, row, "copy_received")}
                         />)}},
-                  { id: 'sent_for_approval', label: 'Sent For Appv', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                  { id: 'sent_for_approval', label: 'Sent For Appv', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,dontShowInPdf: true,
                     format: (value,row)=> {return(
                       <Checkbox
                             className={classes.checkbox}
@@ -144,7 +139,7 @@ const SignSchedulerList = function(props) {
                             checked={value != null}
                             onChange={(event)=> handleUpdateDate(event, row, "sent_for_approval")}
                         />)}},
-                  { id: 'final_copy_approved', label: 'Final Copy Aprv', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                  { id: 'final_copy_approved', label: 'Final Copy Aprv', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
                       <Checkbox
                             className={classes.checkbox}
@@ -154,7 +149,7 @@ const SignSchedulerList = function(props) {
                             checked={value != null}
                             onChange={(event)=> handleUpdateDate(event, row, "final_copy_approved")}
                         />)}},
-                  { id: 'artwork_completed', label: 'Art Complete', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                  { id: 'artwork_completed', label: 'Art Complete', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
                       <Checkbox
                             className={classes.checkbox}
@@ -164,7 +159,7 @@ const SignSchedulerList = function(props) {
                             checked={value != null}
                             onChange={(event)=> handleUpdateDate(event, row, "artwork_completed")}
                         />)}},
-                  { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+                  { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
                         <Checkbox
                         className={classes.checkbox}
@@ -181,7 +176,7 @@ const SignSchedulerList = function(props) {
         case 'default':
         default:
             viewArray =[
-              {id: 'install_date', label: 'Install Date', type: 'date',align: 'center', hideRepeats: true,
+              {id: 'install_date', label: 'Install Date', minWidth: 35,type: 'date',align: 'center', hideRepeats: true,
                    format: (value,row)=>{  
                     if(value == null){
                       return("****");
@@ -194,13 +189,13 @@ const SignSchedulerList = function(props) {
                     // }
                     return value;
                    } },
-              {id: 'type', label: 'WO Type', type: 'text',align: 'center', hideRepeats: true },
+              {id: 'type', label: 'WO Type',minWidth: 35, type: 'text',align: 'center', hideRepeats: true },
               { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
               { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
                 format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>},
-              { id: 'product_to', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
+              { id: 'product_to', label: 'Product Goes To', minWidth: 150, align: 'left', hideRepeats: true},
               { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: false},
-              { id: 'sign_built', label: 'Built', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+              { id: 'sign_built', label: 'Built', minWidth: 50, align: 'center', type: 'date', pdfType: 'checkbox', hideRepeats: false,
                 format: (value,row)=> {return(
                   <Checkbox
                         className={classes.checkbox}
@@ -210,7 +205,7 @@ const SignSchedulerList = function(props) {
                         checked={value != null}
                         onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
                     />)}},
-              { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 50, align: 'center', type: 'date', hideRepeats: false,
+              { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 50, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                 format: (value,row)=> {return(
                     <Checkbox
                     className={classes.checkbox}
@@ -365,7 +360,7 @@ const SignSchedulerList = function(props) {
               <TableBody>
                 {signs?.map((row,i) => {
                   const lastRow = i > 0 ? signs[i-1] : null;
-                  var topBorder = lastRow && row[columns[0].id] != lastRow[columns[0].id];
+                  var topBorder = lastRow && columns && row[columns[0].id] != lastRow[columns[0].id];
                   return (
                     <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
                       {columns && columns.map((column,colI) => {

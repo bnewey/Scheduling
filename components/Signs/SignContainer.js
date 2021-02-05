@@ -54,6 +54,8 @@ const SignContainer = function(props) {
   const [keys, setKeys] = useState(null);
   const [keyState, setKeyState] = useState(null);
   const [columnState, setColumnState] = useState(null);
+  const [columns, setColumns] = useState(null);
+
   // const [detailWOid,setDetailWOid] = useState(null);
 
   // const [editPOModalOpen, setEditPOModalOpen] = React.useState(false);
@@ -194,8 +196,9 @@ const SignContainer = function(props) {
         if(finishedState){
 
           var finished = finishedState.finished;
+          var approved = finishedState.approved;
+          var tmpSigns = [...setSignsData];
           if( finished){
-              var tmpSigns = [...setSignsData];
               if(finished == "yes"){
                   tmpSigns = tmpSigns.filter((v,i)=> v.sign_popped_and_boxed )
               }
@@ -205,8 +208,19 @@ const SignContainer = function(props) {
               if(finished == "all"){
                 //no need to filter
               }
-              setSigns(tmpSigns)
           }
+          if( approved){
+            if(approved == "yes"){
+                tmpSigns = tmpSigns.filter((v,i)=> v.final_copy_approved )
+            }
+            if(approved == "no"){
+              tmpSigns = tmpSigns.filter((v,i)=> !v.final_copy_approved)
+            }
+            if(approved == "all"){
+              //no need to filter
+            }
+          }
+          setSigns(tmpSigns)
         }else{
           setSigns(setSignsData);
         }
@@ -352,7 +366,8 @@ const SignContainer = function(props) {
   return (
     <div className={classes.root}>
       <ListContext.Provider value={{signs, setSigns, setSignRefetch,currentView, setCurrentView, views, signsSaved, setSignsSaved,filters, setFilters,
-      filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState, keyState, setKeyState, columnState, setColumnState} } >
+      filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState, keyState, setKeyState, columnState, setColumnState, 
+      columns, setColumns} } >
       
         <div className={classes.containerDiv}>
         

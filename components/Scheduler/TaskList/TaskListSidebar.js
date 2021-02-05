@@ -32,18 +32,17 @@ const TaskListSidebar = (props) => {
     //STATE
     const [editOpen, setEditOpen] = React.useState(false);
     const [editList, setEditList] = React.useState(null);
-    const [pdfLoaded,setPDFLoaded] = React.useState(false);
 
     const [quickFilters, setQuickFilters] = React.useState(null);
 
     //PROPS
     const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
-        selectedTasks, setSelectedTasks, setSelectedIds, setTableInfo, handleChangeTaskView, taskListTasksRefetch, setTaskListTasksRefetch} = props;
+        selectedTasks, setSelectedTasks, setSelectedIds, handleChangeTaskView, taskListTasksRefetch, setTaskListTasksRefetch} = props;
 
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr ,
-        refreshView, setFilterAndOr} = useContext(TaskContext);
+        refreshView, setFilterAndOr, tableInfo, setTableInfo} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
@@ -183,15 +182,14 @@ const TaskListSidebar = (props) => {
             cogoToast.error("Failed to create PDF");
             return;
         }
-        PDF.createTLPdf(taskListTasks)
-            .then( (data) => {
-                cogoToast.success("Created PDF");
-                setPDFLoaded(true);
-                // setLoading(false);
-            })
-            .catch( error => {
-              console.warn(error);
-            })
+        PDF.createTLPdf(taskListTasks, tableInfo)
+        .then( (data) => {
+            var fileURL = URL.createObjectURL(data);
+            window.open(fileURL);
+        })
+        .catch((error)=>{
+            console.error("Failed to create and open pdf", error);
+        })
     }
 
     const handleChangeTaskListToMap = (event, taskList) =>{
@@ -399,17 +397,6 @@ const TaskListSidebar = (props) => {
                         </span>
                     </div>
                 </div>
-                { pdfLoaded ? 
-                <div className={classes.singleLineDiv}>
-                    <div className={classes.singleItem}>
-                             <PictureAsPdf className={classes.icon} />
-                            <span className={classes.text_button}  >
-                                    <a href={"./static/task_list.pdf"}
-                                target="_blank" >Open PDF</a>
-                            </span>
-                        </div>
-                </div>
-                : <></>}
             </div>
         </Paper>
     );

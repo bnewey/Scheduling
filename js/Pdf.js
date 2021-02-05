@@ -23,21 +23,20 @@ async function createWOPdf(pdf_data){
 
 }
 
-async function createTLPdf(pdf_data){
+async function createTLPdf( data, columns){
     const route = '/scheduling/pdf/createTLPdf';
     try{
-        var response = await fetch(route,
+        var data = await fetch(route,
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({data: pdf_data})
+                responseType: 'blob',
+                body: JSON.stringify({ data, columns})
             });
-        if(!response.ok){
-            throw new Error("createTLPdf error. Server returned bad response")
-        }
-        return(response.ok);
+            //console.log('data', data);
+        return( await data.blob());
     }catch(error){
         throw error;
     }
@@ -147,7 +146,7 @@ async function createCrewJobPdf(crew, jobs){
 
 }
 
-async function createSignSchedulePdf( signs, column_type){
+async function createSignSchedulePdf( signs, columns){
     const route = '/scheduling/pdf/createSignSchedulePdf';
     try{
         var data = await fetch(route,
@@ -157,7 +156,7 @@ async function createSignSchedulePdf( signs, column_type){
                     'Content-Type': 'application/json'
                 },
                 responseType: 'blob',
-                body: JSON.stringify({ signs, column_type})
+                body: JSON.stringify({ signs, columns})
             });
             //console.log('data', data);
         return( await data.blob());

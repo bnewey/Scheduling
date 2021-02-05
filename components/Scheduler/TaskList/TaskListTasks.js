@@ -40,7 +40,7 @@ const TaskListTasks = (props) =>{
 
     //STATE
     //PROPS
-    const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, table_info,
+    const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, tableInfo,
               priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved, setTaskListTasksSaved,
               sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch} = props;
     
@@ -566,7 +566,7 @@ const TaskListTasks = (props) =>{
           <TaskListTasksRows taskListTasks={taskListTasks} taskListTasksSaved={taskListTasksSaved} taskListTasksRefetch={taskListTasksRefetch}
            classes={classes} isSelected={isSelected} 
                 handleRightClick={handleRightClick} handleClick={handleClick} taskListToMap={taskListToMap} getItemStyle={getItemStyle}
-          table_info={table_info} handleSpecialTableValues={handleSpecialTableValues} addSwapCrewAnchorEl={addSwapCrewAnchorEl} 
+          tableInfo={tableInfo} handleSpecialTableValues={handleSpecialTableValues} addSwapCrewAnchorEl={addSwapCrewAnchorEl} 
           addSwapCrewJob={addSwapCrewJob} addSwapCrewPopoverId={addSwapCrewPopoverId} addSwapCrewPopoverOpen={addSwapCrewPopoverOpen}
           handleAddMemberPopoverClose={handleAddMemberPopoverClose} allCrews={allCrews} handleAddSwapCrew={handleAddSwapCrew}
           onDragEnd={onDragEnd} selectedTasks={selectedTasks} dimensions={dimensions}
@@ -582,7 +582,7 @@ export default TaskListTasks;
 
 const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskListTasksRefetch, classes, isSelected, 
   handleRightClick, handleClick, taskListToMap, getItemStyle,
-  table_info, handleSpecialTableValues, addSwapCrewAnchorEl, addSwapCrewJob, addSwapCrewPopoverId, addSwapCrewPopoverOpen,
+  tableInfo, handleSpecialTableValues, addSwapCrewAnchorEl, addSwapCrewJob, addSwapCrewPopoverId, addSwapCrewPopoverOpen,
   handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks, dimensions,
   woiStatusAnchorEl, woiStatusPopoverId, woiStatusRows, woistatusPopoverOpen, handleWoiStatusPopoverClose, woiData})=>{
 
@@ -642,7 +642,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
               <Checkbox checked={isItemSelected} className={classes.tli_checkbox} onClick={event => handleClick(event, row.t_id)}/>
             </div> 
           : <></>}
-          {table_info.map((item, i)=>{
+          {tableInfo.map((item, i)=>{
             var value = row[item.field];
             
             return( 

@@ -36,6 +36,7 @@ const TaskContainer = function(props) {
 
   //TaskList/Scheduler Props
     //TaskListTasks is in TaskListMain
+    const [tableInfo ,setTableInfo] = useState(null);
     const [taskListTasksSaved, setTaskListTasksSaved] = useState([]);
     const [taskLists, setTaskLists] = useState();
     const [priorityList, setPriorityList] = useState(null);
@@ -174,7 +175,7 @@ const TaskContainer = function(props) {
     <div className={classes.root}>
       <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, selectedIds, setSelectedIds, 
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
-                            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,
+                            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
                              sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved, user, refreshView, setRefreshView} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
