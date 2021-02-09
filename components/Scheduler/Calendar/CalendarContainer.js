@@ -237,14 +237,12 @@ const CalendarContainer = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            console.log("MapContainer tmpData in loop", tmpData);
                         }
                     }
                     
-                    console.log("TaskListFilter each loop, ",tmpData);
                 })              
                 }else{
-                console.log("else on filters && filters.length > 0")
+                    console.log("else on filters && filters.length > 0")
                 }
                 
                 setTaskListTasksSaved(data);
@@ -254,8 +252,6 @@ const CalendarContainer = (props) => {
                         tmpData = [...data];
                     }  
                     tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
-                    console.log("Post filterdata", tmpData)
-                    console.log("Post installDateFilter", tmpData)
                 }
                 
                 //No filters 

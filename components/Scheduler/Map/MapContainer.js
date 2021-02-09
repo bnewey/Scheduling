@@ -225,14 +225,11 @@ const MapContainer = (props) => {
                         }
                         if(tmpFilter.length <= 1){
                             tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            console.log("MapContainer tmpData in loop", tmpData);
                         }
                     }
                     
-                    console.log("TaskListFilter each loop, ",tmpData);
                   })              
                 }else{
-                  console.log("else on filters && filters.length > 0")
                 }
                 
                 setTaskListTasksSaved(data);

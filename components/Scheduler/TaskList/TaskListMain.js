@@ -114,11 +114,9 @@ const TaskListMain = (props) => {
                             }
                             if(tmpFilter.length <= 1){
                                 tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                                //console.log("MapContainer tmpData in loop", tmpData);
                             }
                         }
                         
-                        //console.log("TaskListFilter each loop, ",tmpData);
                     })   
                 }
 
@@ -127,8 +125,7 @@ const TaskListMain = (props) => {
                         tmpData = [...data];
                     }  
                     tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
-                    console.log("Post filterdata", tmpData)
-                    console.log("Post installDateFilter", tmpData)
+
                 }
 
                 //No filters or sorters
