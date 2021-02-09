@@ -44,6 +44,7 @@ const TaskContainer = function(props) {
     const [filterInOrOut, setFilterInOrOut] = useState(null);
     const [filterAndOr, setFilterAndOr] = useState(null);
     const [sorters, setSorters] = useState(null);
+    const [installDateFilters, setInstallDateFilters] = useState([]);
 
   //Map Props
     const [taskListToMap, setTaskListToMap] = useState(null);
@@ -143,6 +144,26 @@ const TaskContainer = function(props) {
     
   }, [filters]);
 
+  //Save and/or Fetch filters to local storage
+  useEffect(() => {
+    if(filters == null){
+      var tmp = window.localStorage.getItem('installDateFilters');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(Array.isArray(tmpParsed)){
+        setInstallDateFilters(tmpParsed);
+      }else{
+        setInstallDateFilters([]);
+      }
+    }
+    if(Array.isArray(installDateFilters)){
+      window.localStorage.setItem('installDateFilters', JSON.stringify(installDateFilters));
+    }
+    
+  }, [installDateFilters]);
+
   
   //Save and/or Fetch tabValue to local storage
   useEffect(() => {
@@ -177,7 +198,8 @@ const TaskContainer = function(props) {
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
-                             sorters, setSorters, taskListTasksSaved, setTaskListTasksSaved, user, refreshView, setRefreshView} } >
+                             sorters, setSorters, installDateFilters, setInstallDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
+                             user, refreshView, setRefreshView} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >

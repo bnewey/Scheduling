@@ -58,7 +58,8 @@ const MapContainer = (props) => {
     //const {} = props;
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
-          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, refreshView} = useContext(TaskContext);
+          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, refreshView,
+          installDateFilters , setInstallDateFilters} = useContext(TaskContext);
     const { crewJobDateRange, setShouldResetCrewState} = useContext(CrewContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
@@ -174,7 +175,7 @@ const MapContainer = (props) => {
 
     //useEffect for mapRows
     useEffect( () =>{ 
-      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null){
+      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
             if(mapRowsRefetch == true){
               setMapRowsRefetch(false);
@@ -235,8 +236,16 @@ const MapContainer = (props) => {
                 }
                 
                 setTaskListTasksSaved(data);
+
+                if(installDateFilters.length > 0){
+                  if(tmpData.length <= 0 && filters && !filters.length){
+                      tmpData = [...data];
+                  }  
+                  tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
+                }
+
                 //No filters 
-                if(filters && !filters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length){
                   //no change to tmpData
                   tmpData = [...data];
                 }
@@ -278,7 +287,7 @@ const MapContainer = (props) => {
 
       return () => { //clean up
       }
-    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap]);
+    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters]);
 
     //Sort
     useEffect(()=>{

@@ -262,7 +262,6 @@ const TaskListTasks = (props) =>{
               Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id)
                       .then((data)=>{
                           setShouldResetCrewState(true);
-                          //setTaskListTasks(null);
                           setTaskListTasksRefetch(true)
                       })
                       .catch((error)=>{
@@ -270,6 +269,20 @@ const TaskListTasks = (props) =>{
                           cogoToast.error("Failed to swap jobs");
               });
           }
+
+          //Dalete Function
+          const deleteJob = (id, old_crew_id)=>{
+            Crew.deleteCrewJob(id, old_crew_id)
+                    .then((data)=>{
+                        setShouldResetCrewState(true);
+                        //setTaskListTasks(null);
+                        setTaskListTasksRefetch(true)
+                    })
+                    .catch((error)=>{
+                        console.error(error);
+                        cogoToast.error("Failed to swap jobs");
+            });
+        }
 
           //if we have to create new crew and update job
           if(new_crew.id == -1 ){
@@ -285,9 +298,16 @@ const TaskListTasks = (props) =>{
                   console.error("handleAddOrCreateCrew", error);
                   cogoToast.error("Failed to Create and Add to Crew");
               })
-              //Just Update
+              
           }else{
+            if(new_crew.id == -2){
+              //Delete
+              deleteJob(addSwapCrewJob.job_id, old_crew_id)
+            }else{
+              //Just Update
               updateJob(new_crew.id, old_crew_id);
+            }
+            
           }
           
         }
@@ -746,6 +766,11 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                         Add/Update Crew
                     </ListSubheader>
                 }>
+                  { addSwapCrewJob && addSwapCrewJob.crew_id &&
+                    <ListItem className={classes.crew_list_item} onMouseUp={(event)=>handleAddSwapCrew(event, {id: -2})}>
+                    <ListItemText button primary={'*Remove Crew*'}/>
+                    </ListItem>
+                  }
                   <ListItem className={classes.crew_list_item} onMouseUp={(event)=>handleAddSwapCrew(event, {id: -1})}>
                           <ListItemText button primary={'*Create New*'}/>
                       </ListItem>

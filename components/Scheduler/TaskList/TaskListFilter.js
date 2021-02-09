@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,Collapse, ListSubheader, ListItemIcon,
-     Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControlLabel, Switch,Grid, List, Box } from '@material-ui/core';
+     Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControlLabel, Switch,Grid, List, Box, Select,MenuItem, Tooltip } from '@material-ui/core';
 
      import FilterIcon from '@material-ui/icons/ShortText';
      import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
@@ -11,6 +11,7 @@ import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,C
      import PeopleIcon from '@material-ui/icons/People';
      import SaveIcon from '@material-ui/icons/Save';
      import DeleteIcon from '@material-ui/icons/Clear';
+     import DateIcon from '@material-ui/icons/DateRangeTwoTone'
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import clsx from 'clsx';
@@ -24,6 +25,7 @@ import TaskListFilterSaveDialog from './TaskListFilterSaveDialog'
 import TaskLists from '../../../js/TaskLists';
 import {createFilter} from '../../../js/Filter';
 import cogoToast from 'cogo-toast';
+import moment from 'moment';
 
 import {TaskContext} from '../TaskContainer';
 import {CrewContext} from '../Crew/CrewContextContainer';
@@ -32,7 +34,7 @@ const TaskListFilter = (props) => {
     //PROPS
     const { filteredItems, setFilteredItems } = props;
 
-    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,
+    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,installDateFilters, setInstallDateFilters,
         setRefreshView,tabValue, user} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
@@ -41,6 +43,8 @@ const TaskListFilter = (props) => {
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedField, setSelectedField] = useState(null);
     const [taskListFiltersEdited, setTaskListFiltersEdited] = useState(false);
+    const [installDateFilterOpen, setInstallDateFilterOpen] = useState(null)
+    
     const [tableConfig, setTableInfo] = useState([
         {text: "Type", field: "type", type: 'text'},
         {text: "Completed", field: "completed_wo",  type: 'number'}, 
@@ -108,6 +112,25 @@ const TaskListFilter = (props) => {
         }
         
     }, [filterAndOr]);
+
+    useEffect(() => {
+        if(installDateFilterOpen == null){
+            var tmp = window.localStorage.getItem('installDateFilterOpen');
+            var tmpParsed;
+            if(tmp != null && tmp != undefined){
+                tmpParsed = JSON.parse(tmp);
+            }
+            if(tmpParsed != null){
+                setInstallDateFilterOpen(tmpParsed);
+            }else{
+                setInstallDateFilterOpen(false);
+            }
+        }
+        if((installDateFilterOpen != null)){
+            window.localStorage.setItem('installDateFilterOpen', JSON.stringify(installDateFilterOpen));
+        }
+        
+    }, [installDateFilterOpen]);
     
 
     //CSS
@@ -205,31 +228,35 @@ const TaskListFilter = (props) => {
         setFilterModalOpen(true);
     };
 
+    const handleRefreshView = () =>{
+        //Refreshes based on which tab is currently active
+        //only using taskList bc thats the only page with quick filter access for now
+        var viewToRefresh;
+        switch(tabValue){
+            case 0:
+                viewToRefresh = "calendar"
+                break;
+            case 1:
+                viewToRefresh = "taskList"
+                break;
+            case 2:
+                viewToRefresh = "map"
+                break;
+            // case 3:
+            //     viewToRefresh = "crew"
+            //     break;
+            // case 4:
+            //     viewToRefresh = "allTasks"
+            //     break;
+        }
+        if(viewToRefresh){
+            setRefreshView(viewToRefresh);
+        }
+    }
+
     const handleModalClose = () => {
         if(taskListFiltersEdited){
-            //Refreshes based on which tab is currently active
-            //only using taskList bc thats the only page with quick filter access for now
-            var viewToRefresh;
-            switch(tabValue){
-                // case 0:
-                //     viewToRefresh = "calendar"
-                //     break;
-                case 1:
-                    viewToRefresh = "taskList"
-                    break;
-                // case 2:
-                //     viewToRefresh = "map"
-                //     break;
-                // case 3:
-                //     viewToRefresh = "crew"
-                //     break;
-                // case 4:
-                //     viewToRefresh = "allTasks"
-                //     break;
-            }
-            if(viewToRefresh){
-                setRefreshView(viewToRefresh);
-            }
+            handleRefreshView();
         }
         setFilterModalOpen(false);
     };
@@ -483,6 +510,27 @@ const TaskListFilter = (props) => {
               }
           })
     }
+
+    const handleOpenInstallDateFilter = (event)=>{
+        setInstallDateFilterOpen(true);
+    }
+
+    const handleClearAndCloseInstallDateFilter = (event)=>{
+        setInstallDateFilterOpen(false);
+        setInstallDateFilters([]);
+        handleRefreshView()
+    }
+
+    const handleUpdateInstallDateFilter =(value)=>{
+        console.log("Value ", value);
+
+        var newArray = value.map((item)=>{
+            return ({property: 'sch_install_date', value: item})
+        })
+
+        setInstallDateFilters(newArray);
+        handleRefreshView()
+    }
     
     return(
         <>
@@ -510,13 +558,13 @@ const TaskListFilter = (props) => {
                     
                     <div className={classes.filterTypeInfoDiv}>
                         <span className={classes.filterTypeInfoLabel}>Filtering</span>
-                        <t classes={{tooltip: classes.tooltip}} title={"Filtering 'OUT' removes items matching filters and 'IN' shows only items matching"}>
+                        <Tooltip classes={{tooltip: classes.tooltip}} title={"Filtering 'OUT' removes items matching filters and 'IN' shows only items matching"}>
                         <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateInorOut(event, filterInOrOut)}>{filterInOrOut}</span>
-                        </t>
+                        </Tooltip>
                         <span className={classes.filterTypeInfoLabel}>USING</span>
-                        <t  classes={{tooltip: classes.tooltip}} title={"'OR' shows items matching at least one filter. 'AND' shows items matching every filter."}>
+                        <Tooltip  classes={{tooltip: classes.tooltip}} title={"'OR' shows items matching at least one filter. 'AND' shows items matching every filter."}>
                         <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateAndorOr(event, filterAndOr)}>{filterAndOr}</span>
-                        </t>
+                        </Tooltip>
                     </div>
                     <div className={classes.chipDiv}>
                     {filters && filters.map((filter,i)=>{
@@ -541,6 +589,41 @@ const TaskListFilter = (props) => {
                 <div className={classes.numItemsDiv}>
                     {filteredItems ? filteredItems.length : 0}&nbsp;Item(s)
                 </div>
+                {installDateFilterOpen && taskListTasksSaved ? 
+                <div className={classes.filterInstallDateDiv}>
+                    <Select  multiple
+                            id={"installDateFilter"}
+                            className={classes.selectBox}
+                            value={(installDateFilters?.map((item)=> (item.value))
+                            )}
+                            className={classes.filterInstallDate}
+                            onChange={event => handleUpdateInstallDateFilter(event.target.value)}
+                            >
+                        {(()=> {
+                            var array = [...taskListTasksSaved].map((task)=> task["sch_install_date"])
+                                           .filter((v, i, array)=> array.indexOf(v)===i && v != null )
+                            var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
+                            return newArray.map((item,i)=>{
+                                return( 
+                                <MenuItem value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
+                                );
+                            }) ;
+                        })()}
+                    </Select> 
+                    <span>
+                        <DeleteIcon className={classes.clearInstallDateFilterIcon} onClick={event => handleClearAndCloseInstallDateFilter(event)}/>
+                    </span>
+                </div> : 
+                <Button className={classes.installDateFilterButton}
+                    onClick={event => handleOpenInstallDateFilter(event)}
+                    variant="text"
+                    color="secondary"
+                    size="medium"
+                >
+                    <DateIcon/>
+                    <Box display={{ xs: 'none', md: 'inline' }}  component="span">Install Date Filter</Box>
+                </Button>
+                }
             </div> 
             <Modal aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"
@@ -554,21 +637,69 @@ const TaskListFilter = (props) => {
                 }}>
                 <Fade in={filterModalOpen}>
                     <div className={classes.container}>
+                        
                     <Grid container >  
                         <div className={classes.modalTitleDiv}>
                             <span id="transition-modal-title" className={classes.modalTitle}>
                                 Task Filters
                             </span>
                         </div>
+                        <Grid container>
+                            <Grid item xs={12}>
+                            <div className={classes.filterDiv}>
+                                    {filters && filters.length > 0 ? <>
+                                        <Button className={classes.clearFilterButton}
+                                            onClick={event=> handleClearFilters(event)}
+                                            variant="text"
+                                            color="secondary"
+                                            size="medium"
+                                        >
+                                            <DeleteForeverIcon/>
+                                            <Box display={{ xs: 'none', md: 'inline' }}  component="span">Clear Filters</Box>
+                                        </Button>
+                                        
+                                        <div className={classes.filterTypeInfoDiv}>
+                                            <span className={classes.filterTypeInfoLabel}>Filtering</span>
+                                            <Tooltip classes={{tooltip: classes.tooltip}} title={"Filtering 'OUT' removes items matching filters and 'IN' shows only items matching"}>
+                                            <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateInorOut(event, filterInOrOut)}>{filterInOrOut}</span>
+                                            </Tooltip>
+                                            <span className={classes.filterTypeInfoLabel}>USING</span>
+                                            <Tooltip  classes={{tooltip: classes.tooltip}} title={"'OR' shows items matching at least one filter. 'AND' shows items matching every filter."}>
+                                            <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateAndorOr(event, filterAndOr)}>{filterAndOr}</span>
+                                            </Tooltip>
+                                        </div>
+                                        <div className={classes.chipDiv}>
+                                        {filters && filters.map((filter,i)=>{
+                                            return(<>
+                                                    <Chip
+                                                        icon={<FilterIcon/>}
+                                                        size={'small'}
+                                                        label={ filter && filter.value && filter.property ? filter.property + ' ' +filter.value : "UnidentifiedChip" + i}
+                                                        onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
+                                                        className={classes.chip}
+                                                    />
+                                                </>);
+                                        })}
+                                        </div>
+                                        
+                                        
+                                    </>
+                                    :
+                                    <>
+                                        
+                                    </>}
+                                    <div className={classes.numItemsDiv}>
+                                        {filteredItems ? filteredItems.length : 0}&nbsp;Item(s)
+                                    </div>
+                                </div> 
+                            </Grid>
+                        </Grid>
+                        
                         <Grid item xs={4} className={classes.paper}>
                         <List
                             component="nav"
                             aria-labelledby="nested-list-subheader"
-                            subheader={
-                                <ListSubheader component="div" id="nested-list-subheader">
-                                Filter Categories
-                                </ListSubheader>
-                            }
+            
                             className={classes.root}
                             >
                                 {/* TASK COLUMNS */}
@@ -636,7 +767,7 @@ const TaskListFilter = (props) => {
                                     {openCategory && openCategory == "task_columns" &&  
                                 
                                 <>
-                                    <FormControlLabel
+                                    {/* <FormControlLabel
                                         key={"formControlInOut"}
                                         control={
                                         <Switch
@@ -662,7 +793,7 @@ const TaskListFilter = (props) => {
                                          }
                                     label={filterAndOr && filterAndOr  == "or" ? "Filter using OR. Shows items matching at least one filter." :
                                          "Filter using AND. Shows items matching all filters."}
-                                    />
+                                    /> */}
                                    {selectedField && taskListTasksSaved ? <> 
                                     {taskListTasksSaved.map((task)=> task[selectedField.field]).filter((v, i, array)=> array.indexOf(v)===i ).map((item,i)=>{
                                         const isFiltered =  (filters.filter((filter, i)=> 
@@ -949,10 +1080,12 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: "#c6ccd3",
         color: '#2d343b',
         border: '1px solid #ececec',
+        padding: 0,
         paddingLeft: 10,
         
     },
     fieldListItemSelected:{
+        padding: 0,
         paddingLeft: 10,
         boxShadow: 'inset 0 0 5px 0px #44585896',
         backgroundColor: "#c8ffff",
@@ -971,7 +1104,7 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#ececec',
         padding: '2%',
         boxShadow: '0px 2px 3px 0px #00000073',
-        width: 'fit-content',
+        width: '50%',
         minWidth: '50%',
     },
     listItemDiv:{
@@ -983,11 +1116,13 @@ const useStyles = makeStyles(theme => ({
         color: '#2d343b',
         border: '1px solid #ececec',
         margin: '0px 0px 0px 0px',
+        padding: 0,
     },
     filterListItemFiltered:{
         boxShadow: '0 0 5px 0px #44585896',
         backgroundColor: "#fff",
         color: '#0f447a',
+        padding: 2,
         border: '1px solid #fff',
         '&:hover':{
             border: '1px solid #d88f08'
@@ -998,7 +1133,11 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'row',
         '& span':{
             fontWeight: '600'
-        }
+        },
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        maxWidth: '91%',
     },
     li_checkbox:{
         
@@ -1025,6 +1164,46 @@ const useStyles = makeStyles(theme => ({
         padding: '5px',
         margin: '1%'
     },
+    filterInstallDate: {
+      
+        padding: '0px',
+        background: '#fff',
+        color: '#19253a',
+        '&& .MuiSelect-select':{
+            padding: '8px 20px 8px 10px',
+            minWidth: '100px',
+        },
+    },
+    filterInstallDateDiv:{
+        margin: '0px 10px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: '#d7ffef',
+        padding: '2px 4px',
+        borderRadius: '3px',
+    },
+    installDateFilterButton:{
+        color: '#152f24',
+        border: '1px solid #385248',
+        margin: '0px 10px',
+        fontWeight: 500,
+        backgroundColor: '#d7ffef',
+        '&:hover':{
+            backgroundColor: '#85d1b3',
+            color: '#222',
+        }
+        
+    },
+    clearInstallDateFilterIcon:{
+        margin: '2px',
+        marginTop: '4px',
+        '&:hover':{
+            color: '#000',
+            background: '#b7b7b75c',
+            borderRadius: '8px',
+        }
+    }
 
       
   }));

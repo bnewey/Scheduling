@@ -43,7 +43,7 @@ const TaskListMain = (props) => {
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
-         sorters, setSorters,
+         sorters, setSorters, installDateFilters , setInstallDateFilters,
          taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo } = useContext(TaskContext);
 
 
@@ -63,7 +63,8 @@ const TaskListMain = (props) => {
             //setTaskListTasks(null);
             setTaskListTasksRefetch(true);
         }
-        if(taskLists && taskListToMap && taskListToMap.id && (taskListTasks == null || taskListTasksRefetch == true) && filterInOrOut != null && filterAndOr != null   ) { 
+        if(taskLists && taskListToMap && taskListToMap.id && (taskListTasks == null || taskListTasksRefetch == true)
+                 && filterInOrOut != null && filterAndOr != null  && filters != null && installDateFilters != null ) { 
             if(taskListTasksRefetch == true){
                 setTaskListTasksRefetch(false);
             }
@@ -121,8 +122,17 @@ const TaskListMain = (props) => {
                     })   
                 }
 
+                if(installDateFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
+                    console.log("Post filterdata", tmpData)
+                    console.log("Post installDateFilter", tmpData)
+                }
+
                 //No filters or sorters
-                if(filters && !filters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length){
                     //no change to tmpData
                     tmpData = [...data];
                 }
@@ -157,7 +167,7 @@ const TaskListMain = (props) => {
             if(taskLists){
             }
         }
-    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch]);
+    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch, filters, installDateFilters]);
 
     //WOIDATA 
     useEffect(()=>{

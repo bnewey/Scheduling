@@ -30,7 +30,7 @@ const CalendarContainer = (props) => {
 
     //const {} = props;
 
-    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved, filterInOrOut, filterAndOr, taskListToMap, filters,
+    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved, filterInOrOut, filterAndOr, taskListToMap, filters,installDateFilters, setInstallDateFilters,
         setModalTaskId, setModalOpen, refreshView } = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
@@ -186,7 +186,7 @@ const CalendarContainer = (props) => {
 
     //Filter
     useEffect( () =>{ //useEffect for inputText
-        if((calendarRows == null || calendarRowsRefetch == true)&& filterInOrOut != null && filterAndOr != null){
+        if((calendarRows == null || calendarRowsRefetch == true)&& filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null){
             if(taskLists && taskListToMap && taskListToMap.id ) { 
 
             if(calendarRowsRefetch == true){
@@ -248,9 +248,18 @@ const CalendarContainer = (props) => {
                 }
                 
                 setTaskListTasksSaved(data);
+
+                if(installDateFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
+                    console.log("Post filterdata", tmpData)
+                    console.log("Post installDateFilter", tmpData)
+                }
                 
                 //No filters 
-                if(filters && !filters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length){
                 //no change to tmpData
                 tmpData = [...data];
                 }
@@ -275,7 +284,7 @@ const CalendarContainer = (props) => {
         
         return () => { //clean up
         }
-      },[calendarRows,calendarRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap]);
+      },[calendarRows,calendarRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters]);
     //end of Filter
 
     const handleTimeChange = (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) =>{
