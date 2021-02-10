@@ -584,7 +584,7 @@ const TaskListTasks = (props) =>{
                             maxDate={new Date('01-01-2100')}
                             minDate={new Date('01-01-1970')}
                             className={classes.datePicker}
-                            value={moment(value).format('MM-DD-YYYY hh:mm:ss')} 
+                            value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
                             onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill_date")} 
                             onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
                     </MuiPickersUtilsProvider></div>
@@ -611,7 +611,7 @@ const TaskListTasks = (props) =>{
                         maxDate={new Date('01-01-2100')}
                         minDate={new Date('01-01-1970')}
                         className={classes.datePicker}
-                        value={moment(value).format('MM-DD-YYYY hh:mm:ss')} 
+                        value={value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
                         onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "sch_install_date")} 
                         onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
               </MuiPickersUtilsProvider></div>
