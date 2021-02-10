@@ -195,7 +195,7 @@ const TaskListMain = (props) => {
         if(Array.isArray(tmpParsed)){
             setSorters(tmpParsed);
         }else{
-            setSorters([]);
+            setSorters([{"property":"priority_order","direction":"ASC"}]);
         }
         }
         if(Array.isArray(sorters)){
@@ -303,28 +303,11 @@ const TaskListMain = (props) => {
         //this sort can take multiple sorters but i dont think its necessary
            // if it is, you will have to change the [0] to a dynamic index!
         if(item.type == 'date' || item.type == 'number' || item.type == 'text'){
-            switch(sorterState){
-                case 0:
-                    setSorterState(1);
-                    break;
-                case 1:
-                    if(sorters[0].property == item.field){
-                        setSorterState(2)
-                    }else{
-                        setSorterState(1);
-                    }
-                    break;
-                case 2:
-                    setSorterState(1);
-                    break;
-                default: 
-            }
             setSorters([{
                 property: item.field, 
                 direction: sorters && sorters[0] && sorters[0].property == item.field ? 
-                        ( sorterState === 0 ? "ASC" : sorterState === 1 ? "DESC" : "ASC" ) : "ASC"
-            }]);
-            
+                ( sorters[0].direction === 'DESC' ? "ASC" : sorters[0].direction === 'ASC' ? "DESC" : "ASC" ) : "ASC"
+            }]);   
         }
     }
 
@@ -372,7 +355,8 @@ const TaskListMain = (props) => {
                                         <div style={{flex: `0 0 2%`}}>&nbsp;</div>
                                     {tableInfo.map((item, i)=>{
                                         const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
-                                        const isASC = sorterState === 1;
+                                        const isASC = sorters && sorters[0] && sorters[0].direction === 'ASC';
+                                        //const isASC = sorterState === 1;
                                         return(
                                         <ListItemText      id={"Head-ListItem"+i} 
                                                         align="center"
@@ -418,7 +402,8 @@ const TaskListMain = (props) => {
                                 tableInfo={tableInfo}
                                 priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
                                 taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
-                                woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
+                                woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}
+                                taskLists={taskLists}/>
                                 </List>
                             {/* </TableContainer> */}
                         </>

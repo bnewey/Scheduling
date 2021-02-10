@@ -31,9 +31,9 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
+import TaskListDatePicker from './components/TaskListDatePicker';
 
 import Crew from '../../../js/Crew';
-
 
 const TaskListTasks = (props) =>{
 
@@ -42,7 +42,7 @@ const TaskListTasks = (props) =>{
     //PROPS
     const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, tableInfo,
               priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved, setTaskListTasksSaved,
-              sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch} = props;
+              sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch, taskLists} = props;
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
@@ -168,7 +168,7 @@ const TaskListTasks = (props) =>{
       TaskLists.reorderTaskList(newTaskIds,taskListToMap.id)
         .then( (ok) => {
                 if(!ok){
-                  throw new Error("Could not reorder tasklist" + taskListToMap.id);
+                  throw Error("Could not reorder tasklist" + taskListToMap.id);
                 }
                 cogoToast.success(`Reordered Task List`, {hideAfter: 4});
                 //setTaskListTasks(null);
@@ -437,6 +437,60 @@ const TaskListTasks = (props) =>{
       Router.push('/scheduling/work_orders')
     }
 
+    const handleCompleteJob = (task,fieldId) =>{
+      if(!task || !fieldId){
+        console.error("Failed to complete job, bad params");
+        return;
+      }
+      
+      if(fieldId === "sch_install_date"){
+        //Complete job
+        Crew.updateCrewJobCompleted(1, task.install_job_id,task.install_crew)
+        .then((data)=>{
+          if(data){
+            //Move task to completed list
+            TaskLists.moveTaskToList(task.t_id, taskLists.find((tl,i)=> tl.list_name === "Completed Tasks" ).id)
+            .then((data)=>{
+              if(data){ 
+                cogoToast.success("Updated Crew Job and moved to completed");
+                setTaskListTasksRefetch(true);
+              }else{
+                throw Error("Failed to move item to completed list");
+              }
+            })
+            .catch((error)=>{
+              console.error("Failed to move item to completed lsit", error);
+              cogoToast.error("Internal server error");
+            })
+          }else{
+            throw Error("Did not update crew job")
+          }
+        })
+        .catch((error)=>{
+          console.error("Failed to update job complete", error);
+          cogoToast.error("Internal server error");
+        })
+        
+      }
+
+      if(fieldId === "drill_date"){
+        //Complete job
+        Crew.updateCrewJobCompleted(1, task.drill_job_id,task.drill_crew)
+        .then((data)=>{
+          if(data){
+            cogoToast.success("Updated Crew Job");
+            setTaskListTasksRefetch(true);
+          }else{
+            throw Error("Did not update crew job")
+          }
+        })
+        .catch((error)=>{
+          console.error("Failed to update job complete", error);
+          cogoToast.error("Internal server error");
+        })
+      }
+    }
+
 
     const handleSpecialTableValues = useCallback((fieldId, value, type, task) =>{
       if(fieldId == null || task == null){
@@ -513,7 +567,7 @@ const TaskListTasks = (props) =>{
           if(task.type === "Install (Drill)"){
             if(!task.drill_job_completed){
               return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <DatePicker     format="MM/dd/yyyy" showTodayButton
+                    {/* <DatePicker     format="MM/dd/yyyy" showTodayButton
                             clearable
                             inputVariant="outlined"
                             variant="modal" 
@@ -521,7 +575,18 @@ const TaskListTasks = (props) =>{
                             minDate={new Date('01-01-1970')}
                             className={classes.datePicker}
                             value={value} 
-                            onChange={value => handleUpdateTaskDate(value, task, "drill_date")} />
+                            onChange={value => handleUpdateTaskDate(value, task, "drill_date")} /> */}
+                             <TaskListDatePicker  showTodayButton
+                            clearable
+                            inputVariant="outlined"
+                            variant="modal" 
+                            title="Select Drill Date"
+                            maxDate={new Date('01-01-2100')}
+                            minDate={new Date('01-01-1970')}
+                            className={classes.datePicker}
+                            value={moment(value).format('MM-DD-YYYY hh:mm:ss')} 
+                            onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill_date")} 
+                            onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
                     </MuiPickersUtilsProvider></div>
               break;
             }else{
@@ -536,18 +601,21 @@ const TaskListTasks = (props) =>{
         }
         case 'sch_install_date':{
           if(!task.install_job_completed){
-            return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <DatePicker     format="MM/dd/yyyy" showTodayButton
-                            clearable
-                            inputVariant="outlined"
-                            variant="modal" 
-                            maxDate={new Date('01-01-2100')}
-                            minDate={new Date('01-01-1970')}
-                            className={classes.datePicker}
-                            value={value} 
-                            onChange={value => handleUpdateTaskDate(value, task, "sch_install_date")} />
-                    </MuiPickersUtilsProvider></div>
-                    break;
+            return_value = <div>
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                        <TaskListDatePicker   showTodayButton
+                        clearable
+                        inputVariant="outlined"
+                        variant="modal" 
+                        title="Select Install Date"
+                        maxDate={new Date('01-01-2100')}
+                        minDate={new Date('01-01-1970')}
+                        className={classes.datePicker}
+                        value={moment(value).format('MM-DD-YYYY hh:mm:ss')} 
+                        onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "sch_install_date")} 
+                        onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
+              </MuiPickersUtilsProvider></div>
+                break;
           }else{
             return_value = <span>Completed</span>
             break;
@@ -555,7 +623,6 @@ const TaskListTasks = (props) =>{
         }
         case 'woi_status_check':{
           return_value = <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 
-
                           task={task} 
                           data={woiData?.filter((item)=>item.work_order == task.table_id)}/>
           break;
