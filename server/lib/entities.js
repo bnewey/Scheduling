@@ -185,8 +185,8 @@ router.post('/getDefaultContacts', async (req,res) => {
         ent_id = req.body.ent_id;
     }
     
-
-    const sql = ' SELECT * FROM entities_contacts WHERE entities_id = ?';
+    const sql = ' SELECT ec.*, IFNULL(e.shipping, 0 ) AS default_shipping, IFNULL(e.billing, 0) AS default_billing ' + 
+    ' FROM entities_contacts ec LEFT JOIN entities e ON e.record_id = ec.entities_id  WHERE ec.entities_id = ?';
 
     try{
         if(!ent_id){
@@ -231,6 +231,33 @@ router.post('/getDefaultAddresses', async (req,res) => {
     }
 });
 
+router.post('/getDefaultAddressesForContact', async (req,res) => {
+    var ent_id, contact_id;
+
+    if(req.body){
+        ent_id = req.body.ent_id;
+        contact_id = req.body.contact_id;
+    }
+    if(!ent_id){
+        logger.error("Bad ent_id param in getDefaultAddresses");
+        res.sendStatus(400);
+    }
+
+    const sql = ' SELECT ea.*, IFNULL(ec.shipping, 0 ) AS default_shipping, IFNULL(ec.billing, 0) AS default_billing ' + 
+    ' FROM entities_addresses ea LEFT JOIN entities_contacts ec ON ec.record_id = ?  WHERE ea.entities_id = ? ';
+
+    try{
+        const results = await database.query(sql, [contact_id, ent_id]);
+
+        logger.info("Got Default Addresses for Entity " + ent_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Entities getDefaultAddresses " + error);
+        res.sendStatus(400);
+    }
+});
 
 
 router.post('/getEntityTypes', async (req,res) => {
@@ -601,7 +628,7 @@ router.post('/getEntRelatedWorkOrders', async (req,res) => {
     ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-    ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' +
+    ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
     ' WHERE wo.customer_id = ? OR wo.account_id = ?' + 
     ' ORDER BY wo.record_id DESC ' +

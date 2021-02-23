@@ -19,7 +19,7 @@ router.post('/getAllWorkOrders', async (req,res) => {
     ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-    ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' + //needs to come from entities_contacts 
+    ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +  
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
     ' WHERE date >= ? AND date <= ? ' + 
     ' ORDER BY wo.record_id DESC ' +
@@ -56,12 +56,12 @@ router.post('/getWorkOrderById', async (req,res) => {
     }
 
     const sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, advertising_notes, ' +
-    ' wo.customer_id AS customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state,  ' + 
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id,account_contact_id, account_address_id, advertising_notes, ' +
+    ' wo.customer_id AS customer_id, wo.customer_contact_id, wo.customer_address_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state,  ' + 
     ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, wo.requested_arrival_date   ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-    ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' +
+    ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
     ' WHERE wo.record_id = ? ' + 
     ' limit 1 ';
@@ -100,10 +100,10 @@ router.post('/getWorkOrderByIdForPDF', async (req,res) => {
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities enc ON wo.customer_id = enc.record_id ' +
     ' LEFT JOIN entities ena ON wo.account_id = ena.record_id ' +  
-    ' LEFT JOIN entities_contacts ecc ON enc.shipping = ecc.record_id ' + 
-    ' LEFT JOIN entities_contacts eca ON ena.billing = eca.record_id ' + 
-    ' LEFT JOIN entities_addresses eac ON (ecc.shipping = eac.record_id ) ' +
-    ' LEFT JOIN entities_addresses eaa ON (eca.billing = eaa.record_id ) ' +
+    ' LEFT JOIN entities_contacts ecc ON wo.customer_contact_id = ecc.record_id ' + 
+    ' LEFT JOIN entities_contacts eca ON wo.account_contact_id = eca.record_id ' + 
+    ' LEFT JOIN entities_addresses eac ON (wo.customer_address_id = eac.record_id ) ' +
+    ' LEFT JOIN entities_addresses eaa ON (wo.account_address_id = eaa.record_id ) ' +
     ' WHERE wo.record_id = ? ' + 
     ' limit 1 ';
     try{
@@ -161,7 +161,7 @@ router.post('/searchAllWorkOrders', async (req,res) => {
         ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
         ' FROM work_orders wo ' +
         ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-        ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' +
+        ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id  ' +
         ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' + 
         ' WHERE ?? like ? ' +
         ' ORDER BY wo.record_id DESC '
@@ -345,15 +345,17 @@ router.post('/updateWorkOrder', async (req,res) => {
             wo = req.body.workOrder;
         }  
     }
-    const sql = ' UPDATE work_orders set customer_id = ?, account_id = ?, date = ?, requestor = ? , maker = ?, type = ?, ' +
+    const sql = ' UPDATE work_orders set customer_id = ?, customer_contact_id = ?, customer_address_id=?, account_id = ?, account_contact_id=?, account_address_id=?, ' + 
+    '  date = ?, requestor = ? , maker = ?, type = ?, ' +
     '  job_reference = ? , description = ?, notes = ?, po_number = ?, requested_arrival_date = ?, completed = ?, invoiced = ?, advertising_notes=? ' +
     '  WHERE record_id = ? ';
 
     try{
-        const results = await database.query(sql, [wo.customer_id, wo.account_id, Util.convertISODateToMySqlDate(wo.date), wo.requestor, wo.maker, wo.type,
+        const results = await database.query(sql, [wo.customer_id, wo.customer_contact_id, wo.customer_address_id, wo.account_id, wo.account_contact_id,
+                    wo.account_address_id, Util.convertISODateToMySqlDate(wo.date), wo.requestor, wo.maker, wo.type,
                     wo.job_reference, wo.description, wo.notes, wo.po_number, Util.convertISODateToMySqlDate(wo.requested_arrival_date), wo.completed, wo.invoiced ,
                     wo.advertising_notes, wo.record_id]);
-        logger.info("Work Order  updated", wo.record_id);
+        logger.info("Work Order  updated", [wo.record_id]);
         res.json(results);
 
     }
@@ -372,15 +374,18 @@ router.post('/addWorkOrder', async (req,res) => {
         }  
     }
 
-    const sql = ' INSERT INTO work_orders (company, id_work_orders_types, customer_id, account_id, date, requestor , maker, type, ' +
-    '  job_reference , description, notes, po_number, requested_arrival_date, date_entered, completed, invoiced) values (2, 0, IFNULL(? ,DEFAULT(customer_id)), ' +
-     ' IFNULL(? ,DEFAULT(account_id)),IFNULL(? ,DEFAULT(date)), IFNULL(? ,DEFAULT(requestor)),IFNULL(? ,DEFAULT(maker)),IFNULL(? ,DEFAULT(type)), ' +
+    const sql = ' INSERT INTO work_orders (company, id_work_orders_types, customer_id, customer_contact_id, customer_address_id,  ' + 
+    '  account_id, account_contact_id, account_address_id, date, requestor , maker, type, ' +
+    '  job_reference , description, notes, po_number, requested_arrival_date, date_entered, completed, invoiced) values (2, 0, IFNULL(? ,DEFAULT(customer_id)), ' + 
+    '  ?, ?, IFNULL(? ,DEFAULT(account_id)), ?, ?,IFNULL(? ,DEFAULT(date)), ' + 
+    '  IFNULL(? ,DEFAULT(requestor)),IFNULL(? ,DEFAULT(maker)),IFNULL(? ,DEFAULT(type)), ' +
      ' IFNULL(? ,DEFAULT(job_reference)),IFNULL(? ,DEFAULT(description)),IFNULL(? ,DEFAULT(notes)),IFNULL(? ,DEFAULT(po_number)), ' +
      ' IFNULL(? ,DEFAULT(requested_arrival_date)),IFNULL(? ,DEFAULT(date_entered)),IFNULL(? ,DEFAULT(completed)),IFNULL(? ,DEFAULT(invoiced))) ';
 
     try{
-        const results = await database.query(sql, [wo.customer_id, wo.account_id, wo.date, wo.requestor, wo.maker, wo.type,
-                    wo.job_reference, wo.description, wo.notes, wo.po_number, wo.requested_arrival_date, wo.date, wo.completed, wo.invoiced]);
+        const results = await database.query(sql, [wo.customer_id, wo.customer_contact_id, wo.customer_address_id, wo.account_id,
+                    wo.account_contact_id, wo.account_address_id, Util.convertISODateToMySqlDate(wo.date), wo.requestor, wo.maker, wo.type,
+                    wo.job_reference, wo.description, wo.notes, wo.po_number, Util.convertISODateToMySqlDate(wo.requested_arrival_date), Util.convertISODateTimeToMySqlDateTime(wo.date), wo.completed, wo.invoiced]);
         logger.info("Work Order added ");
         res.json(results);
 

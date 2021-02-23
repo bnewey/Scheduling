@@ -16,9 +16,11 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
-import Util from '../../../js/Util.js';
+import moment from 'moment';
+  import Util from '../../../js/Util.js';
 
 import Settings from  '../../../js/Settings';
+import Entities from  '../../../js/Entities';
 import Work_Orders from  '../../../js/Work_Orders';
 import { ListContext } from '../WOContainer';
 import EntitiesDrawer from './EntitiesDrawer.js';
@@ -33,6 +35,16 @@ const AddEditModal = function(props) {
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
+    const [entityShippingContacts, setEntityShippingContacts] = useState(null);
+    const [entityShippingAddresses, setEntityShippingAddresses] = useState(null);
+    const [entityBillingContacts, setEntityBillingContacts] = useState(null);
+    const [entityBillingAddresses, setEntityBillingAddresses] = useState(null);
+
+    //state variables for shipping and billing logic
+    const [entityShippingEntityEditChanged, setEntityShippingEntityEditChanged ] = useState(false);
+    const [entityShippingContactEditChanged, setEntityShippingContactEditChanged ] = useState(false);
+    const [entityBillingEntityEditChanged, setEntityBillingEntityEditChanged] = useState(false);
+    const [entityBillingContactEditChanged, setEntityBillingContactEditChanged] = useState(false);
 
     const saveRef = React.createRef();
     const classes = useStyles();
@@ -41,6 +53,14 @@ const AddEditModal = function(props) {
         setEntityDrawerOpen(false);
         setActiveWorkOrder(null);
         setEditWOModalOpen(false);
+        setEntityShippingContacts(null)
+        setEntityShippingAddresses(null)
+        setEntityBillingContacts(null)
+        setEntityBillingAddresses(null)
+        setEntityShippingEntityEditChanged(false);
+        setEntityBillingEntityEditChanged(false);
+        setEntityShippingContactEditChanged(false);
+        setEntityBillingContactEditChanged(false);
     };
 
     const handleOpenEntityDraw = ()=>{
@@ -49,12 +69,20 @@ const AddEditModal = function(props) {
    
     const fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name', onClick: ()=>handleOpenEntityDraw()},
-        {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name', onClick: ()=>handleOpenEntityDraw()},
-        {field: 'date', label: 'Date Entered*', type: 'date', updateBy: 'state',required: true},
+        {field: 'customer_id', label: 'Product Goes To', type: 'entity', updateBy: 'ref', displayField: 'c_name', onClick: ()=>handleOpenEntityDraw(),required: true},
+        {field: 'customer_contact_id', label: 'Shipping Contact', type: 'select-entity-contact', updateBy: 'ref',
+            hidden: (row)=> !row || (row && row['customer_id'] == null) ,required: true},
+        {field: 'customer_address_id', label: 'Shipping Address', type: 'select-entity-address', updateBy: 'ref',
+            hidden: (row)=> !row || (row && row['customer_contact_id'] == null),required: true },
+        {field: 'account_id', label: 'Bill Goes To', type: 'entity', updateBy: 'ref', displayField: 'a_name', onClick: ()=>handleOpenEntityDraw(),required: true,},
+        {field: 'account_contact_id', label: 'Billing Contact', type: 'select-entity-contact', updateBy: 'ref',required: true,
+            hidden: (row)=> !row || (row && row['account_id'] == null) },
+        {field: 'account_address_id', label: 'Billing Address', type: 'select-entity-address', updateBy: 'ref',required: true,
+            hidden: (row)=> !row || (row && row['account_contact_id'] == null) },
+        {field: 'date', label: 'Date Entered', type: 'date', updateBy: 'state',required: true},
         {field: 'requestor', label: 'Requestor', type: 'select-users', updateBy: 'ref'},
         {field: 'maker', label: 'Maker', type: 'select-users', updateBy: 'ref'},
-        {field: 'type', label: 'Type*', type: 'select-type', updateBy: 'ref',required: true},
+        {field: 'type', label: 'Type', type: 'select-type', updateBy: 'ref',required: true},
         {field: 'job_reference', label: 'Job Reference', type: 'text', updateBy: 'ref'},
         {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
         {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
@@ -71,9 +99,127 @@ const AddEditModal = function(props) {
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(editModalMode == "add"){
-            setActiveWorkOrder({});
+            setActiveWorkOrder({date: moment().format()});
         }
-    },[editModalMode])
+    },[editModalMode, editWOModalOpen])
+
+    useEffect(()=>{
+        if(!editWOModalOpen){
+            return;
+        }
+        //Shipping Contacts
+        if(activeWorkOrder?.customer_id && entityShippingContacts == null ){
+            
+            Entities.getDefaultContacts(activeWorkOrder.customer_id)
+            .then((data)=>{
+                setEntityShippingContacts(data);
+                //Set default address as selected
+                let updateWorkOrder = {...activeWorkOrder};
+
+                //Dont set Default if were in edit and the customer_id has not been changes
+                if( editModalMode == "add" || (entityShippingEntityEditChanged && editModalMode == "edit")){
+                    
+                    let temp =  data.find((item)=>  item.record_id == item.default_shipping)?.record_id || null;
+                    //let actual = data.find((item)=>  item.record_id == activeWorkOrder.customer_contact_id)?.record_id || null;
+                    updateWorkOrder["customer_contact_id"] = temp;
+                    setEntityShippingContactEditChanged(true);
+                }
+                
+                setActiveWorkOrder(updateWorkOrder);
+            })
+            .catch((error)=>{
+                console.error("Failed to get shipping contacts", error);
+                cogoToast.error("Internal Server Error");
+            })
+        }else{
+            if(!activeWorkOrder?.customer_id && entityShippingContacts){
+                
+                setEntityShippingContacts(null);
+            }
+        }
+
+        //Shipping Addresses
+        if(activeWorkOrder?.customer_contact_id && entityShippingAddresses == null ){
+            
+            Entities.getDefaultAddressesForContact( activeWorkOrder.customer_id,activeWorkOrder.customer_contact_id)
+            .then((data)=>{
+                setEntityShippingAddresses(data);
+                //Set default address as selected
+                let updateWorkOrder = {...activeWorkOrder};
+
+                //Dont set Default if were in edit and the customer_contact_id has not been changes
+                if(editModalMode == "add" || ( entityShippingContactEditChanged && editModalMode == "edit")){
+                    updateWorkOrder["customer_address_id"] = data.find((item)=>  item.record_id == item.default_shipping)?.record_id || null;
+                }
+                setActiveWorkOrder(updateWorkOrder);
+            })
+            .catch((error)=>{
+                console.error("Failed to get shipping contacts", error);
+                cogoToast.error("Internal Server Error");
+            })
+        }else{
+            if(!activeWorkOrder?.customer_contact_id && entityShippingAddresses){
+                
+                setEntityShippingAddresses(null);
+            }
+        }
+
+        //Billing Contacts
+        if(activeWorkOrder?.account_id && entityBillingContacts == null ){
+            
+            Entities.getDefaultContacts(activeWorkOrder.account_id)
+            .then((data)=>{
+                setEntityBillingContacts(data);
+                //Set default address as selected
+                let updateWorkOrder = {...activeWorkOrder};
+
+                //Dont set Default if were in edit and the account_id has not been changes
+                if(editModalMode == "add" || (entityBillingEntityEditChanged && editModalMode == "edit")){
+                    updateWorkOrder["account_contact_id"] = data.find((item)=>  item.record_id == item.default_billing)?.record_id || null;
+                    setEntityBillingContactEditChanged(true);
+                }
+
+                setActiveWorkOrder(updateWorkOrder);
+            })
+            .catch((error)=>{
+                console.error("Failed to get billing contacts", error);
+                cogoToast.error("Internal Server Error");
+            })
+        }else{
+            if(!activeWorkOrder?.account_id && entityBillingContacts){
+                
+                setEntityBillingContacts(null);
+            }
+        }
+
+        //Billing Addresses
+        if(activeWorkOrder?.account_contact_id && entityBillingAddresses == null ){
+            
+            Entities.getDefaultAddressesForContact( activeWorkOrder.account_id,activeWorkOrder.account_contact_id)
+            .then((data)=>{
+                setEntityBillingAddresses(data);
+                //Set default address as selected
+                let updateWorkOrder = {...activeWorkOrder};
+
+                //Dont set Default if were in edit and the account_contact_id has not been changed
+                if(editModalMode == "add" || (entityBillingContactEditChanged && editModalMode == "edit")){
+                    updateWorkOrder["account_address_id"] = data.find((item)=>  item.record_id == item.default_billing)?.record_id || null;
+                }
+
+                setActiveWorkOrder(updateWorkOrder);
+            })
+            .catch((error)=>{
+                console.error("Failed to get billing contacts", error);
+                cogoToast.error("Internal Server Error");
+            })
+        }else{
+            if(!activeWorkOrder?.account_contact_id && entityBillingAddresses){
+               
+                setEntityBillingAddresses(null);
+            }
+        }
+        
+    },[activeWorkOrder,editWOModalOpen])
 
         
 
@@ -165,12 +311,25 @@ const AddEditModal = function(props) {
                                 setFormObject={setActiveWorkOrder}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                raineyUsers={raineyUsers} jobTypes={types} />
+                                raineyUsers={raineyUsers} jobTypes={types}
+                                entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts} 
+                                entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
+                                entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts} 
+                                entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses}
+                                entityShippingContactEditChanged={entityShippingContactEditChanged} setEntityShippingContactEditChanged={setEntityShippingContactEditChanged}
+                                entityBillingContactEditChanged={entityBillingContactEditChanged} setEntityBillingContactEditChanged={setEntityBillingContactEditChanged}/>
                         </Grid>
                         {entityDrawerOpen && 
                             <Grid item xs={5} className={classes.paperScroll}>
                                 <EntitiesDrawer  
-                                     entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen} saveRef={saveRef}/>
+                                     entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen} saveRef={saveRef} 
+                                     setEntityShippingContacts={setEntityShippingContacts}
+                                     setEntityShippingAddresses={setEntityShippingAddresses}
+                                     setEntityBillingContacts={setEntityBillingContacts}
+                                     setEntityBillingAddresses={setEntityBillingAddresses}
+                                     entityShippingEntityEditChanged={entityShippingEntityEditChanged} setEntityShippingEntityEditChanged={setEntityShippingEntityEditChanged}
+                                     entityBillingEntityEditChanged={entityBillingEntityEditChanged} setEntityBillingEntityEditChanged={setEntityBillingEntityEditChanged}
+                                     />
                             </Grid>}
                     </Grid>
                     

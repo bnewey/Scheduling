@@ -17,9 +17,10 @@ router.get('/getAllTasks', async (req,res) => {
     ' t.sch_install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded , ea.record_id AS address_id , ea.entities_id '  +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id ' +
-    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
-        ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
-            ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
+    ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id ' + 
+    // ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
+    //     ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+    //         ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
     ' ORDER BY t_id DESC ' + 
     ' limit 1000';
    try{
@@ -50,9 +51,10 @@ router.post('/getTask', async (req,res) => {
     ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.record_id AS address_id, ea.entities_id, tli.task_list_id, tli.id AS task_list_item_id '  +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id '  +
-    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
-        ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
-            ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' + 
+    ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id ' + 
+    // ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
+    //     ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+    //         ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' + 
     ' LEFT JOIN task_list_items tli ON t.id = task_id ' +
     ' WHERE t.id = ?  ';
 

@@ -22,10 +22,12 @@ import { ListContext } from '../WOContainer';
 
 
 const EntitiesDrawer = function(props) {
-    const {user, entityDrawerOpen, setEntityDrawerOpen, saveRef} = props;
+    const {user, entityDrawerOpen, setEntityDrawerOpen, saveRef, setEntityShippingContacts, setEntityShippingAddresses,
+        setEntityBillingContacts, setEntityBillingAddresses, entityShippingEntityEditChanged,setEntityShippingEntityEditChanged,
+                                     entityBillingEntityEditChanged, setEntityBillingEntityEditChanged} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid,
-    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers, } = useContext(ListContext);
 
     const [entityRows, setEntityRows] = useState(null);
     const [searchValue,setSearchValue] = useState("");
@@ -75,7 +77,28 @@ const EntitiesDrawer = function(props) {
         if(type === "entity"){
             tmpWorkOrder[key[0]] = value[0];
             tmpWorkOrder[key[1]] = value[1];
+            if(key[0] === "customer_id"){
+                console.log("IT HAPPENED")
+                setEntityShippingContacts(null);
+                setEntityShippingAddresses(null);
+                tmpWorkOrder["customer_contact_id"] = null
+                tmpWorkOrder["customer_address_id"] = null
+
+                // Stupid state logic for telling formbuilder to use entity defaults in EDIT mode after a change to entity
+                setEntityShippingEntityEditChanged(true)
+            }
+            if(key[0] === "account_id"){
+                console.log("IT HAPPENED 2")
+                setEntityBillingContacts(null);
+                setEntityBillingAddresses(null);
+                tmpWorkOrder["account_contact_id"] = null
+                tmpWorkOrder["account_address_id"] = null
+
+                // Stupid state logic for telling formbuilder to use entity defaults in EDIT mode after a change to entity
+                setEntityBillingEntityEditChanged(true)
+            }
         }
+  
         saveRef.current.handleShouldUpdate(true);
         setActiveWorkOrder(tmpWorkOrder);
     }

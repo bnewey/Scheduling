@@ -45,7 +45,12 @@ const FormBuilder = forwardRef((props, ref) => {
             entContactTitles,//specific date for entities contacts title
             shipToOptionsWOI, //specific data for woi ship_to
             vendorTypes, //specific data for woi vendor
-            raineyUsers //specific data for all select-users
+            raineyUsers, //specific data for all select-users
+            entityShippingContacts, setEntityShippingContacts,
+            entityShippingAddresses, setEntityShippingAddresses,
+            entityBillingContacts, setEntityBillingContacts,
+            entityBillingAddresses, setEntityBillingAddresses,
+            setEntityShippingContactEditChanged, setEntityBillingContactEditChanged //state for knowing when to show entity defaults or actual wo value
         } = props;
         console.log("Props", props);
         
@@ -98,7 +103,26 @@ const FormBuilder = forwardRef((props, ref) => {
             tmpObject[key] = value ? Util.convertISODateTimeToMySqlDateTime(value) : value;
         }
         if(type.split('-')[0] === "select"){
-            tmpObject[key] = value.target.value;
+            console.log("InputChange value ", value.target.value);
+            tmpObject[key] = value.target.value == 0 ? null : value.target.value;
+          
+            if(type === "select-entity-contact"){
+                if(key === "customer_contact_id"){
+                    setEntityShippingAddresses(null);
+                    tmpObject["customer_address_id"] = null;
+
+                    // Stupid state logic for telling formbuilder to use entity defaults in EDIT mode after a change to entity
+                    setEntityShippingContactEditChanged(true);
+                }
+                if(key === "account_contact_id"){
+                    setEntityBillingAddresses(null);
+                    tmpObject["account_address_id"] = null;
+
+                    // Stupid state logic for telling formbuilder to use entity defaults in EDIT mode after a change to entity
+                    setEntityBillingContactEditChanged(true);
+                }
+                
+            }
         }
         if(type.split('-')[0] === "radio"){
             tmpObject[key] = value;
@@ -263,7 +287,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     })
                     .catch((error)=>{
                         console.log("Failed to save in FormBuilder", error);
-                        cogoToast.info(error);
+                        cogoToast.info( "Error saving");
                     })
                 }
 
@@ -288,13 +312,16 @@ const FormBuilder = forwardRef((props, ref) => {
                 }
                 return(
                 <div className={classes.inputDiv}>  
-                    <span className={classes.inputLabel}>{field.label}</span>
+                    <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span>
                     <GetInputByType field={field} formObject={formObject} errorFields={errorFields} handleShouldUpdate={handleShouldUpdate}
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToOptionsWOI={shipToOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
                     dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} defaultAddresses={defaultAddresses}
-                     entContactTitles={entContactTitles}/>
+                     entContactTitles={entContactTitles} entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts}
+                     entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
+                     entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
+                     entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses}/>
                 </div>)
             })}</>
         : <></>}
@@ -308,7 +335,8 @@ export default FormBuilder;
 const GetInputByType = function(props){
     const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
         shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
-        entContactTitles} = props;
+        entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
+        entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses} = props;
 
     if(!field || field.type == null){
         console.error("Bad field");
@@ -324,7 +352,8 @@ const GetInputByType = function(props){
                 <TextField id={field.field} 
                         error={error}
                          variant="outlined"
-                         multiline={field.multiline}
+                         /*multiline={field.multiline}*/
+                         name={field.field}
                          inputRef={ref_object[field.field]}
                          inputProps={{className: classes.inputStyle}} 
                          classes={{root: classes.inputRoot}}
@@ -453,12 +482,12 @@ const GetInputByType = function(props){
                 <Select
                     error={error}
                     id={field.field}
-                    value={formObject && formObject[field.field] ? formObject[field.field] : null}
+                    value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
                     onChange={value => handleInputOnChange(value, true, field.type, field.field)}
                     native
                 >
-                    <option value={null}>
+                    <option value={0}>
                         Select
                     </option>
                     {vendorTypes && vendorTypes.map((item)=>{
@@ -476,12 +505,12 @@ const GetInputByType = function(props){
                     <Select
                         error={error}
                         id={field.field}
-                        value={formObject && formObject[field.field] ? formObject[field.field] : null}
+                        value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
                         native
                     >
-                        <option value={null}>
+                        <option value={0}>
                             Select
                         </option>
                         {shipToOptionsWOI && shipToOptionsWOI.map((item)=>{
@@ -519,6 +548,72 @@ const GetInputByType = function(props){
                 </div>
             )
             break;
+
+        case 'select-entity-contact':
+            console.log("formObject", formObject )
+                return(<div className={classes.inputValueSelect}>
+                    {error && <span className={classes.errorSpan}>Entity Contact Required</span> }
+                    <Select
+                        error={error}
+                        id={field.field}
+                        value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {field.field === "customer_contact_id" ? (entityShippingContacts && entityShippingContacts.map((item)=>{
+                            return (
+                                <option value={item.record_id}>
+                                    {item.name} {item.record_id===item.default_shipping ? "(Default Shipping)" : ""}
+                                </option>
+                            )
+                        }) ) : 
+                        field.field === "account_contact_id" ? (entityBillingContacts && entityBillingContacts.map((item)=>{
+                            return (
+                                <option value={item.record_id}>
+                                    {item.name} {item.record_id===item.default_billing ? "(Default Billing)" : ""}
+                                </option>
+                            )
+                        }) ) : <></> }
+                        
+                    </Select></div>
+                )
+        break;
+        case 'select-entity-address':
+            return(<div className={classes.inputValueSelect}>
+                {error && <span className={classes.errorSpan}>Entity Address Required</span> }
+                <Select
+                    error={error}
+                    id={field.field}
+                    value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                    inputProps={{classes:  classes.inputSelect}}
+                    onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                    native
+                >
+                    <option value={0}>
+                        Select
+                    </option>
+                    {field.field === "customer_address_id" ? (entityShippingAddresses && entityShippingAddresses.map((item)=>{
+                        return (
+                            <option value={item.record_id}>
+                                {item.name} {item.record_id===item.default_shipping ? "(Default Shipping)" : ""}
+                            </option>
+                        )
+                    }) ) :
+                    field.field === "account_address_id" ? (entityBillingAddresses && entityBillingAddresses.map((item)=>{
+                        return (
+                            <option value={item.record_id}>
+                                {item.name} {item.record_id===item.default_billing ? "(Default Billing)" : ""}
+                            </option>
+                        )
+                    }) ) : <></>
+                }
+                </Select></div>
+            )
+        break;
         case 'radio-scbd_or_sign':
             return(
                 <FormControl component="fieldset" classes={{ root: classes.radioFormControl}}>

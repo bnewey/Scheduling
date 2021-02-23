@@ -25,8 +25,8 @@ router.post('/getAllSignsForScheduler', async (req,res) => {
     ' LEFT JOIN task_list_items tli ON t.id = tli.task_id ' +
     ' LEFT JOIN task_list tl ON tli.task_list_id = tl.id ' +
     ' LEFT JOIN entities enc ON wo.customer_id = enc.record_id ' +
-    ' LEFT JOIN entities_contacts ecc ON enc.shipping = ecc.record_id ' + 
-    ' LEFT JOIN entities_addresses eac ON (ecc.shipping = eac.record_id ) ' +
+    ' LEFT JOIN entities_contacts ecc ON wo.customer_contact_id = ecc.record_id ' + 
+    ' LEFT JOIN entities_addresses eac ON (wo.customer_address_id = eac.record_id ) ' +
     ' WHERE woi.scoreboard_or_sign = 2 AND wo.completed = 0 ORDER BY  t.sch_install_date ASC, wo.record_id DESC';
 
     try{
@@ -55,8 +55,7 @@ router.post('/searchAllSignItems', async (req,res) => {
             table = req.body.table;
         }else{
             return;
-        }
-        
+        }    
     }    
 
     const sql = 'SELECT woi.*, date_format(woi.sign_built, \'%Y-%m-%d %H:%i:%S\') AS sign_built, ' + 
@@ -69,8 +68,8 @@ router.post('/searchAllSignItems', async (req,res) => {
     ' LEFT JOIN task_list_items tli ON t.id = tli.task_id ' +
     ' LEFT JOIN task_list tl ON tli.task_list_id = tl.id  ' +
     ' LEFT JOIN entities enc ON wo.customer_id = enc.record_id ' +
-    ' LEFT JOIN entities_contacts ecc ON enc.shipping = ecc.record_id ' + 
-    ' LEFT JOIN entities_addresses eac ON (ecc.shipping = eac.record_id ) ' +
+    ' LEFT JOIN entities_contacts ecc ON wo.customer_contact_id = ecc.record_id ' + 
+    ' LEFT JOIN entities_addresses eac ON (wo.customer_address_id = eac.record_id ) ' +
     ' WHERE ?? like ? AND woi.scoreboard_or_sign = 2 AND wo.completed = 0 ORDER BY t.sch_install_date ASC, wo.record_id DESC ';
 
     try{

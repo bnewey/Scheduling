@@ -25,8 +25,8 @@ router.post('/getPackingSlipsById', async (req,res) => {
         ' FROM packing_slip ps ' + 
         ' LEFT JOIN work_orders wo ON wo.record_id = ps.work_order ' +      
         ' LEFT JOIN entities en ON wo.customer_id = en.record_id ' + 
-        ' LEFT JOIN entities_contacts ec ON en.shipping = ec.record_id ' + 
-        ' LEFT JOIN entities_addresses ea ON (ec.shipping = ea.record_id ) ' + 
+        ' LEFT JOIN entities_contacts ec ON wo.customer_contact_id = ec.record_id ' + 
+        ' LEFT JOIN entities_addresses ea ON (wo.customer_address_id = ea.record_id ) ' + 
         ' WHERE ps.work_order = ? ';
 
     try{
@@ -183,7 +183,7 @@ router.post('/getShipToWOIOptions', async (req,res) => {
 
 
     const sql = 'SELECT '  + 
-        ' ec.record_id AS ec_record_id, if(ec.entities_id = e1.record_id,concat(ec.name,\' (Product Goes to)\'), concat(ec.name,\' (Bill Goes to)\')) AS ec_name ' + 
+        ' ec.record_id AS ec_record_id, if(ec.entities_id = e1.record_id,concat(ec.name,\' (Bill Goes to)\'), concat(ec.name,\' (Product Goes to)\')) AS ec_name ' + 
         ' FROM work_orders wo ' +
         ' LEFT JOIN entities e1 ON e1.record_id = wo.account_id ' +
         ' LEFT JOIN entities e2 ON e2.record_id = wo.customer_id ' + 
@@ -214,7 +214,7 @@ router.post('/getPastWorkOrders', async (req,res) => {
     ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-    ' LEFT JOIN entities_addresses sa ON a.record_id = sa.entities_id AND sa.main = 1 ' +
+    ' LEFT JOIN entities_addresses sa ON sa.record_id = wo.account_address_id ' +
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
     ' WHERE wo.customer_id = ? ' + 
     ' ORDER BY wo.record_id DESC ' +

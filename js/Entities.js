@@ -155,6 +155,26 @@ async function getDefaultAddresses(ent_id){
 
 }
 
+
+async function getDefaultAddressesForContact(ent_id, contact_id){
+    const route = '/scheduling/entities/getDefaultAddressesForContact';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ent_id, contact_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 async function getEntityTypes(){
     const route = '/scheduling/entities/getEntityTypes';
     try{
@@ -441,6 +461,7 @@ module.exports = {
     deleteEntity,
     getDefaultContacts,
     getDefaultAddresses,
+    getDefaultAddressesForContact,
     getEntityTypes,
     getEntAddresses,
     getEntAddressById,

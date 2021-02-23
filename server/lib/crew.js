@@ -613,9 +613,10 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
     ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 
     ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
     ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' +
-    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
-    ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
-        ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' + 
+    ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id  ' + 
+    // ' LEFT JOIN entities_addresses ea ON (wo.customer_id = ea.entities_id AND ' + 
+    // ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+    //     ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' + 
     ' WHERE cc.id = ? ORDER BY j.ordernum  ';
     
     try{

@@ -57,9 +57,10 @@ router.post('/getTaskList', async (req,res) => {
     ' LEFT JOIN crew_members cmd ON cmd.crew_id = cjd.crew_id AND cmd.is_leader = 1  ' + 
     ' LEFT JOIN crew_members_available mai ON mai.id = cmi.member_id  ' + 
     ' LEFT JOIN crew_members_available mad ON mad.id = cmd.member_id  ' + 
-    ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
-        ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
-            ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
+    ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id  ' +
+    // ' LEFT JOIN entities_addresses ea ON (wo.customer_id = ea.entities_id AND ' + 
+    //     ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
+    //         ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
     ' WHERE tli.task_list_id = ? ORDER BY tli.priority_order ASC ' ;
 
     try{

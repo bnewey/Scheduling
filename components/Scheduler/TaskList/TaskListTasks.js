@@ -566,17 +566,9 @@ const TaskListTasks = (props) =>{
         case 'drill_date':{
           if(task.type === "Install (Drill)"){
             if(!task.drill_job_completed){
-              return_value = <div><MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    {/* <DatePicker     format="MM/dd/yyyy" showTodayButton
-                            clearable
-                            inputVariant="outlined"
-                            variant="modal" 
-                            maxDate={new Date('01-01-2100')}
-                            minDate={new Date('01-01-1970')}
-                            className={classes.datePicker}
-                            value={value} 
-                            onChange={value => handleUpdateTaskDate(value, task, "drill_date")} /> */}
-                             <TaskListDatePicker  showTodayButton
+              return_value = <div>
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                          <TaskListDatePicker  showTodayButton
                             clearable
                             inputVariant="outlined"
                             variant="modal" 

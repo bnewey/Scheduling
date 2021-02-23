@@ -63,10 +63,10 @@ const TaskModalAddressInfo = (props) => {
 
     return(
         <>
-        <div><Typography variant="h3" component="h3" className={classes.taskTitle}>Address Information</Typography>
-        { !editAddressInfo  ? <IconButton edge="end" aria-label="edit" className={classes.editFormButton} onClick={event => handleEditAddressInfo(event)}>
+        <div><Typography variant="h3" component="h3" className={classes.taskTitle}> Shipping Address Information</Typography>
+       {/* { !editAddressInfo  ? <IconButton edge="end" aria-label="edit" className={classes.editFormButton} onClick={event => handleEditAddressInfo(event)}>
             <EditIcon />
-    </IconButton>: <div className={classes.textButtonDiv}><span className={classes.text_button} onClick={event => handleSaveAddress(event)}>save</span></div>}</div>
+    </IconButton>: <div className={classes.textButtonDiv}><span className={classes.text_button} onClick={event => handleSaveAddress(event)}>save</span></div>}*/ }</div>
         
         { !editAddressInfo ?
         <>  {/* TEXT (NON EDIT) MODE */}
