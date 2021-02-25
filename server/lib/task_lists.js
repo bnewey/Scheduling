@@ -29,8 +29,7 @@ router.post('/getTaskList', async (req,res) => {
         id = req.body.id;
     }
 
-    const sql =    
-     'SELECT tl.id as tl_id, tl.list_name as tl_name, date_format(tl.date_entered, \'%Y-%m-%d %H:%i:%S\') as tl_date_entered , tl.is_priority AS tl_is_priority,  ' + 
+    const sql =   'SELECT tl.id as tl_id, tl.list_name as tl_name, date_format(tl.date_entered, \'%Y-%m-%d %H:%i:%S\') as tl_date_entered , tl.is_priority AS tl_is_priority,  ' + 
         ' tl.linked_tl AS tl_linked_tl, t.id AS t_id, t.name AS t_name, tli.task_list_id, t.hours_estimate, ' + 
         ' date_format(t.date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
         ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 

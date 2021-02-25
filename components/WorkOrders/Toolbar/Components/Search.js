@@ -12,6 +12,7 @@ import { ListContext } from '../../WOContainer';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import clsx from 'clsx';
 
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
@@ -29,6 +30,7 @@ const Search = function(props) {
   const searchOpen = currentView && currentView.value == "search";
 
   const searchTableObject= [
+    {value: "all", displayValue: 'All'},
     {value: "wo.description", displayValue: 'Description'},
     {value: "wo.record_id", displayValue: 'Work Order #'},
     {value: "a.name", displayValue: 'Entity Name'},
@@ -43,14 +45,31 @@ const Search = function(props) {
   },[searchOpen])
 
   const searchRef = React.useRef(null);
+  const tableRef = React.useRef(null);
+  const listRef = React.useRef(null);
 
   useEffect(()=>{
     if(searchTable){
+      document.activeElement.blur();
+      console.log("searchTable", searchTable);
       if(searchRef.current){
         console.log("Currnet", searchRef.current);
          searchRef.current.focus();
          searchRef.current.select();
       }
+
+      if(tableRef && tableRef.current){
+        console.log("tableRef", tableRef);
+        console.log("tableRef current", tableRef.current);
+        tableRef.current.blur();
+      }
+
+      if(listRef && listRef.current){
+        console.log("listRef", listRef);
+        console.log("listRef current", listRef.current);
+        listRef.current.blur();
+      }
+      
     }
   },[searchTable])
 
@@ -100,48 +119,84 @@ const Search = function(props) {
         console.error("Bad search value or search table on search");
         reject();
       }
-      Work_Orders.searchAllWorkOrders(searchTable, searchValue)
-      .then((data)=>{
-        if(data){
-          //console.log(data);
-          //Update search history
-          if(searchValue != ""){
-            var updateArray = searchHistory ?  [...searchHistory] : [];
+      if(searchTable === "all"){
+        Work_Orders.superSearchAllWorkOrders(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
+          .then((data)=>{
+            if(data){
+              //console.log(data);
+              //Update search history
+              if(searchValue != ""){
+                var updateArray = searchHistory ?  [...searchHistory] : [];
 
-            //check if current matches last, if so no need to add
-            if(searchHistory.length == 0 || (searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable)){
+                var a = searchHistory[searchHistory.length -1];
+               console.log("Asuper",a);
+                if(searchHistory.length == 0 || (searchHistory.length >0 && (a.searchValue != searchValue || a.searchTable != searchTable))){
 
-              if(updateArray.length > 15){
-                  //remove first index
-                  updateArray.shift();
+                  if(updateArray.length > 15){
+                      //remove first index
+                      updateArray.shift();
+                  }
+                  setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
+                      searchValue: searchValue, searchTable: "all", results: data?.length || 0 }])
+                }
               }
-              setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
-                  searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
+              
+              resolve(data)
             }
-          }
-          
-          resolve(data)
+          })
+          .catch((error)=>{
+            cogoToast.error("Failed to search work orders");
+            reject(error);
+            
+          })
+      }else{
+        Work_Orders.searchAllWorkOrders(searchTable, searchValue)
+          .then((data)=>{
+            if(data){
+              //console.log(data);
+              //Update search history
+              if(searchValue != ""){
+                var updateArray = searchHistory ?  [...searchHistory] : [];
+
+                //check if current matches last, if so no need to add
+                var a = searchHistory[searchHistory.length -1];
+               console.log("A",a);
+                if(searchHistory.length == 0 || (searchHistory.length >0 && (a.searchValue != searchValue || a.searchTable != searchTable))){
+
+                  if(updateArray.length > 15){
+                      //remove first index
+                      updateArray.shift();
+                  }
+                  setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
+                      searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
+                }
+              }
+              
+              resolve(data)
+            }
+          })
+          .catch((error)=>{
+            cogoToast.error("Failed to search work orders");
+            reject(error);
+            
+          })
         }
-      })
-      .catch((error)=>{
-        cogoToast.error("Failed to search work orders");
-        reject(error);
-        
-      })
+      
     })
     
   }
   const handleEnterSearch = async (keyCode, event)=>{
     var id = event.target.id;
-
+    console.log("Enter hit and searching")
     if(isNaN(keyCode) || keyCode ==null || !id ){
       console.error("Bad keycode or element on handleClearSelectedTasksOnEsc");
       return;
     }
+
     if(keyCode === 13 && id ==  "wo_search_input"){ //enter key & input element's id
       try {
         var response = await search(searchTable, searchValue)    
-
+        
         setWorkOrders(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")
@@ -169,8 +224,15 @@ const Search = function(props) {
     } 
   }
 
+  const handleHighLigh = (event, option, reason)=>{
+    console.log("highlight event", event);
+    console.log("higlight", option);
+    console.log("highlight reason", reason);
+  }
+
   const selectSearchField = () =>{
     const handleSearchTable = event => {
+      console.log("select event", event);
       setSearchTable(event.target.value);
     };
 
@@ -180,6 +242,7 @@ const Search = function(props) {
         value={searchTable}
         onChange={handleSearchTable}
         className={classes.selectSearchTable}
+        ref={tableRef}
         disableUnderline
       >
         {searchTableObject.map((item,i)=> (
@@ -200,7 +263,14 @@ const Search = function(props) {
               options={searchHistory}
               getOptionLabel={(option) => option.id || option}
               freeSolo
+              disablePortal
               openOnFocus
+              debug
+              ListboxProps={
+                {ref: listRef}
+              }
+              onHighlightChange={handleHighLigh}
+              autoHighlight={false}
               inputValue={searchValue }
               classes={{input: classes.actualInputElement, option: classes.optionLi, listbox: classes.optionList }}
               onInputChange={async(event, value, reason)=> {
@@ -226,8 +296,8 @@ const Search = function(props) {
             />)}}
 
             renderOption={(option, state)=> {
-              
-            return(<div className={classes.optionDiv}>
+            return(<div className={clsx(classes.optionDiv, {
+              [classes.optionDivSelected]: false})}>
                 <span className={classes.optionSearchTableSpan}>{searchTableObject.filter((item)=> item.value == option.searchTable)[0]?.displayValue || option.searchTable}</span>
                 <span className={classes.optionSearchValueSpan}>{option.searchValue}</span>
                 <span className={classes.optionSearchResultsSpan}>Results: {option.results}</span>
@@ -309,6 +379,9 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: '#d3d3d3',
       borderLeft: '2px solid #ff9007'
     }
+  },
+  optionDivSelected:{
+    backgroundColor: '#ccc',
   },
   optionSearchValueSpan:{
     fontFamily: 'sans-serif',

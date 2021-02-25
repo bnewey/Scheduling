@@ -304,8 +304,11 @@ const FormBuilder = forwardRef((props, ref) => {
         }
     }));
 
+
+
     return(<>
         {ref_object  ? <>
+           
             {fields.map((field, i)=>{
                 if(field?.hidden && field.hidden(formObject)){
                     return (<></>);

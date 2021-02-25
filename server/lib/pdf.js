@@ -238,7 +238,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 //WOI Billing Items
                 doc.fontSize(7);
                 var index = 0;
-                woiArray.forEach((item,i)=>{
+                billing_items.forEach((item,i)=>{
                     if(index >= 20){
                         //new page
                         index=0;

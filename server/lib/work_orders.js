@@ -164,17 +164,60 @@ router.post('/searchAllWorkOrders', async (req,res) => {
         ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id  ' +
         ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' + 
         ' WHERE ?? like ? ' +
-        ' ORDER BY wo.record_id DESC '
-        ' LIMIT 500';
+        ' ORDER BY wo.record_id DESC ';
 
     try{
         const results = await database.query(sql, [table, search_query]);
         logger.info("Got Work Orders by search", [table, search_query]);
         res.json(results);
-
     }
     catch(error){
         logger.error("Search work orders: " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/superSearchAllWorkOrders', async (req,res) => {
+
+    var search_query, tables;
+    if(req.body){
+        if(req.body.search_query != null){
+            search_query = "%" + req.body.search_query + "%";
+        }else{
+            search_query = "%";
+        }
+
+        if(req.body.tables != null){
+            tables = req.body.tables;
+        }else{
+            return;
+        }
+        
+    }    
+
+    var sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
+        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
+        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
+        ' FROM work_orders wo ' +
+        ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
+        ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id  ' +
+        ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' + 
+        ' WHERE CONCAT(';
+    tables.forEach((table,i)=> {
+
+        sql += `${table}, \' \'${i === tables.length -1 ? '' : ', '}`
+    })
+    sql+=    ') LIKE ? ' +
+        ' ORDER BY wo.record_id DESC ';
+
+    logger.info("SQL", [sql])
+    try{
+        const results = await database.query(sql, [ search_query]);
+        logger.info("Got Work Orders by super search", [tables, search_query]);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("superSearchAllWorkOrders : " + error);
         res.sendStatus(400);
     }
 });

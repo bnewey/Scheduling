@@ -108,6 +108,26 @@ async function searchAllWorkOrders(table, query){
 
 }
 
+async function superSearchAllWorkOrders(tables, query){
+    const route = '/scheduling/workOrders/superSearchAllWorkOrders';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({tables: tables, search_query: query})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
 async function getAllWorkOrderItems(table, query){
     const route = '/scheduling/workOrders/getAllWorkOrderItems';
     try{
@@ -322,6 +342,7 @@ module.exports = {
     getWorkOrderByIdForPDF,
     getEmployeeNameFromId,
     searchAllWorkOrders,
+    superSearchAllWorkOrders,
     getAllWorkOrderItems: getAllWorkOrderItems,
     getAllWorkOrderSignArtItems: getAllWorkOrderSignArtItems,
     reorderWOI,
