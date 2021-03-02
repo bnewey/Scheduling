@@ -79,6 +79,7 @@ const WOContainer = function(props) {
       const [workOrderItems, setWorkOrderItems] = React.useState(null);
       const [editWOIModalMode, setEditWOIModalMode] = React.useState("add")
       const [activeWOI, setActiveWOI] = React.useState(null);
+      const [activeWOIPrev, setActiveWOIPrev] = React.useState(null);
       const [editWOIModalOpen, setEditWOIModalOpen] = React.useState(false);
       const [vendorTypes, setVendorTypes] = React.useState(null);
       const [shipToOptionsWOI,setShipToOptionsWOI] = React.useState(null);
@@ -170,6 +171,8 @@ const WOContainer = function(props) {
 
   //Work Order for detail views
   useEffect(()=>{
+    console.log("detail ", detailWOid)
+    console.log("activeWorkOrder ", activeWorkOrder)
     if(detailWOid && activeWorkOrder == null){
       Work_Orders.getWorkOrderById(detailWOid)
       .then((data)=>{
@@ -358,7 +361,7 @@ const WOContainer = function(props) {
       <ListContext.Provider value={{workOrders, setWorkOrders, rowDateRange, setDateRowRange,
           currentView, setCurrentView, views, detailWOid,setDetailWOid, activeWorkOrder, setActiveWorkOrder,
           editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState} } >
-      <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, workOrderItems, 
+      <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, activeWOIPrev, setActiveWOIPrev, workOrderItems, 
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
                      shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
                      fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders}} >

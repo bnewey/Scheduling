@@ -243,6 +243,26 @@ async function updateWorkOrder(workOrder){
 
 }
 
+
+async function deleteWorkOrder(wo_id){
+    const route = '/scheduling/workOrders/deleteWorkOrder';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({wo_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 async function addWorkOrder(workOrder){
     const route = '/scheduling/workOrders/addWorkOrder';
     try{
@@ -349,6 +369,7 @@ module.exports = {
     updateWorkOrderItemArrivalDate: updateWorkOrderItemArrivalDate,
     updateWorkOrderItemVendor,
     updateWorkOrder,
+    deleteWorkOrder,
     addWorkOrder,
     updateWorkOrderItem,
     addWorkOrderItem,

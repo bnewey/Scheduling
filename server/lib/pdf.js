@@ -260,9 +260,6 @@ router.post('/createWorkOrderPdf', async (req,res) => {
 
         //End of WOI section
 
-
-        
-
         doc.end();
         return await getStream.buffer(doc)
     }

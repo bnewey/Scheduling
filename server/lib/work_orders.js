@@ -408,6 +408,31 @@ router.post('/updateWorkOrder', async (req,res) => {
     }
 });
 
+
+
+router.post('/deleteWorkOrder', async (req,res) => {
+    //SQL has triggers to remove task and task_list_item thats associated with the workorder
+    var wo_id ;
+    if(req.body){
+        if(req.body.wo_id != null){
+            wo_id = req.body.wo_id;
+        }  
+    }
+
+    const sql = ' DELETE FROM work_orders WHERE record_id = ? LIMIT 1 ';
+
+    try{ 
+        const results = await database.query(sql, [ wo_id]);
+        logger.info("Work Order  deleted", wo_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Failed to deleteWorkOrder: " + error);
+        res.sendStatus(400);
+    }
+});
+
 router.post('/addWorkOrder', async (req,res) => {
 
     var wo ;
