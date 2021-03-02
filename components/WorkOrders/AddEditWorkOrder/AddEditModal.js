@@ -5,6 +5,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import cogoToast from 'cogo-toast';
 
@@ -17,7 +18,10 @@ import {
   } from '@material-ui/pickers';
 
 import moment from 'moment';
-  import Util from '../../../js/Util.js';
+import Util from '../../../js/Util.js';
+
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import Settings from  '../../../js/Settings';
 import Entities from  '../../../js/Entities';
@@ -92,13 +96,11 @@ const AddEditModal = function(props) {
         {field: 'completed', label: 'Completed', type: 'check', updateBy: 'ref'},
         {field: 'invoiced', label: 'Invoiced', type: 'check', updateBy: 'ref'},
     ];
-
     //This is currently hardcoded in formbuilder
     const types = ["Install", "Install (Drill)", "Delivery", "Parts (Mfg.)", "Parts (Service)", "Field", "Loaner", "Shipment", "Bench", "Pickup"];
-
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
-        if(editModalMode == "add"){
+        if(editModalMode == "add" && editWOModalOpen){
             setActiveWorkOrder({date: moment().format()});
         }
     },[editModalMode, editWOModalOpen])
@@ -115,7 +117,7 @@ const AddEditModal = function(props) {
                 setEntityShippingContacts(data);
                 //Set default address as selected
                 let updateWorkOrder = {...activeWorkOrder};
-
+                
                 //Dont set Default if were in edit and the customer_id has not been changes
                 if( editModalMode == "add" || (entityShippingEntityEditChanged && editModalMode == "edit")){
                     
@@ -133,14 +135,12 @@ const AddEditModal = function(props) {
             })
         }else{
             if(!activeWorkOrder?.customer_id && entityShippingContacts){
-                
                 setEntityShippingContacts(null);
             }
         }
 
         //Shipping Addresses
         if(activeWorkOrder?.customer_contact_id && entityShippingAddresses == null ){
-            
             Entities.getDefaultAddressesForContact( activeWorkOrder.customer_id,activeWorkOrder.customer_contact_id)
             .then((data)=>{
                 setEntityShippingAddresses(data);
@@ -273,6 +273,35 @@ const AddEditModal = function(props) {
         })
     };
 
+    const handleDeleteWO = (wo) => {
+        if(!wo || !wo.wo_record_id){
+            console.error("Bad wo in delete WOI");
+            return;
+        }
+
+        const deleteWOI = () =>{
+            Work_Orders.deleteWorkOrder(wo.wo_record_id)
+            .then((data)=>{
+                setWorkOrders(null)
+                setCurrentView(views.filter((v)=>v.value == "allWorkOrders")[0]);
+                setDetailWOid(null);
+                handleCloseModal();
+            })
+            .catch((error)=>{
+                cogoToast.error("Failed to Delete wo")
+                console.error("Failed to delete wo", error);
+            })
+        }
+
+        confirmAlert({
+            customUI: ({onClose}) => {
+                return(
+                    <ConfirmYesNo onYes={deleteWOI} onClose={onClose} customMessage={"Delete Work Order Item permanently?"}/>
+                );
+            }
+        })
+    }
+
     return(<>
         { editWOModalOpen && <Modal
             aria-labelledby="transition-modal-title"
@@ -337,6 +366,15 @@ const AddEditModal = function(props) {
                     {/* FOOTER */}
                     <Grid container >
                         <Grid item xs={12} className={classes.paper_footer}>
+                        { editModalMode == "edit" && activeWorkOrder?.wo_record_id ? <ButtonGroup className={classes.buttonGroup}>
+                            <Button
+                                    onClick={() => handleDeleteWO(activeWorkOrder)}
+                                    variant="contained"
+                                    size="large"
+                                    className={classes.deleteButton}
+                                >
+                                    <DeleteIcon />Delete
+                        </Button></ButtonGroup> :<></>}
                         <ButtonGroup className={classes.buttonGroup}>
                             <Button
                                     onClick={() => handleCloseModal()}
@@ -418,7 +456,10 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#414d5a'
     },
     deleteButton:{
-        backgroundColor: '#b7c3cd'
+        backgroundColor: '#c4492e',
+        '&:hover':{
+            backgroundColor: '#f81010',
+        }
     },
     buttonGroup: {
         marginLeft: '1%',
