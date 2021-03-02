@@ -79,7 +79,7 @@ const EntityToolbar = function(props) {
       return(
         <Slide direction="left" in={currentView.value} mountOnEnter unmountOnExit>
         <Grid item xs={2} className={classes.toolbarLeftGrid}>
-            <IconButton type="submit" className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
+            <IconButton className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
                   <ArrowBackIcon className={classes.backIcon} />
             </IconButton>
             <span className={classes.toolbarLeftGridHeadSpan}>{currentView.displayName}</span>

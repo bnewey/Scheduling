@@ -36,7 +36,7 @@ const AddEditWOIModal = function(props) {
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
-    const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, workOrderItems, setWorkOrderItems,editWOIModalOpen,
+    const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
         setEditWOIModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI} = useContext(DetailContext)
     
     const saveRef = React.createRef();
@@ -44,18 +44,24 @@ const AddEditWOIModal = function(props) {
 
     const classes = useStyles();
 
+    useEffect(()=>{
+
+        if( resetWOIForm && saveRef?.current ){
+            //resets the form when you change something by state
+            saveRef.current.handleResetFormToDefault()
+            setResetWOIForm(false);
+        }
+    },[resetWOIForm, saveRef])
+
     const handleCloseModal = () => {
         setActiveWOI(null);
         setEditWOIModalOpen(false);
     };
 
-    
-
-
     const woi_fields = [
         //type: select must be hyphenated ex select-type
         {field: 'item_type', label: 'Item Type', type: 'radio-type', updateBy: 'state', defaultValue: 3 ,required: true},
-        {field: 'quantity', label: 'Quantity*', type: 'text', updateBy: 'ref',required: true},
+        {field: 'quantity', label: 'Quantity', type: 'text', updateBy: 'ref',required: true},
         {field: 'part_number', label: 'Part Number', type: 'text', updateBy: 'ref'},
         {field: 'size', label: 'Size', type: 'text', updateBy: 'ref'},
         {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
@@ -114,6 +120,7 @@ const AddEditWOIModal = function(props) {
         {displayField: 'N/A', value: 0 },
     ]
 
+
     const item_type_radio_options = [
         {displayField: 'Repair', value: 1 },
         {displayField: 'Loaner', value: 2 },
@@ -124,6 +131,7 @@ const AddEditWOIModal = function(props) {
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(editWOIModalOpen && editWOIModalMode == "add"){
+            setResetWOIForm(true);
             setActiveWOI({item_type: 3, scoreboard_or_sign: 0, date_offset: 0, price: 0.00  });
         }
     },[editWOIModalMode, editWOIModalOpen])
@@ -140,7 +148,8 @@ const AddEditWOIModal = function(props) {
                     //Refetch our data on save
                     cogoToast.success(`Work Order Item ${woi.record_id} has been updated!`, {hideAfter: 4});
                     setWorkOrderItems(null);
-                    handleCloseModal();
+                    //setActiveWOI({contact: updateItem.contact || null })
+                    //handleCloseModal();
                     resolve(data)
                 })
                 .catch( error => {
@@ -158,7 +167,9 @@ const AddEditWOIModal = function(props) {
                         setWorkOrderItems(null);
                     }
                     cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
-                    handleCloseModal();
+                    setActiveWOI({contact: updateItem.contact || null ,item_type: 3, scoreboard_or_sign: 0, date_offset: 0, price: 0.00 })
+                    setResetWOIForm(true)
+                    //handleCloseModal();
                     resolve(data);
                 })
                 .catch( error => {
@@ -182,6 +193,7 @@ const AddEditWOIModal = function(props) {
             Work_Orders.deleteWorkOrderItem(woi.record_id)
             .then((data)=>{
                 setWorkOrderItems(null);
+                
                 handleCloseModal();
             })
             .catch((error)=>{
@@ -200,19 +212,20 @@ const AddEditWOIModal = function(props) {
     }
 
     return(<>
-        { editWOIModalOpen && <Modal
-            aria-labelledby="transition-modal-title"
-            aria-describedby="transition-modal-description"
-            className={classes.modal}
-            open={editWOIModalOpen}
-            onClose={handleCloseModal}
-            closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{
-            timeout: 500,
-            }}
-        >
-            <Fade in={editWOIModalOpen}>
+        { editWOIModalOpen && 
+        // <Modal
+        //     aria-labelledby="transition-modal-title"
+        //     aria-describedby="transition-modal-description"
+        //     className={classes.modal}
+        //     open={editWOIModalOpen}
+        //     onClose={handleCloseModal}
+        //     closeAfterTransition
+        //     BackdropComponent={Backdrop}
+        //     BackdropProps={{
+        //     timeout: 500,
+        //     }}
+        // >
+        //     <Fade in={editWOIModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
@@ -228,6 +241,7 @@ const AddEditWOIModal = function(props) {
                     <Grid container className={classes.grid_container} >  
                         <Grid item xs={ 12 } className={classes.paperScroll}>
                             {/*FORM*/}
+                            { editWOIModalOpen &&
                             <FormBuilder 
                                 ref={saveRef}
                                 fields={[...woi_fields, ...scbd_or_sign_fields]} 
@@ -239,6 +253,7 @@ const AddEditWOIModal = function(props) {
                                 handleSave={handleSave}
                                 scbd_or_sign_radio_options={scbd_or_sign_radio_options} shipToOptionsWOI={shipToOptionsWOI}
                                 raineyUsers={raineyUsers} vendorTypes={vendorTypes} item_type_radio_options={item_type_radio_options}/>
+                            }
 
                         </Grid>
                     </Grid>
@@ -281,8 +296,9 @@ const AddEditWOIModal = function(props) {
                         </Grid>
                     </Grid>
                 </div>
-            </Fade>
-    </Modal>}
+    //         </Fade>
+    // </Modal>
+    }
     </>) 
     }
 
@@ -299,8 +315,8 @@ const useStyles = makeStyles(theme => ({
         },
     },
     paperScroll: {
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[5],
+        // backgroundColor: theme.palette.background.paper,
+        // boxShadow: theme.shadows[5],
         padding: '3% !important',
         position: 'relative',
         overflowY: 'auto',
@@ -319,8 +335,9 @@ const useStyles = makeStyles(theme => ({
         justifyContent:'flex-end',
     },
     container: {
-        width: '70%',
+        width: '100%',
         textAlign: 'center',
+        boxShadow: theme.shadows[5],
     },
     grid_container:{
         minHeight: 500,
@@ -380,7 +397,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '80%',
+        width: '100%',
         minHeight: '25px',
     //   padding: '4px 0px 4px 0px',
         borderBottom: '1px solid #eee'

@@ -308,7 +308,7 @@ const FormBuilder = forwardRef((props, ref) => {
 
     return(<>
         {ref_object  ? <>
-           
+            <form>
             {fields.map((field, i)=>{
                 if(field?.hidden && field.hidden(formObject)){
                     return (<></>);
@@ -326,7 +326,7 @@ const FormBuilder = forwardRef((props, ref) => {
                      entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
                      entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses}/>
                 </div>)
-            })}</>
+            })}</form></>
         : <></>}
         </>
     )
@@ -545,7 +545,7 @@ const GetInputByType = function(props){
                     <span className={classes.inputRoot}>{formObject[field.displayField]} | ID:{formObject[field.field]}</span>
                     
                         </> : <></>}
-                <IconButton type="submit" className={classes.iconButton} aria-label="clear-search" onClick={field.onClick}>
+                <IconButton className={classes.iconButton} aria-label="clear-search" onClick={field.onClick}>
                     <AccountBoxIcon />
                 </IconButton> 
                 </div>

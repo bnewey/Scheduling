@@ -42,6 +42,27 @@ const TaskListDatePicker = (props) => {
         wrapperProps.onDismiss();
     }
 
+    const handleRenderDayForCalendar =  (day, selectedDate, dayInCurrentMonth, dayComponent) => {
+
+        if(!moment().isSame(day, 'day')){
+            return dayComponent
+        }else{
+            return getTodayStyledDayComponent(dayComponent)
+        }
+        
+    }
+
+    const getTodayStyledDayComponent = (dayComponent) =>{
+        if(!dayComponent){
+            console.error("Bad dayComponent in getTodayStyledDayComponent")
+            return;
+        }
+
+        return <div className={classes.todayDayComponent}>{dayComponent}</div>
+
+        
+    }
+
 
     return(
         <div className={classes.root}>
@@ -51,7 +72,7 @@ const TaskListDatePicker = (props) => {
                     {props.title ? props.title : "Select Date"}
                 </DialogTitle>
                 <DialogContent className={classes.dialog} >
-                <Calendar {...pickerProps} />
+                <Calendar {...pickerProps} renderDay={handleRenderDayForCalendar}/>
                 <DialogActions>
                 <div className={classes.buttonDiv}>
                     <Button className={classes.button} fullWidth onClick={handleCompleteTask}>
@@ -115,6 +136,9 @@ const useStyles = makeStyles(theme => ({
             color: '#0016ff',
             background: 'linear-gradient(#f3f3f3, #c9ced5)',
         }
+    },
+    todayDayComponent:{
+        background: '#ff77228c',
     }
 
   }));

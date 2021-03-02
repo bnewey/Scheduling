@@ -31,7 +31,7 @@ const WOItemization = function(props) {
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
     currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
-  const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, workOrderItems, setWorkOrderItems,editWOIModalOpen,
+  const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
         setEditWOIModalOpen, vendorTypes, shipToOptionsWOI} = useContext(DetailContext)
 
   const classes = useStyles();
@@ -81,6 +81,7 @@ const WOItemization = function(props) {
     var tmp = workOrderItems.find((v)=> v.record_id == woi_id) || -1;
     if(tmp){
       setActiveWOI(tmp);
+      setResetWOIForm(true)
       console.log("WOI to edit", tmp);
       setEditWOIModalMode("edit");
       setEditWOIModalOpen(true)
@@ -116,11 +117,11 @@ const WOItemization = function(props) {
     {id: 'reorder', label: "", minWidth: 20, align: 'center',
       format: (value, row)=> {
           return(<>
-            <IconButton type="submit" className={classes.reorderButton}  size="medium" aria-label="close_search" 
+            <IconButton   className={classes.reorderButton}  size="medium" aria-label="close_search" 
                     onClick={event=> reorder("up", row)}>
                   <ArrowDropUpIcon className={classes.reorderIcon} />
             </IconButton>
-            <IconButton type="submit" className={classes.reorderButton}  size="medium" aria-label="close_search" 
+            <IconButton   className={classes.reorderButton}  size="medium" aria-label="close_search" 
                    onClick={event=> reorder("down", row)} >
                   <ArrowDropDownIcon className={classes.reorderIcon} />
             </IconButton>
@@ -263,10 +264,10 @@ const WOItemization = function(props) {
 
             <Grid container>
                   
-                  <AddEditWOIModal  />
+                  
 
 
-                  <Grid item xs={12}>
+                  <Grid item xs={ editWOIModalOpen ? 8 : 12}>
                     <div className={classes.woiDiv}>
                     { workOrderItems && workOrderItems.length > 0 ?
                     <TableContainer className={classes.container}>
@@ -311,6 +312,9 @@ const WOItemization = function(props) {
 
                     </div>
                   </Grid>
+                  <Grid item xs={ editWOIModalOpen ? 4 : 0}>
+                    <div className={classes.addWoiDiv}><AddEditWOIModal  /></div>
+                  </Grid>
             </Grid>
 
         </div>
@@ -341,6 +345,9 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'wrap',
     width: '-webkit-fill-available',
     maxHeight: '200px',
+  },
+  addWoiDiv:{
+    margin: '2%',
   },
   woiDiv:{
     display: 'flex',

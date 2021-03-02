@@ -308,7 +308,7 @@ const Search = function(props) {
              </div></Grow>
             </> :
                 <><span className={classes.toolbarLeftGridHeadSpan}>Search</span></>}
-        <IconButton type="submit" className={classes.iconButton} aria-label="search" onClick={event=> handleSearchClick()}>
+        <IconButton   className={classes.iconButton} aria-label="search" onClick={event=> handleSearchClick()}>
             <SearchIcon />
         </IconButton>    
         </Grid>

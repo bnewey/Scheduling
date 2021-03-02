@@ -201,7 +201,7 @@ const ScoreboardDrawer = function(props) {
     return(
         <div className={classes.root}>
             <div className={classes.absCloseButton}>
-                <IconButton type="submit"  aria-label="clear-search" onClick={event=> handleCloseScbdDrawer()}>
+                <IconButton    aria-label="clear-search" onClick={event=> handleCloseScbdDrawer()}>
               <ClearIcon />
             </IconButton></div>
             <div className={classes.titleDiv}>

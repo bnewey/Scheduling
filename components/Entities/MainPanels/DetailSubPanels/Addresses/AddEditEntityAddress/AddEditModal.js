@@ -76,7 +76,7 @@ const AddEditEntityAddress = function(props) {
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(editAddressModalMode == "add"){
-            setActiveAddress({});
+            setActiveAddress({to_name: activeEntity?.name || null});
         }
     },[editAddressModalMode])
 

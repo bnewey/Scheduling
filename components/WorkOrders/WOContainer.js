@@ -51,7 +51,8 @@ const WOContainer = function(props) {
                   {value: 'search', displayName: 'Search', closeToView: 'allWorkOrders',
                       onClose: ()=> {setWorkOrders(null)}} ,
                   {value: "woDetail", displayName: 'W.O. Detail', closeToView: 'allWorkOrders', 
-                      onClose: ()=>{setWorkOrders(null);setActiveWorkOrder(null); setDetailWOid(null); setWorkOrderItems(null); setShipToOptionsWOI(null)}}, 
+                      onClose: ()=>{setWorkOrders(null);setActiveWorkOrder(null); setDetailWOid(null); setWorkOrderItems(null); setShipToOptionsWOI(null);
+                                setActiveWOI(null); setEditWOIModalOpen(false); setActiveFPOrder(null); setFPOrderModalOpen(false);}}, 
                   { value: "woItems", displayName: 'Itemization', closeToView: 'allWorkOrders',
                         parent: 'woDetail'},
                   { value: "packingSlip", displayName: 'Packing Slip', closeToView: 'allWorkOrders',
@@ -79,7 +80,7 @@ const WOContainer = function(props) {
       const [workOrderItems, setWorkOrderItems] = React.useState(null);
       const [editWOIModalMode, setEditWOIModalMode] = React.useState("add")
       const [activeWOI, setActiveWOI] = React.useState(null);
-      const [activeWOIPrev, setActiveWOIPrev] = React.useState(null);
+      const [resetWOIForm, setResetWOIForm] = React.useState(null);
       const [editWOIModalOpen, setEditWOIModalOpen] = React.useState(false);
       const [vendorTypes, setVendorTypes] = React.useState(null);
       const [shipToOptionsWOI,setShipToOptionsWOI] = React.useState(null);
@@ -361,7 +362,7 @@ const WOContainer = function(props) {
       <ListContext.Provider value={{workOrders, setWorkOrders, rowDateRange, setDateRowRange,
           currentView, setCurrentView, views, detailWOid,setDetailWOid, activeWorkOrder, setActiveWorkOrder,
           editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState} } >
-      <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, activeWOIPrev, setActiveWOIPrev, workOrderItems, 
+      <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, 
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
                      shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
                      fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders}} >

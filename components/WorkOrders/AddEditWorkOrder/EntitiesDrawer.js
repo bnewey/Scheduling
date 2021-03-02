@@ -141,7 +141,7 @@ const EntitiesDrawer = function(props) {
       const searchXButton = () =>{
         return(
           <div className={classes.searchXDiv}>
-            <IconButton type="submit" className={classes.iconButton} aria-label="clear-search" onClick={event=> handleClearSearch()}>
+            <IconButton   className={classes.iconButton} aria-label="clear-search" onClick={event=> handleClearSearch()}>
               <ClearIcon />
             </IconButton>
           </div>
@@ -199,7 +199,7 @@ const EntitiesDrawer = function(props) {
     return(
         <div className={classes.root}>
             <div className={classes.absCloseButton}>
-                <IconButton type="submit"  aria-label="clear-search" onClick={event=> handleCloseEntityDrawer()}>
+                <IconButton    aria-label="clear-search" onClick={event=> handleCloseEntityDrawer()}>
               <ClearIcon />
             </IconButton></div>
             <div className={classes.titleDiv}>
@@ -220,7 +220,7 @@ const EntitiesDrawer = function(props) {
                     endAdornment={searchValue ? searchXButton() : ""}
                     onChange={event=> handleChangeSearchValue(event.target.value)}
                 /> </div>
-                <IconButton type="submit" className={classes.iconButton} aria-label="search" onClick={event=> handleSearch()}>
+                <IconButton   className={classes.iconButton} aria-label="search" onClick={event=> handleSearch()}>
                     <SearchIcon />
                 </IconButton>    
                 </div>
