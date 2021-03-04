@@ -55,6 +55,7 @@ const AddEditEntityAddress = function(props) {
         setActiveAddress(null);
         setEditAddressModalOpen(false);
         setDetailEntAddressId(null);
+        setSaveButtonDisabled(false);
     };
 
     

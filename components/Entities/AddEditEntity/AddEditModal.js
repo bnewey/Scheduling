@@ -45,6 +45,7 @@ const AddEditEntity = function(props) {
         setEditEntModalOpen(false);
         setDefaultAddresses(null);
         setEntityTypes(null);
+        setSaveButtonDisabled(false);
     };
 
     const [defaultAddresses, setDefaultAddresses] = useState(null);

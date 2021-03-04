@@ -197,6 +197,7 @@ const ScoreboardDrawer = function(props) {
     const handleCloseScbdDrawer = () =>{
         setScbdDrawerOpen(false);
         setActiveFPOrderItem({});
+        setSaveButtonDisabled(false);
     }
 
     

@@ -67,6 +67,7 @@ const AddEditModal = function(props) {
         setEntityBillingEntityEditChanged(false);
         setEntityShippingContactEditChanged(false);
         setEntityBillingContactEditChanged(false);
+        setSaveButtonDisabled(false);
     };
 
     const handleOpenEntityDraw = ()=>{

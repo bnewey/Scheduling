@@ -82,6 +82,7 @@ const AddEditEntityContact = function(props) {
         setActiveContact(null);
         setEditContactModalOpen(false);
         setDetailEntContactId(null);
+        setSaveButtonDisabled(false);
     };
 
     

@@ -78,6 +78,7 @@ const AddEditFPOrder = function(props) {
         setFPOrderItems(null);
         setScbdDrawerOpen(false);
         setActiveFPOrderItem(null);
+        setSaveButtonDisabled(false);
     };
 
 
