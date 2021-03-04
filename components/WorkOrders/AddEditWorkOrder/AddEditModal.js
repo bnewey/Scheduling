@@ -53,6 +53,8 @@ const AddEditModal = function(props) {
     const saveRef = React.createRef();
     const classes = useStyles();
 
+    const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
+
     const handleCloseModal = () => {
         setEntityDrawerOpen(false);
         setActiveWorkOrder(null);
@@ -224,6 +226,11 @@ const AddEditModal = function(props) {
         
 
     const handleSave = (work_order, updateWorkOrder ,addOrEdit) => {
+        if (saveButtonDisabled) {
+            return;
+        }
+        setSaveButtonDisabled(true);
+
         return new Promise((resolve, reject)=>{
             if(!work_order){
                 console.error("Bad work order")
@@ -387,6 +394,7 @@ const AddEditModal = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
+                                    disabled={saveButtonDisabled}
                                     onClick={ () => { saveRef.current.handleSaveParent(activeWorkOrder) }}
                                     variant="contained"
                                     color="primary"

@@ -50,7 +50,8 @@ const FormBuilder = forwardRef((props, ref) => {
             entityShippingAddresses, setEntityShippingAddresses,
             entityBillingContacts, setEntityBillingContacts,
             entityBillingAddresses, setEntityBillingAddresses,
-            setEntityShippingContactEditChanged, setEntityBillingContactEditChanged //state for knowing when to show entity defaults or actual wo value
+            setEntityShippingContactEditChanged, setEntityBillingContactEditChanged, //state for knowing when to show entity defaults or actual wo value
+            dontCloseOnNoChangesSave = false
         } = props;
         console.log("Props", props);
         
@@ -200,56 +201,65 @@ const FormBuilder = forwardRef((props, ref) => {
                             break;
                         case 'entity-titles':
                             const saveEntity = (data, callback) => {
+                                console.log("Data", data);
+                                console.log("Callback entit", callback)
+                                if(itemToSave[field.field]?.length > 0 ){
+                                    itemToSave[field.field].forEach((title)=>{
+                                        //Remove titles if false
+                                        if(title.title_change && title.title_change == "remove"){
+                                            if(title?.title_attached != 0){
+                                                //Delete from entities_contacts_titles
+                                                Entities.deleteContactTitle(title.title_attached)
+                                                .then((data)=>{
+                                                    console.log("Deleted title", title.title_attached)
+                                                    if(callback){
+                                                        callback()
+                                                    }
+                                                })
+                                                .catch((error)=>{
+                                                    console.error("Failed to delete contact title")
+                                                    cogoToast.error("Internal Server Error");
+                                                    if(callback){
+                                                        callback()
+                                                    }
+                                                })
+                                            }
+                                        }
+                                        if(title.title_change && title.title_change == "add"){
+                                            //check against original DB data to see if we really need to add
+                                            var updatedTitle = {...title};
+                                            if(addOrEdit == "add"){
+                                                updatedTitle["contact_id"] = data.insertId;
+                                            }else{
+                                                updatedTitle["contact_id"] = itemToSave["record_id"];
+                                            }
+                                            
+                                            if(title?.title_attached == 0){
+                                                //Add to entities_contacts_titles
+                                                Entities.addContactTitle( updatedTitle )
+                                                .then((data)=>{
+                                                    if(callback){
+                                                        callback()
+                                                    }
+                                                })
+                                                .catch((error)=>{
+                                                    console.error("Failed to delete contact title")
+                                                    cogoToast.error("Internal Server Error");
+                                                    if(callback){
+                                                        callback()
+                                                    }
+                                                })
+                                            }
+                                        }
                                 
-                                itemToSave[field.field]?.forEach((title)=>{
-                                    //Remove titles if false
-                                    if(title.title_change && title.title_change == "remove"){
-                                        if(title?.title_attached != 0){
-                                            //Delete from entities_contacts_titles
-                                            Entities.deleteContactTitle(title.title_attached)
-                                            .then((data)=>{
-                                                console.log("Deleted title", title.title_attached)
-                                                if(callback){
-                                                    callback()
-                                                }
-                                            })
-                                            .catch((error)=>{
-                                                console.error("Failed to delete contact title")
-                                                cogoToast.error("Internal Server Error");
-                                                if(callback){
-                                                    callback()
-                                                }
-                                            })
-                                        }
+                                    }) 
+                                }else{
+                                    //Still run callback if no title change
+                                    if(callback){
+                                        callback();
                                     }
-                                    if(title.title_change && title.title_change == "add"){
-                                        //check against original DB data to see if we really need to add
-                                        var updatedTitle = {...title};
-                                        if(addOrEdit == "add"){
-                                            updatedTitle["contact_id"] = data.insertId;
-                                        }else{
-                                            updatedTitle["contact_id"] = itemToSave["record_id"];
-                                        }
-                                        
-                                        if(title?.title_attached == 0){
-                                            //Add to entities_contacts_titles
-                                            Entities.addContactTitle( updatedTitle )
-                                            .then((data)=>{
-                                                if(callback){
-                                                    callback()
-                                                }
-                                            })
-                                            .catch((error)=>{
-                                                console.error("Failed to delete contact title")
-                                                cogoToast.error("Internal Server Error");
-                                                if(callback){
-                                                    callback()
-                                                }
-                                            })
-                                        }
-                                    }
-                             
-                                })
+                                }
+                                
                             }
                             //saving the save function so that we can run after entity contact is inserted so we can get contact_id
                             updateItem["postSaveFunction"] = saveEntity;
@@ -281,6 +291,7 @@ const FormBuilder = forwardRef((props, ref) => {
                 if(handleSave){
                     handleSave(itemToSave, updateItem, addOrEdit)
                     .then((data)=>{
+                        console.log("Post save function", updateItem.postSaveFunction)
                         if(updateItem.postSaveFunction){
                             updateItem.postSaveFunction(data.data,data?.callback);
                         }
@@ -297,7 +308,9 @@ const FormBuilder = forwardRef((props, ref) => {
                     cogoToast.info("Empty Form not allowed");
                 }else{
                     cogoToast.info("No Changes made");
-                    handleCloseParent();
+                    if(!dontCloseOnNoChangesSave){
+                        handleCloseParent();
+                    }
                 }
                 
             }

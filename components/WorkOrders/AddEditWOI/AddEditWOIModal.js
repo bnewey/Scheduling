@@ -40,7 +40,7 @@ const AddEditWOIModal = function(props) {
         setEditWOIModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI} = useContext(DetailContext)
     
     const saveRef = React.createRef();
-    
+    const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
 
     const classes = useStyles();
 
@@ -56,6 +56,7 @@ const AddEditWOIModal = function(props) {
     const handleCloseModal = () => {
         setActiveWOI(null);
         setEditWOIModalOpen(false);
+        setSaveButtonDisabled(false)
     };
 
     const woi_fields = [
@@ -132,12 +133,19 @@ const AddEditWOIModal = function(props) {
     useEffect(()=>{
         if(editWOIModalOpen && editWOIModalMode == "add"){
             setResetWOIForm(true);
+            
             setActiveWOI({item_type: 3, scoreboard_or_sign: 0, date_offset: 0, price: 0.00  });
         }
     },[editWOIModalMode, editWOIModalOpen])
 
 
     const handleSave = (woi, updateItem, addOrEdit) => {
+
+        if (saveButtonDisabled) {
+            return;
+        }
+        setSaveButtonDisabled(true);
+
         return new Promise((resolve, reject)=>{
             //Add Id to this new object
             if(addOrEdit == "edit"){
@@ -150,12 +158,16 @@ const AddEditWOIModal = function(props) {
                     setWorkOrderItems(null);
                     //setActiveWOI({contact: updateItem.contact || null })
                     //handleCloseModal();
+                    setSaveButtonDisabled(false)
                     resolve(data)
+                    
                 })
                 .catch( error => {
                     console.error("Error updating woi.",error);
                     cogoToast.error(`Error updating woi. ` , {hideAfter: 4});
+                    setSaveButtonDisabled(false)
                     reject(error)
+                    
                 })
             }
             if(addOrEdit == "add"){
@@ -165,15 +177,18 @@ const AddEditWOIModal = function(props) {
                     //Get id of new workorder item 
                     if(data && data.insertId){
                         setWorkOrderItems(null);
+                        
                     }
                     cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
                     setActiveWOI({contact: updateItem.contact || null ,item_type: 3, scoreboard_or_sign: 0, date_offset: 0, price: 0.00 })
                     setResetWOIForm(true)
                     //handleCloseModal();
+                    setSaveButtonDisabled(false)
                     resolve(data);
                 })
                 .catch( error => {
                     console.warn(error);
+                    setSaveButtonDisabled(false)
                     cogoToast.error(`Error adding woi. ` , {hideAfter: 4});
                     reject(error)
                 })
@@ -193,10 +208,11 @@ const AddEditWOIModal = function(props) {
             Work_Orders.deleteWorkOrderItem(woi.record_id)
             .then((data)=>{
                 setWorkOrderItems(null);
-                
+                setSaveButtonDisabled(false)
                 handleCloseModal();
             })
             .catch((error)=>{
+                setSaveButtonDisabled(false)
                 cogoToast.error("Failed to Delete woi")
                 console.error("Failed to delete woi", error);
             })
@@ -252,7 +268,8 @@ const AddEditWOIModal = function(props) {
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
                                 scbd_or_sign_radio_options={scbd_or_sign_radio_options} shipToOptionsWOI={shipToOptionsWOI}
-                                raineyUsers={raineyUsers} vendorTypes={vendorTypes} item_type_radio_options={item_type_radio_options}/>
+                                raineyUsers={raineyUsers} vendorTypes={vendorTypes} item_type_radio_options={item_type_radio_options}
+                                dontCloseOnNoChangesSave={true}/>
                             }
 
                         </Grid>
@@ -284,6 +301,7 @@ const AddEditWOIModal = function(props) {
                             <ButtonGroup className={classes.buttonGroup}>
                                 
                                 <Button
+                                    disabled={saveButtonDisabled}
                                     onClick={ () => { saveRef.current.handleSaveParent(activeWOI) }}
                                     variant="contained"
                                     color="primary"

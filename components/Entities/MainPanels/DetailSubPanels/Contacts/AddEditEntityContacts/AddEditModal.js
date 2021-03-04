@@ -75,6 +75,7 @@ const AddEditEntityContact = function(props) {
     
 
     const saveRef = React.createRef();
+    const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
     const classes = useStyles();
 
     const handleCloseModal = () => {
@@ -108,6 +109,13 @@ const AddEditEntityContact = function(props) {
 
 
     const handleSave = (contact, updateContact ,addOrEdit) => {
+        
+        if (saveButtonDisabled) {
+            return;
+        }
+        setSaveButtonDisabled(true);
+
+
         return new Promise((resolve, reject)=>{
             if(!contact){
                 console.error("Bad contact")
@@ -220,6 +228,7 @@ const AddEditEntityContact = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
+                                    disabled={saveButtonDisabled}
                                     onClick={ () => { saveRef.current.handleSaveParent(activeContact) }}
                                     variant="contained"
                                     color="primary"

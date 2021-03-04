@@ -43,6 +43,7 @@ const AddEditFPOrder = function(props) {
     const [scbdDrawerOpen, setScbdDrawerOpen] = useState(false);
     const [scbdMode, setScbdMode] = useState("add");
     const [activeFPOrderItem, setActiveFPOrderItem] = useState(null);
+    const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
 
     const saveRef = React.createRef();
     
@@ -142,6 +143,12 @@ const AddEditFPOrder = function(props) {
 
 
     const handleSave = (fpOrder, updateItem,addOrEdit) => {
+
+        if (saveButtonDisabled) {
+            return;
+        }
+        setSaveButtonDisabled(true);
+
         return new Promise((resolve, reject)=>{
             if(!fpOrder){
                 console.error("Bad work order item")
@@ -312,6 +319,7 @@ const AddEditFPOrder = function(props) {
                             <ButtonGroup className={classes.buttonGroup}>
                                 
                                 <Button
+                                    disabled={saveButtonDisabled}
                                     onClick={ () => { saveRef.current.handleSaveParent(activeFPOrder) }}
                                     variant="contained"
                                     color="primary"

@@ -34,6 +34,7 @@ const ScoreboardDrawer = function(props) {
 
     const classes = useStyles();
     const saveRef = React.createRef();
+    const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
 
 
     useEffect(()=>{
@@ -43,6 +44,13 @@ const ScoreboardDrawer = function(props) {
     },[scbdDrawerOpen])
      
     const handleSave = (fpoItem, updateFPOItem, scbdAddOrEdit) => {
+
+        if (saveButtonDisabled) {
+            return;
+        }
+        setSaveButtonDisabled(true);
+
+
         return new Promise((resolve, reject)=>{
             if(!fpoItem){
                 console.error("Bad work order item")
@@ -219,7 +227,7 @@ const ScoreboardDrawer = function(props) {
             <div className={classes.buttonDiv}>
                 <Button variant="outlined" onClick={event => handleCloseScbdDrawer()}>Cancel</Button>
                 { scbdMode == "edit" && <Button variant="outlined" onClick={event => handleDeleteItem(activeFPOrderItem)}>Delete</Button>}
-                <Button variant="outlined" onClick={event => saveRef.current.handleSaveParent(activeFPOrderItem)}>Save</Button>
+                <Button disabled={saveButtonDisabled} variant="outlined" onClick={event => saveRef.current.handleSaveParent(activeFPOrderItem)}>Save</Button>
                 
             </div>
         </div>
