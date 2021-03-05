@@ -31,9 +31,11 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
-import TaskListDatePicker from './components/TaskListDatePicker';
+import TLCrewJobDatePicker from './components/TLCrewJobDatePicker';
+import TLArrivalDatePicker from './components/TLArrivalDatePicker';
 
 import Crew from '../../../js/Crew';
+import Work_Orders from '../../../js/Work_Orders'
 
 const TaskListTasks = (props) =>{
 
@@ -491,6 +493,22 @@ const TaskListTasks = (props) =>{
       }
     }
 
+    const handleSetArrivalDates = (selectedWOIs) =>{
+      if(!selectedWOIs?.length){
+        console.log("Bad selectedWOIs in handleSetArrivalDates")
+        return;
+      }
+
+      Work_Orders.setMultipleWOIArrivalDates(selectedWOIs.map((item)=> item.woi_id), moment())
+      .then((data)=>{
+        taskListTasksRefetch(true);
+      })
+      .catch((error)=>{
+        console.error("Failed to set multiple arrival dates", error);
+        cogoToast.error("Internal Server Error");
+      })
+    }
+
 
     const handleSpecialTableValues = useCallback((fieldId, value, type, task) =>{
       if(fieldId == null || task == null){
@@ -568,7 +586,7 @@ const TaskListTasks = (props) =>{
             if(!task.drill_job_completed){
               return_value = <div>
                   <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                          <TaskListDatePicker  showTodayButton
+                          <TLCrewJobDatePicker  showTodayButton
                             clearable
                             inputVariant="outlined"
                             variant="modal" 
@@ -595,7 +613,7 @@ const TaskListTasks = (props) =>{
           if(!task.install_job_completed){
             return_value = <div>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <TaskListDatePicker   showTodayButton
+                        <TLCrewJobDatePicker   showTodayButton
                         clearable
                         inputVariant="outlined"
                         variant="modal" 
@@ -625,6 +643,31 @@ const TaskListTasks = (props) =>{
                                 onClick={event => handleRightClick(event, task.t_id)}>
                                   {value}</span>
         
+          break;
+        case 'wo_arrival_dates':
+          var arrivalValue = value;
+          if(!task.wo_arrival_dates){
+            return_value = <div>
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                        <TLArrivalDatePicker   showTodayButton
+                        clearable
+                        inputVariant="outlined"
+                        variant="modal" 
+                        title="Select Arrival Date"
+                        maxDate={new Date('01-01-2100')}
+                        minDate={new Date('01-01-1970')}
+                        className={classes.datePicker}
+                        value={arrivalValue ? moment(arrivalValue).format('MM-DD-YYYY hh:mm:ss') : null} 
+                        onChange={arrivalValue => handleUpdateArrivalDate(Util.convertISODateTimeToMySqlDateTime(arrivalValue), task, "wo_arrival_dates")} 
+                        onItemsArrived={ (selectedWOIs)=> handleSetArrivalDates(selectedWOIs) }
+                        data={woiData?.filter((item)=>item.work_order == task.table_id)}
+                        task={task} />
+              </MuiPickersUtilsProvider></div>
+                break;
+          }else{
+            return_value = <span>Arrived</span>
+            break;
+          }
           break;
         default:{
           

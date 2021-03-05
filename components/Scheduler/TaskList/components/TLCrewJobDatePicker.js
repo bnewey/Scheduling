@@ -9,7 +9,7 @@ import moment from 'moment';
 import WorkOrders from '../../../../js/Work_Orders'
 
 
-const TaskListDatePicker = (props) => {
+const TLCrewJobDatePicker = (props) => {
  
     //PROPS
     const { ...other} = props;
@@ -22,10 +22,6 @@ const TaskListDatePicker = (props) => {
     });
 
     //STATE
-    console.log("other",{ ...other})
-    console.log("PickerProps", pickerProps);
-    console.log("WrapperProps", wrapperProps);
-    console.log("inputProps", inputProps);
 
     //CSS
     const classes = useStyles();
@@ -95,7 +91,7 @@ const TaskListDatePicker = (props) => {
     );
 
 } 
-export default TaskListDatePicker;
+export default TLCrewJobDatePicker;
 
 const useStyles = makeStyles(theme => ({
     root: {

@@ -613,5 +613,36 @@ router.post('/deleteWorkOrderItem', async (req,res) => {
 });
 
 
+router.post('/setMultipleWOIArrivalDates', async (req,res) => {
+    var woi_ids, date;
+    if(req.body){
+        woi_ids = req.body.woi_ids;
+        date = req.body.date;
+    }
+    
+    const sql = ' UPDATE work_orders_items SET scoreboard_arrival_date = ? ' +
+    ' WHERE record_id = ? ';
+
+
+    async.forEachOf(woi_ids, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [Util.convertISODateTimeToMySqlDateTime(date), id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("WorkOrder (setMultipleWOIArrivalDates): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Set multiple arrival dates WorkOrderItems: " , [woi_ids] );
+            res.sendStatus(200);
+        }
+    })
+});
 
 module.exports = router;

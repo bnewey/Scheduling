@@ -44,6 +44,8 @@ const TaskListFilter = (props) => {
     const [selectedField, setSelectedField] = useState(null);
     const [taskListFiltersEdited, setTaskListFiltersEdited] = useState(false);
     const [installDateFilterOpen, setInstallDateFilterOpen] = useState(null)
+
+    const [selectInstallDateMenuOpen,setSelectInstallDateMenuOpen] = useState(false);
     
     const [tableConfig, setTableInfo] = useState([
         {text: "Type", field: "type", type: 'text'},
@@ -513,6 +515,7 @@ const TaskListFilter = (props) => {
 
     const handleOpenInstallDateFilter = (event)=>{
         setInstallDateFilterOpen(true);
+        setSelectInstallDateMenuOpen(true);
     }
 
     const handleClearAndCloseInstallDateFilter = (event)=>{
@@ -529,8 +532,18 @@ const TaskListFilter = (props) => {
         })
 
         setInstallDateFilters(newArray);
+        handleCloseSelectMenu();
         handleRefreshView()
     }
+
+    const handleCloseSelectMenu = (event)=>{
+        setSelectInstallDateMenuOpen(false);
+    }
+
+    const handleOpenSelectMenu = (event)=>{
+        setSelectInstallDateMenuOpen(true);
+    }
+    
     
     return(
         <>
@@ -596,6 +609,9 @@ const TaskListFilter = (props) => {
                             className={classes.selectBox}
                             value={(installDateFilters?.map((item)=> (item.value))
                             )}
+                            open={selectInstallDateMenuOpen}
+                            onOpen={handleOpenSelectMenu}
+                            onClose={handleCloseSelectMenu}
                             className={classes.filterInstallDate}
                             onChange={event => handleUpdateInstallDateFilter(event.target.value)}
                             >

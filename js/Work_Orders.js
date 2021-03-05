@@ -356,6 +356,26 @@ async function deleteWorkOrderItem(woi_id){
 
 }
 
+async function setMultipleWOIArrivalDates(woi_ids, date){
+    const route = '/scheduling/workOrders/setMultipleWOIArrivalDates';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi_ids, date})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
 module.exports = {
     getAllWorkOrders: getAllWorkOrders,
     getWorkOrderById,
@@ -375,4 +395,5 @@ module.exports = {
     addWorkOrderItem,
     addMultipleWorkOrderItems,
     deleteWorkOrderItem,
+    setMultipleWOIArrivalDates
 };
