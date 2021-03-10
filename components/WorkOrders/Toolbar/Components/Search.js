@@ -34,6 +34,7 @@ const Search = function(props) {
     {value: "wo.description", displayValue: 'Description'},
     {value: "wo.record_id", displayValue: 'Work Order #'},
     {value: "a.name", displayValue: 'Entity Name'},
+    {value: "wo.job_reference", displayValue: 'Job Reference'},
   ];
 
   const classes = useStyles({searchOpen});
@@ -54,21 +55,21 @@ const Search = function(props) {
       console.log("searchTable", searchTable);
       if(searchRef.current){
         console.log("Currnet", searchRef.current);
-         searchRef.current.focus();
-         searchRef.current.select();
+         //searchRef.current.focus();
+         //searchRef.current.select();
       }
 
-      if(tableRef && tableRef.current){
-        console.log("tableRef", tableRef);
-        console.log("tableRef current", tableRef.current);
-        tableRef.current.blur();
-      }
+      // if(tableRef && tableRef.current){
+      //   console.log("tableRef", tableRef);
+      //   console.log("tableRef current", tableRef.current);
+      //   tableRef.current.blur();
+      // }
 
-      if(listRef && listRef.current){
-        console.log("listRef", listRef);
-        console.log("listRef current", listRef.current);
-        listRef.current.blur();
-      }
+      // if(listRef && listRef.current){
+      //   console.log("listRef", listRef);
+      //   console.log("listRef current", listRef.current);
+      //   listRef.current.blur();
+      // }
       
     }
   },[searchTable])
@@ -263,7 +264,6 @@ const Search = function(props) {
               options={searchHistory}
               getOptionLabel={(option) => option.id || option}
               freeSolo
-              disablePortal
               openOnFocus
               debug
               ListboxProps={

@@ -213,7 +213,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 doc.fontSize(8);
                 doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (230 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);
-                doc.text(item.description, 180, (230 + i*13.5), {lineBreak: false})
+                doc.text( (item.quantity != 0 ? item.quantity : "") +" - " + item.description, 180, (230 + i*13.5), {lineBreak: false})
                 
             })
         }
@@ -229,7 +229,7 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 doc.fontSize(8);
                 doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (230 + i*13.5), {lineBreak: false})
                 doc.fontSize(7);
-                doc.text(item.description, 180, (230 + i*13.5), {lineBreak: false})
+                doc.text((item.quantity != 0 ? item.quantity : "")+ " - " + item.description, 180, (230 + i*13.5), {lineBreak: false})
                 
             })
         }
@@ -249,11 +249,13 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                         doc.text(woObject.a_entity_name, 328, 73 , {lineBreak: false});
                         doc.fontSize(7);
                     }
-                    doc.text(item.quantity, 50 , (355 + index*13.5), {lineBreak: false})
+                    doc.text(item.quantity != 0 ? item.quantity : "", 50 , (355 + index*13.5), {lineBreak: false})
                     doc.text(item.part_number ? item.part_number : "", 67, (355 + index*13.5), {lineBreak: false})
                     doc.text(item.description, 167, (355 + index*13.5), {lineBreak: false})
-                    doc.text(item.price ? (item.price).toFixed(2) : "", 500, (355 + index*13.5), {lineBreak: false})
-                    doc.text(item.price && item.quantity ? (item.price*item.quantity).toFixed(2) : "", 542, (355 + index*13.5), {lineBreak: false})
+                    if(item.quantity != 0){
+                        doc.text(item.price ? (item.price).toFixed(2) : "", 500, (355 + index*13.5), {lineBreak: false})
+                        doc.text(item.price && item.quantity ? (item.price*item.quantity).toFixed(2) : "", 542, (355 + index*13.5), {lineBreak: false})
+                    }
                     index++;
                 })
         }

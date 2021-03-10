@@ -15,8 +15,8 @@ router.post('/getAllWorkOrders', async (req,res) => {
     }
 
     const sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
-    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
+    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
     ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +  
@@ -56,13 +56,18 @@ router.post('/getWorkOrderById', async (req,res) => {
     }
 
     const sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id,account_contact_id, account_address_id, advertising_notes, ' +
-    ' wo.customer_id AS customer_id, wo.customer_contact_id, wo.customer_address_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state,  ' + 
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id,account_contact_id, sc.name AS account_contact_name, ' + 
+    ' account_address_id, sa.name AS account_address_name, advertising_notes, ' +
+    ' wo.customer_id AS customer_id, wo.customer_contact_id, bc.name AS customer_contact_name, wo.customer_address_id, ba.name AS customer_address_name, ' + 
+    ' a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state,  ' + 
     ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, wo.requested_arrival_date   ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-    ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
+    ' LEFT JOIN entities_contacts sc ON wo.account_contact_id = sc.record_id ' +
+    ' LEFT JOIN entities_contacts bc ON wo.customer_contact_id = bc.record_id ' +
+    ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +
+    ' LEFT JOIN entities_addresses ba ON wo.customer_address_id = ba.record_id ' +
     ' WHERE wo.record_id = ? ' + 
     ' limit 1 ';
 
@@ -157,8 +162,8 @@ router.post('/searchAllWorkOrders', async (req,res) => {
     }    
 
     const sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
-        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
+        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
+        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state ' +
         ' FROM work_orders wo ' +
         ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
         ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id  ' +
@@ -196,8 +201,8 @@ router.post('/superSearchAllWorkOrders', async (req,res) => {
     }    
 
     var sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
-        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
+        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
+        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state ' +
         ' FROM work_orders wo ' +
         ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
         ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id  ' +

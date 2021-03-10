@@ -50,7 +50,11 @@ const WODetail = function(props) {
   },[workOrderItems, activeWorkOrder]);
 
   const detail_table = [{value: 'c_name', displayName: 'Product To', type: 'text'},
+                        {value: 'customer_contact_name', displayName: 'Product To - Contact', type: 'text'},
+                        {value: 'customer_address_name', displayName: 'Product To - Address', type: 'text'},
                         {value: 'a_name', displayName: 'Bill To', type: 'text'},
+                        {value: 'account_contact_name', displayName: 'Bill To - Contact', type: 'text'},
+                        {value: 'account_address_name', displayName: 'Bill To - Address', type: 'text'},
                         {value: 'date', displayName: 'Date Entered', type: 'date',
                         format: (value,row)=> Util.convertISODateToMySqlDate(value)},
                         {value: 'requestor', displayName: 'Requestor', type: 'number',
@@ -117,6 +121,7 @@ const useStyles = makeStyles(theme => ({
     padding: '23px 0px',
     width: 'fit-content',
     minWidth: 695,
+
   },
   detailInfoDiv:{
     display: 'flex',
@@ -124,7 +129,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    width: 'auto',
+    width: '695px',
     margin: '2px 20px',
   },
   woiDiv:{
@@ -153,7 +158,7 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'uppercase',
     fontSize: '10px',
     textAlign: 'right',
-    flexBasis: '20%',
+    flexBasis: '30%',
   },
   detailValue:{
     fontFamily: 'monospace',

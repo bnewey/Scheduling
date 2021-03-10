@@ -337,7 +337,7 @@ const AddEditModal = function(props) {
                     {/* BODY */}
                     
                     <Grid container >  
-                        <Grid item xs={entityDrawerOpen ? 7 : 12} className={classes.paperScroll}>
+                        <Grid item xs={entityDrawerOpen ? 6 : 12} className={classes.paperScroll}>
                             {/*FORM*/ console.log("Job types in parent", types)}
                             <FormBuilder 
                                 ref={saveRef}
@@ -357,7 +357,7 @@ const AddEditModal = function(props) {
                                 entityBillingContactEditChanged={entityBillingContactEditChanged} setEntityBillingContactEditChanged={setEntityBillingContactEditChanged}/>
                         </Grid>
                         {entityDrawerOpen && 
-                            <Grid item xs={5} className={classes.paperScroll}>
+                            <Grid item xs={6} className={classes.paperScroll}>
                                 <EntitiesDrawer  
                                      entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen} saveRef={saveRef} 
                                      setEntityShippingContacts={setEntityShippingContacts}
@@ -494,7 +494,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '80%',
+        width: '95%',
         minHeight: '25px',
     //   padding: '4px 0px 4px 0px',
         borderBottom: '1px solid #eee'
@@ -506,7 +506,7 @@ const useStyles = makeStyles(theme => ({
     },
     inputStyleDate:{
         padding: '5px 7px',
-        width: '44%',
+        width: '55%',
         
     },
     inputRoot: {

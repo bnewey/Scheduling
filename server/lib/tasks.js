@@ -7,17 +7,19 @@ const logger = require('../../logs');
 const database = require('./db');
 
 router.get('/getAllTasks', async (req,res) => {
-    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS t_name, hours_estimate, date_format(date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, '+
+    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS old_task_name, hours_estimate, date_format(date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, '+
     ' date_format(date_assigned, \'%Y-%m-%d\') as date_assigned, ' + 
     ' date_format(date_completed, \'%Y-%m-%d\') as date_completed, t.description, t.priority_order, t.task_list_id, ' + 
     ' t.task_status, t.drilling, t.sign, t.artwork, t.table_id, date_format(t.order_date, \'%Y-%m-%d\') as order_date, ' + 
     ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, t.drill_crew, ' +
     ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
-    ' t.delivery_crew, t.delivery_order,t.install_order, ' + 
-    ' t.sch_install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded , ea.record_id AS address_id , ea.entities_id '  +
+    ' t.delivery_crew, t.delivery_order,t.install_order, e.name AS customer_name,' + 
+    ' t.sch_install_crew, ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded , ea.record_id AS address_id , ea.entities_id, '  +
+    ' concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name ' + 
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id ' +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id ' + 
+    ' LEFT JOIN entities e ON wo.customer_id = e.record_id ' + 
     // ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
     //     ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
     //         ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
@@ -40,7 +42,7 @@ router.post('/getTask', async (req,res) => {
         id = req.body.id;
     }
 
-    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS t_name, hours_estimate, date_format(date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
+    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS old_task_name, hours_estimate, date_format(date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
     ' date_format(date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
     ' t.description, t.notes, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
     ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, ' +
@@ -48,10 +50,12 @@ router.post('/getTask', async (req,res) => {
     ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
     ' t.drill_crew, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
     ' t.sch_install_crew as install_crew, date_format(sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
-    ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.record_id AS address_id, ea.entities_id, tli.task_list_id, tli.id AS task_list_item_id '  +
+    ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.record_id AS address_id, ea.entities_id, tli.task_list_id, tli.id AS task_list_item_id, e.name AS customer_name, '  +
+    ' concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name ' + 
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id '  +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id ' + 
+    ' LEFT JOIN entities e ON wo.customer_id = e.record_id ' + 
     // ' LEFT JOIN entities_addresses ea ON (wo.account_id = ea.entities_id AND ' + 
     //     ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
     //         ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' + 

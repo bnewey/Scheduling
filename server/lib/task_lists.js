@@ -30,7 +30,7 @@ router.post('/getTaskList', async (req,res) => {
     }
 
     const sql =   'SELECT tl.id as tl_id, tl.list_name as tl_name, date_format(tl.date_entered, \'%Y-%m-%d %H:%i:%S\') as tl_date_entered , tl.is_priority AS tl_is_priority,  ' + 
-        ' tl.linked_tl AS tl_linked_tl, t.id AS t_id, t.name AS t_name, tli.task_list_id, t.hours_estimate, ' + 
+        ' tl.linked_tl AS tl_linked_tl, t.id AS t_id, t.name AS old_task_name, tli.task_list_id, t.hours_estimate, ' + 
         ' date_format(t.date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
         ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
         ' t.description, t.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
@@ -44,7 +44,7 @@ router.post('/getTaskList', async (req,res) => {
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
         ' cji.completed AS install_job_completed,  date_format(cji.completed_date, \'%Y-%m-%d %H:%i:%S\') as install_job_completed_date, ' +
         ' date_format(t.sch_install_date, \'%Y-%m-%d\') as sch_install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
-        ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id ' +
+        ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, e.name AS customer_name, concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name' +
         ' FROM task_list_items tli ' +
     
     ' LEFT JOIN task_list tl ON tli.task_list_id = tl.id ' +
@@ -56,6 +56,7 @@ router.post('/getTaskList', async (req,res) => {
     ' LEFT JOIN crew_members cmd ON cmd.crew_id = cjd.crew_id AND cmd.is_leader = 1  ' + 
     ' LEFT JOIN crew_members_available mai ON mai.id = cmi.member_id  ' + 
     ' LEFT JOIN crew_members_available mad ON mad.id = cmd.member_id  ' + 
+    ' LEFT JOIN entities e ON wo.customer_id = e.record_id '  +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id  ' +
     // ' LEFT JOIN entities_addresses ea ON (wo.customer_id = ea.entities_id AND ' + 
     //     ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 

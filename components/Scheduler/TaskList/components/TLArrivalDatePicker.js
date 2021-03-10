@@ -182,7 +182,9 @@ const TLArrivalDatePicker = (props) => {
                                                     } ) }>
                                      <Checkbox key={'checkboxFieldLI'+i} checked={isSelected} className={classes.li_checkbox}
                                         onChange={event=>handleClickCheckBox(event, item)}/>
-                                     <span>{item.woi_id}</span><span>{item.title}</span><span>{item.date ? item.date : 'Not Set'}</span>
+                                     <span className={classes.liIdSpan}>{item.woi_id}</span>
+                                     <span className={classes.liTitleSpan}>{item.title}</span>
+                                     <span className={classes.liDateSpan}>{item.date ? item.date : 'Not Set'}</span>
                                 </div>
                         })
                         }</>
@@ -271,19 +273,41 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
         
         borderRadius: '3px',
+        '& span':{
+            borderRight: '1px solid #c7c7c7' ,
+            '&:last-child' :{
+            borderRight: 'none' ,
+            },
+            margin: '0px 5px'
+        }
     },
     woiListItemSelected:{
         background: 'linear-gradient(0deg, #26aded8a, #90ebff8c)',
     },
     li_checkbox:{
         padding: '1px',
-        flexBasis: '10%',
+        flexBasis: '13%',
         '& span':{
             color: '#444',
             '&:hover':{
               color: '#000',
-            }
-          }
-    }
+            },
+            border:'none',
+        },
+        
+    },
+    liIdSpan:{
+        flexBasis: '20%',
+        
+    },
+    liTitleSpan:{
+        flexBasis: '35%',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
+    liDateSpan:{
+        flexBasis: '25%',
+    },
 
   }));

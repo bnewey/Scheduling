@@ -625,7 +625,7 @@ router.post('/getEntRelatedWorkOrders', async (req,res) => {
 
     const sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
     ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, ' +
-    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS sa_city, sa.state AS sa_state ' +
+    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
     ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +

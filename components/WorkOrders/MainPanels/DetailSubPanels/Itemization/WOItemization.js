@@ -19,6 +19,7 @@ import cogoToast from 'cogo-toast';
 import Util from  '../../../../../js/Util';
 import Work_Orders from  '../../../../../js/Work_Orders';
 import WorkOrderDetail from  '../../../../../js/WorkOrderDetail';
+import clsx from 'clsx';
 
 import { ListContext } from '../../../WOContainer';
 import { DetailContext } from '../../../WOContainer';
@@ -257,20 +258,20 @@ const WOItemization = function(props) {
     
   }
 
+
    return ( 
     <div className={classes.root}>
         {activeWorkOrder && packingSlips ?
         <div className={classes.container}>
 
-            <Grid container>
+            <Grid  container direction={'column'}>
                   
-                  
-
-
-                  <Grid item xs={ editWOIModalOpen ? 8 : 12}>
+                  <Grid item xs={ editWOIModalOpen ? 12 : 12}>
                     <div className={classes.woiDiv}>
                     { workOrderItems && workOrderItems.length > 0 ?
-                    <TableContainer className={classes.container}>
+                    <TableContainer className={ clsx( { [classes.container_small]: editWOIModalOpen,
+                                                        [classes.container]: !editWOIModalOpen
+                                                      }) }>
                       <Table stickyHeader  size="small" aria-label="sticky table">
                         <TableHead>
                           <TableRow>
@@ -312,7 +313,7 @@ const WOItemization = function(props) {
 
                     </div>
                   </Grid>
-                  <Grid item xs={ editWOIModalOpen ? 4 : 0}>
+                  <Grid item xs={ editWOIModalOpen ? 12 : 0}>
                     <div className={classes.addWoiDiv}><AddEditWOIModal  /></div>
                   </Grid>
             </Grid>
@@ -335,6 +336,9 @@ const useStyles = makeStyles(theme => ({
   },
   container: {
     maxHeight: 700,
+  },
+  container_small:{
+    maxHeight: 300
   },
   detailInfoDiv:{
     display: 'flex',

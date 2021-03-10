@@ -53,8 +53,8 @@ const Search = function(props) {
     if(searchTable){
       if(searchRef.current){
         console.log("Currnet", searchRef.current);
-         searchRef.current.focus();
-         searchRef.current.select();
+         //searchRef.current.focus();
+         //searchRef.current.select();
       }
     }
   },[searchTable])

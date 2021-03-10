@@ -62,7 +62,7 @@ const AddEditWOIModal = function(props) {
     const woi_fields = [
         //type: select must be hyphenated ex select-type
         {field: 'item_type', label: 'Item Type', type: 'radio-type', updateBy: 'state', defaultValue: 3 ,required: true},
-        {field: 'quantity', label: 'Quantity', type: 'text', updateBy: 'ref',required: true},
+        {field: 'quantity', label: 'Quantity', type: 'number', updateBy: 'ref',required: true},
         {field: 'part_number', label: 'Part Number', type: 'text', updateBy: 'ref'},
         {field: 'size', label: 'Size', type: 'text', updateBy: 'ref'},
         {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
@@ -74,11 +74,11 @@ const AddEditWOIModal = function(props) {
     ];
 
     const scbd_or_sign_fields = [
-        {field: 'scoreboard_or_sign', label: '', type: 'radio-scbd_or_sign', updateBy: 'state',required: true,defaultValue: 0 ,},
+        {field: 'scoreboard_or_sign', label: '', type: 'radio-scbd_or_sign', updateBy: 'state',required: true,defaultValue: 0 ,second_column: true},
         //Scoreboard OR Sign
-        {field: 'vendor', label: 'Vendor', type: 'select-vendor', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign == 0},
+        {field: 'vendor', label: 'Vendor', type: 'select-vendor', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign == 0,second_column: true},
         //Scoreboard
-        {field: 'model', label: 'Model', type: 'auto', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
+        {field: 'model', label: 'Model', type: 'auto', updateBy: 'state',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
             dataGetterFunc: async () =>{
                 return new Promise(async function (resolve, reject) {
                      try{
@@ -91,7 +91,7 @@ const AddEditWOIModal = function(props) {
                      }
                 })
             }},
-        {field: 'color', label: 'Color', type: 'auto', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
+        {field: 'color', label: 'Color', type: 'auto',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
             dataGetterFunc: async () =>{
                 return new Promise(async function (resolve, reject) {
                     try{
@@ -104,15 +104,15 @@ const AddEditWOIModal = function(props) {
                     }
                })
             }},
-        {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
-        {field: 'scoreboard_arrival_date', label: 'Arrival Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
-        {field: 'scoreboard_arrival_status', label: 'Arrival Status', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'scoreboard_arrival_date', label: 'Arrival Date', type: 'date',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
+        {field: 'scoreboard_arrival_status', label: 'Arrival Status', type: 'text',second_column: true, updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
         //Sign
-        {field: 'mount', label: 'Mount', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
-        {field: 'trim_size', label: 'Trim Size', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
-        {field: 'trim_corners', label: 'Trim Corners', type: 'text', updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
-        {field: 'date_offset', label: 'Date Offset', type: 'text', updateBy: 'ref',defaultValue: 0, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
-        {field: 'sign_due_date', label: 'Sign Due Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'mount', label: 'Mount', type: 'text', updateBy: 'ref',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'trim_size', label: 'Trim Size', type: 'text', updateBy: 'ref',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'trim_corners', label: 'Trim Corners', type: 'text', updateBy: 'ref',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'date_offset', label: 'Date Offset', type: 'text', updateBy: 'ref',second_column: true,defaultValue: 0, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
+        {field: 'sign_due_date', label: 'Sign Due Date', type: 'date', updateBy: 'state',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 2},
     ];
 
     const scbd_or_sign_radio_options = [
@@ -260,6 +260,7 @@ const AddEditWOIModal = function(props) {
                             { editWOIModalOpen &&
                             <FormBuilder 
                                 ref={saveRef}
+                                columns={true}
                                 fields={[...woi_fields, ...scbd_or_sign_fields]} 
                                 mode={editWOIModalMode} 
                                 classes={classes} 
@@ -358,7 +359,7 @@ const useStyles = makeStyles(theme => ({
         boxShadow: theme.shadows[5],
     },
     grid_container:{
-        minHeight: 500,
+        minHeight: 'auto',
     },
     modalTitleDiv:{
         background: 'linear-gradient(0deg, #f1f1f1, white)',
@@ -421,17 +422,22 @@ const useStyles = makeStyles(theme => ({
         borderBottom: '1px solid #eee'
     },
     inputStyle:{
-        padding: '5px 7px',
+        padding: '2px 7px',
         width: '100%',
         
     },
+    actualInputElement:{
+        padding: '2px 7px !important',
+        width: '100%',
+        
+      },
     inputStyleDate:{
         padding: '5px 7px',
         width: '175px',
         
     },
     inputRoot: {
-        padding: '5px 7px',
+        padding: '3px 7px',
         width: '100%',
         '&& .MuiOutlinedInput-multiline': {
             padding: '0px'
@@ -549,10 +555,14 @@ const useStyles = makeStyles(theme => ({
       autocompleteRoot:{
           width: '70%',
       },
-      actualInputElement:{
-        
-        padding: '4px 5px !important',
-        
-      }
+      formColumnStyle:{
+        display: 'grid',
+        gridTemplateRows: 'repeat(20,auto)',/*big enough*/
+        gridAutoColumns: '1fr',
+        gridAutoFlow:'column', /*column direction*/
+        gridGap: 1,
+      },
+  
+      
 }));
 

@@ -84,8 +84,8 @@ const EntWOs = function(props) {
     { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
     { id: 'wo_type', label: 'Type', minWidth: 50, align: 'left',},
     { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
-    { id: 'sa_city', label: 'City', minWidth: 45, align: 'left' },
-    { id: 'sa_state', label: 'State', minWidth: 35, align: 'left' },
+    { id: 'acc_city', label: 'City', minWidth: 45, align: 'left' },
+    { id: 'acc_state', label: 'State', minWidth: 35, align: 'left' },
     { id: 'description', label: 'Description', minWidth: 400, align: 'left' },
     { id: 'c_name', label: 'Product Goes To', minWidth: 250, align: 'left'  },
   ];

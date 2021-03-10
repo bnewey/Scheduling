@@ -82,8 +82,8 @@ const PastWOs = function(props) {
       align: 'left',
     },
     { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
-    { id: 'sa_city', label: 'City', minWidth: 45, align: 'left' },
-    { id: 'sa_state', label: 'State', minWidth: 35, align: 'left' },
+    { id: 'acc_city', label: 'City', minWidth: 45, align: 'left' },
+    { id: 'acc_state', label: 'State', minWidth: 35, align: 'left' },
     { id: 'description', label: 'Description', minWidth: 400, align: 'left' },
     
     {

@@ -28,9 +28,11 @@ import Settings from  '../../../js/Settings';
 import Entities from  '../../../js/Entities';
 import { ListContext } from '../../../components/WorkOrders/WOContainer';
 import { DetailContext } from '../../../components/WorkOrders/WOContainer';
+import clsx from 'clsx';
 
 const FormBuilder = forwardRef((props, ref) => {
     const { fields, //table of each input field
+            columns,
             mode,  //edit or add mode 
             classes, //classes given to fields
             formObject, //object that is being edited/updated to save to db
@@ -154,7 +156,16 @@ const FormBuilder = forwardRef((props, ref) => {
                 //reset fields to either defaultValue or blank
                 for( const ref in ref_object){
                     if(ref_object[ref].current){
-                        ref_object[ref].current.value = formObject[ref] || fields.find((f)=> f.field == ref)?.defaultValue || null
+                        var field = fields.find((f)=> f.field == ref)
+                        switch (field.type){
+                            case 'number': 
+                                ref_object[ref].current.value = formObject[ref]?.toString() || field?.defaultValue || null;
+                            break;
+                            default: 
+                                ref_object[ref].current.value = formObject[ref] || field?.defaultValue || null;
+                            break;
+                        }
+                        
                     }
                 }
             }
@@ -321,13 +332,14 @@ const FormBuilder = forwardRef((props, ref) => {
 
     return(<>
         {ref_object  ? <>
-            <form>
+            <form className={clsx( {[classes.formColumnStyle]: props.columns })}>
             {fields.map((field, i)=>{
                 if(field?.hidden && field.hidden(formObject)){
                     return (<></>);
                 }
                 return(
-                <div className={classes.inputDiv}>  
+                <div className={clsx(classes.inputDiv,{[classes.formColumnSeperator]: field?.second_column})}
+                    style={field?.second_column ? {gridColumn:'2'} : null}>  
                     <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span>
                     <GetInputByType field={field} formObject={formObject} errorFields={errorFields} handleShouldUpdate={handleShouldUpdate}
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
@@ -363,7 +375,6 @@ const GetInputByType = function(props){
     
     switch(field.type){
         case 'text':
-        case 'number':
             return(<div className={classes.inputValue}>
                 <TextField id={field.field} 
                         error={error}
@@ -374,6 +385,20 @@ const GetInputByType = function(props){
                          inputProps={{className: classes.inputStyle}} 
                          classes={{root: classes.inputRoot}}
                          defaultValue={ formObject && formObject[field.field] ? formObject[field.field] : field?.defaultValue  }
+                         onChange={()=>handleShouldUpdate(true)}  /></div>
+            )
+            break;
+        case 'number':
+            return(<div className={classes.inputValue}>
+                <TextField id={field.field} 
+                        error={error}
+                         variant="outlined"
+                         /*multiline={field.multiline}*/
+                         name={field.field}
+                         inputRef={ref_object[field.field]}
+                         inputProps={{className: classes.inputStyle}} 
+                         classes={{root: classes.inputRoot}}
+                         defaultValue={ formObject && (formObject[field.field] || formObject[field.field] ==0)  ? formObject[field.field] : field?.defaultValue  }
                          onChange={()=>handleShouldUpdate(true)}  /></div>
             )
             break;
@@ -758,9 +783,10 @@ const GetInputByType = function(props){
                 renderInput={(params) => { 
                      ref_object[field.field].current = params.inputProps.ref.current; 
                     return (<TextField
-                        className={classes.input}                
+                        className={classes.input}   
+                         
                         placeholder=""
-                        inputProps={{ 'aria-label': `${field.field}`,ref: ref_object[field.field], id: `${field.field}_inputelement`}}
+                        inputProps={{ 'aria-label': `${field.field}`,ref: ref_object[field.field], id: `${field.field}_inputelement`, className: classes.inputStyle}}
                         {...params}
                         InputProps={{...params.InputProps, classes: {underline: classes.underline}, 
                                         endAdornment: (

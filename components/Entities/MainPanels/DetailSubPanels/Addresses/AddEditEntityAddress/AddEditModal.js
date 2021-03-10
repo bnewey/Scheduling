@@ -306,7 +306,7 @@ const useStyles = makeStyles(theme => ({
     },
     inputStyleDate:{
         padding: '5px 7px',
-        width: '44%',
+        width: '55%',
         
     },
     inputRoot: {
