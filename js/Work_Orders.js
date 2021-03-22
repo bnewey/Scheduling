@@ -359,7 +359,7 @@ async function deleteWorkOrderItem(woi_id){
 async function setMultipleWOIArrivalDates(woi_ids, date){
     const route = '/scheduling/workOrders/setMultipleWOIArrivalDates';
     try{
-        var data = await fetch(route,
+        var response = await fetch(route,
             {
                 method: 'POST',
                 headers: {
@@ -367,12 +367,11 @@ async function setMultipleWOIArrivalDates(woi_ids, date){
                 },
                 body: JSON.stringify({woi_ids, date})
             });
-        var list = await data.json();
-        return(list);
+        return response.ok;
     }catch(error){
+        console.log(error);
         throw error;
     }
-
 }
 
 

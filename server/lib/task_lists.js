@@ -35,7 +35,7 @@ router.post('/getTaskList', async (req,res) => {
         ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
         ' t.description, t.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
         ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, wo.type, t.install_location, ' +
-        ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date,' + 
+        ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.job_reference,' + 
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
         ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, mad.member_name AS drill_crew_leader , '  +
@@ -392,7 +392,7 @@ router.post('/getAllSignScbdWOIFromTL', async (req,res) => {
 
 
     const sql = 'SELECT DISTINCT woi.record_id, woi.work_order, woi.item_type, woi.user_entered, date_format(woi.date_entered, \'%m-%d-%Y\') as date_entered, woi.quantity, woi.part_number, woi.size, woi.description, ' +
-        ' woi.price, date_format(woi.receive_date, \'%m-%d-%Y\') as receive_date , woi.receive_by, woi.packing_slip, woi.contact, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim , date_format(woi.scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
+        ' woi.price, date_format(woi.receive_date, \'%m-%d-%Y\') as receive_date , woi.receive_by, woi.packing_slip, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim , date_format(woi.scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
         ' woi.mount, woi.sign_built, woi.copy_received, woi.sent_for_approval, woi.final_copy_approved, woi.artwork_completed, woi.sign_popped_and_boxed, woi.roy, woi.trim_size, woi.trim_corners, ' +
         ' woi.date_offset, date_format(woi.sign_due_date, \'%m-%d-%Y\') as sign_due_date , woi.ordernum, woi.vendor ' + 
         ' FROM task_list_items tli ' +

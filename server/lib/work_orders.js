@@ -16,11 +16,13 @@ router.post('/getAllWorkOrders', async (req,res) => {
 
     const sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
     ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
-    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state ' +
+    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, ec.name AS cc_name, sa.city AS acc_city, sa.state AS acc_state, sc.city AS customer_city, sc.state AS customer_state ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
     ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +  
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
+    ' LEFT JOIN entities_contacts ec ON wo.customer_contact_id = ec.record_id ' +
+    ' LEFT JOIN entities_addresses sc ON wo.customer_address_id = sc.record_id ' +  
     ' WHERE date >= ? AND date <= ? ' + 
     ' ORDER BY wo.record_id DESC ' +
     ' limit 2000 ';
@@ -59,7 +61,8 @@ router.post('/getWorkOrderById', async (req,res) => {
     ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id,account_contact_id, sc.name AS account_contact_name, ' + 
     ' account_address_id, sa.name AS account_address_name, advertising_notes, ' +
     ' wo.customer_id AS customer_id, wo.customer_contact_id, bc.name AS customer_contact_name, wo.customer_address_id, ba.name AS customer_address_name, ' + 
-    ' a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state,  ' + 
+    ' sa.address AS account_address, ba.address AS customer_address, ba.city AS cus_city, ba.state AS cus_state, ' +
+    ' a.name AS a_name, c.name AS c_name, bc.name as cc_name, sa.city AS acc_city, sa.state AS acc_state,  ' + 
     ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, wo.requested_arrival_date   ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
@@ -210,7 +213,7 @@ router.post('/superSearchAllWorkOrders', async (req,res) => {
         ' WHERE CONCAT(';
     tables.forEach((table,i)=> {
 
-        sql += `${table}, \' \'${i === tables.length -1 ? '' : ', '}`
+        sql += `IFNULL(${table}, ''), \' \'${i === tables.length -1 ? '' : ', '}`
     })
     sql+=    ') LIKE ? ' +
         ' ORDER BY wo.record_id DESC ';
@@ -245,10 +248,15 @@ router.post('/getAllWorkOrderItems', async (req,res) => {
         
     }    
 
-    const sql = 'SELECT woi.*, wo.job_reference, e.name as e_name, date_format(wo.date, \'%m-%d-%Y %H:%i:%S\') as date '  + 
+    const sql = 'SELECT woi.*, wo.job_reference, e.name as e_name, ec.name AS customer_contact_name, ea.name AS customer_address_name, ps.diff_ship_to, ' + 
+        ' IF(ps.diff_ship_to = 1, ps.ship_to_contact, wo.customer_contact_id) AS ship_to_contact, IF(ps.diff_ship_to = 1, ps.ship_to_address, wo.customer_address_id) AS ship_to_address, ' +
+        ' date_format(wo.date, \'%m-%d-%Y %H:%i:%S\') as date '  + 
         ' FROM work_orders_items woi ' +
         ' LEFT JOIN work_orders wo ON woi.work_order=wo.record_id ' + 
+        ' LEFT JOIN packing_slip ps ON woi.packing_slip= ps.record_id ' +
         ' LEFT JOIN entities e ON wo.account_id=e.record_id ' + 
+        ' LEFT JOIN entities_contacts ec ON IF(ps.diff_ship_to = 1,ps.ship_to_contact, wo.customer_contact_id )=ec.record_id ' + 
+        ' LEFT JOIN entities_addresses ea ON IF(ps.diff_ship_to = 1,ps.ship_to_address, wo.customer_address_id )=ea.record_id ' + 
         ' WHERE ?? like ? ' +
         ' ORDER BY woi.work_order DESC ' + 
         ' LIMIT 100';
@@ -276,11 +284,17 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
     logger.verbose(wo_id);    
 
 
-    const sql = 'SELECT record_id, work_order, item_type, user_entered, date_format(date_entered, \'%m-%d-%Y\') as date_entered, quantity, part_number, size, description, ' +
-        ' price, date_format(receive_date, \'%m-%d-%Y\') as receive_date , receive_by, packing_slip, contact, scoreboard_or_sign, model, color, trim , date_format(scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
-        ' mount, sign_built, copy_received, sent_for_approval, final_copy_approved, artwork_completed, sign_popped_and_boxed, roy, trim_size, trim_corners, ' +
-        ' date_offset, date_format(sign_due_date, \'%m-%d-%Y\') as sign_due_date , ordernum, vendor ' + 
+    const sql = 'SELECT woi.record_id,  woi.work_order,  woi.item_type,  woi.user_entered, date_format( woi.date_entered, \'%m-%d-%Y\') as date_entered,  woi.quantity,  woi.part_number,  woi.size,  woi.description, ' +
+        '  woi.price, date_format( woi.receive_date, \'%m-%d-%Y\') as receive_date ,  woi.receive_by,  woi.packing_slip, ps.diff_ship_to, ' + 
+        ' IF(ps.diff_ship_to = 1, ps.ship_to_contact, wo.customer_contact_id) AS ship_to_contact, IF(ps.diff_ship_to = 1, ps.ship_to_address, wo.customer_address_id) AS ship_to_address, ' +
+        '  woi.scoreboard_or_sign,  woi.model,  woi.color,  woi.trim , date_format( woi.scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
+        '  woi.mount,  woi.sign_built,  woi.copy_received,  woi.sent_for_approval,  woi.final_copy_approved,  woi.artwork_completed,  woi.sign_popped_and_boxed,  woi.roy,  woi.trim_size,  woi.trim_corners, ' +
+        '  woi.date_offset, date_format( woi.sign_due_date, \'%m-%d-%Y\') as sign_due_date ,  woi.ordernum,  woi.vendor, ec.name AS customer_contact_name, ea.name AS customer_address_name' + 
         ' FROM work_orders_items woi ' +
+        ' LEFT JOIN work_orders wo ON wo.record_id= woi.work_order ' + 
+        ' LEFT JOIN packing_slip ps ON woi.packing_slip= ps.record_id ' +
+        ' LEFT JOIN entities_contacts ec ON IF(ps.diff_ship_to = 1,ps.ship_to_contact, wo.customer_contact_id )=ec.record_id ' + 
+        ' LEFT JOIN entities_addresses ea ON IF(ps.diff_ship_to = 1,ps.ship_to_address, wo.customer_address_id )=ea.record_id ' + 
         ' WHERE woi.work_order =  ? ' +
         ' ORDER BY woi.ordernum ASC ' + 
         ' LIMIT 100';
@@ -480,11 +494,10 @@ router.post('/updateWorkOrderItem', async (req,res) => {
         }  
     }
 
-    console.log("woi", woi)
 
     const sql = ' UPDATE work_orders_items SET item_type = IFNULL(? ,DEFAULT(item_type)), quantity = IFNULL(? ,DEFAULT(quantity)), ' + 
     ' part_number = ?, size = ?, description = ?, price = IFNULL(? ,DEFAULT(price)), receive_date =?, ' +
-    ' receive_by =?, contact = IFNULL(? ,DEFAULT(contact)), scoreboard_or_sign= IFNULL(? ,DEFAULT(scoreboard_or_sign)), model=?,color=? ,' +
+    ' receive_by =?, scoreboard_or_sign= IFNULL(? ,DEFAULT(scoreboard_or_sign)), model=?,color=? ,' +
     ' trim=?,scoreboard_arrival_date=?,scoreboard_arrival_status=?, mount=?, ' + 
     ' trim_size=?, trim_corners=?, date_offset= IFNULL(? ,DEFAULT(date_offset)), sign_due_date=?, vendor=?, sign_built=?, sign_popped_and_boxed=?, ' +
     ' copy_received=?,sent_for_approval=?,final_copy_approved=?,artwork_completed=? ' +
@@ -493,7 +506,7 @@ router.post('/updateWorkOrderItem', async (req,res) => {
     try{ //Util.convertISODateToMySqlDate(wo.date)
         const results = await database.query(sql, [ woi.item_type || null, woi.quantity || null, woi.part_number || null, woi.size || null,
                 woi.description || null,woi.price || (0).toFixed(2), Util.convertISODateToMySqlDate( woi.receive_date) , woi.receive_by || null,
-                woi.contact || null, woi.scoreboard_or_sign || null,
+                woi.scoreboard_or_sign || null,
                 woi.model || null, woi.color || null, woi.trim  || null,
                 Util.convertISODateToMySqlDate(woi.scoreboard_arrival_date), woi.scoreboard_arrival_status || null,
                  woi.mount || null, woi.trim_size || null, woi.trim_corners || null,
@@ -525,10 +538,10 @@ router.post('/addWorkOrderItem', async (req,res) => {
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM work_orders_items woi WHERE work_order = ?; "
 
     const sql = '  INSERT INTO work_orders_items ( work_order, item_type, user_entered, date_entered, quantity, part_number, size, ' +
-            ' description, price, receive_date, receive_by, packing_slip, contact, scoreboard_or_sign, model, color, trim, ' + 
+            ' description, price, receive_date, receive_by, packing_slip, scoreboard_or_sign, model, color, trim, ' + 
             ' scoreboard_arrival_date, scoreboard_arrival_status, mount, roy, trim_size, trim_corners, date_offset, sign_due_date, ordernum,vendor ) ' +
-            ' VALUES ( IFNULL(? ,DEFAULT(contact)), IFNULL(? ,DEFAULT(item_type)), IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(date_entered)), ' +
-            ' IFNULL(? ,DEFAULT(quantity)), ?, ?, ?, IFNULL(? ,DEFAULT(price)), ?, ?, DEFAULT(packing_slip), IFNULL(? ,DEFAULT(contact)), ' + 
+            ' VALUES ( IFNULL(? ,DEFAULT(work_order)), IFNULL(? ,DEFAULT(item_type)), IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(date_entered)), ' +
+            ' IFNULL(? ,DEFAULT(quantity)), ?, ?, ?, IFNULL(? ,DEFAULT(price)), ?, ?, DEFAULT(packing_slip), ' + 
             ' IFNULL(? ,DEFAULT(scoreboard_or_sign)), ?,?,?,?,?,?,IFNULL(? ,DEFAULT(roy)), ?,?, IFNULL(? ,DEFAULT(date_offset)), ?, ' +
             ' IFNULL(?, 0) , ?) ';
 
@@ -536,14 +549,14 @@ router.post('/addWorkOrderItem', async (req,res) => {
         const data = await database.query(getMax, [ woi.work_order ])
         const results = await database.query(sql, [ woi.work_order, woi.item_type, woi.user_entered || 0, Util.convertISODateToMySqlDate(new Date()),
             woi.quantity, woi.part_number, woi.size, woi.description, woi.price, Util.convertISODateToMySqlDate(woi.receive_date), woi.receive_by,// woi.packing_slip || 0,
-            woi.contact, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim, woi.scoreboard_arrival_date, woi.scoreboard_arrival_status,
+            woi.scoreboard_or_sign, woi.model, woi.color, woi.trim, woi.scoreboard_arrival_date, woi.scoreboard_arrival_status,
             woi.mount, 0, woi.trim_size, woi.trim_corners, woi.date_offset, Util.convertISODateToMySqlDate(woi.sign_due_date), data[0].max_num || 0, woi.vendor ]);
         logger.info("Work Order Item added ");    
         res.json(results);    
  
     }
     catch(error){
-        logger.error("Failed to updateWorkOrderItem: " + error);
+        logger.error("Failed to addWorkOrderItem: " + error);
         res.sendStatus(400);
     }
 });
@@ -558,10 +571,10 @@ router.post('/addMultipleWorkOrderItems', async (req,res) => {
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM work_orders_items woi WHERE work_order = ?; "
 
     const sql = ' INSERT INTO work_orders_items ( work_order, item_type, user_entered, date_entered, quantity, part_number, size, ' +
-    ' description, price, receive_date, receive_by, packing_slip, contact, scoreboard_or_sign, model, color, trim, ' + 
+    ' description, price, receive_date, receive_by, packing_slip, scoreboard_or_sign, model, color, trim, ' + 
     ' scoreboard_arrival_date, scoreboard_arrival_status, mount, roy, trim_size, trim_corners, date_offset, sign_due_date, ordernum,vendor ) ' +
-    ' VALUES ( IFNULL(? ,DEFAULT(contact)), IFNULL(? ,DEFAULT(item_type)), IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(date_entered)), ' +
-    ' IFNULL(? ,DEFAULT(quantity)), ?, ?, ?, IFNULL(? ,DEFAULT(price)), ?, ?, DEFAULT(packing_slip), IFNULL(? ,DEFAULT(contact)), ' + 
+    ' VALUES ( IFNULL(? ,DEFAULT(work_order)), IFNULL(? ,DEFAULT(item_type)), IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(date_entered)), ' +
+    ' IFNULL(? ,DEFAULT(quantity)), ?, ?, ?, IFNULL(? ,DEFAULT(price)), ?, ?, DEFAULT(packing_slip), ' + 
     ' IFNULL(? ,DEFAULT(scoreboard_or_sign)), ?,?,?,?,?,?,IFNULL(? ,DEFAULT(roy)), ?,?, IFNULL(? ,DEFAULT(date_offset)), ?, ' +
     ' IFNULL(?, 0) , ?) ';
 
@@ -573,7 +586,7 @@ router.post('/addMultipleWorkOrderItems', async (req,res) => {
         try{
             const results = await database.query(sql, [wo_id, woi.item_type, woi.user_entered || 0, Util.convertISODateToMySqlDate(new Date()),
                 woi.quantity, woi.part_number, woi.size, woi.description, woi.price, Util.convertISODateToMySqlDate(woi.receive_date), woi.receive_by,// woi.packing_slip || 0,
-                woi.contact, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim, woi.scoreboard_arrival_date, woi.scoreboard_arrival_status,
+                woi.scoreboard_or_sign, woi.model, woi.color, woi.trim, woi.scoreboard_arrival_date, woi.scoreboard_arrival_status,
                 woi.mount, 0, woi.trim_size, woi.trim_corners, woi.date_offset, Util.convertISODateToMySqlDate(woi.sign_due_date), max+i+1, woi.vendor ]);
             return;
         }
@@ -636,7 +649,8 @@ router.post('/setMultipleWOIArrivalDates', async (req,res) => {
             return;
         }
         catch(error){     
-            //callback(error);         
+            //callback(error);     
+            logger.error("Error" + error);    
             throw error;                 
         }
     }, err=> {

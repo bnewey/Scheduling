@@ -37,7 +37,7 @@ const AddEditWOIModal = function(props) {
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
-        setEditWOIModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI} = useContext(DetailContext)
+        setEditWOIModalOpen, vendorTypes, shipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToContactOptionsWOI} = useContext(DetailContext)
     
     const saveRef = React.createRef();
     const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
@@ -67,7 +67,6 @@ const AddEditWOIModal = function(props) {
         {field: 'size', label: 'Size', type: 'text', updateBy: 'ref'},
         {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
         {field: 'price', label: 'Price', type: 'text', updateBy: 'ref',defaultValue: (0.00).toFixed(2) ,},
-        {field: 'contact', label: 'Ship To', type: 'select-ship_to', updateBy: 'state'},
         //Repair or Loaner
         {field: 'receive_date', label: 'Receive Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.item_type == 3 },
         {field: 'receive_by', label: 'Receive By', type: 'select-users', updateBy: 'state', hidden: (current_wo)=> current_wo?.item_type == 3},
@@ -177,7 +176,6 @@ const AddEditWOIModal = function(props) {
                     //Get id of new workorder item 
                     if(data && data.insertId){
                         setWorkOrderItems(null);
-                        
                     }
                     cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
                     setActiveWOI({contact: updateItem.contact || null ,item_type: 3, scoreboard_or_sign: 0, date_offset: 0, price: 0.00 })
@@ -268,7 +266,7 @@ const AddEditWOIModal = function(props) {
                                 setFormObject={setActiveWOI}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                scbd_or_sign_radio_options={scbd_or_sign_radio_options} shipToOptionsWOI={shipToOptionsWOI}
+                                scbd_or_sign_radio_options={scbd_or_sign_radio_options} 
                                 raineyUsers={raineyUsers} vendorTypes={vendorTypes} item_type_radio_options={item_type_radio_options}
                                 dontCloseOnNoChangesSave={true}/>
                             }

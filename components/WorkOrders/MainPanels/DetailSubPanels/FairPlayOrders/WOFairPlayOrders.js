@@ -77,7 +77,7 @@ const WOFairPlayOrders = function(props) {
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
     currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
-    const { workOrderItems, setWorkOrderItems, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,
+    const { workOrderItems, setWorkOrderItems, vendorTypes, shipToContactOptionsWOI, setShipToContactOptionsWOI, fpOrderModalMode,
       setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
         fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders} = useContext(DetailContext)
 

@@ -45,7 +45,8 @@ const FormBuilder = forwardRef((props, ref) => {
             entityTypes,
             defaultAddresses,
             entContactTitles,//specific date for entities contacts title
-            shipToOptionsWOI, //specific data for woi ship_to
+            shipToContactOptionsWOI, //specific data for woi ship_to
+            shipToAddressOptionsWOI,
             vendorTypes, //specific data for woi vendor
             raineyUsers, //specific data for all select-users
             entityShippingContacts, setEntityShippingContacts,
@@ -343,7 +344,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span>
                     <GetInputByType field={field} formObject={formObject} errorFields={errorFields} handleShouldUpdate={handleShouldUpdate}
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
-                    shipToOptionsWOI={shipToOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
+                    shipToContactOptionsWOI={shipToContactOptionsWOI} shipToAddressOptionsWOI={shipToAddressOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
                     dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} defaultAddresses={defaultAddresses}
                      entContactTitles={entContactTitles} entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts}
@@ -362,7 +363,7 @@ export default FormBuilder;
 
 const GetInputByType = function(props){
     const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
-        shipToOptionsWOI , scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
+        shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
         entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
         entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses} = props;
 
@@ -541,7 +542,7 @@ const GetInputByType = function(props){
                 </Select></div>
             )
             break;
-        case 'select-ship_to':
+        case 'select-ship_to-contact':
                 return(<div className={classes.inputValueSelect}>
                     <Select
                         error={error}
@@ -554,10 +555,33 @@ const GetInputByType = function(props){
                         <option value={0}>
                             Select
                         </option>
-                        {shipToOptionsWOI && shipToOptionsWOI.map((item)=>{
+                        {shipToContactOptionsWOI && shipToContactOptionsWOI.map((item)=>{
                             return (
                                 <option value={item.ec_record_id}>
                                     {item.ec_name}
+                                </option>
+                            )
+                        })}
+                    </Select></div>
+                )
+                break;
+        case 'select-ship_to-address':
+                return(<div className={classes.inputValueSelect}>
+                    <Select
+                        error={error}
+                        id={field.field}
+                        value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {shipToAddressOptionsWOI && shipToAddressOptionsWOI.map((item)=>{
+                            return (
+                                <option value={item.ea_record_id}>
+                                    {item.ea_name}
                                 </option>
                             )
                         })}

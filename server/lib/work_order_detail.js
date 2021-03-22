@@ -17,6 +17,7 @@ router.post('/getPackingSlipsById', async (req,res) => {
 
     const sql = ' SELECT ps.record_id, date_format(ps.date_entered, \'%Y-%m-%d\') as date_entered , ps.user_entered, ' + 
         ' date_format(ps.ship_date, \'%Y-%m-%d\') as ship_date, ps.shipped, ps.work_order, ' +
+        ' ps.diff_ship_to, IF(ps.diff_ship_to = 1, ps.ship_to_contact, wo.customer_contact_id) AS ship_to_contact,  IF(ps.diff_ship_to = 1, ps.ship_to_address, wo.customer_address_id) AS ship_to_address, ' +
         ' ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, ' +
         ' ec.name AS contact_name, ' +
@@ -25,8 +26,8 @@ router.post('/getPackingSlipsById', async (req,res) => {
         ' FROM packing_slip ps ' + 
         ' LEFT JOIN work_orders wo ON wo.record_id = ps.work_order ' +      
         ' LEFT JOIN entities en ON wo.customer_id = en.record_id ' + 
-        ' LEFT JOIN entities_contacts ec ON wo.customer_contact_id = ec.record_id ' + 
-        ' LEFT JOIN entities_addresses ea ON (wo.customer_address_id = ea.record_id ) ' + 
+        ' LEFT JOIN entities_contacts ec ON IF(ps.diff_ship_to = 1,ps.ship_to_contact, wo.customer_contact_id )=ec.record_id ' + 
+        ' LEFT JOIN entities_addresses ea ON IF(ps.diff_ship_to = 1,ps.ship_to_address, wo.customer_address_id )=ea.record_id ' + 
         ' WHERE ps.work_order = ? ';
 
     try{
@@ -49,10 +50,11 @@ router.post('/updatePackingSlip', async (req,res) => {
         }  
     }
 
-    const sql = ' UPDATE packing_slip SET ship_date = ?, shipped = ? WHERE record_id = ? ';
+    const sql = ' UPDATE packing_slip SET ship_date = ?, shipped = ?, diff_ship_to =?, ship_to_contact =?, ship_to_address =? WHERE record_id = ? ';
 
     try{
-        const results = await database.query(sql, [Util.convertISODateToMySqlDate(ps.ship_date), ps.shipped, ps.record_id]);
+        const results = await database.query(sql, [Util.convertISODateToMySqlDate(ps.ship_date), ps.shipped, ps.diff_ship_to, ps.ship_to_contact,
+                                                ps.ship_to_address, ps.record_id]);
         logger.info("Packing Slip updated", ps.record_id);
         res.json(results);
 
@@ -141,7 +143,7 @@ router.post('/removePackingSlipFromWOI', async (req,res) => {
         woi_id = req.body.woi_id;
     }
 
-    const sql = ' UPDATE work_orders_items woi SET packing_slip = 0 WHERE woi.record_id = ? AND woi.packing_slip = ? ';
+    const sql = ' UPDATE work_orders_items woi SET packing_slip = NULL WHERE woi.record_id = ? AND woi.packing_slip = ? ';
 
     try{
         const results = await database.query(sql, [woi_id, slip_id]);
@@ -183,7 +185,7 @@ router.post('/getShipToWOIOptions', async (req,res) => {
 
 
     const sql = 'SELECT '  + 
-        ' ec.record_id AS ec_record_id, if(ec.entities_id = e1.record_id,concat(ec.name,\' (Bill Goes to)\'), concat(ec.name,\' (Product Goes to)\')) AS ec_name ' + 
+        ' ec.record_id AS ec_record_id, if(ec.entities_id = e1.record_id,concat(ec.name,\' (Product Goes to)\'), concat(ec.name,\' (Bill Goes to)\')) AS ec_name ' + 
         ' FROM work_orders wo ' +
         ' LEFT JOIN entities e1 ON e1.record_id = wo.account_id ' +
         ' LEFT JOIN entities e2 ON e2.record_id = wo.customer_id ' + 
@@ -202,6 +204,36 @@ router.post('/getShipToWOIOptions', async (req,res) => {
     }
 });
 
+router.post('/getShipToAddressWOIOptions', async (req,res) => {
+
+    var wo_id;
+    if(req.body){
+        if(req.body.wo_id != null){
+            wo_id = req.body.wo_id;
+        }  
+    }
+    logger.verbose(wo_id);
+
+
+    const sql = 'SELECT '  + 
+        ' ea.record_id AS ea_record_id, if(ea.entities_id = e1.record_id,concat(ea.name,\' (Product Goes to)\'), concat(ea.name,\' (Bill Goes to)\')) AS ea_name ' + 
+        ' FROM work_orders wo ' +
+        ' LEFT JOIN entities e1 ON e1.record_id = wo.account_id ' +
+        ' LEFT JOIN entities e2 ON e2.record_id = wo.customer_id ' + 
+        ' LEFT JOIN entities_addresses ea ON ea.entities_id = e2.record_id OR ea.entities_id = e1.record_id  ' +
+        ' WHERE wo.record_id =  ? ';
+
+    try{
+        const results = await database.query(sql, [wo_id]);
+        logger.info("Got getShipToAddressWOIOptions Items");
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("getShipToAddressWOIOptions  Items: " + error);
+        res.sendStatus(400);
+    }
+});
 
 router.post('/getPastWorkOrders', async (req,res) => {
     var c_id = {};

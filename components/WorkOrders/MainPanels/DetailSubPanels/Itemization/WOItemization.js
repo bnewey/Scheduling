@@ -33,16 +33,21 @@ const WOItemization = function(props) {
     currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
   const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
-        setEditWOIModalOpen, vendorTypes, shipToOptionsWOI} = useContext(DetailContext)
+        setEditWOIModalOpen, vendorTypes, shipToContactOptionsWOI} = useContext(DetailContext)
 
   const classes = useStyles();
 
-  const [packingSlips, setPackingSlips] = React.useState(null)
+  const [packingSlips, setPackingSlips] = React.useState(null);
+  const [refetchWOI, setRefetchWOI] = React.useState(false);
 
   //WOI
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
-    if(workOrderItems == null && activeWorkOrder) {
+    if((workOrderItems == null || refetchWOI) && activeWorkOrder) {
+      if(refetchWOI){
+        setRefetchWOI(false);
+      }
+
       Work_Orders.getAllWorkOrderSignArtItems(activeWorkOrder.wo_record_id)
       .then( data => { setWorkOrderItems(data); })
       .catch( error => {
@@ -55,7 +60,13 @@ const WOItemization = function(props) {
     //     setWorkOrderItems(null);
     //   }
     // })
-  },[workOrderItems, activeWorkOrder]);
+  },[workOrderItems, activeWorkOrder, refetchWOI]);
+
+  useEffect(()=>{
+    if(currentView && currentView.value == "woItems"){
+      setRefetchWOI(true);
+    }
+  },[currentView])
 
   //Packing SLips Data
   useEffect( () =>{
@@ -153,29 +164,30 @@ const WOItemization = function(props) {
     { id: 'price', label: 'Unit Price', minWidth: 50, align: 'left' },
     { id: 'price', label: 'Total Price', minWidth: 50, align: 'left',
         format: (value,row)=>  value*row.quantity},
-    { id: 'ship_to', label: 'Ship To', minWidth: 150, align: 'left', format: (value,row)=>  activeWorkOrder.c_name},
+    { id: 'customer_contact_name', label: 'Ship To - Contact', minWidth: 150, align: 'left'},
+    { id: 'customer_address_name', label: 'Ship To - Address', minWidth: 150, align: 'left'},
     { id: 'packing_slip', label: 'Packing Slip', minWidth: 150, align: 'left', 
     format: (value, row)=> {
-        if(value == 0){
+        if(!value){
           return (<div className={classes.inputValueSelect}>
-            <Select
+            {packingSlips?.length ?  <Select
                 id={'selectpacking'+row.record_id}
                 value={value}
                 inputProps={{className: classes.selectInput}}
                 onChange={event => handleAddPackingSlip(event.target.value, row.record_id)}
                 
             >
-                <MenuItem value={0}>
+                {/* <MenuItem value={null}>
                     Add To Packing Slip
-                </MenuItem>
-                {packingSlips && packingSlips.map((item)=>{
+                </MenuItem> */}
+                {packingSlips  && packingSlips.map((item)=>{
                     return (
                         <MenuItem value={item.record_id}>
                             {item.record_id}
                         </MenuItem>
                     )
                 })}
-            </Select></div>)
+            </Select> : <span>No Slips Available</span>}</div>)
         }else{
           return (<span onClick={(event)=>handleRemovePackingSlip(value, row.record_id)} className={classes.clickableWOnumber}>Remove From {value}</span>);
         }
@@ -472,5 +484,6 @@ const useStyles = makeStyles(theme => ({
   selectInput:{
     fontSize: 10,
     padding: '3px 22px',
+    minWidth: '80px',
   }  
 }));

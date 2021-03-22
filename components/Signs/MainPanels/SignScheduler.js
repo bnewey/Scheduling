@@ -276,7 +276,7 @@ const SignSchedulerList = function(props) {
     window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
     
     //set detail view in local data
-    window.localStorage.setItem('currentView', JSON.stringify("woFPOrder"));
+    window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
 
     Router.push('/scheduling/work_orders')
   }

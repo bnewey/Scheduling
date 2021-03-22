@@ -50,17 +50,21 @@ const WODetail = function(props) {
   },[workOrderItems, activeWorkOrder]);
 
   const detail_table = [{value: 'c_name', displayName: 'Product To', type: 'text'},
-                        {value: 'customer_contact_name', displayName: 'Product To - Contact', type: 'text'},
-                        {value: 'customer_address_name', displayName: 'Product To - Address', type: 'text'},
+                        {value: 'customer_contact_name', displayName: 'Contact', type: 'text'},
+                        {value: 'customer_address_name', displayName: 'Address Name', type: 'text'},
+                        {value: 'customer_address', displayName: 'Address', type: 'text',
+                        format: (value,item, row)=>  `${value}, ${row.cus_city}, ${row.cus_state}` }, {},
                         {value: 'a_name', displayName: 'Bill To', type: 'text'},
-                        {value: 'account_contact_name', displayName: 'Bill To - Contact', type: 'text'},
-                        {value: 'account_address_name', displayName: 'Bill To - Address', type: 'text'},
+                        {value: 'account_contact_name', displayName: 'Contact', type: 'text'}, 
+                        {value: 'account_address_name', displayName: 'Address Name', type: 'text'},
+                        {value: 'account_address', displayName: 'Address', type: 'text',
+                        format: (value,item, row)=>  `${value}, ${row.acc_city}, ${row.acc_state}` }, {},
                         {value: 'date', displayName: 'Date Entered', type: 'date',
-                        format: (value,row)=> Util.convertISODateToMySqlDate(value)},
+                        format: (value,item)=> Util.convertISODateToMySqlDate(value)},
                         {value: 'requestor', displayName: 'Requestor', type: 'number',
-                          format: (value,row)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0]?.name  : value },
+                          format: (value,item)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0]?.name  : value },
                         {value: 'maker', displayName: 'maker', type: 'number',
-                          format: (value,row)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0]?.name  : value },
+                          format: (value,item)=> raineyUsers ? raineyUsers.filter((v)=> v.user_id == value)[0]?.name  : value },
                         {value: 'type', displayName: 'Type', type: 'text'},
                         {value: 'job_reference', displayName: 'Job Reference', type: 'text'},
                         {value: 'description', displayName: 'Description', type: 'text'},
@@ -68,7 +72,7 @@ const WODetail = function(props) {
                         {value: 'advertising_notes', displayName: 'Ad Notes', type: 'text'},
                         {value: 'po_number', displayName: 'Purchase Order', type: 'number'},
                         {value: 'requested_arrival_date', displayName: 'Date Desired', type: 'date',
-                        format: (value,row)=> Util.convertISODateToMySqlDate(value)},];
+                        format: (value,item)=> Util.convertISODateToMySqlDate(value)},];
 
    
 
@@ -87,7 +91,7 @@ const WODetail = function(props) {
                       <div className={classes.detailDiv} key={i}>
                         <span className={classes.detailLabel}>{item.displayName}:</span>
                         <span className={classes.detailValue}>
-                          {activeWorkOrder[item.value] ? (item.format ? item.format(activeWorkOrder[item.value], item) :  activeWorkOrder[item.value]) : ""}
+                          {activeWorkOrder[item.value] ? (item.format ? item.format(activeWorkOrder[item.value], item, activeWorkOrder) :  activeWorkOrder[item.value]) : ""}
                           </span>
                       </div>
                       )

@@ -493,15 +493,15 @@ const TaskListTasks = (props) =>{
       }
     }
 
-    const handleSetArrivalDates = (selectedWOIs) =>{
+    const handleSetArrivalDates = (selectedWOIs, date) =>{
       if(!selectedWOIs?.length){
         console.log("Bad selectedWOIs in handleSetArrivalDates")
         return;
       }
 
-      Work_Orders.setMultipleWOIArrivalDates(selectedWOIs.map((item)=> item.woi_id), moment())
+      Work_Orders.setMultipleWOIArrivalDates(selectedWOIs.map((item)=> item.woi_id), date)
       .then((data)=>{
-        taskListTasksRefetch(true);
+        setTaskListTasksRefetch(true);
       })
       .catch((error)=>{
         console.error("Failed to set multiple arrival dates", error);
@@ -658,8 +658,8 @@ const TaskListTasks = (props) =>{
                         minDate={new Date('01-01-1970')}
                         className={classes.datePicker}
                         value={arrivalValue ? moment(arrivalValue).format('MM-DD-YYYY hh:mm:ss') : null} 
-                        onChange={arrivalValue => handleUpdateArrivalDate(Util.convertISODateTimeToMySqlDateTime(arrivalValue), task, "wo_arrival_dates")} 
-                        onItemsArrived={ (selectedWOIs)=> handleSetArrivalDates(selectedWOIs) }
+                        onChange={(arrivalValue, selectedWOIs) => handleSetArrivalDates(selectedWOIs, Util.convertISODateTimeToMySqlDateTime(arrivalValue))} 
+                        onItemsArrived={ (selectedWOIs)=> handleSetArrivalDates(selectedWOIs,moment() ) }
                         data={woiData?.filter((item)=>item.work_order == task.table_id)}
                         task={task} />
               </MuiPickersUtilsProvider></div>

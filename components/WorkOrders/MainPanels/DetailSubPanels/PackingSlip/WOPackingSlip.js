@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {makeStyles, withStyles, CircularProgress, Grid, Accordion, AccordionSummary, AccordionDetails, Checkbox} from '@material-ui/core';
+import {makeStyles, withStyles, CircularProgress, Grid, Accordion, AccordionSummary, AccordionDetails, Checkbox, Select} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -65,7 +65,7 @@ import Util from  '../../../../../js/Util';
 import Pdf from  '../../../../../js/Pdf';
 import WorkOrderDetail from  '../../../../../js/WorkOrderDetail';
 import Work_Orders from  '../../../../../js/Work_Orders';
-import { ListContext } from '../../../WOContainer';
+import { DetailContext, ListContext } from '../../../WOContainer';
 
 
 const WOPackingSlip = function(props) {
@@ -73,6 +73,8 @@ const WOPackingSlip = function(props) {
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
     currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+
+  const {shipToContactOptionsWOI, shipToAddressOptionsWOI} = useContext(DetailContext);
   const classes = useStyles();
 
   const [packingSlips, setPackingSlips] = React.useState(null)
@@ -131,7 +133,7 @@ const WOPackingSlip = function(props) {
         </MuiPickersUtilsProvider>
       ) },
     
-    { field: 'shipped', title: 'Shipped', minWidth: 45, align: 'left', editable: 'onUpdate',
+    { field: 'shipped', title: 'Shipped', minWidth: 45, align: 'center', editable: 'onUpdate',
       render: rowData => rowData.shipped ? 'Yes' : 'No',
       editComponent: props => (
         <Checkbox
@@ -142,14 +144,73 @@ const WOPackingSlip = function(props) {
             onChange={(event)=> props.onChange(event.target.checked ? 1 : 0)}
         />
       )},
-    { field: 'address_name', title: 'Ship To', minWidth: 45, align: 'left',editable: 'never',
-        render: rowData => {
-          var tmp = "";
-          if(rowData && rowData.shipping_entity_id){
-            tmp = rowData.contact_name + ", " + rowData.entity_name + ", " + rowData.address + ", " +  rowData.city + ", " + rowData.state + ", " + rowData.zip;
-          }
-          return tmp;
-        }}
+      { field: 'diff_ship_to', title: 'Different Ship To?', minWidth: 25, align: 'center', editable: 'onUpdate',
+      render: rowData => rowData.diff_ship_to ? 'Yes' : 'No',
+      editComponent: props => (
+        <Checkbox
+            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+            checkedIcon={<CheckBoxIcon fontSize="small" />}
+            name="checkedI"
+            checked={props.value ? true : false}
+            onChange={(event)=> props.onChange(event.target.checked ? 1 : 0)}
+        />
+      )},
+      { field: 'ship_to_contact', title: 'Contact', minWidth: 25, align: 'center', editable: 'onUpdate',
+      render: rowData => rowData.contact_name ? rowData.contact_name : 'N/A',
+      editComponent: props => { return(
+                    props.rowData?.diff_ship_to ?
+                    <Select
+                        id={'ship_to_contact_select'}
+                        value={props && props.value ? props.value : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={(event) => props.onChange(event.target.value)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {shipToContactOptionsWOI && shipToContactOptionsWOI.map((item)=>{
+                            return (
+                                <option value={item.ec_record_id}>
+                                    {item.ec_name}
+                                </option>
+                            )
+                        })}
+                    </Select>
+                    : <span>{props.rowData?.contact_name}</span> 
+      )}},
+      { field: 'ship_to_address', title: 'Address', minWidth: 25, align: 'center', editable: 'onUpdate',
+      render: rowData => rowData.address_name ? rowData.address_name : 'N/A',
+      editComponent: props => { return(
+                    props.rowData?.diff_ship_to ?
+                    <Select
+                        id={'ship_to_address_select'}
+                        value={props && props.value ? props.value : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={(event) => props.onChange(event.target.value)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {shipToAddressOptionsWOI && shipToAddressOptionsWOI.map((item)=>{
+                            return (
+                                <option value={item.ea_record_id}>
+                                    {item.ea_name}
+                                </option>
+                            )
+                        })}
+                    </Select>
+                    : <span>{props.rowData?.address_name}</span> 
+      )}},
+    // { field: 'address_name', title: 'Ship To', minWidth: 45, align: 'left',editable: 'never',
+    //     render: rowData => {
+    //       var tmp = "";
+    //       if(rowData && rowData.shipping_entity_id){
+    //         tmp = rowData.contact_name + ", " + rowData.entity_name + ", " + rowData.address + ", " +  rowData.city + ", " + rowData.state + ", " + rowData.zip;
+    //       }
+    //       return tmp;
+    //     }}
     /* actions column? */
   ];
 

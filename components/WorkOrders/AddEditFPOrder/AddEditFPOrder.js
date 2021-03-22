@@ -38,7 +38,7 @@ const AddEditFPOrder = function(props) {
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const {fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, workOrderItems, setWorkOrderItems,fpOrderModalOpen,
-        setFPOrderModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI, fpOrders, setFPOrders} = useContext(DetailContext)
+        setFPOrderModalOpen, vendorTypes, shipToContactOptionsWOI, setShipToContactOptionsWOI, fpOrders, setFPOrders} = useContext(DetailContext)
     
     const [scbdDrawerOpen, setScbdDrawerOpen] = useState(false);
     const [scbdMode, setScbdMode] = useState("add");
@@ -281,7 +281,7 @@ const AddEditFPOrder = function(props) {
                                 setFormObject={setActiveFPOrder}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                shipToOptionsWOI={shipToOptionsWOI}
+                                shipToContactOptionsWOI={shipToContactOptionsWOI}
                                 raineyUsers={raineyUsers} vendorTypes={vendorTypes} />
                             <hr/>
                             <ScoreboardList scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 

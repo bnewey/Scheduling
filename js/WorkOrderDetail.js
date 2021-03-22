@@ -160,6 +160,28 @@ async function getShipToWOIOptions(wo_id){
     }
 }
 
+async function getShipToAddressWOIOptions(wo_id){
+    const route = '/scheduling/workOrderDetail/getShipToAddressWOIOptions';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({wo_id})
+        });
+
+        if(!data.ok){
+            throw new Error("getShipToAddressWOIOptions returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function getPastWorkOrders(c_id){
     if(!c_id){
         throw new Error("Bad id for getPastWorkOrders");
@@ -445,6 +467,7 @@ module.exports = {
     addWOIToPackingSlip,
     getVendorTypes,
     getShipToWOIOptions,
+    getShipToAddressWOIOptions,
     getPastWorkOrders,
     getFPOrders,
     getFPOrderById,

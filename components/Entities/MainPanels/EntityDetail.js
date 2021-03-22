@@ -29,7 +29,7 @@ const EntityDetail = function(props) {
   const classes = useStyles();
 
   const {vendorTypes, setVendorTypes,
-    shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
+    shipToContactOptionsWOI, setShipToContactOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
     fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders} = useContext(DetailContext);
   
 

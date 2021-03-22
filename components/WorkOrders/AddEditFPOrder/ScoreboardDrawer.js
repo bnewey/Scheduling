@@ -30,7 +30,7 @@ const ScoreboardDrawer = function(props) {
     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const {fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, workOrderItems, setWorkOrderItems,fpOrderModalOpen,
-        setFPOrderModalOpen, vendorTypes, shipToOptionsWOI, setShipToOptionsWOI} = useContext(DetailContext)
+        setFPOrderModalOpen, vendorTypes, shipToContactOptionsWOI, setShipToContactOptionsWOI} = useContext(DetailContext)
 
     const classes = useStyles();
     const saveRef = React.createRef();

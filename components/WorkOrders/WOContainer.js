@@ -51,7 +51,7 @@ const WOContainer = function(props) {
                   {value: 'search', displayName: 'Search', closeToView: 'allWorkOrders',
                       onClose: ()=> {setWorkOrders(null)}} ,
                   {value: "woDetail", displayName: 'W.O. Detail', closeToView: 'allWorkOrders', 
-                      onClose: ()=>{setWorkOrders(null);setActiveWorkOrder(null); setDetailWOid(null); setWorkOrderItems(null); setShipToOptionsWOI(null);
+                      onClose: ()=>{setWorkOrders(null);setActiveWorkOrder(null); setDetailWOid(null); setWorkOrderItems(null); setShipToContactOptionsWOI(null);
                                 setActiveWOI(null); setEditWOIModalOpen(false); setActiveFPOrder(null); setFPOrderModalOpen(false);}}, 
                   { value: "woItems", displayName: 'Itemization', closeToView: 'allWorkOrders',
                         parent: 'woDetail'},
@@ -83,7 +83,8 @@ const WOContainer = function(props) {
       const [resetWOIForm, setResetWOIForm] = React.useState(null);
       const [editWOIModalOpen, setEditWOIModalOpen] = React.useState(false);
       const [vendorTypes, setVendorTypes] = React.useState(null);
-      const [shipToOptionsWOI,setShipToOptionsWOI] = React.useState(null);
+      const [shipToContactOptionsWOI,setShipToContactOptionsWOI] = React.useState(null);
+      const [shipToAddressOptionsWOI,setShipToAddressOptionsWOI] = React.useState(null);
       //
       //Detail - FairPlay Order
       const [fpOrders, setFPOrders] = React.useState(null);
@@ -172,8 +173,8 @@ const WOContainer = function(props) {
 
   //Work Order for detail views
   useEffect(()=>{
-    console.log("detail ", detailWOid)
-    console.log("activeWorkOrder ", activeWorkOrder)
+    // console.log("detail ", detailWOid)
+    // console.log("activeWorkOrder ", activeWorkOrder)
     if(detailWOid && activeWorkOrder == null){
       Work_Orders.getWorkOrderById(detailWOid)
       .then((data)=>{
@@ -275,19 +276,34 @@ const WOContainer = function(props) {
   },[vendorTypes])
 
   useEffect(()=>{
-    if(shipToOptionsWOI == null && activeWorkOrder && activeWorkOrder.wo_record_id){
+    if(shipToContactOptionsWOI == null && activeWorkOrder && activeWorkOrder.wo_record_id){
       WorkOrderDetail.getShipToWOIOptions(activeWorkOrder.wo_record_id)
       .then((data)=>{
         if(data){
-          setShipToOptionsWOI(data);
+          setShipToContactOptionsWOI(data);
         }
       })
       .catch((error)=>{
-        cogoToast.error("Failed to get shipToOptionsWOI ");
-        console.error("Failed to get shipToOptionsWOI", error);
+        cogoToast.error("Failed to get shipToContactOptionsWOI ");
+        console.error("Failed to get shipToContactOptionsWOI", error);
       })
     }
-  },[shipToOptionsWOI, activeWorkOrder])
+  },[shipToContactOptionsWOI, activeWorkOrder])
+
+  useEffect(()=>{
+    if(shipToAddressOptionsWOI == null && activeWorkOrder && activeWorkOrder.wo_record_id){
+      WorkOrderDetail.getShipToAddressWOIOptions(activeWorkOrder.wo_record_id)
+      .then((data)=>{
+        if(data){
+          setShipToAddressOptionsWOI(data);
+        }
+      })
+      .catch((error)=>{
+        cogoToast.error("Failed to get shipToContactOptionsWOI ");
+        console.error("Failed to get shipToContactOptionsWOI", error);
+      })
+    }
+  },[shipToAddressOptionsWOI, activeWorkOrder])
     
 
   const getMainComponent = () =>{
@@ -364,7 +380,7 @@ const WOContainer = function(props) {
           editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState} } >
       <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, 
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
-                     shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
+                     shipToContactOptionsWOI, setShipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToAddressOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
                      fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders}} >
         <div className={classes.containerDiv}>
         

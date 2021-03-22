@@ -232,9 +232,8 @@ const TaskListMain = (props) => {
                     {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
                     {text: "Description", field: "description", width: '18%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
-                    /*{text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},*/
-                    /*{text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},*/
-                    {text: "Status", field: "woi_status_check", width: '17%', maxWidth: 150, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+                    {text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+                    {text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
                     {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
                     {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
                 ];
@@ -245,10 +244,11 @@ const TaskListMain = (props) => {
                     {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
                     {text: "WO Created", field: "date_entered", width: '8%', style: 'smallListItemText', type: 'date'},
                     {text: "Desired Date", field: "date_desired", width: '8%', style: 'smallListItemText', type: 'date'},
-                    {text: "Name", field: "t_name", width: '26%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                    {text: "Name", field: "t_name", width: '22%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
                     {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
                     {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
-                    {text: "Description", field: "description", width: '19%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                    {text: "Description", field: "description", width: '15%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                    {text: "Job Reference", field: "job_reference", width: '8%', maxWidth: 120, style: 'smallListItemText', type: 'text'},
                     {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
                     {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
                 ];

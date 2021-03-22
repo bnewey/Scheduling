@@ -30,7 +30,7 @@ const ScoreboardList = function(props) {
 
     const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, workOrderItems, 
         setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
-         shipToOptionsWOI, setShipToOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
+         shipToContactOptionsWOI, setShipToContactOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
          fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders} = useContext(DetailContext)
 
     
