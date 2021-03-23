@@ -11,6 +11,9 @@ import TableRow from '@material-ui/core/TableRow';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 
+import {debounce} from 'lodash';
+
+
 import DateFnsUtils from '@date-io/date-fns';
 import {
     DatePicker,
@@ -28,15 +31,17 @@ import Work_Orders from '../../../js/Work_Orders';
 import { ListContext } from '../SignContainer';
 import Router from 'next/router'
 import moment from 'moment';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 
 const SignSchedulerList = function(props) {
   const {user, keyState, setKeyState, columnState, setColumnState} = props;
 
-  const { signs, setSigns, setSignRefetch, currentView, setCurrentView, views , columns,setColumns   } = useContext(ListContext);
+  const { signs, setSigns, setSignRefetch, currentView, setCurrentView, views , columns,setColumns, signSearchRefetch, setSignSearchRefetch   } = useContext(ListContext);
   const classes = useStyles();
 
-
+  const [pendingDateChangesSaved,setPendingDateChangesSaved] = React.useState(true);
+  const textRef = React.useRef([]);
 
   const handleChangeSignSchedulerView = (view)=>{
     if(!view){
@@ -73,7 +78,7 @@ const SignSchedulerList = function(props) {
                           checkedIcon={<CheckBoxIcon fontSize="small" />}
                           name="check_sign_popped_and_boxed"
                           checked={value != null}
-                          onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
+                          onChange={(event)=> handleDebounceUpdateDate(event, row, "sign_built" )}
                       /> )}},
                 { id: 'sign_popped_and_boxed', label: 'Finished', minWidth: 50, align: 'center',  type: 'date',pdfType: 'checkbox',  hideRepeats: false,
                   format: (value,row)=> {return(
@@ -83,7 +88,7 @@ const SignSchedulerList = function(props) {
                           checkedIcon={<CheckBoxIcon fontSize="small" />}
                           name="check_sign_popped_and_boxed"
                           checked={value != null}
-                          onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
+                          onChange={(event)=> handleDebounceUpdateDate(event, row, "sign_popped_and_boxed")}
                       />)}},
                 { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
               ];
@@ -117,7 +122,7 @@ const SignSchedulerList = function(props) {
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
                             name="check_sign_popped_and_boxed"
                             checked={value != null}
-                            onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
+                            onChange={(event)=> handleDebounceUpdateDate(event, row, "sign_built")}
                         />)}},
                   { id: 'copy_received', label: 'Copy Rcvd', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,dontShowInPdf: true,
                     format: (value,row)=> {return(
@@ -127,7 +132,7 @@ const SignSchedulerList = function(props) {
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
                             name="check_copy_receieved"
                             checked={value != null}
-                            onChange={(event)=> handleUpdateDate(event, row, "copy_received")}
+                            onChange={(event)=> handleDebounceUpdateDate(event, row, "copy_received")}
                         />)}},
                   { id: 'sent_for_approval', label: 'Sent For Appv', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,dontShowInPdf: true,
                     format: (value,row)=> {return(
@@ -137,7 +142,7 @@ const SignSchedulerList = function(props) {
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
                             name="check_sent_for_approval"
                             checked={value != null}
-                            onChange={(event)=> handleUpdateDate(event, row, "sent_for_approval")}
+                            onChange={(event)=> handleDebounceUpdateDate(event, row, "sent_for_approval")}
                         />)}},
                   { id: 'final_copy_approved', label: 'Final Copy Aprv', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
@@ -147,7 +152,7 @@ const SignSchedulerList = function(props) {
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
                             name="check_final_copy_approved"
                             checked={value != null}
-                            onChange={(event)=> handleUpdateDate(event, row, "final_copy_approved")}
+                            onChange={(event)=> handleDebounceUpdateDate(event, row, "final_copy_approved")}
                         />)}},
                   { id: 'artwork_completed', label: 'Art Complete', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
@@ -157,7 +162,7 @@ const SignSchedulerList = function(props) {
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
                             name="check_artwork_completed"
                             checked={value != null}
-                            onChange={(event)=> handleUpdateDate(event, row, "artwork_completed")}
+                            onChange={(event)=> handleDebounceUpdateDate(event, row, "artwork_completed")}
                         />)}},
                   { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
@@ -167,7 +172,7 @@ const SignSchedulerList = function(props) {
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
                             name="check_sign_popped_and_boxed"
                             checked={value != null}
-                            onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
+                            onChange={(event)=> handleDebounceUpdateDate(event, row, "sign_popped_and_boxed")}
                         />)}},
                   { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
                 ];
@@ -203,7 +208,7 @@ const SignSchedulerList = function(props) {
                         checkedIcon={<CheckBoxIcon fontSize="small" />}
                         name="check_sign_popped_and_boxed"
                         checked={value != null}
-                        onChange={(event)=> handleUpdateDate(event, row, "sign_built")}
+                        onChange={(event)=> handleDebounceUpdateDate(event, row, "sign_built")}
                     />)}},
               { id: 'sign_popped_and_boxed',label: 'Finished', minWidth: 50, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                 format: (value,row)=> {return(
@@ -213,7 +218,7 @@ const SignSchedulerList = function(props) {
                         checkedIcon={<CheckBoxIcon fontSize="small" />}
                         name="check_sign_popped_and_boxed"
                         checked={value != null}
-                        onChange={(event)=> handleUpdateDate(event, row, "sign_popped_and_boxed")}
+                        onChange={(event)=> handleDebounceUpdateDate(event, row, "sign_popped_and_boxed")}
                     />)}},
               { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
             ];
@@ -250,24 +255,6 @@ const SignSchedulerList = function(props) {
   },[columnState])
 
 
-  //Set active worker to a tmp value for add otherwise activeworker will be set to edit
-  // useEffect(()=>{
-  //   if(fpOrderModalOpen && fpOrderModalMode == "add"){
-  //       setActiveFPOrder({order_date: moment(new Date()).format('MM/DD/YYYY') });
-  //   }
-   
-  // },[fpOrderModalMode, fpOrderModalOpen])
-
-  // const handleShowDetailView = (wo_id) =>{
-  //   if(!wo_id){
-  //     cogoToast.error("Failed to get work order");
-  //     console.error("Bad id");
-  //     return;
-  //   }
-  //   //setCurrentView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
-  //   //setDetailWOid(wo_id);
-
-  // }
 
   const handleGoToWorkOrderId = (wo_id, row) =>{
     console.log("woi", wo_id);
@@ -310,7 +297,35 @@ const SignSchedulerList = function(props) {
 
   }
 
-  const handleUpdateDate = (event, row, field) =>{
+
+
+  const handleUpdateDate = React.useCallback(
+
+    debounce((updateRows) => Work_Orders.updateMultipleWorkOrderItemDates(updateRows)
+    .then((data)=>{
+      cogoToast.success("Updated ");
+
+      if(currentView.value === "signScheduler"){
+        setSignRefetch(true);
+      }
+      if(currentView.value === "searchSigns"){
+        setSignSearchRefetch(true);
+      }
+      textRef.current = [];
+      setPendingDateChangesSaved(true);
+      
+    })
+    .catch((error)=>{
+      console.error("failed to update ", error)
+      cogoToast.error("Failed to update ");
+      textRef.current =[];
+    }), 4000)
+    
+    
+  ,[])
+
+
+  const handleDebounceUpdateDate = (event, row, field,text) =>{
     if(!row || !field){
       console.error("Bad row/field in handleUpdateDate")
       return;
@@ -326,20 +341,42 @@ const SignSchedulerList = function(props) {
     var updateRow = {...row};
     updateRow[field] = updateValue;
 
-    Work_Orders.updateWorkOrderItem(updateRow)
-    .then((data)=>{
-      cogoToast.success("Updated "+ field);
-      setSignRefetch(true);
-    })
-    .catch((error)=>{
-      console.error("failed to update "+ field, error)
-      cogoToast.error("Failed to update "+ field);
-    })
+    if(!textRef?.current){
+      console.error("Bad ref for textRef");
+      return;
+    }
+    
+    var updatedInArray = false;
+    //updates the array if its already in our textRef
+    var updateArray =  [...textRef.current]?.map((item,i)=> {
+      if(item.record_id === updateRow.record_id){
+        let tmp = item;
+        tmp[field] = updateValue;
+        updatedInArray = true;
+        return tmp;
+      }else{
+        return item;
+      }
+    }) ;
+
+    if(!updatedInArray){
+      //If not updated in array above, then we add the item to array
+      updateArray = updateArray.length ? [...textRef.current, updateRow] : [updateRow];
+    }
+    
+    //adds values to this ref so that it will update multiple if multiple are clicked and debounced
+    textRef.current = updateArray;
+    setPendingDateChangesSaved(false);
+    handleUpdateDate(updateArray);
+
   }
-  
+
 
   return ( 
     <div className={classes.root}>
+        <div className={classes.progressBar}>
+           { !pendingDateChangesSaved && <LinearProgress />}
+        </div>
           <TableContainer className={classes.container}>
             <Table stickyHeader  size="small" aria-label="sticky table">
               <TableHead>
@@ -446,5 +483,14 @@ const useStyles = makeStyles(theme => ({
   checkbox:{
     padding: 0,
     color: '#6a6a6a !important',
-  }
+  },
+  progressBar: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    },
+    position: 'fixed',
+    top: 0,
+    left: 0,
+  },
 }));

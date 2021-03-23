@@ -205,6 +205,8 @@ async function updateWorkOrderItemArrivalDate(woi_id, date){
 
 }
 
+
+
 async function updateWorkOrderItemVendor(woi_id, vendor){
     const route = '/scheduling/workOrders/updateWorkOrderItemVendor';
     try{
@@ -301,6 +303,26 @@ async function updateWorkOrderItem(woi){
 
 }
 
+
+async function updateMultipleWorkOrderItemDates(wo_ids){
+    const route = '/scheduling/workOrders/updateMultipleWorkOrderItemDates';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({wo_ids})
+            });
+        var list = response.ok;
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
 async function addWorkOrderItem(woi){
     const route = '/scheduling/workOrders/addWorkOrderItem';
     try{
@@ -391,6 +413,7 @@ module.exports = {
     deleteWorkOrder,
     addWorkOrder,
     updateWorkOrderItem,
+    updateMultipleWorkOrderItemDates,
     addWorkOrderItem,
     addMultipleWorkOrderItems,
     deleteWorkOrderItem,

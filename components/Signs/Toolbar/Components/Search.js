@@ -14,6 +14,7 @@ import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
+
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
@@ -26,7 +27,7 @@ const Search = function(props) {
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { signs, setSigns, currentView, setCurrentView, views} = useContext(ListContext);
+  const { signs, setSigns, currentView, setCurrentView, views, signSearchRefetch, setSignSearchRefetch} = useContext(ListContext);
   const searchOpen = currentView && currentView.value == "searchSigns";
 
   const searchTableObject= [
@@ -56,6 +57,24 @@ const Search = function(props) {
       }
     }
   },[searchTable])
+
+  useEffect(()=>{
+    if(signSearchRefetch){
+      setSignSearchRefetch(false);
+      
+
+      handleSearchClick()
+      .then((data)=>{
+        setSigns(data);
+      })
+      .catch((error)=>{
+        console.error("Failed to research")
+        cogoToast.error("Internal Server Error");
+      })
+    }
+
+
+  },[signSearchRefetch])
 
   //Save and/or Fetch searchTable to local storage
   useEffect(() => {

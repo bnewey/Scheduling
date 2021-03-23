@@ -164,13 +164,15 @@ router.post('/searchAllWorkOrders', async (req,res) => {
         
     }    
 
-    const sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
-        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state ' +
-        ' FROM work_orders wo ' +
-        ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-        ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id  ' +
-        ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' + 
+    const sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
+    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, ec.name AS cc_name, sa.city AS acc_city, sa.state AS acc_state, sc.city AS customer_city, sc.state AS customer_state ' +
+    ' FROM work_orders wo ' +
+    ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
+    ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +  
+    ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
+    ' LEFT JOIN entities_contacts ec ON wo.customer_contact_id = ec.record_id ' +
+    ' LEFT JOIN entities_addresses sc ON wo.customer_address_id = sc.record_id ' +  
         ' WHERE ?? like ? ' +
         ' ORDER BY wo.record_id DESC ';
 
@@ -203,13 +205,15 @@ router.post('/superSearchAllWorkOrders', async (req,res) => {
         
     }    
 
-    var sql = 'SELECT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-        ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
-        ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, sa.city AS acc_city, sa.state AS acc_state ' +
-        ' FROM work_orders wo ' +
-        ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
-        ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id  ' +
-        ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' + 
+    var sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS wo_type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id, job_reference, ' +
+    ' wo.customer_id AS wo_customer_id, a.name AS a_name, c.name AS c_name, ec.name AS cc_name, sa.city AS acc_city, sa.state AS acc_state, sc.city AS customer_city, sc.state AS customer_state ' +
+    ' FROM work_orders wo ' +
+    ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
+    ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +  
+    ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
+    ' LEFT JOIN entities_contacts ec ON wo.customer_contact_id = ec.record_id ' +
+    ' LEFT JOIN entities_addresses sc ON wo.customer_address_id = sc.record_id ' + 
         ' WHERE CONCAT(';
     tables.forEach((table,i)=> {
 
@@ -522,6 +526,52 @@ router.post('/updateWorkOrderItem', async (req,res) => {
         logger.error("Failed to updateWorkOrderItem: " + error);
         res.sendStatus(400);
     }
+});
+
+
+router.post('/updateMultipleWorkOrderItemDates', async (req,res) => {
+    var wo_ids;
+    if(req.body){
+        wo_ids = req.body.wo_ids;
+    }
+    
+    const sql = ' UPDATE work_orders_items SET item_type = IFNULL(? ,DEFAULT(item_type)), quantity = IFNULL(? ,DEFAULT(quantity)), ' + 
+    ' part_number = ?, size = ?, description = ?, price = IFNULL(? ,DEFAULT(price)), receive_date =?, ' +
+    ' receive_by =?, scoreboard_or_sign= IFNULL(? ,DEFAULT(scoreboard_or_sign)), model=?,color=? ,' +
+    ' trim=?,scoreboard_arrival_date=?,scoreboard_arrival_status=?, mount=?, ' + 
+    ' trim_size=?, trim_corners=?, date_offset= IFNULL(? ,DEFAULT(date_offset)), sign_due_date=?, vendor=?, sign_built=?, sign_popped_and_boxed=?, ' +
+    ' copy_received=?,sent_for_approval=?,final_copy_approved=?,artwork_completed=? ' +
+    '  WHERE record_id = ? ';
+
+ 
+    async.forEachOf(wo_ids, async (woi, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [ woi.item_type || null, woi.quantity || null, woi.part_number || null, woi.size || null,
+                woi.description || null,woi.price || (0).toFixed(2), Util.convertISODateToMySqlDate( woi.receive_date) , woi.receive_by || null,
+                woi.scoreboard_or_sign || null,
+                woi.model || null, woi.color || null, woi.trim  || null,
+                Util.convertISODateToMySqlDate(woi.scoreboard_arrival_date), woi.scoreboard_arrival_status || null,
+                 woi.mount || null, woi.trim_size || null, woi.trim_corners || null,
+                woi.date_offset || 0, Util.convertISODateToMySqlDate(woi.sign_due_date), woi.vendor || null, Util.convertISODateToMySqlDate(woi.sign_built),
+                Util.convertISODateToMySqlDate(woi.sign_popped_and_boxed),Util.convertISODateToMySqlDate(woi.copy_received),
+                Util.convertISODateToMySqlDate(woi.sent_for_approval), Util.convertISODateToMySqlDate(woi.final_copy_approved),
+                Util.convertISODateToMySqlDate(woi.artwork_completed), woi.record_id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("WorkOrder (updateMultipleWorkOrderItemDates): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Updated WorkOrderItems " + wo_ids);
+            res.sendStatus(200);
+        }
+    })
 });
 
 router.post('/addWorkOrderItem', async (req,res) => {

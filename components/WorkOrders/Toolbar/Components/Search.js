@@ -124,13 +124,13 @@ const Search = function(props) {
         Work_Orders.superSearchAllWorkOrders(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
           .then((data)=>{
             if(data){
-              //console.log(data);
+              
               //Update search history
               if(searchValue != ""){
                 var updateArray = searchHistory ?  [...searchHistory] : [];
 
                 var a = searchHistory[searchHistory.length -1];
-               console.log("Asuper",a);
+               
                 if(searchHistory.length == 0 || (searchHistory.length >0 && (a.searchValue != searchValue || a.searchTable != searchTable))){
 
                   if(updateArray.length > 15){

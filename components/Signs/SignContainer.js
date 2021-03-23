@@ -32,6 +32,7 @@ const SignContainer = function(props) {
 
   const [signs, setSigns] = useState(null);
   const [signRefetch, setSignRefetch] = useState(false);
+  const [signSearchRefetch, setSignSearchRefetch] = useState(false);
 
   const [signsSaved, setSignsSaved] = useState([]);
   const [filters, setFilters] = useState(null);
@@ -367,7 +368,7 @@ const SignContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{signs, setSigns, setSignRefetch,currentView, setCurrentView, views, signsSaved, setSignsSaved,filters, setFilters,
       filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState, keyState, setKeyState, columnState, setColumnState, 
-      columns, setColumns} } >
+      columns, setColumns, signSearchRefetch, setSignSearchRefetch} } >
       
         <div className={classes.containerDiv}>
         
