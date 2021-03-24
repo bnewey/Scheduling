@@ -15,19 +15,14 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
 import Util from '../../../js/Util.js';
 
 import Settings from  '../../../js/Settings';
-import { ListContext } from '../POContainer';
 
 import WorkOrderDetail from  '../../../js/WorkOrderDetail';
 
 
 
 const ScoreboardList = function(props) {
-    const {scbdDrawerOpen, setScbdDrawerOpen,activeFPOrderItem, setActiveFPOrderItem, fpOrderItems, setFPOrderItems, scbdMode, setScbdMode} = props;
-
-    const { purchaseOrders, setPurchaseOrders, fpOrders, setFPOrders, activeFPOrder, setActiveFPOrder,
-        currentView, setCurrentView, views, vendorTypes, setVendorTypes,
-        fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, fpOrderModalMode, setFPOrderModalMode, arrivedState, setArrivedState} = useContext(ListContext);
-
+    const {scbdDrawerOpen, setScbdDrawerOpen,activeFPOrderItem, setActiveFPOrderItem, fpOrderItems, setFPOrderItems, scbdMode, setScbdMode,
+        setResetFPDrawerForm} = props;
     
      
     const classes = useStyles();
@@ -42,6 +37,7 @@ const ScoreboardList = function(props) {
             return;
         }
 
+        setResetFPDrawerForm(true);
         setScbdDrawerOpen(true);
         setScbdMode("edit");
         setActiveFPOrderItem(scbd);

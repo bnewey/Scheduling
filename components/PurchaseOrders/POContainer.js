@@ -54,6 +54,7 @@ const POContainer = function(props) {
 
   //Detail - FairPlay Order
   // const [fpOrders, setFPOrders] = React.useState(null);
+  const [resetFPForm, setResetFPForm] = React.useState(null);
   const [fpOrders, setFPOrders] = React.useState(null);
   const [activeFPOrder, setActiveFPOrder] =React.useState(null);
   const [fpOrderModalMode,setFPOrderModalMode] = React.useState("add");
@@ -227,7 +228,8 @@ const POContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{purchaseOrders, setPurchaseOrders, fpOrders, setFPOrders, activeFPOrder, setActiveFPOrder,
           currentView, setCurrentView, views, vendorTypes, setVendorTypes,
-          fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, fpOrderModalMode, setFPOrderModalMode, arrivedState, setArrivedState} } >
+          fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, fpOrderModalMode, setFPOrderModalMode, arrivedState, setArrivedState,
+          resetFPForm, setResetFPForm} } >
       
         <div className={classes.containerDiv}>
         

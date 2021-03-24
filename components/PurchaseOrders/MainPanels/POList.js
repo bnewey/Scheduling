@@ -30,9 +30,12 @@ import moment from 'moment';
 const POrdersList = function(props) {
   const {user} = props;
 
-  const { purchaseOrders, setPurchaseOrders, rowDateRange, setDateRowRange, activeFPOrder, setActiveFPOrder,
-    currentView, setCurrentView, views, detailWOid,setDetailWOid, fpOrderModalMode, setFPOrderModalMode,fpOrderModalOpen, setFPOrderModalOpen,
+  const { purchaseOrders, setPurchaseOrders, rowDateRange, setDateRowRange, activeFPOrder, setActiveFPOrder,fpOrders,setFPOrders,
+    currentView, setCurrentView, views, detailWOid,setDetailWOid, fpOrderModalMode, setFPOrderModalMode,fpOrderModalOpen, setFPOrderModalOpen,vendorTypes,
+    setVendorTypes,raineyUsers, setRaineyUsers, arrivedState, setArrivedState, resetFPForm, setResetFPForm,
     } = useContext(ListContext);
+
+    
   const classes = useStyles();
 
   const [page, setPage] = React.useState(0);
@@ -238,7 +241,9 @@ const POrdersList = function(props) {
     <div className={classes.root}>
       {fpOrderModalOpen && activeFPOrder ? <>
 
-        <AddEditFPOrder  />
+        <AddEditFPOrder  fpOrderModalMode={fpOrderModalMode} setFPOrderModalMode={setFPOrderModalMode} activeFPOrder={activeFPOrder} setActiveFPOrder={setActiveFPOrder} fpOrders={fpOrders} setFPOrders={setFPOrders}
+        purchaseOrders={purchaseOrders} setPurchaseOrders={setPurchaseOrders} currentView={currentView} setCurrentView={setCurrentView} views={views}  vendorTypes={vendorTypes} setVendorTypes={setVendorTypes}
+        fpOrderModalOpen={fpOrderModalOpen} setFPOrderModalOpen={setFPOrderModalOpen} raineyUsers={raineyUsers} setRaineyUsers={setRaineyUsers} arrivedState={arrivedState} setArrivedState={setArrivedState} resetFPForm={resetFPForm} setResetFPForm={setResetFPForm} />
         </> : <></>}
         <TableContainer className={classes.container}>
         <Table stickyHeader  size="small" aria-label="sticky table">

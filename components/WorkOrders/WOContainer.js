@@ -90,6 +90,7 @@ const WOContainer = function(props) {
       const [fpOrders, setFPOrders] = React.useState(null);
       const [fpOrderModalMode,setFPOrderModalMode] = React.useState("add");
       const [activeFPOrder, setActiveFPOrder] =React.useState(null);
+      const [resetFPForm, setResetFPForm] = React.useState(null);
       const [fpOrderModalOpen, setFPOrderModalOpen] = React.useState(false);
   //
   
@@ -381,7 +382,7 @@ const WOContainer = function(props) {
       <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, 
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
                      shipToContactOptionsWOI, setShipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToAddressOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
-                     fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders}} >
+                     fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders, resetFPForm, setResetFPForm}} >
         <div className={classes.containerDiv}>
         
         <Grid container>

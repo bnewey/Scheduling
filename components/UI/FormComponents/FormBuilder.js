@@ -290,13 +290,42 @@ const FormBuilder = forwardRef((props, ref) => {
                 //Validate Required Fields
                 var empty_required_fields = fields.
                         filter((v,i)=> v.required && !(v.hidden && v.hidden(formObject) )).
-                        filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined);;
-                if(empty_required_fields.length > 0){
-                    cogoToast.error("Required fields are blank");
-                    setErrorFields(empty_required_fields);
+                        filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined);
+                
+
+                //Validate Specific Types
+                var error_fields = fields.
+                filter((v,i)=> !(v.hidden && v.hidden(formObject) )).
+                filter((item)=> { 
+                    switch(item.type){
+                        case 'number':
+                            if(updateItem[item.field] == null || updateItem[item.field] == undefined || isNaN(updateItem[item.field])){
+                                return true;
+                            }
+                            break;
+                        default:
+                            return false;
+                            break;
+                    }
+                    
+                });
+
+                let validation_errors = [...empty_required_fields,...error_fields];
+                if(empty_required_fields.length){
+                    cogoToast.error("Required Fields Missing");
                     console.error("Required fields are blank", empty_required_fields)
-                    return;
                 }
+                if(error_fields.length){
+                    cogoToast.error("Validation Errors");
+                    console.error("Validation Error:", error_fields)
+                }
+                if(validation_errors.length > 0){      
+                    setErrorFields(validation_errors);
+                    return;
+                }else{
+                    setErrorFields([])
+                }
+
 
                 console.log("updateItem", updateItem);
                 //Run given handlSave
@@ -382,6 +411,7 @@ const GetInputByType = function(props){
                          variant="outlined"
                          /*multiline={field.multiline}*/
                          name={field.field}
+                         disabled={field.disabled}
                          inputRef={ref_object[field.field]}
                          inputProps={{className: classes.inputStyle}} 
                          classes={{root: classes.inputRoot}}
@@ -396,6 +426,7 @@ const GetInputByType = function(props){
                          variant="outlined"
                          /*multiline={field.multiline}*/
                          name={field.field}
+                         disabled={field.disabled}
                          inputRef={ref_object[field.field]}
                          inputProps={{className: classes.inputStyle}} 
                          classes={{root: classes.inputRoot}}

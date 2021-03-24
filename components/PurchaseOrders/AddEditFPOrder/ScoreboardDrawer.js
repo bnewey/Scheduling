@@ -17,23 +17,40 @@ import Util from '../../../js/Util.js';
 import WorkOrderDetail from  '../../../js/WorkOrderDetail';
 
 import Settings from  '../../../js/Settings';
-import { ListContext } from '../POContainer';
 import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 
 const ScoreboardDrawer = function(props) {
     const {user, scbdDrawerOpen, setScbdDrawerOpen, fpScbdFields, activeFPOrderItem, setActiveFPOrderItem,
-        fpOrderItems, setFPOrderItems, scbdMode, setScbdMode} = props;
+        fpOrderItems, setFPOrderItems, scbdMode, setScbdMode, resetFPDrawerForm, setResetFPDrawerForm,activeFPOrder,  fpOrderModalMode,} = props;
 
-    const { purchaseOrders, setPurchaseOrders, fpOrders, setFPOrders, activeFPOrder, setActiveFPOrder,
-        currentView, setCurrentView, views, vendorTypes, setVendorTypes,
-        fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, fpOrderModalMode, setFPOrderModalMode, arrivedState, setArrivedState} = useContext(ListContext);
 
 
     const classes = useStyles();
     const saveRef = React.createRef();
     const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
 
+    useEffect(()=>{
+
+        if( resetFPDrawerForm && saveRef?.current ){
+            //resets the form when you change something by state
+            saveRef.current.handleResetFormToDefault()
+            setResetFPDrawerForm(false);
+        }
+    },[resetFPDrawerForm, saveRef])
+
+    //Set active worker to a tmp value for add otherwise activeworker will be set to edit
+    useEffect(()=>{
+        if(scbdDrawerOpen && scbdMode == "add"){
+            setResetFPDrawerForm(true);
+            
+            let a = fpScbdFields.filter((item)=> item.defaultValue ? true : false).reduce((map, obj)=> {
+                 map[obj.field] = obj.defaultValue;
+                 return map;
+            }, {});
+            setActiveFPOrderItem( a);
+        }
+    },[scbdMode, scbdDrawerOpen])
 
     useEffect(()=>{
         if(scbdDrawerOpen == false){
@@ -66,7 +83,7 @@ const ScoreboardDrawer = function(props) {
                             //refetch
                             setFPOrderItems(null);
                             handleCloseScbdDrawer();
-                            resolve(data);
+                            resolve(data)
                         }
                     })
                     .catch((error)=>{
@@ -106,18 +123,10 @@ const ScoreboardDrawer = function(props) {
                 
             }
             if(scbdMode == "add"){
-
+                
+                
                 if(fpOrderModalMode =="edit"){
                     updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
-
-                    item["item_type"] = 3; //billing item
-                    item["scoreboard_or_sign"] = 1; //scbd
-                    item["scoreboard_arrival_date"] = item.arrival_date;
-                    item["vendor"] = 1; //fairplay
-                    item["user_entered"] = updateItem.user_entered;
-                    item["date_entered"] = updateItem.date_entered;
-                    item["quantity"] = item.model_quantity;
-                    item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
                     //record_id exists so we can add item immediately
                     WorkOrderDetail.addNewFPOrderItem(updateFPOItem)
                     .then((data)=>{
@@ -131,7 +140,7 @@ const ScoreboardDrawer = function(props) {
                     .catch((error)=>{
                         cogoToast.error("Failed to add item");
                         console.error("Failed to add item", error)
-                        reject(error)
+                        reject(error);
                     })
 
                 }
@@ -148,6 +157,7 @@ const ScoreboardDrawer = function(props) {
                     setFPOrderItems(items);
                     handleCloseScbdDrawer();
                     resolve()
+
                 }
                 
             }
@@ -227,7 +237,7 @@ const ScoreboardDrawer = function(props) {
                         setFormObject={setActiveFPOrderItem}
                         handleClose={handleCloseScbdDrawer} 
                         handleSave={handleSave}
-                        vendorTypes={vendorTypes} />
+                         />
                 </>
             </div>
             <div className={classes.buttonDiv}>

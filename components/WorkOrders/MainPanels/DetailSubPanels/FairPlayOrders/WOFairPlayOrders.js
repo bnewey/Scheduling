@@ -65,7 +65,7 @@ import Util from  '../../../../../js/Util';
 import Pdf from  '../../../../../js/Pdf';
 import WorkOrderDetail from  '../../../../../js/WorkOrderDetail';
 import Work_Orders from  '../../../../../js/Work_Orders';
-import AddEditFPOrder from '../../../AddEditFPOrder/AddEditFPOrder'
+import AddEditFPOrder from '../../../../PurchaseOrders/AddEditFPOrder/AddEditFPOrder'
 
 import { ListContext } from '../../../WOContainer';
 import { DetailContext } from '../../../WOContainer';
@@ -78,8 +78,9 @@ const WOFairPlayOrders = function(props) {
     currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const { workOrderItems, setWorkOrderItems, vendorTypes, shipToContactOptionsWOI, setShipToContactOptionsWOI, fpOrderModalMode,
-      setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
+      setFPOrderModalMode, activeFPOrder, setActiveFPOrder,resetFPForm, setResetFPForm,
         fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders} = useContext(DetailContext)
+
 
     const classes = useStyles();
 
@@ -196,7 +197,10 @@ const WOFairPlayOrders = function(props) {
     <div className={classes.root}>
         {activeWorkOrder ?
         <div className={classes.container}> <>
-          <AddEditFPOrder  />
+          <AddEditFPOrder  activeWorkOrder={activeWorkOrder} raineyUsers={raineyUsers}
+        fpOrderModalMode={fpOrderModalMode} setFPOrderModalMode={setFPOrderModalMode} activeFPOrder={activeFPOrder} setActiveFPOrder={setActiveFPOrder} resetFPForm={resetFPForm}
+         setResetFPForm={setResetFPForm} workOrderItems={workOrderItems} setWorkOrderItems={setWorkOrderItems} fpOrderModalOpen={fpOrderModalOpen}
+        setFPOrderModalOpen={setFPOrderModalOpen} fpOrders={fpOrders} setFPOrders={setFPOrders}/>
           <Grid container>
                   <Grid item xs={12}>
                     <div className={classes.woiDiv}>

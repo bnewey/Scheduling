@@ -30,16 +30,17 @@ import ScoreboardList from './ScoreboardList';
 import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 const AddEditFPOrder = function(props) {
-    const {user} = props;
-
-    const { fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, fpOrders, setFPOrders,
+    const {user,  fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, fpOrders, setFPOrders,
         purchaseOrders, setPurchaseOrders, currentView, setCurrentView, views,  vendorTypes, setVendorTypes,
-        fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, arrivedState, setArrivedState} = useContext(ListContext);
+        fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, arrivedState, setArrivedState, resetFPForm, setResetFPForm, 
+        activeWorkOrder /* not actually here in Purcahse Orders but in WO */,} = props;
 
-    
+       
     const [scbdDrawerOpen, setScbdDrawerOpen] = useState(false);
     const [scbdMode, setScbdMode] = useState("add");
     const [activeFPOrderItem, setActiveFPOrderItem] = useState(null);
+
+    const [resetFPDrawerForm, setResetFPDrawerForm] = useState(false);
 
     const saveRef = React.createRef();
     const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
@@ -47,6 +48,29 @@ const AddEditFPOrder = function(props) {
     const [fpOrderItems, setFPOrderItems] = useState(null);
 
     const classes = useStyles();
+
+    useEffect(()=>{
+
+        if( resetFPForm && saveRef?.current ){
+            //resets the form when you change something by state
+            saveRef.current.handleResetFormToDefault()
+            setResetFPForm(false);
+        }
+    },[resetFPForm, saveRef])
+
+    //Set active worker to a tmp value for add otherwise activeworker will be set to edit
+    useEffect(()=>{
+        if(fpOrderModalOpen && fpOrderModalMode == "add"){
+            setResetFPForm(true);
+            
+            let a = fpOrderFields.filter((item)=> item.defaultValue ? true : false).reduce((map, obj)=> {
+                 map[obj.field] = obj.defaultValue;
+                 return map;
+            }, {});
+            setActiveFPOrder( a);
+        }
+    },[fpOrderModalMode, fpOrderModalOpen])
+
 
     useEffect(()=>{
         if(activeFPOrder?.record_id && fpOrderItems == null){
@@ -70,7 +94,10 @@ const AddEditFPOrder = function(props) {
     },[fpOrderModalOpen])
 
     const handleCloseModal = () => {
-        setPurchaseOrders(null);
+        if(setPurchaseOrders){
+            setPurchaseOrders(null);
+        }
+        
         setActiveFPOrder(null);
         setFPOrderModalOpen(false);
         setFPOrderItems(null);
@@ -81,14 +108,15 @@ const AddEditFPOrder = function(props) {
 
     const fpOrderFields = [
         //type: select must be hyphenated ex select-type
-        {field: 'work_order', label: 'Work Order', type: 'text', updateBy: 'ref', required: true,},
+        {field: 'work_order', label: 'Work Order', type: 'number', updateBy: 'ref', required: true, defaultValue: activeWorkOrder ? activeWorkOrder.wo_record_id : null,
+                disabled: activeWorkOrder ? true : false },
         {field: 'order_date', label: 'Order Date', type: 'date', updateBy: 'state', defaultValue: moment(new Date()).format('MM/DD/YYYY')},
         {field: 'user_entered', label: 'User Entered', type: 'select-users', updateBy: 'state', required: true},
         {field: 'ship_to', label: 'Ship To', type: 'text', updateBy: 'ref', multiline: true, required: true,
                 defaultValue: 'To be picked up by our freight truck for delivery to Rainey Electronics, Inc. in Little Rock, AR'},
         {field: 'bill_to', label: 'Bill To', type: 'text', updateBy: 'ref', multiline: true, required: true,
                 defaultValue: "Rainey Electronics, Inc. Attention: Bob Rainey 19023 Colonel Glenn Road Little Rock, AR 72210"},
-        {field: 'discount', label: 'Discount', type: 'number', updateBy: 'ref',defaultValue: 0 },
+        {field: 'discount', label: 'Discount', type: 'number', updateBy: 'ref',defaultValue: '0' },
         {field: 'sales_order_id', label: 'Sales Order #', type: 'text', updateBy: 'ref'},
         {field: 'special_instructions', label: 'Special Instructions', type: 'text', updateBy: 'ref', multiline: true},
     ];
@@ -109,7 +137,7 @@ const AddEditFPOrder = function(props) {
                 })
             }},
         
-        {field: 'model_quantity', label: 'Quantity*', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
+        {field: 'model_quantity', label: 'Quantity', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
         {field: 'color', label: 'Color', type: 'auto', updateBy: 'state',  ref: React.useRef(null),
             dataGetterFunc: async () =>{
                 return new Promise(async function (resolve, reject) {
@@ -125,7 +153,7 @@ const AddEditFPOrder = function(props) {
             }},
         {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref'},
         {field: 'controller', label: 'Controller', type: 'text', updateBy: 'ref'},
-        {field: 'controller_quantity', label: 'Quantity*', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
+        {field: 'controller_quantity', label: 'Quantity', type: 'number', updateBy: 'ref',required: true, defaultValue: 1},
         {field: 'ctrl_case', label: 'Case', type: 'text', updateBy: 'ref'},
         {field: 'horn', label: 'Horn', type: 'text', updateBy: 'ref'},
         {field: 'arrival_estimate', label: 'Arrival Estimate', type: 'date', updateBy: 'state'},
@@ -180,17 +208,17 @@ const AddEditFPOrder = function(props) {
                         if(fpOrderItems && Array.isArray(fpOrderItems)){
 
                             var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
-                            var woi_array =  fpOrderItems.map((item, i)=>{
-                                    item["item_type"] = 3; //billing item
-                                    item["scoreboard_or_sign"] = 1; //scbd
-                                    item["scoreboard_arrival_date"] = item.arrival_date;
-                                    item["vendor"] = 1; //fairplay
-                                    item["user_entered"] = updateItem.user_entered;
-                                    item["date_entered"] = updateItem.date_entered;
-                                    item["quantity"] = item.model_quantity;
-                                    item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
-                                return item;
-                            });
+                            // var woi_array =  fpOrderItems.map((item, i)=>{
+                            //         item["item_type"] = 3; //billing item
+                            //         item["scoreboard_or_sign"] = 1; //scbd
+                            //         item["scoreboard_arrival_date"] = item.arrival_date;
+                            //         item["vendor"] = 1; //fairplay
+                            //         item["user_entered"] = updateItem.user_entered;
+                            //         item["date_entered"] = updateItem.date_entered;
+                            //         item["quantity"] = item.model_quantity;
+                            //         item["description"] = `${item.model} ${item.color ? `(${item.color})` : ``}`;
+                            //     return item;
+                            // });
                             
 
                             // Promise.all([Work_Orders.addMultipleWorkOrderItems(updateItem.work_order, woi_array),
@@ -201,7 +229,9 @@ const AddEditFPOrder = function(props) {
                                     //refetch
                                     setFPOrders(null);
                                     setFPOrderItems(null);
-                                    setPurchaseOrders(null);
+                                    if(setPurchaseOrders){
+                                        setPurchaseOrders(null);
+                                    }
                                     cogoToast.success(`Work Order Item has been added!`, {hideAfter: 4});
                                     handleCloseModal();
                                     resolve(data);
@@ -212,14 +242,19 @@ const AddEditFPOrder = function(props) {
                                 console.error("Failed to add item", error)
                                 setFPOrders(null);
                                 setFPOrderItems(null);
-                                setPurchaseOrders(null);
+                                if(setPurchaseOrders){
+                                    setPurchaseOrders(null);
+                                }
                                 handleCloseModal();
                                 reject(error);
                             })
                         }else{
                             setFPOrders(null);
-                            setPurchaseOrders(null);
+                            if(setPurchaseOrders){
+                                setPurchaseOrders(null);
+                            }
                             setFPOrderItems(null);
+                            handleCloseModal();
                         }
                     }else{
                         resolve(data);
@@ -291,7 +326,8 @@ const AddEditFPOrder = function(props) {
                             <hr/>
                             <ScoreboardList scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 
                                     activeFPOrderItem={activeFPOrderItem} setActiveFPOrderItem={setActiveFPOrderItem}
-                                    fpOrderItems={fpOrderItems} setFPOrderItems={setFPOrderItems} scbdMode={scbdMode} setScbdMode={setScbdMode}/>
+                                    fpOrderItems={fpOrderItems} setFPOrderItems={setFPOrderItems} scbdMode={scbdMode} setScbdMode={setScbdMode}
+                                    setResetFPDrawerForm={setResetFPDrawerForm}/>
                             </>
                         </Grid>
                          
@@ -303,7 +339,9 @@ const AddEditFPOrder = function(props) {
                                      scbdDrawerOpen={scbdDrawerOpen} setScbdDrawerOpen={setScbdDrawerOpen} 
                                      fpScbdFields={fpScbdFields} 
                                      activeFPOrderItem={activeFPOrderItem} setActiveFPOrderItem={setActiveFPOrderItem}
-                                     fpOrderItems={fpOrderItems} setFPOrderItems={setFPOrderItems} scbdMode={scbdMode} setScbdMode={setScbdMode}/>
+                                     fpOrderItems={fpOrderItems} setFPOrderItems={setFPOrderItems} scbdMode={scbdMode} setScbdMode={setScbdMode}
+                                     resetFPDrawerForm={resetFPDrawerForm} setResetFPDrawerForm={setResetFPDrawerForm}
+                                     activeFPOrder={activeFPOrder}  fpOrderModalMode={fpOrderModalMode}/>
                                 </>
                             </Grid>}
                             
