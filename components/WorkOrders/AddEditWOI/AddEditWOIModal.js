@@ -209,8 +209,6 @@ const AddEditWOIModal = function(props) {
         }
     
         if(isNaN(keyCode) || keyCode ==null || !id ){
-            console.log("id", id)
-            console.log("event target", event.target);
           console.error("Bad keycode or element on handleClearSelectedTasksOnEsc");
           return;
         }
@@ -223,9 +221,7 @@ const AddEditWOIModal = function(props) {
                 console.error("Save ref not defined in handleSave");
                 
             }
-            //var response = await search(searchTable, searchValue)    
-    
-            //setSigns(response);
+
           } catch (error) {
             cogoToast.error("Failed to search wo")
             console.error("Error", error);
@@ -300,6 +296,7 @@ const AddEditWOIModal = function(props) {
                             <FormBuilder 
                                 ref={saveRef}
                                 columns={true}
+                                id_pretext={"woi_input"}
                                 fields={[...woi_fields, ...scbd_or_sign_fields]} 
                                 mode={editWOIModalMode} 
                                 classes={classes} 

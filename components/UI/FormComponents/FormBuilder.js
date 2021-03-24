@@ -33,6 +33,7 @@ import clsx from 'clsx';
 const FormBuilder = forwardRef((props, ref) => {
     const { fields, //table of each input field
             columns,
+            id_pretext,
             mode,  //edit or add mode 
             classes, //classes given to fields
             formObject, //object that is being edited/updated to save to db
@@ -379,7 +380,7 @@ const FormBuilder = forwardRef((props, ref) => {
                      entContactTitles={entContactTitles} entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts}
                      entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
                      entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
-                     entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses}/>
+                     entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses} id_pretext={id_pretext}/>
                 </div>)
             })}</form></>
         : <></>}
@@ -391,7 +392,7 @@ const FormBuilder = forwardRef((props, ref) => {
 export default FormBuilder;
 
 const GetInputByType = function(props){
-    const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes,
+    const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes, id_pretext,
         shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
         entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
         entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses} = props;
@@ -406,7 +407,7 @@ const GetInputByType = function(props){
     switch(field.type){
         case 'text':
             return(<div className={classes.inputValue}>
-                <TextField id={`woi_input-${field.field}`} 
+                <TextField id={`${id_pretext ? id_pretext : 'input'}-${field.field}`} 
                         error={error}
                          variant="outlined"
                          /*multiline={field.multiline}*/
