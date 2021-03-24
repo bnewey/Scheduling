@@ -13,6 +13,11 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import cogoToast from 'cogo-toast';
 
+import dynamic from 'next/dynamic'
+const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
+    ssr: false
+  });
+
 import DateFnsUtils from '@date-io/date-fns';
 import {
     DatePicker,
@@ -193,6 +198,40 @@ const AddEditWOIModal = function(props) {
             }
         })
     }
+
+    const handleEnterSearch = async (keyCode, event)=>{
+        var id = event.target.id;
+
+        if(saveButtonDisabled){
+            cogoToast.warn("Save disabled");
+            console.error("Cannot save by enter, save was disabled");
+            return;
+        }
+    
+        if(isNaN(keyCode) || keyCode ==null || !id ){
+            console.log("id", id)
+            console.log("event target", event.target);
+          console.error("Bad keycode or element on handleClearSelectedTasksOnEsc");
+          return;
+        }
+        if(keyCode === 13 && id.split('-')[0] === "woi_input"){ //enter key & input element's id
+          try {
+            if(saveRef && saveRef.current){
+                saveRef.current.handleSaveParent(activeWOI)
+            }else{
+                cogoToast.error("Internal Server Error");
+                console.error("Save ref not defined in handleSave");
+                
+            }
+            //var response = await search(searchTable, searchValue)    
+    
+            //setSigns(response);
+          } catch (error) {
+            cogoToast.error("Failed to search wo")
+            console.error("Error", error);
+          }
+        }
+      }
         
     
 
@@ -248,6 +287,7 @@ const AddEditWOIModal = function(props) {
                             { activeWOI?.record_id ? `Edit WOI#: ${activeWOI?.record_id}` : 'Add Work Order Item'} 
                         </span>
                     </div>
+                    
 
 
                     {/* BODY */}
@@ -256,6 +296,7 @@ const AddEditWOIModal = function(props) {
                         <Grid item xs={ 12 } className={classes.paperScroll}>
                             {/*FORM*/}
                             { editWOIModalOpen &&
+                            <><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
                             <FormBuilder 
                                 ref={saveRef}
                                 columns={true}
@@ -268,7 +309,7 @@ const AddEditWOIModal = function(props) {
                                 handleSave={handleSave}
                                 scbd_or_sign_radio_options={scbd_or_sign_radio_options} 
                                 raineyUsers={raineyUsers} vendorTypes={vendorTypes} item_type_radio_options={item_type_radio_options}
-                                dontCloseOnNoChangesSave={true}/>
+                                dontCloseOnNoChangesSave={true}/></>
                             }
 
                         </Grid>

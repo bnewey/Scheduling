@@ -406,7 +406,7 @@ const GetInputByType = function(props){
     switch(field.type){
         case 'text':
             return(<div className={classes.inputValue}>
-                <TextField id={field.field} 
+                <TextField id={`woi_input-${field.field}`} 
                         error={error}
                          variant="outlined"
                          /*multiline={field.multiline}*/
@@ -421,7 +421,7 @@ const GetInputByType = function(props){
             break;
         case 'number':
             return(<div className={classes.inputValue}>
-                <TextField id={field.field} 
+                <TextField id={`woi_input-${field.field}`} 
                         error={error}
                          variant="outlined"
                          /*multiline={field.multiline}*/
@@ -457,7 +457,7 @@ const GetInputByType = function(props){
             return(<div className={classes.inputValueSelect}>
                 <Select
                     error={error}
-                    id={field.field}
+                    id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
                     onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -481,7 +481,7 @@ const GetInputByType = function(props){
                 <div className={classes.inputValueSelect}>
                     <Select
                 error={error}
-                    id={field.field}
+                    id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
                     onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -506,7 +506,7 @@ const GetInputByType = function(props){
                     <div className={classes.inputValueSelect}>
                         <Select
                     error={error}
-                        id={field.field}
+                        id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -530,7 +530,7 @@ const GetInputByType = function(props){
                     <div className={classes.inputValueSelect}>
                         <Select
                     error={error}
-                        id={field.field}
+                        id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -554,7 +554,7 @@ const GetInputByType = function(props){
             return(<div className={classes.inputValueSelect}>
                 <Select
                     error={error}
-                    id={field.field}
+                    id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
                     onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -577,7 +577,7 @@ const GetInputByType = function(props){
                 return(<div className={classes.inputValueSelect}>
                     <Select
                         error={error}
-                        id={field.field}
+                        id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -600,7 +600,7 @@ const GetInputByType = function(props){
                 return(<div className={classes.inputValueSelect}>
                     <Select
                         error={error}
-                        id={field.field}
+                        id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -651,7 +651,7 @@ const GetInputByType = function(props){
                     {error && <span className={classes.errorSpan}>Entity Contact Required</span> }
                     <Select
                         error={error}
-                        id={field.field}
+                        id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
                         onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -683,7 +683,7 @@ const GetInputByType = function(props){
                 {error && <span className={classes.errorSpan}>Entity Address Required</span> }
                 <Select
                     error={error}
-                    id={field.field}
+                    id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
                     onChange={value => handleInputOnChange(value, true, field.type, field.field)}
@@ -807,7 +807,7 @@ const GetInputByType = function(props){
         
             return( 
                 <Autocomplete
-                id={field.field + "_autoinput"}
+                id={`woi_input-${field.field}`}
                 open={open}
                 onOpen={() => {
                     setOpen(true);
@@ -815,6 +815,7 @@ const GetInputByType = function(props){
                 onClose={() => {
                     setOpen(false);
                 }}
+                
                 options={options}
                 loading={loading}
                 getOptionLabel={(option) => (option[field.field] || "").toString()}
