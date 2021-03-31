@@ -265,7 +265,7 @@ const TLArrivalDatePicker = (props) => {
     const handleOnMonthChange = (date, num)=>{
         //num: 1 == left calendar | 2 == right calendar
         return new Promise((resolve, reject)=>{
-            //console.log("Date Month Change", date);
+            console.log("Date Month Change", date);
             
 
             if(num ==1){ // left only
@@ -298,7 +298,7 @@ const TLArrivalDatePicker = (props) => {
                         rightArrowButtonProps={{disableRipple: true,disabled: true, style: {color: '#fff', visibility: 'hidden'}}}/>
                     </div>
                     <div className={classes.calendarDiv}>
-                        <Calendar {...pickerProps} onMonthChange={(date)=>handleOnMonthChange(date,2)}  date={ (()=>{  return inputValue  ? new Date(moment(inputValue).add(1, 'M')) : new Date() })()} 
+                        <Calendar {...pickerProps} onMonthChange={(date)=>handleOnMonthChange(date,2)}  date={ (()=>{  return inputValue  ? new Date(moment(inputValue).add(1, 'M')) : new Date(moment().add(1, 'M')) })()} 
                         renderDay={(day, selectedDate, dayInCurrentMonth, dayComponent)=>handleRenderDayForCalendar(day, selectedDate, dayInCurrentMonth, dayComponent, true)} disableHighlightToday={true} showDaysOutsideCurrentMonth={true}
                         leftArrowButtonProps={{disableRipple: true,disabled: true, style: {color: '#fff', visibility: 'hidden'}}}/>
                     </div>

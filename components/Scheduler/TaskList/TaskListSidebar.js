@@ -42,7 +42,7 @@ const TaskListSidebar = (props) => {
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr ,
-        refreshView, setFilterAndOr, tableInfo, setTableInfo} = useContext(TaskContext);
+        refreshView, setFilterAndOr, tableInfo, setTableInfo, taskViews} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
@@ -82,6 +82,9 @@ const TaskListSidebar = (props) => {
         if(!item){
             console.error("Bad filter in handleApplySavedFilter ");
             return;
+        }
+        if(item.task_view && !isNaN(item.task_view)){ //0 = none
+            handleChangeTaskView(item.task_view)
         }
         setFilters(item.filter_json);
         setFilterInOrOut(item.in_out == 0 ? "in" : (item.in_out == 1 ? "out": null ) );
@@ -340,7 +343,7 @@ const TaskListSidebar = (props) => {
                                         className={isSelected ? classes.text_button_selected : classes.text_button}
                                     >
                                     <span  className={classes.text_button}>
-                                        {filter.name}
+                                        {filter.name} {filter.task_view ? `(${taskViews.find((tv) =>tv.value === filter.task_view).name})` : ''}
                                     </span>
                                     </div>
                                 </div>
@@ -357,7 +360,7 @@ const TaskListSidebar = (props) => {
                              <ViewColumn className={classes.icon} />
                             <span
                                 className={classes.text_button} 
-                                onClick={event => handleChangeTaskView("compact")}>
+                                onClick={event => handleChangeTaskView(3)}>
                                 Compact
                             </span>
                         </div>
@@ -367,7 +370,7 @@ const TaskListSidebar = (props) => {
                              <ViewColumn className={classes.icon} />
                             <span
                                 className={classes.text_button} 
-                                onClick={event => handleChangeTaskView("noDrill")}>
+                                onClick={event => handleChangeTaskView(1)}>
                                 Compact(No Drill)
                             </span>
                         </div>
@@ -377,7 +380,7 @@ const TaskListSidebar = (props) => {
                              <ViewColumn className={classes.icon} />
                             <span
                                 className={classes.text_button} 
-                                onClick={event => handleChangeTaskView("serviceDept")}>
+                                onClick={event => handleChangeTaskView(2)}>
                                 Service Dept
                             </span>
                         </div>

@@ -29,13 +29,15 @@ import moment from 'moment';
 
 import {TaskContext} from '../TaskContainer';
 import {CrewContext} from '../Crew/CrewContextContainer';
+import _, { property } from 'lodash';
+import TaskListFilterTieTaskView from './TaskListFilterTieTaskView';
 
 const TaskListFilter = (props) => {
     //PROPS
     const { filteredItems, setFilteredItems } = props;
 
     const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,installDateFilters, setInstallDateFilters,
-        setRefreshView,tabValue, user} = useContext(TaskContext);
+        setRefreshView,tabValue, user, taskViews,handleChangeTaskView} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
@@ -44,6 +46,9 @@ const TaskListFilter = (props) => {
     const [selectedField, setSelectedField] = useState(null);
     const [taskListFiltersEdited, setTaskListFiltersEdited] = useState(false);
     const [installDateFilterOpen, setInstallDateFilterOpen] = useState(null)
+
+    
+
 
     const [selectInstallDateMenuOpen,setSelectInstallDateMenuOpen] = useState(false);
     
@@ -263,7 +268,7 @@ const TaskListFilter = (props) => {
         setFilterModalOpen(false);
     };
 
-    const handleListFilter = (event, field, fieldItem) =>{
+    const handleListFilter = (event, field, fieldItem, compare_type = "equal", data_type ="text",  displayName) =>{
         if(field == null || fieldItem == null){
             cogoToast.error("Bad field or item");
             console.log("FIeldItem", fieldItem);
@@ -275,6 +280,9 @@ const TaskListFilter = (props) => {
             setFilters([{
                 property: field, 
                 value: fieldItem.toString(),
+                compare_type,
+                data_type,
+                displayName: displayName ? displayName : field
             }]);
             cogoToast.success(`Filtering by ${filters.map((v, i)=> v.property + ", ")}`);
         }
@@ -285,9 +293,12 @@ const TaskListFilter = (props) => {
             var tmpNewFilter = {
                 property: field, 
                 value: tmpString,
+                compare_type,
+                data_type,
+                displayName: displayName ? displayName : field
             };
            
-            var filtersMatching = filters.filter((v , i)=> ( v.property == tmpNewFilter.property && v.value === tmpNewFilter.value));
+            var filtersMatching = filters.filter((v , i)=> ( _.isEqual(v,tmpNewFilter)));
              //not in filters yet
             if(filtersMatching && filtersMatching.length == 0){
                 setFilters([...filters, tmpNewFilter]);
@@ -305,7 +316,7 @@ const TaskListFilter = (props) => {
             cogoToast.error("Bad filter");
             return;
         }
-        setFilters([...filters.filter((v , i)=> !( v.property == filterToRemove.property && v.value === filterToRemove.value))])
+        setFilters([...filters.filter((v , i)=> !(  _.isEqual(v,filterToRemove)))])
         cogoToast.success(`Removed Filter by ${filterToRemove.value}`);
     }
 
@@ -320,27 +331,27 @@ const TaskListFilter = (props) => {
         setSelectedField(item);
     }
 
-    const handleChangeFilterInOutType = (event) =>{
-        setFilteredItems(null);
-        if(filterInOrOut == "out"){
-            setFilterInOrOut("in");
-        }
-        if(filterInOrOut == "in"){
-            setFilterInOrOut("out");
-        }
-    }
+    // const handleChangeFilterInOutType = (event) =>{
+    //     setFilteredItems(null);
+    //     if(filterInOrOut == "out"){
+    //         setFilterInOrOut("in");
+    //     }
+    //     if(filterInOrOut == "in"){
+    //         setFilterInOrOut("out");
+    //     }
+    // }
 
-    const handleChangeFilterAndOrType = (event) =>{
-        setFilteredItems(null);
-        if(filterAndOr == "and"){
-            setFilterAndOr("or");
-        }
-        if(filterAndOr == "or"){
-            setFilterAndOr("and");
-        }
-    }
+    // const handleChangeFilterAndOrType = (event) =>{
+    //     setFilteredItems(null);
+    //     if(filterAndOr == "and"){
+    //         setFilterAndOr("or");
+    //     }
+    //     if(filterAndOr == "or"){
+    //         setFilterAndOr("and");
+    //     }
+    // }
 
-    const handleFixSpecificItem = (item, selectedField) =>{ 
+    const handleFixSpecificItem = (item, selectedField, displayName) =>{ 
         if(item == null){
             return '*N/A*';
         }
@@ -348,6 +359,10 @@ const TaskListFilter = (props) => {
         if(!selectedField.field){
             console.error("Bad selectedField.field in handleFixSpecificItem");
             return 'error';
+        }
+
+        if(displayName != null && displayName != undefined){
+            return displayName;
         }
 
         switch (selectedField.field){
@@ -366,6 +381,27 @@ const TaskListFilter = (props) => {
                 return(item);
         }
 
+    }
+
+    const handleGetExtraFilterItems = (selectedField) => {
+        if(!selectedField){
+            console.error("No selected field");
+            return [];
+        }
+
+        var return_array = [];
+
+        switch(selectedField.field){
+            case "drill_date":
+                return_array.push(
+                    {value: moment().format('YYYY-MM-DD'), compare_type: "lessthan", data_type: 'date',displayName: "Not Completed"}
+                )
+                return_array.push(
+                    {value: moment().format('YYYY-MM-DD'), compare_type: "greaterthan", data_type: 'date',displayName: "Completed"}
+                )
+                break;
+        }
+        return return_array;
 
     }
 
@@ -407,7 +443,7 @@ const TaskListFilter = (props) => {
         }
     }
 
-    const handleFilterCrew = (event, crew) =>{
+    const handleFilterCrew = (event, crew, compare_type = "equal") =>{
         if(!crew){
             cogoToast.error("Failed to Map crew jobs");
             console.log("Bad crew in handleFilterCrewJobs");
@@ -430,8 +466,7 @@ const TaskListFilter = (props) => {
                 }
                 return "";
             }));
-            console.log("Properties", properties);
-            console.log("crew", crew);
+ 
 
             //1 = tasklist
             //setTabValue(1);
@@ -441,9 +476,12 @@ const TaskListFilter = (props) => {
                 newFilters.push({
                     property: item, 
                     value: crew.id.toString(),
+                    compare_type,
+                    data_type: 'text',
+                    displayName: crew && crew.crew_leader_name ? crew.crew_leader_name : `Crew ${crew.crew_id}`
                 })
             })
-            
+
             setFilters(newFilters);
             setFilterInOrOut("in");
             setFilterAndOr("or");
@@ -455,19 +493,21 @@ const TaskListFilter = (props) => {
         })   
     }
 
-    const handleApplySavedFilter = (event, item) =>{
+    const handleApplySavedFilter = (event, item) => {
         if(!item){
             console.error("Bad filter in handleApplySavedFilter ");
             return;
+        }
+        if(item.task_view && !isNaN(item.task_view)){ //0 = none
+            handleChangeTaskView(item.task_view)
         }
         setFilters(item.filter_json);
         setFilterInOrOut(item.in_out == 0 ? "in" : (item.in_out == 1 ? "out": null ) );
         setFilterAndOr(item.and_or == 0 ? "and" : (item.and_or == 1 ? "or": null ));
         cogoToast.success(`Filtering by ${item.name}`)
-
     }
 
-    const handleOverWriteSavedFilter = (event, item)=>{
+    const handleOverWriteSavedFilter = (event, item)=> {
         if(!item || !user || !filterInOrOut || !filterAndOr){
             console.error("Bad parameters in handleOverWriteSavedFilter filter save")
             return;
@@ -485,6 +525,7 @@ const TaskListFilter = (props) => {
                 console.error(error);
         });
     }
+
 
     const handleRemoveSavedFilter = (event, item)=>{
         if(!item){
@@ -585,7 +626,7 @@ const TaskListFilter = (props) => {
                                 <Chip
                                     icon={<FilterIcon/>}
                                     size={'small'}
-                                    label={ filter && filter.value && filter.property ? filter.property + ' ' +filter.value : "UnidentifiedChip" + i}
+                                    label={ filter && filter.value && filter.property ? (filter.displayName ? (filter.property + ' ' +filter.displayName) :  filter.property + ' ' + filter.value) : "UnidentifiedChip" + i}
                                     onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
                                     className={classes.chip}
                                 />
@@ -690,7 +731,7 @@ const TaskListFilter = (props) => {
                                                     <Chip
                                                         icon={<FilterIcon/>}
                                                         size={'small'}
-                                                        label={ filter && filter.value && filter.property ? filter.property + ' ' +filter.value : "UnidentifiedChip" + i}
+                                                        label={ filter && filter.value && filter.property ? (filter.displayName ? (filter.property + ' ' +filter.displayName) :  filter.property + ' ' + filter.value) : "UnidentifiedChip" + i}
                                                         onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
                                                         className={classes.chip}
                                                     />
@@ -783,41 +824,17 @@ const TaskListFilter = (props) => {
                                     {openCategory && openCategory == "task_columns" &&  
                                 
                                 <>
-                                    {/* <FormControlLabel
-                                        key={"formControlInOut"}
-                                        control={
-                                        <Switch
-                                            key={'switchFilterListInOut'}
-                                            checked={filterInOrOut  && filterInOrOut == "in"}
-                                            onChange={(event)=> handleChangeFilterInOutType(event)}
-                                            name="Filter In or Out"
-                                            color="primary"
-                                        />
-                                         }
-                                    label={filterInOrOut && filterInOrOut  == "in" ? "Filter TO Selected" : "Filter OUT Selected"}
-                                    />
-                                    <FormControlLabel
-                                        key={"formControlAddOr"}
-                                        control={
-                                        <Switch
-                                            key={'switchFilterListAndOr'}
-                                            checked={filterAndOr  && filterAndOr == "or"}
-                                            onChange={(event)=> handleChangeFilterAndOrType(event)}
-                                            name="Filter And/Or"
-                                            color="primary"
-                                        />
-                                         }
-                                    label={filterAndOr && filterAndOr  == "or" ? "Filter using OR. Shows items matching at least one filter." :
-                                         "Filter using AND. Shows items matching all filters."}
-                                    /> */}
+                                   
                                    {selectedField && taskListTasksSaved ? <> 
-                                    {taskListTasksSaved.map((task)=> task[selectedField.field]).filter((v, i, array)=> array.indexOf(v)===i ).map((item,i)=>{
+                                    {_.uniqBy(taskListTasksSaved, (o)=> o[selectedField.field]  ).map((task)=> { return { value: task[selectedField.field], compare_type: "equal", data_type: selectedField.data_type || 'text', displayName: task.displayName || task[selectedField.field], } }).map((item,i)=>{
                                         const isFiltered =  (filters.filter((filter, i)=> 
                                         {
-                                            if(item != null){
-                                                return (filter.property == selectedField.field && item && filter.value == item.toString());
+                                            if(item?.value != null){
+                                                return (filter.property == selectedField.field && item?.value && filter.value == item?.value.toString() 
+                                                        && ( filter.data_type && item.data_type ? filter.data_type === item.data_type : false ));
                                             }else{
-                                                return (filter.property == selectedField.field && filter.value == "nonassignedValue");
+                                                return (filter.property == selectedField.field && filter.value == "nonassignedValue"
+                                                        && ( filter.data_type && item.data_type ? filter.data_type === item.data_type : false ));
                                             }
                                         }).length > 0);
                                         
@@ -825,14 +842,42 @@ const TaskListFilter = (props) => {
                                             
                                             <ListItem key={selectedField.field + i} dense button
                                                 className={!isFiltered ? classes.filterListItem : classes.filterListItemFiltered}
-                                               onClick={event=> handleListFilter(event, selectedField.field, item ? item : "nonassignedValue")}
+                                               onClick={event=> handleListFilter(event, selectedField.field, item?.value ? item?.value : "nonassignedValue", item.compare_type, item.data_type, item.displayName)}
 
                                             >
                                                 <ListItemText key={'fieldListItemText'+i}className={classes.filterListItemText}>
                                                     <Checkbox key={'checkboxFieldLI'+i} checked={isFiltered} className={classes.li_checkbox}/>
-                                                    { handleFixSpecificItem(item, selectedField) }
+                                                    { handleFixSpecificItem(item?.value, selectedField, item.displayName) }
                                                 </ListItemText>
                                             </ListItem>
+                                            </div>);
+                                    })}
+                                    {[...handleGetExtraFilterItems(selectedField)]?.map((item, i)=>{
+                                        const isFiltered =  (filters.filter((filter, i)=> 
+                                        {
+                                            if(item?.value != null){
+                                                return (filter.property == selectedField.field && item?.value && filter.value == item?.value.toString() 
+                                                        && ( filter.data_type && item.data_type ? filter.data_type === item.data_type : false )
+                                                        && ( filter.displayName && item.displayName ? filter.displayName === item.displayName : false ));
+                                            }else{
+                                                return (filter.property == selectedField.field && filter.value == "nonassignedValue"
+                                                        && ( filter.data_type && item.data_type ? filter.data_type === item.data_type : false )
+                                                        && ( filter.displayName && item.displayName ? filter.displayName === item.displayName : false ));
+                                            }
+                                        }).length > 0);
+                                        
+                                        return( <div key={'liDiv'+ i} className={classes.listItemDiv}>
+                                            
+                                            <ListItem key={selectedField.field + i} dense button
+                                                className={!isFiltered ? classes.filterListItem : classes.filterListItemFiltered}
+                                               onClick={event=> handleListFilter(event, selectedField.field, item?.value ? item?.value : "nonassignedValue", item.compare_type, item.data_type, item.displayName)}
+
+                                            >
+                                                <ListItemText key={'fieldListItemText'+i}className={classes.filterListItemText}>
+                                                    <Checkbox key={'checkboxFieldLI'+i} checked={isFiltered} className={classes.li_checkbox}/>
+                                                    { handleFixSpecificItem(item?.value, selectedField, item.displayName) }
+                                                </ListItemText>
+                                            </ListItem> 
                                             </div>);
                                     })}
                                 </>
@@ -862,7 +907,7 @@ const TaskListFilter = (props) => {
                             {  openCategory && openCategory == "saved_filters" &&
                                 <Collapse in={openCategory && openCategory === "saved_filters"} timeout="auto" unmountOnExit>
                                 <List component="div" className={classes.fieldList} >
-                                    <TaskListFilterSaveDialog  taskUserFilters={taskUserFilters}  setTaskUserFilters={setTaskUserFilters}
+                                    <TaskListFilterSaveDialog taskViews={taskViews} taskUserFilters={taskUserFilters}  setTaskUserFilters={setTaskUserFilters}
                                         setTaskListFiltersEdited={setTaskListFiltersEdited}/>
                                     
                                     {taskUserFilters && taskUserFilters.map((item,i)=>{
@@ -870,12 +915,14 @@ const TaskListFilter = (props) => {
                                         return(
                                             <ListItem key={item.id} dense button
                                                 onMouseUp={event => handleApplySavedFilter(event, item)}
+                                                classes={{container: classes.rootListItem}}
                                                 className={isSelected ? classes.fieldListItemSelected : classes.fieldListItem}
                                             >
                                                 <ListItemText  className={classes.fieldListItemText}>
-                                                    {item.name}
+                                                    {item.name} {item.task_view ? `(${taskViews.find((tv) =>tv.value === item.task_view).name} View)` : ""}
                                                 </ListItemText>
                                                 <ListItemSecondaryAction className={classes.secondary_div}>
+                                                <TaskListFilterTieTaskView  taskViews={taskViews} taskUserFilter={item} setTaskUserFilters={setTaskUserFilters} setTaskListFiltersEdited={setTaskListFiltersEdited}/>
                                                     <IconButton className={classes.secondary_button} edge="end" aria-label="save" onClick={event => handleOverWriteSavedFilter(event, item)}>
                                                     <SaveIcon />
                                                     </IconButton> 
@@ -1098,6 +1145,7 @@ const useStyles = makeStyles(theme => ({
         border: '1px solid #ececec',
         padding: 0,
         paddingLeft: 10,
+        flexBasis: '62%'
         
     },
     fieldListItemSelected:{
@@ -1109,7 +1157,8 @@ const useStyles = makeStyles(theme => ({
         border: '1px solid #c8ffff',
         '&:hover':{
             border: '1px solid #d88f08'
-        }
+        },
+        flexBasis: '62%'
     },
     fieldListItemText:{
         '& span':{
@@ -1175,10 +1224,17 @@ const useStyles = makeStyles(theme => ({
     },
     secondary_div:{
         display: 'flex',
+        flexBasis: '38%',
     },
     secondary_button:{
         padding: '5px',
         margin: '1%'
+    },
+    rootListItem:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'start',
+        alignItems: 'center',
     },
     filterInstallDate: {
       

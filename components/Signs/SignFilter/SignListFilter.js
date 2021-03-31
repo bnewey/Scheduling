@@ -190,7 +190,7 @@ const SignListFilter = (props) => {
         setFilterModalOpen(false);
     };
 
-    const handleListFilter = (event, field, fieldItem) =>{
+    const handleListFilter = (event, field, fieldItem,compare_type = "equal") =>{
         if(field == null || fieldItem == null){
             cogoToast.error("Bad field or item");
             console.log("FIeldItem", fieldItem);
@@ -202,6 +202,7 @@ const SignListFilter = (props) => {
             setFilters([{
                 property: field, 
                 value: fieldItem.toString(),
+                compare_type
             }]);
             cogoToast.success(`Filtering by ${filters.map((v, i)=> v.property + ", ")}`);
         }
@@ -212,9 +213,10 @@ const SignListFilter = (props) => {
             var tmpNewFilter = {
                 property: field, 
                 value: tmpString,
+                compare_type
             };
            
-            var filtersMatching = filters.filter((v , i)=> ( v.property == tmpNewFilter.property && v.value === tmpNewFilter.value));
+            var filtersMatching = filters.filter((v , i)=> ( v.property == tmpNewFilter.property && v.value === tmpNewFilter.value && v.compare_type === tmpNewFilter.compare_type));
              //not in filters yet
             if(filtersMatching && filtersMatching.length == 0){
                 setFilters([...filters, tmpNewFilter]);
@@ -232,7 +234,7 @@ const SignListFilter = (props) => {
             cogoToast.error("Bad filter");
             return;
         }
-        setFilters([...filters.filter((v , i)=> !( v.property == filterToRemove.property && v.value === filterToRemove.value))])
+        setFilters([...filters.filter((v , i)=> !( v.property == filterToRemove.property && v.value === filterToRemove.value && v.compare_type === filterToRemove.compare_type))])
         cogoToast.success(`Removed Filter by ${filterToRemove.value}`);
     }
 
@@ -334,7 +336,7 @@ const SignListFilter = (props) => {
         }
     }
 
-    const handleFilterCrew = (event, crew) =>{
+    const handleFilterCrew = (event, crew, compare_type = "equal", data_type = "text", displayName) =>{
         if(!crew){
             cogoToast.error("Failed to Map crew jobs");
             console.log("Bad crew in handleFilterCrewJobs");
@@ -368,6 +370,9 @@ const SignListFilter = (props) => {
                 newFilters.push({
                     property: item, 
                     value: crew.id.toString(),
+                    compare_type,
+                    data_type, 
+                    displayName, 
                 })
             })
             

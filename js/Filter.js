@@ -1,16 +1,54 @@
 import 'isomorphic-unfetch';
 
+
 //FILTER CODE
 const doFilter = (item, filter, outOrIn) => {
-    let { value } = filter;
+    let { value, property, compare_type = "equal" } = filter;
     let tmpValue = value;
   
     if (!(tmpValue instanceof RegExp)) {
       tmpValue = new RegExp(tmpValue.toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_'), 'i');
     }
+    var tmpp;
+    if(compare_type === "equal"){
+      if(item[ property ] == null ){
+        tmpp = tmpValue.test( "nonassignedValue" )
+      }else{
+        tmpp = tmpValue.test( ( (item[ property ]).toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') ))
+        &&  (item[property])?.toString()?.length === value?.toString()?.length;
+      }
+    }
 
-    var tmpp = tmpValue.test( (item[ filter.property ] != null ? (item[ filter.property ]).toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') :  "nonassignedValue"))
-              && (item[filter.property]).toString().length === value.toString().length;
+    if(compare_type === "lessthan"){
+      tmpp = value < item[ property ] 
+
+      if(item[ property ] == null || item[ property ]  == undefined){
+        tmpp = false;
+      }
+    }
+    if(compare_type === "greaterthan"){
+      tmpp = value > item[ property ] 
+
+      if(item[ property ] == null || item[ property ]  == undefined){
+        tmpp = false;
+      }
+    }
+    if(compare_type === "lessthanequalto"){
+      tmpp = value <= item[ property ] 
+
+      if(item[ property ] == null || item[ property ]  == undefined){
+        tmpp = false;
+      }
+    }
+    if(compare_type === "greaterthanequalto"){
+      tmpp = value >= item[ property ] 
+
+      if(item[ property ] == null || item[ property ]  == undefined){
+        tmpp = false;
+      }
+    }
+
+
 
     if(outOrIn == "in"){
       return(!!tmpp);
@@ -32,7 +70,8 @@ const doFilter = (item, filter, outOrIn) => {
       filters = [
         {
           property: filters[0],
-          value: filters[1]
+          value: filters[1],
+          compare_type: filters[2] || "equal",
         }
       ];
     }

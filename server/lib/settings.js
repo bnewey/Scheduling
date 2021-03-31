@@ -136,23 +136,24 @@ router.post('/getTaskUserFilters', async (req,res) => {
 });
 
 router.post('/addSavedTaskFilter', async (req,res) => {
-  var name, user_id, filterAndOr, filterInOrOut, filters;
+  var name, user_id, filterAndOr, filterInOrOut, filters, task_view;
   if(req.body){
     name = req.body.name;
     user_id = req.body.user_id;
     filterAndOr = req.body.filterAndOr;
     filterInOrOut = req.body.filterInOrOut;
     filters = req.body.filters;
+    task_view = req.body.task_view;
   }
   if(!name, !user_id, !filters){
     logger.error("Bad params in addSavedTaskFilter")
     res.sendStatus(400);
   }
 
-  const sql = ' INSERT INTO task_user_filters (user_id, and_or, in_out, filter_json, name ) ' +
-    ' VALUES (?,?,?,?,?) ';
+  const sql = ' INSERT INTO task_user_filters (user_id, and_or, in_out, filter_json, name, task_view ) ' +
+    ' VALUES (?,?,?,?,?, IFNULL(?, DEFAULT(task_view) )) ';
   try{
-    const results = await database.query(sql, [user_id, filterAndOr, filterInOrOut, JSON.stringify(filters), name ]);
+    const results = await database.query(sql, [user_id, filterAndOr, filterInOrOut, JSON.stringify(filters), name, task_view]);
     logger.info("Added task_user_filter ");
     res.json(results);
   }
@@ -174,7 +175,7 @@ router.post('/overwriteSavedTaskFilter', async (req,res) => {
     filters = req.body.filters;
   }
   if(!filter_id, !name, !user_id, !filters){
-    logger.error("Bad params in addSavedTaskFilter")
+    logger.error("Bad params in overwriteSavedTaskFilter")
     res.sendStatus(400);
   }
 
@@ -188,6 +189,31 @@ router.post('/overwriteSavedTaskFilter', async (req,res) => {
 
   catch(error){
     logger.error("Settings (overwriteSavedTaskFilter): " + error);
+    res.sendStatus(400);
+  }
+});
+
+router.post('/updateFilterTaskViewTie', async (req,res) => {
+  var filter_id, task_view;
+  if(req.body){
+    filter_id = req.body.filter_id;
+    task_view = req.body.task_view;
+  }
+  if(!filter_id, isNaN(task_view)){
+    logger.error("Bad params in updateFilterTaskViewTie")
+    res.sendStatus(400);
+  }
+
+  const sql = ' UPDATE task_user_filters SET task_view=? ' +
+    ' WHERE id = ? ';
+  try{
+    const results = await database.query(sql, [ task_view, filter_id ]);
+    logger.info("Update task_user_filter task_view ");
+    res.json(results);
+  }
+
+  catch(error){
+    logger.error("Settings (updateFilterTaskViewTie): " + error);
     res.sendStatus(400);
   }
 });

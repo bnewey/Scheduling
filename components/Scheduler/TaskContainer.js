@@ -46,6 +46,8 @@ const TaskContainer = function(props) {
     const [sorters, setSorters] = useState(null);
     const [installDateFilters, setInstallDateFilters] = useState([]);
 
+    const taskViews = [{name: "Compact", value: 3},{name: "Compact(No Drill)", value: 1}, {name: "Service Dept", value: 2}]
+
   //Map Props
     const [taskListToMap, setTaskListToMap] = useState(null);
     const [crewToMap, setCrewToMap] = useState(null);
@@ -189,17 +191,93 @@ const TaskContainer = function(props) {
   }, [tabValue]);
   
 
+  const handleChangeTaskView = (view)=>{
+    if(isNaN(view)){
+      console.error("Bad view in handleChangeTaskView")
+        //setTableInfo(null);
+    }
+    var viewArray =[];
+    switch(view){
+        case 0:
+        case 1:
+            viewArray = [
+                {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+                {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
+                {text: "Name", field: "t_name", width: '26%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+                {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+                {text: "Description", field: "description", width: '18%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                {text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+                {text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+                {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+                {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
+            ];
+            break;
+        case 2:
+            viewArray = [
+                {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+                {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
+                {text: "WO Created", field: "date_entered", width: '8%', style: 'smallListItemText', type: 'date'},
+                {text: "Desired Date", field: "date_desired", width: '8%', style: 'smallListItemText', type: 'date'},
+                {text: "Name", field: "t_name", width: '22%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+                {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+                {text: "Description", field: "description", width: '15%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                {text: "Job Reference", field: "job_reference", width: '8%', maxWidth: 120, style: 'smallListItemText', type: 'text'},
+                {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+                {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
+            ];
+            break;
+        case 3:
+        default:
+            viewArray = [
+                {text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+                {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
+                {text: "Name", field: "t_name", width: '20%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+                {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+                {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+                {text: "Description", field: "description", width: '16%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
+                {text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+                {text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+                {text: "d_date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
+                {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
+                {text: "i_date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+                {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}           
+            ];
+            break;
+      }
+      setTableInfo(viewArray)
+  }
+
+  //Save and/or Fetch tableInfo to local storage
+  useEffect(() => {
+  if(tableInfo == null){
+    var tmp = window.localStorage.getItem('tableInfo');
+    var tmpParsed;
+    if(tmp){
+      tmpParsed = JSON.parse(tmp);
+    }
+    if(Array.isArray(tmpParsed)){
+      setTableInfo(tmpParsed);
+    }else{
+      handleChangeTaskView(1);
+    }
+  }
+  if(Array.isArray(tableInfo)){
+    window.localStorage.setItem('tableInfo', JSON.stringify(tableInfo));
+  }
   
+}, [tableInfo]);
   
 
   return (
     <div className={classes.root}>
       <TaskContext.Provider value={{taskLists,setTaskLists,priorityList,setPriorityList, selectedIds, setSelectedIds, 
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
-                            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,
+                            filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,handleChangeTaskView,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
                              sorters, setSorters, installDateFilters, setInstallDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
-                             user, refreshView, setRefreshView} } >
+                             user, refreshView, setRefreshView, taskViews} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >

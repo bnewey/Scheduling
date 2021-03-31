@@ -121,7 +121,7 @@ async function getTaskUserFilters(user_id){
     }
 }
 
-async function addSavedTaskFilter( name, user_id, filterAndOr, filterInOrOut, filters){
+async function addSavedTaskFilter( name, user_id, filterAndOr, filterInOrOut, filters, task_view){
     const route = '/scheduling/settings/addSavedTaskFilter';
     try{
         var data = await fetch(route,
@@ -130,7 +130,7 @@ async function addSavedTaskFilter( name, user_id, filterAndOr, filterInOrOut, fi
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, user_id, filterAndOr, filterInOrOut, filters })
+            body: JSON.stringify({ name, user_id, filterAndOr, filterInOrOut, filters, task_view })
         });
 
         if(!data.ok){
@@ -157,6 +157,28 @@ async function overwriteSavedTaskFilter( filter_id, name, user_id, filterAndOr, 
 
         if(!data.ok){
             throw new Error("overwriteSavedTaskFilter returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function updateFilterTaskViewTie( filter_id,task_view){
+    const route = '/scheduling/settings/updateFilterTaskViewTie';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ filter_id, task_view })
+        });
+
+        if(!data.ok){
+            throw new Error("updateFilterTaskViewTie returned empty list or bad query")
         }
         var list = await data.json();
         return(list);
@@ -197,5 +219,6 @@ module.exports = {
     getTaskUserFilters,
     addSavedTaskFilter,
     overwriteSavedTaskFilter,
+    updateFilterTaskViewTie,
     removedSavedFilter
 };

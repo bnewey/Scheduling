@@ -373,7 +373,7 @@ const CrewCrews = (props) => {
         setCrewToMap(selectedCrew);
     }
 
-    const handleFilterCrewJobs = (event, crew, jobs) => {
+    const handleFilterCrewJobs = (event, crew, jobs, compare_type = "equal",data_type = "text",  displayName) => {
         if(!crew){
             cogoToast.error("Failed to Map crew jobs");
             console.log("Bad crew in handleFilterCrewJobs");
@@ -403,6 +403,9 @@ const CrewCrews = (props) => {
             newFilters.push({
                 property: item, 
                 value: crew.toString(),
+                compare_type,
+                data_type,
+                displayName: crew && crew.crew_leader_name ? crew.crew_leader_name : `Crew ${crew.crew_id}`
             })
         })
         
