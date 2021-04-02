@@ -37,7 +37,7 @@ const TaskListFilter = (props) => {
     const { filteredItems, setFilteredItems } = props;
 
     const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,installDateFilters, setInstallDateFilters,
-        setRefreshView,tabValue, user, taskViews,handleChangeTaskView} = useContext(TaskContext);
+        setRefreshView,tabValue, user, taskViews,setActiveTaskView} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
@@ -499,7 +499,7 @@ const TaskListFilter = (props) => {
             return;
         }
         if(item.task_view && !isNaN(item.task_view)){ //0 = none
-            handleChangeTaskView(item.task_view)
+            setActiveTaskView(item.task_view)
         }
         setFilters(item.filter_json);
         setFilterInOrOut(item.in_out == 0 ? "in" : (item.in_out == 1 ? "out": null ) );

@@ -26,6 +26,7 @@ import PDF from '../../../js/Pdf';
 import {CrewContext} from '../Crew/CrewContextContainer';
 import TaskListAddCrewDialog from './TaskListAddCrewDialog';
 import TaskListMoveTasks from './Actions/TaskListMoveTasks';
+import _ from 'lodash';
 
 const TaskListSidebar = (props) => {
 
@@ -37,12 +38,12 @@ const TaskListSidebar = (props) => {
 
     //PROPS
     const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
-        selectedTasks, setSelectedTasks, setSelectedIds, handleChangeTaskView, taskListTasksRefetch, setTaskListTasksRefetch} = props;
+        selectedTasks, setSelectedTasks, setSelectedIds,  taskListTasksRefetch, setTaskListTasksRefetch} = props;
 
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr ,
-        refreshView, setFilterAndOr, tableInfo, setTableInfo, taskViews} = useContext(TaskContext);
+        refreshView, setFilterAndOr, tableInfo, setTableInfo, taskViews, activeTaskView, setActiveTaskView,} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
@@ -84,7 +85,7 @@ const TaskListSidebar = (props) => {
             return;
         }
         if(item.task_view && !isNaN(item.task_view)){ //0 = none
-            handleChangeTaskView(item.task_view)
+            setActiveTaskView(item.task_view)
         }
         setFilters(item.filter_json);
         setFilterInOrOut(item.in_out == 0 ? "in" : (item.in_out == 1 ? "out": null ) );
@@ -333,7 +334,7 @@ const TaskListSidebar = (props) => {
                 </div>
                 {
                     quickFilters && quickFilters.map((filter, index)=>{
-                        const isSelected = filters === filter.filter_json && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and"); 
+                        const isSelected =  filter && filters &&_.isEqual(filters ,filter.filter_json) && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and"); 
                             return(
                             <div className={classes.singleLineDiv}>
                                 <div className={classes.singleItem}>
@@ -355,36 +356,22 @@ const TaskListSidebar = (props) => {
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>
-                    <div className={classes.singleLineDiv}>
-                        <div className={classes.singleItem}>
-                             <ViewColumn className={classes.icon} />
-                            <span
-                                className={classes.text_button} 
-                                onClick={event => handleChangeTaskView(3)}>
-                                Compact
-                            </span>
+                {taskViews?.map((view)=>{
+                     const isSelected = activeTaskView === view.value;
+     
+                    return(
+                        <div className={classes.singleLineDiv}>
+                            <div className={classes.singleItem}>
+                                <ViewColumn className={classes.icon} />
+                                <span
+                                    className={isSelected ? classes.text_button_selected : classes.text_button}
+                                    onClick={event => setActiveTaskView(view.value)}>
+                                    {view.name}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div className={classes.singleLineDiv}>
-                        <div className={classes.singleItem}>
-                             <ViewColumn className={classes.icon} />
-                            <span
-                                className={classes.text_button} 
-                                onClick={event => handleChangeTaskView(1)}>
-                                Compact(No Drill)
-                            </span>
-                        </div>
-                    </div>
-                    <div className={classes.singleLineDiv}>
-                        <div className={classes.singleItem}>
-                             <ViewColumn className={classes.icon} />
-                            <span
-                                className={classes.text_button} 
-                                onClick={event => handleChangeTaskView(2)}>
-                                Service Dept
-                            </span>
-                        </div>
-                    </div>
+                    )
+                })}
                     
 
                 <div className={classes.priority_info_heading}>

@@ -44,7 +44,7 @@ const TaskListMain = (props) => {
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters, installDateFilters , setInstallDateFilters,
-         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,handleChangeTaskView } = useContext(TaskContext);
+         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView } = useContext(TaskContext);
 
 
     //CSS
@@ -260,7 +260,7 @@ const TaskListMain = (props) => {
                                  isPriorityOpen={isPriorityOpen} setIsPriorityOpen={setIsPriorityOpen}
                                   priorityList={priorityList} setPriorityList={setPriorityList}
                                   selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks} setSelectedIds={setSelectedIds}
-                                  handleChangeTaskView={handleChangeTaskView}  setTableInfo={setTableInfo}
+                                  setActiveTaskView={setActiveTaskView}  setTableInfo={setTableInfo}
                                   taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
                 </Grid>
                 <Grid item xs={10} >

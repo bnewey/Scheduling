@@ -34,9 +34,9 @@ const TaskListFilterTieTaskView = React.memo(  (props) => {
         setTieOpen(false);
     };
 
-    const handleChangeTaskViewProp =(value) =>{
+    const setActiveTaskViewProp =(value) =>{
         if(isNaN(value)){
-            console.error("Bad param in handleChangeTaskViewProp");
+            console.error("Bad param in setActiveTaskViewProp");
             console.log("Value", value)
             return;
         }
@@ -47,7 +47,7 @@ const TaskListFilterTieTaskView = React.memo(  (props) => {
             console.log("Tmp", tmp)
             setSelectedTaskView(tmp);
         }else{
-            console.error("Bad tmp value in handleChangeTaskViewProp")
+            console.error("Bad tmp value in setActiveTaskViewProp")
             cogoToast.error("Internal Server Error");
         }
         
@@ -96,7 +96,7 @@ const TaskListFilterTieTaskView = React.memo(  (props) => {
                         id={"filterViewTieSelect"}
                         className={classes.selectBox}
                         value={selectedTaskView}
-                        onChange={value => handleChangeTaskViewProp(value.target.value)}
+                        onChange={value => setActiveTaskViewProp(value.target.value)}
                         >
                         <option value={0}>None</option>
                         {taskViews.map((view)=>{
