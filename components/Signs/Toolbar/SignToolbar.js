@@ -23,7 +23,7 @@ const SignToolbar = function(props) {
   const {user} = props;
 
   
-  const { signs, setSigns,  currentView, setCurrentView, views} = useContext(ListContext);
+  const { signs, setSigns,  currentView, previousView, handleSetView, views} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "signScheduler";
 
@@ -48,7 +48,7 @@ const SignToolbar = function(props) {
   const toolBarLeftGrid = ()=>{
     const handleCloseView = (view)=>{
     
-      setCurrentView(views.find((view)=> view.value == currentView.closeToView));
+      handleSetView(views.find((view)=> view.value == currentView.closeToView));
       //Run onClose and onClose of parent page in case it is child
       if(view.onClose){
         view.onClose();

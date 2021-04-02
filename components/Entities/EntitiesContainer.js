@@ -52,6 +52,7 @@ const EntitiesContainer = function(props) {
                 ];
 
   const [currentView,setCurrentView] = useState(null);
+  const [previousView, setPreviousView] = useState(null);
   const [detailEntityId,setDetailEntityId] = useState(null);
   const [activeEntity, setActiveEntity] = useState(null);
 
@@ -87,9 +88,9 @@ const EntitiesContainer = function(props) {
       if(tmpParsed){
         var view = views.filter((v)=> v.value == tmpParsed)[0];
         console.log("View", view);
-        setCurrentView(view || views[0]);
+        handleSetView(view || views[0]);
       }else{
-        setCurrentView(views[0]);
+        handleSetView(views[0]);
       }
     }
     if(currentView){
@@ -193,6 +194,10 @@ const EntitiesContainer = function(props) {
     }
   },[activeEntity])
 
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+    setPreviousView(currentView ? currentView : null);
+  }
     
 
   const getMainComponent = () =>{
@@ -248,7 +253,7 @@ const EntitiesContainer = function(props) {
   return (
     <div className={classes.root}>
       <ListContext.Provider value={{entities, setEntities,
-          currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+          currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
           editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
           setRecentEntities, entitiesRefetch, setEntitiesRefetch} } >
       <DetailContext.Provider value={{ detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,

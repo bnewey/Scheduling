@@ -27,7 +27,7 @@
 //         fpOrderItems, setFPOrderItems, scbdMode, setScbdMode} = props;
 
 //     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid,
-//     currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+//     currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
 //     const {fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, workOrderItems, setWorkOrderItems,fpOrderModalOpen,
 //         setFPOrderModalOpen, vendorTypes, shipToContactOptionsWOI, setShipToContactOptionsWOI} = useContext(DetailContext)

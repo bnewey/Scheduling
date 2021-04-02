@@ -22,7 +22,7 @@ const WOSidebarList = function(props) {
 
 
 
-  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, setCurrentView, 
+  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, previousView, handleSetView, 
       editWOModalOpen, setEditWOModalOpen, setEditModalMode} = useContext(ListContext);
   
   const classes = useStyles();

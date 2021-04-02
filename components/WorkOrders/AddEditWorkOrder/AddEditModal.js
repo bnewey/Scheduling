@@ -36,7 +36,7 @@ const AddEditModal = function(props) {
     const {user, editModalMode} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
-    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
     const [entityShippingContacts, setEntityShippingContacts] = useState(null);
@@ -264,7 +264,7 @@ const AddEditModal = function(props) {
                     //Get id of new workorder and set view to detail
                     if(data && data.insertId){
                         setDetailWOid(data.insertId);
-                        setCurrentView(views.filter((v)=>v.value == "woDetail")[0]);
+                        handleSetView(views.filter((v)=>v.value == "woDetail")[0]);
                     }
                     cogoToast.success(`Work Order has been added!`, {hideAfter: 4});
                     setWorkOrders(null);
@@ -291,7 +291,7 @@ const AddEditModal = function(props) {
             Work_Orders.deleteWorkOrder(wo.wo_record_id)
             .then((data)=>{
                 setWorkOrders(null)
-                setCurrentView(views.filter((v)=>v.value == "allWorkOrders")[0]);
+                handleSetView(views.filter((v)=>v.value == "allWorkOrders")[0]);
                 setDetailWOid(null);
                 handleCloseModal();
             })

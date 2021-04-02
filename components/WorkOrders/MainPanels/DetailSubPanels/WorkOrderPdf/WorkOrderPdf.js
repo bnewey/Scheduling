@@ -15,7 +15,7 @@ import cogoToast from 'cogo-toast';
 const WorkOrderPdf = function(props) {
       
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-        currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+        currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);

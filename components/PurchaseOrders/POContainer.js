@@ -43,6 +43,7 @@ const POContainer = function(props) {
                       onClose: ()=> {setPurchaseOrders(null)}} ];
 
   const [currentView,setCurrentView] = useState(null);
+  const [previousView, setPreviousView] = useState(null);
   // const [detailWOid,setDetailWOid] = useState(null);
 
   // const [editPOModalOpen, setEditPOModalOpen] = React.useState(false);
@@ -73,9 +74,9 @@ const POContainer = function(props) {
       }
       if(tmpParsed){
         var view = views.filter((v)=> v.value == tmpParsed)[0]
-        setCurrentView(view || views[0]);
+        handleSetView(view || views[0]);
       }else{
-        setCurrentView(views[0]);
+        handleSetView(views[0]);
       }
     }
     if(currentView){
@@ -191,6 +192,10 @@ const POContainer = function(props) {
     }
   },[vendorTypes])
 
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+    setPreviousView(currentView ? currentView : null);
+  }
    
 
   const getMainComponent = () =>{
@@ -227,7 +232,7 @@ const POContainer = function(props) {
   return (
     <div className={classes.root}>
       <ListContext.Provider value={{purchaseOrders, setPurchaseOrders, fpOrders, setFPOrders, activeFPOrder, setActiveFPOrder,
-          currentView, setCurrentView, views, vendorTypes, setVendorTypes,
+          currentView, previousView, handleSetView, views, vendorTypes, setVendorTypes,
           fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, fpOrderModalMode, setFPOrderModalMode, arrivedState, setArrivedState,
           resetFPForm, setResetFPForm} } >
       

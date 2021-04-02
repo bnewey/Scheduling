@@ -65,8 +65,10 @@ const WOContainer = function(props) {
                         parent: 'woDetail'}];
 
   const [currentView,setCurrentView] = useState(null);
+  const [previousView, setPreviousView] = useState(null);
   const [detailWOid,setDetailWOid] = useState(null);
   const [activeWorkOrder, setActiveWorkOrder] = useState(null);
+  const [searchValue,setSearchValue] = useState("");
 
   const [editWOModalOpen, setEditWOModalOpen] = React.useState(false);
   const [editModalMode, setEditModalMode] = React.useState(null);
@@ -106,9 +108,9 @@ const WOContainer = function(props) {
       }
       if(tmpParsed){
         var view = views.filter((v)=> v.value == tmpParsed)[0]
-        setCurrentView(view || views[0]);
+        handleSetView(view || views[0]);
       }else{
-        setCurrentView(views[0]);
+        handleSetView(views[0]);
       }
     }
     if(currentView){
@@ -305,6 +307,11 @@ const WOContainer = function(props) {
       })
     }
   },[shipToAddressOptionsWOI, activeWorkOrder])
+
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+    setPreviousView(currentView ? currentView : null);
+  }
     
 
   const getMainComponent = () =>{
@@ -377,8 +384,9 @@ const WOContainer = function(props) {
   return (
     <div className={classes.root}>
       <ListContext.Provider value={{workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-          currentView, setCurrentView, views, detailWOid,setDetailWOid, activeWorkOrder, setActiveWorkOrder,
-          editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState} } >
+          currentView, previousView, handleSetView, views, detailWOid,setDetailWOid, activeWorkOrder, setActiveWorkOrder,
+          editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState,
+          searchValue,setSearchValue} } >
       <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, 
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
                      shipToContactOptionsWOI, setShipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToAddressOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,

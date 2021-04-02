@@ -24,7 +24,7 @@ const EntityToolbar = function(props) {
 
   
   const { entities, setEntities,
-    currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+    currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
     editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities,
      setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
 
@@ -61,7 +61,7 @@ const EntityToolbar = function(props) {
   const toolBarLeftGrid = ()=>{
     const handleCloseView = (view)=>{
     
-      setCurrentView(views.find((view)=> view.value == currentView.closeToView));
+      handleSetView(views.find((view)=> view.value == currentView.closeToView));
       //Run onClose and onClose of parent page in case it is child
       if(view.onClose){
         view.onClose();

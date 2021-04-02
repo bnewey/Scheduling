@@ -22,7 +22,7 @@ const EntityList = function(props) {
   const {user} = props;
 
   const { entities, setEntities,
-    currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+    currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
     editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
   const classes = useStyles();
 
@@ -70,7 +70,7 @@ const EntityList = function(props) {
       console.error("Bad id");
       return;
     }
-    setCurrentView(views && views.find((view, i)=> view.value == "entityDetail"));
+    handleSetView(views && views.find((view, i)=> view.value == "entityDetail"));
     setDetailEntityId(entitiy_id);
 
   }

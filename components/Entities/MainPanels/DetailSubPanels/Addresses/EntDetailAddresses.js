@@ -71,7 +71,7 @@ const EntAddresses = function(props) {
   const {user} = props;
 
   const { entities, setEntities,
-    currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+    currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
     editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
     setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
 

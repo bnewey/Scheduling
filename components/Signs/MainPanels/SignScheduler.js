@@ -37,7 +37,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 const SignSchedulerList = function(props) {
   const {user, keyState, setKeyState, columnState, setColumnState} = props;
 
-  const { signs, setSigns, setSignRefetch, currentView, setCurrentView, views , columns,setColumns, signSearchRefetch, setSignSearchRefetch   } = useContext(ListContext);
+  const { signs, setSigns, setSignRefetch, currentView, previousView, handleSetView, views , columns,setColumns, signSearchRefetch, setSignSearchRefetch   } = useContext(ListContext);
   const classes = useStyles();
 
   const [pendingDateChangesSaved,setPendingDateChangesSaved] = React.useState(true);

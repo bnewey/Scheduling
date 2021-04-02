@@ -23,7 +23,7 @@ const PastWOs = function(props) {
   const {user} = props;
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, activeWorkOrder, 
-    currentView, setCurrentView, views, detailWOid,setDetailWOid} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, detailWOid,setDetailWOid} = useContext(ListContext);
   const classes = useStyles();
 
   const [pastWOs, setPastWOs] = React.useState(null);
@@ -66,7 +66,7 @@ const PastWOs = function(props) {
       console.error("Bad id");
       return;
     }
-    setCurrentView(views && views.find((view, i)=> view.value == "woDetail"));
+    handleSetView(views && views.find((view, i)=> view.value == "woDetail"));
     setDetailWOid(wo_id);
 
   }

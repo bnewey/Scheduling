@@ -19,7 +19,7 @@ const RecentWO = function(props) {
     const {user} = props;
   
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-      currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers, recentWO, setRecentWO, setDetailWOid} = useContext(ListContext);
+      currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers, recentWO, setRecentWO, setDetailWOid} = useContext(ListContext);
     const classes = useStyles();
 
     const handleGoRecentlyViewed = (wo) =>{
@@ -28,7 +28,7 @@ const RecentWO = function(props) {
             console.error("Bad id");
             return;
           }
-          setCurrentView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
+          handleSetView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
           setDetailWOid(wo.wo_record_id);
     }
 

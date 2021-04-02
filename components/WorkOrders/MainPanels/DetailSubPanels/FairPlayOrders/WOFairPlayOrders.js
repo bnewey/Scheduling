@@ -75,7 +75,7 @@ const WOFairPlayOrders = function(props) {
     const {user} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const { workOrderItems, setWorkOrderItems, vendorTypes, shipToContactOptionsWOI, setShipToContactOptionsWOI, fpOrderModalMode,
       setFPOrderModalMode, activeFPOrder, setActiveFPOrder,resetFPForm, setResetFPForm,

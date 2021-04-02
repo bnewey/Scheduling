@@ -30,7 +30,7 @@ const AddEditEntityContact = function(props) {
         editContactModalMode, setEditContactModalMode, setContacts} = props;
 
     const { entities, setEntities,
-        currentView, setCurrentView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
+        currentView, previousView, handleSetView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
     
     const [defaultAddresses, setDefaultAddresses] = useState(null);
     const [entContactTitles, setEntContactTitles] = useState(null);

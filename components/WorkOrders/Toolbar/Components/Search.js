@@ -22,11 +22,11 @@ const Search = function(props) {
   const {user} = props;
 
   
-  const [searchValue,setSearchValue] = useState("");
+  
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, setCurrentView, views} = useContext(ListContext);
+  const {searchValue,setSearchValue, workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, previousView, handleSetView, views} = useContext(ListContext);
   const searchOpen = currentView && currentView.value == "search";
 
   const searchTableObject= [
@@ -48,6 +48,7 @@ const Search = function(props) {
   const searchRef = React.useRef(null);
   const tableRef = React.useRef(null);
   const listRef = React.useRef(null);
+  
 
   useEffect(()=>{
     if(searchTable){
@@ -208,7 +209,7 @@ const Search = function(props) {
 
   const handleSearchClick = async() =>{
     if(searchOpen == false){
-      setCurrentView( views.filter((view)=> view.value == "search")[0] )
+      handleSetView( views.filter((view)=> view.value == "search")[0] )
       
     }else{
       //submit search

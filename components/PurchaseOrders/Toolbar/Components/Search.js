@@ -25,7 +25,7 @@ const Search = function(props) {
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { purchaseOrders,setPurchaseOrders, currentView, setCurrentView, views} = useContext(ListContext);
+  const { purchaseOrders,setPurchaseOrders, currentView, previousView, handleSetView, views} = useContext(ListContext);
   const searchOpen = currentView && currentView.value == "search";
 
   const searchTableObject= [
@@ -154,7 +154,7 @@ const Search = function(props) {
 
   const handleSearchClick = async() =>{
     if(searchOpen == false){
-      setCurrentView( views.filter((view)=> view.value == "search")[0] )
+      handleSetView( views.filter((view)=> view.value == "search")[0] )
       
     }else{
       //submit search

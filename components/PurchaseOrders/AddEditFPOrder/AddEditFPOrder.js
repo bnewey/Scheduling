@@ -31,7 +31,7 @@ import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 const AddEditFPOrder = function(props) {
     const {user,  fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder, fpOrders, setFPOrders,
-        purchaseOrders, setPurchaseOrders, currentView, setCurrentView, views,  vendorTypes, setVendorTypes,
+        purchaseOrders, setPurchaseOrders, currentView, previousView, handleSetView, views,  vendorTypes, setVendorTypes,
         fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, arrivedState, setArrivedState, resetFPForm, setResetFPForm, 
         activeWorkOrder /* not actually here in Purcahse Orders but in WO */,} = props;
 

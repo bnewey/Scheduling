@@ -22,7 +22,7 @@ const EntitySidebarList = function(props) {
 
 
 
-  const { entities,setEntities, currentView, setCurrentView, 
+  const { entities,setEntities, currentView, previousView, handleSetView, 
     editEntModalOpen, setEditEntModalOpen, setEditModalMode} = useContext(ListContext);
   
   const classes = useStyles();

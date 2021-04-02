@@ -39,7 +39,7 @@ const AddEditWOIModal = function(props) {
     const {user } = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
-    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
     const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
         setEditWOIModalOpen, vendorTypes, shipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToContactOptionsWOI} = useContext(DetailContext)

@@ -26,7 +26,7 @@ const Search = function(props) {
   const [searchHistory, setSearchHistory] = useState(null);
   
   const { entities, setEntities,
-    currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+    currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
     editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
     
   const searchOpen = currentView && currentView.value == "search";
@@ -157,7 +157,7 @@ const Search = function(props) {
 
   const handleSearchClick = async() =>{
     if(searchOpen == false){
-      setCurrentView( views.filter((view)=> view.value == "search")[0] )
+      handleSetView( views.filter((view)=> view.value == "search")[0] )
       
     }else{
       //submit search

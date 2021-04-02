@@ -17,7 +17,7 @@ const FilterCompInv = function(props) {
     const {user} = props;
   
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-      currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers, compInvState, setCompInvState} = useContext(ListContext);
+      currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers, compInvState, setCompInvState} = useContext(ListContext);
     const classes = useStyles();
 
     

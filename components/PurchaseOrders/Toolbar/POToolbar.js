@@ -24,7 +24,7 @@ const OrdersToolbar = function(props) {
 
   
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, setCurrentView, views, detailWOid,setDetailWOid, activeWorkOrder} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, detailWOid,setDetailWOid, activeWorkOrder} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "allPurchaseOrders";
 
@@ -49,7 +49,7 @@ const OrdersToolbar = function(props) {
   const toolBarLeftGrid = ()=>{
     const handleCloseView = (view)=>{
     
-      setCurrentView(views.find((view)=> view.value == currentView.closeToView));
+      handleSetView(views.find((view)=> view.value == currentView.closeToView));
       //Run onClose and onClose of parent page in case it is child
       if(view.onClose){
         view.onClose();

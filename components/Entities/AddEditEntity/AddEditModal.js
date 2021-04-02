@@ -32,7 +32,7 @@ const AddEditEntity = function(props) {
     const {user, editModalMode} = props;
 
     const { entities, setEntities,
-        currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,setEntitiesRefetch,
+        currentView, previousView, handleSetView,views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,setEntitiesRefetch,
         editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
 
 
@@ -145,7 +145,7 @@ const AddEditEntity = function(props) {
                     //Get id of new workorder and set view to detail
                     if(data && data.insertId){
                         setDetailEntityId(data.insertId);
-                        setCurrentView(views.filter((v)=>v.value == "entityDetail")[0]);
+                        handleSetView(views.filter((v)=>v.value == "entityDetail")[0]);
                     }
                     cogoToast.success(`Entity has been added!`, {hideAfter: 4});
                     setEntitiesRefetch(null);
@@ -173,7 +173,7 @@ const AddEditEntity = function(props) {
             .then((data)=>{
                 setEntitiesRefetch(true);
                 handleCloseModal();
-                setCurrentView(views.filter((v)=>v.value == "allEntities")[0]);
+                handleSetView(views.filter((v)=>v.value == "allEntities")[0]);
             })
             .catch((error)=>{
                 cogoToast.error("Failed to Delete entity")

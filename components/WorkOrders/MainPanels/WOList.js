@@ -22,7 +22,7 @@ const OrdersList = function(props) {
   const {user} = props;
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, 
-    currentView, setCurrentView, views, detailWOid,setDetailWOid} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, detailWOid,setDetailWOid} = useContext(ListContext);
   const classes = useStyles();
 
   const [page, setPage] = React.useState(0);
@@ -69,7 +69,7 @@ const OrdersList = function(props) {
       console.error("Bad id");
       return;
     }
-    setCurrentView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
+    handleSetView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
     setDetailWOid(wo_id);
 
   }

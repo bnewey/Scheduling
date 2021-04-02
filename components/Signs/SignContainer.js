@@ -52,6 +52,7 @@ const SignContainer = function(props) {
                       onClose: ()=> {setSignRefetch(true)}} ];
 
   const [currentView,setCurrentView] = useState(null);
+  const [previousView, setPreviousView] = useState(null);
   const [keys, setKeys] = useState(null);
   const [keyState, setKeyState] = useState(null);
   const [columnState, setColumnState] = useState(null);
@@ -85,9 +86,9 @@ const SignContainer = function(props) {
       }
       if(tmpParsed){
         var view = views.filter((v)=> v.value == tmpParsed)[0]
-        setCurrentView(view || views[0]);
+        handleSetView(view || views[0]);
       }else{
-        setCurrentView(views[0]);
+        handleSetView(views[0]);
       }
     }
     if(currentView){
@@ -326,6 +327,10 @@ const SignContainer = function(props) {
   // },[vendorTypes])
 
    
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+    setPreviousView(currentView ? currentView : null);
+  }
 
   const getMainComponent = () =>{
     switch(currentView.value){
@@ -366,7 +371,7 @@ const SignContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{signs, setSigns, setSignRefetch,currentView, setCurrentView, views, signsSaved, setSignsSaved,filters, setFilters,
+      <ListContext.Provider value={{signs, setSigns, setSignRefetch,currentView, previousView,handleSetView, views, signsSaved, setSignsSaved,filters, setFilters,
       filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState, keyState, setKeyState, columnState, setColumnState, 
       columns, setColumns, signSearchRefetch, setSignSearchRefetch} } >
       

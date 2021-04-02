@@ -16,7 +16,7 @@ const CompInvTool = function(props) {
     const {user} = props;
   
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-      currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+      currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers} = useContext(ListContext);
     const classes = useStyles();
 
     const [completed, setCompleted] = useState(activeWorkOrder ? (activeWorkOrder["completed"] == 1 ? true : false ) : false )

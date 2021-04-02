@@ -27,7 +27,7 @@ const EntitiesDrawer = function(props) {
                                      entityBillingEntityEditChanged, setEntityBillingEntityEditChanged} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid,
-    currentView, setCurrentView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers, } = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers, } = useContext(ListContext);
 
     const [entityRows, setEntityRows] = useState(null);
     const [searchValue,setSearchValue] = useState("");

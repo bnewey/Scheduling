@@ -19,7 +19,7 @@ const RecentEnt = function(props) {
     const {user} = props;
   
     const {entities, setEntities,
-        currentView, setCurrentView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
+        currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
         editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
         setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
     const classes = useStyles();
@@ -30,7 +30,7 @@ const RecentEnt = function(props) {
             console.error("Bad id");
             return;
           }
-          setCurrentView(views && views.filter((view, i)=> view.value == "entityDetail")[0]);
+          handleSetView(views && views.filter((view, i)=> view.value == "entityDetail")[0]);
           setDetailEntityId(entity.record_id);
     }
 

@@ -20,7 +20,7 @@ const WOSidebarDetail = function(props) {
 
 
 
-  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, setEditWOModalOpen, setEditModalMode, currentView,setCurrentView, views,
+  const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, setEditWOModalOpen, setEditModalMode, currentView,previousView, handleSetView, views,
     activeWorkOrder } = useContext(ListContext);
 
   const {setEditWOIModalMode,setEditWOIModalOpen, setFPOrderModalOpen, setFPOrderModalMode} = useContext(DetailContext);
@@ -50,7 +50,7 @@ const WOSidebarDetail = function(props) {
 
     WorkOrderDetail.addPackingSlip(activeWorkOrder.wo_record_id)
     .then((data)=>{
-      setCurrentView(views.find((v)=> v.value === "packingSlip"))
+      handleSetView(views.find((v)=> v.value === "packingSlip"))
       //setPackingSlips(null);
     })
     .catch((error)=>{

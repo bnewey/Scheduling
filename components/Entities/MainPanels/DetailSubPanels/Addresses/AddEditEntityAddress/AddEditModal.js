@@ -30,7 +30,7 @@ const AddEditEntityAddress = function(props) {
          editAddressModalMode,setEditAddressModalMode , detailEntAddressId,setDetailEntAddressId} = props;
 
     const { entities, setEntities,
-        currentView, setCurrentView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
+        currentView, previousView, handleSetView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
 
     useEffect(()=>{
         if(detailEntAddressId){

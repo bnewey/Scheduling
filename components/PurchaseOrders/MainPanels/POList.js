@@ -31,7 +31,7 @@ const POrdersList = function(props) {
   const {user} = props;
 
   const { purchaseOrders, setPurchaseOrders, rowDateRange, setDateRowRange, activeFPOrder, setActiveFPOrder,fpOrders,setFPOrders,
-    currentView, setCurrentView, views, detailWOid,setDetailWOid, fpOrderModalMode, setFPOrderModalMode,fpOrderModalOpen, setFPOrderModalOpen,vendorTypes,
+    currentView, previousView, handleSetView, views, detailWOid,setDetailWOid, fpOrderModalMode, setFPOrderModalMode,fpOrderModalOpen, setFPOrderModalOpen,vendorTypes,
     setVendorTypes,raineyUsers, setRaineyUsers, arrivedState, setArrivedState, resetFPForm, setResetFPForm,
     } = useContext(ListContext);
 
@@ -89,7 +89,7 @@ const POrdersList = function(props) {
   //     console.error("Bad id");
   //     return;
   //   }
-  //   //setCurrentView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
+  //   //handleSetView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
   //   //setDetailWOid(wo_id);
 
   // }

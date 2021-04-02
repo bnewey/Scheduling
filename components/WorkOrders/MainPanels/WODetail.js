@@ -24,7 +24,7 @@ const WODetail = function(props) {
   const {user} = props;
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
   const classes = useStyles();
 
   const {workOrderItems, setWorkOrderItems} = useContext(DetailContext);

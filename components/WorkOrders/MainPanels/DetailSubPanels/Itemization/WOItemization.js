@@ -30,7 +30,7 @@ const WOItemization = function(props) {
   const {user} = props;
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, setCurrentView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
 
   const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
         setEditWOIModalOpen, vendorTypes, shipToContactOptionsWOI} = useContext(DetailContext)
