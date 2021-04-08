@@ -1,6 +1,6 @@
 
 import {makeStyles} from '@material-ui/core';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const fetch = require("isomorphic-fetch");
 const { compose, withProps, withHandlers } = require("recompose");
@@ -9,6 +9,7 @@ const {
   withGoogleMap,
   GoogleMap,
   Marker,
+  OverlayView
 } = require("react-google-maps");
 const { MarkerClusterer } = require("react-google-maps/lib/components/addons/MarkerClusterer");
 const { MarkerWithLabel } = require("react-google-maps/lib/components/addons/MarkerWithLabel");
@@ -23,6 +24,7 @@ import Util from '../../../js/Util';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
+import _ from 'lodash';
 
 
 //radar variables need to be global
@@ -108,6 +110,12 @@ const CustomMap = compose(
       //console.log("infowindow content changed ", window)
 
     },
+    getPixelPositionOffset: () => (offsetWidth, offsetHeight, labelAnchor) => {
+        return {
+            x: offsetWidth + labelAnchor.x,
+            y: offsetHeight + labelAnchor.y,
+        };
+    },
     
   }),
   withScriptjs,
@@ -121,7 +129,10 @@ const CustomMap = compose(
         multipleMarkersOneLocation,setMultipleMarkersOneLocation} = props;
 
     const [markerToRemap, setMarkerToRemap] = React.useState(null);
-
+    const [markerLabels, setMarkerLabels] = React.useState(null);
+    const [savedClusterer, setSavedClusterer] = React.useState(null)
+    const clustererLengthRef= React.useRef(null);
+    const [changeStateSoMapUpdates, setChangeStateSoMapUpdates] = React.useState(1);
     //Radar state maybe can stay here
     
     const [animationTimer, setAnimationTimer] =React.useState(false);
@@ -298,9 +309,97 @@ const CustomMap = compose(
         return tempBounds;
     };
 
-    const handleClusterClick = (event)=>{
-        console.log("event", event);
+    const handleClusterEnd = (clusterer) =>{
+        //Checking our saved ref vs current clusterer (only way to tell if clusters have changed so it will update the overlay labels)
+        //checking each cluster length of ref vs current cluster
+        if(savedClusterer && !_.isEqual(clustererLengthRef.current, clusterer?.clusters_.map((cluster)=> cluster.length))){ 
+            clusterer["key"] = Math.random(); 
+            setChangeStateSoMapUpdates(Math.random());
+        }
+        
+        if(savedClusterer){
+            clustererLengthRef.current =  savedClusterer.clusters_.map((cluster)=> cluster.length)
+        }
+        setSavedClusterer(clusterer); return;
     }
+
+    const getInitialsFromName = (name)=> {
+        var names = name.split(' '),
+        initials = names[0].substring(0, 1).toUpperCase();
+    
+        if (names.length > 1) {
+            initials += names[names.length - 1].substring(0, 1).toUpperCase();
+        }
+        return initials;
+    }
+
+    useEffect(()=>{
+        console.log("Random", savedClusterer);
+        if(!savedClusterer){
+            console.log(" Bad Random", savedClusterer);
+            return;
+        }
+
+        const markerLabelsList = [];
+        let allClusters = savedClusterer.clusters_,
+            allMarkers;
+            allClusters.forEach( (cluster, clusterIndex) => {
+            allMarkers = cluster.getMarkers();
+            console.log("markers", allMarkers)
+            allMarkers.forEach( (marker, MarkerIndex) => {
+                console.log("marker", marker);
+                let row = JSON.parse(marker.title);
+                let labelAnchor = { x: -66, y: -52 }
+                if (allMarkers.length <= 1) {
+                    let initials = row?.leader_name ? getInitialsFromName(row.leader_name) : 'C' + row?.crew_id ;
+                    let crewColor = row?.crew_color ? row.crew_color : '#bbb';
+                    let borderColor = false ? '#fff' : '#000';
+                    let numServices = 5;
+                   markerLabelsList.push(
+                         <OverlayView
+                             key={MarkerIndex + Math.random()}
+                             position={marker.position}
+                             mapPaneName= {OverlayView.OVERLAY_MOUSE_TARGET}
+                             getPixelPositionOffset={(x, y) => props.getPixelPositionOffset(x, y, labelAnchor)}
+                             >
+                                 <div
+                                   style={{
+                                    background: `#bbb`,
+                                    padding: `12px`,
+                                    fontSize: '11px',
+                                    minHeight: '15px',
+                                    minWidth: '15px',
+                                    color: `white`,
+                                    borderRadius: '50%',
+                                    border: `2px ${borderColor} solid`,
+                                    position: 'relative'
+                                   }}>
+                                    <span style={{
+                                    background: `${crewColor}`,
+                                    borderRadius: '50%',
+                                    padding: '2px',
+                                   }}>{initials}</span>
+                                    {numServices && numServices > 0 ? <div style={{
+                                        background: `#fff`,
+                                        color: '#222',
+                                        position: 'absolute',
+                                        padding: '1px',
+                                        minWidth: '18px',
+                                        minHeight: '15px',
+                                        textAlign: 'center',
+                                        bottom: -8,
+                                        right: -3,
+                                        borderRadius: '50%',
+                                        border: `2px #222 solid`,
+                                    }}>{numServices}</div> : ''}
+                                 </div>
+                          </OverlayView>)
+                }
+             });
+            });
+            console.log("markerLabelsList",markerLabelsList)
+            setMarkerLabels(markerLabelsList)
+    },[savedClusterer, savedClusterer?.key])
 
 
   return(
@@ -312,11 +411,12 @@ const CustomMap = compose(
         onClick={event => props.onMapClick(event, markerToRemap, setMarkerToRemap, showingInfoWindow, setShowingInfoWindow, setMapRows, setMapRowsRefetch,
             activeMarker, setActiveMarker, setCrewMarkers,setCrewMarkersRefetch, setTaskMarkers)}
     >
-        <MarkerClusterer
+       <MarkerClusterer
+       
         onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap)}
         averageCenter
+        ignoreHidden={true}
         enableRetinaIcons
-        
         gridSize={40}
         styles={[{ textColor: 'black', height: 53, url: "/static/ClusterIcons/m1.png", width: 53 }, { textColor: 'black', height: 56, url: "/static/ClusterIcons/m2.png", width: 56 }, { textColor: 'white', height: 66, url: "/static/ClusterIcons/m3.png", width: 66 }, { textColor: 'white', height: 78, url: "/static/ClusterIcons/m4.png", width: 78 }, { textColor: 'white', height: 90, url: "/static/ClusterIcons/m5.png", width: 90 }]}
         >
@@ -331,15 +431,15 @@ const CustomMap = compose(
              labelStyle={{backgroundColor: "rgba(202, 69, 58, 0.8)", fontSize: "13px", padding: "2px", borderRadius: '5px', color: '#fff',}}
             ><div>#{index+1}</div> 
             </MarkerWithLabel>
+           
             )})}
-        </MarkerClusterer>
+        </MarkerClusterer> 
         <MarkerClusterer
-        
-        averageCenter
-        enableRetinaIcons={false}
-        maxZoom={14}
-        gridSize={30}
-        styles={[{ textColor: 'black', height: 40, url: "/static/VehicleCluster/m3.png", width: 40 }, { textColor: 'black', height: 40, url: "/static/VehicleCluster/m4.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m3.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m4.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m5.png", width: 40 }]}
+            averageCenter
+            enableRetinaIcons={false}
+            maxZoom={14}
+            gridSize={30}
+            styles={[{ textColor: 'black', height: 40, url: "/static/VehicleCluster/m3.png", width: 40 }, { textColor: 'black', height: 40, url: "/static/VehicleCluster/m4.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m3.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m4.png", width: 40 }, { textColor: 'white', height: 40, url: "/static/VehicleCluster/m5.png", width: 40 }]}
         >
         {vehicleMarkers && visibleItems.indexOf("vehicles") != -1 && vehicleMarkers.map((vehicle,i) => (
             <MarkerWithLabel
@@ -359,24 +459,30 @@ const CustomMap = compose(
             ><div>{vehicle.name}</div></MarkerWithLabel>
         ))}
         </MarkerClusterer>
-        {crewMarkers && visibleItems.indexOf("crewJobs") != -1 && crewMarkers.map((crew,i) => { 
-            const label = crew?.t_name?.length <= 15 ?  `#${i+1} ${crew.t_name}` : `#${i+1} ${crew.t_name.slice(0,15)}..` 
-            return(
-            <MarkerWithLabel
-            position={{ lat: crew.lat, lng: crew.lng}}
-            onClick = { props.updateActiveMarker(crew.id, "crew") }
-            className={'marker'+i}
-            id={crew.id}
-            key={crew.id}
-            title={crew.t_name} 
-            icon={{
-                url: props.handleFindCrewIcon(crew),
-                scaledSize: new google.maps.Size(30 ,30)
-            }}
-            labelAnchor={new google.maps.Point( label.toString().length / 2 * 5 , 0)}
-            labelStyle={{backgroundColor: "rgba(177, 177, 177, 0.7)", fontSize: "10px", padding: "2px"}}
-            ><div>{label}</div></MarkerWithLabel>
-        ) })}
+
+         {changeStateSoMapUpdates && <MarkerClusterer
+        onClusteringEnd={handleClusterEnd}
+        onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap)}
+        averageCenter
+        ignoreHidden={true}
+        enableRetinaIcons
+        gridSize={3}
+        styles={[{ textColor: 'black', height: 53, url: "/static/ClusterIcons/m1.png", width: 53 }, { textColor: 'black', height: 56, url: "/static/ClusterIcons/m2.png", width: 56 }, { textColor: 'white', height: 66, url: "/static/ClusterIcons/m3.png", width: 66 }, { textColor: 'white', height: 78, url: "/static/ClusterIcons/m4.png", width: 78 }, { textColor: 'white', height: 90, url: "/static/ClusterIcons/m5.png", width: 90 }]}
+        >
+            {crewMarkers && visibleItems.indexOf("crewJobs") != -1 && crewMarkers.map((crew,i) => { 
+                return(
+                <Marker
+                    position={{ lat: crew.lat, lng: crew.lng}}
+                    onClick = { props.updateActiveMarker(crew.id, "crew") }
+                    className={'marker'+i}
+                    id={crew.id}
+                    key={crew.id}
+                    title={JSON.stringify(crew)}
+                />
+            ) })}
+        </MarkerClusterer> }
+        {changeStateSoMapUpdates && markerLabels} 
+
         {showingInfoWindow && activeMarker?.type ==="task" ? <MapMarkerInfoWindow {...props} onContentChanged={props.infoWindowContentChanged} 
                             activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
                             setInfoWeather={setInfoWeather} infoWeather={infoWeather}
@@ -388,6 +494,7 @@ const CustomMap = compose(
                             showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} markerToRemap={markerToRemap} setMarkerToRemap={setMarkerToRemap}/> : <></>}
         {showingInfoWindow && activeMarker?.type === "vehicle" && vehicleMarkers ? <MapVehicleInfoWindow activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                     showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>: <></>}
+    
     </GoogleMap></>
   )}
 );

@@ -437,6 +437,24 @@ async function reorderCrewJobs(cj_array, crew_id){
     }
 }
 
+
+async function updateCrewColor(id, color){
+    const route = '/scheduling/crew/updateCrewColor';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id, color})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
 module.exports = {
     addCrewMember,
     deleteCrewMember,
@@ -461,5 +479,6 @@ module.exports = {
     getAllCrews,
     getCrewJobsByCrew,
     reorderCrewJobs,
+    updateCrewColor
 
 };

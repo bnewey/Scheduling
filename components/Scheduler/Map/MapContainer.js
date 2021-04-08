@@ -73,6 +73,7 @@ const MapContainer = (props) => {
     const [markedRows, setMarkedRows] = useState([]);
     const [noMarkerRows, setNoMarkerRows] = useState(null);
     const [multipleMarkersOneLocation,setMultipleMarkersOneLocation ] = React.useState(null);
+
     
     const [infoWeather, setInfoWeather] = useState(null);
 
@@ -512,6 +513,7 @@ const MapContainer = (props) => {
                       handleFindCrewIcon={handleFindCrewIcon}
                       resetBounds={resetBounds}
                       activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
+                      
                       
                       setInfoWeather={setInfoWeather} infoWeather={infoWeather}
                       showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}

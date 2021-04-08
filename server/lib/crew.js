@@ -139,7 +139,7 @@ router.post('/getCrewMembersByCrew', async (req,res) => {
         crew_id = req.body.crew_id;
     }
 
-    const sql = ' SELECT  cm.id as id, ma.member_name, cm.is_leader, cm.crew_id, cc.id as crew_id ' + 
+    const sql = ' SELECT  cm.id as id, ma.member_name, cm.is_leader, cm.crew_id, cc.id as crew_id, cc.color AS crew_color' + 
         ' FROM crew_members cm ' + 
         ' LEFT JOIN crew_members_available ma ON cm.member_id = ma.id ' + 
         ' LEFT JOIN crew_crews cc ON cc.id = cm.crew_id ' + 
@@ -197,7 +197,7 @@ router.post('/getCrewJobsByTask', async (req,res) => {
     }
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
-            ' cm.id as crew_leader_id,  ' +
+            ' cm.id as crew_leader_id, cc.color AS crew_color,  ' +
             ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
@@ -581,7 +581,7 @@ router.post('/deleteCrew', async (req,res) => {
 
 
 router.post('/getAllCrews', async (req,res) => {
-    const sql = ' SELECT cc.id , ma.member_name AS crew_leader_name  ' + 
+    const sql = ' SELECT cc.id , ma.member_name AS crew_leader_name, cc.color AS crew_color  ' + 
             ' FROM crew_crews cc ' +
             ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' + 
             ' LEFT JOIN crew_members_available ma ON ma.id = cm.member_id ' ;
@@ -604,7 +604,7 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
     }
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date, ' + 
-    ' cm.id as crew_leader_id,  ' +
+    ' cm.id as crew_leader_id, cma.member_name AS leader_name, cc.color AS crew_color, ' +
     ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d\') as sch_install_date, ' +
     ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
     ' t.table_id, t.description ' +
@@ -613,6 +613,7 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
     ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 
     ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
     ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' +
+    ' LEFT JOIN crew_members_available cma ON cma.id = cm.member_id ' +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id  ' + 
     // ' LEFT JOIN entities_addresses ea ON (wo.customer_id = ea.entities_id AND ' + 
     // ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
@@ -662,5 +663,25 @@ router.post('/reorderCrewJobs', async (req,res) => {
     })
 });
 
+router.post('/updateCrewColor', async (req,res) => {
+    var color, id;
+    if(req.body){
+        color = req.body.color;
+        id = req.body.id;
+    }
+
+    const sql = 'UPDATE crew_crews SET color = ? ' +
+    ' WHERE id = ? ';
+    
+    try{
+        const response = await database.query(sql, [color, id]);
+        logger.info("Updated crew color to" + color);
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crews (updateCrewColor): " + error);
+        res.sendStatus(400);
+    }
+});
 
 module.exports = router;

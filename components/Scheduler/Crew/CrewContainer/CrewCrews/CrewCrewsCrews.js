@@ -15,6 +15,7 @@ import cogoToast from 'cogo-toast';
 
 import Crew from '../../../../../js/Crew';
 
+import CrewColorPicker from './CrewColorPicker';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -39,7 +40,7 @@ const CrewCrewsCrews = (props) => {
             cogoToast.error("Error selecting crew", {hideAfter: 4})
         }
         if(selectedCrew  && crew.id == selectedCrew.id){
-            setSelectedCrew(null);
+            //setSelectedCrew(null);
             return;
         }
         setLocalCrewJobs(null);
@@ -168,14 +169,17 @@ const CrewCrewsCrews = (props) => {
                         </ListSubheader>
                     }>
                     {allCrews && allCrews.map((crew, i)=>{
+                        console.log("Cre", crew)
                         return(
                             <div className={classes.member_list_item_div}>
-                            <ListItem className={selectedCrew == crew ? classes.member_select_list_item : classes.member_list_item}
+                            <div className={selectedCrew == crew ? classes.member_select_list_item : classes.member_list_item}
                                 key={`crews+${i}`} button
-                                onMouseUp={(event) => handleSelectCrew(event, crew)}>
+                                onClick={(event) => handleSelectCrew(event, crew)}>
                                 
-                                <ListItemText disableTypography className={classes.crew_text}>
-
+                                <div disableTypography className={classes.crew_text}>
+                                    <span className={classes.colorSpan}>
+                                        <CrewColorPicker setShouldResetCrewState={setShouldResetCrewState} crew={crew} />
+                                    </span>
                                     <span className={classes.leaderSpan}>{crew && crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id}</span>
                                     <div className={classes.otherMemberDiv}>
                                         <span className={classes.otherMemberHeadSpan}>
@@ -196,9 +200,9 @@ const CrewCrewsCrews = (props) => {
                                     <IconButton className={classes.secondary_button} edge="end" aria-label="delete" onClick={event => handleDeleteCrew(event, crew.id)}>
                                         <DeleteIcon />
                                     </IconButton> 
-                            </ListItemText>
+                            </div>
                             
-                        </ListItem>
+                        </div>
                         <Collapse in={selectedCrew ? selectedCrew.id == crew.id : false} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding className={classes.crewMemberList}>
                                 {selectedCrewMembers && selectedCrewMembers.map((member)=>{
