@@ -27,8 +27,8 @@ const sorter_table = [{text: "Order", field: "priority_order",  type: 'number'},
                     {text: "Name", field: "t_name", type: 'text'},
                     {text: "State", field: "state", type: 'text'},
                     {text: "Type", field: "type", type: 'text'},
-                    {text: "d_date", field: "drill_date", type: 'date'},
-                    {text: "i_date", field: "sch_install_date", type: 'date'}]
+                    {text: "Drill Date", field: "drill_date", type: 'date'},
+                    {text: "Install Date", field: "sch_install_date", type: 'date'}]
 
 const MapSidebar = (props) => {
     //STATE

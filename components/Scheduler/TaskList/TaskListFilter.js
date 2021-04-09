@@ -53,24 +53,26 @@ const TaskListFilter = (props) => {
     const [selectInstallDateMenuOpen,setSelectInstallDateMenuOpen] = useState(false);
     
     const [tableConfig, setTableInfo] = useState([
-        {text: "Type", field: "type", type: 'text'},
-        {text: "Completed", field: "completed_wo",  type: 'number'}, 
-        // {text: "i_crew", field: "install_crew",  type: 'text'},
-        // {text: "d_crew", field: "drill_crew",  type: 'text'},
-        {text: "Drilling", field: "drilling", type: 'text'},
-        {text: "Art", field: "artwork", type: 'text'},
-        {text: "Signs", field: "sign",  type: 'text'},
-        {text: "State", field: "state", type: 'text'},
-        {text: "City", field: "city", type: 'text'},
-        {text: "d_date", field: "drill_date",  type: 'date'},  
-        {text: "i_date", field: "sch_install_date", type: 'date'},
-        {text: "Desired Date", field: "date_desired", type: 'date'},
-        {text: "Date Entered", field: "tl_date_entered", type: 'date'},
-        {text: "1st Game", field: "first_game", type: 'date'},
-        {text: "Name", field: "t_name", type: 'text'},
-        {text: "WO #", field: "table_id", type: 'number'},
-        {text: "Description", field: "description",  type: 'text'}, 
-        {text: "Order", field: "priority_order", type: 'number'}
+        {text: "Type", field: "type", data_type: 'text'},
+        {text: "Completed", field: "completed_wo",  data_type: 'number'}, 
+        // {text: "i_crew", field: "install_crew",  data_type: 'text'},
+        // {text: "d_crew", field: "drill_crew",  data_type: 'text'},
+        {text: "Drilling", field: "drilling", data_type: 'text'},
+        {text: "Art", field: "artwork", data_type: 'text'},
+        {text: "Signs", field: "sign",  data_type: 'text'},
+        {text: "State", field: "state", data_type: 'text'},
+        {text: "City", field: "city", data_type: 'text'},
+        {text: "Drill Date", field: "drill_date",  data_type: 'date'},  
+        {text: "Install Date", field: "sch_install_date", data_type: 'date'},
+        {text: "Drill Completed", field: "drill_job_completed", data_type: 'number'},
+        {text: "Install Completed", field: "install_job_completed", data_type: 'number'},
+        {text: "Desired Date", field: "date_desired", data_type: 'date'},
+        {text: "Date Entered", field: "tl_date_entered", data_type: 'date'},
+        {text: "1st Game", field: "first_game", data_type: 'date'},
+        {text: "Name", field: "t_name", data_type: 'text'},
+        {text: "WO #", field: "table_id", data_type: 'number'},
+        {text: "Description", field: "description",  data_type: 'text'}, 
+        {text: "Order", field: "priority_order", data_type: 'number'}
     ]);
 
     const [taskUserFilters, setTaskUserFilters] = React.useState(null);
@@ -268,13 +270,15 @@ const TaskListFilter = (props) => {
         setFilterModalOpen(false);
     };
 
-    const handleListFilter = (event, field, fieldItem, compare_type = "equal", data_type ="text",  displayName) =>{
-        if(field == null || fieldItem == null){
+    const handleListFilter = (event, field, fieldItem , compare_type = "equal", data_type ="text",  displayName) =>{
+        if(field == null){
             cogoToast.error("Bad field or item");
             console.log("FIeldItem", fieldItem);
             return;
             
         }
+        console.log("FieldItem", fieldItem)
+        
         //no filters yet
         if(!filters || filters.length <= 0){
             setFilters([{
@@ -393,12 +397,13 @@ const TaskListFilter = (props) => {
 
         switch(selectedField.field){
             case "drill_date":
-                return_array.push(
-                    {value: moment().format('YYYY-MM-DD'), compare_type: "lessthan", data_type: 'date',displayName: "Not Completed"}
-                )
-                return_array.push(
-                    {value: moment().format('YYYY-MM-DD'), compare_type: "greaterthan", data_type: 'date',displayName: "Completed"}
-                )
+                // return_array.push(
+                //     {value: moment().format('YYYY-MM-DD'), compare_type: "lessthan", data_type: 'date',displayName: "Not Completed"}
+                // )
+                // return_array.push(
+                //     {value: moment().format('YYYY-MM-DD'), compare_type: "greaterthan", data_type: 'date',displayName: "Completed"}
+                // )
+                   
                 break;
         }
         return return_array;
@@ -830,7 +835,7 @@ const TaskListFilter = (props) => {
                                         const isFiltered =  (filters.filter((filter, i)=> 
                                         {
                                             if(item?.value != null){
-                                                return (filter.property == selectedField.field && item?.value && filter.value == item?.value.toString() 
+                                                return (filter.property == selectedField.field && item?.value != null && filter.value == item?.value.toString() 
                                                         && ( filter.data_type && item.data_type ? filter.data_type === item.data_type : false ));
                                             }else{
                                                 return (filter.property == selectedField.field && filter.value == "nonassignedValue"
@@ -842,7 +847,7 @@ const TaskListFilter = (props) => {
                                             
                                             <ListItem key={selectedField.field + i} dense button
                                                 className={!isFiltered ? classes.filterListItem : classes.filterListItemFiltered}
-                                               onClick={event=> handleListFilter(event, selectedField.field, item?.value ? item?.value : "nonassignedValue", item.compare_type, item.data_type, item.displayName)}
+                                               onClick={event=> handleListFilter(event, selectedField.field,  item.value != null ? item.value : "nonassignedValue" , item.compare_type, item.data_type, item.displayName)}
 
                                             >
                                                 <ListItemText key={'fieldListItemText'+i}className={classes.filterListItemText}>
@@ -870,7 +875,7 @@ const TaskListFilter = (props) => {
                                             
                                             <ListItem key={selectedField.field + i} dense button
                                                 className={!isFiltered ? classes.filterListItem : classes.filterListItemFiltered}
-                                               onClick={event=> handleListFilter(event, selectedField.field, item?.value ? item?.value : "nonassignedValue", item.compare_type, item.data_type, item.displayName)}
+                                               onClick={event=> handleListFilter(event, selectedField.field, item.value != null ? item.value :  "nonassignedValue" , item.compare_type, item.data_type, item.displayName)}
 
                                             >
                                                 <ListItemText key={'fieldListItemText'+i}className={classes.filterListItemText}>

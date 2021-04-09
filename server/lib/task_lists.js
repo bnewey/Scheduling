@@ -39,10 +39,10 @@ router.post('/getTaskList', async (req,res) => {
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
         ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, mad.member_name AS drill_crew_leader , '  +
-        ' cjd.completed AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
+        ' IFNULL(cjd.completed, 0) AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
         ' date_format(t.drill_date, \'%Y-%m-%d\') as drill_date, ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
-        ' cji.completed AS install_job_completed,  date_format(cji.completed_date, \'%Y-%m-%d %H:%i:%S\') as install_job_completed_date, ' +
+        ' IFNULL(cji.completed,0) AS install_job_completed,  date_format(cji.completed_date, \'%Y-%m-%d %H:%i:%S\') as install_job_completed_date, ' +
         ' date_format(t.sch_install_date, \'%Y-%m-%d\') as sch_install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, e.name AS customer_name, concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name' +
         ' FROM task_list_items tli ' +

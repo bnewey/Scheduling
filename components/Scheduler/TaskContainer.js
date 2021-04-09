@@ -57,9 +57,9 @@ const TaskContainer = function(props) {
               {text: "Description", field: "description", width: '16%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
               {text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
-              {text: "d_date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
+              {text: "Drill Date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
               {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
-              {text: "i_date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+              {text: "Install Date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}]},
     {name: "Compact(No Drill)", value: 1,
        array: [{text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
@@ -70,7 +70,7 @@ const TaskContainer = function(props) {
               {text: "Description", field: "description", width: '18%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
               {text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
-              {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+              {text: "Install Date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},
     {name: "Service Dept", value: 2,
        array: [{text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
@@ -82,7 +82,7 @@ const TaskContainer = function(props) {
               {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
               {text: "Description", field: "description", width: '15%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
               {text: "Job Reference", field: "job_reference", width: '8%', maxWidth: 120, style: 'smallListItemText', type: 'text'},
-              {text: "i_date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+              {text: "Install Date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"} ]}]
 
   //Map Props

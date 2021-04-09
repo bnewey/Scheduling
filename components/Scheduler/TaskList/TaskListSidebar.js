@@ -34,7 +34,7 @@ const TaskListSidebar = (props) => {
     const [editOpen, setEditOpen] = React.useState(false);
     const [editList, setEditList] = React.useState(null);
 
-    const [quickFilters, setQuickFilters] = React.useState(null);
+    const [savedFilters, setSavedFilters] = React.useState(null);
 
     //PROPS
     const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
@@ -53,12 +53,12 @@ const TaskListSidebar = (props) => {
     //Refresh
     useEffect(()=>{
         if(refreshView && refreshView == "taskList"){
-            setQuickFilters(null)
+            setSavedFilters(null)
         }
     },[refreshView])
 
     useEffect(()=>{
-        if(quickFilters == null && user){
+        if(savedFilters == null && user){
             var user_id = user?.id;
             Settings.getTaskUserFilters(user_id)
             .then((data)=>{
@@ -68,7 +68,7 @@ const TaskListSidebar = (props) => {
                         return item;
                     })
                     console.log("taskUSerfilters", savedFilters);
-                    setQuickFilters(savedFilters);
+                    setSavedFilters(savedFilters);
                 }
             })
             .catch((error)=>{
@@ -77,7 +77,7 @@ const TaskListSidebar = (props) => {
             })
         }
         
-    },[quickFilters, user])
+    },[savedFilters, user])
 
     const handleApplySavedFilter = (event, item) =>{
         if(!item){
@@ -330,10 +330,10 @@ const TaskListSidebar = (props) => {
                     })
                 }
                 <div className={classes.priority_info_heading}>
-                    <span>Quick Filters</span>
+                    <span>Saved Filters</span>
                 </div>
                 {
-                    quickFilters && quickFilters.map((filter, index)=>{
+                    savedFilters && savedFilters.map((filter, index)=>{
                         const isSelected =  filter && filters &&_.isEqual(filters ,filter.filter_json) && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and"); 
                             return(
                             <div className={classes.singleLineDiv}>
