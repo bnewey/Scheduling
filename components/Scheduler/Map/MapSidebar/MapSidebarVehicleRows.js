@@ -13,6 +13,7 @@ import Tasks from '../../../../js/Tasks';
 import TaskLists from '../../../../js/TaskLists';
 import {TaskContext} from '../../TaskContainer';
 import Util from '../../../../js/Util';
+import { MapContext } from '../MapContainer';
 
 
 const MapSiderbarVehicleRows = (props) =>{
@@ -22,10 +23,15 @@ const MapSiderbarVehicleRows = (props) =>{
 
     //PROPS
     //activeMarkerId / setActiveMarkerId / vehicleRows passed from MapContainer => MapSidebar => Here
-    const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, vehicleRows, setMarkedRows , 
-          setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, vehiclePanelRef, expanded, setExpanded, expandedAnimDone} = props;
+    const {   vehiclePanelRef, expanded, setExpanded, expandedAnimDone, tabValue, setTabValue} = props;
     
-    const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
+    const { setModalOpen,setModalTaskId, selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
+
+    const { mapRows, setMapRows,noMarkerRows, setMapRowsRefetch, markedRows, setMarkedRows, vehicleRows, setVehicleRows,
+      activeMarker, setActiveMarker,  setResetBounds, infoWeather,setInfoWeather, bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,
+      visualTimestamp, setVisualTimestamp, radarControl, setRadarControl,  radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, timestamps, setTimestamps,
+      multipleMarkersOneLocation, setMultipleMarkersOneLocation, crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, unfilteredJobs, setUnfilteredJobs,
+      showCompletedJobs, setShowCompletedJobs,setShowingInfoWindow} = useContext(MapContext);
     //CSS
     const classes = useStyles();
     //FUNCTIONS

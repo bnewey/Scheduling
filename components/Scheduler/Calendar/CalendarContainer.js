@@ -431,8 +431,7 @@ const CalendarContainer = (props) => {
             }
         }
 
-        //getFunction does not work
-        Promise.all([Tasks.updateMultipleTaskDates([id], date, type),  getFunction(what_to_run)  ])
+        Promise.all([Tasks.updateMultipleTaskDates([id], date, crew_job.job_type),  getFunction(what_to_run)  ])
         .then((values)=>{
             console.log(values);
             //setCalendarRows(null);

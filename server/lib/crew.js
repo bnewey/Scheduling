@@ -114,8 +114,8 @@ router.post('/getCrewMembersByTask', async (req,res) => {
         id = req.body.id;
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, cm.id as m_id, ma.member_name, j.job_type, cm.is_leader, cm.crew_id, ' + 
-        ' t.name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, cm.id as m_id, ma.member_name, j.job_type, j.num_services, cm.is_leader, cm.crew_id, ' + 
+        ' t.name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' + 
         ' FROM crew_jobs j ' + 
         ' LEFT JOIN crew_members_available ma ON cm.member_id = ma.id ' + 
         ' LEFT JOIN crew_members cm ON j.crew_id = m.crew_id ' +
@@ -166,9 +166,9 @@ router.post('/getCrewJobsByMember', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ' + 
             ' cm.is_leader, cm.id as cm_id, ma.member_name, ma.id as ma_id,  ' +
-            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
+            ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
             ' LEFT JOIN crew_members cm ON cm.crew_id = j.crew_id ' +
@@ -196,9 +196,9 @@ router.post('/getCrewJobsByTask', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
             ' cm.id as crew_leader_id, cc.color AS crew_color,  ' +
-            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
+            ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
             ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
@@ -217,6 +217,47 @@ router.post('/getCrewJobsByTask', async (req,res) => {
     }
 });
 
+router.post('/getCrewJobsByTaskList', async (req,res) => {
+    var tl_id;
+    if(req.body){
+        tl_id = req.body.tl_id;
+    }
+    if(!tl_id){
+        logger.error("Id is not valid in getCrewJobsByTaskList");
+        res.sendStatus(400);
+    }
+
+
+    const sql = ' SELECT tl.id as tl_id, tl.list_name as tl_name, j.id, t.id AS task_id, j.date_assigned, j.ordernum, ' + 
+            ' j.job_type, j.num_services, j.crew_id, ma.member_name AS leader_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
+            ' cm.id as crew_leader_id, cc.color AS crew_color,  t.table_id, t.description, ' +
+            ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
+            '  concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ' +
+            ' date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as job_date ' +
+            ' FROM task_list_items tli ' +
+            ' LEFT JOIN task_list tl ON tli.task_list_id = tl.id ' +
+            ' LEFT JOIN tasks t ON t.id = tli.task_id ' +  
+            ' LEFT JOIN crew_jobs j ON j.task_id = t.id ' +
+            ' LEFT JOIN crew_crews cc ON cc.id = j.crew_id  ' + 
+            ' LEFT JOIN crew_members cm ON cm.is_leader = 1 AND cm.crew_id = cc.id ' +
+            ' LEFT JOIN crew_members_available ma ON cm.member_id = ma.id ' +
+            ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 
+            ' LEFT JOIN entities e ON wo.customer_id = e.record_id '  +
+            ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id  ' +
+            ' WHERE tli.task_list_id = ? ' ;
+    
+    try{
+        const results = await database.query(sql, [tl_id]);
+        logger.info("Got crew jobs by member" + tl_id);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("Crews (getCrewJobsByTaskList): "+ tl_id+ "  , " + error);
+        res.sendStatus(400);
+    }
+});
+
+
 router.post('/getCrewJobsByTaskIds', async (req,res) => {
     var ids, job_type;
     if(req.body){
@@ -228,8 +269,8 @@ router.post('/getCrewJobsByTaskIds', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
-            ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
+    const sql = ' SELECT j.id, j.num_services, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
+            ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id' + 
             ' LEFT JOIN crew_members m ON j.crew_members_id = m.id ' +
@@ -337,8 +378,8 @@ router.post('/deleteCrewJobMember', async (req,res) => {
 });
 
 router.post('/getAllCrewJobs', async (req,res) => {
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id , j.ordernum, j.completed, j.completed_date, ' + 
-    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.num_services, j.job_type, j.crew_id , j.ordernum, j.completed, j.completed_date, ' + 
+    ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' ;
     
@@ -359,15 +400,16 @@ router.post('/addCrewJobs', async (req,res) => {
         ids = req.body.ids;
         job_type = req.body.job_type;
         crew_id = req.body.crew_id;
+        date = req.body.date;
     }
-    if(!ids || !job_type || !crew_id){
+    if(!ids || !job_type ){
         logger.error("Id, jobtype, or crew is not valid in addCrewJobs");
         res.sendStatus(400);
     }
 
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj WHERE crew_id = ?; "
 
-    const sql = ' INSERT INTO crew_jobs (task_id, job_type, crew_id, ordernum) VALUES (? , ? , ?, ?)  ' + 
+    const sql = ' INSERT INTO crew_jobs (task_id, job_type, crew_id, ordernum, job_date) VALUES (? , ? , ?, ?,?)  ' + 
             ' ON DUPLICATE KEY UPDATE crew_id = VALUES(crew_id) '  ;
     
     var all_results = [];
@@ -378,7 +420,7 @@ router.post('/addCrewJobs', async (req,res) => {
     async.forEachOf(ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            all_results.push(await database.query(sql, [id, job_type, crew_id, max+i]));
+            all_results.push(await database.query(sql, [id, job_type, crew_id, max+i, date]));
             return;
         }
         catch(error){
@@ -389,7 +431,7 @@ router.post('/addCrewJobs', async (req,res) => {
             logger.error("Crews (addCrewJobs): "+ ids+ " "+ job_type +"  , " + err);
             res.sendStatus(400);
         }else{
-            logger.info("Added by task ids: " + ids + " , job_type: " + job_type + " , crew_id:" + crew_id );
+            logger.info("Added by task ids: " + ids + " , job_type: " + job_type + " , crew_id:" + crew_id + ', date: ' + date);
             res.json(all_results);
         }
     })
@@ -465,6 +507,73 @@ router.post('/updateCrewJob', async (req,res) => {
     }
     catch(error){
         logger.error("Crews (updateCrewJob): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/updateCrewJobDate', async (req,res) => {
+    var date, job_id;
+    if(req.body){
+        date = req.body.date;
+        job_id = req.body.job_id;
+    }
+
+    const sql = 'UPDATE crew_jobs SET job_date = ? ' +
+    ' WHERE id = ? ';
+    
+    try{        
+        const response = await database.query(sql, [date, job_id  ]);
+
+        logger.info("Updated crew job " + job_id + " to date: " + date );
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crews (updateCrewJobDate): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/updateCrewJobType', async (req,res) => {
+    var type, job_id;
+    if(req.body){
+        type = req.body.type;
+        job_id = req.body.job_id;
+    }
+
+    const sql = 'UPDATE crew_jobs SET job_type = ? ' +
+    ' WHERE id = ? ';
+    
+    try{        
+        const response = await database.query(sql, [type, job_id  ]);
+
+        logger.info("update crew job " + job_id + " to type: " + type );
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crews (updateCrewJobType): " + error);
+        res.sendStatus(400);
+    }
+});
+
+
+router.post('/updateCrewNumServices', async (req,res) => {
+    var numServices, job_id;
+    if(req.body){
+        numServices = req.body.numServices;
+        job_id = req.body.job_id;
+    }
+
+    const sql = 'UPDATE crew_jobs SET num_services = ? ' +
+    ' WHERE id = ? ';
+    
+    try{        
+        const response = await database.query(sql, [numServices, job_id  ]);
+
+        logger.info("Updated crew job " + job_id + " to numServices: " + numServices );
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crews (updateCrewNumServices): " + error);
         res.sendStatus(400);
     }
 });
@@ -603,9 +712,9 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
         crew_id = req.body.crew_id;
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date, ' + 
-    ' cm.id as crew_leader_id, cma.member_name AS leader_name, cc.color AS crew_color, ' +
-    ' t.name as t_name, date_format(t.drill_date, \'%Y-%m-%d\') as drill_date, date_format(t.sch_install_date, \'%Y-%m-%d\') as sch_install_date, ' +
+    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.crew_id, j.ordernum, j.num_services, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date, ' + 
+    ' cm.id as crew_leader_id, cma.member_name AS leader_name, cc.color AS crew_color, cc.id AS crew_id, ' +
+    ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d\') as drill_date, date_format(j.job_date, \'%Y-%m-%d\') as sch_install_date, ' +
     ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
     ' t.table_id, t.description ' +
     ' FROM crew_jobs j ' +

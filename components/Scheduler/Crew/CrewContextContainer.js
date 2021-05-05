@@ -25,6 +25,7 @@ const CrewContainer = function(props) {
     const [shouldResetCrewState, setShouldResetCrewState] = useState(false);
     const [crewJobDateRange, setCrewJobDateRange] = useState({to: Util.convertISODateToMySqlDate(new Date(new Date().setDate(today.getDate()+30))),
         from: Util.convertISODateToMySqlDate(today)})
+    const [crewJobDateRangeActive, setCrewJobDateRangeActive] = useState(false)
         
     //Modal Props
     const [crewModalOpen, setCrewModalOpen] = React.useState(false);
@@ -119,7 +120,8 @@ const CrewContainer = function(props) {
     return (
     <div className={classes.root}>
         <CrewContext.Provider value={{setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
-                allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews, crewJobDateRange, setCrewJobDateRange} } >
+                allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews, crewJobDateRange, setCrewJobDateRange,
+                crewJobDateRangeActive, setCrewJobDateRangeActive} } >
                     <> <>{children} </>
    
                     </>

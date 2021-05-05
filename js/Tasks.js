@@ -76,7 +76,7 @@ async function updateTask(task){
 
 }
 
-async function updateMultipleTaskDates(ids, date, date_type){
+async function updateMultipleTaskDates(ids, date, job_type){
     const route = '/scheduling/tasks/updateMultipleTaskDates';
     try{
         var response = await fetch(route,
@@ -85,7 +85,7 @@ async function updateMultipleTaskDates(ids, date, date_type){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids,date, date_type})
+                body: JSON.stringify({ids,date, job_type})
             });
             return response.ok;
     }catch(error){

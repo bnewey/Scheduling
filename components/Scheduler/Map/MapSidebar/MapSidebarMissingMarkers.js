@@ -5,13 +5,16 @@ import {makeStyles, List, ListItem, ListItemSecondaryAction, ListItemText, IconB
 import DeleteIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import { TaskContext } from '../../TaskContainer';
+import { MapContext } from '../MapContainer';
 
 
 const MapSiderbarMissingMakers = (props) =>{
-    const {mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, noMarkerRows , setModalOpen, setModalTaskId, setResetBounds,
-          infoWeather, setInfoWeather} = props;
+    //const {   } = props;
 
-    const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap} = useContext(TaskContext);
+    const { mapRows, setMapRows,noMarkerRows, activeMarker, setActiveMarker,  setResetBounds,setInfoWeather,setShowingInfoWindow} = useContext(MapContext);
+
+
+    const { setModalOpen, setModalTaskId,  crewToMap, setCrewToMap, sorters, setSorters, setInstallDateFilters, selectedIds, setSelectedIds} = useContext(TaskContext);
 
     //CSS
     const classes = useStyles();

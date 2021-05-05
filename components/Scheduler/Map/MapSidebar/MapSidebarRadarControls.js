@@ -1,17 +1,21 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles, Paper, Button, ButtonGroup, Slider} from '@material-ui/core'
 import PauseIcon from '@material-ui/icons/Pause';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
+import { MapContext } from '../MapContainer';
 
 const MapSidebarRadarControls = (props) => { 
 
-    const {visibleItems, setVisibleItems,
-        visualTimestamp, setVisualTimestamp,
-        radarControl, setRadarControl, radarOpacity, setRadarOpacity,
-        radarSpeed, setRadarSpeed, timestamps, setTimestamps} = props;
+    //const {} = props;
+    
+    const { visibleItems, setVisibleItems,
+        visualTimestamp, setVisualTimestamp, radarControl, setRadarControl,  radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, timestamps, setTimestamps,
+    } = useContext(MapContext);
+    
+    
 
     //CSS
     const classes = useStyles();

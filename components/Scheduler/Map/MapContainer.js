@@ -6,7 +6,7 @@ import ActiveVehicleIcon from '@material-ui/icons/PlayArrow';
 import StoppedVehicleIcon from '@material-ui/icons/Stop';
 import MapSidebar from './MapSidebar/MapSidebar';
 import CustomMap from './Map';
-import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
+import { useState, useEffect, useMemo, useCallback, useContext , createContext} from 'react';
 import moment from 'moment';
 
 const fetch = require("isomorphic-fetch");
@@ -34,10 +34,13 @@ import { TaskContext } from '../TaskContainer';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
+export const MapContext = createContext(null);
+
 import {createFilter} from '../../../js/Filter';
 import {createSorter} from '../../../js/Sort';
 import { use } from 'passport';
 import { CrewContext } from '../Crew/CrewContextContainer';
+import _ from 'lodash';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -59,14 +62,14 @@ const MapContainer = (props) => {
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
           filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, refreshView,
-          installDateFilters , setInstallDateFilters} = useContext(TaskContext);
-    const { crewJobDateRange, setShouldResetCrewState} = useContext(CrewContext);
+          installDateFilters , setInstallDateFilters, job_types} = useContext(TaskContext);
+
+    const { crewJobDateRange, setShouldResetCrewState, crewJobDateRangeActive} = useContext(CrewContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
     const [activeMarker, setActiveMarker] = useState(null);
-    const markerTypes = ["task", "vehicle", "crew"];
-
-    const [bounds, setBounds] = useState(null);
     
+    const [changeStateSoMapUpdates, setChangeStateSoMapUpdates] = React.useState(1);
+
     const [mapRows, setMapRows] = useState(null); 
     const [mapRowsRefetch, setMapRowsRefetch] = useState(false);
     const [resetBounds, setResetBounds] = React.useState(true);
@@ -82,7 +85,7 @@ const MapContainer = (props) => {
     const [vehicleRows, setVehicleRows] = useState(null);
     const [vehicleNeedsRefresh, setVehicleNeedsRefresh] = useState(true);
     const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
-    const [visibleItems, setVisibleItems] = React.useState(() => ['tasks' ,'vehicles']);
+    const [visibleItems, setVisibleItems] = React.useState(() => ['crewJobs' ,'vehicles']);
 
     //Crew
     //const [localCrewJobs, setLocalCrewJobs] = useState(null);
@@ -90,6 +93,9 @@ const MapContainer = (props) => {
     const [crewJobsRefetch, setCrewJobsRefetch] = useState(false);
     const [unfilteredJobs, setUnfilteredJobs] = useState(null);
     const [showCompletedJobs, setShowCompletedJobs] = React.useState(false);
+    const [crewFilters,setCrewFilters] = React.useState([]);
+    const [crewJobSorters, setCrewJobSorters] = useState([{property: "job_date", direction: 'ASC' }]);
+
 
 
     const [mapHeight,setMapHeight] = useState('400px');
@@ -100,6 +106,8 @@ const MapContainer = (props) => {
     const [radarOpacity, setRadarOpacity] = React.useState(.5);
     const [radarSpeed, setRadarSpeed] = React.useState(400);
     const [visualTimestamp, setVisualTimestamp] = useState(null);
+
+   
 
     //Refresh state for components outside scope
     useEffect(()=>{
@@ -356,45 +364,94 @@ const MapContainer = (props) => {
     }, [noMarkerRows, mapRows])
 
     useEffect(()=>{
-      if(crewToMap && (crewJobs == null || crewJobsRefetch == true)){
+      //we get crewJobs and then filter using the mapRows (because mapRows is already filtered to what our tasklist is)
+      if( mapRows && (crewToMap || taskListToMap) && (crewJobs == null || crewJobsRefetch == true) && crewFilters && crewJobSorters ){
           if(crewJobsRefetch == true){
             setCrewJobsRefetch(false);
           }
+          if(taskListToMap){
+            Crew.getCrewJobsByTaskList(taskListToMap.id)
+            .then((data)=>{
+                if(data){
+                    console.log("Data from crewJobsByTL", data);
+                    //Filter using mapRows (ie tasks from TL + filters + sorters)
+                    var updateData = data.filter((item)=>{
+                      return (mapRows.find((row)=> row.t_id === item.task_id)) ? true : false
+                    })
 
-          Crew.getCrewJobsByCrew(crewToMap.id)
-          .then((data)=>{
-              if(data){
-                  //filter using to and from dates
-                  var updateData = data.filter((j)=>j.completed == 0)
-                  if(crewJobDateRange){
-                      updateData = updateData.filter((job,i)=>{
-                          var date;
-                          if(job.job_type == "install"){
-                              date = Util.convertISODateToMySqlDate(job.sch_install_date) || null;
+                    //Filter out completed (seperate list)
+                    //This also filters out items with no crew_job (j.completed is null so fails filter check)
+                    updateData = updateData.filter((j)=>j.completed == 0)
+                    
+                    //Filter using crewFilterButton items if enabled
+                    if(crewFilters?.length){
+                      updateData = updateData.filter((job)=>{
+                        
+                        let return_value = (_.find(crewFilters,function(filter) { 
+                          //handle unassigned items
+                          if(filter === 'unassigned' && job.crew_id === null){
+                            return true;
                           }
-                          if(job.job_type == "drill"){
-                              date = Util.convertISODateToMySqlDate(job.drill_date) || null;
-                          }
-  
-                          if(date != null){
-                              return moment(date).isAfter( moment(Util.convertISODateToMySqlDate(crewJobDateRange.from)).subtract(1, 'days')) && moment(date).isBefore( moment(Util.convertISODateToMySqlDate(crewJobDateRange.to)).add(1,'days'))
-                          }else{
-                              //Date not assigned
-                              return true
-                          }
+                          return filter == job.crew_id 
+                        }))
+
+                        return return_value;
                       })
-                  }
-                  setUnfilteredJobs([...data]);
-                  setCrewJobs( updateData);
-              }
-          })
-          .catch((error)=>{
-              console.error("Error getting crewJobs", error);
-              cogoToast.error("Failed to get crew jobs");
-          })
+                    }
+
+                    //filter using to and from dates if enabled
+                    if(crewJobDateRange){
+                        updateData = updateData.filter((job,i)=>{
+                            var date;
+                            if(job.job_type == "install"){
+                                date = Util.convertISODateToMySqlDate(job.sch_install_date) || null;
+                            }else{
+                              if(job.job_type == "drill"){
+                                date = Util.convertISODateToMySqlDate(job.drill_date) || null;
+                              }else{
+                                date = Util.convertISODateToMySqlDate(job.job_date) || null;
+                              }
+                            }
+                            
+                            if(date != null && crewJobDateRangeActive){
+                                return moment(date).isAfter( moment(Util.convertISODateToMySqlDate(crewJobDateRange.from)).subtract(1, 'days')) && moment(date).isBefore( moment(Util.convertISODateToMySqlDate(crewJobDateRange.to)).add(1,'days'))
+                            }else{
+                                //Date not assigned or we are not filtering out dates
+                                return true
+                            }
+                        })
+                    }
+
+                    //sort
+                    if(crewJobSorters?.length){
+                        if (crewJobs && crewJobs.length) {
+                            updateData = updateData.sort(createSorter(...crewJobSorters))
+                        }
+                    }
+
+                    console.log("Final updateData", updateData);
+                    setUnfilteredJobs([...data]);
+                    setCrewJobs( updateData);
+
+                    //reset activemarker with new data
+                    if(activeMarker && activeMarker.type === 'crew'){
+                      let newMarker = data.find((item)=> item.id === activeMarker.item.id);
+                      if(newMarker){
+                        setActiveMarker({type: 'crew', item: newMarker});
+                      }else{
+                        console.error("Failed to get new activemarker");
+                      }
+                    }
+                }
+            })
+            .catch((error)=>{
+                console.error("Error getting crewJobs", error);
+                cogoToast.error("Failed to get crew jobs");
+            })
+          }
       }
   
-    },[ crewJobs, crewJobsRefetch, crewToMap])
+    },[ mapRows, crewJobs, crewJobsRefetch, crewToMap, taskListToMap, crewFilters, crewJobSorters])
     
     const updateActiveMarker = (id, type) => (props, marker, e) =>{
       var item;
@@ -420,22 +477,6 @@ const MapContainer = (props) => {
 
     }
 
-    // const updateActiveMarker = (id) => (props, marker, e) => {
-    //     var task = mapRows.filter((row, i) => row.t_id === id)[0];
-    //     setActiveMarker(task);
-    //     setShowingInfoWindow(true);
-    //     setActiveVehicle(null);
-        
-    // }
-
-    // const updateActiveVehicle = id => (props, marker, e) => {
-    //   var vehicle = vehicleRows.filter((row, i) => row.vin === id)[0];
-    //   setActiveVehicle(vehicle);
-    //   setShowingInfoWindow(true);
-    //   setActiveMarker(null)
-    // }
-
-    ////
     const handleFindVehicleIcon = (vehicle)=>{
       if(!vehicle){
         console.error("Bad vehilce for handleFindVehcileIcon");
@@ -471,6 +512,7 @@ const MapContainer = (props) => {
         console.error("Bad vehilce for handleFindVehcileIcon");
         return
       }
+      
       let selected = false;
       if(activeMarker?.type === "crew" && job.id === activeMarker?.item.id){
         selected = true;
@@ -485,7 +527,6 @@ const MapContainer = (props) => {
       switch (job.job_type){
         case 'drill':
           url =   `static/crew_icons/drill_marker.png` ;
-          
           break;
         case 'install':
           url =   `static/crew_icons/install_marker.png` ;
@@ -494,14 +535,45 @@ const MapContainer = (props) => {
       return url;
     }
 
+    const getBorderColorBasedOnDate = (date)=>{
+      if(date == null){
+          return '#888'; //default border color
+      }
+
+      //Is after today
+      if(moment(date).isBefore(moment())){
+          return '#ff0000';
+      }
+      //Between today and 2 days from now
+      if(moment(date).isAfter(moment()) && moment(date).isBefore(moment().add(2, "day"))){
+          return '#ff8000';
+      }
+      //between 2 days from now and 5 days from now
+      if(moment(date).isAfter(moment().add(2, "day")) && moment(date).isBefore(moment().add(5, "day"))){
+          return '#fff600';
+      }
+      if(moment(date).isAfter(moment().add(7, "day"))){
+          return '#55c200';
+      }
+
+      //console.error("No border applied");
+      return '#888';
+  }
+
     return (
+      <MapContext.Provider value={ {showingInfoWindow, setShowingInfoWindow, activeMarker, setActiveMarker, mapRows, setMapRows,mapRowsRefetch, setMapRowsRefetch,resetBounds, setResetBounds,markedRows, setMarkedRows,noMarkerRows, setNoMarkerRows,
+        multipleMarkersOneLocation,setMultipleMarkersOneLocation, infoWeather, setInfoWeather, vehicleRows, setVehicleRows, vehicleNeedsRefresh, setVehicleNeedsRefresh,
+        bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, 
+        unfilteredJobs, setUnfilteredJobs, showCompletedJobs, setShowCompletedJobs, radarControl, setRadarControl, timestamps,setTimestamps,
+        radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, visualTimestamp, setVisualTimestamp, crewFilters,setCrewFilters,
+        crewJobSorters, setCrewJobSorters, getBorderColorBasedOnDate, changeStateSoMapUpdates, setChangeStateSoMapUpdates,}} >
       <div>
         <Grid container spacing={1}>
           <Grid item xs={12}>
           <TaskListFilter filteredItems={mapRows}  setFilteredItems={setMapRows}/>
           </Grid>
         </Grid>
-          <Grid container spacing={3} className={classes.mainContainer}>
+          <Grid container spacing={1} className={classes.mainContainer}>
             
             <Grid item xs={12} md={8}>
                 <CustomMap taskMarkers={markedRows} setTaskMarkers={setMarkedRows} vehicleMarkers={vehicleRows}
@@ -515,48 +587,14 @@ const MapContainer = (props) => {
                       activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
                       
                       
-                      setInfoWeather={setInfoWeather} infoWeather={infoWeather}
-                      showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow}
-                      bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
-                      setMapRows={setMapRows} mapRows={mapRows}
-                      
-                      setMapRowsRefetch={setMapRowsRefetch}
-                      visualTimestamp={visualTimestamp} setVisualTimestamp={setVisualTimestamp}
-                      radarControl={radarControl} setRadarControl={setRadarControl}
-                      radarOpacity={radarOpacity} setRadarOpacity={setRadarOpacity}
-                      radarSpeed={radarSpeed} setRadarSpeed={setRadarSpeed}
-                      timestamps={timestamps} setTimestamps={setTimestamps}
-                      multipleMarkersOneLocation={multipleMarkersOneLocation} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}/>
+                    />
             </Grid>
             <Grid item xs={12} md={4}>
-              <MapSidebar mapRows={mapRows} setMapRows={setMapRows} noMarkerRows={noMarkerRows} 
-                          setMapRowsRefetch={setMapRowsRefetch}
-                          markedRows={markedRows} setMarkedRows={setMarkedRows}
-                          vehicleRows={vehicleRows} setVehicleRows={setVehicleRows}
-                          activeMarker={activeMarker} setActiveMarker={setActiveMarker}
-                          setShowingInfoWindow={setShowingInfoWindow}
-                          setModalOpen={setModalOpen} setModalTaskId={setModalTaskId}
-                          setResetBounds={setResetBounds}
-                          infoWeather={infoWeather} setInfoWeather={setInfoWeather}
-                          bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}
-                          visibleItems={visibleItems} setVisibleItems={setVisibleItems}
-                          visualTimestamp={visualTimestamp} setVisualTimestamp={setVisualTimestamp}
-                          radarControl={radarControl} setRadarControl={setRadarControl}
-                          radarOpacity={radarOpacity} setRadarOpacity={setRadarOpacity}
-                          radarSpeed={radarSpeed} setRadarSpeed={setRadarSpeed}
-                          timestamps={timestamps} setTimestamps={setTimestamps}
-                          multipleMarkersOneLocation={multipleMarkersOneLocation} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}
-                          sorters={sorters} setSorters={setSorters}
-                          crewJobs={crewJobs} setCrewJobs={setCrewJobs}
-                          crewJobsRefetch={crewJobsRefetch}
-                          setCrewJobsRefetch={setCrewJobsRefetch}
-                          unfilteredJobs={unfilteredJobs} setUnfilteredJobs={setUnfilteredJobs}
-                          crewToMap={crewToMap} setCrewToMap={setCrewToMap}
-                          showCompletedJobs={showCompletedJobs} setShowCompletedJobs={setShowCompletedJobs}
-                           />
+              <MapSidebar  />
             </Grid>
           </Grid>
         </div>
+        </MapContext.Provider>
     );
     }
   

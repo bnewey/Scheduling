@@ -107,7 +107,7 @@ router.post('/createPackingSlipPdf', async (req,res) => {
         doc.image(`${process.env.PWD}/public/static/PDFS/packing_slip-1.png`, 0, 0, {width: 600, height: 800})
         
         // add your content to the document here, as usual
-        doc.fontSize(10).text(psObject.entity_name, 31, 154);
+        doc.fontSize(10).text(psObject.address_to_name, 31, 154);
         doc.text(psObject.contact_name, 61, 169);
         doc.text(psObject.address, 31,184);
         doc.text(psObject.city + ', ' + psObject.state + ' ' + psObject.zip, 31, 198);

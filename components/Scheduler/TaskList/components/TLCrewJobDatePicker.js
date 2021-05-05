@@ -45,8 +45,6 @@ const TLCrewJobDatePicker = (props) => {
     const handleOnMonthChange = (date, num)=>{
         //num: 1 == left calendar | 2 == right calendar
         return new Promise((resolve, reject)=>{
-            console.log("Date Month Change", date);
-            
 
             if(num ==1){ // left only
                 setInputValue(moment(date).format('MM-DD-YYYY'))

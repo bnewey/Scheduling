@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect, useContext, useLayoutEffect} from 'react';
 
 
 import {makeStyles, List, ListItem, ListItemSecondaryAction, ListItemText,IconButton} from '@material-ui/core';
@@ -23,8 +23,8 @@ const MapSiderbarMarkedTasks = (props) =>{
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
     const { mapRows, setMapRows,activeMarker, setActiveMarker, setShowingInfoWindow, markedRows, setMarkedRows , 
-          setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, expanded, setExpanded, setActiveVehicle,
-          expandedAnimDone, sorters } = props;
+          setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, tabValue, setTabValue, 
+          expandedAnimDone, setExpandedAnimDone, sorters } = props;
     
     const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
     //CSS
@@ -47,8 +47,9 @@ const MapSiderbarMarkedTasks = (props) =>{
     }
 
     useEffect(()=>{
-      if(activeMarker?.type === "task" && activeMarker?.item && expandedAnimDone == true){
-        var el = panelRef.current.querySelector("#mapMarkedListItem"+activeMarker.item.t_id);
+      if(activeMarker?.type === "task" && activeMarker?.item && panelRef.current ){
+        
+        var el = panelRef?.current?.querySelector("#mapMarkedListItem"+activeMarker.item.t_id);
         console.log("Panelref", panelRef.current);
         if(!el){
           console.error("No element for isInViewPort", el);
@@ -60,7 +61,8 @@ const MapSiderbarMarkedTasks = (props) =>{
         }
         
       }
-    },[activeMarker, expanded, expandedAnimDone])
+    },[activeMarker, tabValue, expandedAnimDone, panelRef])
+
 
 
     //Modal
@@ -161,7 +163,7 @@ const MapSiderbarMarkedTasks = (props) =>{
  
 
     return(
-        <List  className={classes.root}> 
+        <List   className={classes.root}> 
         <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="droppable"
             renderClone={(provided, snapshot, rubric) => (
