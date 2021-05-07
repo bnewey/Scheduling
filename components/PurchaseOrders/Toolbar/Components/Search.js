@@ -256,7 +256,7 @@ const useStyles = makeStyles(theme => ({
     margin: '4px 5px 4px 10px',
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: props => props.searchOpen ? 'space-between' : 'flex-end',
+    justifyContent: props => props.searchOpen ? 'space-between' : 'flex-start',
     alignItems: 'center',
     
     background: props => props.searchOpen ?  '#fff' : '',
