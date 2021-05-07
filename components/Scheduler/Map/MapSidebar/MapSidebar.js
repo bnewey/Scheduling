@@ -7,33 +7,66 @@ import SortFlipIcon from '@material-ui/icons/ImportExport';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import VisibilityOnIcon from '@material-ui/icons/Visibility';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
+
 import { Scrollbars} from 'react-custom-scrollbars';
-import {makeStyles, Paper, Accordion, AccordionDetails, AccordionSummary, Select,MenuItem, IconButton, Switch} from '@material-ui/core'
+import {makeStyles, Paper, Accordion, AccordionDetails, AccordionSummary, Select,MenuItem, IconButton, Switch, Tabs, Tab, Box} from '@material-ui/core'
+
 
 import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
-import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
+
 import MapSidebarCrewJobs from './MapSidebarCrewJobs';
 import MapSidebarVehicleRows from './MapSidebarVehicleRows';
-import MapSidebarToolbar from './MapSidebarToolbar';
 import MapSidebarRadarControls from './MapSidebarRadarControls';
+
 
 import { CrewContext } from '../../Crew/CrewContextContainer';
 
 import { withRouter } from "next/router";
 import Link from "next/link";
+import { MapContext } from '../MapContainer';
+import { TaskContext } from '../../TaskContainer';
 
 const sorter_table = [{text: "Order", field: "priority_order",  type: 'number'},
                     {text: "1st Game", field: "first_game", type: 'date'},
                     {text: "Name", field: "t_name", type: 'text'},
                     {text: "State", field: "state", type: 'text'},
                     {text: "Type", field: "type", type: 'text'},
-                    {text: "Drill Date", field: "drill_date", type: 'date'},
-                    {text: "Install Date", field: "sch_install_date", type: 'date'}]
+                    {text: "d_date", field: "drill_date", type: 'date'},
+                    {text: "i_date", field: "sch_install_date", type: 'date'}];
+
+function a11yProps(index) {
+  return {
+    id: `full-width-tab-${index}`,
+    'aria-controls': `full-width-tabpanel-${index}`,
+  };
+}
+
+function TabPanel(props) {
+    const { children, value, index, ref, ...other } = props;
+  
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`full-width-tabpanel-${index}`}
+        aria-labelledby={`full-width-tab-${index}`}
+        {...other}
+      >
+        {value === index && (
+          <div>
+            {children}
+          </div>
+        )}
+      </div>
+    );
+}
 
 const MapSidebar = (props) => {
     //STATE
     const [expanded, setExpanded] = React.useState(false);
     const [expandedAnimDone,setExpandedAnimDone] = React.useState(false);
+
+    const [tabValue, setTabValue] = React.useState(0);
 
     const [sorterVariable, setSorterVariable] = React.useState( "priority_order");
     const [sorterState, setSorterState] = useState(0);
@@ -44,37 +77,30 @@ const MapSidebar = (props) => {
     
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
-        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState, crewJobDateRange, setCrewJobDateRange
-         } = useContext(CrewContext);
+        setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState, crewJobDateRange, setCrewJobDateRange,
+        crewJobDateRangeActive, setCrewJobDateRangeActive} = useContext(CrewContext);
 
+    const { mapRows, setMapRows,noMarkerRows, setMapRowsRefetch, markedRows, setMarkedRows, vehicleRows, setVehicleRows,
+        activeMarker, setActiveMarker,  setResetBounds, infoWeather,setInfoWeather, bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,
+        visualTimestamp, setVisualTimestamp, radarControl, setRadarControl,  radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, timestamps, setTimestamps,
+        multipleMarkersOneLocation, setMultipleMarkersOneLocation, crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, unfilteredJobs, setUnfilteredJobs,
+        showCompletedJobs, setShowCompletedJobs,setShowingInfoWindow} = useContext(MapContext);
 
-    //PROPS
-    const {mapRows, setMapRows, noMarkerRows,markedRows, activeMarker, setActiveMarker, 
-            setShowingInfoWindow, setModalOpen, setModalTaskId, setResetBounds,  
-            bouncieAuthNeeded, setBouncieAuthNeeded, vehicleRows, setVehicleRows, visibleItems, setVisibleItems,
-            visualTimestamp, setVisualTimestamp,
-            radarControl, setRadarControl, radarOpacity, setRadarOpacity,
-            radarSpeed, setRadarSpeed, timestamps, setTimestamps,
-            multipleMarkersOneLocation,setMultipleMarkersOneLocation, sorters, setSorters, crewJobs, setCrewJobs, unfilteredJobs,
-            setUnfilteredJobs,crewToMap, setCrewToMap,
-            showCompletedJobs, setShowCompletedJobs, setMapRowsRefetch, crewJobsRefetch, setCrewJobsRefetch} = props;
+    const { setModalOpen, setModalTaskId,  crewToMap, setCrewToMap, sorters, setSorters, setInstallDateFilters} = useContext(TaskContext);
+    //const {   } = props;
 
     //Ref to check if same vehicle is active so we dont keep expanding vehicle panel on vehicle refetch
     const activeVehicleRef = useRef(null);
 
     useEffect( () =>{ //useEffect for inputText
-        if( activeMarker?.type === "task" && activeMarker?.item?.geocoded && expanded!="taskMarker" ){
-            setExpanded('taskMarker');
-            setExpandedAnimDone(false);
-        }
 
-        if ( activeMarker?.type === "vehicle" && expanded != "vehicleMarker" && ( activeMarker.item.vin !=  activeVehicleRef.current)){
-            setExpanded('vehicleMarker' )
+        if ( activeMarker?.type === "vehicle" && tabValue != 1 && ( activeMarker.item.vin !=  activeVehicleRef.current)){
+            setTabValue(1);
             setExpandedAnimDone(false);    
         }
 
-        if( activeMarker?.type === "crew" && expanded != "crewJobMarker"){
-            setExpanded('crewJobMarker');
+        if( activeMarker?.type === "crew" && tabValue != 0){
+            setTabValue(0);
             setExpandedAnimDone(false);
         }
 
@@ -83,7 +109,10 @@ const MapSidebar = (props) => {
         }
 
         //Need to null multiple marker variable on new activeMarker
-        if(multipleMarkersOneLocation && activeMarker?.type ==="task" && multipleMarkersOneLocation.indexOf(activeMarker.item.t_id.toString())== -1 ){
+        console.log('activeMarker', activeMarker);
+        console.log("multipleMarkersOneLocation",multipleMarkersOneLocation)
+        console.log("multipleMarkersOneLocation.indexOf(activeMarker?.item?.id.toString())",multipleMarkersOneLocation?.indexOf(activeMarker?.item?.id))
+        if(multipleMarkersOneLocation && activeMarker?.type ==="crew" && multipleMarkersOneLocation.indexOf(activeMarker?.item?.id)== -1 ){
             setMultipleMarkersOneLocation(null);
         }
         return () => { //clean up
@@ -124,9 +153,13 @@ const MapSidebar = (props) => {
     const classes = useStyles();
 
     //FUNCTIONS
-    const handleChange = panel => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
-    };
+    // const handleChange = panel => (event, isExpanded) => {
+    //     setExpanded(isExpanded ? panel : false);
+    // };
+    const handleChangeTab = (event, newTabValue) =>{
+        setTabValue(newTabValue);
+        
+    }
 
     const handleResetAfterAuth = (event)=>{
         //setVehicleRows(null);
@@ -204,12 +237,101 @@ const MapSidebar = (props) => {
 
      
     return(
-        <Paper className={classes.root}>
-            <Paper className={classes.head}>
-                <MapSidebarToolbar {...props} />
-                
-            </Paper>
-            <Accordion expanded={expanded === 'taskMarker'} onChange={handleChange('taskMarker')} className={classes.body } 
+        <div className={classes.root}>
+         
+            <Tabs
+            value={tabValue}
+            onChange={handleChangeTab}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            aria-label="sidebar tabs"
+            >
+                {/* <Tab label="Tasks" {...a11yProps(0)} /> */}
+                <Tab label={<div className={classes.tabDiv}>Crew Jobs {isVisible('crewJobs') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                                : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')}/>} </div>}
+                    {...a11yProps(1)} >
+                    
+                </Tab>
+                <Tab label={<div className={classes.tabDiv}>Vehicles {isVisible('vehicles') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'vehicles')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                                : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'vehicles')}/>} </div>} 
+                    {...a11yProps(2)} />
+                <Tab label={<div className={classes.tabDiv}>Weather {isVisible('radar') ? <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'radar')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                                : <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'radar')}/>} </div>} 
+                    {...a11yProps(3)} />
+                { noMarkerRows && noMarkerRows.length >0  ? 
+                <Tab label="No Marker" {...a11yProps(4)}/>
+                : ''}
+            </Tabs>
+     
+        
+        {/* <TabPanel value={tabValue} index={0} >
+                <div className={classes.sortByDiv}>Sort By:&nbsp;
+                        <Select
+                            value={sorterVariable}
+                            onChange={handleChangeSorter}
+                            displayEmpty
+                            className={classes.selectSorter}
+                            inputProps={{ 'aria-label': 'Without label' }}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            {sorter_table.map((item, i)=> (
+                                <MenuItem value={item.field}>{item.text}</MenuItem>
+                            ))}
+                        </Select>
+                        <IconButton className={classes.sortIcon} onClick={handleFlipSort}>
+                            <SortFlipIcon/>
+                        </IconButton>
+                </div>
+                <Scrollbars  ref={s => { panelRef.current = (s?.view); }}  universal autoHeight autoHeightMax={600}>
+                    <MapSidebarMarkedTasks {...props} panelRef={panelRef} tabValue={tabValue} 
+                                    expandedAnimDone={expandedAnimDone} setExpandedAnimDone={setExpandedAnimDone}
+                                            />
+                </Scrollbars>
+        </TabPanel> */}
+        <TabPanel value={tabValue} index={0}>
+               
+
+                <MapSidebarCrewJobs  panelRef={crewPanelRef} tabValue={tabValue} setTabValue={setTabValue} expandedAnimDone={expandedAnimDone} /> 
+
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+                <Scrollbars universal autoHeight autoHeightMax={400}>
+                         <><MapSidebarVehicleRows vehiclePanelRef={vehiclePanelRef} tabValue={tabValue} setTabValue={setTabValue}
+                                expanded={expanded} setExpanded={setExpanded} expandedAnimDone={expandedAnimDone} />
+                        </> 
+                </Scrollbars>
+                {bouncieAuthNeeded==true ? 
+                        <>
+                        <div className={classes.authDiv}>
+                        <Link href={`/bouncieAuth`} as={`/bouncieAuth`} onClick={event => handleResetAfterAuth(event)}>
+                            <span>Authenticate Bouncie gain access to vehicle information</span>
+                        </Link>
+                        </div>
+                        </> : <></>}
+                       
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+                { isVisible('radar') &&
+                    <>
+                        <MapSidebarRadarControls visibleItems={visibleItems} setVisibleItems={setVisibleItems}  visualTimestamp={visualTimestamp}
+                            setVisualTimestamp={setVisualTimestamp} radarControl={radarControl} setRadarControl={setRadarControl}
+                            radarOpacity={radarOpacity} setRadarOpacity={setRadarOpacity} radarSpeed={radarSpeed} setRadarSpeed={setRadarSpeed}
+                            timestamps={timestamps} setTimestamps={setTimestamps}/>
+                    </>
+                }
+        </TabPanel>
+        { noMarkerRows && noMarkerRows.length >0  ? 
+            <TabPanel value={tabValue} index={3}>
+                    <Scrollbars universal autoHeight autoHeightMax={600} style={{marginLeft: '20px'}}>
+                        <MapSidebarMissingMarkers {...props}/>
+                    </Scrollbars>
+            </TabPanel> 
+            :<></>}
+       
+            {/* <Accordion expanded={expanded === 'taskMarker'} onChange={handleChange('taskMarker')} className={classes.body } 
                 TransitionProps={{onEntered: event=> handleAnimationEnd(event)}}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
@@ -363,10 +485,10 @@ const MapSidebar = (props) => {
                         <MapSidebarMissingMarkers {...props}/>
                     </Scrollbars>
                 </AccordionDetails>
-            </Accordion>
-            :<></>}
+            </Accordion> 
+            :<></>}*/}
 
-        </Paper>
+        </div>
     );
 
 } 
@@ -377,14 +499,17 @@ const useStyles = makeStyles(theme => ({
     root: {
         padding: '1% 2% 2% 2%',
         margin: '0px 0px 0px 0px',
-        background: 'linear-gradient( #dadada, #a2a2a2)',
-        boxShadow: '0px 1px 8px 0px rgba(0,0,0,0.52)',
         //minHeight: '400px',
         height: '100%',
         [theme.breakpoints.up('md')]:{
             minHeight: '647px',
         },
-        
+    },
+    tabDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     head: {
         padding: '1% 2% 1% 2%',
@@ -444,5 +569,19 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-    }
+    },
+    iconChecked:{
+        width: '1em',
+        height: '1em',
+        color:'#33bb22',
+    },
+    icon:{
+        width: '1em',
+        height: '1em',
+        color:'#929292',
+        '&:hover':{
+            color: '#303030',
+        },
+        backgroundColor: 'linear-gradient(0deg, #f5f5f5, white)'
+    },
   }));

@@ -175,7 +175,11 @@ const FormBuilder = forwardRef((props, ref) => {
         handleShouldUpdate: (update)=>{
             handleShouldUpdate(update)
         },
-        handleSaveParent: (itemToSave) =>{
+        handleSaveParent: (itemToSave, event) =>{
+            if(event){
+                console.log("Prevent default");
+                event.preventDefault();
+            }
             if(!itemToSave){
                 console.error("Bad itemToSave")
                 return;
@@ -363,7 +367,7 @@ const FormBuilder = forwardRef((props, ref) => {
 
     return(<>
         {ref_object  ? <>
-            <form className={clsx( {[classes.formColumnStyle]: props.columns })}>
+            <div className={clsx( {[classes.formColumnStyle]: props.columns })}>
             {fields.map((field, i)=>{
                 if(field?.hidden && field.hidden(formObject)){
                     return (<></>);
@@ -382,7 +386,7 @@ const FormBuilder = forwardRef((props, ref) => {
                      entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
                      entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses} id_pretext={id_pretext}/>
                 </div>)
-            })}</form></>
+            })}</div></>
         : <></>}
         </>
     )

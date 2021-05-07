@@ -14,7 +14,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import useWindowSize from '../../UI/useWindowSize';
 import WoiStatusCheck from './components/WoiStatusCheck'
 import TaskLists from '../../../js/TaskLists';
-import Tasks from '../../../js/Tasks';
+import Crew from '../../../js/Crew';
 import cogoToast from 'cogo-toast';
 import Util from '../../../js/Util';
 import { select } from 'async';
@@ -33,8 +33,9 @@ import {
 
 import TLCrewJobDatePicker from './components/TLCrewJobDatePicker';
 import TLArrivalDatePicker from './components/TLArrivalDatePicker';
+import TLCrewJobsTypePopover from './components/TLCrewJobsTypePopover';
+import TLCrewJobsServiceCounter from './components/TLCrewJobsServiceCounter';
 
-import Crew from '../../../js/Crew';
 import Work_Orders from '../../../js/Work_Orders'
 
 const TaskListTasks = (props) =>{
@@ -218,11 +219,6 @@ const TaskListTasks = (props) =>{
 
     //Add/Swap Popover for crews
     const handleOpenAddMemberPopover = (event, job, crew, type, task) =>{
-        if(! (type == "install" || type == "drill")){
-          cogoToast.error("Failed to add/update crew job")
-          console.error("Faile to add/update crew job on type");
-          return;
-        }
         
         let job_id = job;
         let crew_id = crew;
@@ -252,10 +248,10 @@ const TaskListTasks = (props) =>{
           console.error("Bad member or addSwapCrewJob for add/update.");
           return;
         }
-        console.log(new_crew.id);
-        console.log(addSwapCrewJob);
+        //console.log(new_crew.id);
+        //console.log(addSwapCrewJob);
         // Update Job
-        if(addSwapCrewJob.crew_id != -1){
+        if(addSwapCrewJob.job_id != -1){
           if(!old_crew_id){
             console.error("No old_crew_id given to handleAddSwapCrew");
           }
@@ -316,10 +312,10 @@ const TaskListTasks = (props) =>{
         
         
         //Create Job 
-        if(addSwapCrewJob.crew_id == -1){
+        if(addSwapCrewJob.job_id == -1){
           //add job function
           const addJobs = (id) => {
-            Crew.addCrewJobs([addSwapCrewJob.task_id], addSwapCrewJob.job_type, id)
+            Crew.addCrewJobs([addSwapCrewJob.task_id], addSwapCrewJob.job_type === 'field' ? 'service' : addSwapCrewJob.job_type, id)
                 .then((response)=>{
                     if(response){
                         cogoToast.success("Created and added to crew");
@@ -392,9 +388,9 @@ const TaskListTasks = (props) =>{
         console.error("Error in indexFromDnDList")
         return -1;
       }
-      console.log("dndindex", dndIndex);
-      console.log("tasklisttasks, could be diff order", taskListTasks);
-      console.log("task from indexfromdndlist", taskListTasks[dndIndex])
+      // console.log("dndindex", dndIndex);
+      // console.log("tasklisttasks, could be diff order", taskListTasks);
+      // console.log("task from indexfromdndlist", taskListTasks[dndIndex])
       let dndTask = taskListTasks[dndIndex].priority_order;
       if(isNaN(dndTask)){
         console.error("Error in indexFromDnDList")
@@ -410,23 +406,57 @@ const TaskListTasks = (props) =>{
       }
 
       var updateTask = {...task};
+      let updateJobDate = Util.convertISODateToMySqlDate(value);
+      //console.log("updateJobTasj", updateTask);
+      
+      
+      let updateJobId;
+      switch(fieldId){
+        case 'install':
+          updateJobId = updateTask["install_job_id"]
+          break;
+        case 'drill':
+          updateJobId = updateTask["drill_job_id"];
+          break;
+        case 'service': 
+          updateJobId = updateTask["field_job_id"];
+          break;
+      }
 
-      updateTask[fieldId] = Util.convertISODateToMySqlDate(value);
-      console.log("Update task", updateTask);
-      Tasks.updateTask(updateTask)
-      .then((data)=>{
-        cogoToast.success(`Updated ${fieldId}`)
-        setTaskListTasksRefetch(true);
-      })
-      .catch((error)=>{
-        console.error("Failed to update task", error);
-        cogoToast.error("Failed to update task");
-      })
+      if(updateJobId == null){
+        //create crew job with date
+        Crew.addCrewJobs([task.t_id], fieldId, null, updateJobDate)
+        .then((response)=>{
+            if(response){
+                cogoToast.success("Created and added to crew");
+                //setTaskListTasks(null);
+                setTaskListTasksRefetch(true);
+                setShouldResetCrewState(true);
+            }
+        })
+        .catch((err)=>{
+            console.error("Failed to add to creww", err);
+        })
+
+      }else{
+        //update existing crew job
+        //console.log("Update task", updateTask);
+        Crew.updateCrewJobDate( updateJobId, updateJobDate)
+        .then((data)=>{
+          cogoToast.success(`Updated ${fieldId} date`)
+          setTaskListTasksRefetch(true);
+        })
+        .catch((error)=>{
+          console.error("Failed to update task", error);
+          cogoToast.error("Failed to update task");
+        })
+      }
+
 
     },[taskListTasks])
 
     const handleGoToWorkOrderId = (wo_id, event) =>{
-      console.log("woi", wo_id);
+      //console.log("woi", wo_id);
       //Disable Default context menu
       event.preventDefault();
       
@@ -448,6 +478,36 @@ const TaskListTasks = (props) =>{
       if(fieldId === "sch_install_date"){
         //Complete job
         Crew.updateCrewJobCompleted(1, task.install_job_id,task.install_crew)
+        .then((data)=>{
+          if(data){
+            //Move task to completed list
+            TaskLists.moveTaskToList(task.t_id, taskLists.find((tl,i)=> tl.list_name === "Completed Tasks" ).id)
+            .then((data)=>{
+              if(data){ 
+                cogoToast.success("Updated Crew Job and moved to completed");
+                setTaskListTasksRefetch(true);
+              }else{
+                throw Error("Failed to move item to completed list");
+              }
+            })
+            .catch((error)=>{
+              console.error("Failed to move item to completed lsit", error);
+              cogoToast.error("Internal server error");
+            })
+          }else{
+            throw Error("Did not update crew job")
+          }
+        })
+        .catch((error)=>{
+          console.error("Failed to update job complete", error);
+          cogoToast.error("Internal server error");
+        })
+        
+      }
+
+      if(fieldId === "field_date"){
+        //Complete job
+        Crew.updateCrewJobCompleted(1, task.field_job_id,task.field_crew)
         .then((data)=>{
           if(data){
             //Move task to completed list
@@ -532,11 +592,17 @@ const TaskListTasks = (props) =>{
           if(!task.install_job_completed){
             if(task.install_crew_leader != null){
               return_value = <div className={classes.popOverDiv} 
+                                  style={{ 
+                                        color: '#fff',
+                                        backgroundColor: `${ task.install_crew ? task.install_crew_color  || '#555' : '#fff'}`}}
                                   onMouseUp={event => handleOpenAddMemberPopover(event, task.install_job_id, task.install_crew, "install", task.t_id)}>
                               {task.install_crew_leader}
                             </div>;
             }else{
               return_value = <div className={classes.popOverDiv} 
+                                    style={{ 
+                                        color: '#fff',
+                                        backgroundColor: `${task.install_crew ? task.install_crew_color  || '#555' : '#fff'}`}}
                               onMouseUp={event => handleOpenAddMemberPopover(event, task.install_job_id, task.install_crew, "install", task.t_id)}>
                                 { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
                               </div>;
@@ -556,11 +622,17 @@ const TaskListTasks = (props) =>{
             if(!task.drill_job_completed){
               if(task.drill_crew_leader != null){
                 return_value = <div className={classes.popOverDiv} 
+                                style={{ 
+                                        color: '#fff',
+                                        backgroundColor: `${ task.drill_crew ? task.drill_crew_color || '#555' : '#fff'}`}}
                                 onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew, "drill", task.t_id)}>
                                   {task.drill_crew_leader}
                                 </div>;
               }else{
                 return_value = <div className={classes.popOverDiv} 
+                                  style={{ 
+                                        color: '#fff',
+                                        backgroundColor: `${task.drill_crew ? task.drill_crew_color || '#555' : '#fff'}`}}
                                 onMouseUp={event => handleOpenAddMemberPopover(event, task.drill_job_id, task.drill_crew,"drill", task.t_id)}>
                                   { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
                                 </div>;
@@ -595,7 +667,7 @@ const TaskListTasks = (props) =>{
                             minDate={new Date('01-01-1970')}
                             className={classes.datePicker}
                             value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
-                            onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill_date")} 
+                            onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
                             onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
                     </MuiPickersUtilsProvider></div>
               break;
@@ -622,7 +694,7 @@ const TaskListTasks = (props) =>{
                         minDate={new Date('01-01-1970')}
                         className={classes.datePicker}
                         value={value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
-                        onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "sch_install_date")} 
+                        onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "install")} 
                         onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
               </MuiPickersUtilsProvider></div>
                 break;
@@ -630,6 +702,70 @@ const TaskListTasks = (props) =>{
             return_value = <span>Completed</span>
             break;
           }
+        }
+        case 'field_crew':{
+            if(!task.field_job_completed){
+              if(task.field_crew_leader != null){
+                return_value = <div className={classes.popOverDiv} 
+                                      style={{ 
+                                        color: '#fff',
+                                        backgroundColor: `${task.field_crew ? task.field_crew_color || '#555' : '#fff'}`}}
+                                onMouseUp={event => handleOpenAddMemberPopover(event, task.field_job_id, task.field_crew, "field", task.t_id)}>
+                                  {task.field_crew_leader}
+                                </div>;
+              }else{
+                return_value = <div className={classes.popOverDiv} 
+                                      style={{ 
+                                        color: '#fff',
+                                        backgroundColor: `${task.field_crew ? task.field_crew_color || '#555' : '#fff'}`}}
+                                onMouseUp={event => handleOpenAddMemberPopover(event, task.field_job_id, task.field_crew,"field", task.t_id)}>
+                                  { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+                                </div>;
+              }
+              break;
+            }else{
+              if(task.field_crew_leader != null){
+                return_value = <span> {task.field_crew_leader} </span>;
+              }else{
+                return_value = <span>
+                                  { value ? 'Crew ' + value.toString() : <>&nbsp;</> }
+                                </span>;
+              }
+              break;
+            }
+          
+        }
+        case 'field_date':{
+            if(!task.field_job_completed){
+              return_value = <div>
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                          <TLCrewJobDatePicker  showTodayButton
+                            clearable
+                            inputVariant="outlined"
+                            variant="modal" 
+                            title="Select Service Date"
+                            maxDate={new Date('01-01-2100')}
+                            minDate={new Date('01-01-1970')}
+                            className={classes.datePicker}
+                            value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
+                            onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "service")} 
+                            onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
+                    </MuiPickersUtilsProvider></div>
+              break;
+            }else{
+              return_value = <span>Completed</span>
+              break;
+            }
+          
+          
+        }
+        case 'field_type':{
+          return_value = <TLCrewJobsTypePopover crewJob={task} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
+          break;
+        }
+        case 'field_num_services':{
+          return_value = <TLCrewJobsServiceCounter crewJob={task} setTaskListTasksRefetch={setTaskListTasksRefetch}/>
+          break;
         }
         case 'woi_status_check':{
           return_value = <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 

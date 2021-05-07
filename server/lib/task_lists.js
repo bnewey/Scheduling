@@ -39,11 +39,15 @@ router.post('/getTaskList', async (req,res) => {
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
         ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, mad.member_name AS drill_crew_leader , '  +
-        ' IFNULL(cjd.completed, 0) AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
-        ' date_format(t.drill_date, \'%Y-%m-%d\') as drill_date, ' + 
+        ' cjd.completed AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
+        ' date_format(cjd.job_date, \'%Y-%m-%d\') as drill_date, cci.color AS install_crew_color,  ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
-        ' IFNULL(cji.completed,0) AS install_job_completed,  date_format(cji.completed_date, \'%Y-%m-%d %H:%i:%S\') as install_job_completed_date, ' +
-        ' date_format(t.sch_install_date, \'%Y-%m-%d\') as sch_install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
+        ' cji.completed AS install_job_completed,  date_format(cji.completed_date, \'%Y-%m-%d %H:%i:%S\') as install_job_completed_date, ' +
+        ' date_format(cji.job_date, \'%Y-%m-%d\') as sch_install_date, ccd.color AS drill_crew_color,  ' + 
+        ' cjf.crew_id AS field_crew, cjf.id AS field_job_id, maf.member_name AS field_crew_leader , cjf.job_type AS field_type, cjf.num_services AS field_num_services, '  +
+        ' cjf.completed AS field_job_completed,  date_format(cjf.completed_date, \'%Y-%m-%d %H:%i:%S\') as field_job_completed_date, ' +
+        ' date_format(cjf.job_date, \'%Y-%m-%d\') as field_date, ccf.color AS field_crew_color,  ' + 
+        ' ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, e.name AS customer_name, concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name' +
         ' FROM task_list_items tli ' +
     
@@ -52,15 +56,18 @@ router.post('/getTaskList', async (req,res) => {
     ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 
     ' LEFT JOIN crew_jobs cji ON cji.job_type = \'install\' AND cji.task_id = t.id  ' + 
     ' LEFT JOIN crew_jobs cjd ON cjd.job_type = \'drill\' AND cjd.task_id = t.id  ' + 
+    ' LEFT JOIN crew_jobs cjf ON cjf.job_type != \'install\' AND cjf.job_type != \'drill\' AND cjf.task_id = t.id  ' + 
+    ' LEFT JOIN crew_crews cci ON cji.crew_id = cci.id ' +
+    ' LEFT JOIN crew_crews ccd ON cjd.crew_id = ccd.id ' +
+    ' LEFT JOIN crew_crews ccf ON cjf.crew_id = ccf.id ' +
     ' LEFT JOIN crew_members cmi ON cmi.crew_id = cji.crew_id AND cmi.is_leader = 1  ' + 
     ' LEFT JOIN crew_members cmd ON cmd.crew_id = cjd.crew_id AND cmd.is_leader = 1  ' + 
+    ' LEFT JOIN crew_members cmf ON cmf.crew_id = cjf.crew_id AND cmf.is_leader = 1  ' + 
     ' LEFT JOIN crew_members_available mai ON mai.id = cmi.member_id  ' + 
     ' LEFT JOIN crew_members_available mad ON mad.id = cmd.member_id  ' + 
+    ' LEFT JOIN crew_members_available maf ON maf.id = cmf.member_id  ' + 
     ' LEFT JOIN entities e ON wo.customer_id = e.record_id '  +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id  ' +
-    // ' LEFT JOIN entities_addresses ea ON (wo.customer_id = ea.entities_id AND ' + 
-    //     ' IF(ea.task = 1, true, ' + //selects task = 1 address if available, defaults to mail =1 
-    //         ' IF(ea.main =1 AND NOT EXISTS(select address from entities_addresses where task = 1 AND entities_id = ea.entities_id), true, false ))) ' +
     ' WHERE tli.task_list_id = ? ORDER BY tli.priority_order ASC ' ;
 
     try{

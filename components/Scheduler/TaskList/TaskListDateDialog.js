@@ -34,9 +34,9 @@ const TaskListDateDialog = (props) => {
     //STATE
     const [dateDialogOpen, setDateDialogOpen] = React.useState(false);
     const [selectedDate, setSelectedDate] = React.useState(null);
-    const [dateType, setDateType] = React.useState("sch_install_date");
+    const [dateType, setDateType] = React.useState("install");
 
-    const date_params = [{ field: 'sch_install_date', label: 'Install Date'},{ field: 'drill_date', label: 'Drill Date'},{ field: 'delivery_date', label: 'Delivery Date'}];
+    const date_params = [{ field: 'install', label: 'Install Date'},{ field: 'drill', label: 'Drill Date'}];
 
     //CSS
     const classes = useStyles();

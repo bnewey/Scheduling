@@ -269,18 +269,12 @@ const TaskListMain = (props) => {
                         <TaskListFilter filteredItems={taskListTasks}  setFilteredItems={setTaskListTasks} />
                         {taskListTasks && tableInfo && taskListTasksSaved ? 
                         <>  
-                            {/* <TableContainer> */}
                                 <List >
-                                
-                                {/* <TableHead> */}
                                     <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
-                                        {/* <TableCell>&nbsp;</TableCell>
-                                        <TableCell>&nbsp;</TableCell> */}
                                         <div style={{flex: `0 0 2%`}}>&nbsp;</div>
                                     {tableInfo.map((item, i)=>{
                                         const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
                                         const isASC = sorters && sorters[0] && sorters[0].direction === 'ASC';
-                                        //const isASC = sorterState === 1;
                                         return(
                                         <ListItemText      id={"Head-ListItem"+i} 
                                                         align="center"
@@ -300,36 +294,21 @@ const TaskListMain = (props) => {
                                                             </span>
                                         </ListItemText>
                                     )})}
-                                    {/* <TableCell>&nbsp;</TableCell> */}
+                                    
                                     </ListItem>
-                                {/* </TableHead> */}
-                            {/* <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}> */}
                                 
-                                {/* <ListItemSecondaryAction>            
-                                        <React.Fragment>
-                                        <IconButton edge="end" aria-label="edit">
-                                        
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="delete">
-                                            
-                                        </IconButton> 
-                                        </React.Fragment>
-                                    &nbsp;&nbsp;&nbsp;
-                                </ListItemSecondaryAction> */}
-                            {/* </ListItem> */}
-                            <TaskListTasks 
-                                selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
-                                taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
-                                taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
-                                setModalOpen={setModalOpen} 
-                                setModalTaskId={setModalTaskId}
-                                tableInfo={tableInfo}
-                                priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
-                                taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
-                                woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}
-                                taskLists={taskLists}/>
+                                <TaskListTasks 
+                                    selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
+                                    taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
+                                    taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}
+                                    setModalOpen={setModalOpen} 
+                                    setModalTaskId={setModalTaskId}
+                                    tableInfo={tableInfo}
+                                    priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
+                                    taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
+                                    woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}
+                                    taskLists={taskLists}/>
                                 </List>
-                            {/* </TableContainer> */}
                         </>
                         : <>
                         <div className={classes.HeadListItem} classes={{container: classes.liContainer}}>

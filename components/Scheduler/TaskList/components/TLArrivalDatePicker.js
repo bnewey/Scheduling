@@ -157,15 +157,12 @@ const TLArrivalDatePicker = (props) => {
         let matchToday = moment().isSame(day, 'day');
 
        return   <div className={clsx({[classes.todayDayComponent]: matchToday })}>
-                    <button data-tip={clsx(
-                                { ["Arrive Date"]: set,
-                                  ["(Today)"]: matchToday
-                                 }
-                            )} 
+                    <button data-tip={clsx({ ["Arrive Date"]: set,
+                                  ["(Today)"]: matchToday})} 
                             className={clsx( classes.pickerDay, classes.pickerIconButton, classes.pickerButtonBase,
                                            { /*[classes.pickerDaySelected]: selected && !futureMonth, */
                                             [classes.pickerDaySet]: set ,
-                                            })}
+                                        })}
                             tabindex="0" type="button">
                         <span class="MuiIconButton-label">
                             <p class="MuiTypography-root MuiTypography-body2 MuiTypography-colorInherit">{moment(day).date()}</p>
@@ -240,9 +237,8 @@ const TLArrivalDatePicker = (props) => {
             }
         }
 
-        return return_value
+        return return_value;
     }
-
 
     const handleSelectAllSigns = ()=>{
         if(!statusList?.length){
@@ -254,8 +250,7 @@ const TLArrivalDatePicker = (props) => {
             setSelectedWOIs(statusList)
         }else{
             setSelectedWOIs([]);
-        }
-        
+        } 
     }
 
     const handleOpenPicker = () =>{
@@ -264,9 +259,7 @@ const TLArrivalDatePicker = (props) => {
 
     const handleOnMonthChange = (date, num)=>{
         //num: 1 == left calendar | 2 == right calendar
-        return new Promise((resolve, reject)=>{
-            console.log("Date Month Change", date);
-            
+        return new Promise((resolve, reject)=>{            
 
             if(num ==1){ // left only
                 setInputValue(moment(date).format('MM-DD-YYYY'))
@@ -277,6 +270,7 @@ const TLArrivalDatePicker = (props) => {
             resolve(date);
         })
     }
+
 
     if(!statusList.length){
         return <></>
@@ -291,7 +285,7 @@ const TLArrivalDatePicker = (props) => {
                 <DialogTitle id="customized-dialog-title" onClose={wrapperProps.onDismiss} className={classes.dialogTitle}>
                     {props.title ? props.title : "Select Date"}
                 </DialogTitle>
-                <DialogContent className={classes.dialog} >
+                <DialogContent className={classes.dialog}>
                 <div className={classes.calendarContainer}>
                     <div className={classes.calendarDiv}>
                         <Calendar  {...pickerProps} onMonthChange={(date)=>handleOnMonthChange(date, 1)}  showDaysOutsideCurrentMonth={true} date={ (()=>{  return inputValue  ? new Date(inputValue) : new Date() })()} renderDay={handleRenderDayForCalendar}

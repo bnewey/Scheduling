@@ -158,6 +158,27 @@ async function getCrewJobsByTask(id){
     }
 }
 
+async function getCrewJobsByTaskList(tl_id){
+    const route = '/scheduling/crew/getCrewJobsByTaskList';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tl_id})
+            });
+        if(!data.ok){
+            throw new Error("getCrewJobsByTaskList returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function getCrewJobsByTaskIds(ids, job_type){
     const route = '/scheduling/crew/getCrewJobsByTaskIds';
     try{
@@ -256,7 +277,7 @@ async function getAllCrewJobs(){
     }
 }
 
-async function addCrewJobs(ids, job_type, crew_id){
+async function addCrewJobs(ids, job_type, crew_id,date){
     const route = '/scheduling/crew/addCrewJobs';
     try{
         var response = await fetch(route,
@@ -265,7 +286,7 @@ async function addCrewJobs(ids, job_type, crew_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids, job_type, crew_id})
+                body: JSON.stringify({ids, job_type, crew_id, date})
             });
         return response.ok;
     }catch(error){
@@ -302,6 +323,57 @@ async function updateCrewJob(  crew_id,job_id, old_crew_id){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({job_id,  crew_id, old_crew_id})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function updateCrewJobDate( job_id, date){
+    const route = '/scheduling/crew/updateCrewJobDate';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({job_id, date})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function updateCrewJobType( job_id, type){
+    const route = '/scheduling/crew/updateCrewJobType';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({job_id, type})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function updateCrewNumServices( job_id, numServices){
+    const route = '/scheduling/crew/updateCrewNumServices';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({job_id, numServices})
             });
         return response.ok;
     }catch(error){
@@ -437,6 +509,24 @@ async function reorderCrewJobs(cj_array, crew_id){
     }
 }
 
+
+async function updateCrewColor(id, color){
+    const route = '/scheduling/crew/updateCrewColor';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id, color})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
 module.exports = {
     addCrewMember,
     deleteCrewMember,
@@ -444,6 +534,7 @@ module.exports = {
     getCrewMembers,
     getCrewJobsByMember,
     getCrewJobsByTask,
+    getCrewJobsByTaskList,
     getCrewJobsByTaskIds,
     getCrewMembersByTask,
     getCrewMembersByCrew,
@@ -456,10 +547,14 @@ module.exports = {
     updateCrewJob,
     updateCrewJobCompleted,
     updateCrewJobMember,
+    updateCrewJobType,
+    updateCrewNumServices,
+    updateCrewJobDate,
     addNewCrew,
     deleteCrew,
     getAllCrews,
     getCrewJobsByCrew,
     reorderCrewJobs,
+    updateCrewColor
 
 };

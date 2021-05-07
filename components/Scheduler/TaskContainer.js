@@ -58,9 +58,9 @@ const TaskContainer = function(props) {
               {text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Drill Date", field: "drill_date", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
-              {text: "d_crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
+              {text: "Drill Crew", field: "drill_crew", width: '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
               {text: "Install Date", field: "sch_install_date", width: '5%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-              {text: "i_crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}]},
+              {text: "Install Crew", field: "install_crew", width: '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}]},
     {name: "Compact(No Drill)", value: 1,
        array: [{text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
@@ -71,19 +71,31 @@ const TaskContainer = function(props) {
               {text: "Status", field: "woi_status_check", width: '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Arrival Date", field: "wo_arrival_dates", width: '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Install Date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-              {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},
+              {text: "Install Crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},
     {name: "Service Dept", value: 2,
        array: [{text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
-              {text: "WO Created", field: "date_entered", width: '8%', style: 'smallListItemText', type: 'date'},
-              {text: "Desired Date", field: "date_desired", width: '8%', style: 'smallListItemText', type: 'date'},
-              {text: "Name", field: "t_name", width: '22%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+              {text: "WO Created", field: "date_entered", width: '5%', style: 'smallListItemText', type: 'date'},
+              {text: "Desired Date", field: "date_desired", width: '5%', style: 'smallListItemText', type: 'date'},
+              {text: "Name", field: "t_name", width: '18%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
               {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
               {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
               {text: "Description", field: "description", width: '15%', maxWidth: 170, style: 'smallListItemText', type: 'text'},
               {text: "Job Reference", field: "job_reference", width: '8%', maxWidth: 120, style: 'smallListItemText', type: 'text'},
-              {text: "Install Date", field: "sch_install_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-              {text: "i_crew", field: "install_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"} ]}]
+              {text: "Service Date", field: "field_date", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+              {text: "Service Crew", field: "field_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "field_crew_leader"},
+              {text: "Service Type", field: "field_type", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
+              {text: "Services", field: "field_num_services", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
+             ]}]
+
+    const job_types = [{type: 'install', color: "#004488", shorthand: 'IN'},
+                    {type: 'drill', color: "#3c00d0", shorthand: 'DR'},
+                    {type: 'lampbanks', color: "#ea7500", shorthand: 'LB'},
+                    {type: 'sportsplayer', color: "#e30000", shorthand: 'SP'},
+                    {type: 'service', color: "#444", shorthand: 'SR'},
+                    {type: 'wireless', color: "#fc00d2", shorthand: 'WL'},
+                    {type: 'power', color: "#00af7e", shorthand: 'PR'},
+                    {type: 'marquee', color: "#5b443b", shorthand: 'MQ'}]
 
   //Map Props
     const [taskListToMap, setTaskListToMap] = useState(null);
@@ -271,7 +283,7 @@ const TaskContainer = function(props) {
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,activeTaskView, setActiveTaskView,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
                              sorters, setSorters, installDateFilters, setInstallDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
-                             user, refreshView, setRefreshView, taskViews} } >
+                             user, refreshView, setRefreshView, taskViews, job_types} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >

@@ -22,7 +22,7 @@ router.post('/getPackingSlipsById', async (req,res) => {
         ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, ' +
         ' ec.name AS contact_name, ' +
         ' wo.job_reference, wo.po_number, date_format(wo.date, \'%Y-%m-%d\') as date_ordered, ' +   
-        ' en.shipping AS shipping_entity_id, en.name AS entity_name ' + 
+        ' en.shipping AS shipping_entity_id, en.name AS entity_name, ea.to_name AS address_to_name ' + 
         ' FROM packing_slip ps ' + 
         ' LEFT JOIN work_orders wo ON wo.record_id = ps.work_order ' +      
         ' LEFT JOIN entities en ON wo.customer_id = en.record_id ' + 

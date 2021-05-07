@@ -58,12 +58,12 @@ router.post('/getWorkOrderById', async (req,res) => {
     }
 
     const sql = 'SELECT DISTINCT wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id,account_contact_id, sc.name AS account_contact_name, ' + 
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, wo.description, wo.customer, wo.account_id,wo.account_contact_id, sc.name AS account_contact_name, ' + 
     ' account_address_id, sa.name AS account_address_name, advertising_notes, ' +
     ' wo.customer_id AS customer_id, wo.customer_contact_id, bc.name AS customer_contact_name, wo.customer_address_id, ba.name AS customer_address_name, ' + 
     ' sa.address AS account_address, ba.address AS customer_address, ba.city AS cus_city, ba.state AS cus_state, ' +
     ' a.name AS a_name, c.name AS c_name, bc.name as cc_name, sa.city AS acc_city, sa.state AS acc_state,  ' + 
-    ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, wo.requested_arrival_date   ' +
+    ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, date_format( IFNULL(cj.job_date, wo.requested_arrival_date), \'%Y-%m-%d\') as requested_arrival_date   ' +
     ' FROM work_orders wo ' +
     ' LEFT JOIN entities a ON wo.account_id = a.record_id ' +
     ' LEFT JOIN entities c ON wo.customer_id = c.record_id ' +
@@ -71,6 +71,8 @@ router.post('/getWorkOrderById', async (req,res) => {
     ' LEFT JOIN entities_contacts bc ON wo.customer_contact_id = bc.record_id ' +
     ' LEFT JOIN entities_addresses sa ON wo.account_address_id = sa.record_id ' +
     ' LEFT JOIN entities_addresses ba ON wo.customer_address_id = ba.record_id ' +
+    ' LEFT JOIN tasks t ON t.table_id = wo.record_id ' +
+    ' LEFT JOIN crew_jobs cj ON cj.id = ( SELECT cj2.id FROM crew_jobs cj2 WHERE cj2.task_id = t.id LIMIT 1 )   ' +
     ' WHERE wo.record_id = ? ' + 
     ' limit 1 ';
 
@@ -92,8 +94,8 @@ router.post('/getWorkOrderByIdForPDF', async (req,res) => {
     }
 
     const sql = 'SELECT  wo.record_id AS wo_record_id, date_format(wo.date, \'%Y-%m-%d\') as date, wo.type AS type, wo.completed AS completed, wo.invoiced AS invoiced, ' +
-    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, description, customer, account_id,wo.customer_id AS customer_id, ' +
-    ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, date_format(wo.requested_arrival_date, \'%Y-%m-%d\') as requested_arrival_date,   ' +
+    ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, wo.description, wo.customer, wo.account_id,wo.customer_id AS customer_id, ' +
+    ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, date_format( IFNULL(cj.job_date, wo.requested_arrival_date), \'%Y-%m-%d\') as requested_arrival_date,   ' +
     //Shipping Info
     ' enc.name AS c_entity_name,  eac.address AS c_address, eac.state AS c_state, eac.city AS c_city,eac.zip AS c_zip,   ' +
     ' eac.name AS c_address_name, eac.to_name AS c_address_to_name, ' +
@@ -103,15 +105,19 @@ router.post('/getWorkOrderByIdForPDF', async (req,res) => {
     ' ena.name AS a_entity_name, ena.account_number AS a_account_number, eaa.address AS a_address, eaa.state AS a_state, eaa.city AS a_city,eaa.zip AS a_zip, ' +
     ' ena.purchase_order_required, eaa.name AS a_address_name, eaa.to_name AS a_address_to_name, ' +
     ' eca.name AS a_contact_name, eca.work_phone AS a_work_phone,  eca.fax AS a_fax, ' +
-    ' eca.title AS a_contact_title ' + 
+    ' eca.title AS a_contact_title, ' + 
+    //Crew Jobs 
+    ' cj.job_date AS service_date ' +
 
-    ' FROM work_orders wo ' +
+    ' FROM work_orders wo ' + 
     ' LEFT JOIN entities enc ON wo.customer_id = enc.record_id ' +
     ' LEFT JOIN entities ena ON wo.account_id = ena.record_id ' +  
     ' LEFT JOIN entities_contacts ecc ON wo.customer_contact_id = ecc.record_id ' + 
     ' LEFT JOIN entities_contacts eca ON wo.account_contact_id = eca.record_id ' + 
     ' LEFT JOIN entities_addresses eac ON (wo.customer_address_id = eac.record_id ) ' +
     ' LEFT JOIN entities_addresses eaa ON (wo.account_address_id = eaa.record_id ) ' +
+    ' LEFT JOIN tasks t ON t.table_id = wo.record_id ' +
+    ' LEFT JOIN crew_jobs cj ON cj.id = ( SELECT cj2.id FROM crew_jobs cj2 WHERE cj2.task_id = t.id  LIMIT 1 )   ' +
     ' WHERE wo.record_id = ? ' + 
     ' limit 1 ';
     try{
@@ -368,6 +374,31 @@ router.post('/updateWorkOrderItemArrivalDate', async (req,res) => {
     }
     catch(error){
         logger.error("Failed to updateWorkOrderItemArrivalDate: " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/updateWONotes', async (req,res) => {
+
+    var wo_id, notes;
+    if(req.body){
+        if(req.body.wo_id != null){
+            wo_id = req.body.wo_id;
+            notes =req.body.notes;
+        }  
+    }
+    
+
+    const sql = ' UPDATE work_orders set notes = ? WHERE record_id = ? ';
+
+    try{
+        const results = await database.query(sql, [notes, wo_id]);
+        logger.info("Work Order Notes updated", wo_id);
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("Failed to updateWONotes: " + error);
         res.sendStatus(400);
     }
 });

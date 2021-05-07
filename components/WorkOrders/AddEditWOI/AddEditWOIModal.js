@@ -287,12 +287,13 @@ const AddEditWOIModal = function(props) {
 
 
                     {/* BODY */}
-                     
+                    <form onSubmit={ (event)=>saveRef.current.handleSaveParent(activeWOI, event) } >
                     <Grid container className={classes.grid_container} >  
                         <Grid item xs={ 12 } className={classes.paperScroll}>
                             {/*FORM*/}
                             { editWOIModalOpen &&
                             <><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
+                            
                             <FormBuilder 
                                 ref={saveRef}
                                 columns={true}
@@ -339,7 +340,8 @@ const AddEditWOIModal = function(props) {
                                 
                                 <Button
                                     disabled={saveButtonDisabled}
-                                    onClick={ () => { saveRef.current.handleSaveParent(activeWOI) }}
+                                    //onClick={ () => { saveRef.current.handleSaveParent(activeWOI) }}
+                                    type="submit"
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -350,6 +352,7 @@ const AddEditWOIModal = function(props) {
                             </ButtonGroup>
                         </Grid>
                     </Grid>
+                    </form>
                 </div>
     //         </Fade>
     // </Modal>

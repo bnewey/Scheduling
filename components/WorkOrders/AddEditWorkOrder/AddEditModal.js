@@ -95,7 +95,7 @@ const AddEditModal = function(props) {
         {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
         {field: 'advertising_notes', label: 'Ad Notes', type: 'text', updateBy: 'ref', multiline: true},
         {field: 'po_number', label: 'Purchase Order #', type: 'text', updateBy: 'ref'},
-        {field: 'requested_arrival_date', label: 'Desired Date', type: 'date', updateBy: 'state'},
+        {field: 'requested_arrival_date', label: 'Desired Date', type: 'date', updateBy: 'state', hidden: (row)=> row?.wo_record_id  /*hidden on edit*/},
         {field: 'completed', label: 'Completed', type: 'check', updateBy: 'ref'},
         {field: 'invoiced', label: 'Invoiced', type: 'check', updateBy: 'ref'},
     ];
