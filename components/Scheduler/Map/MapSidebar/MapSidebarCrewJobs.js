@@ -663,10 +663,10 @@ const MapSiderbarCrewJobs = (props) =>{
                             
                     {unfilteredJobs && unfilteredJobs.filter((j)=> j.completed == 1).map((row, index) => {
                                 const labelId = `checkbox-list-label-${row.id}`;
-                                const date = row.job_type == "install" ? row.sch_install_date  : (row.job_type =="drill" ? row.drill_date : null);
+                                const date = row?.job_date;
                                 
                                 const datePassed = date && (new Date(date) < new Date());
-                                const borderColor = getBorderColorBasedOnDate(datePassed);
+                                const borderColor = getBorderColorBasedOnDate(date);
                                 const selected = activeMarker?.job?.id === row.id;
                                 return (
                                 <ListItem key={`${row.id + '_' + index}test`} 
@@ -840,7 +840,6 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
 
         }else{
             //update existing crew job
-            
             Crew.updateCrewJobDate( updateJobId, updateJobDate)
             .then((data)=>{
                 cogoToast.success(`Updated ${fieldId} date`)
@@ -912,6 +911,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
         if(!crewToMap){
         return;
         }
+
         // dropped outside the list
         if (!result.destination) {
         return;
@@ -928,6 +928,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
             console.error("Failed to reorder, bad temp list to update")
             return;
         }
+
 
         Crew.reorderCrewJobs(temp,crewToMap.id)
         .then( (ok) => {
@@ -958,6 +959,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
                 cogoToast.success(`Sorting by ${crewJobSorters.map((v, i)=> v.property + ", ")}`);
             }
         }
+
     },[crewJobSorters]);
 
     const handleListSort = (event, item) =>{
@@ -985,7 +987,6 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
         }
 
         //const isItemSelected = activeMarker?.item?.id === row.id;
-
         return(
             <Draggable key={row.id + '_'+ index+ 'draggable' + row.job_type } 
                             draggableId={row.id.toString()} 
@@ -1015,8 +1016,8 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
                                     {[classes.datePassed3Row]: !selected && moment(date).isAfter(moment().add(2, "day")) && moment(date).isBefore(moment().add(5, "day")) },
                                     {[classes.datePassed3SelectedRow]: selected && moment(date).isAfter(moment().add(2, "day")) && moment(date).isBefore(moment().add(5, "day")) },
 
-                                    {[classes.datePassed4Row]: !selected && moment(date).isAfter(moment().add(7, "day")) },
-                                    {[classes.datePassed4SelectedRow]: selected && moment(date).isAfter(moment().add(7, "day")) },
+                                    {[classes.datePassed4Row]: !selected && moment(date).isAfter(moment().add(5, "day")) },
+                                    {[classes.datePassed4SelectedRow]: selected && moment(date).isAfter(moment().add(5, "day")) },
                                 )}
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}

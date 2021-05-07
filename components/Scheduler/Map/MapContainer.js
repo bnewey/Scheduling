@@ -536,6 +536,7 @@ const MapContainer = (props) => {
     }
 
     const getBorderColorBasedOnDate = (date)=>{
+      
       if(date == null){
           return '#888'; //default border color
       }
@@ -552,11 +553,10 @@ const MapContainer = (props) => {
       if(moment(date).isAfter(moment().add(2, "day")) && moment(date).isBefore(moment().add(5, "day"))){
           return '#fff600';
       }
-      if(moment(date).isAfter(moment().add(7, "day"))){
+      if(moment(date).isAfter(moment().add(5, "day"))){
           return '#55c200';
       }
 
-      //console.error("No border applied");
       return '#888';
   }
 

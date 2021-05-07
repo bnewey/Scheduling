@@ -294,7 +294,7 @@ const CustomMap = compose(
         }
         radarLayers[nextTimestamp].setOpacity(radarOpacity);
         
-        setVisualTimestamp((new Date(nextTimestamp * 1000)).toString())
+        setVisualTimestamp((new Date(nextTimestamp * 1000)).toString());
     }
     const showFrame = (nextPosition) => {
         var preloadingDirection = (animationPosition + nextPosition) - animationPosition > 0 ? 1 : -1;
@@ -304,6 +304,9 @@ const CustomMap = compose(
         changeRadarPosition((animationPosition + nextPosition) + preloadingDirection, true);
     }
     ///END OF RADAR //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///
+    // end of radar //
   
     const getBounds = (map, markers)=> {
         const points = markers.filter((v, i)=> v.geocoded).map((item, index)=> ({ lat: item.lat, lng: item.lng}));
@@ -341,7 +344,6 @@ const CustomMap = compose(
     
 
     useEffect(()=>{
-        
         if(!savedClusterer){
             console.log(" Bad Random", savedClusterer);
             return;
@@ -356,12 +358,11 @@ const CustomMap = compose(
             allMarkers.forEach( (marker, MarkerIndex) => {
                 
                 let row = JSON.parse(marker.title);
-                let labelAnchor = { x: -56, y: -56 }
+                let labelAnchor = { x: -56, y: -56 };
                 if (allMarkers.length <= 1) {
                     let initials = row?.leader_name ? getInitialsFromName(row.leader_name) : 'C' + row?.crew_id ;
                     let crewColor = row?.crew_color ? row.crew_color : '#555';
-                    let borderColor = getBorderColorBasedOnDate(row?.job_type === "install" ? row?.sch_install_date : (row?.job_type === "drill" ? row?.drill_date : null) );
-    
+                    let borderColor = getBorderColorBasedOnDate(row?.job_date );
                     let jobTypeColor = job_types.find((type)=> type.type === row.job_type )?.color || '#fff';
                     let jobTypeShorthand = job_types.find((type)=> type.type === row.job_type )?.shorthand || '';
                    markerLabelsList.push(
@@ -370,10 +371,9 @@ const CustomMap = compose(
                              position={marker.position}
                              mapPaneName= {OverlayView.OVERLAY_MOUSE_TARGET}
                              getPixelPositionOffset={(x, y) => props.getPixelPositionOffset(x, y, labelAnchor)}
-                             
                              >
-                                 <div
-                                 onClick = { props.updateActiveMarker(row.id, "crew") }
+                                 <div 
+                                   onClick = { props.updateActiveMarker(row.id, "crew") }
                                    style={{
                                     boxShadow: 'rgb(0 0 0 / 48%) 0px 0px 2px 2px',
                                     background: `#fff`,
@@ -532,7 +532,7 @@ const CustomMap = compose(
                             showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} markerToRemap={markerToRemap} setMarkerToRemap={setMarkerToRemap}/> : <></>}
         {showingInfoWindow && activeMarker?.type ==="crew" ? <MapCrewInfoWindow {...props} onContentChanged={props.infoWindowContentChanged} 
                             activeMarker={activeMarker} setActiveMarker={setActiveMarker} multipleMarkersOneLocation={multipleMarkersOneLocation} 
-                            setInfoWeather={setInfoWeather} infoWeather={infoWeather} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation}
+                            setInfoWeather={setInfoWeather} infoWeather={infoWeather} setMultipleMarkersOneLocation={setMultipleMarkersOneLocation} setCrewMarkersRefetch={setCrewMarkersRefetch}
                             showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} markerToRemap={markerToRemap} setMarkerToRemap={setMarkerToRemap}/> : <></>}
         {showingInfoWindow && activeMarker?.type === "vehicle" && vehicleMarkers ? <MapVehicleInfoWindow activeMarker={activeMarker} setActiveMarker={setActiveMarker}
                     showingInfoWindow={showingInfoWindow} setShowingInfoWindow={setShowingInfoWindow} bouncieAuthNeeded={bouncieAuthNeeded} setBouncieAuthNeeded={setBouncieAuthNeeded}/>: <></>}

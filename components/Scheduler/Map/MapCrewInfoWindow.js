@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect} from 'react';
 
 import ReactDOM from 'react-dom';
-import {makeStyles, Avatar, Tooltip, Button} from '@material-ui/core';
+import {makeStyles, Avatar, Tooltip, Button,TextField} from '@material-ui/core';
 //import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 const {
     withScriptjs,
@@ -15,11 +15,15 @@ const {
   import EditLocationSharpIcon from '@material-ui/icons/EditLocationSharp';
 
 import Tasks from '../../../js/Tasks';
+import Work_Orders from '../../../js/Work_Orders';
+
 import Util from '../../../js/Util';
 import cogoToast from 'cogo-toast';
 import moment from 'moment';
+import Router from 'next/router'
 import clsx from 'clsx';
 import { TaskContext } from '../TaskContainer';
+import { MapContext } from './MapContainer';
 
 const days=["Sunday",'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -28,17 +32,21 @@ const MapCrewInfoWindow = (props)=>{
     //PROPS
     const {crewMarkers, activeMarker, setActiveMarker, infoWeather, setInfoWeather, showingInfoWindow, setShowingInfoWindow,markerToRemap, setMarkerToRemap,
         multipleMarkersOneLocation, setMultipleMarkersOneLocation} = props;
+    const {setCrewJobsRefetch} = React.useContext(MapContext)
 
         const {  job_types } = React.useContext(TaskContext);
     //STATE
     const [jobTask, setJobTask] = useState(null);
+    const [notesEdit, setNotesEdit] = useState(false);
+    const [notes, setNotes] = useState(null);
+    const [shouldUpdate,setShouldUpdate]  = useState(false)
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
     useEffect( () =>{ //useEffect for inputText
         setInfoWeather(null);
-
+        setShouldUpdate(false);
         console.log("Active marker", activeMarker);
         if(activeMarker){
             Tasks.getTask(activeMarker.item?.task_id)
@@ -51,14 +59,26 @@ const MapCrewInfoWindow = (props)=>{
                 console.error("Failed to get task for job", error);
                 cogoToast.error("Failed to get task for job");
             })
+
+            if(notesEdit){
+                setNotesEdit(false);
+            }
+            if(notes !== activeMarker.item?.notes){
+                setNotes(null)
+            }
         }
     },[activeMarker]);
 
+    const handleShouldUpdate = (event , update) =>{
+        setNotes(event.target.value);
+        setShouldUpdate(update)
+    }
 
     const handleInfoWindowClose = () =>{
         setInfoWeather(null);
         setShowingInfoWindow(false);
         setMultipleMarkersOneLocation(null);
+        setShouldUpdate(false)
     }
 
     const getWeather = (event, lat, lng) => {
@@ -137,6 +157,57 @@ const MapCrewInfoWindow = (props)=>{
         setActiveMarker({type: "crew", item: newActiveMarker});
     }
 
+    const handleGoToWorkOrderId = (wo_id, event) =>{
+        //console.log("woi", wo_id);
+        //Disable Default context menu
+        event.preventDefault();
+        
+        //set detailWOIid in local data
+        window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
+        
+        //set detail view in local data
+        window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
+    
+        Router.push('/scheduling/work_orders')
+      }
+
+    const handleEditNotes = (notesEdit)=>{
+        if(notesEdit == false){
+            setNotesEdit(true);
+        }else{
+            setNotesEdit(false);
+        }
+        
+    }
+
+    const handleSaveNotes = (event, item)=>{
+        if(!shouldUpdate){
+            console.log("No changes");
+            cogoToast.info("No changes");
+            setNotesEdit(false);
+            return
+        }
+        if(!item){
+            cogoToast.error("Internal Server Error");
+            console.error("No item in handleSaveNotes")
+        }
+
+        console.log("notes", notes);
+        Work_Orders.updateWONotes(item.wo_id, notes )
+        .then((data)=>{
+            cogoToast.success("Updated notes");
+            setCrewJobsRefetch(true);
+            setNotesEdit(false);
+            setShouldUpdate(false);
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to update notes");
+            console.error("Failed to update notes", error);
+        })
+
+    }
+
+
     const crewColor = React.useCallback(activeMarker?.item?.crew_color || '#555', [activeMarker]);
     const typeColor = React.useCallback(job_types.find((type)=> type.type === activeMarker?.item?.job_type )?.color || '#222', [activeMarker]);
 
@@ -166,7 +237,9 @@ const MapCrewInfoWindow = (props)=>{
                 <div className={classes.markerSubInfo}> 
                     <div className={classes.markerSubInfoDiv}>
                         <span className={classes.markerSubInfoLabel}>WO#:</span>
-                        <span className={classes.markerSubInfoValue}>{activeMarker?.item?.table_id}</span>
+                        <span className={clsx({[classes.markerSubInfoValue]: true, 
+                                            [classes.clickableWOnumber]: true})} 
+                                            onClick={(event)=>handleGoToWorkOrderId(activeMarker?.item?.table_id,event)}>{activeMarker?.item?.table_id}</span>
                     </div> 
                     <div className={classes.markerSubInfoDiv}>
                         <span className={classes.markerSubInfoLabel}>Services:</span>
@@ -186,6 +259,29 @@ const MapCrewInfoWindow = (props)=>{
                     <div className={classes.markerSubInfoDiv}>
                         <span className={classes.markerSubInfoLabel}>Date:</span>
                         <span className={classes.markerSubInfoValue}>{ activeMarker?.item?.job_date ? moment(activeMarker?.item?.job_date).format('MM-DD-YYYY') : ''}</span>
+                    </div>
+                    <div className={classes.markerSubInfoDiv}>
+                        <span className={classes.markerSubInfoLabel}>Descr:</span>
+                        <span className={classes.markerSubInfoValue}>{ activeMarker?.item?.description}</span>
+                    </div>
+                    <div className={classes.markerSubInfoDiv}>
+                        <span className={clsx({[classes.markerSubInfoLabel]: true, 
+                                            [classes.clickableWOnumber]: true})}
+                                            onClick={(event)=> handleEditNotes(notesEdit)}>Notes:</span>
+                        {!notesEdit && <span className={classes.markerSubInfoValue}>{ activeMarker?.item?.notes}</span>}
+                        
+                        {notesEdit && <div>
+                                <TextField id={`wo_notes`} 
+                                   
+                                    variant="outlined"
+                                    multiline
+                                    name={'item_notes'}
+                                    value={notes}
+                                    InputProps={{className: classes.inputRoot}} 
+                                    defaultValue={ activeMarker?.item?.notes }
+                                    onChange={(event)=>handleShouldUpdate(event,true)}  />
+                                <span className={classes.clickableWOnumber} onClick={(event)=> handleSaveNotes(event, activeMarker?.item )}>Save</span>
+                            </div>}
                     </div>
                 </div>
                 
@@ -322,17 +418,20 @@ class InfoWindowEx extends React.Component {
         display:'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'start',
     },
     markerSubInfoLabel:{
+        color: '#555',
         flexBasis: '25%',
         paddingRight: '10px',
         textAlign: 'right',
     },
     markerSubInfoValue:{
+        color: '#000', 
         flexBasis: '75%',
         paddingLeft: '10px',
         textAlign: 'left',
+        maxWidth: '300px'
     },
     buttonContainer:{
         width: '100%',
@@ -418,5 +517,18 @@ class InfoWindowEx extends React.Component {
     },
     multiMarkerLabelDiv:{
         margin: '2%'
+    },
+    clickableWOnumber:{
+        cursor: 'pointer',
+        textDecoration: 'underline',
+        '&:hover':{
+          color: '#ee3344',
+        }
+    },
+    inputRoot:{
+        backgroundColor: '#f5fdff',
+        padding: '2px 2px',
+        fontSize: 12,
     }
+
   }));

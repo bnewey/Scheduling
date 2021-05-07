@@ -153,6 +153,7 @@ const useStyles = makeStyles(theme => ({
             padding: '1px 0px 0px 0px',
             backgroundColor: '#f5fdff',
             padding: '0px 5px',
+            fontSize: 13,
         }
         
     },

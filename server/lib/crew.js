@@ -230,7 +230,7 @@ router.post('/getCrewJobsByTaskList', async (req,res) => {
 
     const sql = ' SELECT tl.id as tl_id, tl.list_name as tl_name, j.id, t.id AS task_id, j.date_assigned, j.ordernum, ' + 
             ' j.job_type, j.num_services, j.crew_id, ma.member_name AS leader_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
-            ' cm.id as crew_leader_id, cc.color AS crew_color,  t.table_id, t.description, ' +
+            ' cm.id as crew_leader_id, cc.color AS crew_color,  t.table_id,wo.record_id AS wo_id, wo.description, wo.notes, ' +
             ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
             '  concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ' +
             ' date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as job_date ' +
