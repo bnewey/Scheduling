@@ -2,14 +2,15 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles,Modal, Backdrop, Fade, Grid,ButtonGroup, Button,TextField, InputBase, Select, MenuItem,
      Checkbox,IconButton} from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@material-ui/icons/Delete'
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 
+import moment from 'moment';
 import cogoToast from 'cogo-toast';
 import { confirmAlert } from 'react-confirm-alert'; // Import
-import ConfirmYesNo from '../../UI/ConfirmYesNo';
+import ConfirmYesNo from '../../../UI/ConfirmYesNo';
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -19,184 +20,151 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
-import Util from '../../../js/Util.js';
+import Util from '../../../../js/Util.js';
 
-import Settings from  '../../../js/Settings';
-import Entities from  '../../../js/Entities';
-import { ListContext } from '../EntitiesContainer';
+import Settings from  '../../../../js/Settings';
+import Inventory from  '../../../../js/Inventory';
+import { ListContext } from '../InvPartsContainer';
 
-import FormBuilder from '../../UI/FormComponents/FormBuilder';
+import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
 
-const AddEditEntity = function(props) {
-    const {user, editModalMode} = props;
+const AddEditModal = function(props) {
+    const {user} = props;
 
-    const { entities, setEntities,
-        currentView, previousView, handleSetView,views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,setEntitiesRefetch,
-        editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
-
+    const { parts, setParts, setPartsRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailPartId,
+        setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
+         recentParts, setRecentParts} = useContext(ListContext);
 
     const saveRef = React.createRef();
-    const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
     const classes = useStyles();
 
     const handleCloseModal = () => {
-        setActiveEntity(null);
-        setEditEntModalOpen(false);
-        setDefaultAddresses(null);
-        setEntityTypes(null);
-        setSaveButtonDisabled(false);
+        setActivePart(null);
+        setEditPartModalOpen(false);
     };
 
-    const [defaultAddresses, setDefaultAddresses] = useState(null);
-    const [entityTypes, setEntityTypes] = useState(null);
-
-    useEffect(()=>{
-        if(activeEntity && defaultAddresses==null){
-            console.log("active entity CONTACT", activeEntity);
-
-            Entities.getDefaultContacts(activeEntity.record_id)
-            .then((data)=>{
-                console.log("Entity Default Contacts", data);
-                setDefaultAddresses(data);
-            })
-            .catch((error)=>{
-                console.error("Failed to get default addresses for entity addedit form")
-            })
-        }
-
-        if(entityTypes == null){
-            Entities.getEntityTypes()
-            .then((data)=>{
-                setEntityTypes(data);
-            })
-            .catch((error)=>{
-                console.error("Failed to get entity types for entity addedit form")
-            })
-        }
-    },[activeEntity])
-
-    
    
     const fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'name', label: 'Name', type: 'text', updateBy: 'ref', multiline: false,required: true},
-        {field: 'county_or_parish', label: 'County or Parish', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'entities_types_id', label: 'Entity Type', type: 'select-entity-type', updateBy: 'ref',required: true},
-        {field: 'class', label: 'Class', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'other_organization', label: 'Other Organization', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'phone', label: 'Phone', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'fax', label: 'Fax', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'website', label: 'Website', type: 'text', updateBy: 'ref', multiline: false},
-        {field: 'shipping', label: 'Default Shipping Contact', type: 'select-default-address', updateBy: 'ref'},
-        {field: 'billing', label: 'Default Billing Contact', type: 'select-default-address', updateBy: 'ref'},
-        {field: 'mailing', label: 'Default Mailing Contact', type: 'select-default-address', updateBy: 'ref'},
-        {field: 'account_number', label: 'Account Number', type: 'text', updateBy: 'ref'},
-        {field: 'purchase_order_required', label: 'Purchase Order Required', type: 'check', updateBy: 'ref'},
-        {field: 'prepayment_required', label: 'Prepayment Required', type: 'check', updateBy: 'ref'},
-        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
+        { field: 'description', label: 'Description', type: 'text',updateBy: 'ref', required:true }, 
+        { field: 'inv_qty', label: 'In Stock',  type: 'number',updateBy: 'ref',  },
+        { field: 'cost_each', label: 'Cost Each', type: 'number',updateBy: 'ref',  },
+        { field: 'part_type', label: 'Part Type', type: 'select-part-type', updateBy: 'ref'},
+        { field: 'storage_location', label: 'Storage Location',  type: 'number',updateBy: 'ref',  },
+        { field: 'notes', label: 'Notes',  type: 'text',updateBy: 'ref',}, 
+        { field: 'reel_width', label: 'Reel Width',  type: 'text',updateBy: 'ref',  },
+        { field: 'obsolete', label: 'Obsolete',   type: 'check',updateBy: 'ref', },
     ];
-
 
     //Set active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
-        if(editModalMode == "add"){
-            setActiveEntity({});
+        if(setEditPartModalMode == "add"){
+            setActivePart({});
         }
-    },[editModalMode])
+    },[setEditPartModalMode])
 
+    const [partTypes, setPartTypes] = useState(null);
 
-    const handleSave = (entity, updateEntity ,addOrEdit) => {
-        if (saveButtonDisabled) {
-            return;
-        }
-        setSaveButtonDisabled(true);
-
-        return new Promise((resolve, reject)=>{
-            if(!entity){
-                console.error("Bad entity")
-                reject("Bad entity");
+    useEffect(()=>{
+            if(partTypes == null){
+                Inventory.getPartTypes()
+                .then((data)=>{
+                    setPartTypes(data);
+                })
+                .catch((error)=>{
+                    console.error("Failed to get entity types for entity addedit form")
+                })
             }
+    },[activePart])
 
-            updateEntity["entities_id"] = activeEntity.record_id;
+        
+
+    const handleSave = (part, updatePart ,addOrEdit) => {
+        return new Promise((resolve, reject)=>{
+            if(!part){
+                console.error("Bad work order")
+                reject("Bad work order");
+            }
             
             //Add Id to this new object
             if(addOrEdit == "edit"){
-                updateEntity["record_id"] = entity.record_id;
+                updatePart["rainey_id"] = part.rainey_id;
+                updatePart["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
 
-                Entities.updateEntity( updateEntity )
+                Inventory.updatePart( updatePart )
                 .then( (data) => {
                     //Refetch our data on save
-                    cogoToast.success(`Entity ${entity.record_id} has been updated!`, {hideAfter: 4});
-                    setEntitiesRefetch(null);
-                    setActiveEntity(null);
+                    cogoToast.success(`Part ${part.rainey_id} has been updated!`, {hideAfter: 4});
+                    setPartsRefetch(true);
+                    setActivePart(null);
                     handleCloseModal();
-                    resolve(data);
+                    resolve(data)
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error updating entity. ` , {hideAfter: 4});
-                    reject(error);
+                    cogoToast.error(`Error updating part. ` , {hideAfter: 4});
+                    reject(error)
                 })
             }
             if(addOrEdit == "add"){
-                Entities.addEntity( updateEntity )
+                Inventory.addNewPart( updatePart )
                 .then( (data) => {
                     //Get id of new workorder and set view to detail
                     if(data && data.insertId){
-                        setDetailEntityId(data.insertId);
-                        handleSetView(views.filter((v)=>v.value == "entityDetail")[0]);
+                        setDetailPartId(data.insertId);
+                        setCurrentView(views.filter((v)=>v.value == "partDetail")[0]);
                     }
-                    cogoToast.success(`Entity has been added!`, {hideAfter: 4});
-                    setEntitiesRefetch(null);
-                    setActiveEntity(null);
+                    cogoToast.success(`Part has been added!`, {hideAfter: 4});
+                    setPartsRefetch(true);
+                    setActivePart(null);
                     handleCloseModal();
                     resolve(data);
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error adding entity. ` , {hideAfter: 4});
-                    reject(error);
+                    cogoToast.error(`Error adding part. ` , {hideAfter: 4});
+                    reject(error)
                 })
             }
         })
     };
 
-    const handleDeleteEntity = (entity) => {
-        if(!entity || !entity.record_id){
-            console.error("Bad entity in delete Entity");
+    const handleDeletePart = (part) => {
+        if(!part || !part.rainey_id){
+            console.error("Bad part in delete Part");
             return;
         }
 
         const deleteEnt = () =>{
-            Entities.deleteEntity(entity.record_id)
+            Inventory.deletePart(part.rainey_id)
             .then((data)=>{
-                setEntitiesRefetch(true);
+                setPartsRefetch(true);
                 handleCloseModal();
-                handleSetView(views.filter((v)=>v.value == "allEntities")[0]);
+                setCurrentView(views.filter((v)=>v.value == "partsList")[0]);
+                cogoToast.success("Deleted Part: " + part.rainey_id);
             })
             .catch((error)=>{
-                cogoToast.error("Failed to Delete entity")
-                console.error("Failed to delete entity", error);
+                cogoToast.error("Failed to Delete part")
+                console.error("Failed to delete part", error);
             })
         }
 
         confirmAlert({
             customUI: ({onClose}) => {
                 return(
-                    <ConfirmYesNo onYes={deleteEnt} onClose={onClose} customMessage={"Delete Entity permanently?"}/>
+                    <ConfirmYesNo onYes={deleteEnt} onClose={onClose} customMessage={"Delete Part permanently?"}/>
                 );
             }
         })
     }
 
-
     return(<>
-        { editEntModalOpen && <Modal
+        { editPartModalOpen && <Modal
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             className={classes.modal}
-            open={editEntModalOpen}
+            open={editPartModalOpen}
             onClose={handleCloseModal}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -204,13 +172,13 @@ const AddEditEntity = function(props) {
             timeout: 500,
             }}
         >
-            <Fade in={editEntModalOpen}>
+            <Fade in={editPartModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            {detailEntityId && activeEntity ? `Edit Entity #: ${activeEntity.record_id}` : 'Add Entity'} 
+                            {detailPartId && activePart ? `Edit Rainey Part#: ${activePart.rainey_id}` : 'Add Part'} 
                         </span>
                     </div>
                 
@@ -219,18 +187,16 @@ const AddEditEntity = function(props) {
                     
                     <Grid container >  
                         <Grid item xs={12} className={classes.paperScroll}>
-                            {/*FORM*/}
                             <FormBuilder 
                                 ref={saveRef}
                                 fields={fields} 
-                                mode={editModalMode} 
+                                mode={editPartModalMode} 
                                 classes={classes} 
-                                formObject={activeEntity} 
-                                setFormObject={setActiveEntity}
+                                formObject={activePart} 
+                                setFormObject={setActivePart}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                entityTypes={entityTypes} defaultAddresses={defaultAddresses}
-                                 />
+                                partTypes={partTypes} />
                         </Grid>
                         
                     </Grid>
@@ -239,9 +205,9 @@ const AddEditEntity = function(props) {
                     {/* FOOTER */}
                     <Grid container >
                         <Grid item xs={12} className={classes.paper_footer}>
-                        { editModalMode == "edit" && activeEntity?.record_id ? <ButtonGroup className={classes.buttonGroup}>
+                        { editPartModalMode == "edit" && activePart?.rainey_id ? <ButtonGroup className={classes.buttonGroup}>
                             <Button
-                                    onClick={() => handleDeleteEntity(activeEntity)}
+                                    onClick={() => handleDeletePart(activePart)}
                                     variant="contained"
                                     size="large"
                                     className={classes.deleteButton}
@@ -249,7 +215,7 @@ const AddEditEntity = function(props) {
                                     <DeleteIcon />Delete
                         </Button></ButtonGroup> :<></>}
                         <ButtonGroup className={classes.buttonGroup}>
-                                <Button
+                            <Button
                                     onClick={() => handleCloseModal()}
                                     variant="contained"
                                     color="primary"
@@ -260,8 +226,7 @@ const AddEditEntity = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
-                                    disabled={saveButtonDisabled}
-                                    onClick={ () => { saveRef.current.handleSaveParent(activeEntity) }}
+                                    onClick={ () => { saveRef.current.handleSaveParent(activePart) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"
@@ -278,7 +243,7 @@ const AddEditEntity = function(props) {
     </>) 
     }
 
-export default AddEditEntity;
+export default AddEditModal;
 
 const useStyles = makeStyles(theme => ({
     modal: {
@@ -329,7 +294,12 @@ const useStyles = makeStyles(theme => ({
     saveButton:{
         backgroundColor: '#414d5a'
     },
-
+    deleteButton:{
+        backgroundColor: '#c4492e',
+        '&:hover':{
+            backgroundColor: '#f81010',
+        }
+    },
     buttonGroup: {
         marginLeft: '1%',
         '& .MuiButton-label':{
@@ -366,7 +336,7 @@ const useStyles = makeStyles(theme => ({
     },
     inputStyleDate:{
         padding: '5px 7px',
-        width: '55%',
+        width: '44%',
         
     },
     inputRoot: {
@@ -414,11 +384,5 @@ const useStyles = makeStyles(theme => ({
     },
     errorSpan:{
         color: '#bb4444',
-    },
-    deleteButton:{
-        backgroundColor: '#c4492e',
-        '&:hover':{
-            backgroundColor: '#f81010',
-        }
-    },
+    }
 }));

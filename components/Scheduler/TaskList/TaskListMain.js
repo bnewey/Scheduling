@@ -33,7 +33,7 @@ const TaskListMain = (props) => {
     const [taskListTasksRefetch, setTaskListTasksRefetch] = React.useState(false);
     const [selectedTasks, setSelectedTasks] = useState([]);
     
-    const [sorterState, setSorterState] = useState(0);
+    
 
     
     //PROPS
@@ -43,7 +43,7 @@ const TaskListMain = (props) => {
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
-         sorters, setSorters, installDateFilters , setInstallDateFilters,
+         sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,
          taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView } = useContext(TaskContext);
 
 
@@ -226,7 +226,23 @@ const TaskListMain = (props) => {
         //sort taskListItems according to item
         //this sort can take multiple sorters but i dont think its necessary
            // if it is, you will have to change the [0] to a dynamic index!
-        if(item.type == 'date' || item.type == 'number' || item.type == 'text'){
+        if(item.type == 'date' || item.type == 'datetime' || item.type == 'number' || item.type == 'text'){
+            switch(sorterState){
+                case 0:
+                    setSorterState(1);
+                    break;
+                case 1:
+                    if(sorters[0].property == item.field){
+                        setSorterState(2)
+                    }else{
+                        setSorterState(1);
+                    }
+                    break;
+                case 2:
+                    setSorterState(1);
+                    break;
+                default: 
+            }
             setSorters([{
                 property: item.field, 
                 direction: sorters && sorters[0] && sorters[0].property == item.field ? 
@@ -294,6 +310,7 @@ const TaskListMain = (props) => {
                                                             </span>
                                         </ListItemText>
                                     )})}
+<<<<<<< HEAD
                                     
                                     </ListItem>
                                 

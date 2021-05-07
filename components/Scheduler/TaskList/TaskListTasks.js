@@ -586,6 +586,9 @@ const TaskListTasks = (props) =>{
       if(type=="date"){
         return_value = moment(value).format("MM/DD/YYYY")
       }
+      if(type=="datetime"){
+        return_value = moment(value).format('MM/DD/YYYY HH:mm:ss')
+      }
 
       switch(fieldId){
         case 'install_crew':{
@@ -886,10 +889,6 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    // style={getItemStyle(
-                    //   snapshot.isDragging,
-                    //   provided.draggableProps.style
-                    // )}
                     style={{ ...getItemStyle(
                          snapshot.isDragging,
                          provided.draggableProps.style),
@@ -898,7 +897,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
           { taskListToMap 
           ? <div className={classes.checkBoxDiv}>
               <Checkbox checked={isItemSelected} className={classes.tli_checkbox} onClick={event => handleClick(event, row.t_id)}/>
-            </div> 
+            </div>
           : <></>}
           {tableInfo.map((item, i)=>{
             var value = row[item.field];
@@ -935,7 +934,6 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
   return(
       <React.Fragment>
       { taskListTasks && taskListTasksSaved ? <>
-      {/* <List className={classes.root}>   */}
           <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable" mode="virtual"
           renderClone={(provided, snapshot, rubric) => (

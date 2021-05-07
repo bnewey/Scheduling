@@ -56,11 +56,13 @@ const FormBuilder = forwardRef((props, ref) => {
             entityBillingAddresses, setEntityBillingAddresses,
             setEntityShippingContactEditChanged, setEntityBillingContactEditChanged, //state for knowing when to show entity defaults or actual wo value
             dontCloseOnNoChangesSave = false
+            partTypes
         } = props;
         console.log("Props", props);
         
     const [shouldUpdate, setShouldUpdate] = useState(false);
     const [errorFields,setErrorFields] = useState([]);
+    const [validErrorFields,setValidErrorFields] = useState([]);
 
     //Building an object of refs to update text input values instead of having them tied to state and updating every character
     const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
@@ -104,7 +106,7 @@ const FormBuilder = forwardRef((props, ref) => {
         
         var tmpObject = {...formObject};
 
-        if(type === "date") {
+        if(type === "date" || type === "datetime") {
             tmpObject[key] = value ? Util.convertISODateTimeToMySqlDateTime(value) : value;
         }
         if(type.split('-')[0] === "select"){
@@ -202,6 +204,9 @@ const FormBuilder = forwardRef((props, ref) => {
                     const type = field.type;
                     switch(type){
                         case 'number':
+                            if(textValueObject[field.field])
+                            updateItem[field.field] = textValueObject[field.field];
+                        break;
                         case 'text':
                             //Get updated values with textValueObject bc text values use ref, check against "" bc ""==false
                             if(textValueObject[field.field]){
@@ -241,6 +246,46 @@ const FormBuilder = forwardRef((props, ref) => {
                                                     }
                                                 })
                                             }
+                        case 'datetime':
+                            if(textValueObject[field.field])
+                                updateItem[field.field] = Util.convertISODateTimeToMySqlDateTime(textValueObject[field.field]);
+                            break;
+                        // case 'auto':
+                        //     //Auto doesnt usually use ref but leaving in case we need to switch from state
+                        //     //Get updated values with textValueObject bc text values use ref
+                        //     if(textValueObject[field.field])
+                        //         console.log("TEST",textValueObject[field.field]);
+                        //         updateItem[field.field] = textValueObject[field.field];
+                        //     break;
+                        case 'entity-titles':
+                            const saveEntity = (data, callback) => {
+                                itemToSave[field.field]?.forEach((title)=>{
+                                    //Remove titles if false
+                                    if(title.title_change && title.title_change == "remove"){
+                                        if(title?.title_attached != 0){
+                                            //Delete from entities_contacts_titles
+                                            Entities.deleteContactTitle(title.title_attached)
+                                            .then((data)=>{
+                                                if(callback){
+                                                    callback()
+                                                }
+                                            })
+                                            .catch((error)=>{
+                                                console.error("Failed to delete contact title")
+                                                cogoToast.error("Internal Server Error");
+                                                if(callback){
+                                                    callback()
+                                                }
+                                            })
+                                        }
+                                    }
+                                    if(title.title_change && title.title_change == "add"){
+                                        //check against original DB data to see if we really need to add
+                                        var updatedTitle = {...title};
+                                        if(addOrEdit == "add"){
+                                            updatedTitle["contact_id"] = data.insertId;
+                                        }else{
+                                            updatedTitle["contact_id"] = itemToSave["record_id"];
                                         }
                                         if(title.title_change && title.title_change == "add"){
                                             //check against original DB data to see if we really need to add
@@ -290,34 +335,13 @@ const FormBuilder = forwardRef((props, ref) => {
                     }
                 })
 
-                
-
                 //Validate Required Fields
                 var empty_required_fields = fields.
                         filter((v,i)=> v.required && !(v.hidden && v.hidden(formObject) )).
-                        filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined);
-                
-
-                //Validate Specific Types
-                var error_fields = fields.
-                filter((v,i)=> !(v.hidden && v.hidden(formObject) )).
-                filter((item)=> { 
-                    switch(item.type){
-                        case 'number':
-                            if(updateItem[item.field] == null || updateItem[item.field] == undefined || isNaN(updateItem[item.field])){
-                                return true;
-                            }
-                            break;
-                        default:
-                            return false;
-                            break;
-                    }
-                    
-                });
-
-                let validation_errors = [...empty_required_fields,...error_fields];
-                if(empty_required_fields.length){
-                    cogoToast.error("Required Fields Missing");
+                        filter((item)=> updateItem[item.field] == null || updateItem[item.field] == undefined || updateItem[item.field]=== "");;
+                if(empty_required_fields.length > 0){
+                    cogoToast.error("Required fields are blank", {hideAfter: 10});
+                    setErrorFields(empty_required_fields);
                     console.error("Required fields are blank", empty_required_fields)
                 }
                 if(error_fields.length){
@@ -328,7 +352,40 @@ const FormBuilder = forwardRef((props, ref) => {
                     setErrorFields(validation_errors);
                     return;
                 }else{
-                    setErrorFields([])
+                    setErrorFields([]);
+                }
+
+                const validate_by_type = (field, index) =>{
+                    if(!field || !updateItem){
+                        //Return true so we dont add error on bad code
+                        console.error("Error in validation params; Bad field or updateItem")
+                        return true;
+                    }
+                    var type = field.type;
+                    var error = false;
+
+                    switch(type){
+                        case 'text':
+                            break;
+                        case 'number':
+                            //test against regexp for nondecimal or decimal 
+                            error = updateItem[field.field] && !(/^\d+$/.test(updateItem[field.field]) || /^\d+\.\d+$/.test(updateItem[field.field]));
+                            break;
+                    }
+                    return error;
+                }
+
+                //Validate Field Data
+                var fail_validation_fields = fields.
+                        filter((v,i)=> v.type && !(v.hidden && v.hidden(formObject) )).
+                        filter( validate_by_type );;
+                if(fail_validation_fields.length > 0){
+                    cogoToast.error("Validation data error on marked fields", {hideAfter: 10});
+                    setValidErrorFields(fail_validation_fields);
+                    console.error("Validation data error on marked fields", fail_validation_fields)
+                    return;
+                }else{
+                    setValidErrorFields([]);
                 }
 
 
@@ -344,7 +401,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     })
                     .catch((error)=>{
                         console.log("Failed to save in FormBuilder", error);
-                        cogoToast.info( "Error saving");
+                        cogoToast.info("Failed to save in FormBuilde");
                     })
                 }
 
@@ -376,11 +433,11 @@ const FormBuilder = forwardRef((props, ref) => {
                 <div className={clsx(classes.inputDiv,{[classes.formColumnSeperator]: field?.second_column})}
                     style={field?.second_column ? {gridColumn:'2'} : null}>  
                     <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span>
-                    <GetInputByType field={field} formObject={formObject} errorFields={errorFields} handleShouldUpdate={handleShouldUpdate}
+                    <GetInputByType field={field} formObject={formObject} errorFields={errorFields} validErrorFields={validErrorFields} handleShouldUpdate={handleShouldUpdate}
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToContactOptionsWOI={shipToContactOptionsWOI} shipToAddressOptionsWOI={shipToAddressOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
-                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} defaultAddresses={defaultAddresses}
+                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} partTypes={partTypes} defaultAddresses={defaultAddresses}
                      entContactTitles={entContactTitles} entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts}
                      entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
                      entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
@@ -396,7 +453,8 @@ const FormBuilder = forwardRef((props, ref) => {
 export default FormBuilder;
 
 const GetInputByType = function(props){
-    const {field,dataGetterFunc , formObject, errorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes, id_pretext,
+<<<<<<< HEAD
+    const {field,dataGetterFunc , formObject, errorFields, validErrorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes, id_pretext,
         shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
         entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
         entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses} = props;
@@ -407,12 +465,13 @@ const GetInputByType = function(props){
     }
     
     var error = errorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
+    var valid_error = validErrorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
     
     switch(field.type){
         case 'text':
             return(<div className={classes.inputValue}>
                 <TextField id={`${id_pretext ? id_pretext : 'input'}-${field.field}`} 
-                        error={error}
+                        error={error || valid_error}
                          variant="outlined"
                          /*multiline={field.multiline}*/
                          name={field.field}
@@ -440,6 +499,7 @@ const GetInputByType = function(props){
             )
             break;
         case 'date':
+        case 'datetime':
             return(<div className={classes.inputValue}>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <KeyboardDatePicker className={classes.inputStyleDate} 
@@ -447,7 +507,7 @@ const GetInputByType = function(props){
                                 clearable
                                 error={error}
                                 inputVariant="outlined"  
-                                disableFuture={field.field == "date" }
+                                disableFuture={field.field == "date" || field.field == "datetime" }
                                 onChange={(value, value2)=> {
                                     handleInputOnChange(value, true, field.type, field.field)
                                     
@@ -524,6 +584,30 @@ const GetInputByType = function(props){
                             return (
                                 <option value={type.record_id}>
                                     {type.name}
+                                </option>
+                            )
+                        }) :  <></>}
+                    </Select></div>
+                )
+                break;
+            case 'select-part-type':
+                return(
+                    <div className={classes.inputValueSelect}>
+                        <Select
+                    error={error}
+                        id={field.field}
+                        value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                        inputProps={{classes:  classes.inputSelect}}
+                        onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                        native
+                    >
+                        <option value={0}>
+                            Select
+                        </option>
+                        {partTypes ? partTypes.map((type)=>{
+                            return (
+                                <option value={type.id}>
+                                    {type.type}
                                 </option>
                             )
                         }) :  <></>}
@@ -625,16 +709,14 @@ const GetInputByType = function(props){
                 )
                 break;
         case 'check':
-            return(
-                <div className={classes.inputValue}>
+            return(<div className={classes.inputValue}>
                 <Checkbox
                     icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                     checkedIcon={<CheckBoxIcon fontSize="small" />}
                     name="checkedI"
                     checked={formObject && formObject[field.field] ? formObject[field.field] == 1 ? true : false : false}
                     onChange={(event)=> handleInputOnChange(event.target.checked ? 1 : 0, true, field.type, field.field)}
-                /></div>
-            )
+                /></div>)
             break;
         case 'entity':
             return(<div className={classes.inputValue}>{error && <span className={classes.errorSpan}>Entity Required</span> }
