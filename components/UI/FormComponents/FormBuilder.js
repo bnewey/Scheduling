@@ -55,7 +55,7 @@ const FormBuilder = forwardRef((props, ref) => {
             entityBillingContacts, setEntityBillingContacts,
             entityBillingAddresses, setEntityBillingAddresses,
             setEntityShippingContactEditChanged, setEntityBillingContactEditChanged, //state for knowing when to show entity defaults or actual wo value
-            dontCloseOnNoChangesSave = false
+            dontCloseOnNoChangesSave = false,
             partTypes
         } = props;
         console.log("Props", props);
@@ -221,6 +221,17 @@ const FormBuilder = forwardRef((props, ref) => {
                             if(textValueObject[field.field])
                                 updateItem[field.field] = Util.convertISODateToMySqlDate(textValueObject[field.field]);
                             break;
+                        case 'datetime':
+                            if(textValueObject[field.field])
+                                updateItem[field.field] = Util.convertISODateTimeToMySqlDateTime(textValueObject[field.field]);
+                            break;
+                        // case 'auto':
+                        //     //Auto doesnt usually use ref but leaving in case we need to switch from state
+                        //     //Get updated values with textValueObject bc text values use ref
+                        //     if(textValueObject[field.field])
+                        //         console.log("TEST",textValueObject[field.field]);
+                        //         updateItem[field.field] = textValueObject[field.field];
+                        //     break;
                         case 'entity-titles':
                             const saveEntity = (data, callback) => {
                                 console.log("Data", data);
@@ -246,46 +257,6 @@ const FormBuilder = forwardRef((props, ref) => {
                                                     }
                                                 })
                                             }
-                        case 'datetime':
-                            if(textValueObject[field.field])
-                                updateItem[field.field] = Util.convertISODateTimeToMySqlDateTime(textValueObject[field.field]);
-                            break;
-                        // case 'auto':
-                        //     //Auto doesnt usually use ref but leaving in case we need to switch from state
-                        //     //Get updated values with textValueObject bc text values use ref
-                        //     if(textValueObject[field.field])
-                        //         console.log("TEST",textValueObject[field.field]);
-                        //         updateItem[field.field] = textValueObject[field.field];
-                        //     break;
-                        case 'entity-titles':
-                            const saveEntity = (data, callback) => {
-                                itemToSave[field.field]?.forEach((title)=>{
-                                    //Remove titles if false
-                                    if(title.title_change && title.title_change == "remove"){
-                                        if(title?.title_attached != 0){
-                                            //Delete from entities_contacts_titles
-                                            Entities.deleteContactTitle(title.title_attached)
-                                            .then((data)=>{
-                                                if(callback){
-                                                    callback()
-                                                }
-                                            })
-                                            .catch((error)=>{
-                                                console.error("Failed to delete contact title")
-                                                cogoToast.error("Internal Server Error");
-                                                if(callback){
-                                                    callback()
-                                                }
-                                            })
-                                        }
-                                    }
-                                    if(title.title_change && title.title_change == "add"){
-                                        //check against original DB data to see if we really need to add
-                                        var updatedTitle = {...title};
-                                        if(addOrEdit == "add"){
-                                            updatedTitle["contact_id"] = data.insertId;
-                                        }else{
-                                            updatedTitle["contact_id"] = itemToSave["record_id"];
                                         }
                                         if(title.title_change && title.title_change == "add"){
                                             //check against original DB data to see if we really need to add
@@ -342,18 +313,22 @@ const FormBuilder = forwardRef((props, ref) => {
                 if(empty_required_fields.length > 0){
                     cogoToast.error("Required fields are blank", {hideAfter: 10});
                     setErrorFields(empty_required_fields);
-                    console.error("Required fields are blank", empty_required_fields)
                 }
-                if(error_fields.length){
-                    cogoToast.error("Validation Errors");
-                    console.error("Validation Error:", error_fields)
-                }
-                if(validation_errors.length > 0){      
-                    setErrorFields(validation_errors);
-                    return;
-                }else{
-                    setErrorFields([]);
-                }
+                // let validation_errors = [...empty_required_fields,...error_fields];
+                // if(empty_required_fields.length){
+                //     cogoToast.error("Required Fields Missing");    
+                //     console.error("Required fields are blank", empty_required_fields)
+                // }
+                // if(error_fields.length){
+                //     cogoToast.error("Validation Errors");
+                //     console.error("Validation Error:", error_fields)
+                // }
+                // if(validation_errors.length > 0){      
+                //     setErrorFields(validation_errors);
+                //     return;
+                // }else{
+                //     setErrorFields([]);
+                // }
 
                 const validate_by_type = (field, index) =>{
                     if(!field || !updateItem){
@@ -453,9 +428,9 @@ const FormBuilder = forwardRef((props, ref) => {
 export default FormBuilder;
 
 const GetInputByType = function(props){
-<<<<<<< HEAD
+
     const {field,dataGetterFunc , formObject, errorFields, validErrorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes, id_pretext,
-        shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, defaultAddresses,
+        shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, defaultAddresses,
         entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
         entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses} = props;
 

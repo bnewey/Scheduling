@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useLayoutEffect,useContext} from 'react';
-import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
+import {makeStyles, withStyles, CircularProgress, Grid, IconButton, TextField} from '@material-ui/core';
 
 //import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,7 +14,10 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 
 import {createSorter} from '../../../../js/Sort';
+import Inventory from '../../../../js/Inventory' 
+import _, {debounce} from 'lodash';
 
+import LinearProgress from '@material-ui/core/LinearProgress';
 import moment from 'moment';
 
 import cogoToast from 'cogo-toast';
@@ -23,6 +26,8 @@ import clsx from 'clsx';
 
 import Util from  '../../../../js/Util';
 import { ListContext } from '../InvPartsContainer';
+import { InventoryContext } from '../../InventoryContainer';
+import EditPartInvDialog from '../../components/EditPartInvDialog';
 
 const styles = (theme) => ({
   root: {
@@ -69,9 +74,12 @@ export default function ReactVirtualizedTable() {
 const PartsList = function(props) {
   const {user, dimensions, rowHeight = 22, headerHeight = 30,} = props;
 
-  const { parts, setParts, currentView, setCurrentView, views,detailPartId , setDetailPartId, sorters, setSorters} = useContext(ListContext);
-  const classes = useStyles();
+  const { parts, setParts, setPartsRefetch, currentView, setCurrentView, views,detailPartId , setDetailPartId, sorters, setSorters,
+    setPartsSearchRefetch, } = useContext(ListContext);
 
+  const {editInvModalOpen, setEditInvModalOpen} = useContext(InventoryContext);
+  
+  const classes = useStyles();
 
   const handleShowDetailView = (part_id) =>{
     if(!part_id){
@@ -82,12 +90,43 @@ const PartsList = function(props) {
     setCurrentView(views && views.filter((view, i)=> view.value == "partsDetail")[0]);
     setDetailPartId(part_id);
   }
+
+  // const handleUpdatePart = (updateRow)=>{
+
+  //   Inventory.updatePart(updateRow)
+  //   .then((data)=>{
+  //     cogoToast.success("Updated ");
+
+  //     if(currentView.value === "partsList"){
+  //       setPartsRefetch(true);
+  //     }
+  //     if(currentView.value === "partsSearch"){
+  //       setPartsSearchRefetch(true);
+  //     }
+      
+  //   })
+  //   .catch((error)=>{
+  //     console.error("failed to update ", error)
+  //     cogoToast.error("Failed to update ");
+  //     invUpdateArray.current =[];
+  //   })
+  // }
+    
+
+  
   
   const columns = [
     { dataKey: 'rainey_id', label: 'Rainey PN', type: 'number', width: 90, align: 'center',
       format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickablePartnumber}>{value}</span> }, 
     { dataKey: 'description', label: 'Description', type: 'text', width: 350, align: 'left' }, 
-    { dataKey: 'inv_qty', label: 'In Stock', type: 'number', width: 60, align: 'center', },
+    { dataKey: 'inv_qty', label: 'In Stock', type: 'number', width: 60, align: 'center',
+      format: (value,rowData)=> {
+        return(
+          <EditPartInvDialog part={rowData}/>
+        )
+      }
+          
+    },
     { dataKey: 'cost_each', label: 'Cost Each', type: 'number', width: 100, align: 'right',
       format: (value)=> `$ ${value.toFixed(6)}` },
     { dataKey: 'type', label: 'Type', width: 150,type: 'text', align: 'center', },
@@ -107,7 +146,7 @@ const PartsList = function(props) {
     });
   };
 
-  const cellRenderer = ({ cellData, columnIndex }) => {
+  const cellRenderer = ({ cellData, columnIndex, rowData}) => {
     const column = columns[columnIndex];
 
     return(
@@ -116,7 +155,7 @@ const PartsList = function(props) {
                     align={column.align}
                     variant="body"
                     style={{ minWidth: column.width, height: rowHeight }}>
-              {column.format  ? column.format(cellData) : cellData}
+              {column.format  ? column.format(cellData, rowData) : cellData}
         </TableCell>
     )
   };
@@ -142,7 +181,7 @@ const PartsList = function(props) {
               <div>
                   {isASC ? <ArrowDropDownIcon/> : <ArrowDropUpIcon/>}
               </div> 
-              : <></>}
+                 : <></>}
       </span>
     </TableCell>)
   };
@@ -162,10 +201,8 @@ const PartsList = function(props) {
             direction: sorters && sorters[0] && sorters[0].property == item.dataKey ? 
                     ( sorters[0].direction === 'DESC' ? "ASC" : sorters[0].direction === 'ASC' ? "DESC" : "ASC" ) : "ASC"
         }]);
-        
     }
   }
-  console.log("Cols", columns)
   return (
     <div className={classes.root}>
         <TableContainer className={classes.container}>

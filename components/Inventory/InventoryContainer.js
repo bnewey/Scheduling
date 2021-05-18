@@ -16,6 +16,7 @@ import InvPartsContainer from './Inv_Parts/InvPartsContainer';
 //import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
 //import InvOrdersInContainer from './Inv_OrdersIn/InvOrdersInContainer';
 import _ from 'lodash';
+import InvAdminContainer from './Inv_Admin/InvAdminContainer';
 
 
 export const InventoryContext = createContext(null);
@@ -29,10 +30,12 @@ const InventoryContainer = function(props) {
   const views = [ { value: "invParts", displayName: "Inventory Parts", index: 0 },
                   { value: "invSets", displayName: "Inventory Sets", index: 1 },
                   { value: "invOrdersOut", displayName: "Inv Orders Out", index: 2},
-                  { value: "invOrdersIn", displayName: "Inv Orders In", index: 3},];
+                  { value: "invOrdersIn", displayName: "Inv Orders In", index: 3},
+                  { value: "invAdmin", displayName: "Admin", index: 4 },];
 
   const [currentView,setCurrentView] = useState(null);
 
+  //Parts
 
   const classes = useStyles();
 
@@ -61,16 +64,19 @@ const InventoryContainer = function(props) {
   const getInvPage = () =>{
     switch(currentView.value){
       case "invParts":
-        return 
+        return <InvPartsContainer/>
         break;
       case "invSets":
-        return <InvSetsContainer/>
+        //return <InvSetsContainer/>
         break;
       case "invOrdersOut":
-        return <InvOrdersOutContainer/>
+        //return <InvOrdersOutContainer/>
         break;
       case "invOrdersIn":
-        return <InvOrdersInContainer/>
+        //return <InvOrdersInContainer/>
+        break;
+      case "invAdmin":
+        return <InvAdminContainer/>
         break;
       default: 
         cogoToast.error("Bad view");
@@ -87,11 +93,11 @@ const InventoryContainer = function(props) {
         <div className={classes.containerDiv}>
         
         <InventoryTabs >
-              { /*currentView && getInvPage()*/}
-              <div><InvPartsContainer/></div>
-              <div><InvPartsContainer/></div>
-              <div><InvPartsContainer/></div>
-              <div><InvPartsContainer/></div>
+              { currentView && getInvPage()}
+              { currentView && getInvPage()}
+              { currentView && getInvPage()}
+              { currentView && getInvPage()}
+              { currentView && getInvPage()}
               {/* <InvSetsContainer/>
               <InvOrdersOutContainer/>
               <InvOrdersInContainer/> */}
@@ -115,6 +121,7 @@ const useStyles = makeStyles(theme => ({
     
   },
   mainPanel:{
-    boxShadow: 'inset 0px 2px 4px 0px #a7a7a7',
+    // boxShadow: 'inset 0px 2px 4px 0px #a7a7a7',
+    // backgroundColor: '#e7eff8'
   }
 }));

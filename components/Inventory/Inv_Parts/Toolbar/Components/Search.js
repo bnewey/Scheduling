@@ -26,7 +26,7 @@ const Search = function(props) {
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { parts, setParts, currentView, setCurrentView, views} = useContext(ListContext);
+  const { parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views} = useContext(ListContext);
   const searchOpen = currentView && currentView.value == "partsSearch";
 
   const searchTableObject= [
@@ -54,6 +54,24 @@ const Search = function(props) {
       }
     }
   },[searchTable])
+
+  useEffect(()=>{
+    if(partsSearchRefetch){
+      setPartsSearchRefetch(false);
+      
+
+      handleSearchClick()
+      .then((data)=>{
+        setParts(data);
+      })
+      .catch((error)=>{
+        console.error("Failed to research")
+        cogoToast.error("Internal Server Error");
+      })
+    }
+
+
+  },[partsSearchRefetch])
 
   //Save and/or Fetch searchTable to local storage
   useEffect(() => {

@@ -36,6 +36,7 @@ const InvPartsContainer = function(props) {
 
   const [parts, setParts] = useState(null);
   const [partsRefetch, setPartsRefetch] = useState(false);
+  const [partsSearchRefetch,setPartsSearchRefetch] = useState(false);
 
   
   // const [rowDateRange, setDateRowRange] = useState({
@@ -272,7 +273,7 @@ const InvPartsContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{parts, setParts, setPartsRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
+      <ListContext.Provider value={{parts, setParts, setPartsRefetch, partsSearchRefetch,setPartsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailPartId,  setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
          recentParts, setRecentParts, sorters, setSorters} } >
       <DetailContext.Provider value={{}} >
@@ -322,5 +323,6 @@ const useStyles = makeStyles(theme => ({
   },
   mainPanel:{
     boxShadow: 'inset 0px 2px 4px 0px #a7a7a7',
+    backgroundColor: '#fff',
   }
 }));

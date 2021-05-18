@@ -310,7 +310,6 @@ const TaskListMain = (props) => {
                                                             </span>
                                         </ListItemText>
                                     )})}
-<<<<<<< HEAD
                                     
                                     </ListItem>
                                 

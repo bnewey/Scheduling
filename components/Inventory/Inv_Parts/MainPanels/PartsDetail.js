@@ -17,6 +17,9 @@ import Util from  '../../../../js/Util';
 import Inventory from  '../../../../js/Inventory';
 import { ListContext } from '../InvPartsContainer';
 import { DetailContext } from '../InvPartsContainer';
+import EditPartInvDialog from '../../components/EditPartInvDialog';
+import PartManufactureList from '../../components/PartManufactureList';
+import clsx from 'clsx';
 
 
 
@@ -29,13 +32,17 @@ const PartsDetail = function(props) {
 
   //const {} = useContext(DetailContext);
 
-  const detail_table = [{ value: 'rainey_id', displayName: 'Rainey PartNumber', 
-                          format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickablePartnumber}>{value}</span> }, 
+  const main_detail_table = [
+                        { value: 'rainey_id', displayName: 'Rainey ID' }, 
                         { value: 'description', displayName: 'Description' }, 
-                        { value: 'inv_qty', displayName: 'In Stock',   },
+                        { value: 'inv_qty', displayName: 'In Stock', 
+                          format: (value,row ) => <EditPartInvDialog part={row}/> },
                         { value: 'cost_each', displayName: 'Cost Each',
                           format: (value)=> `$ ${value.toFixed(6)}`   },
                         { value: 'type', displayName: 'Part Type', },
+                    ]
+
+  const second_detail_table = [
                         { value: 'storage_location', displayName: 'Storage Location',   },
                         { value: 'notes', displayName: 'Notes'}, 
                         { value: 'reel_width', displayName: 'Reel Width',   },
@@ -44,32 +51,65 @@ const PartsDetail = function(props) {
                         { value: 'date_updated', displayName: 'Date Updated', 
                             format: (value)=> moment(value).format("MM-DD-YYYY HH:mm:ss") },
                         { value: 'obsolete', displayName: 'Obsolete',   },
-                    ]
-   
+                    ]   
 
    return ( 
     <div className={classes.root}>
         {activePart ?
         <div className={classes.container}>
-            
-            <div className={classes.grid_container}>
-                  
+
+          {/* MAIN DETAIL */}
+          <div className={classes.main_grid_container}>
+                  <div className={classes.descriptionDiv}>
+                    <span className={classes.descriptionSpan}>{activePart.description}</span>
+                  </div>
+                  <div className={classes.mainDetailInfoDiv}>
+                    {activePart && main_detail_table.map((item,i)=> {
+                      return(
+                      <div className={classes.mainDetailDiv} key={i}>
+                        <span className={classes.mainDetailLabel}>{item.displayName}:</span>
+                        <span className={classes.mainDetailValue}>
+                          {activePart[item.value] != null ? (item.format ? item.format(activePart[item.value], activePart) :  activePart[item.value]) : ""}
+                        </span>
+                      </div>
+                      )
+                    })}
+
+                    </div>
+            </div>
+            {/* END MAIN DETAIL */}
+          
+          <div className={classes.secondRow}>
+            {/* SECOND DETAIL */}
+            <div className={ clsx({[classes.grid_container]: true, [classes.moreInfoContainer]: true})}>
+                  <div className={classes.moreInfoDiv}>More Info</div>
                   <div className={classes.detailInfoDiv}>
-                    {activePart && detail_table.map((item,i)=> {
+
+                    {activePart && second_detail_table.map((item,i)=> {
                       return(
                         
                       <div className={classes.detailDiv} key={i}>
                         <span className={classes.detailLabel}>{item.displayName}:</span>
                         <span className={classes.detailValue}>
-                          {activePart[item.value] ? (item.format ? item.format(activePart[item.value], item) :  activePart[item.value]) : ""}
+                          {activePart[item.value] != null ? (item.format ? item.format(activePart[item.value], item) :  activePart[item.value]) : ""}
                           </span>
                       </div>
                       )
                     })}
                     </div>
             </div>
-            
-          
+            {/* END SECOND  DETAIL */}
+
+            {/* MANUFACTURE DETAIL */}
+            <div className={ clsx({[classes.grid_container]: true, [classes.manuListContainer]: true})}>
+                  <div className={classes.moreInfoDiv}>Manufacture List</div>
+                  <div className={classes.detailInfoDiv}>
+
+                      <PartManufactureList part={activePart} resetFunction={()=> setActivePart(null) } />
+                    </div>
+            </div>
+            {/* END MANUFACTURE  DETAIL */}
+          </div>
         </div>
         :<><CircularProgress/></>}
     </div>
@@ -85,16 +125,68 @@ const useStyles = makeStyles(theme => ({
     // border: '1px solid #339933',
     padding: '1%',
     minHeight: '730px',
+    boxShadow: 'inset 0px 2px 4px 0px #a7a7a7',
+    backgroundColor: '#e7eff8'
   },
   container: {
     maxHeight: 650,
+  },
+  main_grid_container:{
+    boxShadow: '0 0 2px black',
+    borderRadius: 8,
+    padding: '3px 0px',
+    marginBottom: '15px',
+    width: '100%',
+    minWidth: 695,
+    background: '#fff',
   },
   grid_container:{
     boxShadow: '0 0 2px black',
     borderRadius: 8,
     padding: '23px 0px',
+    margin: '0px 0px',
     width: 'fit-content',
-    minWidth: 695,
+    //minWidth: 695,
+    background: '#fff',
+  },
+  moreInfoContainer:{
+    flexBasis: '39%'
+  },
+  manuListContainer:{
+    flexBasis: '59%',
+  },
+  secondRow:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'start',
+  },
+  descriptionDiv:{
+    background: 'linear-gradient(0deg, #d1d1d1, #e0e0e0)',
+    borderRadius: 8,
+    padding: '12px 15px',
+    margin: '0px 3px',
+  },
+  descriptionSpan:{
+    fontFamily: 'arial',
+    fontSize: '1.7em',
+    fontWeight: '600',
+    color: '#3b3b3b',
+  },
+  mainDetailInfoDiv:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'start',
+    alignItems: 'flex-start',
+    width: 'auto',
+    margin: '2px 20px',
+  },
+  moreInfoDiv:{
+    fontFamily: 'arial',
+    fontSize: '1.5em',
+    fontWeight: '600',
+    color: '#666',
+    margin: '-5px 0px 10px 26px',
   },
   detailInfoDiv:{
     display: 'flex',
@@ -105,27 +197,46 @@ const useStyles = makeStyles(theme => ({
     width: 'auto',
     margin: '2px 20px',
   },
-  woiDiv:{
+  mainDetailDiv:{
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    maxHeight: '400px',
-    flexWrap: 'wrap',
-    width: 'auto',
+    alignItems: 'start',
+    //width: '100%',
+    justifyContent: 'start',
+    padding: 5,
+    marginRight: '5%',
   },
   detailDiv:{
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'flex-start',
     borderBottom: '1px solid #f1f1f1',
     width: '100%',
     justifyContent: 'space-between',
     padding: 5,
   },
+  mainDetailLabel:{
+    fontFamily: 'arial',
+    fontWeight: '500',
+    color: '#777',
+    padding: '2px 3px',
+    textTransform: 'uppercase',
+    fontSize: '11px',
+    textAlign: 'left',
+  },
+  mainDetailValue:{
+    fontFamily: 'Roboto, Helvetica,Arial,',
+    color: '#112',
+    padding: '2px 3px',
+    fontSize: '14px',
+    fontWeight: '500',
+    textAlign: 'left',
+    width: '100%',
+    whiteSpace: 'nowrap'
+  },
   detailLabel:{
-    fontFamily: 'serif',
-    fontWeight: '600',
+    fontFamily: 'arial',
+    fontWeight: '500',
     color: '#777',
     padding: '2px 13px',
     textTransform: 'uppercase',
@@ -134,18 +245,18 @@ const useStyles = makeStyles(theme => ({
     flexBasis: '20%',
   },
   detailValue:{
-    fontFamily: 'monospace',
+    fontFamily: 'Roboto, Helvetica,Arial,',
     color: '#112',
     padding: '2px 3px',
-    fontSize: '11px',
-    fontWeight: '600',
+    fontSize: '14px',
+    fontWeight: '500',
     textAlign: 'left',
     width: '100%',
   },
   detailsContainer:{
     background: 'linear-gradient(45deg, rgb(255, 255, 255), rgba(255, 255, 255, 0.36))',
     borderRadius:' 0px 0px 17px 17px',
-    boxShadow: '0px 1px 2px #969696',
+    boxShadow: '0px 1px 2px #595959',
     margin: '0px 1% 0 1%',
   },
   accordion:{
