@@ -39,6 +39,25 @@ async function searchAllParts(table, query){
     }
 }
 
+async function superSearchAllParts(tables, query){
+    const route = '/scheduling/inventory/superSearchAllParts';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({tables: tables, search_query: query})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 async function getPartById(rainey_id){
     if(!rainey_id){
         throw new Error("No/bad id for getPartById");
@@ -391,6 +410,7 @@ async function deletePartType(id){
 module.exports = {
     getAllParts,
     searchAllParts,
+    superSearchAllParts,
     getPartById,
     getPartTypes,
     getManufactures,

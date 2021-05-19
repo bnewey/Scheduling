@@ -20,6 +20,7 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 import RecentParts from './components/RecentParts';
+import TypeFilterSelect from './components/TypeFilterSelect';
 
 
 const PartsListSidebar = function(props) {
@@ -51,6 +52,10 @@ const PartsListSidebar = function(props) {
         <div className={classes.dateRangeDiv}>
             
             <RecentParts />
+        </div>
+        <div className={classes.dateRangeDiv}>
+            
+            <TypeFilterSelect />
         </div>
           
     </div>

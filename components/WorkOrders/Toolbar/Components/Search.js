@@ -59,18 +59,6 @@ const Search = function(props) {
          //searchRef.current.focus();
          //searchRef.current.select();
       }
-
-      // if(tableRef && tableRef.current){
-      //   console.log("tableRef", tableRef);
-      //   console.log("tableRef current", tableRef.current);
-      //   tableRef.current.blur();
-      // }
-
-      // if(listRef && listRef.current){
-      //   console.log("listRef", listRef);
-      //   console.log("listRef current", listRef.current);
-      //   listRef.current.blur();
-      // }
       
     }
   },[searchTable])

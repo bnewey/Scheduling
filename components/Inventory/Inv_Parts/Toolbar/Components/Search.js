@@ -30,9 +30,11 @@ const Search = function(props) {
   const searchOpen = currentView && currentView.value == "partsSearch";
 
   const searchTableObject= [
+    {value: "all", displayValue: 'All'},
     {value: "p.rainey_id", displayValue: 'Rainey P#'},
     {value: "p.description", displayValue: 'Description'},
     {value: "pt.type", displayValue: 'Type'},
+    {value: "p.notes", displayValue: 'Notes'}
   ];
 
   const classes = useStyles({searchOpen});
@@ -44,14 +46,20 @@ const Search = function(props) {
   },[searchOpen])
 
   const searchRef = React.useRef(null);
+  const tableRef = React.useRef(null);
+  const listRef = React.useRef(null);
+  
 
   useEffect(()=>{
     if(searchTable){
+      document.activeElement.blur();
+      console.log("searchTable", searchTable);
       if(searchRef.current){
         console.log("Currnet", searchRef.current);
-         searchRef.current.focus();
-         searchRef.current.select();
+         //searchRef.current.focus();
+         //searchRef.current.select();
       }
+      
     }
   },[searchTable])
 
@@ -84,7 +92,7 @@ const Search = function(props) {
       if(tmpParsed){
         setSearchTable(tmpParsed);
       }else{
-        setSearchTable("enc.name");
+        setSearchTable("all");
       }
     }
     if(searchTable){
@@ -119,34 +127,67 @@ const Search = function(props) {
         console.error("Bad search value or search table on search");
         reject();
       }
-      Inventory.searchAllParts(searchTable, searchValue)
-      .then((data)=>{
-        if(data){
-          //console.log(data);
-          //Update search history
-          if(searchValue != ""){
-            var updateArray = searchHistory ?  [...searchHistory] : [];
 
-            //check if current matches last, if so no need to add
-            if(searchHistory.length == 0 || (searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable)){
+      if(searchTable === "all"){
+        Inventory.superSearchAllParts(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
+          .then((data)=>{
+            if(data){
+              
+              //Update search history
+              if(searchValue != ""){
+                var updateArray = searchHistory ?  [...searchHistory] : [];
 
-              if(updateArray.length > 15){
-                  //remove first index
-                  updateArray.shift();
+                var a = searchHistory[searchHistory.length -1];
+               
+                if(searchHistory.length == 0 || (searchHistory.length >0 && (a.searchValue != searchValue || a.searchTable != searchTable))){
+
+                  if(updateArray.length > 15){
+                      //remove first index
+                      updateArray.shift();
+                  }
+                  setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
+                      searchValue: searchValue, searchTable: "all", results: data?.length || 0 }])
+                }
               }
-              setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
-                  searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
+              
+              resolve(data)
             }
-          }
+          })
+          .catch((error)=>{
+            cogoToast.error("Failed to search all tables within parts");
+            reject(error);
+            
+          })
+      }else{
+        Inventory.searchAllParts(searchTable, searchValue)
+        .then((data)=>{
+          if(data){
+            //console.log(data);
+            //Update search history
+            if(searchValue != ""){
+              var updateArray = searchHistory ?  [...searchHistory] : [];
 
-          resolve(data);
-        }
-      })
-      .catch((error)=>{
-        cogoToast.error("Failed to search work orders");
-        reject(error);
-        
-      })
+              //check if current matches last, if so no need to add
+              if(searchHistory.length == 0 || (searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable)){
+
+                if(updateArray.length > 15){
+                    //remove first index
+                    updateArray.shift();
+                }
+                setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
+                    searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
+              }
+            }
+
+            resolve(data);
+          }
+        })
+        .catch((error)=>{
+          cogoToast.error("Failed to search parts");
+          reject(error);
+          
+        })
+      }
     })
     
   }
@@ -198,6 +239,7 @@ const Search = function(props) {
       <Select
         value={searchTable}
         onChange={handleSearchTable}
+        ref={tableRef}
         className={classes.selectSearchTable}
         disableUnderline
       >
@@ -220,6 +262,9 @@ const Search = function(props) {
               getOptionLabel={(option) => option.id || option}
               freeSolo
               openOnFocus
+              ListboxProps={
+                {ref: listRef}
+              }
               inputValue={searchValue }
               classes={{input: classes.actualInputElement, option: classes.optionLi, listbox: classes.optionList }}
               onInputChange={async(event, value, reason)=> {

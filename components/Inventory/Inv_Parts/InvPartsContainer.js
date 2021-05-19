@@ -4,6 +4,7 @@ import {makeStyles, CircularProgress, Grid} from '@material-ui/core';
 
 import cogoToast from 'cogo-toast';
 import {createSorter} from '../../../js/Sort';
+import {createFilter} from '../../../js/Filter';
 
 import Util from '../../../js/Util';
 import Settings from '../../../js/Settings';
@@ -35,6 +36,7 @@ const InvPartsContainer = function(props) {
   const {user} = props;
 
   const [parts, setParts] = useState(null);
+  const [partsSaved, setPartsSaved] = useState(null);
   const [partsRefetch, setPartsRefetch] = useState(false);
   const [partsSearchRefetch,setPartsSearchRefetch] = useState(false);
 
@@ -60,6 +62,7 @@ const InvPartsContainer = function(props) {
   const [currentView,setCurrentView] = useState(null);
   const [columnState, setColumnState] = useState(null);
   const [sorters, setSorters] = useState(null);
+  const [typeFilter, setTypeFilter] = useState(null);
 
   const [recentParts, setRecentParts] = React.useState(null);
   const [activePart, setActivePart] = React.useState(null);
@@ -103,12 +106,18 @@ const InvPartsContainer = function(props) {
       Inventory.getAllParts()
       .then( data => { 
         var tmpData = [...data];
+        //Filters
+        if(typeFilter){
+          tmpData = tmpData.filter(createFilter([{property: 'type', value: typeFilter}], "in", "or"))
+        }
+
         //SORT after filters -------------------------------------------------------------------------
         if(sorters && sorters.length > 0){
           tmpData = tmpData.sort(createSorter(...sorters))
         }
         //--------------------------------------------------------------------------------------------
         setParts(tmpData);
+        setPartsSaved(data);
       })
       .catch( error => {
         console.warn(error);
@@ -148,6 +157,38 @@ const InvPartsContainer = function(props) {
             }
         }
     },[sorters]);
+
+  //Save and/or Fetch sorters to local storage
+  useEffect(() => {
+    if(typeFilter == null){
+      var tmp = window.localStorage.getItem('invTypeFilter');
+      var tmpParsed;
+      if(tmp){
+          tmpParsed = JSON.parse(tmp);
+      }
+      if(tmpParsed){
+          setTypeFilter(tmpParsed);
+      }else{
+          setTypeFilter("");
+      }
+    }
+    if(typeFilter){
+        window.localStorage.setItem('invTypeFilter', JSON.stringify(typeFilter));
+    }
+
+}, [typeFilter]);
+
+//Filter - when filter is updated after parts already exist
+useEffect(()=>{
+  if (typeFilter) {
+        if (partsSaved && partsSaved.length) {
+          var tmpData = partsSaved.filter(createFilter([{property: 'type', value: typeFilter}], "in", "or"))
+          var copyObject = [...tmpData];
+          setParts(copyObject);
+          cogoToast.success(`Filtering by ${typeFilter}`);
+      }
+  }
+},[typeFilter]);
 
 
   //Save and/or Fetch detailPartId to local storage
@@ -275,7 +316,7 @@ const InvPartsContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{parts, setParts, setPartsRefetch, partsSearchRefetch,setPartsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailPartId,  setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
-         recentParts, setRecentParts, sorters, setSorters} } >
+         recentParts, setRecentParts, sorters, setSorters, typeFilter, setTypeFilter, partsSaved, setPartsSaved} } >
       <DetailContext.Provider value={{}} >
         <div className={classes.containerDiv}>
         

@@ -65,6 +65,47 @@ router.post('/searchAllParts', async (req,res) => {
     }
 });
 
+
+router.post('/superSearchAllParts', async (req,res) => {
+
+    var search_query, tables;
+    if(req.body){
+        if(req.body.search_query != null){
+            search_query = "%" + req.body.search_query + "%";
+        }else{
+            search_query = "%";
+        }
+
+        if(req.body.tables != null){
+            tables = req.body.tables;
+        }else{
+            return;
+        }
+        
+    }    
+
+    var sql = ' SELECT p.*, pt.type, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(p.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' +
+    ' FROM inv__parts p ' + 
+    ' LEFT JOIN inv__parts_types pt ON pt.id = p.part_type ' +
+        ' WHERE CONCAT(';
+    tables.forEach((table,i)=> {
+
+        sql += `IFNULL(${table}, ''), \' \'${i === tables.length -1 ? '' : ', '}`
+    })
+    sql+=    ') LIKE ? ' ;
+
+    logger.info("SQL", [sql])
+    try{
+        const results = await database.query(sql, [ search_query]);
+        logger.info("Got Parts by super search", [tables, search_query]);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("superSearchAllParts : " + error);
+        res.sendStatus(400);
+    }
+});
+
 router.post('/getPartById', async (req,res) => {
     var rainey_id ;
     if(req.body){
@@ -299,8 +340,6 @@ router.post('/updatePartManItem', async (req,res) => {
         ' default_man=?, url=? ' +
         ' WHERE id = ? ';
 
-    
-
     try{
         const results = await database.query(sql, [item.mf_part_number, item.default_qty, item.manufacturer, item.notes,
                  Util.convertISODateTimeToMySqlDateTime(moment()), item.default_man, item.url, item.id ]);
@@ -350,7 +389,7 @@ router.post('/addNewPartManItem', async (req,res) => {
     }
     const sql = ' INSERT INTO inv__parts_manufacturing (rainey_id, mf_part_number, default_qty, ' + 
                 ' manufacturer, notes,date_entered, date_updated, default_man, url) ' +
-                ' VALUES ( ?, ?, IFNULL(?, DEFAULT(default_qty)), ?,?,IFNULL(?, NOW()),?, ?, ? ) ';
+                ' VALUES ( ?, ?, IFNULL(?, DEFAULT(default_qty)), ?,?,IFNULL(?, NOW()),?, IFNULL(?, DEFAULT(default_man)), ? ) ';
 
     try{
         const results = await database.query(sql, [part_item.rainey_id, part_item.mf_part_number, part_item.default_qty, part_item.manufacturer ? part_item.manufacturer : null,

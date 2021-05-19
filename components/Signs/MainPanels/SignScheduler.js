@@ -59,11 +59,11 @@ const SignSchedulerList = function(props) {
 
   const [pendingDateChangesSaved,setPendingDateChangesSaved] = React.useState(true);
   const textRef = React.useRef([]);
-  const [columns, setColumns] = useState(null);
+  //const [columns, setColumns] = useState(null);
 
-  useEffect(()=>{
+  //useEffect(()=>{
 
-  },[columnState,columns]);
+  //},[columnState,columns]);
 
  
 
@@ -284,7 +284,7 @@ const SignSchedulerList = function(props) {
 
   const handleGoToWorkOrderId = (wo_id, row) =>{
     console.log("woi", wo_id);
-    
+
     //set detailWOIid in local data
     window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
     
@@ -347,7 +347,6 @@ const SignSchedulerList = function(props) {
       textRef.current =[];
     }), 4000)
     
-    
   ,[])
 
 
@@ -383,7 +382,7 @@ const SignSchedulerList = function(props) {
       }else{
         return item;
       }
-    }) ;
+    });
 
     if(!updatedInArray){
       //If not updated in array above, then we add the item to array
