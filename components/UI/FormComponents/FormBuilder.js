@@ -182,6 +182,7 @@ const FormBuilder = forwardRef((props, ref) => {
                 console.log("Prevent default");
                 event.preventDefault();
             }
+            console.log("itemToSave",itemToSave)
             if(!itemToSave){
                 console.error("Bad itemToSave")
                 return;
@@ -405,10 +406,10 @@ const FormBuilder = forwardRef((props, ref) => {
                     return (<></>);
                 }
                 return(
-                <div className={clsx(classes.inputDiv,{[classes.formColumnSeperator]: field?.second_column})}
+                <div key={`${field.field}_div_key`} className={clsx(classes.inputDiv,{[classes.formColumnSeperator]: field?.second_column})}
                     style={field?.second_column ? {gridColumn:'2'} : null}>  
                     <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span>
-                    <GetInputByType field={field} formObject={formObject} errorFields={errorFields} validErrorFields={validErrorFields} handleShouldUpdate={handleShouldUpdate}
+                    <GetInputByType key={`${field.field}_key`} field={field} formObject={formObject} errorFields={errorFields} validErrorFields={validErrorFields} handleShouldUpdate={handleShouldUpdate}
                     handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToContactOptionsWOI={shipToContactOptionsWOI} shipToAddressOptionsWOI={shipToAddressOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}

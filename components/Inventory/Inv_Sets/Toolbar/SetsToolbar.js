@@ -10,7 +10,7 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../js/Util';
 import Work_Orders from  '../../../../js/Work_Orders';
-import { ListContext } from '../InvPartsContainer';
+import { ListContext } from '../InvSetsContainer';
 
 import Search from './Components/Search';
 
@@ -19,28 +19,26 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
 
-const PartsToolbar = function(props) {
+const SetsToolbar = function(props) {
   const {user} = props;
 
   
-  const { parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views} = useContext(ListContext);
+  const { sets, setSets,  currentView, setCurrentView, views} = useContext(ListContext);
 
-  const backMode = currentView && currentView.value != "partsList";
+  const backMode = currentView && currentView.value != "setsList";
 
   const classes = useStyles({backMode});
   
   
   const toolBarMainGrid = () =>{
     switch(currentView.value){
-      case "partsList":
-        return <Search parts={parts} setParts={setParts} partsSearchRefetch={partsSearchRefetch}
-             setPartsSearchRefetch={setPartsSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} openOnFocus/>
+      case "setsList":
+        return <Search />
         break
-      case "partsSearch":
-        return <Search parts={parts} setParts={setParts} partsSearchRefetch={partsSearchRefetch}
-        setPartsSearchRefetch={setPartsSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} openOnFocus/>
+      case "setsSearch":
+        return <Search />
         break;
-      case "partsDetail":
+      case "setsDetail":
         return <></>
           break;
       default: 
@@ -100,7 +98,7 @@ const PartsToolbar = function(props) {
   );
 }
 
-export default PartsToolbar
+export default SetsToolbar
 
 const useStyles = makeStyles(theme => ({
   root:{

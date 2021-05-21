@@ -313,7 +313,7 @@ router.post('/getPartManItems', async (req,res) => {
                 ' date_format(pm.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
                 ' FROM inv__parts_manufacturing pm ' +
                 ' LEFT JOIN inv__manufacturers m ON m.id = pm.manufacturer ' +
-                ' WHERE pm.rainey_id = ?  ORDER BY date_updated DESC ';
+                ' WHERE pm.rainey_id = ?  ORDER BY pm.date_entered DESC ';
 
     try{
         const results = await database.query(sql, [rainey_id]);
@@ -335,12 +335,19 @@ router.post('/updatePartManItem', async (req,res) => {
             item = req.body.item;
         }  
     }
+
+    //runs only if we are setting default_man to 1
+    const sql2 = ' UPDATE inv__parts_manufacturing SET default_man = 0 WHERE rainey_id = ? ';
+
     logger.info('item to update', [item]);
     const sql = ' UPDATE inv__parts_manufacturing SET mf_part_number=?, default_qty=?, manufacturer=?, notes=?, date_updated=?, ' +
         ' default_man=?, url=? ' +
         ' WHERE id = ? ';
 
     try{
+        if(item.default_man === 1){
+            var pre_results = await database.query(sql2, [ item.rainey_id ]);
+        }
         const results = await database.query(sql, [item.mf_part_number, item.default_qty, item.manufacturer, item.notes,
                  Util.convertISODateTimeToMySqlDateTime(moment()), item.default_man, item.url, item.id ]);
         logger.info("Inventory Part Man Item updated " + item.rainey_id);

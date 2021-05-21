@@ -12,7 +12,7 @@ import InventoryTabs from './components/InventoryTabs';
 
 //Page Panels
 import InvPartsContainer from './Inv_Parts/InvPartsContainer';
-//import InvSetsContainer from './Inv_Sets/InvSetsContainer';
+import InvSetsContainer from './Inv_Sets/InvSetsContainer';
 //import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
 //import InvOrdersInContainer from './Inv_OrdersIn/InvOrdersInContainer';
 import _ from 'lodash';
@@ -67,7 +67,7 @@ const InventoryContainer = function(props) {
         return <InvPartsContainer/>
         break;
       case "invSets":
-        //return <InvSetsContainer/>
+        return <InvSetsContainer/>
         break;
       case "invOrdersOut":
         //return <InvOrdersOutContainer/>

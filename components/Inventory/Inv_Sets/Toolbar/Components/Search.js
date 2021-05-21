@@ -8,8 +8,8 @@ import cogoToast from 'cogo-toast';
 import {createSorter} from '../../../../../js/Sort';
 
 import Util from  '../../../../../js/Util';
-import Inventory from  '../../../../../js/Inventory';
-import { ListContext } from '../../InvPartsContainer';
+import InventorySets from  '../../../../../js/InventorySets';
+import { ListContext } from '../../InvSetsContainer';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -19,22 +19,21 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
 });
 
 const Search = function(props) {
-  //const {user} = props;
+  const {user} = props;
 
   
   const [searchValue,setSearchValue] = useState("");
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { searchOpenPermanent, parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views, openOnFocus} = props// useContext(ListContext);
-  const searchOpen = searchOpenPermanent ||(currentView && currentView.value == "partsSearch");
+  const { sets, setSets, setsSearchRefetch, setSetsSearchRefetch, currentView, setCurrentView, views} = useContext(ListContext);
+  const searchOpen = currentView && currentView.value == "setsSearch";
 
   const searchTableObject= [
     {value: "all", displayValue: 'All'},
-    {value: "p.rainey_id", displayValue: 'Rainey P#'},
-    {value: "p.description", displayValue: 'Description'},
-    {value: "pt.type", displayValue: 'Type'},
-    {value: "p.notes", displayValue: 'Notes'}
+    {value: "s.rainey_id", displayValue: 'Rainey P#'},
+    {value: "s.description", displayValue: 'Description'},
+    {value: "s.notes", displayValue: 'Notes'}
   ];
 
   const classes = useStyles({searchOpen});
@@ -64,13 +63,13 @@ const Search = function(props) {
   },[searchTable])
 
   useEffect(()=>{
-    if(partsSearchRefetch){
-      setPartsSearchRefetch(false);
+    if(setsSearchRefetch){
+      setSetsSearchRefetch(false);
       
 
       handleSearchClick()
       .then((data)=>{
-        setParts(data);
+        setSets(data);
       })
       .catch((error)=>{
         console.error("Failed to research")
@@ -79,12 +78,12 @@ const Search = function(props) {
     }
 
 
-  },[partsSearchRefetch])
+  },[setsSearchRefetch])
 
   //Save and/or Fetch searchTable to local storage
   useEffect(() => {
     if(searchTable == null){
-      var tmp = window.localStorage.getItem('searchInvPartsTable');
+      var tmp = window.localStorage.getItem('searchInvSetsTable');
       var tmpParsed;
       if(tmp){
         tmpParsed = JSON.parse(tmp);
@@ -96,7 +95,7 @@ const Search = function(props) {
       }
     }
     if(searchTable){
-      window.localStorage.setItem('searchInvPartsTable', JSON.stringify(searchTable));
+      window.localStorage.setItem('searchInvSetsTable', JSON.stringify(searchTable));
     }
     
   }, [searchTable]);
@@ -104,7 +103,7 @@ const Search = function(props) {
   //Save and/or Fetch searchHistory to local storage
   useEffect(() => {
     if(searchHistory == null){
-      var tmp = window.localStorage.getItem('searchInvPartsHistory');
+      var tmp = window.localStorage.getItem('searchInvSetsHistory');
       var tmpParsed;
       if(tmp){
         tmpParsed = JSON.parse(tmp);
@@ -116,7 +115,7 @@ const Search = function(props) {
       }
     }
     if(Array.isArray(searchHistory)){
-      window.localStorage.setItem('searchInvPartsHistory', JSON.stringify(searchHistory));
+      window.localStorage.setItem('searchInvSetsHistory', JSON.stringify(searchHistory));
     }
     
   }, [searchHistory]);
@@ -129,7 +128,7 @@ const Search = function(props) {
       }
 
       if(searchTable === "all"){
-        Inventory.superSearchAllParts(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
+        InventorySets.superSearchAllSets(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
           .then((data)=>{
             if(data){
               
@@ -154,12 +153,12 @@ const Search = function(props) {
             }
           })
           .catch((error)=>{
-            cogoToast.error("Failed to search all tables within parts");
+            cogoToast.error("Failed to search all tables within sets");
             reject(error);
             
           })
       }else{
-        Inventory.searchAllParts(searchTable, searchValue)
+        InventorySets.searchAllSets(searchTable, searchValue)
         .then((data)=>{
           if(data){
             //console.log(data);
@@ -183,7 +182,7 @@ const Search = function(props) {
           }
         })
         .catch((error)=>{
-          cogoToast.error("Failed to search parts");
+          cogoToast.error("Failed to search sets");
           reject(error);
           
         })
@@ -202,7 +201,7 @@ const Search = function(props) {
       try {
         var response = await search(searchTable, searchValue)    
 
-        setParts(response);
+        setSets(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")
         console.error("Error", error);
@@ -212,11 +211,11 @@ const Search = function(props) {
 
   const handleSearchClick = async() =>{
     if(searchOpen == false){
-      setCurrentView( views.filter((view)=> view.value == "partsSearch")[0] )
+      setCurrentView( views.filter((view)=> view.value == "setsSearch")[0] )
       
     }else{
       //submit search
-      setParts(await search(searchTable, searchValue));
+      setSets(await search(searchTable, searchValue));
     }
   }
 
@@ -251,7 +250,7 @@ const Search = function(props) {
 
   return (
         <> 
-        <Grid item className={  classes.searchGridItem} xs={ searchOpenPermanent ? 12 : searchOpen ? 5 : 5} style={searchOpenPermanent ? {width: '35em'} :{} } >
+        <Grid item className={classes.searchGridItem} xs={searchOpen ? 5 : 5}>
         {searchHistory && searchOpen == true ? 
             <><Grow in={searchOpen} style={{width: '100%'}}  >
             <div><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
@@ -261,7 +260,7 @@ const Search = function(props) {
               options={searchHistory}
               getOptionLabel={(option) => option.id || option}
               freeSolo
-              openOnFocus={openOnFocus}
+              openOnFocus
               ListboxProps={
                 {ref: listRef}
               }
@@ -275,14 +274,14 @@ const Search = function(props) {
                 handleChangeSearchValue(event, matchValue || value, reason)
                 if(matchValue){
                   setSearchTable(searchMatch.searchTable);
-                  setParts(await search(searchMatch.searchTable, matchValue ));
+                  setSets(await search(searchMatch.searchTable, matchValue ));
                 }
               } }
               renderInput={(params) => {  searchRef.current = params.inputProps.ref.current; return (<TextField
                 
                 className={classes.input}                
-                placeholder="Search Parts"
-                inputProps={{ 'aria-label': 'search parts', id: "parts_search_input", ref: searchRef, autoFocus: true}}
+                placeholder="Search Sets"
+                inputProps={{ 'aria-label': 'search sets', id: "sets_search_input", ref: searchRef, autoFocus: true}}
                 autoFocus={true}
                 {...params}
                 InputProps={{...params.InputProps, startAdornment: searchOpen ? selectSearchField() : "", classes: {underline: classes.underline}}}

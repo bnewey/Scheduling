@@ -158,37 +158,37 @@ const InvPartsContainer = function(props) {
         }
     },[sorters]);
 
-  //Save and/or Fetch sorters to local storage
-  useEffect(() => {
-    if(typeFilter == null){
-      var tmp = window.localStorage.getItem('invTypeFilter');
-      var tmpParsed;
-      if(tmp){
-          tmpParsed = JSON.parse(tmp);
+    //Save and/or Fetch sorters to local storage
+    useEffect(() => {
+      if(typeFilter == null){
+        var tmp = window.localStorage.getItem('invTypeFilter');
+        var tmpParsed;
+        if(tmp){
+            tmpParsed = JSON.parse(tmp);
+        }
+        if(tmpParsed){
+            setTypeFilter(tmpParsed);
+        }else{
+            setTypeFilter("");
+        }
       }
-      if(tmpParsed){
-          setTypeFilter(tmpParsed);
-      }else{
-          setTypeFilter("");
+      if(typeFilter || typeFilter === ""){
+          window.localStorage.setItem('invTypeFilter', JSON.stringify(typeFilter));
       }
-    }
-    if(typeFilter){
-        window.localStorage.setItem('invTypeFilter', JSON.stringify(typeFilter));
-    }
 
-}, [typeFilter]);
+    }, [typeFilter]);
 
-//Filter - when filter is updated after parts already exist
-useEffect(()=>{
-  if (typeFilter) {
-        if (partsSaved && partsSaved.length) {
-          var tmpData = partsSaved.filter(createFilter([{property: 'type', value: typeFilter}], "in", "or"))
-          var copyObject = [...tmpData];
-          setParts(copyObject);
-          cogoToast.success(`Filtering by ${typeFilter}`);
+    //Filter - when filter is updated after parts already exist
+    useEffect(()=>{
+      if (typeFilter) {
+            if (partsSaved && partsSaved.length) {
+              var tmpData = partsSaved.filter(createFilter([{property: 'type', value: typeFilter}], "in", "or"))
+              var copyObject = [...tmpData];
+              setParts(copyObject);
+              cogoToast.success(`Filtering by ${typeFilter}`);
+          }
       }
-  }
-},[typeFilter]);
+    },[typeFilter]);
 
 
   //Save and/or Fetch detailPartId to local storage
