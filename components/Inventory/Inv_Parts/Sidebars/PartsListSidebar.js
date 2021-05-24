@@ -4,6 +4,8 @@ import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-
 import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
 
+import { CSVLink, CSVDownload } from "react-csv";
+
 //import FilterFinished from './components/FilterFinished'
 //import SignsPdf from './components/SignsPdf';
 //import SignsSortOrder from './components/SignsSortOrder';
@@ -26,7 +28,7 @@ import TypeFilterSelect from './components/TypeFilterSelect';
 const PartsListSidebar = function(props) {
   const {user} = props;
 
-  const {  currentView, setEditPartModalMode, setEditPartModalOpen  } = useContext(ListContext);
+  const { parts, currentView, setEditPartModalMode, setEditPartModalOpen  } = useContext(ListContext);
   
   const classes = useStyles(); 
 
@@ -57,6 +59,15 @@ const PartsListSidebar = function(props) {
             
             <TypeFilterSelect />
         </div>
+        <div className={classes.dateRangeDiv}>
+          <div className={classes.headDiv}>
+                <span className={classes.headSpan}>
+                    Other
+                </span>
+            </div>
+          {parts?.length > 0 && <CSVLink data={parts}><span className={classes.csvSpan}>Download CSV</span></CSVLink>} 
+        </div>
+        
           
     </div>
   );
@@ -86,6 +97,7 @@ const useStyles = makeStyles(theme => ({
       padding: '3%',
       width: '100%',
       backgroundColor: '#f9f9f9',
+      textAlign: 'center',
     },
     newButtonLabel:{
       display:'flex',
@@ -148,6 +160,22 @@ const useStyles = makeStyles(theme => ({
       textAlign: 'center',
       color: '#e91818',
       margin: '3px 10px'
-    }
+    },
+    csvSpan:{
+      textAlign: 'center',
+    },
+    headDiv:{
+      width:'100%',
+      textAlign: 'center',
+      padding: 4,
+  },
+  headSpan:{
+      color: '#666',
+      fontSize: 13,
+      textAlign: 'center',
+      fontFamily: 'sans-serif',
+      fontWeight: 600,
+      marginRight: 10,
+  },
   
 }));
