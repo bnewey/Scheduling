@@ -5,6 +5,11 @@ import {makeStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbo
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 
+const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
+    ssr: false
+  });
+  import dynamic from 'next/dynamic'
+
 import InventorySets from '../../../../js/InventorySets';
 import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
@@ -140,6 +145,31 @@ const EditSetInvDialog = (props) => {
     }
 
 
+    const handleChangeAddSubByKey = async (keyCode, event)=>{
+        var id = event.target.id;
+        console.log("id", id);
+        console.log("keycode", keyCode)
+        if(isNaN(keyCode) || keyCode ==null || !id ){
+          console.error("Bad keycode or element on handleChangeAddSubByKey");
+          return;
+        }
+        if(keyCode === 109 && id ==  "inv_update"){ //enter key & input element's id
+          try {
+            setAddSub('sub');
+          } catch (error) {
+            console.error("Error", error);
+          }
+        }
+        if(keyCode === 107 && id ==  "inv_update"){ //enter key & input element's id
+            try {
+              setAddSub('add');
+            } catch (error) {
+              console.error("Error", error);
+            }
+          }
+    }
+
+
     
     return(
         <React.Fragment>  
@@ -166,6 +196,7 @@ const EditSetInvDialog = (props) => {
                                             [classes.sub_button]: addSub === "sub"})}/>
                             </div>
                             <div>
+                            <KeyBinding onKey={ (e) => handleChangeAddSubByKey(e.keyCode, e) } />
                                    <input id={`inv_update`} 
                                     ref={textFieldRef}
                                     autocomplete="off"

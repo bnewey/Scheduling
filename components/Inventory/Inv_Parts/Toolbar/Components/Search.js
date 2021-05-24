@@ -19,9 +19,7 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
 });
 
 const Search = function(props) {
-  //const {user} = props;
 
-  
   const [searchValue,setSearchValue] = useState("");
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
@@ -189,8 +187,8 @@ const Search = function(props) {
         })
       }
     })
-    
   }
+
   const handleEnterSearch = async (keyCode, event)=>{
     var id = event.target.id;
 
@@ -234,7 +232,6 @@ const Search = function(props) {
       setSearchTable(event.target.value);
     };
 
-
     return ( 
       <Select
         value={searchTable}
@@ -251,7 +248,7 @@ const Search = function(props) {
 
   return (
         <> 
-        <Grid item className={  classes.searchGridItem} xs={ searchOpenPermanent ? 12 : searchOpen ? 5 : 5} style={searchOpenPermanent ? {width: '35em'} :{} } >
+        <Grid item className={  classes.searchGridItem} xs={ searchOpenPermanent ? 12 : searchOpen ? 5 : 5} style={searchOpenPermanent ? {width: '47em'} :{} } >
         {searchHistory && searchOpen == true ? 
             <><Grow in={searchOpen} style={{width: '100%'}}  >
             <div><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />

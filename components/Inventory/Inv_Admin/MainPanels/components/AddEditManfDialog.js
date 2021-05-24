@@ -5,6 +5,7 @@ import {makeStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbo
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 
+
 import Inventory from '../../../../../js/Inventory';
 import Util from '../../../../../js/Util';
 import cogoToast from 'cogo-toast';
@@ -94,7 +95,6 @@ const AddEditManfDialog = (props) => {
         
     };
 
- 
 
 
 
@@ -116,6 +116,7 @@ const AddEditManfDialog = (props) => {
                         <div className={classes.inputDivs}>
                             <span>Name: </span>
                             <div>
+                            <KeyBinding onKey={ (e) => handleChangeAddSubByKey(e.keyCode, e) } />
                                    <input id={`name_manf`} 
                                     ref={textFieldRef}
                                     autocomplete="off"
