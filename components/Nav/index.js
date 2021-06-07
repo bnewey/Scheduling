@@ -65,8 +65,8 @@ const Nav = (props) => {
           </IconButton>
           <Drawer anchor={'left'} open={drawerOpen} onClose={event => closeDrawer(event)}>
             <List className={classes.list}>
-                {props.navButtons.map(button => (
-                  <ListItem className={classes.listItem}>
+                {props.navButtons.map((button,i) => (
+                  <ListItem key={`button_${i}`} className={classes.listItem}>
                       <Link href={button.path} as={`/scheduling/${button.path}`}><h3>{button.label}</h3></Link>
                   </ListItem>
                 ))}

@@ -15,6 +15,20 @@ async function getRaineyUsers(){
     }
 }
 
+async function getGoogleUsers(){
+    const route = '/scheduling/settings/getGoogleUsers';
+    try{
+        var data = await fetch(route);
+        if(!data.ok){
+            throw new Error("getGoogleUsers returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 
 async function getEntities(){
     const route = '/scheduling/settings/getEntities';
@@ -212,6 +226,7 @@ async function removedSavedFilter( filter_id){
 
 module.exports = {
     getRaineyUsers,
+    getGoogleUsers,
     getEntities,
     getEntityNameById,
     getEntitiesSearch,

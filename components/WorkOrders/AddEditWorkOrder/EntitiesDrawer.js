@@ -99,8 +99,14 @@ const EntitiesDrawer = function(props) {
             }
         }
   
-        saveRef.current.handleShouldUpdate(true);
-        setActiveWorkOrder(tmpWorkOrder);
+        saveRef.current.handleShouldUpdate(true)
+        .then((data)=>{
+            setActiveWorkOrder(tmpWorkOrder);
+        })
+        .catch((error)=>{
+            console.error("Failed to set form to update", error)
+        });
+        
     }
     
     function renderRow(props) {

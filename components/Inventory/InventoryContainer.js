@@ -13,7 +13,7 @@ import InventoryTabs from './components/InventoryTabs';
 //Page Panels
 import InvPartsContainer from './Inv_Parts/InvPartsContainer';
 import InvSetsContainer from './Inv_Sets/InvSetsContainer';
-//import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
+import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
 //import InvOrdersInContainer from './Inv_OrdersIn/InvOrdersInContainer';
 import _ from 'lodash';
 import InvAdminContainer from './Inv_Admin/InvAdminContainer';
@@ -70,7 +70,7 @@ const InventoryContainer = function(props) {
         return <InvSetsContainer/>
         break;
       case "invOrdersOut":
-        //return <InvOrdersOutContainer/>
+        return <InvOrdersOutContainer/>
         break;
       case "invOrdersIn":
         //return <InvOrdersInContainer/>
@@ -88,7 +88,7 @@ const InventoryContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <InventoryContext.Provider value={{currentView, setCurrentView, views} } >
+      <InventoryContext.Provider value={{user,currentView, setCurrentView, views} } >
       
         <div className={classes.containerDiv}>
         

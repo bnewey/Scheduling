@@ -309,7 +309,7 @@ router.post('/getPartManItems', async (req,res) => {
         rainey_id = req.body.rainey_id;
     }
 
-    const sql = ' SELECT pm.*, IFNULL(pm.manufacturer, 0), m.name AS manufacture_name, date_format(pm.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, ' + 
+    const sql = ' SELECT pm.*, IFNULL(pm.manufacturer, 0) AS manufacturer, m.name AS manufacture_name, date_format(pm.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, ' + 
                 ' date_format(pm.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
                 ' FROM inv__parts_manufacturing pm ' +
                 ' LEFT JOIN inv__manufacturers m ON m.id = pm.manufacturer ' +

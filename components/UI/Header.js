@@ -15,13 +15,15 @@ const StyledNav = styled(Nav)({
 });
 
 import AvatarMenu from './AvatarMenu';
+import NotificationsMenu from './NotificationsMenu';
 
 import Avatar from '@material-ui/core/Avatar';
 
 
 //import { styleToolbar } from './SharedStyles';
 
-function Header({ user }) {
+function Header(props) {
+  const { user } = props;
 
   const classes = useStyles();
 
@@ -50,12 +52,18 @@ function Header({ user }) {
             <StyledNav navButtons={navButtons} />
             </Grid>
             <Grid item sm={1} xs={3} style={{ textAlign: 'right' }}>
-            {user ? (
-                <div style={{ whiteSpace: ' nowrap' }}>
-                    {user.avatarUrl ? (
-                        <AvatarMenu options={optionsMenu} src={user.avatarUrl} alt={user.displayName} />
-                    ) : null}
-                </div>
+            {user ? ( <div className={classes.userDiv}>
+                          <div style={{ whiteSpace: ' nowrap' }}>
+                          {user ? (
+                              <NotificationsMenu user={user}  />
+                          ) : null}
+                          </div>
+                          <div style={{ whiteSpace: ' nowrap' }}>
+                              {user.avatarUrl ? (
+                                  <AvatarMenu options={optionsMenu} src={user.avatarUrl} alt={user.displayName} />
+                              ) : null}
+                          </div>
+                      </div>
             ) : (
               <Link href="/login">
               <Avatar
@@ -107,5 +115,11 @@ const useStyles = makeStyles(theme => ({
     padding:'0px',
     margin: '0px',
     boxShadow: 'inset 0px 2px 4px -1px rgba(0,0,0,0.2), inset 0px 4px 5px 0px rgba(0,0,0,0.14), inset 0px 1px 10px 0px rgba(0,0,0,0.12)'
+  },
+  userDiv:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 }));

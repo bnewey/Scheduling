@@ -31,7 +31,7 @@ const POrdersList = function(props) {
   const {user} = props;
 
   const { purchaseOrders, setPurchaseOrders, rowDateRange, setDateRowRange, activeFPOrder, setActiveFPOrder,fpOrders,setFPOrders,
-    currentView, previousView, handleSetView, views, detailWOid,setDetailWOid, fpOrderModalMode, setFPOrderModalMode,fpOrderModalOpen, setFPOrderModalOpen,vendorTypes,
+    currentView,setCurrentView, previousView, handleSetView, views, detailWOid,setDetailWOid, fpOrderModalMode, setFPOrderModalMode,fpOrderModalOpen, setFPOrderModalOpen,vendorTypes,
     setVendorTypes,raineyUsers, setRaineyUsers, arrivedState, setArrivedState, resetFPForm, setResetFPForm,
     } = useContext(ListContext);
 

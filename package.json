@@ -76,6 +76,7 @@
     "socket.io": "^2.3.0",
     "sql-template-strings": "^2.2.2",
     "styled-components": "^4.4.1",
+    "web-push": "^3.4.4",
     "winston": "^3.3.3"
   },
   "devDependencies": {

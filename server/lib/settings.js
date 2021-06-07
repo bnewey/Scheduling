@@ -23,6 +23,22 @@ router.get('/getRaineyUsers', async (req,res) => {
    }
  });
 
+ router.get('/getGoogleUsers', async (req,res) => {
+  const sql = ' SELECT id, googleId AS user_id, displayName AS name, email  ' + 
+  ' FROM google_users ' +
+  ' ORDER BY user_id ASC ' +
+  'limit 1000';
+ try{
+   const results = await database.query(sql, []);
+   logger.info("Got Rainey Users ");
+   res.json(results);
+ }
+ catch(error){
+   logger.error("Settings (getGoogleUsers): " + error);
+   res.sendStatus(400);
+ }
+});
+
  router.get('/getEntities', async (req,res) => {
     const sql = ' SELECT record_id, name, company, entities_types_id, county_or_parish, city, state   ' + 
       ' FROM entities ' +

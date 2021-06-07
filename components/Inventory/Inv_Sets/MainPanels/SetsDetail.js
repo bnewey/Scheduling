@@ -239,6 +239,7 @@ const useStyles = makeStyles(theme => ({
     fontSize: '10px',
     textAlign: 'right',
     flexBasis: '20%',
+    whiteSpace: 'nowrap',
   },
   detailValue:{
     fontFamily: 'Roboto, Helvetica,Arial,',

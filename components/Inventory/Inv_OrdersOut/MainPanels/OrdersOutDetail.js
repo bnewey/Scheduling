@@ -14,101 +14,137 @@ import cogoToast from 'cogo-toast';
 import moment from 'moment';
 
 import Util from  '../../../../js/Util';
-import Inventory from  '../../../../js/Inventory';
-import { ListContext } from '../InvPartsContainer';
-import { DetailContext } from '../InvPartsContainer';
-import EditPartInvDialog from '../../components/EditPartInvDialog';
-import PartManufactureList from '../../components/PartManufactureList';
+import InventoryOrdersOut from  '../../../../js/InventoryOrdersOut';
+import { ListContext } from '../InvOrdersOutContainer';
+import { DetailContext } from '../InvOrdersOutContainer';
+
 import clsx from 'clsx';
+import OOApprovers from '../components/OOApprovers';
+//import OrdersOutItemList from '../components/OrdersOutItemList';
 
 
 
-const PartsDetail = function(props) {
+const OrdersOutDetail = function(props) {
   const {user} = props;
 
-  const { parts, setParts, setPartsRefetch,currentView, setCurrentView, views,columnState, setColumnState,
-    editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen} = useContext(ListContext);
+  const { ordersOut, setOrdersOut, setOrdersOutRefetch,currentView, setCurrentView, views,columnState, setColumnState,detailOrderOutId,
+    editOrderOutModalMode,setEditOrderOutModalMode, activeOrderOut, setActiveOrderOut, editOrderOutModalOpen,setEditOrderOutModalOpen} = useContext(ListContext);
   const classes = useStyles();
+  const [orderItems, setOrderItems] = useState(null);
+  const [orderApprovers, setOrderApprovers] = useState(null)
 
-  //const {} = useContext(DetailContext);
+  useEffect(()=>{
+    if(orderItems == null && detailOrderOutId){
+      InventoryOrdersOut.getOrderOutItems(detailOrderOutId)
+      .then((data)=>{
+        setOrderItems(data);
+      })
+      .catch((error)=>{
+        cogoToast.error("Failed to get order items");
+        console.error("failed to get order items", error)
+      })
+    }
+},[orderItems, detailOrderOutId])
 
-  const main_detail_table = [
-                        { value: 'rainey_id', displayName: 'Rainey ID' }, 
-                        { value: 'description', displayName: 'Description' }, 
-                        { value: 'inv_qty', displayName: 'In Stock', 
-                          format: (value,row ) => <EditPartInvDialog part={row}/> },
-                        { value: 'cost_each', displayName: 'Cost Each',
-                          format: (value)=> `$ ${value.toFixed(6)}`   },
-                        { value: 'type', displayName: 'Part Type', },
-                    ]
+useEffect(()=>{
+  if(orderApprovers == null && detailOrderOutId){
+    InventoryOrdersOut.getOrderOutApprovers(detailOrderOutId)
+    .then((data)=>{
+      setOrderApprovers(data);
+    })
+    .catch((error)=>{
+      cogoToast.error("Failed to get order approvers");
+      console.error("failed to get order approvers", error)
+    })
+  }
+},[orderApprovers, detailOrderOutId])
 
-  const second_detail_table = [
-                        { value: 'storage_location', displayName: 'Storage Location',   },
-                        { value: 'notes', displayName: 'Notes'}, 
-                        { value: 'reel_width', displayName: 'Reel Width',   },
-                        { value: 'date_entered', displayName: 'Date Entered', 
-                            format: (value)=> moment(value).format("MM-DD-YYYY") },
-                        { value: 'date_updated', displayName: 'Date Updated', 
-                            format: (value)=> moment(value).format("MM-DD-YYYY HH:mm:ss") },
-                        { value: 'obsolete', displayName: 'Obsolete',   },
-                    ]   
+//const {} = useContext(DetailContext);
 
-   return ( 
+const main_detail_table = [
+                  { value: 'id', displayName: 'ID' }, 
+                  { value: 'description', displayName: 'Description', format: (value)=> <div className={classes.descSpan}>{value}</div> }, 
+                  { value: 'notes', displayName: 'Notes', format: (value)=> <div className={classes.notesSpan}>{value}</div>}, 
+                  { value: 'date_entered', displayName: 'Date Entered', 
+                      format: (value)=> moment(value).format("MM-DD-YYYY") },
+                  { value: 'date_updated', displayName: 'Date Updated', 
+                      format: (value)=> moment(value).format("MM-DD-YYYY HH:mm:ss") },
+                  { value: 'made_by_name', displayName: 'Made By',   },
+                  { value: 'requested_by_name', displayName: 'Requested By',   },
+              ]
+
+
+const handleGetStatus = (activeOrderOut) =>{
+  return "Status placeholder"
+}
+
+  return ( 
     <div className={classes.root}>
-        {activePart ?
+        {activeOrderOut ?
         <div className={classes.container}>
-
           {/* MAIN DETAIL */}
           <div className={classes.main_grid_container}>
                   <div className={classes.descriptionDiv}>
-                    <span className={classes.descriptionSpan}>{activePart.description}</span>
+                    <span className={classes.descriptionSpan}>{activeOrderOut.description}</span>
                   </div>
                   <div className={classes.mainDetailInfoDiv}>
-                    {activePart && main_detail_table.map((item,i)=> {
+                    {activeOrderOut && main_detail_table.map((item,i)=> {
                       return(
                       <div className={classes.mainDetailDiv} key={i}>
                         <span className={classes.mainDetailLabel}>{item.displayName}:</span>
                         <span className={classes.mainDetailValue}>
-                          {activePart[item.value] != null ? (item.format ? item.format(activePart[item.value], activePart) :  activePart[item.value]) : ""}
+                          {activeOrderOut[item.value] != null ? (item.format ? item.format(activeOrderOut[item.value], activeOrderOut) :  activeOrderOut[item.value]) : ""}
                         </span>
                       </div>
                       )
                     })}
-
-                    </div>
+                  </div>
             </div>
             {/* END MAIN DETAIL */}
           
           <div className={classes.secondRow}>
             {/* SECOND DETAIL */}
-            <div className={ clsx({[classes.grid_container]: true, [classes.moreInfoContainer]: true})}>
+            {/* <div className={ clsx({[classes.grid_container]: true, [classes.moreInfoContainer]: true})}>
                   <div className={classes.moreInfoDiv}>More Info</div>
                   <div className={classes.detailInfoDiv}>
 
-                    {activePart && second_detail_table.map((item,i)=> {
+                    {activeOrderOut && second_detail_table.map((item,i)=> {
                       return(
                         
                       <div className={classes.detailDiv} key={i}>
                         <span className={classes.detailLabel}>{item.displayName}:</span>
                         <span className={classes.detailValue}>
-                          {activePart[item.value] != null ? (item.format ? item.format(activePart[item.value], item) :  activePart[item.value]) : ""}
+                          {activeOrderOut[item.value] != null ? (item.format ? item.format(activeOrderOut[item.value], item) :  activeOrderOut[item.value]) : ""}
                           </span>
                       </div>
                       )
                     })}
                     </div>
-            </div>
+            </div> */}
             {/* END SECOND  DETAIL */}
 
-            {/* MANUFACTURE DETAIL */}
-            <div className={ clsx({[classes.grid_container]: true, [classes.manuListContainer]: true})}>
-                  <div className={classes.moreInfoDiv}>Manufacture List</div>
+            {/* OrderOut Items DETAIL */}
+            <div className={ clsx({[classes.grid_container]: true, [classes.moreInfoContainer]: true})}>
+                  <div className={classes.moreInfoDiv}>OrderOut Status</div>
                   <div className={classes.detailInfoDiv}>
+                    <OOApprovers orderApprovers={orderApprovers} setOrderApprovers={setOrderApprovers}/>     
+                  </div>
+            </div>
+            {/* END OrderOut Items  DETAIL */}
 
-                      <PartManufactureList part={activePart} resetFunction={()=> setActivePart(null) } />
+            {/* OrderOut Items DETAIL */}
+            <div className={ clsx({[classes.grid_container]: true, [classes.manuListContainer]: true})}>
+                  <div className={classes.moreInfoDiv}>OrderOut Item List</div>
+                  <div className={classes.detailInfoDiv}>
+                    {/* <OrdersOutItemList ordersOut={activeOrdersOut} resetFunction={()=> setOrdersOutRefetch(true)}/> */}
+                      {orderItems?.length > 0 ? orderItems.map((item)=>{
+                        return (
+                          <div>{item.rainey_id}{item.description}</div>
+                        );
+                      }) : <span>No Items added yet</span>}
                     </div>
             </div>
-            {/* END MANUFACTURE  DETAIL */}
+            {/* END OrderOut Items  DETAIL */}
           </div>
         </div>
         :<><CircularProgress/></>}
@@ -116,7 +152,7 @@ const PartsDetail = function(props) {
   );
 }
 
-export default PartsDetail
+export default OrdersOutDetail
 
 
 
@@ -150,10 +186,10 @@ const useStyles = makeStyles(theme => ({
     background: '#fff',
   },
   moreInfoContainer:{
-    flexBasis: '39%'
+    flexBasis: '49%'
   },
   manuListContainer:{
-    flexBasis: '59%',
+    flexBasis: '49%',
   },
   secondRow:{
     display: 'flex',
@@ -318,6 +354,63 @@ const useStyles = makeStyles(theme => ({
   },
   infoSpan:{
     fontSize: '20px'
-  }
+  },
+  statusDiv:{
+    padding: '10px 15px',
+    borderBottom: '1px solid #ddd',
+  },
+  subLabelSpan:{
+
+    fontFamily: 'arial',
+    fontSize: '1.6em',
+    fontWeight: '600',
+    color: '#444',
+    margin: '-5px 10px 10px 10px',
+  },
+  statusSpan:{
+    fontFamily: 'sans-serif',
+    fontSize: '1.6em',
+    fontWeight: '500',
+    color: '#444',
+    margin: '-5px 10px 10px 10px',
+  },
+  approverContainer:{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: '5px 5px',
+    padding: '5px',
+
+  },
+  approverTitleDiv:{
+    padding: '5px',
+    margin: '5px',
+  },
+  approversDiv:{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  approverItemDiv:{
+
+  },
+  notesSpan:{
+    maxWidth: '200px',
+    whiteSpace: 'pre-wrap',
+    fontSize: '10px',
+    maxHeight: '50px',
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+},
+  descSpan:{
+    maxWidth: '150px',
+    whiteSpace: 'pre-wrap',
+    fontSize: '10px',
+    maxHeight: '50px',
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+  },
   //End Table Stuff
 }));

@@ -140,6 +140,7 @@ const useStyles = makeStyles(theme => ({
     fontSize: '10px',
     textAlign: 'right',
     flexBasis: '43%',
+    whiteSpace: 'nowrap',
   },
   detailValue:{
     fontFamily: 'monospace',

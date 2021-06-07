@@ -14,7 +14,8 @@ import { ListContext } from '../EntitiesContainer';
 
 import Search from './Components/Search';
 
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic';
+import clsx from 'clsx';
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
@@ -79,10 +80,13 @@ const EntityToolbar = function(props) {
       return(
         <Slide direction="left" in={currentView.value} mountOnEnter unmountOnExit>
         <Grid item xs={2} className={classes.toolbarLeftGrid}>
-            <IconButton className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
+          <div className={classes.backContainer} onClick={event=> handleCloseView(currentView )}>
+            <IconButton   className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
                   <ArrowBackIcon className={classes.backIcon} />
             </IconButton>
-            <span className={classes.toolbarLeftGridHeadSpan}>{currentView.displayName}</span>
+            <span className={clsx({[classes.toolbarLeftGridHeadSpan]:true}) } 
+                  >{views.find((view)=> currentView.closeToView == view.value).displayName }</span>
+            </div>
         </Grid>
         </Slide>
       );
@@ -138,6 +142,16 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     //padding: '7px 7px',
     minHeight: '56px',
+  },
+  backContainer:{
+    cursor: 'pointer',
+    '&:hover':{
+      textDecoration: 'underline',
+    },
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   toolbarLeftGridHeadSpan:{
     fontFamily: 'sans-serif',

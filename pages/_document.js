@@ -43,7 +43,6 @@ class MyDocument extends Document {
           <link rel="stylesheet" type="text/css" href="/static/react-confirm-alert.css" />
           <link rel="stylesheet" type="text/css" href="/static/css/Timeline.css" />
           <link rel="stylesheet" type="text/css" href="/static/css/react-virtualized-styles.css" />
-
           {/* we could add global styles here */ }
         </Head>
         <body>

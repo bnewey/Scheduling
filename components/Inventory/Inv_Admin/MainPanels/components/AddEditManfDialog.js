@@ -21,7 +21,6 @@ const AddEditManfDialog = (props) => {
 
     //STATE
     const [newName, setNewName] = useState("")
-    //const [editInvModalOpen,setEditInvModalOpen] = useState(false);
     const [validationErrors , setValidationErrors] = useState([]);
     //CSS
     const classes = useStyles();
@@ -116,7 +115,6 @@ const AddEditManfDialog = (props) => {
                         <div className={classes.inputDivs}>
                             <span>Name: </span>
                             <div>
-                            <KeyBinding onKey={ (e) => handleChangeAddSubByKey(e.keyCode, e) } />
                                    <input id={`name_manf`} 
                                     ref={textFieldRef}
                                     autocomplete="off"

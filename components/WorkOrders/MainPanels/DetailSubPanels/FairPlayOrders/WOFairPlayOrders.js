@@ -333,7 +333,7 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'uppercase',
     fontSize: '10px',
     textAlign: 'right',
-
+    whiteSpace: 'nowrap',
   },
   detailValue:{
     fontFamily: 'monospace',

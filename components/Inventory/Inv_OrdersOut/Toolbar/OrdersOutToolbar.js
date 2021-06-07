@@ -8,9 +8,9 @@ import Grow from '@material-ui/core/Grow';
 import Slide from '@material-ui/core/Slide';
 import cogoToast from 'cogo-toast';
 
-import Util from  '../../../js/Util';
-import Work_Orders from  '../../../js/Work_Orders';
-import { ListContext } from '../SignContainer';
+import Util from  '../../../../js/Util';
+import Work_Orders from  '../../../../js/Work_Orders';
+import { ListContext } from '../InvOrdersOutContainer';
 
 import Search from './Components/Search';
 
@@ -20,25 +20,29 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
 
-const SignToolbar = function(props) {
+const OrdersOutToolbar = function(props) {
   const {user} = props;
 
   
-  const { signs, setSigns,  currentView, previousView, handleSetView, views} = useContext(ListContext);
+  const { ordersOut, setOrdersOut,  currentView, setCurrentView, views} = useContext(ListContext);
 
-  const backMode = currentView && currentView.value != "signScheduler";
+  const backMode = currentView && currentView.value != "ordersOutList";
 
   const classes = useStyles({backMode});
   
   
   const toolBarMainGrid = () =>{
     switch(currentView.value){
-      case "signScheduler":
+      case "ordersOutList":
         return <Search />
         break
-      case "searchSigns":
+      case "ordersOutSearch":
         return <Search />
         break;
+      case "ordersOutDetail":
+      case "orderOutItems":
+        return <></>
+          break;
       default: 
         cogoToast.error("Bad view");
         return <></>;
@@ -49,7 +53,7 @@ const SignToolbar = function(props) {
   const toolBarLeftGrid = ()=>{
     const handleCloseView = (view)=>{
     
-      handleSetView(views.find((view)=> view.value == currentView.closeToView));
+      setCurrentView(views.find((view)=> view.value == currentView.closeToView));
       //Run onClose and onClose of parent page in case it is child
       if(view.onClose){
         view.onClose();
@@ -73,7 +77,7 @@ const SignToolbar = function(props) {
             </IconButton>
             <span className={clsx({[classes.toolbarLeftGridHeadSpan]:true}) } 
                   >{views.find((view)=> currentView.closeToView == view.value).displayName }</span>
-            </div>
+            </div>   
         </Grid>
         </Slide>
       );
@@ -99,7 +103,7 @@ const SignToolbar = function(props) {
   );
 }
 
-export default SignToolbar
+export default OrdersOutToolbar
 
 const useStyles = makeStyles(theme => ({
   root:{
@@ -121,15 +125,6 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     minHeight: '56px',
   },
-  toolbarLeftGridPlain:{
-    margin: '0px 5px 0px 0px',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    //padding: '7px 7px',
-    minHeight: '56px',
-  },
   backContainer:{
     cursor: 'pointer',
     '&:hover':{
@@ -139,6 +134,15 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  toolbarLeftGridPlain:{
+    margin: '0px 5px 0px 0px',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    //padding: '7px 7px',
+    minHeight: '56px',
   },
   toolbarLeftGridHeadSpan:{
     fontFamily: 'sans-serif',

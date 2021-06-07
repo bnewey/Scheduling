@@ -175,7 +175,13 @@ const FormBuilder = forwardRef((props, ref) => {
             }
         },
         handleShouldUpdate: (update)=>{
-            handleShouldUpdate(update)
+            return new Promise((resolve,reject)=>{
+                
+                handleShouldUpdate(update)
+                resolve(true);
+                
+            })
+            
         },
         handleSaveParent: (itemToSave, event) =>{
             if(event){
@@ -314,6 +320,7 @@ const FormBuilder = forwardRef((props, ref) => {
                 if(empty_required_fields.length > 0){
                     cogoToast.error("Required fields are blank", {hideAfter: 10});
                     setErrorFields(empty_required_fields);
+                    return;
                 }
                 // let validation_errors = [...empty_required_fields,...error_fields];
                 // if(empty_required_fields.length){
@@ -345,7 +352,7 @@ const FormBuilder = forwardRef((props, ref) => {
                             break;
                         case 'number':
                             //test against regexp for nondecimal or decimal 
-                            error = updateItem[field.field] && !(/^\d+$/.test(updateItem[field.field]) || /^\d+\.\d+$/.test(updateItem[field.field]));
+                            error = updateItem[field.field] && (!(/^\d+$/.test(updateItem[field.field]) || /^(\d)?(\.\d{1,6})?$/.test(updateItem[field.field])));
                             break;
                     }
                     return error;

@@ -13,7 +13,8 @@ import Work_Orders from  '../../../../js/Work_Orders';
 import { AdminContext } from '../InvAdminContainer';
 
 
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic';
+import clsx from 'clsx';
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
@@ -62,10 +63,13 @@ const AdminToolbar = function(props) {
       return(
         <Slide direction="left" in={currentView.value} mountOnEnter unmountOnExit>
         <Grid item xs={2} className={classes.toolbarLeftGrid}>
-            <IconButton type="submit" className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
+         <div className={classes.backContainer} onClick={event=> handleCloseView(currentView )}>
+            <IconButton   className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
                   <ArrowBackIcon className={classes.backIcon} />
             </IconButton>
-            <span className={classes.toolbarLeftGridHeadSpan}>{currentView.displayName}</span>
+            <span className={clsx({[classes.toolbarLeftGridHeadSpan]:true}) } 
+                  >{views.find((view)=> currentView.closeToView == view.value).displayName }</span>
+            </div>
         </Grid>
         </Slide>
       );
@@ -127,6 +131,16 @@ const useStyles = makeStyles(theme => ({
     fontSize: '21px',
     color: '#4e4e4e',
     margin: '0px 10px 0px 10px'
+  },
+  backContainer:{
+    cursor: 'pointer',
+    '&:hover':{
+      textDecoration: 'underline',
+    },
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   backIcon:{
     fontSize: '30px',

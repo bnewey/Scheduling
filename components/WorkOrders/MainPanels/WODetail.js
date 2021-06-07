@@ -29,7 +29,6 @@ const WODetail = function(props) {
 
   const {workOrderItems, setWorkOrderItems} = useContext(DetailContext);
   
-
   
   //WOI
   useEffect( () =>{
@@ -42,11 +41,7 @@ const WODetail = function(props) {
         cogoToast.error(`Error getting wois`, {hideAfter: 4});
       })
     }
-    // return(()=>{
-    //   if(workOrderItems){
-    //     setWorkOrderItems(null);
-    //   }
-    // })
+
   },[workOrderItems, activeWorkOrder]);
 
   const detail_table = [{value: 'c_name', displayName: 'Product To', type: 'text'},
@@ -75,8 +70,6 @@ const WODetail = function(props) {
                         format: (value,item)=> Util.convertISODateToMySqlDate(value)},];
 
    
-
-
    return ( 
     <div className={classes.root}>
         {activeWorkOrder ?
@@ -163,6 +156,7 @@ const useStyles = makeStyles(theme => ({
     fontSize: '10px',
     textAlign: 'right',
     flexBasis: '30%',
+    whiteSpace: 'nowrap',
   },
   detailValue:{
     fontFamily: 'monospace',

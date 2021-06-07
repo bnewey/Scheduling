@@ -42,6 +42,8 @@ const entities = require('./lib/entities.js');
 const settings = require('./lib/settings.js');
 const inventory = require('./lib/inventory.js');
 const inventorySets = require('./lib/inventorySets.js');
+const inventoryOrdersOut = require('./lib/inventoryOrdersOut.js');
+const notifications = require('./lib/notifications.js');
 
 const {emailRouter} = require('./lib/email');
 
@@ -82,6 +84,8 @@ nextApp
     app.use('/scheduling/settings', settings);
     app.use('/scheduling/inventory', inventory);
     app.use('/scheduling/inventorySets', inventorySets);
+    app.use('/scheduling/inventoryOrdersOut', inventoryOrdersOut);
+    app.use('/scheduling/notifications', notifications.router);
     ///
 
     //Session   ////
@@ -128,8 +132,9 @@ nextApp
 
       if (pathname === '/sw.js' || pathname.startsWith('/workbox-')) {
         console.log("SW or Worker");
-        const filePath = path.join(__dirname, '.next', pathname)
-        app.serveStatic(req, res, filePath)
+        const filePath = path.join(__dirname, '/../public', pathname)
+        logger.info(filePath);
+        nextApp.serveStatic(req, res, filePath)
       } else {
         handle(req, res, parsedUrl)
       }

@@ -164,6 +164,46 @@ async function getWeatherRadar(url){
 
 }
 
+const getCurrentDetailNameByType = (type)=>{
+    if(!type){
+        return null;
+    }
+    switch(type){
+        case "orderOutApprover":{
+            return 'detailOrderOutId';
+            break;
+        }
+    }
+    return null;
+}
+const getCurrentViewNameByType = (type)=>{
+    if(!type){
+        return null;
+    }
+    switch(type){
+        case "orderOutApprover":{
+            return 'currentInventoryView';
+            break;
+        }
+        
+    }
+    return null;
+}
+
+const getSubCurrentViewNameByType = (type)=>{
+    if(!type){
+        return null;
+    }
+    switch(type){
+        case "orderOutApprover":{
+            return 'currentInvOrdersOutView';
+            break;
+        }
+        
+    }
+    return null;
+}
+
 module.exports = { 
     convertISODateTimeToMySqlDateTime,
     convertISODateToMySqlDate,
@@ -171,4 +211,7 @@ module.exports = {
     numberToColorHsl,
     getDirectionFromDegree,
     getWeatherRadar,
+    getCurrentDetailNameByType,
+    getCurrentViewNameByType,
+    getSubCurrentViewNameByType,
 }
