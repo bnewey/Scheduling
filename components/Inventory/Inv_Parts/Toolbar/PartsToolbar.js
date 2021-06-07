@@ -14,6 +14,7 @@ import { ListContext } from '../InvPartsContainer';
 
 
 import Search from './Components/Search';
+import clsx from 'clsx';
 
 import dynamic from 'next/dynamic'
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
