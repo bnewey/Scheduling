@@ -31,6 +31,7 @@ import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 import { ListContext } from '../../Inv_OrdersOut/InvOrdersOutContainer';
 import clsx from 'clsx';
 import Search from '../../Inv_Parts/Toolbar/Components/Search';
+import PartManufactureList from '../../components/PartManufactureList';
 
 
 const AddEditOrdersOutItemDialog = (props) => {
@@ -65,6 +66,13 @@ const AddEditOrdersOutItemDialog = (props) => {
         }
 
     },[editOOIDialogMode])
+
+    useEffect(()=>{
+      //select only man item if there is 1 there
+      if(activeStep === 2 && selectedManItem == null && partManItems?.length === 1){
+        setSelectedManItem(partManItems[0]);
+      }
+    },[activeStep])
 
     useEffect(()=>{      
       if( editOOIModalOpen == true && editOOIDialogMode == "edit" && activeOOItem && partsList && partManItems && selectedPart == null && selectedManItem == null){
@@ -239,7 +247,7 @@ const AddEditOrdersOutItemDialog = (props) => {
                         <Search searchOpenPermanent parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
              setPartsListSearchRefetch={setPartsListSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} />
                         <div className={classes.inputDivs}>
-                            <VirtualizedPartTable setShouldUpdate={setShouldUpdate}  parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
+                            <VirtualizedPartTable setShouldUpdate={setShouldUpdate} setSelectedManItem={setSelectedManItem} parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
                 setPartsListSearchRefetch={setPartsListSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views}
                 selectedPart={selectedPart} setSelectedPart={setSelectedPart}/>
                         </div>
@@ -248,19 +256,61 @@ const AddEditOrdersOutItemDialog = (props) => {
                     }
                     {activeStep === 1 && 
                         <div className={classes.formGrid}>
-                            <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Selecting Manufacturer Item for Part:</span></div>
-                            <div className={classes.subTitleValueDiv}>
-                                <span className={classes.subTitleValueIdSpan}><div className={classes.urlSpan} ><span onClick={handleGoToPart} >{selectedPart?.rainey_id}</span></div></span>
-                                <span className={classes.subTitleValueDescSpan}>{selectedPart?.description}</span>
+                            <div className={classes.orderInfoPartDiv}>
+                              <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Selecting Manufacturer Item for Part:</span></div>
+                              <div className={classes.subTitleValueDiv}>
+                                  <span className={classes.subTitleValueIdSpan}><div className={classes.urlSpan} ><span onClick={handleGoToPart} >{selectedPart?.rainey_id}</span></div></span>
+                                  <span className={classes.subTitleValueDescSpan}>{selectedPart?.description}</span>
+                              </div>
                             </div>
                              <div className={classes.inputDivs}>
-                            <VirtualizedManItemTable setShouldUpdate={setShouldUpdate} partManItems={partManItems} selectedManItem={selectedManItem} setSelectedManItem={setSelectedManItem}
-                             currentView={currentView} setCurrentView={setCurrentView} views={views}/>
+                                <VirtualizedManItemTable setShouldUpdate={setShouldUpdate} partManItems={partManItems} selectedManItem={selectedManItem} setSelectedManItem={setSelectedManItem}
+                                  currentView={currentView} setCurrentView={setCurrentView} views={views}/>
+                            
                              </div>
                         </div>
                     }
                     {activeStep === 2 && 
                         <div className={classes.formGrid}>
+                            <div className={classes.orderInfoPartContainer}>
+                              <div className={classes.orderInfoPartDiv}  style={{flexBasis: '65%'}}>
+                                <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Part Selected:</span></div>
+                                <div className={classes.subTitleValueDiv}>
+                                    <span className={classes.subTitleValueIdSpan}><div className={classes.urlSpan} ><span onClick={handleGoToPart} >{selectedPart?.rainey_id}</span></div></span>
+                                    <span className={classes.subTitleValueDescSpan}>{selectedPart?.description}</span>
+                                </div>
+                                <div className={classes.subPartCostDiv}>
+                                    <span >Avg Cost: </span><span>{selectedPart.cost_each}</span>
+                                </div>
+                              </div>
+                              <div className={classes.orderInfoPartDiv} style={{flexBasis: '35%'}}>
+                                <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Manfucturer Selected:</span></div>
+                                {selectedManItem ? <>
+                                  <div className={classes.selectedManItemContainer}>
+                                    <div className={classes.subTitleValueDiv}>
+                                      <span className={clsx({[classes.manSpan]:true, [classes.subTitleValueIdSpan]: true}) }>
+                                          {selectedManItem?.manufacture_name || 'N/A'}
+                                      </span>
+                                    </div>
+                                      {selectedManItem?.url ? 
+                                        <div className={classes.manItemLink}>
+                                          <a className={clsx({[classes.aLink]:true, [classes.subTitleValueIdSpan]: true}) }
+                                            href={selectedManItem?.url} target="_blank">
+                                            <LinkIcon className={classes.linkIcon}/> <span>Product Link</span>
+                                          </a>
+                                        </div> : <></> }
+                                  </div>
+                                    <div>
+                                      <span className={classes.subTitleValueDescSpan}>Default Qty: {selectedManItem?.default_qty}</span>
+                                    </div>
+                                  </> 
+                                    :
+                                    <div className={classes.subTitleValueDiv}>
+                                      <span className={classes.subTitleValueIdSpan}><div className={classes.manErrorSpan} ><span>No Manufacturer selected</span></div></span>
+                                    </div>
+                                  }
+                              </div>
+                            </div>
                             <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>OrderOut Info</span></div>
                             <Grid container >  
                                 <Grid item xs={12} className={classes.paperScroll}>
@@ -312,7 +362,7 @@ export default AddEditOrdersOutItemDialog;
 const PickPartList = (props) =>{
 
     const {user, dimensions = {height: 300, width: 700}, rowHeight = 22, headerHeight = 30, parts, setParts, setPartsRefetch,
-         currentView, setCurrentView, views,setPartsSearchRefetch,selectedPart,setSelectedPart, setShouldUpdate} = props;
+         currentView, setCurrentView, views,setPartsSearchRefetch,selectedPart,setSelectedPart, setShouldUpdate, setSelectedManItem} = props;
 
     
 
@@ -361,7 +411,7 @@ const PickPartList = (props) =>{
           className={clsx({ [classes.tableCellHead]: true })}
           classes={{stickyHeader: classes.stickyHeader}}
           align={column.align}
-          style={{ minWidth: column.width,height: headerHeight  }}
+          style={{ minWidth: column.width,height: headerHeight,color: '#000', fontWeight: '600'  }}
           > 
           <span>
             <div>{label}</div>
@@ -375,6 +425,7 @@ const PickPartList = (props) =>{
         }
         setShouldUpdate(true)
         setSelectedPart({...event.rowData, index: event.index});
+        setSelectedManItem(null);
       }
 
       
@@ -495,7 +546,7 @@ const ManItemList = (props) =>{
           className={clsx({ [classes.tableCellHead]: true })}
           classes={{stickyHeader: classes.stickyHeader}}
           align={column.align}
-          style={{ minWidth: column.width,height: headerHeight  }}
+          style={{ minWidth: column.width,height: headerHeight, color: '#000', fontWeight: '600'  }}
           > 
           <span>
             <div>{label}</div>
@@ -508,7 +559,7 @@ const ManItemList = (props) =>{
         setSelectedManItem({...event.rowData, index: event.index});
       }
 
-      
+
     
       
       return (
@@ -729,6 +780,10 @@ const useStyles = makeStyles(theme => ({
             color: '#d87b04'
         }
     },
+    paperScroll:{
+      padding: '5px',
+      margin: '10px 15px',
+    },
     inputField: {
         '&:active':{
             backgroundColor: '#dde8eb',
@@ -867,6 +922,15 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'underline',
         color: '#0055ff',
     },
+    manSpan:{
+      fontFamily: 'arial',
+      color: '#333',
+      fontWeight: '600',
+    },
+    manErrorSpan:{
+      color: '#c50000',
+      fontWeight: 500,
+    },
     subTitleDiv:{
 
     },
@@ -890,7 +954,10 @@ const useStyles = makeStyles(theme => ({
         margin: '2px 10px',
     },
     subTitleValueDescSpan:{
-
+      whiteSpace: 'pre-wrap',
+      maxHeight: '35px',
+      overflowY: 'scroll',
+      overflowX: 'hidden',
     },
     stickyHeader:{
         // background: 'linear-gradient(0deg, #a4dbe6, #cbf1f9)',
@@ -968,8 +1035,50 @@ const useStyles = makeStyles(theme => ({
     },
     errorSpan:{
         color: '#bb4444',
-    }
+    },
     /*end of formbuilder*/
    
+    orderInfoPartContainer:{
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '80%',
+      margin: '5px 0px 15px 0px',
+      fontSize: '.85em',
+    },
+    orderInfoPartDiv:{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      boxShadow: '0px 1px 4px 0px #9b9b9b',
+      padding: '5px',
+      minHeight: '80px',
+    },
+    selectedManItemContainer:{
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    linkIcon:{
+      width: '.85em',
+      height: '.85em'
+    },
+    manItemLink:{
+      color: '#001166',
+      display: 'flex',
+      alignItems: 'center',
+      marginBottom: 10,
+      flexDirection: 'row',
+      justifyContent: 'center',
+    },
+    aLink:{
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }
     
   }));

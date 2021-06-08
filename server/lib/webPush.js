@@ -12,7 +12,7 @@ webpush.setVapidDetails(
 const testData = {
     title: "Testing",
     body: "It's a success!",
-    icon: "/path/to/an/icon.png"
+    icon: "/static/rainey_elec.png"
   }
   
   let subscription

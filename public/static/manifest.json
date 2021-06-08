@@ -5,10 +5,16 @@
     "start_url": "/",
     "display": "browser",
     "theme_color": "#5b7087",
+    "background_color": "#fff",
     "icons": [
       {
         "src": "/static/favicon.ico",
         "sizes": "48x48",
+        "type": "png"
+      },
+      {
+        "src": "/static/rainey_elec.png",
+        "sizes": "512x512",
         "type": "png"
       }
     ]

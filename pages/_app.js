@@ -44,6 +44,18 @@ class MyApp extends App {
     if (jssStyles) {
       jssStyles.parentNode.removeChild(jssStyles);
     }
+
+    self.addEventListener("push", event => {
+      const data = event.data.json()
+      const { title } = data
+    
+      const body = {
+        body: data.body,
+        icon: data.icon
+      }
+    
+      event.waitUntil(self.registration.showNotification(title, body))
+    })
   }
 
   render() {

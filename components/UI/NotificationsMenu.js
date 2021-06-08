@@ -21,13 +21,30 @@ import { Clear } from "@material-ui/icons";
 import clsx from "clsx";
 import moment from "moment";
 
+import Subscription from '../../js/Subscription';
+
 const NotificationsMenu = ({user}) => {
   
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
   const classes = useStyles();
   const [notifications, setNotifications] = useState(null);
   const [notificationsRefetch, setNotificationsRefetch] = useState(false);
+
+  useEffect(()=>{
+    if(open){
+      Subscription.subscribePush();
+      setSubscribed(true);
+
+    return(()=>{
+      if(subscribed){
+        Subscription?.unsubscribePush();
+        setSubscribed(false)
+      }
+    })
+    }
+  },[open])
 
   useEffect(()=>{
     if(notifications == null || notificationsRefetch == true){

@@ -56,15 +56,12 @@ import moment from 'moment';
 
 import Util from  '../../../js/Util';
 import Inventory from  '../../../js/Inventory';
-import { ListContext } from '../Inv_Parts/InvPartsContainer';
-import { de } from 'date-fns/locale';
 import { Add } from '@material-ui/icons';
 //import { DetailContext } from '../InvPartsContainer';
 
 const PartManufactureList = function(props) {
     const {user, part, resetFunction} = props;
 
-    const {currentView} = useContext(ListContext);
     const classes = useStyles();
     const [partManItems, setPartManItems] = React.useState(null)
     const [manNames, setManNames] = React.useState(null);
