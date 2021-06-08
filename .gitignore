@@ -8,3 +8,5 @@
 node_modules/
 .env
 public/sw.js
+server/cert.pem
+server/key.pem

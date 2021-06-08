@@ -4,7 +4,8 @@ const next = require('next');
 const logger = require('../logs');
 
 const expressValidator = require('express-validator');
-const http = require("http");
+const https = require("https");
+const fs = require('fs');
 const favicon = require('serve-favicon');
 const cors = require('cors');
 const { parse } = require('url')
@@ -16,9 +17,14 @@ const MySQLStore = require('express-mysql-session')(session);
 const auth = require('./google');
 const {bouncie} = require('./lib/bouncie');
 
+const options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
+
 dotenv.config();
 const app = express();
-const server = http.createServer(app);
+const server = https.createServer(options, app);
 
 //Handle Database
 const database = require('./lib/db');
