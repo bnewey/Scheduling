@@ -17,9 +17,11 @@ const MySQLStore = require('express-mysql-session')(session);
 const auth = require('./google');
 const {bouncie} = require('./lib/bouncie');
 
+logger.info(__dirname + '/key.pem');
 const options = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
+  key: fs.readFileSync(__dirname + '/key.pem'),
+  cert: fs.readFileSync(__dirname +'/cert.pem'),
+  passphrase: 'pl@yf@!r'
 };
 
 dotenv.config();
