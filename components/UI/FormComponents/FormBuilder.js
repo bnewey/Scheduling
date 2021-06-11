@@ -173,6 +173,8 @@ const FormBuilder = forwardRef((props, ref) => {
                     }
                 }
             }
+            setValidErrorFields([])
+            setErrorFields([])
         },
         handleShouldUpdate: (update)=>{
             return new Promise((resolve,reject)=>{
@@ -183,17 +185,20 @@ const FormBuilder = forwardRef((props, ref) => {
             })
             
         },
-        handleSaveParent: (itemToSave, event) =>{
+        handleSaveParent: (itemToSave, event, add_and_continue) =>{
             if(event){
                 console.log("Prevent default");
                 event.preventDefault();
             }
+            
+            var addOrEdit = mode;
+
             console.log("itemToSave",itemToSave)
-            if(!itemToSave){
+            if(!itemToSave && addOrEdit === "edit"){
                 console.error("Bad itemToSave")
+                cogoToast.error("Internal Server Error")
                 return;
             }
-            var addOrEdit = mode;
             
             if(shouldUpdate){
                 //Create Object with our text input values using ref_object
@@ -307,7 +312,7 @@ const FormBuilder = forwardRef((props, ref) => {
                             break;
                         default:
                             //Others are updated with itemToSave (formObject) state variable
-                            if(itemToSave[field.field])
+                            if(itemToSave && itemToSave[field.field])
                                 updateItem[field.field] = itemToSave[field.field];
                             break;
                     }
@@ -321,22 +326,10 @@ const FormBuilder = forwardRef((props, ref) => {
                     cogoToast.error("Required fields are blank", {hideAfter: 10});
                     setErrorFields(empty_required_fields);
                     return;
+                }else{
+                    setErrorFields([]);
                 }
-                // let validation_errors = [...empty_required_fields,...error_fields];
-                // if(empty_required_fields.length){
-                //     cogoToast.error("Required Fields Missing");    
-                //     console.error("Required fields are blank", empty_required_fields)
-                // }
-                // if(error_fields.length){
-                //     cogoToast.error("Validation Errors");
-                //     console.error("Validation Error:", error_fields)
-                // }
-                // if(validation_errors.length > 0){      
-                //     setErrorFields(validation_errors);
-                //     return;
-                // }else{
-                //     setErrorFields([]);
-                // }
+
 
                 const validate_by_type = (field, index) =>{
                     if(!field || !updateItem){
@@ -352,7 +345,7 @@ const FormBuilder = forwardRef((props, ref) => {
                             break;
                         case 'number':
                             //test against regexp for nondecimal or decimal 
-                            error = updateItem[field.field] && (!(/^\d+$/.test(updateItem[field.field]) || /^(\d)?(\.\d{1,6})?$/.test(updateItem[field.field])));
+                            error = updateItem[field.field] && (!(/^\d+$/.test(updateItem[field.field]) || /^(\d{1,8})?(\.\d{1,6})?$/.test(updateItem[field.field])));
                             break;
                     }
                     return error;
@@ -361,7 +354,7 @@ const FormBuilder = forwardRef((props, ref) => {
                 //Validate Field Data
                 var fail_validation_fields = fields.
                         filter((v,i)=> v.type && !(v.hidden && v.hidden(formObject) )).
-                        filter( validate_by_type );;
+                        filter( validate_by_type );
                 if(fail_validation_fields.length > 0){
                     cogoToast.error("Validation data error on marked fields", {hideAfter: 10});
                     setValidErrorFields(fail_validation_fields);
@@ -375,7 +368,7 @@ const FormBuilder = forwardRef((props, ref) => {
                 console.log("updateItem", updateItem);
                 //Run given handlSave
                 if(handleSave){
-                    handleSave(itemToSave, updateItem, addOrEdit)
+                    handleSave(itemToSave, updateItem, addOrEdit, add_and_continue)
                     .then((data)=>{
                         console.log("Post save function", updateItem.postSaveFunction)
                         if(updateItem.postSaveFunction){
@@ -425,6 +418,7 @@ const FormBuilder = forwardRef((props, ref) => {
                      entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
                      entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
                      entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses} id_pretext={id_pretext}/>
+                    {field.addOn ? <div style={{flexBasis: '20%'}}>{field.addOn()}</div> : <></>}
                 </div>)
             })}</div></>
         : <></>}
@@ -469,7 +463,7 @@ const GetInputByType = function(props){
         case 'number':
             return(<div className={classes.inputValue}>
                 <TextField id={`woi_input-${field.field}`} 
-                        error={error}
+                        error={error || valid_error}
                          variant="outlined"
                          /*multiline={field.multiline}*/
                          name={field.field}
@@ -488,7 +482,7 @@ const GetInputByType = function(props){
                 <KeyboardDatePicker className={classes.inputStyleDate} 
                                 showTodayButton
                                 clearable
-                                error={error}
+                                error={error || valid_error}
                                 inputVariant="outlined"  
                                 disableFuture={field.field == "date" || field.field == "datetime" }
                                 onChange={(value, value2)=> {
@@ -504,7 +498,7 @@ const GetInputByType = function(props){
         case 'select-users':
             return(<div className={classes.inputValueSelect}>
                 <Select
-                    error={error}
+                    error={error || valid_error}
                     id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
@@ -528,7 +522,7 @@ const GetInputByType = function(props){
             return(
                 <div className={classes.inputValueSelect}>
                     <Select
-                error={error}
+                error={error || valid_error}
                     id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
@@ -553,7 +547,7 @@ const GetInputByType = function(props){
                 return(
                     <div className={classes.inputValueSelect}>
                         <Select
-                    error={error}
+                    error={error || valid_error}
                         id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
@@ -577,7 +571,7 @@ const GetInputByType = function(props){
                 return(
                     <div className={classes.inputValueSelect}>
                         <Select
-                    error={error}
+                    error={error || valid_error}
                         id={field.field}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
@@ -601,7 +595,7 @@ const GetInputByType = function(props){
                 return(
                     <div className={classes.inputValueSelect}>
                         <Select
-                    error={error}
+                    error={error || valid_error}
                         id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
@@ -625,7 +619,7 @@ const GetInputByType = function(props){
         case 'select-vendor':
             return(<div className={classes.inputValueSelect}>
                 <Select
-                    error={error}
+                    error={error || valid_error}
                     id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}
@@ -648,7 +642,7 @@ const GetInputByType = function(props){
         case 'select-ship_to-contact':
                 return(<div className={classes.inputValueSelect}>
                     <Select
-                        error={error}
+                        error={error || valid_error}
                         id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
@@ -671,7 +665,7 @@ const GetInputByType = function(props){
         case 'select-ship_to-address':
                 return(<div className={classes.inputValueSelect}>
                     <Select
-                        error={error}
+                        error={error || valid_error}
                         id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
@@ -702,7 +696,7 @@ const GetInputByType = function(props){
                 /></div>)
             break;
         case 'entity':
-            return(<div className={classes.inputValue}>{error && <span className={classes.errorSpan}>Entity Required</span> }
+            return(<div className={classes.inputValue}>{(error || valid_error) && <span className={classes.errorSpan}>Entity Required</span> }
             {formObject && formObject[field.field] ? <>
                     
                     <span className={classes.inputRoot}>{formObject[field.displayField]} | ID:{formObject[field.field]}</span>
@@ -718,9 +712,9 @@ const GetInputByType = function(props){
         case 'select-entity-contact':
             console.log("formObject", formObject )
                 return(<div className={classes.inputValueSelect}>
-                    {error && <span className={classes.errorSpan}>Entity Contact Required</span> }
+                    {(error || valid_error) && <span className={classes.errorSpan}>Entity Contact Required</span> }
                     <Select
-                        error={error}
+                        error={error || valid_error}
                         id={`woi_input-${field.field}`}
                         value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                         inputProps={{classes:  classes.inputSelect}}
@@ -750,9 +744,9 @@ const GetInputByType = function(props){
         break;
         case 'select-entity-address':
             return(<div className={classes.inputValueSelect}>
-                {error && <span className={classes.errorSpan}>Entity Address Required</span> }
+                {(error || valid_error) && <span className={classes.errorSpan}>Entity Address Required</span> }
                 <Select
-                    error={error}
+                    error={error || valid_error}
                     id={`woi_input-${field.field}`}
                     value={formObject && formObject[field.field] ? formObject[field.field] : 0}
                     inputProps={{classes:  classes.inputSelect}}

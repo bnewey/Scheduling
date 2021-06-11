@@ -7,14 +7,14 @@ const moment = require("moment")
 
 var notificationSystem = {router: router};
 
-notificationSystem.sendNotification = function(user_id, type,body, page, current_view, sub_current_view, detail_id) {
+notificationSystem.sendNotification = function(user_id, type,body, page, current_view, sub_current_view, detail_id, requires_action) {
     return new Promise( async (resolve,reject) => {
-        const sql = ' INSERT INTO user_notifications (googleId, type, body, page, current_view,sub_current_view, detail_id) VALUES (?, IFNULL(?,DEFAULT(type)) ,?, IFNULL(?,DEFAULT(page)) , ' +
-        ' IFNULL(?,DEFAULT(current_view)),IFNULL(?,DEFAULT(sub_current_view)), IFNULL(?,DEFAULT(detail_id)) ) ' ;
+        const sql = ' INSERT INTO user_notifications (googleId, type, body, page, current_view,sub_current_view, detail_id, requires_action) VALUES (?, IFNULL(?,DEFAULT(type)) ,?, IFNULL(?,DEFAULT(page)) , ' +
+        ' IFNULL(?,DEFAULT(current_view)),IFNULL(?,DEFAULT(sub_current_view)), IFNULL(?,DEFAULT(detail_id)), IFNULL(?,DEFAULT(requires_action)) ) ' ;
 
 
             try{
-                const results = await database.query(sql, [user_id, type, body, page, current_view, sub_current_view, detail_id]);
+                const results = await database.query(sql, [user_id, type, body, page, current_view, sub_current_view, detail_id, requires_action]);
                 logger.info("Inserted notification :"+ user_id);
                 resolve(results);
             }

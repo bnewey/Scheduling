@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect, useContext, useCallback} from 'react';
 import {makeStyles, withStyles,Modal, Backdrop, Fade, Grid,ButtonGroup, Button,TextField, InputBase, Select, MenuItem,
      Checkbox,IconButton} from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
@@ -27,6 +27,8 @@ import Inventory from  '../../../../js/Inventory';
 import { ListContext } from '../InvPartsContainer';
 
 import FormBuilder from '../../../UI/FormComponents/FormBuilder';
+import AddEditPartTypeDialog  from '../../Inv_Admin/MainPanels/components/AddEditPartTypeDialog.js';
+import _ from 'lodash';
 
 
 const AddEditModal = function(props) {
@@ -37,12 +39,20 @@ const AddEditModal = function(props) {
          recentParts, setRecentParts} = useContext(ListContext);
 
     const saveRef = React.createRef();
+    const [partTypes, setPartTypes] = useState(null);
     const classes = useStyles();
+
+    const [addNewPartTypeDialog,setAddNewPartTypeDialog] = useState(false);
 
     const handleCloseModal = () => {
         setActivePart(null);
         setEditPartModalOpen(false);
     };
+
+    const handleOpenPartDialog = (event)=>{
+        setAddNewPartTypeDialog(true);
+    }
+
 
    
     const fields = [
@@ -50,7 +60,17 @@ const AddEditModal = function(props) {
         { field: 'description', label: 'Description', type: 'text',updateBy: 'ref', required:true }, 
         { field: 'inv_qty', label: 'In Stock',  type: 'number',updateBy: 'ref', hidden: (data)=> data?.rainey_id  },
         { field: 'cost_each', label: 'Cost Each', type: 'number',updateBy: 'ref',  },
-        { field: 'part_type', label: 'Part Type', type: 'select-part-type', updateBy: 'ref'},
+        { field: 'part_type', label: 'Part Type', type: 'select-part-type', required: true, updateBy: 'ref',
+            addOn: ()=> {
+                return <><AddEditPartTypeDialog part_type={{}} 
+                                                refreshFunction={()=> { 
+                                                    setPartTypes(null);
+                                                }} 
+                                                addNewPartTypeDialog={addNewPartTypeDialog} setAddNewPartTypeDialog={setAddNewPartTypeDialog}/>
+                        <div className={classes.newTypeButton} onClick={(event)=> handleOpenPartDialog(event)}>Add New Part Type</div>
+                        </>
+            }},
+        
         { field: 'storage_location', label: 'Storage Location',  type: 'number',updateBy: 'ref',  },
         { field: 'notes', label: 'Notes',  type: 'text',updateBy: 'ref',}, 
         { field: 'reel_width', label: 'Reel Width',  type: 'text',updateBy: 'ref',  },
@@ -64,7 +84,7 @@ const AddEditModal = function(props) {
         }
     },[setEditPartModalMode])
 
-    const [partTypes, setPartTypes] = useState(null);
+    
 
     useEffect(()=>{
             if(partTypes == null){
@@ -76,19 +96,30 @@ const AddEditModal = function(props) {
                     console.error("Failed to get entity types for entity addedit form")
                 })
             }
+    },[activePart, partTypes])
+
+    useEffect(()=>{
+        if(activePart && _.isEmpty(activePart) && saveRef?.current){
+            saveRef.current.handleResetFormToDefault();
+        }
     },[activePart])
 
         
 
-    const handleSave = (part, updatePart ,addOrEdit) => {
+    const handleSave = (part, updatePart ,addOrEdit, add_and_continue) => {
+
         return new Promise((resolve, reject)=>{
-            if(!part){
-                console.error("Bad work order")
-                reject("Bad work order");
+            if(!updatePart){
+                console.error("Bad updatePart")
+                reject("Bad updatePart");
             }
             
             //Add Id to this new object
             if(addOrEdit == "edit"){
+                if(!part){
+                    console.error("Bad part in edit")
+                    reject("Bad updatePart");
+                }
                 updatePart["rainey_id"] = part.rainey_id;
                 updatePart["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
 
@@ -99,6 +130,7 @@ const AddEditModal = function(props) {
                     setPartsRefetch(true);
                     setActivePart(null);
                     handleCloseModal();
+                    
                     resolve(data)
                 })
                 .catch( error => {
@@ -111,14 +143,20 @@ const AddEditModal = function(props) {
                 Inventory.addNewPart( updatePart )
                 .then( (data) => {
                     //Get id of new workorder and set view to detail
-                    if(data && data.insertId){
-                        setDetailPartId(data.insertId);
-                        setCurrentView(views.filter((v)=>v.value == "partDetail")[0]);
-                    }
                     cogoToast.success(`Part has been added!`, {hideAfter: 4});
                     setPartsRefetch(true);
-                    setActivePart(null);
-                    handleCloseModal();
+                    if(add_and_continue){
+                        setActivePart({});
+                    }else{
+                        if(data && data.insertId){
+                            console.log("Data",data);
+                            setDetailPartId(data.insertId);
+                            //should do this in a post save function to prevent memory leak
+                            setCurrentView(views.filter((v)=>v.value == "partsDetail")[0]);
+                        }
+                        setActivePart(null);
+                        handleCloseModal();
+                    }
                     resolve(data);
                 })
                 .catch( error => {
@@ -232,8 +270,20 @@ const AddEditModal = function(props) {
                                     size="large"
                                     className={classes.saveButton}
                                 >
-                                    <SaveIcon />Save
+                                    <SaveIcon />{activePart?.rainey_id  ? "Save" : "Add"}
                                 </Button>
+                                </ButtonGroup>
+                                <ButtonGroup className={classes.buttonGroup}>
+                                {!activePart?.rainey_id  ? <Button
+                                    onClick={ (event) => { saveRef.current.handleSaveParent(activePart,event, true) }}
+                                    variant="contained"
+                                    color="primary"
+                                    size="large"
+                                    className={classes.saveButton}
+                                >
+                                    <SaveIcon />Add + New
+                                </Button>
+                                :   <></>}
                             </ButtonGroup>
                         </Grid>
                     </Grid>
@@ -358,7 +408,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'left',
     },
     inputValueSelect:{
-        flexBasis: '70%',
+        flexBasis: '50%',
         textAlign: 'left',
         padding: '5px 7px',
     },
@@ -384,5 +434,20 @@ const useStyles = makeStyles(theme => ({
     },
     errorSpan:{
         color: '#bb4444',
+    },
+    newTypeButton:{
+        fontFamily: 'arial',
+        fontWeight: '600',
+        background: 'linear-gradient( whitesmoke, #dbdbdb)',
+        boxShadow: '1px 1px 2px 0px #5d7093',
+        padding: '2px 5px',
+        
+        cursor: 'pointer',
+        color: '#777',
+        '&:hover':{
+            color: '#666',
+            background: 'linear-gradient( whitesmoke, #d4d4d4)',
+            boxShadow: '1px 1px 2px 0px #666 ',
+        }
     }
 }));

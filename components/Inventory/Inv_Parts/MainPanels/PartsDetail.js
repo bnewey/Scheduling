@@ -21,16 +21,39 @@ import EditPartInvDialog from '../../components/EditPartInvDialog';
 import PartManufactureList from '../../components/PartManufactureList';
 import clsx from 'clsx';
 
+import AddEditManfDialog from '../../Inv_Admin/MainPanels/components/AddEditManfDialog'
+import { AddCircleOutlineOutlined } from '@material-ui/icons';
 
 
 const PartsDetail = function(props) {
   const {user} = props;
 
   const { parts, setParts, setPartsRefetch,currentView, setCurrentView, views,columnState, setColumnState,
-    editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen} = useContext(ListContext);
+    editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen, detailPartId} = useContext(ListContext);
   const classes = useStyles();
 
   //const {} = useContext(DetailContext);
+
+  const [manNames, setManNames] = React.useState(null);
+  const [addNewManDialog,setAddNewManDialog] = useState(false);
+
+  const handleOpenManDialog = (event)=>{
+    setAddNewManDialog(true);
+}
+
+  //Part manufacturing Data
+    useEffect( () =>{
+        if(manNames == null) {
+            
+            Inventory.getManufactures()
+            .then( data => { setManNames(data); })
+            .catch( error => {
+                console.warn(error);
+                cogoToast.error(`Error getting wois`, {hideAfter: 4});
+                setManNames([]);
+            })
+        }
+    },[manNames]);
 
   const main_detail_table = [
                         { value: 'rainey_id', displayName: 'Rainey ID' }, 
@@ -102,10 +125,19 @@ const PartsDetail = function(props) {
 
             {/* MANUFACTURE DETAIL */}
             <div className={ clsx({[classes.grid_container]: true, [classes.manuListContainer]: true})}>
-                  <div className={classes.moreInfoDiv}>Manufacture List</div>
+                  <div className={classes.moreInfoDiv}>
+                    <span>Manufacture List</span>
+                    <div><AddEditManfDialog manf={{}} refreshFunction={()=> setManNames(null)}
+                         addNewManDialog={addNewManDialog} setAddNewManDialog={setAddNewManDialog}/>
+                         <div className={classes.newTypeButton} onClick={(event)=> handleOpenManDialog(event)}>
+                           <AddCircleOutlineOutlined className={classes.addIcon} /><span>Add New Manufacturer</span>
+                          </div>
+                    </div>
+                  </div>
                   <div className={classes.detailInfoDiv}>
 
-                      <PartManufactureList part={activePart} resetFunction={()=> setActivePart(null) } />
+                      <PartManufactureList part={activePart} detailPartId={detailPartId} resetFunction={()=> setActivePart(null) } manNames={manNames} setManNames={setManNames} />
+                      
                     </div>
             </div>
             {/* END MANUFACTURE  DETAIL */}
@@ -182,6 +214,10 @@ const useStyles = makeStyles(theme => ({
     margin: '2px 20px',
   },
   moreInfoDiv:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'start',
+    alignItems: 'center',
     fontFamily: 'arial',
     fontSize: '1.5em',
     fontWeight: '600',
@@ -318,6 +354,31 @@ const useStyles = makeStyles(theme => ({
   },
   infoSpan:{
     fontSize: '20px'
+  },
+  newTypeButton:{
+    fontFamily: 'arial',
+    fontWeight: '500',
+    fontSize: '.8em',
+    background: 'linear-gradient( whitesmoke, #dbdbdb)',
+    boxShadow: '1px 1px 2px 0px #5d7093',
+    padding: '2px 5px',
+    margin: '0px 10px',
+    cursor: 'pointer',
+    color: '#668',
+    '&:hover':{
+        color: '#555',
+        background: 'linear-gradient( whitesmoke, #d4d4d4)',
+        boxShadow: '1px 1px 2px 0px #666 ',
+    },
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addIcon:{
+    width: '.8em',
+    height: '.8em',
+    margin: '0px 3px',
   }
   //End Table Stuff
 }));

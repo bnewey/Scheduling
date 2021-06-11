@@ -121,7 +121,7 @@ async function getManufactures(){
 async function addNewPart(part){
     const route = '/scheduling/inventory/addNewPart';
     try{
-        var response = await fetch(route,
+        var data = await fetch(route,
             {
                 method: 'POST',
                 headers: {
@@ -129,7 +129,7 @@ async function addNewPart(part){
                 },
                 body: JSON.stringify({part})
             });
-        var list = await response.ok;
+        var list = await data.json();
         return(list);
     }catch(error){
         throw error;

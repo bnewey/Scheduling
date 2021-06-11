@@ -359,6 +359,11 @@ router.post('/updateOrderOutApprover', async (req,res) => {
                   item.id ]);
         logger.info("Inventory OrderOut  Approver updated " + item.googleId);
 
+        //Update notifications tied to 
+        const not_sql = " UPDATE user_notifications SET requires_action = 0 WHERE googleId = ? AND detail_id = ?";
+        const not_results = await database.query(not_sql, [item.googleId, 
+            item.order_id ]);
+
         if(item.status == 2){ // rejected
             //get maker
             const maker_sql = ' SELECT * FROM inv__orders_out oo WHERE id = ? LIMIT 1 '
@@ -494,7 +499,7 @@ router.post('/addNewOrderOutApprover', async (req,res) => {
             if(flagged_items.length == 0){
                 //send notification to next tier 
                 const note_results = await notificationSystem.sendNotification(orderOut_item.googleId, nav_item.type,
-                  "Inventory Order Out is waiting for your approval.", nav_item.page, nav_item.current_view, nav_item.sub_current_view, nav_item.detail_id);
+                  "Inventory Order Out is waiting for your approval.", nav_item.page, nav_item.current_view, nav_item.sub_current_view, nav_item.detail_id, 1);
             }
         }
         logger.info("Inventory OrderOut  Approver added ", [orderOut_item]);

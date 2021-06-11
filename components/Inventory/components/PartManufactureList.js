@@ -60,11 +60,10 @@ import { Add } from '@material-ui/icons';
 //import { DetailContext } from '../InvPartsContainer';
 
 const PartManufactureList = function(props) {
-    const {user, part, resetFunction} = props;
+    const {user, part,detailPartId, resetFunction, manNames, setManNames} = props;
 
     const classes = useStyles();
     const [partManItems, setPartManItems] = React.useState(null)
-    const [manNames, setManNames] = React.useState(null);
 
 
     const columns = [
@@ -162,9 +161,9 @@ const PartManufactureList = function(props) {
 
     //Part manufacturing Data
     useEffect( () =>{
-        if(partManItems == null && part) {
+        if(partManItems == null && (part || detailPartId)) {
             
-            Inventory.getPartManItems(part.rainey_id)
+            Inventory.getPartManItems(part?.rainey_id || detailPartId)
             .then( data => { setPartManItems(data); })
             .catch( error => {
                 console.warn(error);
@@ -172,21 +171,9 @@ const PartManufactureList = function(props) {
                 setPartManItems([]);
             })
         }
-    },[partManItems, part]);
+    },[partManItems, part,detailPartId]);
 
-    //Part manufacturing Data
-    useEffect( () =>{
-        if(manNames == null) {
-            
-            Inventory.getManufactures()
-            .then( data => { setManNames(data); })
-            .catch( error => {
-                console.warn(error);
-                cogoToast.error(`Error getting wois`, {hideAfter: 4});
-                setManNames([]);
-            })
-        }
-    },[manNames]);
+    
 
 
     const handleUpdatePartManItem = (newData, oldData) => {

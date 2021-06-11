@@ -171,7 +171,10 @@ const NotificationsMenu = ({user}) => {
                  <div className={clsx({[classes.listItemDiv]: true, [classes.listItemNotViewed]: notViewed}) }
                       onClick={(event)=> handleGoToNotification(event, item)}>
                    <div style={{flexBasis: '10%'}}><Clear className={classes.clearIcon}/></div>
-                   <div style={{flexBasis: '75%'}}><span className={classes.messageSpan}>{item.body}</span></div>
+                   <div style={{flexBasis: '75%', display: 'flex', flexDirection: 'column'}}>
+                            <div><span className={classes.messageSpan}>{item.body}</span></div>
+                            {item.requires_action ? <div><span className={classes.actionReqSpan}> Action Required </span></div>: <></>}
+                  </div>
                    <div style={{flexBasis: '15%'}}><span className={classes.noteDateSpan}>{moment(item.date_entered).format('MMM Do')}</span></div>
                  </div>)
                })}
@@ -250,6 +253,12 @@ const useStyles = makeStyles(theme => ({
     fontWeight: '600',
     color: '#333',
     letterSpacing: '.02em',
+  },
+  actionReqSpan:{
+    fontFamily: 'arial',
+    fontWeight: '600',
+    color: '#cc4422',
+    letterSpacing: '0em',
   },
   noteDateSpan:{
     fontFamily: 'arial',

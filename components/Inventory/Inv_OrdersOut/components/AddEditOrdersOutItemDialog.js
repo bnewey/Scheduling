@@ -150,11 +150,11 @@ const AddEditOrdersOutItemDialog = (props) => {
         setPartManItems(tmpData);
         tmpData.forEach((item)=> {
             console.log('item',item);
-            if(item.default_man && activeOOItem.part_mf_id == null){
+            if(item.default_man && activeOOItem?.part_mf_id == null){
                 setSelectedManItem(item)
                 console.log("OrderOut default item");
             }
-            if(item.id === activeOOItem.part_mf_id){
+            if(item.id === activeOOItem?.part_mf_id){
               setSelectedManItem(item);
             }
         })
