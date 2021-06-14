@@ -2,7 +2,7 @@
     "name": "REI IControl",
     "short_name": "IControl",
     "lang": "en-US",
-    "start_url": "/",
+    "start_url": "https://icontrol.raineyelectronics.com/scheduling/",
     "display": "standalone",
     "theme_color": "#5b7087",
     "background_color": "#fff",
