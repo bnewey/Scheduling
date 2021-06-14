@@ -29,4 +29,4 @@ Offline.defaultProps = {
   settings: null,
 };
 
-export default Index;
+export default Offline;
