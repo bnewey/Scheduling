@@ -19,10 +19,10 @@ const {bouncie} = require('./lib/bouncie');
 
 logger.info(__dirname + '/key.pem');
 const options = {
-  key: fs.readFileSync(__dirname + '/key.pem'),
-  cert: fs.readFileSync(__dirname +'/cert.pem'),
-  passphrase: 'pl@yf@!r'
+  key: fs.readFileSync('/etc/ssl/private/private.key', 'utf8'),
+  cert: fs.readFileSync('/etc/ssl/certificate.crt', 'utf8')
 };
+
 
 dotenv.config();
 const app = express();

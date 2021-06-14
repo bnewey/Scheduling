@@ -1,16 +1,17 @@
 {
-    "name": "REI Scheduling",
-    "short_name": "Scheduling",
+    "name": "REI IControl",
+    "short_name": "IControl",
     "lang": "en-US",
     "start_url": "/",
-    "display": "browser",
+    "display": "standalone",
     "theme_color": "#5b7087",
     "background_color": "#fff",
     "icons": [
       {
-        "src": "/static/favicon.ico",
+        "src": "/static/maskable_icon_x48.png",
         "sizes": "48x48",
-        "type": "png"
+        "type": "png",
+        "purpose": "any maskable"
       },
       {
         "src": "/static/rainey_elec.png",
