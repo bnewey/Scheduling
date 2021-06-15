@@ -1,4 +1,11 @@
 const withPWA = require('next-pwa')
+const runtimeCaching = require('next-pwa/cache') 
+try{
+  runtimeCaching[0].options.precacheFallback.fallbackURL = "/scheduling/_offline";
+}
+catch(err){
+  
+}
 
 module.exports = withPWA({
 	assetPrefix: process.env.NODE_ENV === 'development' ? '' : '/scheduling',
@@ -11,9 +18,5 @@ module.exports = withPWA({
       disable: process.env.NODE_ENV === 'development',
       scope: '/',
       subdomainPrefix: '/scheduling',
-      fallbacks: {
-        image: '/static/images/rainey_elec.png',
-        document: '/scheduling/_offline',
-      }
     }
   })
