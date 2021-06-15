@@ -18,7 +18,7 @@ function subscribePush() {
         userVisibleOnly: true, //Always display notifications
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
       })
-      .then(subscription => axios.post("/api/push/register", subscription))
+      .then(subscription => axios.post("/webPush/register", subscription))
       .catch(err => console.error("Push subscription error: ", err))
   })
 }
@@ -39,7 +39,7 @@ function unsubscribePush() {
           }
           subscription
             .unsubscribe()
-            .then(() => axios.delete("/api/push/unregister"))
+            .then(() => axios.delete("/webPush/unregister"))
             .catch(err => console.error(err))
         })
         .catch((err) => console.error(err))
