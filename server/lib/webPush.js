@@ -21,13 +21,14 @@ const testData = {
   router.post("/register", (req, res, next) => {
     subscription = req.body
     console.log(subscription)
-    res.sendStatus(201)
+    
     pushIntervalID = setInterval(() => {
       console.log("Send notification");
       // sendNotification can only take a string as it's second parameter
       webpush.sendNotification(subscription, JSON.stringify(testData))
         .catch(() => { console.log("Failed to send"); return clearInterval(pushIntervalID)})
     }, 30000)
+    res.sendStatus(201)
   })
   
   router.delete("/unregister", (req, res, next) => {
