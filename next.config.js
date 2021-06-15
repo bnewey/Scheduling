@@ -11,5 +11,9 @@ module.exports = withPWA({
       disable: process.env.NODE_ENV === 'development',
       scope: '/',
       subdomainPrefix: '/scheduling',
+      fallbacks: {
+        image: '/static/images/rainey_elec.png',
+        document: '/scheduling/_offline',
+      }
     }
   })
