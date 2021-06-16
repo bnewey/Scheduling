@@ -20,6 +20,7 @@ pushSystem.getUserSubscriptions = async function(googleId){
 
     try{
       const results = await database.query(sql, [ googleId ]);
+      logger.verbose("Results", results);
       logger.verbose("Got user subscriptions  :" + googleId  );
       if(results && results.length){
         return await results.json();
