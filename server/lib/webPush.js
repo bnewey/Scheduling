@@ -23,7 +23,7 @@ pushSystem.getUserSubscriptions = async function(googleId){
       logger.verbose("Results", results);
       logger.verbose("Got user subscriptions  :" + googleId  );
       if(results && results.length){
-        return await results.json();
+        return await json(results);
       }else{
         return [];
       }
@@ -88,5 +88,18 @@ pushSystem.sendPushNotification = function(subscription, data){
     }
     
   })
+
+  const json = function(object) {
+    return new Promise( (resolve,reject) => { 
+        
+            var parsed = JSON.parse(JSON.stringify(object));
+            if(parsed){
+                resolve(parsed[0]);
+                return;
+            }else{
+                reject({error: "Error"});
+            }
+    })
+}
 
   module.exports = pushSystem;
