@@ -71,7 +71,7 @@ pushSystem.sendPushNotification = function(subscription, data){
   
   })
   
-  router.delete("/unregister",  async (req, res, next) => {
+  router.post("/unregister",  async (req, res, next) => {
     let subscription = req.body
     console.log(subscription)
     const sql = ' DELETE FROM  push_subscriptions WHERE subscription = ? ';

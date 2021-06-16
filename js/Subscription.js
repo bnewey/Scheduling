@@ -49,7 +49,7 @@ function unsubscribePush() {
           }
           subscription
             .unsubscribe()
-            .then(() => axios.delete("/scheduling/webPush/unregister", subscription))
+            .then(() => axios.post("/scheduling/webPush/unregister", subscription))
             .catch(err => console.error(err))
         })
         .catch((err) => console.error(err))

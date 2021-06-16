@@ -534,7 +534,9 @@ router.post('/addNewOrderOutApprover', async (req,res) => {
                 
                 pushSystem.getUserSubscriptions(orderOut_item.googleId)
                 .then((data)=>{
+                    logger.info("data", data);
                     if(data && data.length > 0){
+                        logger.info("ran forEach", data);
                         data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription), "Inventory Order Out is waiting for your approval."))
                     }
                 })
