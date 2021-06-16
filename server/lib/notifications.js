@@ -7,6 +7,7 @@ const moment = require("moment")
 
 var notificationSystem = {router: router};
 
+
 notificationSystem.sendNotification = function(user_id, type,body, page, current_view, sub_current_view, detail_id, requires_action) {
     return new Promise( async (resolve,reject) => {
         const sql = ' INSERT INTO user_notifications (googleId, type, body, page, current_view,sub_current_view, detail_id, requires_action) VALUES (?, IFNULL(?,DEFAULT(type)) ,?, IFNULL(?,DEFAULT(page)) , ' +

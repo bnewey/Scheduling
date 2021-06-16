@@ -95,7 +95,7 @@ nextApp
     app.use('/scheduling/inventorySets', inventorySets);
     app.use('/scheduling/inventoryOrdersOut', inventoryOrdersOut);
     app.use('/scheduling/notifications', notifications.router);
-    app.use('/scheduling/webPush', webPush);
+    app.use('/scheduling/webPush', webPush.router);
     ///
 
     //Session   ////

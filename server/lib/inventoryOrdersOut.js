@@ -10,7 +10,7 @@ const Util = require('../../js/Util');
 //Handle Database
 const database = require('./db');
 const notificationSystem = require('./notifications');
-
+const pushSystem = require('./webPush');
 
 router.post('/getAllOrdersOut', async (req,res) => {
 
@@ -373,6 +373,16 @@ router.post('/updateOrderOutApprover', async (req,res) => {
                 //send notification to maker
                 const reject_results = await notificationSystem.sendNotification(order.made_by, nav_item.type,
                     "Inventory Order Out is has been rejected.", nav_item.page, nav_item.current_view, nav_item.sub_current_view, nav_item.detail_id);
+
+                pushSystem.getUserSubscriptions(order.made_by)
+                .then((data)=>{
+                    if(data && data.length > 0){
+                        data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription), "Inventory Order Out is has been rejected."))
+                    }
+                })
+                .catch((error)=>{
+                    logger.error("Failure in sending push notifications: " + error);
+                })
             }else{
                 throw "Bad order from maker_results in rejection notification";
             }
@@ -400,7 +410,19 @@ router.post('/updateOrderOutApprover', async (req,res) => {
                         //will automatically call callback after successful execution
                         const note_results = await notificationSystem.sendNotification(nt_item.googleId, nav_item.type,
                             "Inventory Order Out is waiting for your approval.", nav_item.page, nav_item.current_view, nav_item.sub_current_view, nav_item.detail_id);
-                        return;
+
+                        pushSystem.getUserSubscriptions(nt_item.googleId)
+                        .then((data)=>{
+                            if(data && data.length > 0){
+                                data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription), "Inventory Order Out is waiting for your approval."))
+                            }
+                            return;
+                        })
+                        .catch((error)=>{
+                            logger.error("Failure in sending push notifications: " + error);
+                            return;
+                        })
+                        
 
                     }, err=> {
                         if(err){
@@ -421,6 +443,15 @@ router.post('/updateOrderOutApprover', async (req,res) => {
                         //send notification to maker
                         var reject_results = await notificationSystem.sendNotification(order.made_by, nav_item.type,
                             "Inventory Order Out is has been approved.", nav_item.page, nav_item.current_view, nav_item.sub_current_view, nav_item.detail_id);
+                        pushSystem.getUserSubscriptions(order.made_by)
+                        .then((data)=>{
+                            if(data && data.length > 0){
+                                data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription), "Inventory Order Out is has been approved."))
+                            }
+                        })
+                        .catch((error)=>{
+                            throw error
+                        })
                     }else{
                         throw "Bad order from maker_results in approve notification";
                     }
@@ -500,6 +531,17 @@ router.post('/addNewOrderOutApprover', async (req,res) => {
                 //send notification to next tier 
                 const note_results = await notificationSystem.sendNotification(orderOut_item.googleId, nav_item.type,
                   "Inventory Order Out is waiting for your approval.", nav_item.page, nav_item.current_view, nav_item.sub_current_view, nav_item.detail_id, 1);
+                
+                pushSystem.getUserSubscriptions(orderOut_item.googleId)
+                .then((data)=>{
+                    if(data && data.length > 0){
+                        data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription), "Inventory Order Out is waiting for your approval."))
+                    }
+                })
+                .catch((error)=>{
+                    throw error
+                })
+                
             }
         }
         logger.info("Inventory OrderOut  Approver added ", [orderOut_item]);
