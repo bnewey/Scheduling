@@ -48,16 +48,9 @@ pushSystem.sendPushNotification = function(subscription, data){
   
   
   router.post("/register", async (req, res, next) => {
-    let subscription = req.body
+    let subscription = req.body.subscription;
+    let googleId = req.body.googleId;
     console.log(subscription)
-    // {
-    //   endpoint: 'https://fcm.googleapis.com/fcm/send/dNdCVWnE0lw:APA91bHPOnOs7DS4BLo-39YDjMi_QvdXuXX5bUGuP2eNtxgi4T8yGdVAPlZHkzEZwaxOOltzLt1cZDbMAkOhs2y5r1oRLqII5hLUlvMd2Jm-BVW8qdZcHxluJ__6XtRwQZYHAO-K6DdM',
-    //   expirationTime: null,
-    //   keys: {
-    //     p256dh: 'BOkT-vOeQnBIb5DPWa2ZgD-EFzTXQTI8J8slqD910gg2as-70Kama4YocOdyuMOfbIT2RF9U2oyiJuU8o5ltARI',
-    //     auth: 'Hmhe8ra6WbXTl-DFU2dVeA'
-    //   }
-    // }
 
     //send subscription info to db
     const sql = ' INSERT INTO push_subscriptions ( googleId, subscription) VALUES (?, ?) ';

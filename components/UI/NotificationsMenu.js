@@ -27,24 +27,20 @@ const NotificationsMenu = ({user}) => {
   
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
   const classes = useStyles();
   const [notifications, setNotifications] = useState(null);
   const [notificationsRefetch, setNotificationsRefetch] = useState(false);
 
   useEffect(()=>{
-    if(open){
-      Subscription.subscribePush();
-      setSubscribed(true);
+    console.log("unsub")
+      Subscription.subscribePush(user.googleId);
+   
+  },[])
 
-    return(()=>{
-      if(subscribed){
-        Subscription?.unsubscribePush();
-        setSubscribed(false)
-      }
-    })
-    }
-  },[open])
+  const handleUnsubscribe = ()=>{
+
+      Subscription.unsubscribePush();
+  }
 
   useEffect(()=>{
     if(notifications == null || notificationsRefetch == true){
@@ -180,7 +176,9 @@ const NotificationsMenu = ({user}) => {
                })}
             </div>
           </div>
+          <div className={classes.unsubscribeButton} onClick={event=> handleUnsubscribe()}><span>Unsubscribe</span></div>
         </Menu>
+        
       </div>
     );
 }
@@ -266,5 +264,13 @@ const useStyles = makeStyles(theme => ({
     color: '#777',
     letterSpacing: '.01em',
     cursor: 'default'
+  },
+  unsubscribeButton:{
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    color: '#666',
+    '&:hover':{
+      color: '#222',
+    }
   }
 }))

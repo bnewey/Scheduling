@@ -1,7 +1,7 @@
 import axios from "axios"
 const vapidPublicKey = "BKTbHPoxBADK46purpWUaDhWXIuoofRGTgxcgqVPC2XNfok1N6hCr99c0G7dwvh-Bz18ze0Fa7w_ayvQaVzDR6c";
 
-function subscribePush() {
+function subscribePush(googleId) {
     console.log("Navigator", navigator);
     if(!navigator?.serviceWorker){
         return;
@@ -13,13 +13,23 @@ function subscribePush() {
       return
     }
     
-    registration.pushManager
-      .subscribe({
-        userVisibleOnly: true, //Always display notifications
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+    registration.pushManager.getSubscription()
+      .then((subscription)=>{
+          if(!subscription){
+            console.log("Subscribing");
+            registration.pushManager.subscribe({
+              userVisibleOnly: true, //Always display notifications
+              applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+            })
+            .then(subscription => axios.post("/scheduling/webPush/register", {subscription, googleId}))
+            .catch(err => console.error("Push subscription error: ", err))
+          }else{
+            console.log("Subscription exists", subscription)
+          }
+
       })
-      .then(subscription => axios.post("/scheduling/webPush/register", subscription))
-      .catch(err => console.error("Push subscription error: ", err))
+    
+      
   })
 }
 
