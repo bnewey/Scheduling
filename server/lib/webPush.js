@@ -94,7 +94,7 @@ pushSystem.sendPushNotification = function(subscription, data){
         
             var parsed = JSON.parse(JSON.stringify(object));
             if(parsed){
-                resolve(parsed[0]);
+                resolve(parsed);
                 return;
             }else{
                 reject({error: "Error"});
