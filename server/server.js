@@ -58,7 +58,7 @@ const {emailRouter} = require('./lib/email');
 
 
 global.SERVER_APP_ROOT = __dirname;
-global.ROOT_URL = process.env.NODE_ENV == 'production' ? "http://icontrol.raineyelectronics.com" : "http://scheduling.com:8000";
+global.ROOT_URL = process.env.NODE_ENV == 'production' ? "https://icontrol.raineyelectronics.com" : `https://icontrol.raineyelectronics.com:${process.env.PORT}`;
 nextApp
   .prepare()
   .then(() => {

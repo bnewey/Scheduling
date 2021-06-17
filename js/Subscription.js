@@ -28,8 +28,6 @@ function subscribePush(googleId) {
           }
 
       })
-    
-      
   })
 }
 
