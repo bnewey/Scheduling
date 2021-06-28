@@ -180,13 +180,13 @@ const useStyles = makeStyles(theme => ({
     },
     title:{
         '&& .MuiTypography-root':{
-            fontSize: '18px',
+            fontSize: '15px',
             color: '#fff',
         },
-        
+        padding: '5px 13px',
         backgroundColor: '#16233b',
-
-    },
+  
+      },
     formGrid:{
         display: 'flex',
         flexDirection: 'column',

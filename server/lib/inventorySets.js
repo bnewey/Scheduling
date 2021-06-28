@@ -265,6 +265,38 @@ router.post('/getSetItems', async (req,res) => {
 });
 
 
+router.post('/getSetItemsWithManf', async (req,res) => {
+    var rainey_id ;
+    if(req.body){
+        rainey_id = req.body.rainey_id;
+    }
+
+    const sql = ' SELECT si.*, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as part_date_updated, date_format(si.date_entered, \'%Y-%m-%d %H:%i:%S\') as si_date_entered, ' +
+                ' p.description, p.inv_qty, p.cost_each, p.storage_location, p.notes, p.part_type, p.reel_width, ' +
+                ' pm_all.id AS mf_id, pm_all.manufacturer,  pm_all.mf_part_number, pm_all.url, pm_all.notes AS man_notes, pm_all.default_man, pm.id AS default_man_id, ' +
+                ' pmm.name AS man_name ' +
+                ' FROM inv__sets_items si ' +
+                ' LEFT JOIN inv__parts p ON p.rainey_id = si.rainey_id ' +
+                ' LEFT JOIN inv__parts_manufacturing pm_all ON pm_all.rainey_id = si.rainey_id ' +
+                ' LEFT JOIN inv__parts_manufacturing pm ON pm.rainey_id = si.rainey_id AND pm.id = ' +
+                   '(SELECT pm2.id FROM inv__parts_manufacturing pm2 WHERE IF(si.part_mf_id IS NULL, pm2.default_man = 1, pm.id = si.part_mf_id) LIMIT 1)  ' +
+                ' LEFT JOIN inv__manufacturers pmm ON pmm.id = pm_all.manufacturer ' +
+                ' WHERE si.set_rainey_id = ? ' + 
+                ' ORDER BY date_entered DESC ' ;
+
+
+    try{
+        const results = await database.query(sql, [rainey_id]);
+        logger.info("Got Set Man Items from set id:"+rainey_id);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("getSetManItems w/ Set id: " + rainey_id + " , " + error);
+        res.sendStatus(400);
+    }
+});
+
+
 router.post('/updateSetItem', async (req,res) => {
 
     var item ;

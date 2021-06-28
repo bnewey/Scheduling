@@ -199,6 +199,26 @@ async function updateOrderOutItem(item){
 
 }
 
+async function updateMultipleOrderOutItems(item){
+    const route = '/scheduling/inventoryOrdersOut/updateMultipleOrderOutItems';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({item})
+            });
+            return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+
+}
+
+
 async function deleteOrderOutItem(id){
     const route = '/scheduling/inventoryOrdersOut/deleteOrderOutItem';
     try{
@@ -232,6 +252,26 @@ async function addNewOrderOutItem(orderOut_item){
         var list = await data.json();
         return(list);
     }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function addNewMultpleOrderOutItem(item){
+    const route = '/scheduling/inventoryOrdersOut/addNewMultpleOrderOutItem';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({item})
+            });
+            return response.ok;
+    }catch(error){
+        console.log(error);
         throw error;
     }
 
@@ -326,8 +366,10 @@ module.exports = {
     deleteOrderOut,
     getOrderOutItems,
     updateOrderOutItem,
+    updateMultipleOrderOutItems,
     deleteOrderOutItem,
     addNewOrderOutItem,
+    addNewMultpleOrderOutItem,
     getOrderOutApprovers,
     updateOrderOutApprover,
     deleteOrderOutApprover,

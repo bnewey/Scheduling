@@ -182,6 +182,28 @@ async function getSetItems(rainey_id){
 
 }
 
+async function getSetItemsWithManf(rainey_id){
+    if(!rainey_id){
+        throw new Error("No/bad id for getSetItemsWithManf");
+    }
+    const route = '/scheduling/inventorySets/getSetItemsWithManf';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({rainey_id: rainey_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 
 async function updateSetItem(item){
     const route = '/scheduling/inventorySets/updateSetItem';
@@ -250,6 +272,7 @@ module.exports = {
     updateSetInv,
     deleteSet,
     getSetItems,
+    getSetItemsWithManf,
     updateSetItem,
     deleteSetItem,
     addNewSetItem,

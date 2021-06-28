@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles, CircularProgress, Grid, IconButton,Accordion, AccordionSummary, AccordionDetails,
-  Select, MenuItem,} from '@material-ui/core';
+  Select, MenuItem, TableFooter,} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -26,7 +26,7 @@ import AddEditOrdersOutItemDialog from '../../../components/AddEditOrdersOutItem
 //import AddEditWOIModal from '../../../../AddEditWOI/AddEditWOIModal';
 
 const OrderOutItemization = function(props) {
-  const {user} = props;
+  const {user, type = "full"} = props;
 
   const { activeOrderOut, setActiveOrderOut, resetWOIForm, setResetWOIForm,editOrderOutModalOpen,
     setEditOrderOutModalOpen, currentView,  ordersOut, setOrdersOut, setOrdersOutRefetch, views,editOrderOutModalMode,setEditOrderOutModalMode, 
@@ -34,7 +34,7 @@ const OrderOutItemization = function(props) {
 
   const {editOOIDialogMode, setEditOOIDialogMode, editOOIModalOpen, setEditOOIModalOpen, activeOOItem, setActiveOOItem} = useContext(DetailContext)
 
-  const classes = useStyles();
+  const classes = useStyles(type);
 
   const [orderOutItems, setOrderOutItems] = React.useState(null);
   
@@ -85,12 +85,12 @@ const OrderOutItemization = function(props) {
   }
 
   
-  const columns = [
+  const columns =  type == 'full' ? [
     { id: 'id', label: 'ID', minWidth: 20, align: 'center',
       format: (value, row)=>  <span onClick={()=>handleShowOOIView(value)} className={classes.clickableWOnumber}>{value}</span>  },
     { id: 'rainey_id', label: 'Rainey ID', minWidth: 20, align: 'center',
       format: (value, row)=>  <div className={classes.urlSpan} onClick={event => handleGoToPart(event,value)}>{value}</div>  },
-    { id: 'description', label: 'Description', type: 'text', minWidth: 250, align: 'left',
+    { id: 'description', label: 'Description', type: 'text', minWidth: 150, align: 'left',
     format: (value) => <div className={classes.descSpan}>{value}</div>,  }, 
     { id: 'qty_in_order', label: "Qty In Order", type: 'number', minWidth:40, align: 'center'},
     { id: 'inv_qty', label: 'In Stock', type: 'number', minWidth: 40, align: 'center',},
@@ -101,12 +101,28 @@ const OrderOutItemization = function(props) {
       format: (value, rowData)=> `$ ${value?.toFixed(6)}` },
     { id: 'actual_cost_each', label: 'Cost Each', type: 'number', minWidth: 100, align: 'right',
       format: (value,rowData)=> `$ ${value?.toFixed(6)}` },
+      { id: 'total_cost', label: 'Cost', type: 'number', minWidth: 100, align: 'right',
+        format: (value,rowData)=> `$ ${(rowData?.actual_cost_each * rowData?.qty_in_order)?.toFixed(3)}` },
     { id: 'type', label: 'Type', minWidth: 150,type: 'text', align: 'center', },
     { id: 'notes', label: 'Notes', minWidth: 200,type: 'text', align: 'left',
     format: (value) => <div className={classes.descSpan}>{value}</div>,  }, 
-    { id: 'reel_minWidth', label: 'Reel Width', type: 'text',minWidth: 50, align: 'center' },
-    { id: 'obsolete', label: 'Obsolete',type: 'number', minWidth: 40, align: 'center' },
-  ];
+    { id: 'reel_minWidth', label: 'Reel Width', type: 'text',minWidth: 10, align: 'center' },
+    { id: 'obsolete', label: 'Obsolete',type: 'number', minWidth: 10, align: 'center' },
+  ] : 
+   [
+    { id: 'id', label: 'ID', minWidth: 20, align: 'center',
+    format: (value, row)=>  <span onClick={()=>handleShowOOIView(value)} className={classes.clickableWOnumber}>{value}</span>  },
+    { id: 'rainey_id', label: 'Rainey ID', minWidth: 20, align: 'center',
+      format: (value, row)=>  <div className={classes.urlSpan} onClick={event => handleGoToPart(event,value)}>{value}</div>  },
+    { id: 'description', label: 'Description', type: 'text', minWidth: 250, align: 'left',
+    format: (value) => <div className={classes.descSpan}>{value}</div>,  }, 
+    { id: 'qty_in_order', label: "Qty In Order", type: 'number', minWidth:40, align: 'center'},
+    { id: 'man_name', label: 'Manf', minWidth: 80, align: 'center'     },  
+    { id: 'actual_cost_each', label: 'Cost Each', type: 'number', minWidth: 100, align: 'right',
+      format: (value,rowData)=> `$ ${value?.toFixed(6)}` },
+      { id: 'total_cost', label: 'Cost', type: 'number', minWidth: 100, align: 'right',
+      format: (value,rowData)=> `$ ${(rowData?.actual_cost_each * rowData?.qty_in_order)?.toFixed(3)}` },
+   ];
 
   const handleGoToPart = (event, rainey_id)=>{
         //ordersOut detailWOIid in local data
@@ -148,7 +164,7 @@ const OrderOutItemization = function(props) {
         <div className={classes.container}>
 
             <Grid  container direction={'column'}>
-                  <Grid item xs={ editOrderOutModalOpen ? 12 : 12}>
+                  <Grid item xs={ type == "full" ? 12 : 12}>
                     <div className={classes.woiDiv}>
                     { orderOutItems && orderOutItems.length > 0 ?
                     <TableContainer className={ clsx( { [classes.container_small]: editOrderOutModalOpen,
@@ -187,7 +203,27 @@ const OrderOutItemization = function(props) {
                               </StyledTableRow>
                             );
                           })}
+                          
                         </TableBody>
+                        <TableFooter  className={classes.stickyFooter}>
+                          {/* total row */}
+                          <StyledTableRow hover role="checkbox" tabIndex={-1} key={`total_row`} className={classes.stickyFooter} >
+                                {columns.map((column,i) => {
+                                  const value = column.id == 'total_cost' ?  
+                                      orderOutItems.reduce((total, item)=>  (total + item.qty_in_order * item.actual_cost_each), 0)
+                                    : null;
+                                  console.log("value", value)
+                                  return (
+                                    <TableCell className={clsx({[classes.tableCellTotal]:true , [classes.stickyFooter]:true})}
+                                               key={`total_row` + i} align={column.align}
+                                               style={{ minWidth: column.minWidth }}>
+                                      {column.id == 'total_cost'  ? `$ ${value?.toFixed(3)}` :  column.id == 'actual_cost_each' ? 'TOTAL' : ''}
+                                    </TableCell>
+                                  );
+                                })}
+                              </StyledTableRow>
+                            {/* total row */}
+                        </TableFooter>
                       </Table>
                     </TableContainer>
                     : <span className={classes.infoSpan}>No Order Out Items</span>}
@@ -213,14 +249,14 @@ export default OrderOutItemization
 
 
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(({type}) => ({
   root:{
     // border: '1px solid #339933',
     padding: '1%',
-    minHeight: '730px',
+    minHeight: `${type == 'full' ? '730px' : 'none' }`,
   },
   container: {
-    maxHeight: 700,
+    maxHeight: `${type == 'full' ? '700px' : '400px' }`,
   },
   container_small:{
     maxHeight: 300
@@ -318,6 +354,12 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#fff',
     zIndex: '1',
   },
+  stickyFooter:{
+    left: 0,
+    bottom: 0, // <-- KEY
+    zIndex: 2,
+    position: 'sticky'
+  },
   tableCell:{
     borderRight: '1px solid #c7c7c7' ,
     '&:last-child' :{
@@ -328,6 +370,21 @@ const useStyles = makeStyles(theme => ({
     maxWidth: '150px',
     textOverflow: 'ellipsis',
     padding: "2px 6px"
+  },
+  tableCellTotal:{
+    // borderRight: '1px solid #c7c7c7' ,
+    // '&:last-child' :{
+    //   borderRight: 'none' ,
+    // },
+    background: '#ddf9ff',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    maxWidth: '150px',
+    textOverflow: 'ellipsis',
+    padding: "6px 6px",
+    fontWeight:'600',
+    fontSize: '1.5em',
+    color: '#000',
   },
   tableCellHead:{
     

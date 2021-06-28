@@ -63,7 +63,6 @@ nextApp
   .prepare()
   .then(() => {
 
-
     app.use(favicon(__dirname + '/../public/static/favicon.ico'));
     app.use(expressValidator());
     app.use(bodyParser.json({limit: '50mb'}));

@@ -29,6 +29,9 @@ import Entities from  '../../../js/Entities';
 import { ListContext } from '../../../components/WorkOrders/WOContainer';
 import { DetailContext } from '../../../components/WorkOrders/WOContainer';
 import clsx from 'clsx';
+import _ from 'lodash';
+import { AddCircleOutline } from '@material-ui/icons';
+import AddEditManfItemDialog from '../../Inventory/Inv_Parts/components/AddEditManfItemDialog';
 
 const FormBuilder = forwardRef((props, ref) => {
     const { fields, //table of each input field
@@ -56,7 +59,9 @@ const FormBuilder = forwardRef((props, ref) => {
             entityBillingAddresses, setEntityBillingAddresses,
             setEntityShippingContactEditChanged, setEntityBillingContactEditChanged, //state for knowing when to show entity defaults or actual wo value
             dontCloseOnNoChangesSave = false,
-            partTypes
+            partTypes,
+            setPartsManItems, setSetsPartsManItemsRefetch,
+            manufacturers
         } = props;
         console.log("Props", props);
         
@@ -147,6 +152,41 @@ const FormBuilder = forwardRef((props, ref) => {
         if(type === "entity-titles"){
             console.log("Entity-Titles inputChange")
             tmpObject[key] = value;
+        }
+        if(type === "order_set_select"){
+            let subtype = key.split('-')[0];
+            let rainey_id = parseInt(key.split('-')[1]);
+            let index = tmpObject[`set_items`] ?  _.findIndex(tmpObject[`set_items`], (item)=> item.rainey_id === rainey_id ) : null;
+
+            let updateValue;
+            switch (subtype){
+                case "part_mf_id":
+                    updateValue =  value.target.value == 0 ? null : value.target.value
+                    break;
+                case "qty_in_order":
+                case "actual_cost_each":
+                    updateValue =  value.target.value
+                    break;
+                default:
+                    updateValue =  value.target.value
+                    break;
+            }
+            //If item is in array
+            if(index != -1 && index != null && index != undefined){
+
+                tmpObject[`set_items`][index][subtype] =  updateValue;
+                
+            }else{
+                //Item not in array yet or object not defined
+                if(tmpObject[`set_items`] == undefined){
+                    tmpObject[`set_items`]= [];
+                }
+                
+                tmpObject[`set_items`].push({rainey_id, [subtype]: updateValue })
+       
+            }
+            console.log(`${key}`, tmpObject);
+ 
         }
 
         setFormObject(tmpObject);
@@ -347,6 +387,9 @@ const FormBuilder = forwardRef((props, ref) => {
                             //test against regexp for nondecimal or decimal 
                             error = updateItem[field.field] && (!(/^\d+$/.test(updateItem[field.field]) || /^(\d{1,8})?(\.\d{1,6})?$/.test(updateItem[field.field])));
                             break;
+                        case 'order_set_select':
+                            error = updateItem["set_items"]?.length > 0 && !(updateItem["set_items"].filter((item)=> item.selected).every((item)=> { console.log("item", item); return ( item.part_mf_id && item.actual_cost_each && item.rainey_id && item.qty_in_order)} ))
+                            break;
                     }
                     return error;
                 }
@@ -408,16 +451,17 @@ const FormBuilder = forwardRef((props, ref) => {
                 return(
                 <div key={`${field.field}_div_key`} className={clsx(classes.inputDiv,{[classes.formColumnSeperator]: field?.second_column})}
                     style={field?.second_column ? {gridColumn:'2'} : null}>  
-                    <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span>
-                    <GetInputByType key={`${field.field}_key`} field={field} formObject={formObject} errorFields={errorFields} validErrorFields={validErrorFields} handleShouldUpdate={handleShouldUpdate}
-                    handleInputOnChange={handleInputOnChange} classes={classes} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
+                    { field.label  ? <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span> : <></>}
+                    <GetInputByType key={`${field.field}_key`} field={field} formObject={formObject} setFormObject={setFormObject} errorFields={errorFields} validErrorFields={validErrorFields} handleShouldUpdate={handleShouldUpdate}
+                    handleInputOnChange={handleInputOnChange} classes={classes} mode={mode} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToContactOptionsWOI={shipToContactOptionsWOI} shipToAddressOptionsWOI={shipToAddressOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
-                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} partTypes={partTypes} defaultAddresses={defaultAddresses}
+                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} partTypes={partTypes} setPartsManItems={setPartsManItems} setSetsPartsManItemsRefetch={setSetsPartsManItemsRefetch}
+                     defaultAddresses={defaultAddresses}
                      entContactTitles={entContactTitles} entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts}
                      entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
                      entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
-                     entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses} id_pretext={id_pretext}/>
+                     entityBillingAddresses={entityBillingAddresses} setEntityBillingAddresses={setEntityBillingAddresses} manufacturers={manufacturers} id_pretext={id_pretext}/>
                     {field.addOn ? <div style={{flexBasis: '20%'}}>{field.addOn()}</div> : <></>}
                 </div>)
             })}</div></>
@@ -431,10 +475,11 @@ export default FormBuilder;
 
 const GetInputByType = function(props){
 
-    const {field,dataGetterFunc , formObject, errorFields, validErrorFields, handleShouldUpdate, handleInputOnChange, classes, raineyUsers, vendorTypes, id_pretext,
-        shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, defaultAddresses,
+    const {field,dataGetterFunc , formObject,setFormObject, errorFields, validErrorFields, handleShouldUpdate, handleInputOnChange, classes, mode, raineyUsers, vendorTypes, id_pretext,
+        shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, setPartsManItems, setSetsPartsManItemsRefetch,
+         defaultAddresses,
         entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
-        entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses} = props;
+        entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses, manufacturers} = props;
 
     if(!field || field.type == null){
         console.error("Bad field");
@@ -924,6 +969,191 @@ const GetInputByType = function(props){
                     </div>)
                 }}
                 /> 
+            )
+            break;
+        case 'order_set_select':
+
+            const [openAddManfItem, setOpenAddManfItem] = useState(false);
+            const [manfItemId, setManfItemId] = useState(null);
+            const [activePart, setActivePart] = useState({});
+            const [addEditManfItemMode, setAddEditManfItemMode] =useState("add");
+            const [selectedParts, setSelectedParts] = useState([]);
+
+            const handleChangeForSet = (value, shouldUpdate, type, field, part, manfItemToEdit)=>{
+                
+                if(value.target.value === '-1'){
+                    //add was chosen
+                    setActivePart(part)
+                    setAddEditManfItemMode("add")
+                    setOpenAddManfItem(true);
+                    return;
+                }
+                if(value.target.value === '-2'){
+                    console.log("manfItemToEdit",manfItemToEdit);
+                    //edit was chosen
+                    setActivePart(part)
+                    setManfItemId(manfItemToEdit)
+                    setAddEditManfItemMode("edit")
+                    setOpenAddManfItem(true);
+                    return;
+                }
+                handleInputOnChange(value, shouldUpdate, type, field);
+                
+            }
+
+            useEffect(()=>{
+                let selectedItems =  _.uniqBy(setPartsManItems, 'rainey_id').map((part)=>{
+                    return {rainey_id: part.rainey_id, selected: true}
+                }) 
+
+                if(formObject && !formObject["set_items"] && selectedItems?.length > 0 && mode == "add") {
+                    setFormObject({...formObject, set_items: selectedItems})
+                }
+
+            },[setPartsManItems])
+
+            const handleSelectAll = (value) => {
+                console.log("value", value)
+                if(formObject &&  formObject["set_items"]?.length > 0) {
+                    setFormObject({...formObject, set_items: formObject["set_items"].map((item)=> ({...item, selected: value}))})
+                }
+            }
+            
+            const handleSelectPart = (value, row)=>{
+                console.log("row",row)
+                setFormObject({...formObject, set_items: formObject["set_items"] ? formObject["set_items"].map((item)=> {
+                    if(item.rainey_id == row.rainey_id){
+                        return ({...item, selected: value});
+                    }
+                    return item;
+                } ) : {rainey_id: row.rainey_id, selected: value} });
+            }
+            
+            return(<>
+            <AddEditManfItemDialog activePart={activePart} manfItemId={manfItemId} setManfItemId={setManfItemId}
+                            addNewManDialogOpen={openAddManfItem} setAddNewManDialogOpen={setOpenAddManfItem} 
+                            editDialogMode={addEditManfItemMode} setEditDialogMode={setAddEditManfItemMode} refreshFunction={()=>setSetsPartsManItemsRefetch(true)}/>
+                {setPartsManItems?.length > 0 ? 
+                
+                <div style={{width: '100%'}}>
+                    {(error || valid_error) && <span className={classes.errorSpan}>Valid Manufacturing Item Required</span> }
+                    <div className={classes.headListItemDiv}> {/*Head Item*/}
+                        <div className={classes.headListCheckDiv}><Checkbox
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="checkedI"
+                            checked={formObject ? formObject["set_items"] ? formObject["set_items"].every((item)=>item.selected)  ? true : false : true : false }
+                            onChange={(event)=> handleSelectAll(event.target.checked ? 1 : 0)}
+                        /></div>
+                        <div className={classes.headListNameDiv}><span>Part Name</span></div>
+                        <div className={classes.headListManfDiv}><span>Manfucturer</span></div>
+                        <div className={classes.headListQtyDiv}><span>Order Qty</span></div>
+                        <div className={classes.headListPriceDiv}><span>Order Price</span></div>
+                    </div>
+                {_.uniqBy(setPartsManItems, 'rainey_id').map((part)=> 
+                {
+                    let manItems = setPartsManItems.filter((item)=> item.rainey_id === part.rainey_id);
+                    const updateRow = formObject ? formObject["set_items"]?.find((item)=> part.rainey_id == item.rainey_id) : {rainey_id: part.rainey_id};
+                    const partSelected = updateRow && updateRow[`selected`] ? true : false;
+                    return (
+                        <>
+                        
+                        
+                        
+                        <div className={clsx({[classes.inputValueSetSelect]:true, [classes.listItemDiv]:true})}>
+                        <div className={classes.headListCheckDiv}><Checkbox
+                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            name="checkedI"
+                            checked={ partSelected }
+                            onChange={(event)=> handleSelectPart(event.target.checked ? 1 : 0, updateRow )}
+                        /></div>
+                        <div className={classes.headListNameDiv}>
+                            <span className={clsx({[classes.setDescSpan]:true, [classes.disabledSpan]: !partSelected})}>{part.description}</span>
+                        </div>
+                        <div className={classes.headListManfDiv}>
+                        <Select
+                            disabled={!partSelected}
+                            //error={error || valid_error}
+                            id={`woi_input_man_select-part_mf_id-${part.rainey_id}`}
+                            value={updateRow && updateRow[`part_mf_id`] ? updateRow[`part_mf_id`] : 0}
+                            className={classes.inputSelect}
+                            onChange={value => handleChangeForSet(value, true, field.type, `part_mf_id-${part.rainey_id}`, part, updateRow ? updateRow[`part_mf_id`] : null ) }
+                            native
+                        >
+                            <option value={0} disabled selected>
+                                {"<Select Manufacturer>"}
+                            </option>
+                            <option value={-1} >
+                                {"*Add New*"}
+                            </option>
+                            {updateRow && updateRow[`part_mf_id`] ? <option value={-2} >
+                                {"*Edit Current*"}
+                            </option> : <></>}
+                             {manItems?.length > 0 && manItems.map((manItem)=>{
+                                 //console.log("manItem", manItem);
+                                return (
+                                    <option value={manItem.mf_id}>
+                                        {manItem.man_name}- PN:{manItem.mf_part_number} - {manItem.man_notes}
+                                    </option>
+                                )
+                            }) }
+                        </Select>
+                        </div>
+                        <div className={clsx({[classes.inputValue]:true, [classes.headListQtyDiv]: true})}>
+                            <TextField id={`woi_input-qty_in_order-${part.rainey_id}`} 
+                                    
+                                    //error={error || valid_error}
+                                    variant="outlined"
+                                    /*multiline={field.multiline}*/
+                                    name={`qty_in_order-${part.rainey_id}`}
+                                    disabled={field.disabled || !partSelected}
+                                    inputProps={{className: classes.inputStyle}} 
+                                    classes={{root: classes.setInputRoot}}
+                                    value={updateRow &&  updateRow[`qty_in_order`] }
+                                    onChange={value => handleInputOnChange(value, true, field.type, `qty_in_order-${part.rainey_id}`)}  />
+                        </div>
+                        <div className={clsx({[classes.inputValue]:true, [classes.headListPriceDiv]: true})}>
+                            <TextField id={`woi_input-actual_cost_each-${part.rainey_id}`} 
+                                    
+                                    //error={error || valid_error}
+                                    variant="outlined"
+                                    /*multiline={field.multiline}*/
+                                    name={`actual_cost_each-${part.rainey_id}`}
+                                    disabled={field.disabled || !partSelected}
+                                    
+                                    inputProps={{className: classes.inputStyle}} 
+                                    classes={{root: classes.setInputRoot}}
+                                    value={updateRow &&  updateRow[`actual_cost_each`] }
+                                    onChange={value => handleInputOnChange(value, true, field.type, `actual_cost_each-${part.rainey_id}`)}  />
+                        </div>
+                        </div></> ) 
+                    } 
+                    ) }
+            </div> : <>No parts added to this set</>}
+            </>)
+            break;
+        case "select-manufacturer":
+            return(<div className={classes.inputValueSelect}>
+                <Select
+                    error={error || valid_error}
+                    id={`woi_input-${field.field}`}
+                    value={formObject && formObject[field.field] ? formObject[field.field] : 0}
+                    inputProps={{classes:  classes.inputSelect}}
+                    onChange={value => handleInputOnChange(value, true, field.type, field.field)}
+                    native
+                >
+                    <option value={0}>
+                        Select
+                    </option>
+                    {manufacturers && manufacturers.map((item)=>{
+                        return (
+                            <option value={item.id}>
+                                {item.name}
+                            </option>
+                        )
+                    })}
+                </Select></div>
             )
             break;
         default: 

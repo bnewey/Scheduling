@@ -306,7 +306,7 @@ const MapSidebar = (props) => {
                 {bouncieAuthNeeded==true ? 
                         <>
                         <div className={classes.authDiv}>
-                        <Link href={`/bouncieAuth`} as={`/bouncieAuth`} onClick={event => handleResetAfterAuth(event)}>
+                        <Link href={`/scheduling/bouncieAuth`} as={`/scheduling/bouncieAuth`} onClick={event => handleResetAfterAuth(event)}>
                             <span>Authenticate Bouncie gain access to vehicle information</span>
                         </Link>
                         </div>

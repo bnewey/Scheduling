@@ -58,6 +58,27 @@ async function superSearchAllParts(tables, query){
 
 }
 
+async function superSearchAllPartsAndSets(tables, query){
+    const route = '/scheduling/inventory/superSearchAllPartsAndSets';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({tables: tables, search_query: query})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+
 async function getPartById(rainey_id){
     if(!rainey_id){
         throw new Error("No/bad id for getPartById");
@@ -226,6 +247,51 @@ async function getPartManItems(rainey_id){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({rainey_id: rainey_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function getPartManItemById(id){
+    if(!id){
+        throw new Error("No/bad id for getPartManItemById");
+    }
+    const route = '/scheduling/inventory/getPartManItemById';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id: id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function getPartManItemsForMultiple(rainey_id){
+    if(!rainey_id){
+        throw new Error("No/bad id for getPartManItemsForMultiple");
+    }
+    const route = '/scheduling/inventory/getPartManItemsForMultiple';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({rainey_ids: rainey_ids})
             });
         var list = await data.json();
         return(list);
@@ -411,6 +477,7 @@ module.exports = {
     getAllParts,
     searchAllParts,
     superSearchAllParts,
+    superSearchAllPartsAndSets,
     getPartById,
     getPartTypes,
     getManufactures,
@@ -420,6 +487,7 @@ module.exports = {
     //updateMultipleParts,
     deletePart,
     getPartManItems,
+    getPartManItemById,
     updatePartManItem,
     deletePartManItem,
     addNewPartManItem,

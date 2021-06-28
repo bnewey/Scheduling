@@ -264,6 +264,42 @@ router.post('/updateOrderOutItem', async (req,res) => {
     }
 });
 
+router.post('/updateMultipleOrderOutItems', async (req,res) => {
+
+    var item ;
+    if(req.body){
+        if(req.body.item != null){
+            item = req.body.item;
+        }  
+    }
+    logger.info('item to update', [item]);
+    const sql = ' UPDATE inv__orders_out_items SET rainey_id=?, order_id=?, qty_in_order=?, part_mf_id=?, actual_cost_each=? ' +
+        ' WHERE id = ? ';
+        
+
+    async.forEachOf(item.set_items, async (set_item, i, callback) => {
+            //will automatically call callback after successful execution
+            try{
+                const results = await database.query(sql, [set_item.rainey_id, item.order_id, set_item.qty_in_order, set_item.part_mf_id, set_item.actual_cost_each,
+                    set_item.id ]);
+                return;
+            }
+            catch(error){     
+                //callback(error);         
+                throw error;                 
+            }
+        }, err=> {
+            if(err){
+                logger.error("Inventory OrderOut (updateMultipleOrderOutItems): " + err);
+                res.sendStatus(400);
+            }else{
+                logger.info("Inventory OrderOut  Item updated " + item.order_id);
+                res.sendStatus(200);
+            }
+        })
+});
+
+
 router.post('/deleteOrderOutItem', async (req,res) => {
     var id;
 
@@ -290,7 +326,6 @@ router.post('/deleteOrderOutItem', async (req,res) => {
     }
 });
 
-
 router.post('/addNewOrderOutItem', async (req,res) => {
 
     var orderOut_item ;
@@ -313,6 +348,41 @@ router.post('/addNewOrderOutItem', async (req,res) => {
         logger.error("Failed to addNewOrderOutItem: " + error);
         res.sendStatus(400);
     }
+});
+
+
+router.post('/addNewMultpleOrderOutItem', async (req,res) => {
+
+    var item ;
+    if(req.body){
+        if(req.body.item != null){
+            item = req.body.item;
+        }  
+    }
+    const sql = ' INSERT INTO inv__orders_out_items (order_id, rainey_id, qty_in_order, ' + 
+                ' date_entered, part_mf_id, actual_cost_each) ' +
+                ' VALUES ( ?, ?, IFNULL(?, DEFAULT(qty_in_order)), IFNULL(?, NOW()), IFNULL(?, DEFAULT(part_mf_id)), IFNULL( ?, DEFAULT(actual_cost_each))) ';
+
+    async.forEachOf(item.set_items, async (set_item, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [ item.order_id, set_item.rainey_id, set_item.qty_in_order,
+             Util.convertISODateTimeToMySqlDateTime(moment()), set_item.part_mf_id, set_item.actual_cost_each  ]);
+            return;
+        }
+        catch(error){     
+            //callback(error);         
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("Inventory OrderOut (addNewMultpleOrderOutItem): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Inventory OrderOut Multiple  Item added ", [item]);
+            res.sendStatus(200);
+        }
+    })
 });
 
 

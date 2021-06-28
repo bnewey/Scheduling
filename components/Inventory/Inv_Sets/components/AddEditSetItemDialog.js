@@ -686,12 +686,12 @@ const useStyles = makeStyles(theme => ({
         }
     },
     title:{
-        '&& .MuiTypography-root':{
-            fontSize: '18px',
-            color: '#fff',
-        },
-        
-        backgroundColor: '#16233b',
+      '&& .MuiTypography-root':{
+          fontSize: '15px',
+          color: '#fff',
+      },
+      padding: '5px 13px',
+      backgroundColor: '#16233b',
 
     },
     formGrid:{

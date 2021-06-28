@@ -13,7 +13,7 @@ const database = require('./db');
 
 router.post('/getAllParts', async (req,res) => {
 
-    const sql = ' SELECT p.*, pt.type, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(p.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
+    const sql = ' SELECT p.*, pt.type, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, \'part\' AS item_type, date_format(p.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
                 ' FROM inv__parts p ' +
                 ' LEFT JOIN inv__parts_types pt ON pt.id = p.part_type ' +
                 ' ORDER BY pt.type ASC ';
@@ -97,6 +97,57 @@ router.post('/superSearchAllParts', async (req,res) => {
     logger.info("SQL", [sql])
     try{
         const results = await database.query(sql, [ search_query]);
+        logger.info("Got Parts by super search", [tables, search_query]);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("superSearchAllParts : " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/superSearchAllPartsAndSets', async (req,res) => {
+
+    var search_query, tables;
+    if(req.body){
+        if(req.body.search_query != null){
+            search_query = "%" + req.body.search_query + "%";
+        }else{
+            search_query = "%";
+        }
+
+        if(req.body.tables != null){
+            tables = req.body.tables;
+        }else{
+            return;
+        }
+        
+    }    
+
+    var sql = ' SELECT p.rainey_id, p.description, p.cost_each, p.notes, p.obsolete, pt.type, \'part\' AS item_type, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(p.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' +
+    ' FROM inv__parts p ' + 
+    ' LEFT JOIN inv__parts_types pt ON pt.id = p.part_type ' +
+        ' WHERE CONCAT(';
+    let part_tables = tables.filter((item)=> item.table == "parts");
+    part_tables.forEach((table,i)=> {
+        
+        sql += `IFNULL(${table.value}, ''), \' \'${i === part_tables.length -1 ? '' : ', '}`
+        
+    })
+    sql+=    ') LIKE ? ' + 
+    ' UNION SELECT s.rainey_id, s.description, \'0.00\' AS cost_each, s.notes, s.obsolete, \' \' AS type, \'set\' AS item_type, date_format(s.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(s.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
+    ' FROM inv__sets s ' +
+        ' WHERE CONCAT(';
+    let set_tables = tables.filter((item)=> item.table == "sets");
+    set_tables.forEach((table,i)=> {
+
+        sql += `IFNULL(${table.value}, ''), \' \'${i === set_tables.length -1 ? '' : ', '}`
+    })
+    sql+=    ') LIKE ? ' ; 
+
+    logger.info("SQL", [sql])
+    try{
+        const results = await database.query(sql, [ search_query,search_query]);
         logger.info("Got Parts by super search", [tables, search_query]);
         res.json(results);
     }
@@ -325,6 +376,31 @@ router.post('/getPartManItems', async (req,res) => {
         res.sendStatus(400);
     }
 });
+
+router.post('/getPartManItemById', async (req,res) => {
+    var id ;
+    if(req.body){
+        id = req.body.id;
+    }
+
+    const sql = ' SELECT pm.*, IFNULL(pm.manufacturer, 0) AS manufacturer, m.name AS manufacture_name, date_format(pm.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, ' + 
+                ' date_format(pm.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
+                ' FROM inv__parts_manufacturing pm ' +
+                ' LEFT JOIN inv__manufacturers m ON m.id = pm.manufacturer ' +
+                ' WHERE pm.id = ? LIMIT 1';
+
+    try{
+        const results = await database.query(sql, [id]);
+        logger.info("Got Part Man Item from manf id:"+id);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("getPartManItemById w/ Part manf id: " + id + " , " + error);
+        res.sendStatus(400);
+    }
+});
+
+
 
 
 router.post('/updatePartManItem', async (req,res) => {

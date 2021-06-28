@@ -277,13 +277,13 @@ const useStyles = makeStyles(theme => ({
     },
     title:{
         '&& .MuiTypography-root':{
-            fontSize: '22px',
+            fontSize: '15px',
             color: '#fff',
         },
-        
+        padding: '5px 13px',
         backgroundColor: '#16233b',
-
-    },
+  
+      },
     content:{
         minWidth: '500px',
     },

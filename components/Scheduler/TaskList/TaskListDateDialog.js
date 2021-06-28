@@ -252,12 +252,13 @@ const useStyles = makeStyles(theme => ({
     },
     title:{
         '&& .MuiTypography-root':{
-            fontSize: '16px',
+            fontSize: '15px',
             color: '#fff',
         },
+        padding: '5px 13px',
         backgroundColor: '#16233b',
-        padding: '7px 15px',
-    },
+  
+      },
     formGrid:{
         alignItems: 'baseline',
         padding: '20px'

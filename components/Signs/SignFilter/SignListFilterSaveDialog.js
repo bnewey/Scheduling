@@ -23,7 +23,6 @@ const TaskListFilterSaveDialog = React.memo(  (props) => {
     const classes = useStyles();
 
     //FUNCTIONS
-
     const handleAddClickOpen = (event) => {
         setAddOpen(true);   
     };
@@ -33,15 +32,14 @@ const TaskListFilterSaveDialog = React.memo(  (props) => {
         setAddOpen(false);
     };
   
-
     const handleAddNew = React.useCallback((event, name) =>{
         if(!name || !user || !filterInOrOut || !filterAndOr){
-            console.error("Bad parameters in handleAddNew filter save")
+            console.error("Bad parameters in handleAddNew filter save");
             return;
         }
+
         Settings.addSavedTaskFilter(name, user.id, filterAndOr == "and" ? 0 : 1, filterInOrOut == "in" ? 0 : 1, filters)
             .then((response) => {
-                
                 //refetch tasklists
                 setTaskUserFilters(null);
                 
@@ -118,13 +116,13 @@ const useStyles = makeStyles(theme => ({
     },
     title:{
         '&& .MuiTypography-root':{
-            fontSize: '22px',
+            fontSize: '15px',
             color: '#fff',
         },
-        
+        padding: '5px 13px',
         backgroundColor: '#16233b',
-
-    },
+  
+      },
     content:{
         minWidth: '500px',
     },

@@ -20,7 +20,8 @@ import { DetailContext } from '../InvOrdersOutContainer';
 
 import clsx from 'clsx';
 import OOApprovers from '../components/OOApprovers';
-//import OrdersOutItemList from '../components/OrdersOutItemList';
+import OrdersOutItemList from '../components/OrdersOutItemList';
+import OrderOutItemization from './DetailSubPanels/Itemization/OrderOutItemization';
 
 
 
@@ -136,12 +137,12 @@ const handleGetStatus = (activeOrderOut) =>{
             <div className={ clsx({[classes.grid_container]: true, [classes.manuListContainer]: true})}>
                   <div className={classes.moreInfoDiv}>OrderOut Item List</div>
                   <div className={classes.detailInfoDiv}>
-                    {/* <OrdersOutItemList ordersOut={activeOrdersOut} resetFunction={()=> setOrdersOutRefetch(true)}/> */}
-                      {orderItems?.length > 0 ? orderItems.map((item)=>{
+                  <OrderOutItemization type="half"/>
+                      {/* {orderItems?.length > 0 ? orderItems.map((item)=>{
                         return (
                           <div>{item.rainey_id}{item.description}</div>
                         );
-                      }) : <span>No Items added yet</span>}
+                      }) : <span>No Items added yet</span>} */}
                     </div>
             </div>
             {/* END OrderOut Items  DETAIL */}

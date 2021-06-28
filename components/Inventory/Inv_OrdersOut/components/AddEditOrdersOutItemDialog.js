@@ -8,6 +8,7 @@ import LinkIcon from '@material-ui/icons/Link'
 
 import InventoryOrdersOut from '../../../../js/InventoryOrdersOut';
 import Inventory from '../../../../js/Inventory';
+import InventorySets from '../../../../js/InventorySets';
 import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
 
@@ -30,8 +31,9 @@ import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
 import { ListContext } from '../../Inv_OrdersOut/InvOrdersOutContainer';
 import clsx from 'clsx';
-import Search from '../../Inv_Parts/Toolbar/Components/Search';
+import PartsAndSetsSearch from './PartsAndSetsSearch';
 import PartManufactureList from '../../components/PartManufactureList';
+import _ from 'lodash';
 
 
 const AddEditOrdersOutItemDialog = (props) => {
@@ -53,6 +55,8 @@ const AddEditOrdersOutItemDialog = (props) => {
     const [shouldUpdate, setShouldUpdate]= React.useState(false);
 
     const [validationErrors , setValidationErrors] = useState([]);
+    const [ setPartsManItems , setSetsPartsManItems] = useState([]);
+    const [ setsPartsManItemsRefetch, setSetsPartsManItemsRefetch] = useState(false);
     
     //const [activeOOItem, setActiveOOItem] = useState(null)
     const saveRef = React.createRef();
@@ -75,6 +79,7 @@ const AddEditOrdersOutItemDialog = (props) => {
     },[activeStep])
 
     useEffect(()=>{      
+      //selects item in list on edit
       if( editOOIModalOpen == true && editOOIDialogMode == "edit" && activeOOItem && partsList && partManItems && selectedPart == null && selectedManItem == null){
  
         let editSP;
@@ -112,7 +117,7 @@ const AddEditOrdersOutItemDialog = (props) => {
         setSelectedManItem(null);
         setPartsList(null);
         setPartManItems([]);
-        setActiveOOItem(null);
+        setActiveOOItem({});
         setShouldUpdate(false);
     };
 
@@ -140,9 +145,9 @@ const AddEditOrdersOutItemDialog = (props) => {
    //Sign Rows
    useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
-    if((selectedPart) ) {
+    console.log("seletedpart", selectedPart)
+    if(selectedPart && selectedPart.item_type === "part" ) {
       
-
       Inventory.getPartManItems(selectedPart.rainey_id)
       .then( data => { 
         var tmpData = [...data];
@@ -164,10 +169,35 @@ const AddEditOrdersOutItemDialog = (props) => {
         cogoToast.error(`Error getting partsList`, {hideAfter: 4});
       })
     }
-  },[selectedPart]);
 
+    if(selectedPart && selectedPart.item_type === "set" ){
+     
+      InventorySets.getSetItemsWithManf(selectedPart.rainey_id)
+      .then((data)=>{
+        // console.log("data",data);
+        // // we need all parts within set and all potential part manf items
+        // let uniqueParts = _.uniqBy(data, 'rainey_id').map((item)=> item.rainey_id);
+        // console.log("unique parts", uniqueParts);
+        let updateData = data.map((item)=> ( {...item, selected: true}))
 
-    
+        setSetsPartsManItems(updateData);
+      })
+      .catch((error)=>{
+        console.error("Failed to get set items",error);
+        cogoToast.error("Internal Server Error");
+      })
+    }
+  },[selectedPart, setsPartsManItemsRefetch]);
+
+    useEffect(()=>{
+
+      if( setsPartsManItemsRefetch && saveRef?.current ){
+          //resets the form when you change something by state
+          saveRef.current.handleResetFormToDefault()
+          setSetsPartsManItemsRefetch(false);
+      }
+    },[setsPartsManItemsRefetch, saveRef])
+  
     const handleGoToPart = (event)=>{
          //set detailWOIid in local data
       window.localStorage.setItem('detailPartId', JSON.stringify(selectedPart?.rainey_id));
@@ -180,58 +210,141 @@ const AddEditOrdersOutItemDialog = (props) => {
 
     }
 
-    const fields = [
+    const partFields = [
         //type: select must be hyphenated ex select-type
-        {field: 'qty_in_order', label: 'Qty in Order', type: 'number', updateBy: 'ref'},
-        {field: 'actual_cost_each', label: 'Cost Each', type: 'number', updateBy: 'ref'},
+        {field: 'qty_in_order', label: 'Qty in Order', type: 'number', updateBy: 'ref', required: true},
+        {field: 'actual_cost_each', label: 'Cost Each', type: 'number', updateBy: 'ref', required: true},
     ];
 
-    const handleSave = (og_orderOut_item, orderOutItem, addOrEdit)=>{
+    const setFields = [
+      {field: 'order_set_select', label: '', type: 'order_set_select', updateBy: 'state'},
+    ]
+
+    const handleSave = (og_orderOut_item, orderOutItem, addOrEdit, add_and_continue)=>{
         return new Promise((resolve, reject)=>{
-            if(!og_orderOut_item){
+            if(!orderOutItem){
                 console.error("Bad item");
                 reject("Bad item");
             }
-            console.log("og item", og_orderOut_item)
+            console.log("orderOutItem item", orderOutItem)
+            console.log("og_orderOut_item item", og_orderOut_item)
     
-            orderOutItem["rainey_id"] = selectedPart.rainey_id;
-            orderOutItem["part_mf_id"] = selectedManItem?.id || null;
+            if(selectedPart.item_type === "part" ){
+                
+                  orderOutItem["rainey_id"] = selectedPart.rainey_id;
+                  orderOutItem["part_mf_id"] = selectedManItem?.id || null;
+                  orderOutItem["item_type"] = selectedPart.item_type;
+                  
+                  //Add Id to this new object
+                  if(addOrEdit == "edit"){
+                      if(!og_orderOut_item){
+                          console.error("Bad og_orderOut_item in edit")
+                          reject("Bad og_orderOut_item");
+                      }
+
+                      orderOutItem["id"] = og_orderOut_item.id;
+
+                      InventoryOrdersOut.updateOrderOutItem( orderOutItem )
+                      .then( (data) => {
+                          //Refetch our data on save
+                          cogoToast.success(`OrderOut Item ${og_orderOut_item.id} has been updated!`, {hideAfter: 4});
+                          setOrderOutItems(null)
+                          handleDialogClose()
+                          resolve(data)
+                      })
+                      .catch( error => {
+                          console.warn(error);
+                          cogoToast.error(`Error updating activeOrderOut item. ` , {hideAfter: 4});
+                          reject(error)
+                      })
+                  }
+                  if(addOrEdit == "add"){
+                      orderOutItem["order_id"] = activeOrderOut.id;
+
+                      InventoryOrdersOut.addNewOrderOutItem( orderOutItem )
+                      .then( (data) => {
+                          //Get id of new workorder and activeOrderOut view to detail
+                          cogoToast.success(`OrderOut item has been added!`, {hideAfter: 4});
+                          //setPartsRefetch(true);
+                          setActiveStep(0);
+                          handleDialogClose()
+                          if(add_and_continue){
+                            console.log('add_and_continue',add_and_continue);
+                              setActiveOOItem({});
+                              setEditOOIModalOpen(true);
+                          }else{
+                            
+                          }
+                          setOrderOutItems(null)
+                          
+                          resolve(data)
+                      })
+                      .catch( error => {
+                          console.warn(error);
+                          cogoToast.error(`Error adding activeOrderOut item. ` , {hideAfter: 4});
+                          reject(error)
+                      })
+                  }
+            }
+            if(selectedPart.item_type === "set"){
+                    
+                    orderOutItem["rainey_id"] = selectedPart.rainey_id;
+                    //orderOutItem["part_mf_id"] = selectedManItem?.id || null;
+                    orderOutItem["item_type"] = selectedPart.item_type;
+                    
+                    //Add Id to this new object
+                    if(addOrEdit == "edit"){
+                        if(!og_orderOut_item){
+                            console.error("Bad og_orderOut_item in edit")
+                            reject("Bad og_orderOut_item");
+                        }
+
+                        orderOutItem["id"] = og_orderOut_item.id;
+
+                        InventoryOrdersOut.updateMultipleOrderOutItems( orderOutItem )
+                        .then( (data) => {
+                            //Refetch our data on save
+                            cogoToast.success(`OrderOut Items ${og_orderOut_item.id} has been updated!`, {hideAfter: 4});
+                            setOrderOutItems(null)
+                            handleDialogClose()
+                            resolve(data)
+                        })
+                        .catch( error => {
+                            console.warn(error);
+                            cogoToast.error(`Error updating activeOrderOut items. ` , {hideAfter: 4});
+                            reject(error)
+                        })
+                    }
+                    if(addOrEdit == "add"){
+                        //Filter out unselected Parts
+                        orderOutItem["set_items"] = orderOutItem["set_items"].filter((item)=> item.selected);
+                        orderOutItem["order_id"] = activeOrderOut.id;
+
+                        InventoryOrdersOut.addNewMultpleOrderOutItem( orderOutItem )
+                        .then( (data) => {
+                            //Get id of new workorder and activeOrderOut view to detail
+                            cogoToast.success(`OrderOut items has been added!`, {hideAfter: 4});
+                            //setPartsRefetch(true);
+                            setActiveStep(0);
+                            handleDialogClose()
+                            if(add_and_continue){
+                                setActiveOOItem({});
+                                setEditOOIModalOpen(true);
+                            }else{
+                              
+                            }
+                            setOrderOutItems(null)
+                            
+                            resolve(data)
+                        })
+                        .catch( error => {
+                            console.warn(error);
+                            cogoToast.error(`Error adding activeOrderOut items. ` , {hideAfter: 4});
+                            reject(error)
+                        })
+                    }
+            }
             
-            //Add Id to this new object
-            if(addOrEdit == "edit"){
-                orderOutItem["id"] = og_orderOut_item.id;
-
-                InventoryOrdersOut.updateOrderOutItem( orderOutItem )
-                .then( (data) => {
-                    //Refetch our data on save
-                    cogoToast.success(`OrderOut Item ${og_orderOut_item.id} has been updated!`, {hideAfter: 4});
-                    setOrderOutItems(null)
-                    handleDialogClose()
-                    resolve(data)
-                })
-                .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error updating activeOrderOut item. ` , {hideAfter: 4});
-                    reject(error)
-                })
-            }
-            if(addOrEdit == "add"){
-                orderOutItem["order_id"] = activeOrderOut.id;
-
-                InventoryOrdersOut.addNewOrderOutItem( orderOutItem )
-                .then( (data) => {
-                    //Get id of new workorder and activeOrderOut view to detail
-                    cogoToast.success(`OrderOut item has been added!`, {hideAfter: 4});
-                    setOrderOutItems(null)
-                    handleDialogClose()
-                    resolve(data)
-                })
-                .catch( error => {
-                    console.warn(error);
-                    cogoToast.error(`Error adding activeOrderOut item. ` , {hideAfter: 4});
-                    reject(error)
-                })
-            }
         })
     }
     
@@ -239,12 +352,12 @@ const AddEditOrdersOutItemDialog = (props) => {
         <React.Fragment>     
             
             <Dialog PaperProps={{className: classes.dialog}} open={editOOIModalOpen } onClose={handleDialogClose}>
-            <DialogTitle className={classes.title}>{`${editOOIDialogMode == "add" ? 'Add' : 'Edit'} Part to OrderOut`}</DialogTitle>
+            <DialogTitle className={classes.title}>{`${editOOIDialogMode == "add" ? 'Add' : 'Edit'} Part/Set to OrderOut`}</DialogTitle>
                 <DialogContent className={classes.content}>
                     
                     {activeStep === 0 && 
                      <div className={classes.formGrid}>
-                        <Search searchOpenPermanent parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
+                        <PartsAndSetsSearch searchOpenPermanent parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
              setPartsListSearchRefetch={setPartsListSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} />
                         <div className={classes.inputDivs}>
                             <VirtualizedPartTable setShouldUpdate={setShouldUpdate} setSelectedManItem={setSelectedManItem} parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
@@ -272,6 +385,7 @@ const AddEditOrdersOutItemDialog = (props) => {
                     }
                     {activeStep === 2 && 
                         <div className={classes.formGrid}>
+                          { selectedPart.item_type === "part" ? <>
                             <div className={classes.orderInfoPartContainer}>
                               <div className={classes.orderInfoPartDiv}  style={{flexBasis: '65%'}}>
                                 <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Part Selected:</span></div>
@@ -316,7 +430,7 @@ const AddEditOrdersOutItemDialog = (props) => {
                                 <Grid item xs={12} className={classes.paperScroll}>
                                     <FormBuilder 
                                         ref={saveRef}
-                                        fields={fields} 
+                                        fields={partFields} 
                                         mode={editOOIDialogMode} 
                                          classes={classes}
                                         formObject={activeOOItem} 
@@ -325,6 +439,26 @@ const AddEditOrdersOutItemDialog = (props) => {
                                         handleSave={handleSave}/>
                                 </Grid>
                             </Grid>
+                            </>
+                            : 
+                            <>{/* if Set */}
+                            <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>OrderOut Info</span></div>
+                            <Grid container >  
+                                <Grid item xs={12} className={classes.paperScroll}>
+                                    <FormBuilder 
+                                        ref={saveRef}
+                                        fields={setFields} 
+                                        mode={editOOIDialogMode} 
+                                         classes={classes}
+                                        formObject={activeOOItem} 
+                                        setFormObject={setActiveOOItem}
+                                        handleClose={handleDialogClose} 
+                                        handleSave={handleSave}
+                                        setPartsManItems={setPartsManItems} setSetsPartsManItemsRefetch={setSetsPartsManItemsRefetch}
+                                        />
+                                </Grid>
+                            </Grid>
+                            </>}
                         </div>
                     }
                     {validationErrors.length > 0 ? <div className={classes.validationDiv}>
@@ -372,7 +506,7 @@ const PickPartList = (props) =>{
         { dataKey: 'rainey_id', label: 'Rainey PN', type: 'number', width: 90, align: 'center' }, 
         { dataKey: 'description', label: 'Description', type: 'text', width: 350, align: 'left' }, 
         { dataKey: 'cost_each', label: 'Cost Each', type: 'number', width: 100, align: 'right',
-          format: (value)=> `$ ${value.toFixed(6)}` },
+          format: (value)=> `$ ${value.toFixed ? value.toFixed(6) : " "}` },
         { dataKey: 'type', label: 'Type', width: 150,type: 'text', align: 'center', },
         { dataKey: 'notes', label: 'Notes', width: 200,type: 'text', align: 'left' }, 
         { dataKey: 'obsolete', label: 'Obsolete',type: 'number', width: 40, align: 'center' },
@@ -608,7 +742,7 @@ const ManItemList = (props) =>{
 const VirtualizedManItemTable = withStyles(styles)(ManItemList);
 
 function getSteps() {
-    return ['Part', 'Manufacturer', 'OrderOut Info'];
+    return ['Part/Set', 'Manufacturer', 'OrderOut Info'];
 }
 
 function getStepContent(step) {
@@ -629,17 +763,23 @@ function HorizontalLinearStepper(props) {
     const {activeStep, setActiveStep, selectedPart,selectedManItem,editOOIDialogMode, saveRef, shouldUpdate, activeOOItem, setActiveOOItem} = props;
     const steps = getSteps();
     
-    const handleNext = () => {
+    const handleNext = (add_and_continue = false) => {
         if(activeStep == 0 &&  !selectedPart){
-            cogoToast.warn("No part selected!");
+            cogoToast.warn("No part/set selected!");
             return;
+        }
+        if(activeStep == 0 && selectedPart?.item_type === "set"){
+          //skip manufacturer
+          setActiveStep(steps.length -1)
+          return;
         }
         if(activeStep === steps.length -1){
           //this should update to true only
           if(shouldUpdate){
             saveRef.current.handleShouldUpdate(shouldUpdate)
             .then((data)=>{
-              saveRef.current.handleSaveParent(activeOOItem)
+              console.log("handleNext add_and_continue", add_and_continue)
+              saveRef.current.handleSaveParent(activeOOItem, null, add_and_continue)
             })
             .catch((error)=>{
               cogoToast.error("Failed to save");
@@ -647,7 +787,7 @@ function HorizontalLinearStepper(props) {
               return;
             }) 
           } else{
-            saveRef.current.handleSaveParent(activeOOItem)
+            saveRef.current.handleSaveParent(activeOOItem, null,add_and_continue)
           }          
         }else{
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -656,6 +796,10 @@ function HorizontalLinearStepper(props) {
     };
   
     const handleBack = () => {
+      if(activeStep === steps.length -1 && selectedPart?.item_type === "set"){
+        setActiveStep(0);
+        return;
+      }
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
   
@@ -698,11 +842,21 @@ function HorizontalLinearStepper(props) {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleNext}
+                  onClick={event => handleNext(false)}
                   className={classes.button}
                 >
-                  {activeStep === steps.length - 1 ? editOOIDialogMode == 'add' ? 'Add': 'Update' : 'Next'}
+                  {activeStep === steps.length - 1 ? editOOIDialogMode == 'add' ? activeOOItem?.rainey_id  ? "Save" : "Add" : 'Update' : 'Next'}
                 </Button>
+                { ! activeOOItem?.rainey_id && activeStep === steps.length - 1 &&
+                  <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={event=> handleNext(true)}
+                  className={classes.button}
+                >
+                  { "Add +" }
+                </Button>
+                }
               </div>
             </div>
           )}
@@ -737,12 +891,12 @@ const useStyles = makeStyles(theme => ({
         }
     },
     title:{
-        '&& .MuiTypography-root':{
-            fontSize: '18px',
-            color: '#fff',
-        },
-        
-        backgroundColor: '#16233b',
+      '&& .MuiTypography-root':{
+          fontSize: '15px',
+          color: '#fff',
+      },
+      padding: '5px 13px',
+      backgroundColor: '#16233b',
 
     },
     formGrid:{
@@ -863,16 +1017,6 @@ const useStyles = makeStyles(theme => ({
     },
     sub_button:{
         color: '#dd0000',
-    },
-    inputRoot:{
-        margin: '10px 5px',
-        
-            padding: '10px 7px',
-            fontSize: '1.5em',
-            height: '1.8em',
-            width: '150px',
-        
-        
     },
     stockDiv:{
         display: 'flex',
@@ -997,6 +1141,12 @@ const useStyles = makeStyles(theme => ({
             padding: '0px'
         },
     },
+    setInputRoot: {
+      width: '100%',
+      '&& .MuiOutlinedInput-multiline': {
+          padding: '0px'
+      },
+    },
     inputLabel:{
         flexBasis: '30%',
         textAlign: 'right',
@@ -1012,6 +1162,15 @@ const useStyles = makeStyles(theme => ({
         flexBasis: '70%',
         textAlign: 'left',
         padding: '5px 7px',
+    },
+    inputValueSetSelect:{
+      flexBasis: '100%',
+      textAlign: 'left',
+      
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: "center",
     },
     inputFieldMatUi: {
         margin: '10px 17px 7px 17px',
@@ -1079,6 +1238,52 @@ const useStyles = makeStyles(theme => ({
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    inputSelect:{
+      width: '100%',
+      whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    maxWidth: '250px',
+    textOverflow: 'ellipsis',
+    },
+    headListItemDiv:{
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      fontWeight: '600',
+      color: '#435483',
+      background: 'linear-gradient(    360deg  , #dcdcdc, #eeeeee)',
+      fontFamily: 'arial',
+      padding:'2px 0px'
+    },
+    listItemDiv:{
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      fontFamily: 'arial',
+    },
+    headListManfDiv:{
+      flexBasis: '38%',
+    },
+    headListNameDiv:{
+      flexBasis: '35%',
+    },
+    headListQtyDiv:{
+      flexBasis: '13%',
+    },
+    headListPriceDiv:{
+      flexBasis: '13%',
+    },
+    setDescSpan:{
+      fontWeight: '600',
+      fontFamily: 'arial',
+      color: '#333',
+    },
+    disabledSpan:{
+      color: '#999',
     }
+
     
   }));

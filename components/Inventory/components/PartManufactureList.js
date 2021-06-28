@@ -60,10 +60,11 @@ import { Add } from '@material-ui/icons';
 //import { DetailContext } from '../InvPartsContainer';
 
 const PartManufactureList = function(props) {
-    const {user, part,detailPartId, resetFunction, manNames, setManNames} = props;
+    const {user,partManItems, setPartManItems, part,detailPartId, resetFunction, manNames, setManNames, setAddNewManDialogOpen, 
+        setEditDialogMode,setManfItemId} = props;
 
     const classes = useStyles();
-    const [partManItems, setPartManItems] = React.useState(null)
+    const [] = React.useState(null)
 
 
     const columns = [
@@ -174,29 +175,12 @@ const PartManufactureList = function(props) {
     },[partManItems, part,detailPartId]);
 
     
-
-
-    const handleUpdatePartManItem = (newData, oldData) => {
-        return new Promise((resolve, reject)=>{
-            Inventory.updatePartManItem(newData)
-            .then((data)=>{
-                cogoToast.success("Updated Part Manf Item");
-                if(resetFunction){
-                    resetFunction();
-                }
-                resolve();
-            })
-            .catch((error)=>{
-                console.error("Failed to update Part Manf Item", error);
-                cogoToast.error("Failed to update Part Manf Item");
-                if(resetFunction){
-                    resetFunction();
-                }
-                reject();
-            })
-        })
-    }   
-
+    const handleEditItem = (row) => {
+        setManfItemId(row.id)
+        setEditDialogMode("edit");
+        setAddNewManDialogOpen(true);
+    }
+    
     const handleDeleteManItem = (row)=>{
         if(!row.id){
           cogoToast.error("Bad row in delete part manufacture item");
@@ -214,7 +198,6 @@ const PartManufactureList = function(props) {
             }
           })
           .catch((error)=>{
-              
             cogoToast.error("Failed to delete part manufacture item")
             console.error("Failed to delete part manufacture item", error);
             if(resetFunction){
@@ -234,27 +217,8 @@ const PartManufactureList = function(props) {
     }
     
     const handleAddNewItem = (event,)=>{
-        if( !part){
-            console.error("Bad rowData or part in handleAddNewItem")
-            return;
-        }
-
-        let addData = { rainey_id: part.rainey_id}
-        Inventory.addNewPartManItem(addData)
-        .then((data)=>{
-            cogoToast.success("Added part manufacture item")
-            if(resetFunction){
-                resetFunction();
-            }
-        })
-        .catch((error)=>{
-            cogoToast.error("Failed to add part manufacture item")
-            console.error("Failed to add part manufacture item", error);
-            if(resetFunction){
-                resetFunction();
-            }
-            
-        })
+        setAddNewManDialogOpen(true);
+        setEditDialogMode('add');
     }
 
     return ( 
@@ -272,9 +236,9 @@ const PartManufactureList = function(props) {
                                 style={{ width: "inherit"}}
                                 data={partManItems}
                                 title={"Part Manufacturing List"}
-                                editable={{
-                                    onRowUpdate: (newData, oldData) => handleUpdatePartManItem(newData, oldData)
-                                }}
+                                // editable={{
+                                //     onRowUpdate: (newData, oldData) => handleUpdatePartManItem(newData, oldData)
+                                // }}
                                 icons={tableIcons}
                                 options={{
                                     filtering: false,
@@ -311,11 +275,17 @@ const PartManufactureList = function(props) {
                                     },
                                 }} 
                                 actions={[
-                                {
-                                    icon: tableIcons.Delete,
-                                    tooltip: 'Delete Packing Slip',
-                                    onClick: (event, rowData) => handleDeleteManItem(rowData)
-                                },
+                                    {
+                                        icon: tableIcons.Edit,
+                                        tooltip: 'Edit Manf Item',
+                                        onClick: (event, rowData) => handleEditItem(rowData)
+                                    },
+                                    {
+                                        icon: tableIcons.Delete,
+                                        tooltip: 'Delete Manf Item',
+                                        onClick: (event, rowData) => handleDeleteManItem(rowData)
+                                    },
+                                
                                 ]}
                                 
                             />
