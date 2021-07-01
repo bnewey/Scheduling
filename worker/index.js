@@ -1,14 +1,6 @@
 'use strict'
 
-self.addEventListener('push', function (event) {
-  const data = JSON.parse(event.data.text())
-  event.waitUntil(
-    registration.showNotification(data.title, {
-      body: data.message,
-      icon: '/static/drilling-icon.png'
-    })
-  )
-})
+
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close()
@@ -27,6 +19,49 @@ self.addEventListener('notificationclick', function (event) {
     })
   )
 })
+
+/**
+ * Send message to client
+ * @param {Object} client The current client to be sent
+ * @param {Object} data The data to be sent to current web application
+ * @return {Promise} The promise with thenable
+ */
+ function messageToClient(client, data) {
+  return new Promise(function (resolve, reject) {
+      const channel = new MessageChannel();
+
+      channel.port1.onmessage = function (event) {
+          if (event.data.error) {
+              reject(event.data.error);
+          } else {
+              resolve(event.data);
+          }
+      };
+
+      client.postMessage(JSON.stringify(data), [channel.port2]);
+  });
+}
+
+self.addEventListener('push', function (event) {
+  if (event && event.data) {
+      self.pushData = event.data.json();
+      if (self.pushData) {
+          self.clients.matchAll({ type: 'window' }).then(function (clientList) {
+              if (clientList.length > 0) {
+                  messageToClient(clientList[0], self.pushData);
+              }
+          });
+      }
+
+      const data = JSON.parse(event.data.text())
+      event.waitUntil(
+        registration.showNotification(data.title, {
+          body: data.message,
+          icon: '/static/drilling-icon.png'
+        })
+      )
+  }
+});
 
   // A common UX pattern for progressive web apps is to show a banner when a service worker has updated and waiting to install.
       // NOTE: MUST set skipWaiting to false in next.config.js pwa object
