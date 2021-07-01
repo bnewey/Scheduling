@@ -322,13 +322,12 @@ router.post('/getNotificationSettings', async (req,res) => {
 
   if(page){
     sql = ' SELECT ns.*, nss.id as setting_id, nss.name, nss.description, nss.page  FROM user_notifications_settings_settings nss ' + 
-          ' LEFT JOIN user_notifications_settings ns ON nss.id = ns.setting ' + 
-          '  WHERE ( ns.googleId = ? OR ns.googleId is NULL ) AND nss.page = ? ';
+          ' LEFT JOIN user_notifications_settings ns ON nss.id = ns.setting AND ns.googleId = ? ' + 
+          '  WHERE nss.page = ? ';
     params = [googleId, page]
   }else{
     sql = ' SELECT ns.*,nss.id as setting_id, nss.name, nss.description, nss.page  FROM user_notifications_settings_settings nss ' + 
-          ' LEFT JOIN user_notifications_settings ns ON nss.id = ns.setting ' + 
-          '  WHERE  ns.googleId = ? OR ns.googleId is NULL   ';
+          ' LEFT JOIN user_notifications_settings ns ON nss.id = ns.setting AND ns.googleId = ? ';
     params = [googleId]
   }
 
