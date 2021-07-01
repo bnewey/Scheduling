@@ -9,6 +9,8 @@ const logger = require('../../logs');
 const Util = require('../../js/Util');
 //Handle Database
 const database = require('./db');
+const notificationSystem = require('./notifications');
+const pushSystem = require('./webPush');
 
 
 router.post('/getAllParts', async (req,res) => {
@@ -124,7 +126,7 @@ router.post('/superSearchAllPartsAndSets', async (req,res) => {
         
     }    
 
-    var sql = ' SELECT p.rainey_id, p.description, p.cost_each, p.notes, p.obsolete, pt.type, \'part\' AS item_type, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(p.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' +
+    var sql = ' SELECT p.rainey_id, p.description, p.cost_each, p.notes, p.min_inv, p.obsolete, pt.type, \'part\' AS item_type, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(p.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' +
     ' FROM inv__parts p ' + 
     ' LEFT JOIN inv__parts_types pt ON pt.id = p.part_type ' +
         ' WHERE CONCAT(';
@@ -220,11 +222,11 @@ router.post('/addNewPart', async (req,res) => {
             part = req.body.part;
         }  
     }
-    const sql = ' INSERT INTO inv__parts (description, inv_qty, cost_each, storage_location, notes, part_type, reel_width, date_updated, obsolete ) ' +
-                ' VALUES (?,IFNULL(?, default(inv_qty)),IFNULL(?,default(cost_each)),?,?,?,?,?,IFNULL(?, default(obsolete))) ';
+    const sql = ' INSERT INTO inv__parts (description, inv_qty, min_inv, cost_each, storage_location, notes, part_type, reel_width, date_updated, obsolete ) ' +
+                ' VALUES (?,IFNULL(?, default(inv_qty)),IFNULL(?, default(min_inv)),IFNULL(?,default(cost_each)),?,?,?,?,?,IFNULL(?, default(obsolete))) ';
 
     try{
-        const results = await database.query(sql, [part.description, part.inv_qty, part.cost_each, part.storage_location, part.notes,
+        const results = await database.query(sql, [part.description, part.inv_qty, part.min_inv , part.cost_each, part.storage_location, part.notes,
             part.part_type, part.reel_width, part.date_updated, part.obsolete ]);
         logger.info("Inventory Part added ", [part]);
         res.json(results);
@@ -244,7 +246,7 @@ router.post('/updatePart', async (req,res) => {
         }  
     }
     logger.info('part to update', [part]);
-    const sql = ' UPDATE inv__parts SET description=?, cost_each=?, storage_location=IFNULL(?, DEFAULT(storage_location)), ' +
+    const sql = ' UPDATE inv__parts SET description=?,min_inv=?,  cost_each=?, storage_location=IFNULL(?, DEFAULT(storage_location)), ' +
         ' notes=?, part_type=?, reel_width=?, ' +
         ' date_updated=?, obsolete=? ' +
         ' WHERE rainey_id = ? ';
@@ -252,7 +254,7 @@ router.post('/updatePart', async (req,res) => {
 
     try{
         logger.info("Date updated", [Util.convertISODateTimeToMySqlDateTime(part.date_updated)])
-        const results = await database.query(sql, [part.description, part.cost_each, part.storage_location, part.notes,
+        const results = await database.query(sql, [part.description,part.min_inv,  part.cost_each, part.storage_location, part.notes,
             part.part_type, part.reel_width, Util.convertISODateTimeToMySqlDateTime(moment()), part.obsolete, part.rainey_id ]);
         logger.info("Inventory Part updated " + part.rainey_id);
         res.json(results);
@@ -276,13 +278,50 @@ router.post('/updatePartInv', async (req,res) => {
         ' WHERE rainey_id = ?;  ' + 
         ' INSERT INTO inv__parts_transactions (rainey_id, type, new_value, old_value) ' +
         ' VALUES (?,?,?,?) ';
-    
 
     try{
-        logger.info("Date updated", [Util.convertISODateTimeToMySqlDateTime(part.date_updated)])
+        
         const results = await database.query(sql, [ part.inv_qty, Util.convertISODateTimeToMySqlDateTime(moment()), part.rainey_id, part.rainey_id,
                 "inv_qty", part.inv_qty, part.old_inv_qty  ]);
         logger.info("Inventory INV_QTY updated " + part.rainey_id);
+
+        //check against min_inv and get notification if going below
+        if(part.inv_qty <= part.min_inv){
+            //send notification to all subscribed to part min inv alerts
+            const subscribed_users_sql = " SELECT ns.*, nss.name FROM user_notifications_settings ns " +
+                        " LEFT JOIN user_notifications_settings_settings nss ON nss.id = ns.setting " + 
+                        " WHERE nss.name = 'Part Minimum Inventory Alert'  "
+            const subscribed_users = await database.query(subscribed_users_sql, [ ]);
+
+            async.forEachOf(subscribed_users, async (user, i, callback) => {
+
+                //will automatically call callback after successful execution
+                const note_results = await notificationSystem.sendNotification(user.googleId, "minInvPart",
+                    `Part (${part.rainey_id}) has reached minimum inventory.`, '/inventory', 'invParts', 'partsDetail', part.rainey_id);
+
+                pushSystem.getUserSubscriptions(user.googleId)
+                .then((data)=>{
+                    if(data && data.length > 0){
+                        data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription),  `Part (${part.rainey_id}) has reached minimum inventory.`))
+                    }
+                    return;
+                })
+                .catch((error)=>{
+                    logger.error("Failure in sending push notifications: " + error);
+                    return;
+                })
+                
+
+            }, err=> {
+                if(err){
+                    logger.error("Failed to send notification(s): " + err);
+                    //throw err;
+                }else{
+                    logger.info("Notification sent " + subscribed_users);
+                }
+            })
+        }
+
         res.json(results);
     }
     catch(error){

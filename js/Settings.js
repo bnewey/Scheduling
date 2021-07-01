@@ -156,6 +156,7 @@ async function addSavedTaskFilter( name, user_id, filterAndOr, filterInOrOut, fi
         throw error;
     }
 }
+ 
 
 async function overwriteSavedTaskFilter( filter_id, name, user_id, filterAndOr, filterInOrOut, filters){
     const route = '/scheduling/settings/overwriteSavedTaskFilter';
@@ -223,6 +224,69 @@ async function removedSavedFilter( filter_id){
     }
 }
 
+async function addNotificationSetting( setting){
+    const route = '/scheduling/settings/addNotificationSetting';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ setting })
+        });
+
+        if(!data.ok){
+            throw new Error("addNotificationSetting returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function updateNotificationSetting( setting){
+    const route = '/scheduling/settings/updateNotificationSetting';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ setting })
+        });
+
+        if(!data.ok){
+            throw new Error("updateNotificationSetting returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function getNotificationSettings( googleId, page){
+    const route = '/scheduling/settings/getNotificationSettings';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({  googleId, page })
+        });
+
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 
 module.exports = {
     getRaineyUsers,
@@ -235,5 +299,8 @@ module.exports = {
     addSavedTaskFilter,
     overwriteSavedTaskFilter,
     updateFilterTaskViewTie,
-    removedSavedFilter
+    removedSavedFilter,
+    addNotificationSetting,
+    updateNotificationSetting,
+    getNotificationSettings,
 };

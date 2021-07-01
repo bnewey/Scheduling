@@ -260,4 +260,89 @@ router.post('/removedSavedFilter', async (req,res) => {
 });
 
 
+router.post('/addNotificationSetting', async (req,res) => {
+  var setting;
+  if(req.body){
+    setting = req.body.setting;
+   
+  }
+  if(!setting){
+    logger.error("Bad params in addNotificationSetting")
+    res.sendStatus(400);
+  }
+
+  const sql = ' INSERT INTO user_notifications_settings ( googleId, setting, push, notify, email ) ' +
+    ' VALUES ( ? , ? , IFNULL(?, DEFAULT(push)) , IFNULL(?, DEFAULT(notify)) , IFNULL(?, DEFAULT(email))) ';
+  try{
+    const results = await database.query(sql, [ setting.googleId, setting.setting, setting.push, setting.notify, setting.email ]);
+    logger.info("Added  user_notifications_settings");
+    res.json(results);
+  }
+
+  catch(error){
+    logger.error("Settings (addNotificationSetting): " + error);
+    res.sendStatus(400);
+  }
+});
+
+router.post('/updateNotificationSetting', async (req,res) => {
+  var setting;
+  if(req.body){
+    setting = req.body.setting;
+   
+  }
+  if(!setting){
+    logger.error("Bad params in updateNotificationSetting")
+    res.sendStatus(400);
+  }
+
+  const sql = ' UPDATE user_notifications_settings SET push=?, notify=? , email=? WHERE id=? ';
+  try{
+    const results = await database.query(sql, [ setting.push, setting.notify, setting.email, setting.id ]);
+    logger.info("Updated  user_notifications_settings");
+    res.json(results);
+  }
+
+  catch(error){
+    logger.error("Settings (updateNotificationSetting): " + error);
+    res.sendStatus(400);
+  }
+});
+
+
+router.post('/getNotificationSettings', async (req,res) => {
+  var googleId, page;
+  if(req.body){
+    googleId = req.body.googleId;
+    page = req.body.page;
+   
+  }
+
+  var sql, params;
+
+  if(page){
+    sql = ' SELECT ns.*, nss.id as setting_id, nss.name, nss.description, nss.page  FROM user_notifications_settings_settings nss ' + 
+          ' LEFT JOIN user_notifications_settings ns ON nss.id = ns.setting ' + 
+          '  WHERE ( ns.googleId = ? OR ns.googleId is NULL ) AND nss.page = ? ';
+    params = [googleId, page]
+  }else{
+    sql = ' SELECT ns.*,nss.id as setting_id, nss.name, nss.description, nss.page  FROM user_notifications_settings_settings nss ' + 
+          ' LEFT JOIN user_notifications_settings ns ON nss.id = ns.setting ' + 
+          '  WHERE  ns.googleId = ? OR ns.googleId is NULL   ';
+    params = [googleId]
+  }
+
+
+  try{
+    const results = await database.query(sql, params);
+    logger.info("Got  getNotificationSettings");
+    res.json(results);
+  }
+
+  catch(error){
+    logger.error("Settings (getNotificationSettings): " + error);
+    res.sendStatus(400);
+  }
+});
+
 module.exports = router;

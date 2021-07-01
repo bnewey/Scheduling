@@ -34,7 +34,7 @@ const NotificationsMenu = ({user}) => {
   useEffect(()=>{
     console.log("unsub")
       Subscription.subscribePush(user.googleId);
-   
+      Subscription.listenServiceWorkerMessages();
   },[])
 
   const handleUnsubscribe = ()=>{

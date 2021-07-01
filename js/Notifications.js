@@ -78,6 +78,26 @@ async function updateNotificationsViewed(items){
 
 // }
 
+// async function addNewNotificationSetting(orderOut_item){
+//     const route = '/scheduling/notifications/addNewNotificationSetting';
+//     try{
+//         var data = await fetch(route,
+//             {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json'
+//                 },
+//                 body: JSON.stringify({orderOut_item})
+//             });
+//         var list = await data.json();
+//         return(list);
+//     }catch(error){
+//         throw error;
+//     }
+    
+// }
+
+
 module.exports = {
 
     getNotificationsForUser,

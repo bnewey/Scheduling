@@ -18,6 +18,7 @@ import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 
 import {createSorter} from '../../../../js/Sort';
 import Inventory from '../../../../js/Inventory' 
+import Settings from '../../../../js/Settings' 
 import _, {debounce} from 'lodash';
 
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -34,6 +35,7 @@ import { AdminContext } from '../InvAdminContainer';
 import { InventoryContext } from '../../InventoryContainer';
 import AddEditManfDialog from './components/AddEditManfDialog';
 import AddEditPartTypeDialog from './components/AddEditPartTypeDialog';
+import UpdateNotificationSettingDialog from "./components/UpdateNotificationSettingDialog";
 
 const styles = (theme) => ({
   root: {
@@ -58,7 +60,6 @@ const styles = (theme) => ({
 });
 
 export default function ReactVirtualizedTable() {
-
   const targetRef = React.useRef();
   const [dimensions, setDimensions] = useState({ width:600, height: 500 });
   //Gets size of our list container so that we can size our virtual list appropriately
@@ -78,24 +79,47 @@ export default function ReactVirtualizedTable() {
 }
 
 const AdminPage = function(props) {
-  const {user, dimensions, rowHeight = 22, headerHeight = 30,} = props;
+  const { dimensions, rowHeight = 22, headerHeight = 30,} = props;
 
   const {  currentView, setCurrentView, views, manItems, manItemsRefetch, setManItemsRefetch, partTypes,
      partTypesRefetch, setPartTypesRefetch } = useContext(AdminContext);
 
-  //const {} = useContext(InventoryContext);
+  const {user} = useContext(InventoryContext);
   const classes = useStyles();
 
 
   const [tableRows, setTableRows] = useState(null);
   const [columns, setColumns] = useState(null);
-  const tabs = [{field:"manufacturers", label: "Manufacturers"}, {field:"partTypes", label: "Part Types"} ]
+  const tabs = [{field:"manufacturers", label: "Manufacturers"}, {field:"partTypes", label: "Part Types"}, {field:"settings", label: "Settings"} ]
   const [adminTab, setAdminTab] = useState("manufacturers");
 
   const [manfToEdit, setManfToEdit] = useState(null);
   const [addNewManDialog,setAddNewManDialog] = useState(false);
   const [partTypeToEdit, setPartTypeToEdit] = useState(null);
   const [addNewPartTypeDialog,setAddNewPartTypeDialog ] = useState(false);
+  const [settingToEdit, setSettingToEdit] = useState(null);
+  const [updateSettingDialogOpen,setUpdateSettingDialogOpen ] = useState(false);
+
+  const [settings, setSettings] = useState(null);
+  const [settingsRefetch, setSettingsRefetch] = useState(false);
+
+  useEffect(()=>{
+    if(adminTab == "settings" && (settings == null || settingsRefetch == true)){
+      if(settingsRefetch){
+        setSettingsRefetch(false);
+      }
+      
+      Settings.getNotificationSettings(user.googleId, 'inventory')
+      .then((data)=>{
+        setSettings(data);
+      })
+      .catch((error)=>{
+        console.error("Failed to get settings", error);
+        cogoToast.error("Internal Server Error");
+      })
+    }
+
+  },[settings, settingsRefetch, adminTab])
   
   useEffect(()=>{
     if(adminTab){
@@ -108,10 +132,13 @@ const AdminPage = function(props) {
           setTableRows(partTypes)
           setColumns(part_columns);
           break;
+        case 'settings':
+          setTableRows(settings);
+          setColumns(settings_columns);
       }
       
     }
-  },[adminTab,manItems,partTypes ])
+  },[adminTab,manItems,partTypes, settings ])
 
  
   
@@ -135,6 +162,15 @@ const AdminPage = function(props) {
      format: (value, row)=> <div>
        <IconButton onClick={event=> handleOpenAddNewDialog(event, row)}><EditIcon/></IconButton>
        <IconButton onClick={event=> handleDeleteItem(event, row)}><DeleteIcon/></IconButton></div> }
+    
+  ];
+
+  const settings_columns = [
+    { dataKey: 'name', label: 'Setting', type: 'text', width: 250, align: 'left' }, 
+    { dataKey: 'description', label: 'Description', type: 'text', width: 250, align: 'left' }, 
+    { dataKey: 'actions', label: 'Actions', type: 'text', width: 80, align: 'left',
+     format: (value, row)=> <div>
+       <IconButton onClick={event=> handleOpenAddNewDialog(event, row)}><EditIcon/></IconButton></div> }
     
   ];
 
@@ -190,6 +226,9 @@ const AdminPage = function(props) {
         setAddNewPartTypeDialog(true);
         setPartTypeToEdit(row)
         break;
+      case "settings":
+        setUpdateSettingDialogOpen(true);
+        setSettingToEdit(row);
     }
     
   }
@@ -252,6 +291,9 @@ const AdminPage = function(props) {
           }
         })
         break;
+      case 'settings':
+
+        break;
     }
     
   }
@@ -273,7 +315,7 @@ const AdminPage = function(props) {
           <div className={classes.tableLabelDiv}>
             <span className={classes.tableLabel}>{tabs.find((tab)=> tab.field === adminTab)?.label}</span>
             <div>
-                <div className={classes.addButton} onClick={event=> handleOpenAddNewDialog(event)}><span>Add New</span></div>
+                { adminTab != "settings" && <div className={classes.addButton} onClick={event=> handleOpenAddNewDialog(event)}><span>Add New</span></div>}
             </div>
           </div>
         <Table stickyHeader
@@ -310,6 +352,7 @@ const AdminPage = function(props) {
       </TableContainer>
       <AddEditManfDialog manf={manfToEdit} refreshFunction={()=> setManItemsRefetch(true)} addNewManDialog={addNewManDialog} setAddNewManDialog={setAddNewManDialog}/>
       <AddEditPartTypeDialog part_type={partTypeToEdit} refreshFunction={()=> setPartTypesRefetch(true)} addNewPartTypeDialog={addNewPartTypeDialog} setAddNewPartTypeDialog={setAddNewPartTypeDialog}/>
+      <UpdateNotificationSettingDialog settingToEdit={settingToEdit} setSettingToEdit={setSettingToEdit} refreshFunction={()=> setSettingsRefetch(true)} updateSettingDialogOpen={updateSettingDialogOpen}  setUpdateSettingDialogOpen={setUpdateSettingDialogOpen}/>
     </div>
   );
 }

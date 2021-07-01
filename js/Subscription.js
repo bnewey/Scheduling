@@ -31,6 +31,18 @@ function subscribePush(googleId) {
   })
 }
 
+function listenServiceWorkerMessages() {
+  const serviceWorker = navigator.serviceWorker;
+  let handler = (event) => {
+      if (event.data) {
+          // The data payload got from nodejs
+          console.log("event.data", event.data)
+      }
+  };
+
+  serviceWorker.addEventListener('message', handler);
+}
+
 function unsubscribePush() {
     
     if(!navigator?.serviceWorker){
@@ -69,6 +81,8 @@ function urlBase64ToUint8Array(base64String) {
 
   module.exports = {
     subscribePush,
-    unsubscribePush
+    listenServiceWorkerMessages,
+    unsubscribePush,
+    
 
 };

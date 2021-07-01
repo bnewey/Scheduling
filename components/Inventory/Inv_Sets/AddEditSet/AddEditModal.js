@@ -49,6 +49,7 @@ const AddEditModal = function(props) {
         //type: select must be hyphenated ex select-type
         { field: 'description', label: 'Description', type: 'text',updateBy: 'ref', required:true }, 
         { field: 'inv_qty', label: 'In Stock',  type: 'number',updateBy: 'ref', hidden: (data)=> data?.rainey_id  },
+        { field: 'min_inv', label: 'Minimum Inv',  type: 'number',updateBy: 'ref' },
         { field: 'num_in_set', label: '# in Set', type: 'number',updateBy: 'ref',  },
         { field: 'notes', label: 'Notes',  type: 'text',updateBy: 'ref',}, 
         { field: 'obsolete', label: 'Obsolete',   type: 'check',updateBy: 'ref', },

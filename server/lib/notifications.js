@@ -86,4 +86,6 @@ router.post('/updateNotificationsViewed', async (req,res) => {
 });
 
 
+
+
 module.exports = notificationSystem;

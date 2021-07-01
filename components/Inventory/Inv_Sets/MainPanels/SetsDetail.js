@@ -20,6 +20,7 @@ import { DetailContext } from '../InvSetsContainer';
 import EditSetInvDialog from '../components/EditSetInvDialog';
 import clsx from 'clsx';
 import SetItemList from '../components/SetItemList';
+import { Warning } from '@material-ui/icons';
 
 
 
@@ -37,6 +38,8 @@ const SetsDetail = function(props) {
                         { value: 'description', displayName: 'Description' }, 
                         { value: 'inv_qty', displayName: 'In Stock', 
                           format: (value,row ) => <EditSetInvDialog set={row}/> },
+                          { value: 'min_inv', displayName: 'Minimum in Inv',
+                          format: (value,row ) => <div className={classes.minInvDiv}>{row.min_inv >= row.inv_qty ? <Warning className={classes.warnIcon}/> : <></>}{value}</div>   },
                         { value: 'num_in_set', displayName: '# in Set'   },
                     ]
 
@@ -314,6 +317,18 @@ const useStyles = makeStyles(theme => ({
   },
   infoSpan:{
     fontSize: '20px'
-  }
+  },
   //End Table Stuff
+  warnIcon:{
+    height: '1em',
+    width: '1em',
+    color: '#ff0d0d',
+    margin: '0px 5px',
+  },
+  minInvDiv:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 }));

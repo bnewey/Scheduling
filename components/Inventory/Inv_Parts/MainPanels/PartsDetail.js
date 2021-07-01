@@ -22,6 +22,7 @@ import PartManufactureList from '../../components/PartManufactureList';
 import clsx from 'clsx';
 
 import AddEditManfItemDialog from '../components/AddEditManfItemDialog';
+import { Warning } from '@material-ui/icons';
 
 
 const PartsDetail = function(props) {
@@ -64,6 +65,8 @@ const PartsDetail = function(props) {
                         { value: 'description', displayName: 'Description' }, 
                         { value: 'inv_qty', displayName: 'In Stock', 
                           format: (value,row ) => <EditPartInvDialog part={row}/> },
+                          { value: 'min_inv', displayName: 'Minimum in Inv',
+                          format: (value,row ) => <div className={classes.minInvDiv}>{row.min_inv >= row.inv_qty ? <Warning className={classes.warnIcon}/> : <></>}{value}</div>   },
                         { value: 'cost_each', displayName: 'Cost Each',
                           format: (value)=> `$ ${value.toFixed(6)}`   },
                         { value: 'type', displayName: 'Part Type', },
@@ -361,4 +364,16 @@ const useStyles = makeStyles(theme => ({
   },
   
   //End Table Stuff
+  warnIcon:{
+    height: '1em',
+    width: '1em',
+    color: '#ff0d0d',
+    margin: '0px 5px',
+  },
+  minInvDiv:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 }));

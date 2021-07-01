@@ -135,11 +135,11 @@ router.post('/addNewSet', async (req,res) => {
             set = req.body.set;
         }  
     }
-    const sql = ' INSERT INTO inv__sets (description, num_in_set, notes, date_updated, obsolete ) ' +
-                ' VALUES (?,IFNULL(?, default(num_in_set)),?,?,IFNULL(?, default(obsolete))) ';
+    const sql = ' INSERT INTO inv__sets (description, inv_qty, min_inv, num_in_set, notes, date_updated, obsolete ) ' +
+                ' VALUES (?,IFNULL(?, default(inv_qty)),IFNULL(?, default(min_inv)),IFNULL(?, default(num_in_set)),?,?,IFNULL(?, default(obsolete))) ';
 
     try{
-        const results = await database.query(sql, [set.description, set.num_in_set, set.notes,
+        const results = await database.query(sql, [set.description, set.inv_qty, set.min_inv, set.num_in_set, set.notes,
              set.date_updated, set.obsolete ]);
         logger.info("Inventory Set added ", [set]);
         res.json(results);
@@ -159,7 +159,7 @@ router.post('/updateSet', async (req,res) => {
         }  
     }
     logger.info('set to update', [set]);
-    const sql = ' UPDATE inv__sets SET description=?, num_in_set=?, ' +
+    const sql = ' UPDATE inv__sets SET description=?, min_inv=?, num_in_set=?, ' +
         ' notes=?,  ' +
         ' date_updated=?, obsolete=? ' +
         ' WHERE rainey_id = ? ';
@@ -167,7 +167,7 @@ router.post('/updateSet', async (req,res) => {
 
     try{
         logger.info("Date updated", [Util.convertISODateTimeToMySqlDateTime(set.date_updated)])
-        const results = await database.query(sql, [set.description, set.num_in_set,  set.notes,
+        const results = await database.query(sql, [set.description,set.min_inv, set.num_in_set,  set.notes,
              Util.convertISODateTimeToMySqlDateTime(moment()), set.obsolete, set.rainey_id ]);
         logger.info("Inventory Set updated " + set.rainey_id);
         res.json(results);
@@ -194,10 +194,49 @@ router.post('/updateSetInv', async (req,res) => {
     
 
     try{
+        //Check against min_inv and give notification 
         logger.info("Date updated", [Util.convertISODateTimeToMySqlDateTime(set.date_updated)])
         const results = await database.query(sql, [ set.inv_qty, Util.convertISODateTimeToMySqlDateTime(moment()), set.rainey_id, set.rainey_id,
                 "inv_qty", set.inv_qty, set.old_inv_qty  ]);
         logger.info("Inventory INV_QTY updated " + set.rainey_id);
+
+        //check against min_inv and get notification if going below
+        if(set.inv_qty <= set.min_inv){
+            //send notification to all subscribed to set min inv alerts
+            const subscribed_users_sql = " SELECT ns.*, nss.name FROM user_notifications_settings ns " +
+                        " LEFT JOIN user_notifications_settings_settings nss ON nss.id = ns.setting " + 
+                        " WHERE nss.name = 'Set Minimum Inventory Alert'  "
+            const subscribed_users = await database.query(subscribed_users_sql, [ ]);
+
+            async.forEachOf(subscribed_users, async (user, i, callback) => {
+
+                //will automatically call callback after successful execution
+                const note_results = await notificationSystem.sendNotification(user.googleId, "minInvSet",
+                    `Set (${set.rainey_id}) has reached minimum inventory.`, '/inventory', 'invSets', 'setsDetail', set.rainey_id);
+
+                pushSystem.getUserSubscriptions(user.googleId)
+                .then((data)=>{
+                    if(data && data.length > 0){
+                        data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription),  `Set (${set.rainey_id}) has reached minimum inventory.`))
+                    }
+                    return;
+                })
+                .catch((error)=>{
+                    logger.error("Failure in sending push notifications: " + error);
+                    return;
+                })
+                
+
+            }, err=> {
+                if(err){
+                    logger.error("Failed to send notification(s): " + err);
+                    //throw err;
+                }else{
+                    logger.info("Notification sent " + subscribed_users);
+                }
+            })
+        }
+
         res.json(results);
     }
     catch(error){
