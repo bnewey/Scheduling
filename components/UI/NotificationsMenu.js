@@ -32,9 +32,9 @@ const NotificationsMenu = ({user}) => {
   const [notificationsRefetch, setNotificationsRefetch] = useState(false);
 
   useEffect(()=>{
-    console.log("unsub")
+    console.log("Listening to messages")
       Subscription.subscribePush(user.googleId);
-      Subscription.listenServiceWorkerMessages();
+      Subscription.listenServiceWorkerMessages(setNotificationsRefetch);
   },[])
 
   const handleUnsubscribe = ()=>{

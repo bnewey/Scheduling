@@ -31,12 +31,16 @@ function subscribePush(googleId) {
   })
 }
 
-function listenServiceWorkerMessages() {
+function listenServiceWorkerMessages(setNotificationsRefetch) {
   const serviceWorker = navigator.serviceWorker;
   let handler = (event) => {
       if (event.data) {
           // The data payload got from nodejs
           console.log("event.data", event.data)
+          if(setNotificationsRefetch){
+            setNotificationsRefetch(true)
+          }
+          
       }
   };
 
