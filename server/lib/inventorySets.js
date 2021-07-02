@@ -9,6 +9,8 @@ const logger = require('../../logs');
 const Util = require('../../js/Util');
 //Handle Database
 const database = require('./db');
+const notificationSystem = require('./notifications');
+const pushSystem = require('./webPush');
 
 
 router.post('/getAllSets', async (req,res) => {

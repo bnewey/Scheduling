@@ -294,22 +294,28 @@ router.post('/updatePartInv', async (req,res) => {
             const subscribed_users = await database.query(subscribed_users_sql, [ ]);
 
             async.forEachOf(subscribed_users, async (user, i, callback) => {
-
-                //will automatically call callback after successful execution
-                const note_results = await notificationSystem.sendNotification(user.googleId, "minInvPart",
+                
+                if(user.notify){
+                    //will automatically call callback after successful execution
+                    const note_results = await notificationSystem.sendNotification(user.googleId, "minInvPart",
                     `Part (${part.rainey_id}) has reached minimum inventory.`, '/inventory', 'invParts', 'partsDetail', part.rainey_id);
+                }
+                
 
-                pushSystem.getUserSubscriptions(user.googleId)
-                .then((data)=>{
-                    if(data && data.length > 0){
-                        data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription),  `Part (${part.rainey_id}) has reached minimum inventory.`))
-                    }
-                    return;
-                })
-                .catch((error)=>{
-                    logger.error("Failure in sending push notifications: " + error);
-                    return;
-                })
+                if(user.push){
+                    pushSystem.getUserSubscriptions(user.googleId)
+                    .then((data)=>{
+                        if(data && data.length > 0){
+                            data.forEach((sub) => pushSystem.sendPushNotification(JSON.parse(sub.subscription),  `Part (${part.rainey_id}) has reached minimum inventory.`))
+                        }
+                        return;
+                    })
+                    .catch((error)=>{
+                        logger.error("Failure in sending push notifications: " + error);
+                        return;
+                    })
+                }
+                
                 
 
             }, err=> {

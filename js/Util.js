@@ -173,6 +173,14 @@ const getCurrentDetailNameByType = (type)=>{
             return 'detailOrderOutId';
             break;
         }
+        case "minInvPart":{
+            return 'detailPartId';
+            break;
+        }
+        case "minInvSet":{
+            return 'detailSetId';
+            break;
+        }
     }
     return null;
 }
@@ -183,6 +191,14 @@ const getCurrentViewNameByType = (type)=>{
     switch(type){
         case "orderOutApprover":{
             return 'currentInventoryView';
+            break;
+        }
+        case "minInvPart":{
+            return "currentInventoryView";
+            break;
+        }
+        case "minInvSet":{
+            return "currentInventoryView";
             break;
         }
         
@@ -204,6 +220,23 @@ const getSubCurrentViewNameByType = (type)=>{
     return null;
 }
 
+const promiseTimeout = function(ms, promise){
+
+    // Create a promise that rejects in <ms> milliseconds
+    let timeout = new Promise((resolve, reject) => {
+      let id = setTimeout(() => {
+        clearTimeout(id);
+        reject('Timed out in '+ ms + 'ms.')
+      }, ms)
+    })
+  
+    // Returns a race between our timeout and the passed in promise
+    return Promise.race([
+      promise,
+      timeout
+    ])
+  }
+
 module.exports = { 
     convertISODateTimeToMySqlDateTime,
     convertISODateToMySqlDate,
@@ -214,4 +247,5 @@ module.exports = {
     getCurrentDetailNameByType,
     getCurrentViewNameByType,
     getSubCurrentViewNameByType,
+    promiseTimeout
 }

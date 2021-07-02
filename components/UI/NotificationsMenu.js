@@ -32,9 +32,38 @@ const NotificationsMenu = ({user}) => {
   const [notificationsRefetch, setNotificationsRefetch] = useState(false);
 
   useEffect(()=>{
-    console.log("Listening to messages")
-      Subscription.subscribePush(user.googleId);
-      Subscription.listenServiceWorkerMessages(setNotificationsRefetch);
+    console.log("Listening to messages");
+    var refetchInterval;
+
+    Subscription.askPermission()
+    .then((permissionResult)=>{
+        console.log("permissionResult", permissionResult)
+        if(permissionResult){
+          return Util.promiseTimeout(14000, Subscription.subscribePush(user.googleId))
+        }else{
+          throw permissionResult;
+        }
+    })  
+    .then((subResult)=>{
+        console.log("subResult", subResult)
+        if(subResult){
+          Subscription.listenServiceWorkerMessages(setNotificationsRefetch);
+        }else{
+          throw subResult;
+        }
+    })
+    .catch((error)=>{
+        console.error("Failed to subscribe; using interval instead",error);
+  
+        refetchInterval = setInterval( ()=> setNotificationsRefetch(true), 30000);
+
+    })
+
+    return () => {
+      if(refetchInterval)
+        clearInterval(refetchInterval)
+    }
+      
   },[])
 
   const handleUnsubscribe = ()=>{

@@ -1,33 +1,60 @@
 import axios from "axios"
+import cogoToast from "cogo-toast";
 const vapidPublicKey = "BKTbHPoxBADK46purpWUaDhWXIuoofRGTgxcgqVPC2XNfok1N6hCr99c0G7dwvh-Bz18ze0Fa7w_ayvQaVzDR6c";
 
 function subscribePush(googleId) {
-    console.log("Navigator", navigator);
-    if(!navigator?.serviceWorker){
-        return;
-    }
+  return new Promise((resolve, reject)=>{
+      if(!navigator?.serviceWorker){
+          reject("No service worker in navigator");
+      }
+      
+      navigator.serviceWorker.ready.then(registration => {
+      if (!registration.pushManager) {
+        cogoToast.warn("Push Unsupported")
+        reject("Push Unsupported");
+      }
 
-    navigator.serviceWorker.ready.then(registration => {
-    if (!registration.pushManager) {
-      alert("Push Unsupported")
-      return
-    }
-    
-    registration.pushManager.getSubscription()
-      .then((subscription)=>{
-          if(!subscription){
-            console.log("Subscribing");
-            registration.pushManager.subscribe({
-              userVisibleOnly: true, //Always display notifications
-              applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-            })
-            .then(subscription => axios.post("/scheduling/webPush/register", {subscription, googleId}))
-            .catch(err => console.error("Push subscription error: ", err))
-          }else{
-            console.log("Subscription exists", subscription)
-          }
+      
+      registration.pushManager.getSubscription()
+        .then((subscription)=>{
+            if(!subscription){
+              console.log("Subscribing");
+              registration.pushManager.subscribe({
+                userVisibleOnly: true, //Always display notifications
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+              })
+              .then((subscription) => {
+                axios.post("/scheduling/webPush/register", {subscription, googleId})
+                resolve(true)
+              } )
+              .catch(err => {
+                console.error("Push subscription error: ", err)
+                reject('Push subscription error');
+              })
+            }else{
+              console.log("Subscription exists", subscription)
+              resolve(true);
+            }
 
-      })
+        })
+    })
+  });
+}
+
+function askPermission() {
+  return new Promise(function(resolve, reject) {
+    Notification.requestPermission()
+    .then((result) => {
+      console.log("result",result);
+      if (result != 'granted') {
+        console.log("reject");
+        reject(result)
+      }else{
+        console.log("grant");
+        resolve(result);
+      }
+      
+    });
   })
 }
 
@@ -85,6 +112,7 @@ function urlBase64ToUint8Array(base64String) {
 
   module.exports = {
     subscribePush,
+    askPermission,
     listenServiceWorkerMessages,
     unsubscribePush,
     
