@@ -72,13 +72,13 @@ const AddEditModal = function(props) {
                         </>
             }},
         
-        { field: 'storage_location', label: 'Storage Location',  type: 'number',updateBy: 'ref',  },
+        { field: 'storage_location', label: 'Storage Location',  type: 'text',updateBy: 'ref',  },
         { field: 'notes', label: 'Notes',  type: 'text',updateBy: 'ref',}, 
         { field: 'reel_width', label: 'Reel Width',  type: 'text',updateBy: 'ref',  },
         { field: 'obsolete', label: 'Obsolete',   type: 'check',updateBy: 'ref', },
     ];
 
-    //Set active worker to a tmp value for add otherwise activeworker will be set to edit
+    //Kit active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         if(setEditPartModalMode == "add"){
             setActivePart({});
@@ -143,7 +143,7 @@ const AddEditModal = function(props) {
             if(addOrEdit == "add"){
                 Inventory.addNewPart( updatePart )
                 .then( (data) => {
-                    //Get id of new workorder and set view to detail
+                    //Get id of new workorder and kit view to detail
                     cogoToast.success(`Part has been added!`, {hideAfter: 4});
                     setPartsRefetch(true);
                     if(add_and_continue){

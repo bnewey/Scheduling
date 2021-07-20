@@ -78,8 +78,8 @@ const OrdersOutItemList = function(props) {
         { field: 'man_name', title: 'Manf', minWidth: 80, align: 'center', editable: 'never'      },
         { field: 'mf_part_number', title: 'Manf #', minWidth: 80, align: 'center', editable: 'never' ,
         render: rowData => <div className={classes.notesSpan}>{rowData.mf_part_number}</div>,     },
-        { field: 'qty_in_set', title: 'Qty In OrdersOut', minWidth: 25, align: 'center', editable: 'onUpdate',
-          render: rowData => rowData.qty_in_set,
+        { field: 'qty_in_order', title: 'Qty In OrdersOut', minWidth: 25, align: 'center', editable: 'onUpdate',
+          render: rowData => rowData.qty_in_order,
           editComponent: props => (
             <TextField id={`qty_input`} 
                 type="number"

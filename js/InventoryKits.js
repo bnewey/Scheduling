@@ -1,7 +1,8 @@
 import 'isomorphic-unfetch';
 
-async function getAllSets(){
-    const route = '/scheduling/inventorySets/getAllSets';
+
+async function getAllPartsAndKits(){
+    const route = '/scheduling/inventoryKits/getAllPartsAndKits';
     try{
         var data = await fetch(route,
         {
@@ -12,7 +13,7 @@ async function getAllSets(){
         });
 
         if(!data.ok){
-            throw new Error("getAllSets returned empty list or bad query")
+            throw new Error("getAllPartsAndKits returned empty list or bad query")
         }
         var list = await data.json();
         return(list);
@@ -21,8 +22,31 @@ async function getAllSets(){
     }
 }
 
-async function searchAllSets(table, query){
-    const route = '/scheduling/inventorySets/searchAllSets';
+
+async function getAllKits(){
+    const route = '/scheduling/inventoryKits/getAllKits';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if(!data.ok){
+            throw new Error("getAllKits returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
+async function searchAllKits(table, query){
+    const route = '/scheduling/inventoryKits/searchAllKits';
     try{
         var data = await fetch(route,
             {
@@ -39,8 +63,9 @@ async function searchAllSets(table, query){
     }
 }
 
-async function superSearchAllSets(tables, query){
-    const route = '/scheduling/inventorySets/superSearchAllSets';
+
+async function superSearchAllKits(tables, query){
+    const route = '/scheduling/inventoryKits/superSearchAllKits';
     try{
         var data = await fetch(route,
             {
@@ -58,11 +83,12 @@ async function superSearchAllSets(tables, query){
 
 }
 
-async function getSetById(rainey_id){
+
+async function getKitById(rainey_id){
     if(!rainey_id){
-        throw new Error("No/bad id for getSetById");
+        throw new Error("No/bad id for getKitById");
     }
-    const route = '/scheduling/inventorySets/getSetById';
+    const route = '/scheduling/inventoryKits/getKitById';
     try{
         var data = await fetch(route,
             {
@@ -81,10 +107,8 @@ async function getSetById(rainey_id){
 }
 
 
-
-
-async function addNewSet(set){
-    const route = '/scheduling/inventorySets/addNewSet';
+async function addNewKit(kit){
+    const route = '/scheduling/inventoryKits/addNewKit';
     try{
         var response = await fetch(route,
             {
@@ -92,7 +116,7 @@ async function addNewSet(set){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({set})
+                body: JSON.stringify({kit})
             });
         var list = await response.ok;
         return(list);
@@ -102,8 +126,9 @@ async function addNewSet(set){
 
 }
 
-async function updateSet(set){
-    const route = '/scheduling/inventorySets/updateSet';
+
+async function updateKit(kit){
+    const route = '/scheduling/inventoryKits/updateKit';
     try{
         var data = await fetch(route,
             {
@@ -111,26 +136,7 @@ async function updateSet(set){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({set})
-            });
-        var list = await data.json();
-        return(list);
-    }catch(error){
-        throw error;
-    }
-
-}
-
-async function updateSetInv(set){
-    const route = '/scheduling/inventorySets/updateSetInv';
-    try{
-        var data = await fetch(route,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({set})
+                body: JSON.stringify({kit})
             });
         var list = await data.json();
         return(list);
@@ -141,8 +147,28 @@ async function updateSetInv(set){
 }
 
 
-async function deleteSet(rainey_id){
-    const route = '/scheduling/inventorySets/deleteSet';
+async function updateKitInv(kit){
+    const route = '/scheduling/inventoryKits/updateKitInv';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({kit})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function deleteKit(rainey_id){
+    const route = '/scheduling/inventoryKits/deleteKit';
     try{
         var response = await fetch(route,
             {
@@ -160,33 +186,12 @@ async function deleteSet(rainey_id){
 
 }
 
-async function getSetItems(rainey_id){
-    if(!rainey_id){
-        throw new Error("No/bad id for getSetItems");
-    }
-    const route = '/scheduling/inventorySets/getSetItems';
-    try{
-        var data = await fetch(route,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({rainey_id: rainey_id})
-            });
-        var list = await data.json();
-        return(list);
-    }catch(error){
-        throw error;
-    }
 
-}
-
-async function getSetItemsWithManf(rainey_id){
+async function getKitItems(rainey_id){
     if(!rainey_id){
-        throw new Error("No/bad id for getSetItemsWithManf");
+        throw new Error("No/bad id for getKitItems");
     }
-    const route = '/scheduling/inventorySets/getSetItemsWithManf';
+    const route = '/scheduling/inventoryKits/getKitItems';
     try{
         var data = await fetch(route,
             {
@@ -205,8 +210,54 @@ async function getSetItemsWithManf(rainey_id){
 }
 
 
-async function updateSetItem(item){
-    const route = '/scheduling/inventorySets/updateSetItem';
+async function getKitItemsCostData(rainey_id){
+    if(!rainey_id){
+        throw new Error("No/bad id for getKitItemsCostData");
+    }
+    const route = '/scheduling/inventoryKits/getKitItemsCostData';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({rainey_id: rainey_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function getKitItemsWithManf(rainey_id){
+    if(!rainey_id){
+        throw new Error("No/bad id for getKitItemsWithManf");
+    }
+    const route = '/scheduling/inventoryKits/getKitItemsWithManf';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({rainey_id: rainey_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function updateKitPart(item){
+    const route = '/scheduling/inventoryKits/updateKitPart';
     try{
         var data = await fetch(route,
             {
@@ -224,8 +275,9 @@ async function updateSetItem(item){
 
 }
 
-async function deleteSetItem(id){
-    const route = '/scheduling/inventorySets/deleteSetItem';
+
+async function deleteKitPart(id){
+    const route = '/scheduling/inventoryKits/deleteKitPart';
     try{
         var data = await fetch(route,
             {
@@ -243,8 +295,9 @@ async function deleteSetItem(id){
 
 }
 
-async function addNewSetItem(set_item){
-    const route = '/scheduling/inventorySets/addNewSetItem';
+
+async function addNewKitPart(kit_item){
+    const route = '/scheduling/inventoryKits/addNewKitPart';
     try{
         var data = await fetch(route,
             {
@@ -252,7 +305,7 @@ async function addNewSetItem(set_item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({set_item})
+                body: JSON.stringify({kit_item})
             });
         var list = await data.json();
         return(list);
@@ -262,19 +315,84 @@ async function addNewSetItem(set_item){
 
 }
 
-module.exports = {
-    getAllSets,
-    searchAllSets,
-    superSearchAllSets,
-    getSetById,
-    addNewSet,
-    updateSet,
-    updateSetInv,
-    deleteSet,
-    getSetItems,
-    getSetItemsWithManf,
-    updateSetItem,
-    deleteSetItem,
-    addNewSetItem,
 
+async function updateKitKit(item){
+    const route = '/scheduling/inventoryKits/updateKitKit';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({item})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function deleteKitKit(id){
+    const route = '/scheduling/inventoryKits/deleteKitKit';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+async function addNewKitKit(kit_item){
+    const route = '/scheduling/inventoryKits/addNewKitKit';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({kit_item})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
+module.exports = {
+    getAllKits,
+    getAllPartsAndKits,
+    searchAllKits,
+    superSearchAllKits,
+    getKitById,
+    addNewKit,
+    updateKit,
+    updateKitInv,
+    deleteKit,
+    getKitItems,
+    getKitItemsCostData,
+    getKitItemsWithManf,
+    updateKitPart,
+    deleteKitPart,
+    addNewKitPart,
+    updateKitKit,
+    deleteKitKit,
+    addNewKitKit,
 };

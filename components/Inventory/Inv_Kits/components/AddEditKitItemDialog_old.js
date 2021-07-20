@@ -6,7 +6,7 @@ import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 import LinkIcon from '@material-ui/icons/Link'
 
-import InventorySets from '../../../../js/InventorySets';
+import InventoryKits from '../../../../js/InventoryKits';
 import Inventory from '../../../../js/Inventory';
 import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
@@ -28,16 +28,16 @@ import TableRow from '@material-ui/core/TableRow';
 import { AutoSizer, Column, Table } from 'react-virtualized';
 import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
-import { ListContext } from '../../Inv_Sets/InvSetsContainer';
+import { ListContext } from '../../Inv_Kits/InvKitsContainer';
 import clsx from 'clsx';
 import Search from '../../Inv_Parts/Toolbar/Components/Search';
 
 
-const AddEditSetItemDialog = (props) => {
+const AddEditKitItemDialog = (props) => {
  
     //PROPS
-    const { set, addEditSetItemOpen,setEditSetItemOpen,setSetItems } = props;
-    const { setSetsRefetch, setSetsSearchRefetch, currentView, setCurrentView,setActiveSet, views} = useContext(ListContext);
+    const { kit, addEditKitItemOpen,setEditKitItemOpen,setKitItems } = props;
+    const { setKitsRefetch, setKitsSearchRefetch, currentView, setCurrentView,setActiveKit, views} = useContext(ListContext);
 
     //STATE
     const [partId, setPartId] = useState(null)
@@ -51,7 +51,7 @@ const AddEditSetItemDialog = (props) => {
 
     const [validationErrors , setValidationErrors] = useState([]);
     const [editDialogMode, setEditDialogMode] = useState("add")
-    const [setItemToSave, setSetItemToSave] = useState(null)
+    const [setItemToSave, setKitItemToSave] = useState(null)
     const saveRef = React.createRef();
     //CSS
     const classes = useStyles();
@@ -59,14 +59,14 @@ const AddEditSetItemDialog = (props) => {
     //FUNCTIONS
     useEffect(()=>{
         if(editDialogMode == "add"){
-            setSetItemToSave({})
+            setKitItemToSave({})
         }
 
     },[editDialogMode])
 
 
     const handleDialogClose = () => {
-        setEditSetItemOpen(false);
+        setEditKitItemOpen(false);
         setPartId(0);
         setValidationErrors([]);
         setActiveStep(0)
@@ -74,12 +74,12 @@ const AddEditSetItemDialog = (props) => {
         setSelectedManItem(null);
         setPartsList(null);
         setPartManItems([]);
-        setSetItemToSave(null);
+        setKitItemToSave(null);
     };
 
     //Sign Rows
   useEffect( () =>{
-    //Gets data only on initial component mount or when rows is set to null
+    //Gets data only on initial component mount or when rows is kit to null
     if(((partsList == null || partsListRefetch == true)) ) {
       if(partsListRefetch == true){
         setPartsListRefetch(false);
@@ -100,7 +100,7 @@ const AddEditSetItemDialog = (props) => {
 
    //Sign Rows
    useEffect( () =>{
-    //Gets data only on initial component mount or when rows is set to null
+    //Gets data only on initial component mount or when rows is kit to null
     if((selectedPart) ) {
       
 
@@ -113,7 +113,7 @@ const AddEditSetItemDialog = (props) => {
             console.log('item',item);
             if(item.default_man){
                 setSelectedManItem(item)
-                console.log("Set default item");
+                console.log("Kit default item");
             }
         })
       })
@@ -125,17 +125,17 @@ const AddEditSetItemDialog = (props) => {
   },[selectedPart]);
 
 
-    const handleUpdateSetInv = (event, addSub) =>{
+    const handleUpdateKitInv = (event, addSub) =>{
 
-        let updateSet = {...set};
+        let updateKit = {...kit};
 
-        updateSet.old_inv_qty = updateSet["inv_qty"];
-        updateSet.inv_qty = handleGetSumFromRef(partId, set.inv_qty, addSub  )
+        updateKit.old_inv_qty = updateKit["inv_qty"];
+        updateKit.inv_qty = handleGetSumFromRef(partId, kit.inv_qty, addSub  )
 
 
         //Validate
         var validationArray = [];
-        if(updateSet.inv_qty  < 0){
+        if(updateKit.inv_qty  < 0){
             validationArray.push("Negative Inventory not allowed")
         }
         setValidationErrors( validationArray )
@@ -152,19 +152,19 @@ const AddEditSetItemDialog = (props) => {
             return;
         }
        
-        // //UpdateSetInv only updates inv_qty and tracks inventory change
-        // InventorySets.updateSetInv(updateSet)
+        // //UpdateKitInv only updates inv_qty and tracks inventory change
+        // InventoryKits.updateKitInv(updateKit)
         // .then((data)=>{
         //     cogoToast.success("Updated ");
 
-        //     if(currentView.value === "setsList"){
-        //         setSetsRefetch(true);
+        //     if(currentView.value === "kitsList"){
+        //         setKitsRefetch(true);
         //     }
-        //     if(currentView.value === "setsSearch"){
-        //         setSetsSearchRefetch(true);
+        //     if(currentView.value === "kitsSearch"){
+        //         setKitsSearchRefetch(true);
         //     }
-        //     if(currentView.value === "setsDetail"){
-        //         setActiveSet(null);
+        //     if(currentView.value === "kitsDetail"){
+        //         setActiveKit(null);
         //     }
         //     handleDialogClose();
         // })
@@ -175,13 +175,13 @@ const AddEditSetItemDialog = (props) => {
     };
 
     const handleOpenEditInvModal = (event)=>{
-        setEditSetItemOpen(true)
+        setEditKitItemOpen(true)
     }
     const handleGoToPart = (event)=>{
-         //set detailWOIid in local data
+         //kit detailWOIid in local data
       window.localStorage.setItem('detailPartId', JSON.stringify(selectedPart?.rainey_id));
       
-      //set detail view in local data
+      //kit detail view in local data
       window.localStorage.setItem('currentInvPartsView', JSON.stringify("partsDetail"));
       window.localStorage.setItem('currentInventoryView', JSON.stringify("invParts"));
       
@@ -191,7 +191,7 @@ const AddEditSetItemDialog = (props) => {
 
     const fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'qty_in_set', label: 'Qty in Set', type: 'number', updateBy: 'ref'},
+        {field: 'qty_in_kit', label: 'Qty in Kit', type: 'number', updateBy: 'ref'},
     ];
 
     const handleSave = (og_set_item, setItem, addOrEdit)=>{
@@ -208,34 +208,34 @@ const AddEditSetItemDialog = (props) => {
             if(addOrEdit == "edit"){
                 setItem["id"] = og_set_item.id;
 
-                InventorySets.updateSetItem( setItem )
+                InventoryKits.updateKitItem( setItem )
                 .then( (data) => {
                     //Refetch our data on save
-                    cogoToast.success(`Set Item ${og_set_item.id} has been updated!`, {hideAfter: 4});
-                    setSetItems(null)
+                    cogoToast.success(`Kit Item ${og_set_item.id} has been updated!`, {hideAfter: 4});
+                    setKitItems(null)
                     handleDialogClose()
                     resolve(data)
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error updating set item. ` , {hideAfter: 4});
+                    cogoToast.error(`Error updating kit item. ` , {hideAfter: 4});
                     reject(error)
                 })
             }
             if(addOrEdit == "add"){
-                setItem["set_rainey_id"] = set.rainey_id;
+                setItem["set_rainey_id"] = kit.rainey_id;
 
-                InventorySets.addNewSetItem( setItem )
+                InventoryKits.addNewKitItem( setItem )
                 .then( (data) => {
-                    //Get id of new workorder and set view to detail
-                    cogoToast.success(`Set item has been added!`, {hideAfter: 4});
-                    setSetItems(null)
+                    //Get id of new workorder and kit view to detail
+                    cogoToast.success(`Kit item has been added!`, {hideAfter: 4});
+                    setKitItems(null)
                     handleDialogClose()
                     resolve(data)
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error adding set item. ` , {hideAfter: 4});
+                    cogoToast.error(`Error adding kit item. ` , {hideAfter: 4});
                     reject(error)
                 })
             }
@@ -245,8 +245,8 @@ const AddEditSetItemDialog = (props) => {
     return(
         <React.Fragment>     
             
-            <Dialog PaperProps={{className: classes.dialog}} open={addEditSetItemOpen} onClose={handleDialogClose}>
-            <DialogTitle className={classes.title}>{`Add Part to Set`}</DialogTitle>
+            <Dialog PaperProps={{className: classes.dialog}} open={addEditKitItemOpen} onClose={handleDialogClose}>
+            <DialogTitle className={classes.title}>{`Add Part to Kit`}</DialogTitle>
                 <DialogContent className={classes.content}>
                     
                     {activeStep === 0 && 
@@ -276,7 +276,7 @@ const AddEditSetItemDialog = (props) => {
                     }
                     {activeStep === 2 && 
                         <div className={classes.formGrid}>
-                            <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Set Info</span></div>
+                            <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Kit Info</span></div>
                             <Grid container >  
                                 <Grid item xs={12} className={classes.paperScroll}>
                                     <FormBuilder 
@@ -285,7 +285,7 @@ const AddEditSetItemDialog = (props) => {
                                         mode={editDialogMode} 
                                          classes={classes}
                                         formObject={setItemToSave} 
-                                        setFormObject={setSetItemToSave}
+                                        setFormObject={setKitItemToSave}
                                         handleClose={handleDialogClose} 
                                         handleSave={handleSave}/>
                                 </Grid>
@@ -301,14 +301,14 @@ const AddEditSetItemDialog = (props) => {
                             Cancel
                         </Button>
                         <Button
-                            onMouseUp={event => handleUpdateSetInv(event, addSub)}
+                            onMouseUp={event => handleUpdateKitInv(event, addSub)}
                             variant="contained"
                             color="secondary"
                             size="medium"
                             className={classes.saveButton} >{addSub === "add" ? "ADD" : "SUBTRACT"}
                             </Button> */}
                             <HorizontalLinearStepper activeStep={activeStep} setActiveStep={setActiveStep} setItemToSave={setItemToSave} 
-                            setSetItemToSave={setSetItemToSave}
+                            setKitItemToSave={setKitItemToSave}
                              selectedPart={selectedPart} selectedManItem={selectedManItem} editDialogMode={editDialogMode} saveRef={saveRef}/>
                     </DialogActions> 
 
@@ -321,7 +321,7 @@ const AddEditSetItemDialog = (props) => {
 
 } 
 
-export default AddEditSetItemDialog;
+export default AddEditKitItemDialog;
 
 const PickPartList = (props) =>{
 
@@ -570,7 +570,7 @@ const ManItemList = (props) =>{
 const VirtualizedManItemTable = withStyles(styles)(ManItemList);
 
 function getSteps() {
-    return ['Part', 'Manufacturer', 'Set Info'];
+    return ['Part', 'Manufacturer', 'Kit Info'];
 }
 
 function getStepContent(step) {
@@ -580,7 +580,7 @@ function getStepContent(step) {
     case 1:
       return 'Select Part\'s Manufacturer';
     case 2: 
-      return 'Set Info'
+      return 'Kit Info'
     default:
       return 'Unknown step';
   }
@@ -588,7 +588,7 @@ function getStepContent(step) {
 
 function HorizontalLinearStepper(props) {
     const classes = useStyles();
-    const {activeStep, setActiveStep, selectedPart,selectedManItem,editDialogMode, saveRef, setItemToSave, setSetItemToSave} = props;
+    const {activeStep, setActiveStep, selectedPart,selectedManItem,editDialogMode, saveRef, setItemToSave, setKitItemToSave} = props;
     const steps = getSteps();
   
 

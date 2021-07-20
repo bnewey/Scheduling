@@ -10,7 +10,7 @@ import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../js/Util';
 import Work_Orders from  '../../../../js/Work_Orders';
-import { ListContext } from '../InvSetsContainer';
+import { ListContext } from '../InvKitsContainer';
 
 import Search from './Components/Search';
 
@@ -20,26 +20,27 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
 
-const SetsToolbar = function(props) {
+const KitsToolbar = function(props) {
   const {user} = props;
 
   
-  const { sets, setSets,  currentView, setCurrentView, views} = useContext(ListContext);
+  const { kits, setKits,  currentView, setCurrentView, views} = useContext(ListContext);
 
-  const backMode = currentView && currentView.value != "setsList";
+  const backMode = currentView && currentView.value != "kitsList";
 
   const classes = useStyles({backMode});
   
   
   const toolBarMainGrid = () =>{
     switch(currentView.value){
-      case "setsList":
+      case "kitsList":
         return <Search />
         break
-      case "setsSearch":
+      case "kitsSearch":
         return <Search />
         break;
-      case "setsDetail":
+      case "kitsDetail":
+      case "kitsItemization":
         return <></>
           break;
       default: 
@@ -102,7 +103,7 @@ const SetsToolbar = function(props) {
   );
 }
 
-export default SetsToolbar
+export default KitsToolbar
 
 const useStyles = makeStyles(theme => ({
   root:{

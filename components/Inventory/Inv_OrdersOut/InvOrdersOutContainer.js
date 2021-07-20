@@ -80,7 +80,7 @@ const InvOrdersOutContainer = function(props) {
 
   const classes = useStyles();
 
-  //Get View from local storage if possible || set default
+  //Get View from local storage if possible || kit default
   useEffect(() => {
     if(currentView == null){
       var tmp = window.localStorage.getItem('currentInvOrdersOutView');
@@ -104,7 +104,7 @@ const InvOrdersOutContainer = function(props) {
  
   //Sign Rows
   useEffect( () =>{
-    //Gets data only on initial component mount or when rows is set to null
+    //Gets data only on initial component mount or when rows is kit to null
     if(((ordersOut == null || ordersOutRefetch == true) && sorters != null) ) {
       if(ordersOutRefetch == true){
         setOrdersOutRefetch(false);

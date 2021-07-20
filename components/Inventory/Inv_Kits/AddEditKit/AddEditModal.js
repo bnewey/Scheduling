@@ -23,8 +23,8 @@ import {
 import Util from '../../../../js/Util.js';
 
 import Settings from  '../../../../js/Settings';
-import InventorySets from '../../../../js/InventorySets';
-import { ListContext } from '../InvSetsContainer';
+import InventoryKits from '../../../../js/InventoryKits';
+import { ListContext } from '../InvKitsContainer';
 
 import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
@@ -32,16 +32,16 @@ import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 const AddEditModal = function(props) {
     const {user} = props;
 
-    const { sets, setSets, setSetsRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailSetId,
-        setDetailSetId,editSetModalMode,setEditSetModalMode, activeSet, setActiveSet, editSetModalOpen,setEditSetModalOpen,
-         recentSets, setRecentSets} = useContext(ListContext);
+    const { kits, setKits, setKitsRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailKitId,
+        setDetailKitId,editKitModalMode,setEditKitModalMode, activeKit, setActiveKit, editKitModalOpen,setEditKitModalOpen,
+         recentKits, setRecentKits} = useContext(ListContext);
 
     const saveRef = React.createRef();
     const classes = useStyles();
 
     const handleCloseModal = () => {
-        setActiveSet(null);
-        setEditSetModalOpen(false);
+        setActiveKit(null);
+        setEditKitModalOpen(false);
     };
 
    
@@ -50,108 +50,109 @@ const AddEditModal = function(props) {
         { field: 'description', label: 'Description', type: 'text',updateBy: 'ref', required:true }, 
         { field: 'inv_qty', label: 'In Stock',  type: 'number',updateBy: 'ref', hidden: (data)=> data?.rainey_id  },
         { field: 'min_inv', label: 'Minimum Inv',  type: 'number',updateBy: 'ref' },
-        { field: 'num_in_set', label: '# in Set', type: 'number',updateBy: 'ref',  },
+        { field: 'num_in_kit', label: '# in Kit', type: 'number',updateBy: 'ref',  },
+        { field: 'storage_location', label: 'Storage Location',  type: 'text',updateBy: 'ref',  },
         { field: 'notes', label: 'Notes',  type: 'text',updateBy: 'ref',}, 
         { field: 'obsolete', label: 'Obsolete',   type: 'check',updateBy: 'ref', },
     ];
 
-    //Set active worker to a tmp value for add otherwise activeworker will be set to edit
+    //Kit active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
         console.log("Tes");
-        if(editSetModalMode == "add"){
+        if(editKitModalMode == "add"){
             console.log("setting to {}")
-            setActiveSet({});
+            setActiveKit({});
         }
-    },[editSetModalMode])
+    },[editKitModalMode])
 
 
         
 
-    const handleSave = (set, updateSet ,addOrEdit) => {
+    const handleSave = (kit, updateKit ,addOrEdit) => {
         return new Promise((resolve, reject)=>{
-            if(!set){
+            if(!kit){
                 console.error("Bad work order")
                 reject("Bad work order");
             }
             
             //Add Id to this new object
             if(addOrEdit == "edit"){
-                updateSet["rainey_id"] = set.rainey_id;
-                updateSet["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
+                updateKit["rainey_id"] = kit.rainey_id;
+                updateKit["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
 
-                InventorySets.updateSet( updateSet )
+                InventoryKits.updateKit( updateKit )
                 .then( (data) => {
                     //Refetch our data on save
-                    cogoToast.success(`Set ${set.rainey_id} has been updated!`, {hideAfter: 4});
-                    setSetsRefetch(true);
-                    setActiveSet(null);
+                    cogoToast.success(`Kit ${kit.rainey_id} has been updated!`, {hideAfter: 4});
+                    setKitsRefetch(true);
+                    setActiveKit(null);
                     handleCloseModal();
                     resolve(data)
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error updating set. ` , {hideAfter: 4});
+                    cogoToast.error(`Error updating kit. ` , {hideAfter: 4});
                     reject(error)
                 })
             }
             if(addOrEdit == "add"){
-                InventorySets.addNewSet( updateSet )
+                InventoryKits.addNewKit( updateKit )
                 .then( (data) => {
-                    //Get id of new workorder and set view to detail
+                    //Get id of new workorder and kit view to detail
                     if(data && data.insertId){
-                        setDetailSetId(data.insertId);
+                        setDetailKitId(data.insertId);
                         setCurrentView(views.filter((v)=>v.value == "setDetail")[0]);
                     }
-                    cogoToast.success(`Set has been added!`, {hideAfter: 4});
-                    setSetsRefetch(true);
-                    setActiveSet(null);
+                    cogoToast.success(`Kit has been added!`, {hideAfter: 4});
+                    setKitsRefetch(true);
+                    setActiveKit(null);
                     handleCloseModal();
                     resolve(data);
                 })
                 .catch( error => {
                     console.warn(error);
-                    cogoToast.error(`Error adding set. ` , {hideAfter: 4});
+                    cogoToast.error(`Error adding kit. ` , {hideAfter: 4});
                     reject(error)
                 })
             }
         })
     };
 
-    const handleDeleteSet = (set) => {
-        if(!set || !set.rainey_id){
-            console.error("Bad set in delete Set");
+    const handleDeleteKit = (kit) => {
+        if(!kit || !kit.rainey_id){
+            console.error("Bad kit in delete Kit");
             return;
         }
 
         const deleteEnt = () =>{
-            InventorySets.deleteSet(set.rainey_id)
+            InventoryKits.deleteKit(kit.rainey_id)
             .then((data)=>{
-                setSetsRefetch(true);
+                setKitsRefetch(true);
                 handleCloseModal();
-                setCurrentView(views.filter((v)=>v.value == "setsList")[0]);
-                cogoToast.success("Deleted Set: " + set.rainey_id);
+                setCurrentView(views.filter((v)=>v.value == "kitsList")[0]);
+                cogoToast.success("Deleted Kit: " + kit.rainey_id);
             })
             .catch((error)=>{
-                cogoToast.error("Failed to Delete set")
-                console.error("Failed to delete set", error);
+                cogoToast.error("Failed to Delete kit")
+                console.error("Failed to delete kit", error);
             })
         }
 
         confirmAlert({
             customUI: ({onClose}) => {
                 return(
-                    <ConfirmYesNo onYes={deleteEnt} onClose={onClose} customMessage={"Delete Set permanently?"}/>
+                    <ConfirmYesNo onYes={deleteEnt} onClose={onClose} customMessage={"Delete Kit permanently?"}/>
                 );
             }
         })
     }
 
     return(<>
-        { editSetModalOpen && <Modal
+        { editKitModalOpen && <Modal
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             className={classes.modal}
-            open={editSetModalOpen}
+            open={editKitModalOpen}
             onClose={handleCloseModal}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -159,13 +160,13 @@ const AddEditModal = function(props) {
             timeout: 500,
             }}
         >
-            <Fade in={editSetModalOpen}>
+            <Fade in={editKitModalOpen}>
                 
                 <div className={classes.container}>
                     {/* HEAD */}
                     <div className={classes.modalTitleDiv}>
                         <span id="transition-modal-title" className={classes.modalTitle}>
-                            {detailSetId && activeSet ? `Edit Rainey Set#: ${activeSet.rainey_id}` : 'Add Set'} 
+                            {detailKitId && activeKit ? `Edit Rainey Kit#: ${activeKit.rainey_id}` : 'Add Kit'} 
                         </span>
                     </div>
                 
@@ -177,10 +178,10 @@ const AddEditModal = function(props) {
                             <FormBuilder 
                                 ref={saveRef}
                                 fields={fields} 
-                                mode={editSetModalMode} 
+                                mode={editKitModalMode} 
                                 classes={classes} 
-                                formObject={activeSet} 
-                                setFormObject={setActiveSet}
+                                formObject={activeKit} 
+                                setFormObject={setActiveKit}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}/>
                         </Grid>
@@ -191,9 +192,9 @@ const AddEditModal = function(props) {
                     {/* FOOTER */}
                     <Grid container >
                         <Grid item xs={12} className={classes.paper_footer}>
-                        { editSetModalMode == "edit" && activeSet?.rainey_id ? <ButtonGroup className={classes.buttonGroup}>
+                        { editKitModalMode == "edit" && activeKit?.rainey_id ? <ButtonGroup className={classes.buttonGroup}>
                             <Button
-                                    onClick={() => handleDeleteSet(activeSet)}
+                                    onClick={() => handleDeleteKit(activeKit)}
                                     variant="contained"
                                     size="large"
                                     className={classes.deleteButton}
@@ -212,7 +213,7 @@ const AddEditModal = function(props) {
                                 </Button></ButtonGroup>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
-                                    onClick={ () => { console.log("1",activeSet); saveRef.current.handleSaveParent(activeSet) }}
+                                    onClick={ () => { console.log("1",activeKit); saveRef.current.handleSaveParent(activeKit) }}
                                     variant="contained"
                                     color="primary"
                                     size="large"

@@ -25,7 +25,7 @@ const SidebarPages = function(props) {
     const classes = useStyles();
 
     const pages = [
-        "partsDetail", "partsRecentOrders", "partsSets"
+        "partsDetail", "partsRecentOrders", "partsKits"
     ];
 
     const handleChangePage = (view) =>{
@@ -38,7 +38,7 @@ const SidebarPages = function(props) {
                 return(<DetailIcon className={classes.icon}/>)
                 break;
             }
-            case 'partsSets':{
+            case 'partsKits':{
                 return(<ListIcon className={classes.icon}/>)
                 break;
             }

@@ -60,7 +60,7 @@ const FormBuilder = forwardRef((props, ref) => {
             setEntityShippingContactEditChanged, setEntityBillingContactEditChanged, //state for knowing when to show entity defaults or actual wo value
             dontCloseOnNoChangesSave = false,
             partTypes,
-            setPartsManItems, setSetsPartsManItemsRefetch,
+            kitPartsManItems, setKitsPartsManItemsRefetch,
             manufacturers
         } = props;
         console.log("Props", props);
@@ -100,7 +100,7 @@ const FormBuilder = forwardRef((props, ref) => {
     //     }
     // },[formObject])
 
-
+    
 
     const handleInputOnChange = (value, should, type, key) => {
         //this function updates by state instead of ref
@@ -153,10 +153,10 @@ const FormBuilder = forwardRef((props, ref) => {
             console.log("Entity-Titles inputChange")
             tmpObject[key] = value;
         }
-        if(type === "order_set_select"){
+        if(type === "order_kit_select"){
             let subtype = key.split('-')[0];
             let rainey_id = parseInt(key.split('-')[1]);
-            let index = tmpObject[`set_items`] ?  _.findIndex(tmpObject[`set_items`], (item)=> item.rainey_id === rainey_id ) : null;
+            let index = tmpObject[`kit_items`] ?  _.findIndex(tmpObject[`kit_items`], (item)=> item.rainey_id === rainey_id ) : null;
 
             let updateValue;
             switch (subtype){
@@ -174,15 +174,15 @@ const FormBuilder = forwardRef((props, ref) => {
             //If item is in array
             if(index != -1 && index != null && index != undefined){
 
-                tmpObject[`set_items`][index][subtype] =  updateValue;
+                tmpObject[`kit_items`][index][subtype] =  updateValue;
                 
             }else{
                 //Item not in array yet or object not defined
-                if(tmpObject[`set_items`] == undefined){
-                    tmpObject[`set_items`]= [];
+                if(tmpObject[`kit_items`] == undefined){
+                    tmpObject[`kit_items`]= [];
                 }
                 
-                tmpObject[`set_items`].push({rainey_id, [subtype]: updateValue })
+                tmpObject[`kit_items`].push({rainey_id, [subtype]: updateValue })
        
             }
             console.log(`${key}`, tmpObject);
@@ -233,7 +233,7 @@ const FormBuilder = forwardRef((props, ref) => {
             
             var addOrEdit = mode;
 
-            console.log("itemToSave",itemToSave)
+            console.log("itemToSave",itemToSave);
             if(!itemToSave && addOrEdit === "edit"){
                 console.error("Bad itemToSave")
                 cogoToast.error("Internal Server Error")
@@ -247,10 +247,9 @@ const FormBuilder = forwardRef((props, ref) => {
                 var textValueObject = objectMap(ref_object, v => v.current ? v.current.value || v.current.value === "" ? v.current.value : null : null );
 
                 console.log("textValueObject", textValueObject);
-
+                
                 var updateItem = {...itemToSave};
 
-                
                 //Get only values we need to updateTask()
                 fields.forEach((field, i)=>{
                     const type = field.type;
@@ -370,7 +369,6 @@ const FormBuilder = forwardRef((props, ref) => {
                     setErrorFields([]);
                 }
 
-
                 const validate_by_type = (field, index) =>{
                     if(!field || !updateItem){
                         //Return true so we dont add error on bad code
@@ -387,8 +385,8 @@ const FormBuilder = forwardRef((props, ref) => {
                             //test against regexp for nondecimal or decimal 
                             error = updateItem[field.field] && (!(/^\d+$/.test(updateItem[field.field]) || /^(\d{1,8})?(\.\d{1,6})?$/.test(updateItem[field.field])));
                             break;
-                        case 'order_set_select':
-                            error = updateItem["set_items"]?.length > 0 && !(updateItem["set_items"].filter((item)=> item.selected).every((item)=> { console.log("item", item); return ( item.part_mf_id && item.actual_cost_each && item.rainey_id && item.qty_in_order)} ))
+                        case 'order_kit_select':
+                            error = updateItem["kit_items"]?.length > 0 && !(updateItem["kit_items"].filter((item)=> item.selected).every((item)=> { console.log("item", item); return ( item.part_mf_id && item.actual_cost_each && item.rainey_id && item.qty_in_order)} ))
                             break;
                     }
                     return error;
@@ -406,8 +404,6 @@ const FormBuilder = forwardRef((props, ref) => {
                 }else{
                     setValidErrorFields([]);
                 }
-
-
                 console.log("updateItem", updateItem);
                 //Run given handlSave
                 if(handleSave){
@@ -419,7 +415,7 @@ const FormBuilder = forwardRef((props, ref) => {
                         }
                     })
                     .catch((error)=>{
-                        console.log("Failed to save in FormBuilder", error);
+                        console.error("Failed to save in FormBuilder", error);
                         cogoToast.info("Failed to save in FormBuilde");
                     })
                 }
@@ -456,7 +452,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     handleInputOnChange={handleInputOnChange} classes={classes} mode={mode} raineyUsers={raineyUsers} vendorTypes={vendorTypes}
                     shipToContactOptionsWOI={shipToContactOptionsWOI} shipToAddressOptionsWOI={shipToAddressOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
-                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} partTypes={partTypes} setPartsManItems={setPartsManItems} setSetsPartsManItemsRefetch={setSetsPartsManItemsRefetch}
+                    dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} partTypes={partTypes} kitPartsManItems={kitPartsManItems} setKitsPartsManItemsRefetch={setKitsPartsManItemsRefetch}
                      defaultAddresses={defaultAddresses}
                      entContactTitles={entContactTitles} entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts}
                      entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
@@ -476,7 +472,7 @@ export default FormBuilder;
 const GetInputByType = function(props){
 
     const {field,dataGetterFunc , formObject,setFormObject, errorFields, validErrorFields, handleShouldUpdate, handleInputOnChange, classes, mode, raineyUsers, vendorTypes, id_pretext,
-        shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, setPartsManItems, setSetsPartsManItemsRefetch,
+        shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, kitPartsManItems, setKitsPartsManItemsRefetch,
          defaultAddresses,
         entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
         entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses, manufacturers} = props;
@@ -485,7 +481,7 @@ const GetInputByType = function(props){
         console.error("Bad field");
         return;
     }
-    
+
     var error = errorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
     var valid_error = validErrorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
     
@@ -971,7 +967,7 @@ const GetInputByType = function(props){
                 /> 
             )
             break;
-        case 'order_set_select':
+        case 'order_kit_select':
 
             const [openAddManfItem, setOpenAddManfItem] = useState(false);
             const [manfItemId, setManfItemId] = useState(null);
@@ -979,7 +975,7 @@ const GetInputByType = function(props){
             const [addEditManfItemMode, setAddEditManfItemMode] =useState("add");
             const [selectedParts, setSelectedParts] = useState([]);
 
-            const handleChangeForSet = (value, shouldUpdate, type, field, part, manfItemToEdit)=>{
+            const handleChangeForKit = (value, shouldUpdate, type, field, part, manfItemToEdit)=>{
                 
                 if(value.target.value === '-1'){
                     //add was chosen
@@ -1002,26 +998,26 @@ const GetInputByType = function(props){
             }
 
             useEffect(()=>{
-                let selectedItems =  _.uniqBy(setPartsManItems, 'rainey_id').map((part)=>{
+                let selectedItems =  _.uniqBy(kitPartsManItems, 'rainey_id').map((part)=>{
                     return {rainey_id: part.rainey_id, selected: true}
                 }) 
 
-                if(formObject && !formObject["set_items"] && selectedItems?.length > 0 && mode == "add") {
-                    setFormObject({...formObject, set_items: selectedItems})
+                if(formObject && !formObject["kit_items"] && selectedItems?.length > 0 && mode == "add") {
+                    setFormObject({...formObject, kit_items: selectedItems})
                 }
 
-            },[setPartsManItems])
+            },[kitPartsManItems])
 
             const handleSelectAll = (value) => {
                 console.log("value", value)
-                if(formObject &&  formObject["set_items"]?.length > 0) {
-                    setFormObject({...formObject, set_items: formObject["set_items"].map((item)=> ({...item, selected: value}))})
+                if(formObject &&  formObject["kit_items"]?.length > 0) {
+                    setFormObject({...formObject, kit_items: formObject["kit_items"].map((item)=> ({...item, selected: value}))})
                 }
             }
             
             const handleSelectPart = (value, row)=>{
                 console.log("row",row)
-                setFormObject({...formObject, set_items: formObject["set_items"] ? formObject["set_items"].map((item)=> {
+                setFormObject({...formObject, kit_items: formObject["kit_items"] ? formObject["kit_items"].map((item)=> {
                     if(item.rainey_id == row.rainey_id){
                         return ({...item, selected: value});
                     }
@@ -1032,8 +1028,8 @@ const GetInputByType = function(props){
             return(<>
             <AddEditManfItemDialog activePart={activePart} manfItemId={manfItemId} setManfItemId={setManfItemId}
                             addNewManDialogOpen={openAddManfItem} setAddNewManDialogOpen={setOpenAddManfItem} 
-                            editDialogMode={addEditManfItemMode} setEditDialogMode={setAddEditManfItemMode} refreshFunction={()=>setSetsPartsManItemsRefetch(true)}/>
-                {setPartsManItems?.length > 0 ? 
+                            editDialogMode={addEditManfItemMode} setEditDialogMode={setAddEditManfItemMode} refreshFunction={()=>setKitsPartsManItemsRefetch(true)}/>
+                {kitPartsManItems?.length > 0 ? 
                 
                 <div style={{width: '100%'}}>
                     {(error || valid_error) && <span className={classes.errorSpan}>Valid Manufacturing Item Required</span> }
@@ -1042,7 +1038,7 @@ const GetInputByType = function(props){
                             icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
                             name="checkedI"
-                            checked={formObject ? formObject["set_items"] ? formObject["set_items"].every((item)=>item.selected)  ? true : false : true : false }
+                            checked={formObject ? formObject["kit_items"] ? formObject["kit_items"].every((item)=>item.selected)  ? true : false : true : false }
                             onChange={(event)=> handleSelectAll(event.target.checked ? 1 : 0)}
                         /></div>
                         <div className={classes.headListNameDiv}><span>Part Name</span></div>
@@ -1050,17 +1046,17 @@ const GetInputByType = function(props){
                         <div className={classes.headListQtyDiv}><span>Order Qty</span></div>
                         <div className={classes.headListPriceDiv}><span>Order Price</span></div>
                     </div>
-                {_.uniqBy(setPartsManItems, 'rainey_id').map((part)=> 
+                {_.uniqBy(kitPartsManItems, 'rainey_id').map((part)=> 
                 {
-                    let manItems = setPartsManItems.filter((item)=> item.rainey_id === part.rainey_id);
-                    const updateRow = formObject ? formObject["set_items"]?.find((item)=> part.rainey_id == item.rainey_id) : {rainey_id: part.rainey_id};
+                    let manItems = kitPartsManItems.filter((item)=> item.rainey_id === part.rainey_id);
+                    const updateRow = formObject ? formObject["kit_items"]?.find((item)=> part.rainey_id == item.rainey_id) : {rainey_id: part.rainey_id};
                     const partSelected = updateRow && updateRow[`selected`] ? true : false;
                     return (
                         <>
                         
                         
                         
-                        <div className={clsx({[classes.inputValueSetSelect]:true, [classes.listItemDiv]:true})}>
+                        <div className={clsx({[classes.inputValueKitSelect]:true, [classes.listItemDiv]:true})}>
                         <div className={classes.headListCheckDiv}><Checkbox
                             icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                             checkedIcon={<CheckBoxIcon fontSize="small" />}
@@ -1078,7 +1074,7 @@ const GetInputByType = function(props){
                             id={`woi_input_man_select-part_mf_id-${part.rainey_id}`}
                             value={updateRow && updateRow[`part_mf_id`] ? updateRow[`part_mf_id`] : 0}
                             className={classes.inputSelect}
-                            onChange={value => handleChangeForSet(value, true, field.type, `part_mf_id-${part.rainey_id}`, part, updateRow ? updateRow[`part_mf_id`] : null ) }
+                            onChange={value => handleChangeForKit(value, true, field.type, `part_mf_id-${part.rainey_id}`, part, updateRow ? updateRow[`part_mf_id`] : null ) }
                             native
                         >
                             <option value={0} disabled selected>

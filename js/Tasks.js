@@ -95,7 +95,7 @@ async function updateMultipleTaskDates(ids, date, job_type){
 
 
 async function getCoordinates(address, city, state, zip){
-    var s_address =  ((address ? address : "" )+ "+" + (city ? city : "" )+ "+" + (state ? state : "" )+ "+" + (zip ? zip : "")).replace(/\s/g, "+")
+    var s_address =  ((address ? address : "" )+ "+" + (city ? city : "" )+ "+" + (state ? state : "" )+ "+" + (zip ? zip : "")).replace(/\s/g, "+").replace(/[&\/\\#,()$~%.'":*?<>{}]/g, '')
     var return_value;
     console.log("address", s_address)
     const route = `https://maps.googleapis.com/maps/api/geocode/json?address=` + 

@@ -177,8 +177,8 @@ const getCurrentDetailNameByType = (type)=>{
             return 'detailPartId';
             break;
         }
-        case "minInvSet":{
-            return 'detailSetId';
+        case "minInvKit":{
+            return 'detailKitId';
             break;
         }
     }
@@ -197,7 +197,7 @@ const getCurrentViewNameByType = (type)=>{
             return "currentInventoryView";
             break;
         }
-        case "minInvSet":{
+        case "minInvKit":{
             return "currentInventoryView";
             break;
         }
@@ -213,6 +213,14 @@ const getSubCurrentViewNameByType = (type)=>{
     switch(type){
         case "orderOutApprover":{
             return 'currentInvOrdersOutView';
+            break;
+        }
+        case "minInvPart":{
+            return "currentInvPartsView";
+            break;
+        }
+        case "minInvKit":{
+            return "currentInvKitsView";
             break;
         }
         

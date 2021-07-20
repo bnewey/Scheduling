@@ -12,7 +12,7 @@ import InventoryTabs from './components/InventoryTabs';
 
 //Page Panels
 import InvPartsContainer from './Inv_Parts/InvPartsContainer';
-import InvSetsContainer from './Inv_Sets/InvSetsContainer';
+import InvKitsContainer from './Inv_Kits/InvKitsContainer';
 import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
 //import InvOrdersInContainer from './Inv_OrdersIn/InvOrdersInContainer';
 import _ from 'lodash';
@@ -28,7 +28,7 @@ const InventoryContainer = function(props) {
 
   //views used through whole inventory app, 
   const views = [ { value: "invParts", displayName: "Inventory Parts", index: 0 },
-                  { value: "invSets", displayName: "Inventory Sets", index: 1 },
+                  { value: "invKits", displayName: "Inventory Kits", index: 1 },
                   { value: "invOrdersOut", displayName: "Inv Orders Out", index: 2},
                   { value: "invOrdersIn", displayName: "Inv Orders In", index: 3},
                   { value: "invAdmin", displayName: "Admin", index: 4 },];
@@ -39,7 +39,7 @@ const InventoryContainer = function(props) {
 
   const classes = useStyles();
 
-  //Get View from local storage if possible || set default
+  //Get View from local storage if possible || kit default
   useEffect(() => {
     if(currentView == null){
       var tmp = window.localStorage.getItem('currentInventoryView');
@@ -66,8 +66,8 @@ const InventoryContainer = function(props) {
       case "invParts":
         return <InvPartsContainer/>
         break;
-      case "invSets":
-        return <InvSetsContainer/>
+      case "invKits":
+        return <InvKitsContainer/>
         break;
       case "invOrdersOut":
         return <InvOrdersOutContainer/>
@@ -98,7 +98,7 @@ const InventoryContainer = function(props) {
               { currentView && getInvPage()}
               { currentView && getInvPage()}
               { currentView && getInvPage()}
-              {/* <InvSetsContainer/>
+              {/* <InvKitsContainer/>
               <InvOrdersOutContainer/>
               <InvOrdersInContainer/> */}
          </InventoryTabs>

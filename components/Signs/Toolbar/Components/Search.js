@@ -62,15 +62,8 @@ const Search = function(props) {
     if(signSearchRefetch){
       setSignSearchRefetch(false);
       
-
-      handleSearchClick()
-      .then((data)=>{
-        setSigns(data);
-      })
-      .catch((error)=>{
-        console.error("Failed to research")
-        cogoToast.error("Internal Server Error");
-      })
+      handleSearchClickPromise();
+  
     }
 
 
@@ -215,6 +208,24 @@ const Search = function(props) {
       //submit search
       setSigns(await search(searchTable, searchValue));
     }
+  }
+
+  const handleSearchClickPromise = ()=>{
+    return new Promise(async(resolve, reject)=>{
+      if(searchOpen){
+        try {
+          let data = await search(searchTable, searchValue);
+          setSigns(data);
+          resolve(true);
+        } catch (error) {
+          console.error("failed to handleSearchClickPromise", error);
+          reject(false);
+        }
+        
+      }else{
+        reject(false);
+      }
+    })
   }
 
   const handleChangeSearchValue = (event, value, reason, submit = false)=>{

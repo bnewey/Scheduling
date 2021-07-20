@@ -9,7 +9,7 @@ import cogoToast from 'cogo-toast';
 //import SignsSortOrder from './components/SignsSortOrder';
 
 import Util from  '../../../../js/Util';
-import { ListContext } from '../InvSetsContainer';
+import { ListContext } from '../InvKitsContainer';
 // import FilterArrivalState from './components/FilterArrivalState';
 
 import DateFnsUtils from '@date-io/date-fns';
@@ -19,22 +19,22 @@ import {
     DateTimePicker,
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
-import RecentSets from './components/RecentSets';
+import RecentKits from './components/RecentKits';
 //import TypeFilterSelect from './components/TypeFilterSelect';
 
 
-const SetsListSidebar = function(props) {
+const KitsListSidebar = function(props) {
   const {user} = props;
 
-  const {  currentView, setEditSetModalMode, setEditSetModalOpen  } = useContext(ListContext);
+  const {  currentView, setEditKitModalMode, setEditKitModalOpen  } = useContext(ListContext);
   
   const classes = useStyles(); 
 
-  const searchOpen = currentView && currentView.value == "setsSearch";
+  const searchOpen = currentView && currentView.value == "kitsSearch";
 
-  const handleOpenAddEditSetModal = () =>{
-    setEditSetModalMode("add");
-    setEditSetModalOpen(true);
+  const handleOpenAddEditKitModal = () =>{
+    setEditKitModalMode("add");
+    setEditKitModalOpen(true);
   }
 
   return (
@@ -43,15 +43,15 @@ const SetsListSidebar = function(props) {
              <Button className={classes.newButton} 
                     classes={{label: classes.newButtonLabel}} 
                     variant="outlined"
-                     onClick={event=> handleOpenAddEditSetModal()}
+                     onClick={event=> handleOpenAddEditKitModal()}
                     >
               <AddIcon className={classes.plusIcon}/>
-              <div>New Set</div>
+              <div>New Kit</div>
             </Button> 
         </div>
         <div className={classes.dateRangeDiv}>
             
-            <RecentSets />
+            <RecentKits />
         </div>
     
           
@@ -59,7 +59,7 @@ const SetsListSidebar = function(props) {
   );
 }
 
-export default SetsListSidebar
+export default KitsListSidebar
 
 const useStyles = makeStyles(theme => ({
     root:{

@@ -332,9 +332,11 @@ const SignSchedulerList = function(props) {
       cogoToast.success("Updated ");
 
       if(currentView.value === "signScheduler"){
+        console.log("SignScheduler refetch")
         setSignRefetch(true);
       }
       if(currentView.value === "searchSigns"){
+        console.log("searchSigns refetch")
         setSignSearchRefetch(true);
       }
       textRef.current = [];

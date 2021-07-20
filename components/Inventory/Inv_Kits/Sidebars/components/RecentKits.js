@@ -11,23 +11,23 @@ import clsx from 'clsx';
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../../js/Util';
-import { ListContext } from '../../InvSetsContainer';
+import { ListContext } from '../../InvKitsContainer';
 
 
-const RecentSets = function(props) {
+const RecentKits = function(props) {
     const {user} = props;
   
-    const { sets, setSets,  currentView, setCurrentView, views, recentSets, setRecentSets, setDetailSetId} = useContext(ListContext);
+    const { kits, setKits,  currentView, setCurrentView, views, recentKits, setRecentKits, setDetailKitId} = useContext(ListContext);
     const classes = useStyles();
 
-    const handleGoRecentlyViewed = (set) =>{
-        if(!set || !set.rainey_id){
-            cogoToast.error("Failed to get set");
+    const handleGoRecentlyViewed = (kit) =>{
+        if(!kit || !kit.rainey_id){
+            cogoToast.error("Failed to get kit");
             console.error("Bad id");
             return;
           }
-          setCurrentView(views && views.filter((view, i)=> view.value == "setsDetail")[0]);
-          setDetailSetId(set.rainey_id);
+          setCurrentView(views && views.filter((view, i)=> view.value == "kitsDetail")[0]);
+          setDetailKitId(kit.rainey_id);
     }
 
     return(<>
@@ -39,7 +39,7 @@ const RecentSets = function(props) {
             </div>
             <div className={classes.recentDiv}>
                 
-                {Array.isArray(recentSets) && recentSets.map((item,i)=>{
+                {Array.isArray(recentKits) && recentKits.map((item,i)=>{
                     return (
                     <div className={classes.itemDiv} onClick={event => handleGoRecentlyViewed(item)}>
                         <span className={classes.setNumberSpan}>{item.rainey_id}</span>
@@ -52,7 +52,7 @@ const RecentSets = function(props) {
     </>)
 }
 
-export default RecentSets;
+export default RecentKits;
 
 
 

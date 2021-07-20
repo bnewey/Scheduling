@@ -14,7 +14,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 
 import {createSorter} from '../../../../js/Sort';
-import InventorySets from  '../../../../js/InventorySets';
+import InventoryKits from  '../../../../js/InventoryKits';
 import _, {debounce} from 'lodash';
 
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -25,9 +25,9 @@ import clsx from 'clsx';
 
 
 import Util from  '../../../../js/Util';
-import { ListContext } from '../InvSetsContainer';
+import { ListContext } from '../InvKitsContainer';
 import { InventoryContext } from '../../InventoryContainer';
-import EditSetInvDialog from '../components/EditSetInvDialog';
+import EditKitInvDialog from '../components/EditKitInvDialog';
 
 const styles = (theme) => ({
   root: {
@@ -71,11 +71,11 @@ export default function ReactVirtualizedTable() {
   );
 }
 
-const SetsList = function(props) {
+const KitsList = function(props) {
   const {user, dimensions, rowHeight = 22, headerHeight = 30,} = props;
 
-  const { sets, setSets, setSetsRefetch, currentView, setCurrentView, views,detailSetId , setDetailSetId, sorters, setSorters,
-    setSetsSearchRefetch, } = useContext(ListContext);
+  const { kits, setKits, setKitsRefetch, currentView, setCurrentView, views,detailKitId , setDetailKitId, sorters, setSorters,
+    setKitsSearchRefetch, } = useContext(ListContext);
 
   const {editInvModalOpen, setEditInvModalOpen} = useContext(InventoryContext);
   
@@ -83,25 +83,25 @@ const SetsList = function(props) {
 
   const handleShowDetailView = (set_id) =>{
     if(!set_id){
-      cogoToast.error("Failed to get set");
+      cogoToast.error("Failed to get kit");
       console.error("Bad id");
       return;
     }
-    setCurrentView(views && views.filter((view, i)=> view.value == "setsDetail")[0]);
-    setDetailSetId(set_id);
+    setCurrentView(views && views.filter((view, i)=> view.value == "kitsDetail")[0]);
+    setDetailKitId(set_id);
   }
 
-  // const handleUpdateSet = (updateRow)=>{
+  // const handleUpdateKit = (updateRow)=>{
 
-  //   InventorySets.updateSet(updateRow)
+  //   InventoryKits.updateKit(updateRow)
   //   .then((data)=>{
   //     cogoToast.success("Updated ");
 
-  //     if(currentView.value === "setsList"){
-  //       setSetsRefetch(true);
+  //     if(currentView.value === "kitsList"){
+  //       setKitsRefetch(true);
   //     }
-  //     if(currentView.value === "setsSearch"){
-  //       setSetsSearchRefetch(true);
+  //     if(currentView.value === "kitsSearch"){
+  //       setKitsSearchRefetch(true);
   //     }
       
   //   })
@@ -117,16 +117,16 @@ const SetsList = function(props) {
   
   const columns = [
     { dataKey: 'rainey_id', label: 'Rainey PN', type: 'number', width: 90, align: 'center',
-      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableSetnumber}>{value}</span> }, 
+      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableKitnumber}>{value}</span> }, 
     { dataKey: 'description', label: 'Description', type: 'text', width: 350, align: 'left' }, 
     { dataKey: 'inv_qty', label: 'In Stock', type: 'number', width: 60, align: 'center',
       format: (value,rowData)=> {
         return(
-          <EditSetInvDialog set={rowData}/>
+          <EditKitInvDialog kit={rowData}/>
         )
       }
     },
-    { dataKey: 'num_in_set', label: '# in Set', type: 'number', width: 100, align: 'right' },
+    { dataKey: 'num_in_kit', label: '# in Kit', type: 'number', width: 100, align: 'right' },
     { dataKey: 'notes', label: 'Notes', width: 200,type: 'text', align: 'left' }, 
     { dataKey: 'date_entered', label: 'Date Entered',type: 'date', width: 80, align: 'center',
         format: (value)=> moment(value).format("MM-DD-YYYY") },
@@ -210,8 +210,8 @@ const SetsList = function(props) {
             }}
             headerHeight={headerHeight}
             className={classes.table}
-            rowCount={sets ? sets.length : 0 }
-            rowGetter={({ index }) => sets ? sets[index] : null }
+            rowCount={kits ? kits.length : 0 }
+            rowGetter={({ index }) => kits ? kits[index] : null }
             rowClassName={getRowClassName}
           >
             {columns.map(({ dataKey, ...other }, index) => {
@@ -237,7 +237,7 @@ const SetsList = function(props) {
   );
 }
 
-const VirtualizedTable = withStyles(styles)(SetsList);
+const VirtualizedTable = withStyles(styles)(KitsList);
 
 
 
@@ -312,7 +312,7 @@ const useStyles = makeStyles(theme => ({
     padding: 0,
     background: '#dbeaff',
 },
-  clickableSetnumber:{
+  clickableKitnumber:{
     cursor: 'pointer',
     textDecoration: 'underline',
     '&:hover':{

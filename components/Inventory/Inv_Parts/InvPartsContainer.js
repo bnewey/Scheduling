@@ -55,7 +55,7 @@ const InvPartsContainer = function(props) {
                       onClose: ()=> {setPartsRefetch(true); setActivePart(null); setDetailPartId(null);}},
                     {value: 'partsRecentOrders', displayName: 'Recent Orders', closeToView: 'partsList',
                       parent: 'partsDetail'},
-                    {value: 'partsSets', displayName: 'Related Sets', closeToView: 'partsList',
+                    {value: 'partsKits', displayName: 'Related Kits', closeToView: 'partsList',
                       parent: 'partsDetail'},
                 ];
 
@@ -281,7 +281,7 @@ const InvPartsContainer = function(props) {
       case  "partsRecentOrders":
         return <></>;
         break;
-      case "partsSets":
+      case "partsKits":
         return <></>;
         break;
       default: 
@@ -301,7 +301,7 @@ const InvPartsContainer = function(props) {
         break;
       case "partsDetail":
       case  "partsRecentOrders":
-      case "partsSets":
+      case "partsKits":
         return <PartsDetailSidebar />
         break;
       default: 

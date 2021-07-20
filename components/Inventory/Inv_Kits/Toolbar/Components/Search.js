@@ -8,8 +8,8 @@ import cogoToast from 'cogo-toast';
 import {createSorter} from '../../../../../js/Sort';
 
 import Util from  '../../../../../js/Util';
-import InventorySets from  '../../../../../js/InventorySets';
-import { ListContext } from '../../InvSetsContainer';
+import InventoryKits from  '../../../../../js/InventoryKits';
+import { ListContext } from '../../InvKitsContainer';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -26,14 +26,14 @@ const Search = function(props) {
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { sets, setSets, setsSearchRefetch, setSetsSearchRefetch, currentView, setCurrentView, views} = useContext(ListContext);
-  const searchOpen = currentView && currentView.value == "setsSearch";
+  const { kits, setKits, kitsSearchRefetch, setKitsSearchRefetch, currentView, setCurrentView, views} = useContext(ListContext);
+  const searchOpen = currentView && currentView.value == "kitsSearch";
 
   const searchTableObject= [
     {value: "all", displayValue: 'All'},
-    {value: "s.rainey_id", displayValue: 'Rainey P#'},
-    {value: "s.description", displayValue: 'Description'},
-    {value: "s.notes", displayValue: 'Notes'}
+    {value: "k.rainey_id", displayValue: 'Rainey P#'},
+    {value: "k.description", displayValue: 'Description'},
+    {value: "k.notes", displayValue: 'Notes'}
   ];
 
   const classes = useStyles({searchOpen});
@@ -63,13 +63,13 @@ const Search = function(props) {
   },[searchTable])
 
   useEffect(()=>{
-    if(setsSearchRefetch){
-      setSetsSearchRefetch(false);
+    if(kitsSearchRefetch){
+      setKitsSearchRefetch(false);
       
 
       handleSearchClick()
       .then((data)=>{
-        setSets(data);
+        setKits(data);
       })
       .catch((error)=>{
         console.error("Failed to research")
@@ -78,12 +78,12 @@ const Search = function(props) {
     }
 
 
-  },[setsSearchRefetch])
+  },[kitsSearchRefetch])
 
   //Save and/or Fetch searchTable to local storage
   useEffect(() => {
     if(searchTable == null){
-      var tmp = window.localStorage.getItem('searchInvSetsTable');
+      var tmp = window.localStorage.getItem('searchInvKitsTable');
       var tmpParsed;
       if(tmp){
         tmpParsed = JSON.parse(tmp);
@@ -95,7 +95,7 @@ const Search = function(props) {
       }
     }
     if(searchTable){
-      window.localStorage.setItem('searchInvSetsTable', JSON.stringify(searchTable));
+      window.localStorage.setItem('searchInvKitsTable', JSON.stringify(searchTable));
     }
     
   }, [searchTable]);
@@ -103,7 +103,7 @@ const Search = function(props) {
   //Save and/or Fetch searchHistory to local storage
   useEffect(() => {
     if(searchHistory == null){
-      var tmp = window.localStorage.getItem('searchInvSetsHistory');
+      var tmp = window.localStorage.getItem('searchInvKitsHistory');
       var tmpParsed;
       if(tmp){
         tmpParsed = JSON.parse(tmp);
@@ -115,7 +115,7 @@ const Search = function(props) {
       }
     }
     if(Array.isArray(searchHistory)){
-      window.localStorage.setItem('searchInvSetsHistory', JSON.stringify(searchHistory));
+      window.localStorage.setItem('searchInvKitsHistory', JSON.stringify(searchHistory));
     }
     
   }, [searchHistory]);
@@ -128,7 +128,7 @@ const Search = function(props) {
       }
 
       if(searchTable === "all"){
-        InventorySets.superSearchAllSets(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
+        InventoryKits.superSearchAllKits(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
           .then((data)=>{
             if(data){
               
@@ -153,12 +153,12 @@ const Search = function(props) {
             }
           })
           .catch((error)=>{
-            cogoToast.error("Failed to search all tables within sets");
+            cogoToast.error("Failed to search all tables within kits");
             reject(error);
             
           })
       }else{
-        InventorySets.searchAllSets(searchTable, searchValue)
+        InventoryKits.searchAllKits(searchTable, searchValue)
         .then((data)=>{
           if(data){
             //console.log(data);
@@ -182,7 +182,7 @@ const Search = function(props) {
           }
         })
         .catch((error)=>{
-          cogoToast.error("Failed to search sets");
+          cogoToast.error("Failed to search kits");
           reject(error);
           
         })
@@ -201,7 +201,7 @@ const Search = function(props) {
       try {
         var response = await search(searchTable, searchValue)    
 
-        setSets(response);
+        setKits(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")
         console.error("Error", error);
@@ -211,11 +211,11 @@ const Search = function(props) {
 
   const handleSearchClick = async() =>{
     if(searchOpen == false){
-      setCurrentView( views.filter((view)=> view.value == "setsSearch")[0] )
+      setCurrentView( views.filter((view)=> view.value == "kitsSearch")[0] )
       
     }else{
       //submit search
-      setSets(await search(searchTable, searchValue));
+      setKits(await search(searchTable, searchValue));
     }
   }
 
@@ -274,14 +274,14 @@ const Search = function(props) {
                 handleChangeSearchValue(event, matchValue || value, reason)
                 if(matchValue){
                   setSearchTable(searchMatch.searchTable);
-                  setSets(await search(searchMatch.searchTable, matchValue ));
+                  setKits(await search(searchMatch.searchTable, matchValue ));
                 }
               } }
               renderInput={(params) => {  searchRef.current = params.inputProps.ref.current; return (<TextField
                 
                 className={classes.input}                
-                placeholder="Search Sets"
-                inputProps={{ 'aria-label': 'search sets', id: "sets_search_input", ref: searchRef, autoFocus: true}}
+                placeholder="Search Kits"
+                inputProps={{ 'aria-label': 'search kits', id: "kits_search_input", ref: searchRef, autoFocus: true}}
                 autoFocus={true}
                 {...params}
                 InputProps={{...params.InputProps, startAdornment: searchOpen ? selectSearchField() : "", classes: {underline: classes.underline}}}

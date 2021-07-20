@@ -9,6 +9,7 @@ import {createSorter} from '../../../../js/Sort';
 
 import Util from  '../../../../js/Util';
 import Inventory from  '../../../../js/Inventory';
+import InventoryKits from  '../../../../js/InventoryKits';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -17,7 +18,7 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
 
-const PartsAndSetsSearch = function(props) {
+const PartsAndKitsSearch = function(props) {
 
   const [searchValue,setSearchValue] = useState("");
   const [searchTable, setSearchTable] = useState(null);
@@ -32,9 +33,9 @@ const PartsAndSetsSearch = function(props) {
     {value: "p.description", displayValue: 'Part Description', table: 'parts'},
     {value: "pt.type", displayValue: 'Part Type', table: 'parts'},
     {value: "p.notes", displayValue: 'Part Notes', table: 'parts'},
-    {value: "s.rainey_id", displayValue: 'Set Rainey P#', table: 'sets'},
-    {value: "s.description", displayValue: 'Set Description', table: 'sets'},
-    {value: "s.notes", displayValue: 'Set Notes', table: 'sets'}
+    {value: "k.rainey_id", displayValue: 'Kit Rainey P#', table: 'kits'},
+    {value: "k.description", displayValue: 'Kit Description', table: 'kits'},
+    {value: "k.notes", displayValue: 'Kit Notes', table: 'kits'}
   ];
 
   const classes = useStyles({searchOpen});
@@ -129,7 +130,7 @@ const PartsAndSetsSearch = function(props) {
       }
 
       if(searchTable === "all"){
-        Inventory.superSearchAllPartsAndSets(searchTableObject.filter((j)=>j.value !== "all"), searchValue)
+        Inventory.superSearchAllPartsAndKits(searchTableObject.filter((j)=>j.value !== "all"), searchValue)
           .then((data)=>{
             if(data){
               
@@ -159,34 +160,67 @@ const PartsAndSetsSearch = function(props) {
             
           })
       }else{
-        Inventory.searchAllParts(searchTable, searchValue)
-        .then((data)=>{
-          if(data){
-            //console.log(data);
-            //Update search history
-            if(searchValue != ""){
-              var updateArray = searchHistory ?  [...searchHistory] : [];
+        if(searchTableObject.find((item)=> item.value == searchTable )?.table == 'parts'){
+            Inventory.searchAllParts(searchTable, searchValue)
+            .then((data)=>{
+              if(data){
+                //console.log(data);
+                //Update search history
+                if(searchValue != ""){
+                  var updateArray = searchHistory ?  [...searchHistory] : [];
 
-              //check if current matches last, if so no need to add
-              if(searchHistory.length == 0 || (searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable)){
+                  //check if current matches last, if so no need to add
+                  if(searchHistory.length == 0 || (searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable)){
 
-                if(updateArray.length > 15){
-                    //remove first index
-                    updateArray.shift();
+                    if(updateArray.length > 15){
+                        //remove first index
+                        updateArray.shift();
+                    }
+                    setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
+                        searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
+                  }
                 }
-                setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
-                    searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
-              }
-            }
 
-            resolve(data);
-          }
-        })
-        .catch((error)=>{
-          cogoToast.error("Failed to search parts");
-          reject(error);
-          
-        })
+                resolve(data);
+              }
+            })
+            .catch((error)=>{
+              cogoToast.error("Failed to search parts");
+              reject(error);
+              
+            })
+        }
+        if(searchTableObject.find((item)=> item.value == searchTable )?.table == 'kits'){
+          InventoryKits.searchAllKits(searchTable, searchValue)
+            .then((data)=>{
+              if(data){
+                //console.log(data);
+                //Update search history
+                if(searchValue != ""){
+                  var updateArray = searchHistory ?  [...searchHistory] : [];
+
+                  //check if current matches last, if so no need to add
+                  if(searchHistory.length == 0 || (searchHistory.length >0 && searchHistory[searchHistory.length -1]?.searchValue != searchValue && searchHistory[searchHistory.length -1]?.searchTable != searchTable)){
+
+                    if(updateArray.length > 15){
+                        //remove first index
+                        updateArray.shift();
+                    }
+                    setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
+                        searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
+                  }
+                }
+
+                resolve(data);
+              }
+            })
+            .catch((error)=>{
+              cogoToast.error("Failed to search kits");
+              reject(error);
+              
+            })
+        }
+        
       }
     })
   }
@@ -280,7 +314,7 @@ const PartsAndSetsSearch = function(props) {
               renderInput={(params) => {  searchRef.current = params.inputProps.ref.current; return (<TextField
                 
                 className={classes.input}                
-                placeholder="Search Parts and Sets"
+                placeholder="Search Parts and Kits"
                 inputProps={{ 'aria-label': 'search parts', id: "parts_search_input", ref: searchRef, autoFocus: true}}
                 autoFocus={true}
                 {...params}
@@ -309,7 +343,7 @@ const PartsAndSetsSearch = function(props) {
   );
 }
 
-export default PartsAndSetsSearch
+export default PartsAndKitsSearch
 
 const useStyles = makeStyles(theme => ({
   

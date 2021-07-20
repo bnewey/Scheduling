@@ -219,17 +219,22 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         }
 
         if(repairs && repairs.length > 0){
-            
+            let index = 0;
+            if(loaners && loaners.length > 0){
+                //skip space if there are also loaners on pdf so we dont overwrite
+                index = loaners.length;
+            }
             
             repairs.forEach((item,i)=>{
                 if(i >= 8){
                     //new page?
                 }
-                doc.fontSize(10).text("X", 66 , (228 + i*13.7), {lineBreak: false});
+                index+=i;
+                doc.fontSize(10).text("X", 66 , (228 + index*13.7), {lineBreak: false});
                 doc.fontSize(8);
-                doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (230 + i*13.5), {lineBreak: false})
+                doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (230 + index*13.5), {lineBreak: false})
                 doc.fontSize(7);
-                doc.text((item.quantity != 0 ? item.quantity : "")+ " - " + item.description, 180, (230 + i*13.5), {lineBreak: false})
+                doc.text((item.quantity != 0 ? item.quantity : "")+ " - " + item.description, 180, (230 + index*13.5), {lineBreak: false})
                 
             })
         }

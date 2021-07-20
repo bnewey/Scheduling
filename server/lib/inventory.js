@@ -95,7 +95,7 @@ router.post('/superSearchAllParts', async (req,res) => {
         sql += `IFNULL(${table}, ''), \' \'${i === tables.length -1 ? '' : ', '}`
     })
     sql+=    ') LIKE ? ' ;
-
+    
     logger.info("SQL", [sql])
     try{
         const results = await database.query(sql, [ search_query]);
@@ -108,7 +108,8 @@ router.post('/superSearchAllParts', async (req,res) => {
     }
 });
 
-router.post('/superSearchAllPartsAndSets', async (req,res) => {
+
+router.post('/superSearchAllPartsAndKits', async (req,res) => {
 
     var search_query, tables;
     if(req.body){
@@ -137,13 +138,13 @@ router.post('/superSearchAllPartsAndSets', async (req,res) => {
         
     })
     sql+=    ') LIKE ? ' + 
-    ' UNION SELECT s.rainey_id, s.description, \'0.00\' AS cost_each, s.notes, s.obsolete, \' \' AS type, \'set\' AS item_type, date_format(s.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(s.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
-    ' FROM inv__sets s ' +
+    ' UNION SELECT k.rainey_id, k.description, \'0.00\' AS cost_each, k.notes,k.min_inv, k.obsolete, \' \' AS type, \'kit\' AS item_type, date_format(k.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, date_format(k.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
+    ' FROM inv__kits k ' +
         ' WHERE CONCAT(';
-    let set_tables = tables.filter((item)=> item.table == "sets");
-    set_tables.forEach((table,i)=> {
+    let kit_tables = tables.filter((item)=> item.table == "kits");
+    kit_tables.forEach((table,i)=> {
 
-        sql += `IFNULL(${table.value}, ''), \' \'${i === set_tables.length -1 ? '' : ', '}`
+        sql += `IFNULL(${table.value}, ''), \' \'${i === kit_tables.length -1 ? '' : ', '}`
     })
     sql+=    ') LIKE ? ' ; 
 

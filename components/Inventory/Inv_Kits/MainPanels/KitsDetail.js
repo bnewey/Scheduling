@@ -14,21 +14,22 @@ import cogoToast from 'cogo-toast';
 import moment from 'moment';
 
 import Util from  '../../../../js/Util';
-import InventorySets from  '../../../../js/InventorySets';
-import { ListContext } from '../InvSetsContainer';
-import { DetailContext } from '../InvSetsContainer';
-import EditSetInvDialog from '../components/EditSetInvDialog';
+import InventoryKits from  '../../../../js/InventoryKits';
+import { ListContext } from '../InvKitsContainer';
+import { DetailContext } from '../InvKitsContainer';
+import EditKitInvDialog from '../components/EditKitInvDialog';
 import clsx from 'clsx';
-import SetItemList from '../components/SetItemList';
+import KitItemList from '../components/KitItemList';
 import { Warning } from '@material-ui/icons';
+import KitsItemization from './DetailSubPanels/KitsItemization';
 
 
 
-const SetsDetail = function(props) {
+const KitsDetail = function(props) {
   const {user} = props;
 
-  const { sets, setSets, setSetsRefetch,currentView, setCurrentView, views,columnState, setColumnState,
-    editSetModalMode,setEditSetModalMode, activeSet, setActiveSet, editSetModalOpen,setEditSetModalOpen} = useContext(ListContext);
+  const { kits, setKits, setKitsRefetch,currentView, setCurrentView, views,columnState, setColumnState,
+    editKitModalMode,setEditKitModalMode, activeKit, setActiveKit, editKitModalOpen,setEditKitModalOpen} = useContext(ListContext);
   const classes = useStyles();
 
   //const {} = useContext(DetailContext);
@@ -37,13 +38,14 @@ const SetsDetail = function(props) {
                         { value: 'rainey_id', displayName: 'Rainey ID' }, 
                         { value: 'description', displayName: 'Description' }, 
                         { value: 'inv_qty', displayName: 'In Stock', 
-                          format: (value,row ) => <EditSetInvDialog set={row}/> },
+                          format: (value,row ) => <EditKitInvDialog kit={row}/> },
                           { value: 'min_inv', displayName: 'Minimum in Inv',
                           format: (value,row ) => <div className={classes.minInvDiv}>{row.min_inv >= row.inv_qty ? <Warning className={classes.warnIcon}/> : <></>}{value}</div>   },
-                        { value: 'num_in_set', displayName: '# in Set'   },
+                        { value: 'num_in_kit', displayName: '# in Kit'   },
                     ]
 
   const second_detail_table = [
+                        { value: 'storage_location', displayName: 'Storage Location',   },
                         { value: 'notes', displayName: 'Notes'}, 
                         { value: 'date_entered', displayName: 'Date Entered', 
                             format: (value)=> moment(value).format("MM-DD-YYYY") },
@@ -54,21 +56,21 @@ const SetsDetail = function(props) {
 
    return ( 
     <div className={classes.root}>
-        {activeSet ?
+        {activeKit ?
         <div className={classes.container}>
 
           {/* MAIN DETAIL */}
           <div className={classes.main_grid_container}>
                   <div className={classes.descriptionDiv}>
-                    <span className={classes.descriptionSpan}>{activeSet.description}</span>
+                    <span className={classes.descriptionSpan}>{activeKit.description}</span>
                   </div>
                   <div className={classes.mainDetailInfoDiv}>
-                    {activeSet && main_detail_table.map((item,i)=> {
+                    {activeKit && main_detail_table.map((item,i)=> {
                       return(
                       <div className={classes.mainDetailDiv} key={i}>
                         <span className={classes.mainDetailLabel}>{item.displayName}:</span>
                         <span className={classes.mainDetailValue}>
-                          {activeSet[item.value] != null ? (item.format ? item.format(activeSet[item.value], activeSet) :  activeSet[item.value]) : ""}
+                          {activeKit[item.value] != null ? (item.format ? item.format(activeKit[item.value], activeKit) :  activeKit[item.value]) : ""}
                         </span>
                       </div>
                       )
@@ -84,13 +86,13 @@ const SetsDetail = function(props) {
                   <div className={classes.moreInfoDiv}>More Info</div>
                   <div className={classes.detailInfoDiv}>
 
-                    {activeSet && second_detail_table.map((item,i)=> {
+                    {activeKit && second_detail_table.map((item,i)=> {
                       return(
                         
                       <div className={classes.detailDiv} key={i}>
                         <span className={classes.detailLabel}>{item.displayName}:</span>
                         <span className={classes.detailValue}>
-                          {activeSet[item.value] != null ? (item.format ? item.format(activeSet[item.value], item) :  activeSet[item.value]) : ""}
+                          {activeKit[item.value] != null ? (item.format ? item.format(activeKit[item.value], item) :  activeKit[item.value]) : ""}
                           </span>
                       </div>
                       )
@@ -101,10 +103,9 @@ const SetsDetail = function(props) {
 
             {/* MANUFACTURE DETAIL */}
             <div className={ clsx({[classes.grid_container]: true, [classes.manuListContainer]: true})}>
-                  <div className={classes.moreInfoDiv}>Set Item List</div>
+                  <div className={classes.moreInfoDiv}>Kit Item List</div>
                   <div className={classes.detailInfoDiv}>
-                    <SetItemList set={activeSet} resetFunction={()=> setSetsRefetch(true)}/>
-                      
+                      <KitsItemization type="half"/>
                     </div>
             </div>
             {/* END MANUFACTURE  DETAIL */}
@@ -115,7 +116,7 @@ const SetsDetail = function(props) {
   );
 }
 
-export default SetsDetail
+export default KitsDetail
 
 
 

@@ -447,7 +447,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'left',
         padding: '5px 7px',
     },
-    inputValueSetSelect:{
+    inputValueKitSelect:{
       flexBasis: '100%',
       textAlign: 'left',
       

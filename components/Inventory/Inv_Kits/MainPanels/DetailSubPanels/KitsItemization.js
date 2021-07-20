@@ -5,6 +5,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import EditIcon from '@material-ui/icons/Edit';
+import LinkIcon from '@material-ui/icons/Link';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -16,68 +17,89 @@ import TableRow from '@material-ui/core/TableRow';
 
 import cogoToast from 'cogo-toast';
 
-import Util from  '../../../../../../js/Util';
-import InventoryOrdersOut from  '../../../../../../js/InventoryOrdersOut';
+import Util from  '../../../../../js/Util';
+import InventoryKits from  '../../../../../js/InventoryKits';
 import clsx from 'clsx';
 
-import { DetailContext, ListContext } from '../../../InvOrdersOutContainer';
-import AddEditOrdersOutItemDialog from '../../../components/AddEditOrdersOutItemDialog';
+import { DetailContext, ListContext } from '../../InvKitsContainer';
+import AddEditKitItemDialog from '../../components/AddEditKitItemDialog.js';
 
 //import AddEditWOIModal from '../../../../AddEditWOI/AddEditWOIModal';
 
-const OrderOutItemization = function(props) {
+const KitsItemization = function(props) {
   const {user, type = "full"} = props;
 
-  const { activeOrderOut, setActiveOrderOut, resetWOIForm, setResetWOIForm,editOrderOutModalOpen,
+  const { activeKit, setActiveKit, resetWOIForm, setResetWOIForm,editOrderOutModalOpen,
     setEditOrderOutModalOpen, currentView,  ordersOut, setOrdersOut, setOrdersOutRefetch, views,editOrderOutModalMode,setEditOrderOutModalMode, 
        } = useContext(ListContext);
 
-  const {editOOIDialogMode, setEditOOIDialogMode, editOOIModalOpen, setEditOOIModalOpen, activeOOItem, setActiveOOItem} = useContext(DetailContext)
+  const {editKitItemDialogMode, setEditKitItemDialogMode, editKitItemModalOpen, setEditKitItemModalOpen, activeKitItemItem, setActiveKitItemItem} = useContext(DetailContext)
 
   const classes = useStyles(type);
 
-  const [orderOutItems, setOrderOutItems] = React.useState(null);
+  const [kitItems, setKitItems] = React.useState(null);
   
-  const [refetchOOI, setRefetchOOI] = React.useState(false);
+  const [refetchKitItem, setRefetchKitItem] = React.useState(false);
 
   //WOI
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
-    if((orderOutItems == null || refetchOOI) && activeOrderOut) {
-      if(refetchOOI){
-        setRefetchOOI(false);
+    if((kitItems == null || refetchKitItem) && activeKit) {
+      if(refetchKitItem){
+        setRefetchKitItem(false);
       }
 
-      InventoryOrdersOut.getOrderOutItems(activeOrderOut.id)
-      .then( data => { setOrderOutItems(data); })
+      InventoryKits.getKitItems(activeKit.rainey_id)
+      .then( async (data) => {
+        console.log("data",data); 
+        let promises = data.map(async(item)=>{
+          if(item.item_type === "part"){
+            return item;
+          }
+          if(item.item_type === "kit"){
+            item.cost_each = await InventoryKits.getKitItemsCostData(item.rainey_id)
+            console.log("item.cost_each ", item.cost_each );
+            return item;
+          }
+          
+          throw "No item type";
+        })
+
+        Promise.all(promises).then((results)=>{
+          console.log("kitData",results);
+          setKitItems(results); 
+        })
+        
+      })
       .catch( error => {
         console.warn(error);
         cogoToast.error(`Error getting oois`, {hideAfter: 4});
       })
     }
+    
   
-  },[orderOutItems, activeOrderOut, refetchOOI]);
+  },[kitItems, activeKit, refetchKitItem]);
 
   useEffect(()=>{
-    if(currentView && currentView.value == "orderOutItems"){
-      setRefetchOOI(true);
+    if(currentView && currentView.value == "kitItems"){
+      setRefetchKitItem(true);
     }
   },[currentView]);
 
   
-  const handleShowOOIView = (id)=>{
+  const handleShowKitItemView = (id)=>{
     if(id == null){
       cogoToast.error("Failed to get order out item");
       console.error("Bad id");
       return;
     }
     
-    var tmp = orderOutItems.find((v)=> v.id == id) || -1;
+    var tmp = kitItems.find((v)=> v.id == id) || -1;
     if(tmp){
-      setActiveOOItem(tmp);
+      setActiveKitItemItem(tmp);
       //setResetWOIForm(true)
-      setEditOOIDialogMode("edit");
-      setEditOOIModalOpen(true)
+      setEditKitItemDialogMode("edit");
+      setEditKitItemModalOpen(true)
     }else{
       cogoToast.error("Failed to open ooi");
       console.error("Failed to open ooi", error);
@@ -85,43 +107,40 @@ const OrderOutItemization = function(props) {
   }
 
   
+
+  
   const columns =  type == 'full' ? [
-    { id: 'id', label: 'ID', minWidth: 20, align: 'center',
-      format: (value, row)=>  <span onClick={()=>handleShowOOIView(value)} className={classes.clickableWOnumber}>{value}</span>  },
-    { id: 'rainey_id', label: 'Rainey ID', minWidth: 20, align: 'center',
-      format: (value, row)=>  <div className={classes.urlSpan} onClick={event => handleGoToPart(event,value)}>{value}</div>  },
-    { id: 'description', label: 'Description', type: 'text', minWidth: 150, align: 'left',
-    format: (value) => <div className={classes.descSpan}>{value}</div>,  }, 
-    { id: 'qty_in_order', label: "Qty In Order", type: 'number', minWidth:40, align: 'center'},
+      {id: 'id', label: 'ID', minWidth: 80, align: 'center',
+      format: (value, row)=>  <span onClick={()=>handleShowKitItemView(value)} className={classes.clickableWOnumber}>{value}</span>},
+    { id: 'rainey_id', label: 'Rainey ID', minWidth: 80, align: 'center', editable: 'never' ,
+    render: (value, rowData) => <div className={classes.urlSpan} onClick={event => handleGoToPart(event,rowData.rainey_id)}>{rowData.rainey_id}</div>    },
+    { id: 'description', label: 'Description', minWidth: 80, align: 'center', editable: 'never' ,
+    render: (value, rowData) => <div className={classes.notesSpan}>{rowData.description}</div>,     },
+    { id: 'type_name', label: 'Type', minWidth: 100,type: 'text', align: 'center', },
     { id: 'inv_qty', label: 'In Stock', type: 'number', minWidth: 40, align: 'center',},
-    { id: 'man_name', label: 'Manf', minWidth: 80, align: 'center'     },
-    { id: 'mf_part_number', label: 'Manf #', minWidth: 150, align: 'center',
-        format: (value) => <div className={classes.notesSpan}>{value}</div>,     },
-    { id: 'est_cost_each', label: 'Est Cost Each', type: 'number', minWidth: 100, align: 'right',
-      format: (value, rowData)=> `$ ${value?.toFixed(6)}` },
-    { id: 'actual_cost_each', label: 'Cost Each', type: 'number', minWidth: 100, align: 'right',
-      format: (value,rowData)=> `$ ${value?.toFixed(6)}` },
+    { id: 'cost_each', label: 'Est Cost Each', type: 'number', minWidth: 100, align: 'right',
+       format: (value, rowData)=> `$ ${value.toFixed ? value?.toFixed(6) : value}` },
       { id: 'total_cost', label: 'Cost', type: 'number', minWidth: 100, align: 'right',
-        format: (value,rowData)=> `$ ${(rowData?.actual_cost_each * rowData?.qty_in_order)?.toFixed(3)}` },
-    { id: 'type', label: 'Type', minWidth: 150,type: 'text', align: 'center', },
-    { id: 'notes', label: 'Notes', minWidth: 200,type: 'text', align: 'left',
-    format: (value) => <div className={classes.descSpan}>{value}</div>,  }, 
-    { id: 'reel_minWidth', label: 'Reel Width', type: 'text',minWidth: 10, align: 'center' },
-    { id: 'obsolete', label: 'Obsolete',type: 'number', minWidth: 10, align: 'center' },
+         format: (value,rowData)=> `$ ${(rowData?.cost_each * rowData?.qty_in_kit)?.toFixed(3)}` },
+    { id: 'qty_in_kit', label: 'Qty In Kit', minWidth: 25, align: 'center', editable: 'onUpdate',
+      render: (value, rowData) => rowData.qty_in_kit },
+      { id: 'notes', label: 'Notes', minWidth: 200,type: 'text', align: 'left',
+     format: (value) => <div className={classes.descSpan}>{value}</div>,  }, 
+    { id: 'date_updated', label: 'Part Updated', minWidth: 80, align: 'center', editable: 'never'   },
   ] : 
    [
     { id: 'id', label: 'ID', minWidth: 20, align: 'center',
-    format: (value, row)=>  <span onClick={()=>handleShowOOIView(value)} className={classes.clickableWOnumber}>{value}</span>  },
+    format: (value, row)=>  <span onClick={()=>handleShowKitItemView(value)} className={classes.clickableWOnumber}>{value}</span>  },
     { id: 'rainey_id', label: 'Rainey ID', minWidth: 20, align: 'center',
       format: (value, row)=>  <div className={classes.urlSpan} onClick={event => handleGoToPart(event,value)}>{value}</div>  },
     { id: 'description', label: 'Description', type: 'text', minWidth: 250, align: 'left',
     format: (value) => <div className={classes.descSpan}>{value}</div>,  }, 
-    { id: 'qty_in_order', label: "Qty In Order", type: 'number', minWidth:40, align: 'center'},
+    { id: 'qty_in_kit', label: "Qty In Order", type: 'number', minWidth:40, align: 'center'},
     { id: 'man_name', label: 'Manf', minWidth: 80, align: 'center'     },  
-    { id: 'actual_cost_each', label: 'Cost Each', type: 'number', minWidth: 100, align: 'right',
-      format: (value,rowData)=> `$ ${value?.toFixed(6)}` },
+    { id: 'cost_each', label: 'Est Cost Each', type: 'number', minWidth: 100, align: 'right',
+       format: (value, rowData)=> `$ ${value.toFixed ? value?.toFixed(6) : value}` },
       { id: 'total_cost', label: 'Cost', type: 'number', minWidth: 100, align: 'right',
-      format: (value,rowData)=> `$ ${(rowData?.actual_cost_each * rowData?.qty_in_order)?.toFixed(3)}` },
+         format: (value,rowData)=> `$ ${(rowData?.cost_each * rowData?.qty_in_kit)?.toFixed(3)}` },
    ];
 
   const handleGoToPart = (event, rainey_id)=>{
@@ -160,13 +179,13 @@ const OrderOutItemization = function(props) {
 
   return ( 
     <div className={classes.root}>
-        {activeOrderOut ?
+        {activeKit ?
         <div className={classes.container}>
 
             <Grid  container direction={'column'}>
                   <Grid item xs={ type == "full" ? 12 : 12}>
                     <div className={classes.woiDiv}>
-                    { orderOutItems && orderOutItems.length > 0 ?
+                    { kitItems && kitItems.length > 0 ?
                     <TableContainer className={ clsx( { [classes.container_small]: editOrderOutModalOpen,
                                                         [classes.container]: !editOrderOutModalOpen
                                                       }) }>
@@ -187,15 +206,17 @@ const OrderOutItemization = function(props) {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          { orderOutItems.map((row) => {
+                          { kitItems.map((row) => {
                             return (
                               <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.id} >
                                 {columns.map((column,i) => {
                                   const value = row[column.id];
+                                  const item_type = row.item_type;
                                   return (
                                     <TableCell className={classes.tableCell}
                                                key={column.id + i} align={column.align}
                                                style={{ minWidth: column.minWidth }}>
+                                      
                                       {column.format  ? column.format(value, row) : value}
                                     </TableCell>
                                   );
@@ -210,14 +231,29 @@ const OrderOutItemization = function(props) {
                           <StyledTableRow hover role="checkbox" tabIndex={-1} key={`total_row`} className={classes.stickyFooter} >
                                 {columns.map((column,i) => {
                                   const value = column.id == 'total_cost' ?  
-                                      orderOutItems.reduce((total, item)=>  (total + item.qty_in_order * item.actual_cost_each), 0)
+                                      kitItems.reduce((total, item)=>  (total + item.qty_in_kit * item.cost_each), 0)
                                     : null;
                                   console.log("value", value)
                                   return (
                                     <TableCell className={clsx({[classes.tableCellTotal]:true , [classes.stickyFooter]:true})}
                                                key={`total_row` + i} align={column.align}
                                                style={{ minWidth: column.minWidth }}>
-                                      {column.id == 'total_cost'  ? `$ ${value?.toFixed(3)}` :  column.id == 'actual_cost_each' ? 'TOTAL' : ''}
+                                      {column.id == 'total_cost'  ? `$ ${value?.toFixed(3)}` :  column.id == 'cost_each' ? 'TOTAL' : ''}
+                                    </TableCell>
+                                  );
+                                })}
+                              </StyledTableRow>
+                            <StyledTableRow hover role="checkbox" tabIndex={-1} key={`total_row`} className={classes.stickyFooter} >
+                                {columns.map((column,i) => {
+                                  const value = column.id == 'total_cost' ?  
+                                      (kitItems.reduce((total, item)=>  (total + item.qty_in_kit * item.cost_each), 0) * activeKit.num_in_kit)
+                                    : null;
+                                  console.log("value", value)
+                                  return (
+                                    <TableCell className={clsx({[classes.tableCellTotal]:true , [classes.stickyFooter]:true})}
+                                               key={`total_row` + i} align={column.align}
+                                               style={{ minWidth: column.minWidth }}>
+                                      {column.id == 'total_cost'  ? `$ ${value?.toFixed(3)}` :  column.id == 'cost_each' ? `SET TOTAL(x${activeKit.num_in_kit})` : ''}
                                     </TableCell>
                                   );
                                 })}
@@ -226,16 +262,16 @@ const OrderOutItemization = function(props) {
                         </TableFooter>
                       </Table>
                     </TableContainer>
-                    : <span className={classes.infoSpan}>No Order Out Items</span>}
+                    : <span className={classes.infoSpan}>No Kit Items</span>}
 
 
                     </div>
                   </Grid>
                   
                     {/* <div className={classes.addWoiDiv}><AddEditWOIModal  /></div> */}
-                        <AddEditOrdersOutItemDialog editOOIDialogMode={editOOIDialogMode} setEditOOIDialogMode={setEditOOIDialogMode} editOOIModalOpen={editOOIModalOpen}
-                        setEditOOIModalOpen={setEditOOIModalOpen} setOrderOutItems={setOrderOutItems}
-                        activeOOItem={activeOOItem} setActiveOOItem={setActiveOOItem} />
+                        <AddEditKitItemDialog editKitItemDialogMode={editKitItemDialogMode} setEditKitItemDialogMode={setEditKitItemDialogMode} editKitItemModalOpen={editKitItemModalOpen}
+                        setEditKitItemModalOpen={setEditKitItemModalOpen} setKitItems={setKitItems}
+                        activeKitItemItem={activeKitItemItem} setActiveKitItemItem={setActiveKitItemItem} /> 
                   
             </Grid>
 
@@ -245,7 +281,7 @@ const OrderOutItemization = function(props) {
   );
 }
 
-export default OrderOutItemization
+export default KitsItemization
 
 
 

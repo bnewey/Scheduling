@@ -58,8 +58,8 @@ async function superSearchAllParts(tables, query){
 
 }
 
-async function superSearchAllPartsAndSets(tables, query){
-    const route = '/scheduling/inventory/superSearchAllPartsAndSets';
+async function superSearchAllPartsAndKits(tables, query){
+    const route = '/scheduling/inventory/superSearchAllPartsAndKits';
     try{
         var data = await fetch(route,
             {
@@ -477,7 +477,7 @@ module.exports = {
     getAllParts,
     searchAllParts,
     superSearchAllParts,
-    superSearchAllPartsAndSets,
+    superSearchAllPartsAndKits,
     getPartById,
     getPartTypes,
     getManufactures,

@@ -10,7 +10,7 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   });
   import dynamic from 'next/dynamic'
 
-import InventorySets from '../../../../js/InventorySets';
+import InventoryKits from '../../../../js/InventoryKits';
 import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
 
@@ -21,15 +21,15 @@ import {
     DateTimePicker,
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
-import { ListContext } from '../../Inv_Sets/InvSetsContainer';
+import { ListContext } from '../../Inv_Kits/InvKitsContainer';
 import clsx from 'clsx';
 
 
-const EditSetInvDialog = (props) => {
+const EditKitInvDialog = (props) => {
  
     //PROPS
-    const { set } = props;
-    const { setSetsRefetch, setSetsSearchRefetch, currentView,setActiveSet} = useContext(ListContext);
+    const { kit } = props;
+    const { setKitsRefetch, setKitsSearchRefetch, currentView,setActiveKit} = useContext(ListContext);
     const textFieldRef = React.useRef();
     const refreshRef= React.useRef();
 
@@ -54,17 +54,17 @@ const EditSetInvDialog = (props) => {
 
   
 
-    const handleUpdateSetInv = (event, addSub) =>{
+    const handleUpdateKitInv = (event, addSub) =>{
 
-        let updateSet = {...set};
+        let updateKit = {...kit};
 
-        updateSet.old_inv_qty = updateSet["inv_qty"];
-        updateSet.inv_qty = handleGetSumFromRef(invValue, set.inv_qty, addSub  )
+        updateKit.old_inv_qty = updateKit["inv_qty"];
+        updateKit.inv_qty = handleGetSumFromRef(invValue, kit.inv_qty, addSub  )
 
 
         //Validate
         var validationArray = [];
-        if(updateSet.inv_qty  < 0){
+        if(updateKit.inv_qty  < 0){
             validationArray.push("Negative Inventory not allowed")
         }
         setValidationErrors( validationArray )
@@ -81,19 +81,19 @@ const EditSetInvDialog = (props) => {
             return;
         }
        
-        //UpdateSetInv only updates inv_qty and tracks inventory change
-        InventorySets.updateSetInv(updateSet)
+        //UpdateKitInv only updates inv_qty and tracks inventory change
+        InventoryKits.updateKitInv(updateKit)
         .then((data)=>{
             cogoToast.success("Updated ");
 
-            if(currentView.value === "setsList"){
-                setSetsRefetch(true);
+            if(currentView.value === "kitsList"){
+                setKitsRefetch(true);
             }
-            if(currentView.value === "setsSearch"){
-                setSetsSearchRefetch(true);
+            if(currentView.value === "kitsSearch"){
+                setKitsSearchRefetch(true);
             }
-            if(currentView.value === "setsDetail"){
-                setActiveSet(null);
+            if(currentView.value === "kitsDetail"){
+                setActiveKit(null);
             }
             handleDialogClose();
         })
@@ -173,17 +173,17 @@ const EditSetInvDialog = (props) => {
     
     return(
         <React.Fragment>  
-            <div onClick={handleOpenEditInvModal} className={classes.editDiv} >{set.inv_qty}</div>          
+            <div onClick={handleOpenEditInvModal} className={classes.editDiv} >{kit.inv_qty}</div>          
             
             
             <Dialog PaperProps={{className: classes.dialog}} open={editInvModalOpen} onClose={handleDialogClose}>
-            <DialogTitle className={classes.title}>{set.description}</DialogTitle>
+            <DialogTitle className={classes.title}>{kit.description}</DialogTitle>
                 <DialogContent className={classes.content}>
 
                     <div className={classes.formGrid}>
                         <div className={classes.stockDiv}>
                             <span className={classes.stockLabel}>IN STOCK: </span>
-                            <span className={classes.stockValue}>{set.inv_qty}</span>
+                            <span className={classes.stockValue}>{kit.inv_qty}</span>
                         </div>
                        
                         <div className={classes.inputDivs}>
@@ -212,7 +212,7 @@ const EditSetInvDialog = (props) => {
                         </div>
                         <div className={classes.stockDiv} key={refreshRef}>
                             <span className={classes.stockLabel}>NEW TOTAL: </span>
-                            <span className={classes.stockValue}>{handleGetSumFromRef(invValue,parseInt(set.inv_qty), addSub)}</span>
+                            <span className={classes.stockValue}>{handleGetSumFromRef(invValue,parseInt(kit.inv_qty), addSub)}</span>
                         </div>
                     </div>
 
@@ -225,7 +225,7 @@ const EditSetInvDialog = (props) => {
                             Cancel
                         </Button>
                         <Button
-                            onMouseUp={event => handleUpdateSetInv(event, addSub)}
+                            onMouseUp={event => handleUpdateKitInv(event, addSub)}
                             variant="contained"
                             color="secondary"
                             size="medium"
@@ -242,7 +242,7 @@ const EditSetInvDialog = (props) => {
 
 } 
 
-export default EditSetInvDialog;
+export default EditKitInvDialog;
 
 const useStyles = makeStyles(theme => ({
     root: {

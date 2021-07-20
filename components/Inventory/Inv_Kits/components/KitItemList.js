@@ -55,19 +55,19 @@ import cogoToast from 'cogo-toast';
 import moment from 'moment';
 
 import Util from  '../../../../js/Util';
-import InventorySets from  '../../../../js/InventorySets';
-import AddEditSetItemDialog from '../components/AddEditSetItemDialog';
-import { ListContext } from '../InvSetsContainer';
+import InventoryKits from  '../../../../js/InventoryKits';
+import AddEditKitItemDialog from './AddEditKitItemDialog.js';
+import { ListContext } from '../InvKitsContainer';
 import { Add } from '@material-ui/icons';
-//import { DetailContext } from '../InvSetsContainer';
+//import { DetailContext } from '../InvKitsContainer';
 
-const SetItemList = function(props) {
-    const {user, set, resetFunction} = props;
+const KitItemList = function(props) {
+    const {user, kit, resetFunction} = props;
 
     const {currentView} = useContext(ListContext);
     const classes = useStyles();
-    const [setItems, setSetItems] = React.useState(null);
-    const [addEditSetItemOpen, setEditSetItemOpen] =React.useState(false);
+    const [setItems, setKitItems] = React.useState(null);
+    const [addEditKitItemOpen, setEditKitItemOpen] =React.useState(false);
 
     const columns = [
         // { field: 'id', title: 'ID', minWidth: 20, align: 'center', editable: 'never' },
@@ -78,8 +78,8 @@ const SetItemList = function(props) {
         { field: 'man_name', title: 'Manf', minWidth: 80, align: 'center', editable: 'never'      },
         { field: 'mf_part_number', title: 'Manf #', minWidth: 80, align: 'center', editable: 'never' ,
         render: rowData => <div className={classes.notesSpan}>{rowData.mf_part_number}</div>,     },
-        { field: 'qty_in_set', title: 'Qty In Set', minWidth: 25, align: 'center', editable: 'onUpdate',
-          render: rowData => rowData.qty_in_set,
+        { field: 'qty_in_kit', title: 'Qty In Kit', minWidth: 25, align: 'center', editable: 'onUpdate',
+          render: rowData => rowData.qty_in_kit,
           editComponent: props => (
             <TextField id={`qty_input`} 
                 type="number"
@@ -94,38 +94,38 @@ const SetItemList = function(props) {
         }
       ];
 
-    //Set manufacturing Data
+    //Kit manufacturing Data
     useEffect( () =>{
-        if(setItems == null && set) {
+        if(setItems == null && kit) {
             
-            InventorySets.getSetItems(set.rainey_id)
-            .then( data => { setSetItems(data); })
+            InventoryKits.getKitItems(kit.rainey_id)
+            .then( data => { setKitItems(data); })
             .catch( error => {
                 console.warn(error);
                 cogoToast.error(`Error getting wois`, {hideAfter: 4});
-                setSetItems([]);
+                setKitItems([]);
             })
         }
-    },[setItems, set]);
+    },[setItems, kit]);
 
-    const handleUpdateSetItem = (newData, oldData) => {
+    const handleUpdateKitItem = (newData, oldData) => {
         return new Promise((resolve, reject)=>{
-            Inventory.updateSetItem(newData)
+            Inventory.updateKitItem(newData)
             .then((data)=>{
-                cogoToast.success("Updated Set  Item");
+                cogoToast.success("Updated Kit  Item");
                 if(resetFunction){
                     resetFunction();
                 }
-                setSetItems(null);
+                setKitItems(null);
                 resolve();
             })
             .catch((error)=>{
-                console.error("Failed to update Set  Item", error);
-                cogoToast.error("Failed to update Set  Item");
+                console.error("Failed to update Kit  Item", error);
+                cogoToast.error("Failed to update Kit  Item");
                 if(resetFunction){
                     resetFunction();
                 }
-                setSetItems(null);
+                setKitItems(null);
                 reject();
             })
         })
@@ -133,29 +133,29 @@ const SetItemList = function(props) {
 
     const handleDeleteItem = (row)=>{
         if(!row.id){
-          cogoToast.error("Bad row in delete set item");
-          console.error("Failed to delete set item");
+          cogoToast.error("Bad row in delete kit item");
+          console.error("Failed to delete kit item");
           return;
         }
         const deleteItem = ()=>{
-          InventorySets.deleteSetItem(row.id)
+          InventoryKits.deleteKitItem(row.id)
           .then((data)=>{
             if(data){
                 if(resetFunction){
                     resetFunction();
                 }
-                setSetItems(null);
-              cogoToast.success("Deleted set item");
+                setKitItems(null);
+              cogoToast.success("Deleted kit item");
             }
           })
           .catch((error)=>{
               
-            cogoToast.error("Failed to delete set item")
-            console.error("Failed to delete set item", error);
+            cogoToast.error("Failed to delete kit item")
+            console.error("Failed to delete kit item", error);
             if(resetFunction){
                 resetFunction();
             }
-            setSetItems(null);
+            setKitItems(null);
           })
         }
 
@@ -170,19 +170,19 @@ const SetItemList = function(props) {
     }
     
     const handleAddNewItem = (event,)=>{
-        if( !set){
-            console.error("Bad rowData or set in handleAddNewItem")
+        if( !kit){
+            console.error("Bad rowData or kit in handleAddNewItem")
             return;
         }
 
-        setEditSetItemOpen(true);
+        setEditKitItemOpen(true);
     }
 
     const handleGoToPart = (event, rainey_id)=>{
-        //set detailWOIid in local data
+        //kit detailWOIid in local data
      window.localStorage.setItem('detailPartId', JSON.stringify(rainey_id));
      
-     //set detail view in local data
+     //kit detail view in local data
      window.localStorage.setItem('currentInvPartsView', JSON.stringify("partsDetail"));
      window.localStorage.setItem('currentInventoryView', JSON.stringify("invParts"));
      
@@ -193,7 +193,7 @@ const SetItemList = function(props) {
     return ( 
         <>
 
-        {set ?
+        {kit ?
             <div className={classes.container}>
                 
             <Grid container>
@@ -204,9 +204,9 @@ const SetItemList = function(props) {
                                 columns={columns}
                                 style={{ width: "inherit"}}
                                 data={setItems}
-                                title={"Set List"}
+                                title={"Kit List"}
                                 editable={{
-                                    onRowUpdate: (newData, oldData) => handleUpdateSetItem(newData, oldData)
+                                    onRowUpdate: (newData, oldData) => handleUpdateKitItem(newData, oldData)
                                 }}
                                 icons={tableIcons}
                                 options={{
@@ -247,7 +247,7 @@ const SetItemList = function(props) {
                                 actions={[
                                 {
                                     icon: tableIcons.Delete,
-                                    tooltip: 'Delete Set Item',
+                                    tooltip: 'Delete Kit Item',
                                     onClick: (event, rowData) => handleDeleteItem(rowData)
                                 },
                                 ]}
@@ -261,7 +261,7 @@ const SetItemList = function(props) {
                 onClick={(event) => handleAddNewItem(event)} ><Add 
                 />Add New </IconButton></div>
                 </Grid>
-                <AddEditSetItemDialog set={set} addEditSetItemOpen={addEditSetItemOpen} setEditSetItemOpen={setEditSetItemOpen} setSetItems={setSetItems} />
+                <AddEditKitItemDialog kit={kit} addEditKitItemOpen={addEditKitItemOpen} setEditKitItemOpen={setEditKitItemOpen} setKitItems={setKitItems} />
             </div>
         :<><CircularProgress/></>}
 
@@ -269,7 +269,7 @@ const SetItemList = function(props) {
     );
 }
 
-export default SetItemList
+export default KitItemList
 
 
 const useStyles = makeStyles(theme => ({

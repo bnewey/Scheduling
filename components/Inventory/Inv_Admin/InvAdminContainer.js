@@ -47,7 +47,7 @@ const InvAdminContainer = function(props) {
 
   const classes = useStyles();
 
-  //Get View from local storage if possible || set default
+  //Get View from local storage if possible || kit default
   useEffect(() => {
     if(currentView == null){
       var tmp = window.localStorage.getItem('currentInvAdminView');
@@ -71,7 +71,7 @@ const InvAdminContainer = function(props) {
  
   //Sign Rows
   useEffect( () =>{
-    //Gets data only on initial component mount or when rows is set to null
+    //Gets data only on initial component mount or when rows is kit to null
     if(((manItems == null || manItemsRefetch == true) ) ) {
       if(manItemsRefetch == true){
         setManItemsRefetch(false);
@@ -90,7 +90,7 @@ const InvAdminContainer = function(props) {
 
   //Sign Rows
   useEffect( () =>{
-    //Gets data only on initial component mount or when rows is set to null
+    //Gets data only on initial component mount or when rows is kit to null
     if(((partTypes == null || partTypesRefetch == true) ) ) {
       if(partTypesRefetch == true){
         setPartTypesRefetch(false);

@@ -8,47 +8,65 @@ import cogoToast from 'cogo-toast';
 import Util from  '../../../../js/Util';
 import WorkOrderDetail from  '../../../../js/WorkOrderDetail';
 
-import { ListContext } from '../InvSetsContainer';
-//import { DetailContext } from '../WOContainer';
+import { ListContext } from '../InvKitsContainer';
+import { DetailContext } from '../InvKitsContainer';
 
 import SidebarPages from './components/SidebarPages';
 
 
-const SetsDetailSidebar = function(props) {
+const KitsDetailSidebar = function(props) {
   const {user} = props;
 
 
 
-  const { sets,setSets,  currentView,setCurrentView, views, setEditSetModalMode, setEditSetModalOpen } = useContext(ListContext);
+  const { kits,setKits,  currentView,setCurrentView, views, setEditKitModalMode, setEditKitModalOpen,  } = useContext(ListContext);
 
-  // const {} = useContext(DetailContext);
+   const {setEditKitItemDialogMode,setEditKitItemModalOpen} = useContext(DetailContext);
   
   const classes = useStyles();
   
-  const handleOpenAddEditSetModal = () =>{
-    setEditSetModalMode("edit");
-    setEditSetModalOpen(true);
+  const handleOpenAddEditKitModal = () =>{
+    setEditKitModalMode("edit");
+    setEditKitModalOpen(true);
+  }
+
+  const handleOpenKitItemModal = () =>{
+    setEditKitItemDialogMode("add")
+    setEditKitItemModalOpen(true);
   }
 
   const sideBarTopButtons = () =>{
     switch(currentView.value){
-      case "setsList":
+      case "kitsList":
         return <Search />
         break
-      case "setsSearch":
+      case "kitsSearch":
         return <Search />
         break;
-      case "setsDetail":
+      case "kitsDetail":
         return (<>
           <div className={classes.newButtonDiv} >
               <Button className={classes.newButton} 
                     classes={{label: classes.newButtonLabel}} 
                     variant="outlined"
-                    onClick={event=> handleOpenAddEditSetModal()}>
+                    onClick={event=> handleOpenAddEditKitModal()}>
                       <EditIcon className={classes.editIcon}/><div>Edit Info</div>
               </Button>
           </div></>);
         break;
+        case "kitsItemization":
+          return (<>
+            <div className={classes.newButtonDiv} >
+              <Button className={classes.newButton} 
+                      classes={{label: classes.newButtonLabel}} 
+                      variant="outlined"
+                      onClick={event => handleOpenKitItemModal()}
+                      >
+                <AddIcon className={classes.plusIcon}/>
+                <div>New Item</div>
+              </Button>
+            </div></>);
+            break;
       default: 
         cogoToast.error("Bad view");
         return <></>;
@@ -72,7 +90,7 @@ const SetsDetailSidebar = function(props) {
   );
 }
 
-export default SetsDetailSidebar
+export default KitsDetailSidebar
 
 const useStyles = makeStyles(theme => ({
     root:{

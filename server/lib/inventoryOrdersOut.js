@@ -277,11 +277,11 @@ router.post('/updateMultipleOrderOutItems', async (req,res) => {
         ' WHERE id = ? ';
         
 
-    async.forEachOf(item.set_items, async (set_item, i, callback) => {
+    async.forEachOf(item.kit_items, async (kit_item, i, callback) => {
             //will automatically call callback after successful execution
             try{
-                const results = await database.query(sql, [set_item.rainey_id, item.order_id, set_item.qty_in_order, set_item.part_mf_id, set_item.actual_cost_each,
-                    set_item.id ]);
+                const results = await database.query(sql, [kit_item.rainey_id, item.order_id, kit_item.qty_in_order, kit_item.part_mf_id, kit_item.actual_cost_each,
+                    kit_item.id ]);
                 return;
             }
             catch(error){     
@@ -363,11 +363,11 @@ router.post('/addNewMultpleOrderOutItem', async (req,res) => {
                 ' date_entered, part_mf_id, actual_cost_each) ' +
                 ' VALUES ( ?, ?, IFNULL(?, DEFAULT(qty_in_order)), IFNULL(?, NOW()), IFNULL(?, DEFAULT(part_mf_id)), IFNULL( ?, DEFAULT(actual_cost_each))) ';
 
-    async.forEachOf(item.set_items, async (set_item, i, callback) => {
+    async.forEachOf(item.kit_items, async (kit_item, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            const results = await database.query(sql, [ item.order_id, set_item.rainey_id, set_item.qty_in_order,
-             Util.convertISODateTimeToMySqlDateTime(moment()), set_item.part_mf_id, set_item.actual_cost_each  ]);
+            const results = await database.query(sql, [ item.order_id, kit_item.rainey_id, kit_item.qty_in_order,
+             Util.convertISODateTimeToMySqlDateTime(moment()), kit_item.part_mf_id, kit_item.actual_cost_each  ]);
             return;
         }
         catch(error){     

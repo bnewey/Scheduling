@@ -12,20 +12,20 @@ import clsx from 'clsx';
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../../../../js/Util';
-import InventorySets from  '../../../../../js/InventorySets';
-import { ListContext } from '../../InvSetsContainer';
+import InventoryKits from  '../../../../../js/InventoryKits';
+import { ListContext } from '../../InvKitsContainer';
 
 
 const SidebarPages = function(props) {
     const {user} = props;
   
-    const { sets, setSets, setSetsRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
-        setDetailSetId,editSetModalMode,setEditSetModalMode, activeSet, setActiveSet, editSetModalOpen,setEditSetModalOpen,
-         recentSets, setRecentSets} = useContext(ListContext);
+    const { kits, setKits, setKitsRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
+        setDetailKitId,editKitModalMode,setEditKitModalMode, activeKit, setActiveKit, editKitModalOpen,setEditKitModalOpen,
+         recentKits, setRecentKits} = useContext(ListContext);
     const classes = useStyles();
 
     const pages = [
-        "setsDetail", "setsRecentOrders", "setsSets"
+        "kitsDetail", "kitsItemization", "kitsRecentOrders", "kitsKits"
     ];
 
     const handleChangePage = (view) =>{
@@ -34,15 +34,19 @@ const SidebarPages = function(props) {
 
     const getIcon = (page)=>{
         switch(page){
-            case 'setsDetail':{
+            case 'kitsDetail':{
                 return(<DetailIcon className={classes.icon}/>)
                 break;
             }
-            case 'setsSets':{
+            case 'kitsItemization':{
                 return(<ListIcon className={classes.icon}/>)
                 break;
             }
-            case 'setsRecentOrders':{
+            case 'kitsKits':{
+                return(<ListIcon className={classes.icon}/>)
+                break;
+            }
+            case 'kitsRecentOrders':{
                 return(<PastIcon className={classes.icon}/>);
                 break;
             }

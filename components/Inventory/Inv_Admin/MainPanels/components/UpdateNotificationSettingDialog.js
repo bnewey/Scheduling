@@ -20,43 +20,33 @@ const UpdateNotificationSettingDialog = (props) => {
     //PROPS
     const { settingToEdit,setSettingToEdit, updateSettingDialogOpen,setUpdateSettingDialogOpen, refreshFunction } = props;
     const saveRef = React.createRef();
-    const [editSetModalMode, setEditSetModalMode] = useState('add');
+    const [editSettingModalMode, setEditSettingModalMode] = useState('add');
 
     //STATE
-    const [newName, setNewName] = useState("")
-    //const [editInvModalOpen,setEditInvModalOpen] = useState(false);
     const [validationErrors , setValidationErrors] = useState([]);
-    const { user} = useContext(InventoryContext);
+    const { user } = useContext(InventoryContext);
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
-
     const fields = [
-        //type: select must be hyphenated ex select-type
         { field: 'push', label: 'Push Notification',   type: 'check',updateBy: 'ref', },
         { field: 'notify', label: 'Basic Notification',   type: 'check',updateBy: 'ref', },
         { field: 'email', label: 'Email',   type: 'check',updateBy: 'ref', },
     ];
 
-   
-
     useEffect(()=>{
         if(settingToEdit && settingToEdit.id){
-            setEditSetModalMode("edit");
+            setEditSettingModalMode("edit");
         }else{
-            setEditSetModalMode("add");
-            //setSettingToEdit({});
+            setEditSettingModalMode("add");
         }
     },[settingToEdit])
 
     const handleDialogClose = () => {
         setUpdateSettingDialogOpen(false);
-        setNewName("");
         setValidationErrors([]);
     };
-
-
 
 
     const handleSave = (setting, updateSetting ,addOrEdit) => {
@@ -80,10 +70,11 @@ const UpdateNotificationSettingDialog = (props) => {
                     cogoToast.success('Saved Setting');
                     
                     handleDialogClose();  
+                    resolve();
                 }).catch((err) => {
                     cogoToast.error('Failed to save setting');
                     console.log('Failed to edit setting ', err);
-                    
+                    reject(err);
                     
                 });
                 
@@ -100,10 +91,11 @@ const UpdateNotificationSettingDialog = (props) => {
                     cogoToast.success('Saved Setting');
                     
                     handleDialogClose();  
+                    resolve();
                 }).catch((err) => {
                     cogoToast.error('Failed to save setting');
                     console.log('Failed to add setting ', err);
-                    
+                    reject(err);
                     
                 });
             }
@@ -122,14 +114,14 @@ const UpdateNotificationSettingDialog = (props) => {
                     <Grid container >  
                         <Grid item xs={12} className={classes.paperScroll}>
                             <FormBuilder 
-                            ref={saveRef}
-                            fields={fields} 
-                            mode={editSetModalMode} 
-                            classes={classes} 
-                            formObject={settingToEdit} 
-                            setFormObject={setSettingToEdit}
-                            handleClose={handleDialogClose} 
-                            handleSave={handleSave}/>
+                                ref={saveRef}
+                                fields={fields} 
+                                mode={editSettingModalMode} 
+                                classes={classes} 
+                                formObject={settingToEdit} 
+                                setFormObject={setSettingToEdit}
+                                handleClose={handleDialogClose} 
+                                handleSave={handleSave}/>
                         </Grid>
                    </Grid>
 

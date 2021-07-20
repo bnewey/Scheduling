@@ -49,7 +49,7 @@ const calendar = require('./lib/calendar.js');
 const entities = require('./lib/entities.js');
 const settings = require('./lib/settings.js');
 const inventory = require('./lib/inventory.js');
-const inventorySets = require('./lib/inventorySets.js');
+const inventoryKits = require('./lib/inventoryKits.js');
 const inventoryOrdersOut = require('./lib/inventoryOrdersOut.js');
 const notifications = require('./lib/notifications.js');
 const webPush = require('./lib/webPush');
@@ -91,7 +91,7 @@ nextApp
     app.use('/scheduling/entities', entities);
     app.use('/scheduling/settings', settings);
     app.use('/scheduling/inventory', inventory);
-    app.use('/scheduling/inventorySets', inventorySets);
+    app.use('/scheduling/inventoryKits', inventoryKits);
     app.use('/scheduling/inventoryOrdersOut', inventoryOrdersOut);
     app.use('/scheduling/notifications', notifications.router);
     app.use('/scheduling/webPush', webPush.router);
