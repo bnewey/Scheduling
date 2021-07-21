@@ -12,13 +12,6 @@ import cogoToast from 'cogo-toast';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
 
-import DateFnsUtils from '@date-io/date-fns';
-import {
-    DatePicker,
-    KeyboardDatePicker,
-    TimePicker,
-    MuiPickersUtilsProvider,
-  } from '@material-ui/pickers';
 
 import Util from '../../../../js/Util.js';
 
@@ -30,9 +23,9 @@ import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
 
 const AddEditModal = function(props) {
-    const {user} = props;
+    //const {} = props;
 
-    const { kits, setKits, setKitsRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailKitId,
+    const { user, kits, setKits, setKitsRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailKitId,
         setDetailKitId,editKitModalMode,setEditKitModalMode, activeKit, setActiveKit, editKitModalOpen,setEditKitModalOpen,
          recentKits, setRecentKits} = useContext(ListContext);
 
@@ -58,7 +51,6 @@ const AddEditModal = function(props) {
 
     //Kit active worker to a tmp value for add otherwise activeworker will be set to edit
     useEffect(()=>{
-        console.log("Tes");
         if(editKitModalMode == "add"){
             console.log("setting to {}")
             setActiveKit({});
@@ -80,7 +72,7 @@ const AddEditModal = function(props) {
                 updateKit["rainey_id"] = kit.rainey_id;
                 updateKit["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
 
-                InventoryKits.updateKit( updateKit )
+                InventoryKits.updateKit( updateKit , user)
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Kit ${kit.rainey_id} has been updated!`, {hideAfter: 4});
@@ -96,12 +88,13 @@ const AddEditModal = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                InventoryKits.addNewKit( updateKit )
+                InventoryKits.addNewKit( updateKit, user )
                 .then( (data) => {
+                    console.log("data",data);
                     //Get id of new workorder and kit view to detail
                     if(data && data.insertId){
                         setDetailKitId(data.insertId);
-                        setCurrentView(views.filter((v)=>v.value == "setDetail")[0]);
+                        setCurrentView(views.filter((v)=>v.value == "kitsDetail")[0]);
                     }
                     cogoToast.success(`Kit has been added!`, {hideAfter: 4});
                     setKitsRefetch(true);
@@ -125,7 +118,7 @@ const AddEditModal = function(props) {
         }
 
         const deleteEnt = () =>{
-            InventoryKits.deleteKit(kit.rainey_id)
+            InventoryKits.deleteKit(kit.rainey_id, user)
             .then((data)=>{
                 setKitsRefetch(true);
                 handleCloseModal();

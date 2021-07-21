@@ -225,7 +225,7 @@ const AddEditKitItemDialog = (props) => {
             if(addOrEdit == "add"){
                 setItem["set_rainey_id"] = kit.rainey_id;
 
-                InventoryKits.addNewKitItem( setItem )
+                InventoryKits.addNewKitItem( setItem , user)
                 .then( (data) => {
                     //Get id of new workorder and kit view to detail
                     cogoToast.success(`Kit item has been added!`, {hideAfter: 4});

@@ -57,7 +57,7 @@ async function signInOrSignUp({ database, googleId, email, googleToken, displayN
     displayName,
     avatarUrl,
     slug,
-    isAdmin: true,
+    isAdmin: false,
   });
   if(newUser){
     var tmpUser = await getUser( database, slug);

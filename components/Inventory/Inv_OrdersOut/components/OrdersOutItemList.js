@@ -62,9 +62,9 @@ import { Add } from '@material-ui/icons';
 //import { DetailContext } from '../InvOrdersOutsContainer';
 
 const OrdersOutItemList = function(props) {
-    const {user, ordersOut, resetFunction} = props;
+    const { ordersOut, resetFunction} = props;
 
-    const {currentView} = useContext(ListContext);
+    const {user,currentView} = useContext(ListContext);
     const classes = useStyles();
     const [ordersOutItems, setOrdersOutItems] = React.useState(null);
     const [addEditOrdersOutItemOpen, setEditOrdersOutItemOpen] =React.useState(false);
@@ -110,7 +110,7 @@ const OrdersOutItemList = function(props) {
 
     const handleUpdateOrdersOutItem = (newData, oldData) => {
         return new Promise((resolve, reject)=>{
-            Inventory.updateOrdersOutItem(newData)
+            Inventory.updateOrdersOutItem(newData, user)
             .then((data)=>{
                 cogoToast.success("Updated OrdersOut  Item");
                 if(resetFunction){
@@ -138,7 +138,7 @@ const OrdersOutItemList = function(props) {
           return;
         }
         const deleteItem = ()=>{
-          InventoryOrdersOuts.deleteOrdersOutItem(row.id)
+          InventoryOrdersOuts.deleteOrdersOutItem(row.id, user)
           .then((data)=>{
             if(data){
                 if(resetFunction){

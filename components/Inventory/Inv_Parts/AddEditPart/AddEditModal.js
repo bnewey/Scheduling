@@ -32,9 +32,9 @@ import _ from 'lodash';
 
 
 const AddEditModal = function(props) {
-    const {user} = props;
+    //const {} = props;
 
-    const { parts, setParts, setPartsRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailPartId,
+    const { user, parts, setParts, setPartsRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailPartId,
         setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
          recentParts, setRecentParts} = useContext(ListContext);
 
@@ -63,7 +63,8 @@ const AddEditModal = function(props) {
         { field: 'cost_each', label: 'Cost Each', type: 'number',updateBy: 'ref',  },
         { field: 'part_type', label: 'Part Type', type: 'select-part-type', required: true, updateBy: 'ref',
             addOn: ()=> {
-                return <><AddEditPartTypeDialog part_type={{}} 
+                return <><AddEditPartTypeDialog user={user}
+                                                part_type={{}} 
                                                 refreshFunction={()=> { 
                                                     setPartTypes(null);
                                                 }} 
@@ -124,7 +125,7 @@ const AddEditModal = function(props) {
                 updatePart["rainey_id"] = part.rainey_id;
                 updatePart["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
 
-                Inventory.updatePart( updatePart )
+                Inventory.updatePart( updatePart, user )
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Part ${part.rainey_id} has been updated!`, {hideAfter: 4});
@@ -141,7 +142,7 @@ const AddEditModal = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                Inventory.addNewPart( updatePart )
+                Inventory.addNewPart( updatePart, user )
                 .then( (data) => {
                     //Get id of new workorder and kit view to detail
                     cogoToast.success(`Part has been added!`, {hideAfter: 4});
@@ -176,7 +177,7 @@ const AddEditModal = function(props) {
         }
 
         const deleteEnt = () =>{
-            Inventory.deletePart(part.rainey_id)
+            Inventory.deletePart(part.rainey_id, user)
             .then((data)=>{
                 setPartsRefetch(true);
                 handleCloseModal();

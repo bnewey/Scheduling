@@ -16,7 +16,7 @@ import clsx from 'clsx';
 const AddEditManfDialog = (props) => {
  
     //PROPS
-    const { manf, addNewManDialog,setAddNewManDialog, refreshFunction } = props;
+    const {user, manf, addNewManDialog,setAddNewManDialog, refreshFunction } = props;
     const textFieldRef = React.useRef();
 
     //STATE
@@ -52,7 +52,7 @@ const AddEditManfDialog = (props) => {
        
         //Update
         if(updateManufacturer.id){
-            Inventory.updateManufacturer(updateManufacturer)
+            Inventory.updateManufacturer(updateManufacturer, user)
             .then((data)=>{
                 cogoToast.success("Updated ");
 
@@ -72,7 +72,7 @@ const AddEditManfDialog = (props) => {
 
         }else{
             //Add New
-            Inventory.addNewManufacturer(updateManufacturer)
+            Inventory.addNewManufacturer(updateManufacturer, user)
             .then((data)=>{
                 cogoToast.success("Added New ");
 

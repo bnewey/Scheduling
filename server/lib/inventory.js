@@ -217,12 +217,19 @@ router.post('/getManufactures', async (req,res) => {
 
 router.post('/addNewPart', async (req,res) => {
 
-    var part ;
+    var part, user;
     if(req.body){
         if(req.body.part != null){
             part = req.body.part;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     const sql = ' INSERT INTO inv__parts (description, inv_qty, min_inv, cost_each, storage_location, notes, part_type, reel_width, date_updated, obsolete ) ' +
                 ' VALUES (?,IFNULL(?, default(inv_qty)),IFNULL(?, default(min_inv)),IFNULL(?,default(cost_each)),?,?,?,?,?,IFNULL(?, default(obsolete))) ';
 
@@ -240,12 +247,20 @@ router.post('/addNewPart', async (req,res) => {
 
 router.post('/updatePart', async (req,res) => {
 
-    var part ;
+    var part, user ;
     if(req.body){
         if(req.body.part != null){
             part = req.body.part;
+            user = req.body.user;
         }  
     }
+
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('part to update', [part]);
     const sql = ' UPDATE inv__parts SET description=?,min_inv=?,  cost_each=?, storage_location=IFNULL(?, DEFAULT(storage_location)), ' +
         ' notes=?, part_type=?, reel_width=?, ' +
@@ -268,12 +283,20 @@ router.post('/updatePart', async (req,res) => {
 
 router.post('/updatePartInv', async (req,res) => {
 
-    var part ;
+    var part, user ;
     if(req.body){
         if(req.body.part != null){
             part = req.body.part;
+            user = req.body.user;
         }  
     }
+
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('part to update', [part]);
     const sql = ' UPDATE inv__parts SET  inv_qty=?, date_updated=? ' +
         ' WHERE rainey_id = ?;  ' + 
@@ -374,14 +397,20 @@ router.post('/updatePartInv', async (req,res) => {
 // });
 
 router.post('/deletePart', async (req,res) => {
-    var rainey_id;
+    var rainey_id, user;
 
     if(req.body){
         rainey_id = req.body.rainey_id;
+        user = req.body.user;
     }
     if(!rainey_id){
         logger.error("Bad rainey_id param in deletePart");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__parts WHERE rainey_id = ? LIMIT 1 ';
@@ -451,11 +480,18 @@ router.post('/getPartManItemById', async (req,res) => {
 
 router.post('/updatePartManItem', async (req,res) => {
 
-    var item ;
+    var item , user;
     if(req.body){
         if(req.body.item != null){
             item = req.body.item;
+            user = req.body.user;
         }  
+    }
+
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     //runs only if we are setting default_man to 1
@@ -482,14 +518,20 @@ router.post('/updatePartManItem', async (req,res) => {
 });
 
 router.post('/deletePartManItem', async (req,res) => {
-    var id;
+    var id, user;
 
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
     if(!id){
         logger.error("Bad id param in deletePartManItem");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__parts_manufacturing WHERE id = ? LIMIT 1 ';
@@ -510,12 +552,19 @@ router.post('/deletePartManItem', async (req,res) => {
 
 router.post('/addNewPartManItem', async (req,res) => {
 
-    var part_item ;
+    var part_item, user ;
     if(req.body){
         if(req.body.part_item != null){
             part_item = req.body.part_item;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     const sql = ' INSERT INTO inv__parts_manufacturing (rainey_id, mf_part_number, default_qty, ' + 
                 ' manufacturer, notes,date_entered, date_updated, default_man, url) ' +
                 ' VALUES ( ?, ?, IFNULL(?, DEFAULT(default_qty)), ?,?,IFNULL(?, NOW()),?, IFNULL(?, DEFAULT(default_man)), ? ) ';
@@ -534,12 +583,19 @@ router.post('/addNewPartManItem', async (req,res) => {
 
 router.post('/addNewManufacturer', async (req,res) => {
 
-    var manf ;
+    var manf, user;
     if(req.body){
         if(req.body.manf != null){
             manf = req.body.manf;
+            user= req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     const sql = ' INSERT INTO inv__manufacturers (name ) ' +
                 ' VALUES (?) ';
 
@@ -556,12 +612,20 @@ router.post('/addNewManufacturer', async (req,res) => {
 
 router.post('/updateManufacturer', async (req,res) => {
 
-    var manf ;
+    var manf, user ;
     if(req.body){
         if(req.body.manf != null){
             manf = req.body.manf;
+            user = req.body.user;
         }  
     }
+
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('manf to update', [manf]);
     const sql = ' UPDATE inv__manufacturers SET name=? ' + 
         ' WHERE id = ? ';
@@ -582,15 +646,22 @@ router.post('/updateManufacturer', async (req,res) => {
 
 
 router.post('/deleteManufacturer', async (req,res) => {
-    var id;
+    var id, user;
 
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
     if(!id){
         logger.error("Bad id param in deleteManufacturer");
         res.sendStatus(400);
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+    
 
     const sql = ' DELETE FROM inv__manufacturers WHERE id = ? LIMIT 1 ';
 
@@ -609,12 +680,19 @@ router.post('/deleteManufacturer', async (req,res) => {
 
 router.post('/addNewPartType', async (req,res) => {
 
-    var part_type ;
+    var part_type, user ;
     if(req.body){
         if(req.body.part_type != null){
             part_type = req.body.part_type;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     const sql = ' INSERT INTO inv__parts_types (type ) ' +
                 ' VALUES (?) ';
 
@@ -631,12 +709,20 @@ router.post('/addNewPartType', async (req,res) => {
 
 router.post('/updatePartType', async (req,res) => {
 
-    var part_type ;
+    var part_type, user;
     if(req.body){
         if(req.body.part_type != null){
             part_type = req.body.part_type;
+            user = req.body.user;
         }  
     }
+
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('part_type to update', [part_type]);
     const sql = ' UPDATE inv__parts_types SET type=? ' + 
         ' WHERE id = ? ';
@@ -657,14 +743,20 @@ router.post('/updatePartType', async (req,res) => {
 
 
 router.post('/deletePartType', async (req,res) => {
-    var id;
+    var id, user;
 
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
     if(!id){
         logger.error("Bad id param in deletePartType");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__parts_types WHERE id = ? LIMIT 1 ';

@@ -30,9 +30,9 @@ import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
 
 const AddEditModal = function(props) {
-    const {user} = props;
+    //const {} = props;
 
-    const { ordersOut, setOrdersOut, setOrdersOutRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailOrderOutId,
+    const { user, ordersOut, setOrdersOut, setOrdersOutRefetch,currentView, setCurrentView, views,columnState, setColumnState, detailOrderOutId,
         setDetailOrderOutId,editOrderOutModalMode,setEditOrderOutModalMode, activeOrderOut, setActiveOrderOut, editOrderOutModalOpen,setEditOrderOutModalOpen,
          recentOrdersOut, setRecentOrdersOut} = useContext(ListContext);
 
@@ -88,7 +88,7 @@ const AddEditModal = function(props) {
                 updateOrderOut["id"] = ordersOut.id;
                 updateOrderOut["date_updated"] = moment().format('YYYY-MM-DD HH:mm:ss');
 
-                InventoryOrdersOut.updateOrderOut( updateOrderOut )
+                InventoryOrdersOut.updateOrderOut( updateOrderOut, user )
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`OrderOut ${ordersOut.id} has been updated!`, {hideAfter: 4});
@@ -110,6 +110,7 @@ const AddEditModal = function(props) {
                     if(data && data.insertId){
                         setDetailOrderOutId(data.insertId);
                         setCurrentView(views.filter((v)=>v.value == "ordersOutDetail")[0]);
+
                     }
                     cogoToast.success(`OrderOut has been added!`, {hideAfter: 4});
                     setOrdersOutRefetch(true);
@@ -133,7 +134,7 @@ const AddEditModal = function(props) {
         }
 
         const deleteEnt = () =>{
-            InventoryOrdersOut.deleteOrderOut(ordersOut.id)
+            InventoryOrdersOut.deleteOrderOut(ordersOut.id, user)
             .then((data)=>{
                 setOrdersOutRefetch(true);
                 handleCloseModal();

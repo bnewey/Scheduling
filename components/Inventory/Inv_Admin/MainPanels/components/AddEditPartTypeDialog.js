@@ -15,7 +15,7 @@ import clsx from 'clsx';
 const AddEditPartTypeDialog = (props) => {
  
     //PROPS
-    const { part_type, addNewPartTypeDialog,setAddNewPartTypeDialog, refreshFunction } = props;
+    const { user, part_type, addNewPartTypeDialog,setAddNewPartTypeDialog, refreshFunction } = props;
     const textFieldRef = React.useRef();
 
     //STATE
@@ -52,7 +52,7 @@ const AddEditPartTypeDialog = (props) => {
        
         //Update
         if(updatePartType.id){
-            Inventory.updatePartType(updatePartType)
+            Inventory.updatePartType(updatePartType, user)
             .then((data)=>{
                 cogoToast.success("Updated ");
 
@@ -72,7 +72,7 @@ const AddEditPartTypeDialog = (props) => {
 
         }else{
             //Add New
-            Inventory.addNewPartType(updatePartType)
+            Inventory.addNewPartType(updatePartType, user)
             .then((data)=>{
                 cogoToast.success("Added New ");
 

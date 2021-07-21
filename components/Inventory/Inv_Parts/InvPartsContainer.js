@@ -34,6 +34,7 @@ export const DetailContext = createContext(null);
 //Contains all important props that all tabs use
 const InvPartsContainer = function(props) {
   const {user} = props;
+  console.log("user",user);
 
   const [parts, setParts] = useState(null);
   const [partsSaved, setPartsSaved] = useState(null);
@@ -270,13 +271,13 @@ const InvPartsContainer = function(props) {
   const getMainComponent = () =>{
     switch(currentView.value){
       case "partsList":
-        return <PartsList  columnState={columnState} setColumnState={setColumnState}/>
+        return <PartsList user={user} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "partsSearch":
-        return <PartsList  columnState={columnState} setColumnState={setColumnState}/>
+        return <PartsList user={user} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "partsDetail":
-        return <PartsDetail/>
+        return <PartsDetail user={user}/>
         break;
       case  "partsRecentOrders":
         return <></>;
@@ -314,7 +315,7 @@ const InvPartsContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{parts, setParts, setPartsRefetch, partsSearchRefetch,setPartsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
+      <ListContext.Provider value={{user, parts, setParts, setPartsRefetch, partsSearchRefetch,setPartsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailPartId,  setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
          recentParts, setRecentParts, sorters, setSorters, typeFilter, setTypeFilter, partsSaved, setPartsSaved} } >
       <DetailContext.Provider value={{}} >
@@ -344,7 +345,7 @@ const InvPartsContainer = function(props) {
         
 
         </div>
-        {editPartModalOpen  && <AddEditModal /> }
+        {editPartModalOpen  && <AddEditModal user={user} /> }
         </DetailContext.Provider>
       </ListContext.Provider>
     </div>

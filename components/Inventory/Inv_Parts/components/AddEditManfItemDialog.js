@@ -17,7 +17,7 @@ import clsx from 'clsx';
 const AddEditManfItemDialog = (props) => {
  
     //PROPS
-    const { activePart, manfItemId, setManfItemId, addNewManDialogOpen,setAddNewManDialogOpen, editDialogMode, setEditDialogMode, refreshFunction } = props;
+    const { user, activePart, manfItemId, setManfItemId, addNewManDialogOpen,setAddNewManDialogOpen, editDialogMode, setEditDialogMode, refreshFunction } = props;
     const textFieldRef = React.useRef();
 
     //STATE
@@ -35,7 +35,7 @@ const AddEditManfItemDialog = (props) => {
         {field: 'default_qty', label: 'Default Qty', type: 'number', updateBy: 'ref', required: true},
         {field: 'manufacturer', label: 'Manufacturer', type: 'select-manufacturer', updateBy: 'state', required: true,
             addOn: ()=> {
-                return(<div><AddEditManfDialog manf={{}} refreshFunction={()=> setManufacturers(null)}
+                return(<div><AddEditManfDialog user={user} manf={{}} refreshFunction={()=> setManufacturers(null)}
                         addNewManDialog={addNewManDialog} setAddNewManDialog={setAddNewManDialog}/>
                         <div className={classes.newTypeButton} onClick={(event)=> handleOpenManDialog(event)}>
                         <AddCircleOutlineOutlined className={classes.addIcon} /><span>Add New</span>
@@ -124,7 +124,7 @@ const AddEditManfItemDialog = (props) => {
                 updateManufacturer["id"] = og_manf_item.id;
                 console.log("updateManufacturer",updateManufacturer);
                 resolve();
-                Inventory.updatePartManItem(updateManufacturer)
+                Inventory.updatePartManItem(updateManufacturer, user)
                 .then((data)=>{
                     cogoToast.success("Updated ");
 
@@ -147,7 +147,7 @@ const AddEditManfItemDialog = (props) => {
             if(addOrEdit == "add"){
                 updateManufacturer["rainey_id"] = activePart.rainey_id
 
-                Inventory.addNewPartManItem(updateManufacturer)
+                Inventory.addNewPartManItem(updateManufacturer, user)
                 .then((data)=>{
                     cogoToast.success("Added New ");
 

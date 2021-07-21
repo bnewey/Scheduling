@@ -25,7 +25,7 @@ const PartsToolbar = function(props) {
   const {user} = props;
 
   
-  const { parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views} = useContext(ListContext);
+  const { parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views, activePart} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "partsList";
 
@@ -43,7 +43,10 @@ const PartsToolbar = function(props) {
         setPartsSearchRefetch={setPartsSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} openOnFocus/>
         break;
       case "partsDetail":
-        return <></>
+        return <><div className={classes.woDetailToolbarDiv}>
+        <span className={classes.woLabelSpan}>ID: {activePart && activePart.rainey_id}</span>
+        <span className={classes.woLabelSpan}>DESC: {activePart && activePart.description}</span>
+      </div></>
           break;
       default: 
         cogoToast.error("Bad view");
@@ -171,7 +174,7 @@ const useStyles = makeStyles(theme => ({
   woLabelSpan:{
     fontWeight: '600',
     fontFamilt: 'sans-serif',
-    color: '#777',
+    color: '#a3a3a3',
     marginLeft: '20px',
   }
 

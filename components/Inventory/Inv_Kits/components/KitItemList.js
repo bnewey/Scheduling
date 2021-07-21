@@ -62,9 +62,9 @@ import { Add } from '@material-ui/icons';
 //import { DetailContext } from '../InvKitsContainer';
 
 const KitItemList = function(props) {
-    const {user, kit, resetFunction} = props;
+    const { kit, resetFunction} = props;
 
-    const {currentView} = useContext(ListContext);
+    const {user, currentView} = useContext(ListContext);
     const classes = useStyles();
     const [setItems, setKitItems] = React.useState(null);
     const [addEditKitItemOpen, setEditKitItemOpen] =React.useState(false);
@@ -110,7 +110,7 @@ const KitItemList = function(props) {
 
     const handleUpdateKitItem = (newData, oldData) => {
         return new Promise((resolve, reject)=>{
-            Inventory.updateKitItem(newData)
+            Inventory.updateKitItem(newData, user)
             .then((data)=>{
                 cogoToast.success("Updated Kit  Item");
                 if(resetFunction){
@@ -138,7 +138,7 @@ const KitItemList = function(props) {
           return;
         }
         const deleteItem = ()=>{
-          InventoryKits.deleteKitItem(row.id)
+          InventoryKits.deleteKitItem(row.id, user)
           .then((data)=>{
             if(data){
                 if(resetFunction){

@@ -29,7 +29,7 @@ const EditKitInvDialog = (props) => {
  
     //PROPS
     const { kit } = props;
-    const { setKitsRefetch, setKitsSearchRefetch, currentView,setActiveKit} = useContext(ListContext);
+    const { user, setKitsRefetch, setKitsSearchRefetch, currentView,setActiveKit} = useContext(ListContext);
     const textFieldRef = React.useRef();
     const refreshRef= React.useRef();
 
@@ -82,7 +82,7 @@ const EditKitInvDialog = (props) => {
         }
        
         //UpdateKitInv only updates inv_qty and tracks inventory change
-        InventoryKits.updateKitInv(updateKit)
+        InventoryKits.updateKitInv(updateKit, user)
         .then((data)=>{
             cogoToast.success("Updated ");
 

@@ -64,23 +64,23 @@ const InventoryContainer = function(props) {
   const getInvPage = () =>{
     switch(currentView.value){
       case "invParts":
-        return <InvPartsContainer/>
+        return <InvPartsContainer user={user}/>
         break;
       case "invKits":
-        return <InvKitsContainer/>
+        return <InvKitsContainer user={user}/>
         break;
       case "invOrdersOut":
-        return <InvOrdersOutContainer/>
+        return <InvOrdersOutContainer user={user}/>
         break;
       case "invOrdersIn":
-        //return <InvOrdersInContainer/>
+        //return <InvOrdersInContainer user={user}/>
         break;
       case "invAdmin":
-        return <InvAdminContainer/>
+        return <InvAdminContainer user={user}/>
         break;
       default: 
         cogoToast.error("Bad view");
-        return <InvPartsContainer/>;
+        return <InvPartsContainer user={user}/>;
         break;
     }
   }

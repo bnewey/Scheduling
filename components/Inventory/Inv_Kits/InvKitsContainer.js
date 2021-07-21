@@ -243,16 +243,16 @@ const InvKitsContainer = function(props) {
   const getMainComponent = () =>{
     switch(currentView.value){
       case "kitsList":
-        return <KitsList  columnState={columnState} setColumnState={setColumnState}/>
+        return <KitsList user={user} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "kitsSearch":
-        return <KitsList  columnState={columnState} setColumnState={setColumnState}/>
+        return <KitsList user={user} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "kitsDetail":
-        return <KitsDetail/>
+        return <KitsDetail user={user}/>
         break;
       case "kitsItemization":
-        return <KitsItemization/>
+        return <KitsItemization user={user}/>
         break;
       case  "kitsRecentOrders":
         return <></>;
@@ -291,7 +291,7 @@ const InvKitsContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{kits, setKits, setKitsRefetch, kitsSearchRefetch,setKitsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
+      <ListContext.Provider value={{user, kits, setKits, setKitsRefetch, kitsSearchRefetch,setKitsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailKitId,  setDetailKitId,editKitModalMode,setEditKitModalMode, activeKit, setActiveKit, editKitModalOpen,setEditKitModalOpen,
          recentKits, setRecentKits, sorters, setSorters,  kitsSaved, setKitsSaved, 
         } } >

@@ -114,7 +114,7 @@ const InvAdminContainer = function(props) {
   const getMainComponent = () =>{
     switch(currentView.value){
       case "adminPage":
-        return <AdminPage  />
+        return <AdminPage user={user} />
         break;
       
       default: 
@@ -139,7 +139,7 @@ const InvAdminContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <AdminContext.Provider value={{currentView, setCurrentView, views, manItems, manItemsRefetch, setManItemsRefetch, partTypes, partTypesRefetch, setPartTypesRefetch} } >
+      <AdminContext.Provider value={{user, currentView, setCurrentView, views, manItems, manItemsRefetch, setManItemsRefetch, partTypes, partTypesRefetch, setPartTypesRefetch} } >
       
         <div className={classes.containerDiv}>
         

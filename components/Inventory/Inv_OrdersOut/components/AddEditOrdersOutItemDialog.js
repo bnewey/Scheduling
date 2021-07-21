@@ -41,7 +41,7 @@ const AddEditOrdersOutItemDialog = (props) => {
     //PROPS
     const { editOOIModalOpen, setEditOOIModalOpen,setOrderOutItems, editOOIDialogMode, setEditOOIDialogMode,
        activeOOItem, setActiveOOItem } = props;
-    const { setOrdersOutRefetch, setOrdersOutSearchRefetch, currentView, setCurrentView, activeOrderOut,setActiveOrderOut, views} = useContext(ListContext);
+    const {user, setOrdersOutRefetch, setOrdersOutSearchRefetch, currentView, setCurrentView, activeOrderOut,setActiveOrderOut, views} = useContext(ListContext);
 
     //STATE
     const [partId, setPartId] = useState(null)
@@ -244,7 +244,7 @@ const AddEditOrdersOutItemDialog = (props) => {
 
                       orderOutItem["id"] = og_orderOut_item.id;
 
-                      InventoryOrdersOut.updateOrderOutItem( orderOutItem )
+                      InventoryOrdersOut.updateOrderOutItem( orderOutItem, user )
                       .then( (data) => {
                           //Refetch our data on save
                           cogoToast.success(`OrderOut Item ${og_orderOut_item.id} has been updated!`, {hideAfter: 4});
@@ -301,7 +301,7 @@ const AddEditOrdersOutItemDialog = (props) => {
 
                         orderOutItem["id"] = og_orderOut_item.id;
 
-                        InventoryOrdersOut.updateMultipleOrderOutItems( orderOutItem )
+                        InventoryOrdersOut.updateMultipleOrderOutItems( orderOutItem, user )
                         .then( (data) => {
                             //Refetch our data on save
                             cogoToast.success(`OrderOut Items ${og_orderOut_item.id} has been updated!`, {hideAfter: 4});

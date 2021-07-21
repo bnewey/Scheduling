@@ -203,12 +203,19 @@ router.post('/getKitById', async (req,res) => {
 
 router.post('/addNewKit', async (req,res) => {
 
-    var kit ;
+    var kit, user ;
     if(req.body){
         if(req.body.kit != null){
             kit = req.body.kit;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     const sql = ' INSERT INTO inv__kits (description, inv_qty, min_inv, num_in_kit, notes, storage_location, date_updated, obsolete ) ' +
                 ' VALUES (?,IFNULL(?, default(inv_qty)),IFNULL(?, default(min_inv)),IFNULL(?, default(num_in_kit)),?,?,?,IFNULL(?, default(obsolete))) ';
 
@@ -226,12 +233,19 @@ router.post('/addNewKit', async (req,res) => {
 
 router.post('/updateKit', async (req,res) => {
 
-    var kit ;
+    var kit, user ;
     if(req.body){
         if(req.body.kit != null){
             kit = req.body.kit;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('kit to update', [kit]);
     const sql = ' UPDATE inv__kits SET description=?, min_inv=?, num_in_kit=?, ' +
         ' notes=?,storage_location=?,  ' +
@@ -254,12 +268,19 @@ router.post('/updateKit', async (req,res) => {
 
 router.post('/updateKitInv', async (req,res) => {
 
-    var kit ;
+    var kit, user ;
     if(req.body){
         if(req.body.kit != null){
             kit = req.body.kit;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('kit to update', [kit]);
     const sql = ' UPDATE inv__kits SET  inv_qty=?, date_updated=? ' +
         ' WHERE rainey_id = ?;  ' + 
@@ -321,14 +342,20 @@ router.post('/updateKitInv', async (req,res) => {
 
 
 router.post('/deleteKit', async (req,res) => {
-    var rainey_id;
+    var rainey_id,user ;
 
     if(req.body){
         rainey_id = req.body.rainey_id;
+        user = req.body.user;
     }
     if(!rainey_id){
         logger.error("Bad rainey_id param in deleteKit");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__kits WHERE rainey_id = ? LIMIT 1 ';
@@ -536,12 +563,19 @@ router.post('/getKitItemsWithManf', async (req,res) => {
 
 router.post('/updateKitPart', async (req,res) => {
 
-    var item ;
+    var item, user;
     if(req.body){
         if(req.body.item != null){
             item = req.body.item;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('item to update', [item]);
     const sql = ' UPDATE inv__kits_parts SET  qty_in_kit=?, rainey_id=? ' +
         ' WHERE id = ? ';
@@ -559,14 +593,20 @@ router.post('/updateKitPart', async (req,res) => {
 
 
 router.post('/deleteKitPart', async (req,res) => {
-    var id;
+    var id, user;
 
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
     if(!id){
         logger.error("Bad id param in deleteKitPart");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__kits_parts WHERE id = ? LIMIT 1 ';
@@ -587,12 +627,19 @@ router.post('/deleteKitPart', async (req,res) => {
 
 router.post('/addNewKitPart', async (req,res) => {
 
-    var kit_item ;
+    var kit_item, user ;
     if(req.body){
         if(req.body.kit_item != null){
             kit_item = req.body.kit_item;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     const sql = ' INSERT INTO inv__kits_parts (kit_rainey_id, rainey_id, qty_in_kit, ' + 
                 ' date_entered, part_mf_id) ' +
                 ' VALUES ( ?, ?, IFNULL(?, DEFAULT(qty_in_kit)), IFNULL(?, NOW()), IFNULL(?, DEFAULT(part_mf_id)) ) ';
@@ -612,11 +659,17 @@ router.post('/addNewKitPart', async (req,res) => {
 
 router.post('/updateKitKit', async (req,res) => {
 
-    var item ;
+    var item, user ;
     if(req.body){
         if(req.body.item != null){
             item = req.body.item;
+            user = req.body.user;
         }  
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
     logger.info('item to update', [item]);
     const sql = ' UPDATE inv__kits_kits SET  qty_in_kit=?, rainey_id=? ' +
@@ -641,14 +694,20 @@ router.post('/updateKitKit', async (req,res) => {
 
 
 router.post('/deleteKitKit', async (req,res) => {
-    var id;
+    var id, user;
 
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
     if(!id){
         logger.error("Bad id param in deleteKitKit");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__kits_kits WHERE id = ? LIMIT 1 ';
@@ -669,11 +728,17 @@ router.post('/deleteKitKit', async (req,res) => {
 
 router.post('/addNewKitKit', async (req,res) => {
 
-    var kit_item ;
+    var kit_item, user ;
     if(req.body){
         if(req.body.kit_item != null){
             kit_item = req.body.kit_item;
+            user = req.body.user;
         }  
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
     
     const sql = ' INSERT INTO inv__kits_kits (kit_rainey_id, rainey_id, qty_in_kit, ' + 

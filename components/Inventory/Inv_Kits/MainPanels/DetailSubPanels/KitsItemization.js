@@ -48,7 +48,7 @@ const KitsItemization = function(props) {
       if(refetchKitItem){
         setRefetchKitItem(false);
       }
-
+      console.log("activeKit", activeKit);
       InventoryKits.getKitItems(activeKit.rainey_id)
       .then( async (data) => {
         console.log("data",data); 

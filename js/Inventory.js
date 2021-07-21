@@ -139,7 +139,7 @@ async function getManufactures(){
 
 }
 
-async function addNewPart(part){
+async function addNewPart(part, user){
     const route = '/scheduling/inventory/addNewPart';
     try{
         var data = await fetch(route,
@@ -148,7 +148,7 @@ async function addNewPart(part){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({part})
+                body: JSON.stringify({part, user})
             });
         var list = await data.json();
         return(list);
@@ -158,7 +158,7 @@ async function addNewPart(part){
 
 }
 
-async function updatePart(part){
+async function updatePart(part, user){
     const route = '/scheduling/inventory/updatePart';
     try{
         var data = await fetch(route,
@@ -167,7 +167,7 @@ async function updatePart(part){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({part})
+                body: JSON.stringify({part, user})
             });
         var list = await data.json();
         return(list);
@@ -177,7 +177,7 @@ async function updatePart(part){
 
 }
 
-async function updatePartInv(part){
+async function updatePartInv(part, user){
     const route = '/scheduling/inventory/updatePartInv';
     try{
         var data = await fetch(route,
@@ -186,7 +186,7 @@ async function updatePartInv(part){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({part})
+                body: JSON.stringify({part, user})
             });
         var list = await data.json();
         return(list);
@@ -215,7 +215,7 @@ async function updatePartInv(part){
 // }
 
 
-async function deletePart(rainey_id){
+async function deletePart(rainey_id, user){
     const route = '/scheduling/inventory/deletePart';
     try{
         var response = await fetch(route,
@@ -224,7 +224,7 @@ async function deletePart(rainey_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({rainey_id})
+                body: JSON.stringify({rainey_id, user})
             });
         var list = await response.ok
         return(list);
@@ -302,7 +302,7 @@ async function getPartManItemsForMultiple(rainey_id){
 }
 
 
-async function updatePartManItem(item){
+async function updatePartManItem(item, user){
     const route = '/scheduling/inventory/updatePartManItem';
     try{
         var data = await fetch(route,
@@ -311,7 +311,7 @@ async function updatePartManItem(item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({item})
+                body: JSON.stringify({item, user})
             });
         var list = await data.json();
         return(list);
@@ -321,7 +321,7 @@ async function updatePartManItem(item){
 
 }
 
-async function deletePartManItem(id){
+async function deletePartManItem(id, user){
     const route = '/scheduling/inventory/deletePartManItem';
     try{
         var data = await fetch(route,
@@ -330,7 +330,7 @@ async function deletePartManItem(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await data.json();
         return(list);
@@ -340,7 +340,7 @@ async function deletePartManItem(id){
 
 }
 
-async function addNewPartManItem(part_item){
+async function addNewPartManItem(part_item, user){
     const route = '/scheduling/inventory/addNewPartManItem';
     try{
         var data = await fetch(route,
@@ -349,7 +349,7 @@ async function addNewPartManItem(part_item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({part_item})
+                body: JSON.stringify({part_item, user})
             });
         var list = await data.json();
         return(list);
@@ -359,7 +359,7 @@ async function addNewPartManItem(part_item){
 
 }
 
-async function addNewManufacturer(manf){
+async function addNewManufacturer(manf, user){
     const route = '/scheduling/inventory/addNewManufacturer';
     try{
         var response = await fetch(route,
@@ -368,7 +368,7 @@ async function addNewManufacturer(manf){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({manf})
+                body: JSON.stringify({manf, user})
             });
         var list = await response.ok;
         return(list);
@@ -378,7 +378,7 @@ async function addNewManufacturer(manf){
 
 }
 
-async function updateManufacturer(manf){
+async function updateManufacturer(manf, user){
     const route = '/scheduling/inventory/updateManufacturer';
     try{
         var data = await fetch(route,
@@ -387,7 +387,7 @@ async function updateManufacturer(manf){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({manf})
+                body: JSON.stringify({manf, user})
             });
         var list = await data.json();
         return(list);
@@ -397,7 +397,7 @@ async function updateManufacturer(manf){
 
 }
 
-async function deleteManufacturer(id){
+async function deleteManufacturer(id, user){
     const route = '/scheduling/inventory/deleteManufacturer';
     try{
         var response = await fetch(route,
@@ -406,7 +406,7 @@ async function deleteManufacturer(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await response.ok
         return(list);
@@ -416,7 +416,7 @@ async function deleteManufacturer(id){
 
 }
 
-async function addNewPartType(part_type){
+async function addNewPartType(part_type, user){
     const route = '/scheduling/inventory/addNewPartType';
     try{
         var response = await fetch(route,
@@ -425,7 +425,7 @@ async function addNewPartType(part_type){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({part_type})
+                body: JSON.stringify({part_type, user})
             });
         var list = await response.ok;
         return(list);
@@ -435,7 +435,7 @@ async function addNewPartType(part_type){
 
 }
 
-async function updatePartType(part_type){
+async function updatePartType(part_type, user){
     const route = '/scheduling/inventory/updatePartType';
     try{
         var data = await fetch(route,
@@ -444,7 +444,7 @@ async function updatePartType(part_type){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({part_type})
+                body: JSON.stringify({part_type, user})
             });
         var list = await data.json();
         return(list);
@@ -454,7 +454,7 @@ async function updatePartType(part_type){
 
 }
 
-async function deletePartType(id){
+async function deletePartType(id, user){
     const route = '/scheduling/inventory/deletePartType';
     try{
         var response = await fetch(route,
@@ -463,7 +463,7 @@ async function deletePartType(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await response.ok
         return(list);

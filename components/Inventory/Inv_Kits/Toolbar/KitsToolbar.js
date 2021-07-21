@@ -24,7 +24,7 @@ const KitsToolbar = function(props) {
   const {user} = props;
 
   
-  const { kits, setKits,  currentView, setCurrentView, views} = useContext(ListContext);
+  const { kits, setKits,  currentView, setCurrentView, views,activeKit} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "kitsList";
 
@@ -35,13 +35,16 @@ const KitsToolbar = function(props) {
     switch(currentView.value){
       case "kitsList":
         return <Search />
-        break
+        break;
       case "kitsSearch":
         return <Search />
         break;
       case "kitsDetail":
       case "kitsItemization":
-        return <></>
+        return <><div className={classes.woDetailToolbarDiv}>
+                  <span className={classes.woLabelSpan}>ID: {activeKit && activeKit.rainey_id}</span>
+                  <span className={classes.woLabelSpan}>DESC: {activeKit && activeKit.description}</span>
+                </div></>
           break;
       default: 
         cogoToast.error("Bad view");
@@ -163,13 +166,12 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-
     fontSize: '15px',
   },
   woLabelSpan:{
     fontWeight: '600',
     fontFamilt: 'sans-serif',
-    color: '#777',
+    color: '#a3a3a3',
     marginLeft: '20px',
   }
 

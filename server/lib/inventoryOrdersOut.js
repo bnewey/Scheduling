@@ -183,14 +183,20 @@ router.post('/updateOrderOut', async (req,res) => {
 
 
 router.post('/deleteOrderOut', async (req,res) => {
-    var id;
+    var id, user;
 
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
     if(!id){
         logger.error("Bad id param in deleteOrderOut");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__orders_out WHERE id = ? LIMIT 1 ';
@@ -541,14 +547,20 @@ router.post('/updateOrderOutApprover', async (req,res) => {
 });
 
 router.post('/deleteOrderOutApprover', async (req,res) => {
-    var id;
+    var id, user;
 
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
     if(!id){
         logger.error("Bad id param in deleteOrderOutApprover");
         res.sendStatus(400);
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE FROM inv__orders_out_approvers WHERE id = ? LIMIT 1 ';

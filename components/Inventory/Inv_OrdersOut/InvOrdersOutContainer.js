@@ -244,16 +244,16 @@ const InvOrdersOutContainer = function(props) {
   const getMainComponent = () =>{
     switch(currentView.value){
       case "ordersOutList":
-        return <OrdersOutList  columnState={columnState} setColumnState={setColumnState}/>
+        return <OrdersOutList user={user} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "ordersOutSearch":
-        return <OrdersOutList  columnState={columnState} setColumnState={setColumnState}/>
+        return <OrdersOutList user={user} columnState={columnState} setColumnState={setColumnState}/>
         break;
       case "ordersOutDetail":
-        return <OrdersOutDetail/>
+        return <OrdersOutDetail user={user}/>
         break;
       case 'orderOutItems':
-        return <OrderOutItemization/>
+        return <OrderOutItemization user={user}/>
         break;
       case  "ordersOutRecentOrders":
         return <></>;
@@ -291,7 +291,7 @@ const InvOrdersOutContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{ordersOut, setOrdersOut, setOrdersOutRefetch, ordersOutSearchRefetch,setOrdersOutSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
+      <ListContext.Provider value={{user ,ordersOut, setOrdersOut, setOrdersOutRefetch, ordersOutSearchRefetch,setOrdersOutSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailOrderOutId,  setDetailOrderOutId,editOrderOutModalMode,setEditOrderOutModalMode, activeOrderOut, setActiveOrderOut, editOrderOutModalOpen,setEditOrderOutModalOpen,
          recentOrdersOut, setRecentOrdersOut, sorters, setSorters,  ordersOutSaved, setOrdersOutSaved} } >
       <DetailContext.Provider value={{editOOIDialogMode, setEditOOIDialogMode, editOOIModalOpen, setEditOOIModalOpen,

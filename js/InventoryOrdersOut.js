@@ -94,7 +94,7 @@ async function addNewOrderOut(orderOut){
                 },
                 body: JSON.stringify({orderOut})
             });
-        var list = await response.ok;
+        var list = await response.json();
         return(list);
     }catch(error){
         throw error;
@@ -121,27 +121,9 @@ async function updateOrderOut(orderOut){
 
 }
 
-async function updateOrderOutInv(orderOut){
-    const route = '/scheduling/inventoryOrdersOut/updateOrderOutInv';
-    try{
-        var data = await fetch(route,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({orderOut})
-            });
-        var list = await data.json();
-        return(list);
-    }catch(error){
-        throw error;
-    }
-
-}
 
 
-async function deleteOrderOut(id){
+async function deleteOrderOut(id, user){
     const route = '/scheduling/inventoryOrdersOut/deleteOrderOut';
     try{
         var response = await fetch(route,
@@ -150,7 +132,7 @@ async function deleteOrderOut(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await response.ok
         return(list);
@@ -317,7 +299,7 @@ async function updateOrderOutApprover(item, nav_item){
 
 }
 
-async function deleteOrderOutApprover(id){
+async function deleteOrderOutApprover(id, user){
     const route = '/scheduling/inventoryOrdersOut/deleteOrderOutApprover';
     try{
         var data = await fetch(route,
@@ -326,7 +308,7 @@ async function deleteOrderOutApprover(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await data.json();
         return(list);
@@ -362,7 +344,6 @@ module.exports = {
     getOrderOutById,
     addNewOrderOut,
     updateOrderOut,
-    updateOrderOutInv,
     deleteOrderOut,
     getOrderOutItems,
     updateOrderOutItem,

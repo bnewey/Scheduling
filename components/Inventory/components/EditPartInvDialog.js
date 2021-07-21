@@ -30,7 +30,7 @@ const EditPartInvDialog = (props) => {
  
     //PROPS
     const { part } = props;
-    const { setPartsRefetch, setPartsSearchRefetch, currentView,setActivePart} = useContext(ListContext);
+    const { user, setPartsRefetch, setPartsSearchRefetch, currentView,setActivePart} = useContext(ListContext);
     const textFieldRef = React.useRef();
     const refreshRef= React.useRef();
 
@@ -83,7 +83,7 @@ const EditPartInvDialog = (props) => {
         }
        
         //UpdatePartInv only updates inv_qty and tracks inventory change
-        Inventory.updatePartInv(updatePart)
+        Inventory.updatePartInv(updatePart, user)
         .then((data)=>{
             cogoToast.success("Updated ");
 

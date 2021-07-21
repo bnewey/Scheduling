@@ -87,7 +87,6 @@ const AdminPage = function(props) {
   const {user} = useContext(InventoryContext);
   const classes = useStyles();
 
-
   const [tableRows, setTableRows] = useState(null);
   const [columns, setColumns] = useState(null);
   const tabs = [{field:"manufacturers", label: "Manufacturers"}, {field:"partTypes", label: "Part Types"}, {field:"settings", label: "Settings"} ]
@@ -244,7 +243,7 @@ const AdminPage = function(props) {
       case "manufacturers":
         
         var deleteItem = ()=>{
-          Inventory.deleteManufacturer(row.id)
+          Inventory.deleteManufacturer(row.id, user)
           .then((data)=>{
             if(data){
                 setManItemsRefetch(true);
@@ -269,7 +268,7 @@ const AdminPage = function(props) {
         break;
       case "partTypes":
         var deleteItem = ()=>{
-          Inventory.deletePartType(row.id)
+          Inventory.deletePartType(row.id, user)
           .then((data)=>{
             if(data){
                 setPartTypesRefetch(true);
@@ -350,8 +349,8 @@ const AdminPage = function(props) {
             })}
           </Table>
       </TableContainer>
-      <AddEditManfDialog manf={manfToEdit} refreshFunction={()=> setManItemsRefetch(true)} addNewManDialog={addNewManDialog} setAddNewManDialog={setAddNewManDialog}/>
-      <AddEditPartTypeDialog part_type={partTypeToEdit} refreshFunction={()=> setPartTypesRefetch(true)} addNewPartTypeDialog={addNewPartTypeDialog} setAddNewPartTypeDialog={setAddNewPartTypeDialog}/>
+      <AddEditManfDialog user={user} manf={manfToEdit} refreshFunction={()=> setManItemsRefetch(true)} addNewManDialog={addNewManDialog} setAddNewManDialog={setAddNewManDialog}/>
+      <AddEditPartTypeDialog user={user} part_type={partTypeToEdit} refreshFunction={()=> setPartTypesRefetch(true)} addNewPartTypeDialog={addNewPartTypeDialog} setAddNewPartTypeDialog={setAddNewPartTypeDialog}/>
       <UpdateNotificationSettingDialog settingToEdit={settingToEdit} setSettingToEdit={setSettingToEdit} refreshFunction={()=> setSettingsRefetch(true)} updateSettingDialogOpen={updateSettingDialogOpen}  setUpdateSettingDialogOpen={setUpdateSettingDialogOpen}/>
     </div>
   );

@@ -42,7 +42,7 @@ const AddEditOrdersOutItemDialog = (props) => {
     //PROPS
     const { editKitItemModalOpen, setEditKitItemModalOpen,setKitItems, editKitItemDialogMode, setEditKitItemDialogMode,
        activeKitItemItem, setActiveKitItemItem } = props;
-    const {  currentView, setCurrentView, activeKit,setActiveKit, views} = useContext(ListContext);
+    const { user, currentView, setCurrentView, activeKit,setActiveKit, views} = useContext(ListContext);
 
     //STATE
     const [partId, setPartId] = useState(null)
@@ -164,7 +164,7 @@ const AddEditOrdersOutItemDialog = (props) => {
 
                       updateKitItem["id"] = og_kit_item.id;
                       
-                      InventoryKits.updateKitPart( updateKitItem )
+                      InventoryKits.updateKitPart( updateKitItem, user )
                       .then( (data) => {
                           //Refetch our data on save
                           cogoToast.success(`Kit Item ${og_kit_item.id} has been updated!`, {hideAfter: 4});
@@ -181,7 +181,7 @@ const AddEditOrdersOutItemDialog = (props) => {
                   if(addOrEdit == "add"){
                       updateKitItem["kit_rainey_id"] = activeKit.rainey_id;
 
-                      InventoryKits.addNewKitPart( updateKitItem )
+                      InventoryKits.addNewKitPart( updateKitItem, user )
                       .then( (data) => {
                           //Get id of new workorder and activeKit view to detail
                           cogoToast.success(`Kit item has been added!`, {hideAfter: 4});
@@ -220,7 +220,7 @@ const AddEditOrdersOutItemDialog = (props) => {
 
                         updateKitItem["id"] = og_kit_item.id;
 
-                        InventoryKits.updateKitKit( updateKitItem )
+                        InventoryKits.updateKitKit( updateKitItem , user)
                         .then( (data) => {
                             if(data.error){
                               throw data.error;
@@ -242,7 +242,7 @@ const AddEditOrdersOutItemDialog = (props) => {
                         //updateKitItem["kit_items"] = updateKitItem["kit_items"].filter((item)=> item.selected);
                         updateKitItem["kit_rainey_id"] = activeKit.rainey_id;
 
-                        InventoryKits.addNewKitKit( updateKitItem  )
+                        InventoryKits.addNewKitKit( updateKitItem, user  )
                         .then( (data) => {
                             if(data.error){
                               throw data.error;
@@ -282,7 +282,7 @@ const AddEditOrdersOutItemDialog = (props) => {
           } 
 
           const deleteEnt = () =>{
-              InventoryKits.deleteKitKit(item.id)
+              InventoryKits.deleteKitKit(item.id, user)
               .then((data)=>{
                   setKitItems(null);
                   handleDialogClose();
@@ -309,7 +309,7 @@ const AddEditOrdersOutItemDialog = (props) => {
           }
 
           const deleteEnt = () =>{
-              InventoryKits.deleteKitPart(item.id)
+              InventoryKits.deleteKitPart(item.id, user)
               .then((data)=>{
                   setKitItems(null);
                   handleDialogClose();
@@ -345,7 +345,7 @@ const AddEditOrdersOutItemDialog = (props) => {
                         <PartsAndKitsSearch searchOpenPermanent parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
              setPartsListSearchRefetch={setPartsListSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} />
                         <div className={classes.inputDivs}>
-                            <VirtualizedPartTable setShouldUpdate={setShouldUpdate} parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
+                            <VirtualizedPartTable user={user} setShouldUpdate={setShouldUpdate} parts={partsList} setParts={setPartsList} partsSearchRefetch={partsListSearchRefetch}
                 setPartsListSearchRefetch={setPartsListSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views}
                 selectedPart={selectedPart} setSelectedPart={setSelectedPart}/>
                         </div>

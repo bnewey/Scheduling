@@ -107,7 +107,7 @@ async function getKitById(rainey_id){
 }
 
 
-async function addNewKit(kit){
+async function addNewKit(kit, user){
     const route = '/scheduling/inventoryKits/addNewKit';
     try{
         var response = await fetch(route,
@@ -116,9 +116,9 @@ async function addNewKit(kit){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({kit})
+                body: JSON.stringify({kit, user})
             });
-        var list = await response.ok;
+        var list = await response.json();
         return(list);
     }catch(error){
         throw error;
@@ -127,7 +127,7 @@ async function addNewKit(kit){
 }
 
 
-async function updateKit(kit){
+async function updateKit(kit, user){
     const route = '/scheduling/inventoryKits/updateKit';
     try{
         var data = await fetch(route,
@@ -136,7 +136,7 @@ async function updateKit(kit){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({kit})
+                body: JSON.stringify({kit, user})
             });
         var list = await data.json();
         return(list);
@@ -147,7 +147,7 @@ async function updateKit(kit){
 }
 
 
-async function updateKitInv(kit){
+async function updateKitInv(kit, user){
     const route = '/scheduling/inventoryKits/updateKitInv';
     try{
         var data = await fetch(route,
@@ -156,7 +156,7 @@ async function updateKitInv(kit){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({kit})
+                body: JSON.stringify({kit, user})
             });
         var list = await data.json();
         return(list);
@@ -167,7 +167,7 @@ async function updateKitInv(kit){
 }
 
 
-async function deleteKit(rainey_id){
+async function deleteKit(rainey_id, user){
     const route = '/scheduling/inventoryKits/deleteKit';
     try{
         var response = await fetch(route,
@@ -176,7 +176,7 @@ async function deleteKit(rainey_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({rainey_id})
+                body: JSON.stringify({rainey_id, user})
             });
         var list = await response.ok
         return(list);
@@ -189,7 +189,9 @@ async function deleteKit(rainey_id){
 
 async function getKitItems(rainey_id){
     if(!rainey_id){
-        throw new Error("No/bad id for getKitItems");
+        console.error("rainey_id", rainey_id);
+        console.error("No/bad id for getKitItems");
+        return [];
     }
     const route = '/scheduling/inventoryKits/getKitItems';
     try{
@@ -206,7 +208,6 @@ async function getKitItems(rainey_id){
     }catch(error){
         throw error;
     }
-
 }
 
 
@@ -256,7 +257,7 @@ async function getKitItemsWithManf(rainey_id){
 }
 
 
-async function updateKitPart(item){
+async function updateKitPart(item, user){
     const route = '/scheduling/inventoryKits/updateKitPart';
     try{
         var data = await fetch(route,
@@ -265,7 +266,7 @@ async function updateKitPart(item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({item})
+                body: JSON.stringify({item, user})
             });
         var list = await data.json();
         return(list);
@@ -276,7 +277,7 @@ async function updateKitPart(item){
 }
 
 
-async function deleteKitPart(id){
+async function deleteKitPart(id, user){
     const route = '/scheduling/inventoryKits/deleteKitPart';
     try{
         var data = await fetch(route,
@@ -285,7 +286,7 @@ async function deleteKitPart(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await data.json();
         return(list);
@@ -296,7 +297,7 @@ async function deleteKitPart(id){
 }
 
 
-async function addNewKitPart(kit_item){
+async function addNewKitPart(kit_item, user){
     const route = '/scheduling/inventoryKits/addNewKitPart';
     try{
         var data = await fetch(route,
@@ -305,7 +306,7 @@ async function addNewKitPart(kit_item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({kit_item})
+                body: JSON.stringify({kit_item, user})
             });
         var list = await data.json();
         return(list);
@@ -316,7 +317,7 @@ async function addNewKitPart(kit_item){
 }
 
 
-async function updateKitKit(item){
+async function updateKitKit(item, user){
     const route = '/scheduling/inventoryKits/updateKitKit';
     try{
         var data = await fetch(route,
@@ -325,7 +326,7 @@ async function updateKitKit(item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({item})
+                body: JSON.stringify({item, user})
             });
         var list = await data.json();
         return(list);
@@ -336,7 +337,7 @@ async function updateKitKit(item){
 }
 
 
-async function deleteKitKit(id){
+async function deleteKitKit(id, user){
     const route = '/scheduling/inventoryKits/deleteKitKit';
     try{
         var data = await fetch(route,
@@ -345,7 +346,7 @@ async function deleteKitKit(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await data.json();
         return(list);
@@ -356,7 +357,7 @@ async function deleteKitKit(id){
 }
 
 
-async function addNewKitKit(kit_item){
+async function addNewKitKit(kit_item, user){
     const route = '/scheduling/inventoryKits/addNewKitKit';
     try{
         var data = await fetch(route,
@@ -365,7 +366,7 @@ async function addNewKitKit(kit_item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({kit_item})
+                body: JSON.stringify({kit_item, user})
             });
         var list = await data.json();
         return(list);

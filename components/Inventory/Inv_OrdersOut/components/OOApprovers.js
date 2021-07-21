@@ -72,7 +72,7 @@ const OOApprovers = function(props) {
         let nav_item = {page: '/inventory', current_view: invCurrentView.value , sub_current_view: currentView.value ,
                  detail_id: detailOrderOutId, type: 'orderOutApprover'}
 
-        InventoryOrdersOut.updateOrderOutApprover(updateItem, nav_item)
+        InventoryOrdersOut.updateOrderOutApprover(updateItem, nav_item, user)
         .then((data)=>{
             console.log("Update data", data);
             cogoToast.success("Updated Approve Item")
@@ -148,7 +148,7 @@ const OOApprovers = function(props) {
         }
     
         const deleteSlip = ()=>{
-        InventoryOrdersOut.deleteOrderOutApprover(row.id)
+        InventoryOrdersOut.deleteOrderOutApprover(row.id, user)
         .then((data)=>{
             setOrderApprovers(null);
         })

@@ -188,7 +188,7 @@ const PartManufactureList = function(props) {
           return;
         }
         const deleteItem = ()=>{
-          Inventory.deletePartManItem(row.id)
+          Inventory.deletePartManItem(row.id, user)
           .then((data)=>{
             if(data){
                 if(resetFunction){

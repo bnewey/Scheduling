@@ -137,7 +137,7 @@ const PartsDetail = function(props) {
                     
                   </div>
                   <div className={classes.detailInfoDiv}>
-                    <AddEditManfItemDialog activePart={activePart} partManItems={partManItems} setPartManItems={setPartManItems} addNewManDialogOpen={addNewManDialogOpen} setAddNewManDialogOpen={setAddNewManDialogOpen}
+                    <AddEditManfItemDialog user={user} activePart={activePart} partManItems={partManItems} setPartManItems={setPartManItems} addNewManDialogOpen={addNewManDialogOpen} setAddNewManDialogOpen={setAddNewManDialogOpen}
                        editDialogMode={editDialogMode} setEditDialogMode={setEditDialogMode} refreshFunction={()=>setPartManItems(null)}
                        manfItemId={manfItemId} setManfItemId={setManfItemId}/>
                       <PartManufactureList partManItems={partManItems} setPartManItems={setPartManItems} setAddNewManDialogOpen={setAddNewManDialogOpen}

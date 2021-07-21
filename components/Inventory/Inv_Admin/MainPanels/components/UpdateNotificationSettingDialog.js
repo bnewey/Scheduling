@@ -62,7 +62,7 @@ const UpdateNotificationSettingDialog = (props) => {
             if(addOrEdit == "edit"){
                 updateSetting["id"] = setting.id;
 
-                Settings.updateNotificationSetting(updateSetting)
+                Settings.updateNotificationSetting(updateSetting,user)
                 .then((result) => {
                     if(refreshFunction){
                         refreshFunction();
