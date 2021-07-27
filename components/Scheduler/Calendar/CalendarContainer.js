@@ -30,7 +30,7 @@ const CalendarContainer = (props) => {
 
     //const {} = props;
 
-    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved, filterInOrOut, filterAndOr, taskListToMap, filters,installDateFilters, setInstallDateFilters,
+    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved, filterInOrOut, filterAndOr, taskListToMap, filters,installDateFilters, setInstallDateFilters, drillDateFilters,
         setModalTaskId, setModalOpen, refreshView } = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
@@ -186,7 +186,7 @@ const CalendarContainer = (props) => {
 
     //Filter
     useEffect( () =>{ //useEffect for inputText
-        if((calendarRows == null || calendarRowsRefetch == true)&& filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null){
+        if((calendarRows == null || calendarRowsRefetch == true)&& filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null && drillDateFilters != null){
             if(taskLists && taskListToMap && taskListToMap.id ) { 
 
             if(calendarRowsRefetch == true){
@@ -253,9 +253,16 @@ const CalendarContainer = (props) => {
                     }  
                     tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
                 }
-                
+
+                if(drillDateFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
+                }
+
                 //No filters 
-                if(filters && !filters.length && installDateFilters && !installDateFilters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length ){
                 //no change to tmpData
                 tmpData = [...data];
                 }
@@ -280,7 +287,7 @@ const CalendarContainer = (props) => {
         
         return () => { //clean up
         }
-      },[calendarRows,calendarRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters]);
+      },[calendarRows,calendarRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters, drillDateFilters]);
     //end of Filter
 
     const handleTimeChange = (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) =>{

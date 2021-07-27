@@ -31,13 +31,15 @@ import {TaskContext} from '../TaskContainer';
 import {CrewContext} from '../Crew/CrewContextContainer';
 import _, { property } from 'lodash';
 import TaskListFilterTieTaskView from './TaskListFilterTieTaskView';
+import TLInstallDateFilter from './components/TLInstallDateFilter';
+import TLDrillDateFilter from './components/TLDrillDateFilter';
 
 const TaskListFilter = (props) => {
     //PROPS
     const { filteredItems, setFilteredItems } = props;
 
-    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,installDateFilters, setInstallDateFilters,
-        setRefreshView,tabValue, user, taskViews,setActiveTaskView} = useContext(TaskContext);
+    const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,installDateFilters, setInstallDateFilters,drillDateFilters, setDrillDateFilters,
+        setRefreshView,tabValue, user, taskViews,activeTaskView,setActiveTaskView} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
@@ -45,12 +47,7 @@ const TaskListFilter = (props) => {
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedField, setSelectedField] = useState(null);
     const [taskListFiltersEdited, setTaskListFiltersEdited] = useState(false);
-    const [installDateFilterOpen, setInstallDateFilterOpen] = useState(null)
 
-    
-
-
-    const [selectInstallDateMenuOpen,setSelectInstallDateMenuOpen] = useState(false);
     
     const [tableConfig, setTableInfo] = useState([
         {text: "Type", field: "type", data_type: 'text'},
@@ -121,26 +118,7 @@ const TaskListFilter = (props) => {
         }
         
     }, [filterAndOr]);
-
-    useEffect(() => {
-        if(installDateFilterOpen == null){
-            var tmp = window.localStorage.getItem('installDateFilterOpen');
-            var tmpParsed;
-            if(tmp != null && tmp != undefined){
-                tmpParsed = JSON.parse(tmp);
-            }
-            if(tmpParsed != null){
-                setInstallDateFilterOpen(tmpParsed);
-            }else{
-                setInstallDateFilterOpen(false);
-            }
-        }
-        if((installDateFilterOpen != null)){
-            window.localStorage.setItem('installDateFilterOpen', JSON.stringify(installDateFilterOpen));
-        }
-        
-    }, [installDateFilterOpen]);
-    
+  
 
     //CSS
     const classes = useStyles({filters});
@@ -559,36 +537,6 @@ const TaskListFilter = (props) => {
           })
     }
 
-    const handleOpenInstallDateFilter = (event)=>{
-        setInstallDateFilterOpen(true);
-        setSelectInstallDateMenuOpen(true);
-    }
-
-    const handleClearAndCloseInstallDateFilter = (event)=>{
-        setInstallDateFilterOpen(false);
-        setInstallDateFilters([]);
-        handleRefreshView()
-    }
-
-    const handleUpdateInstallDateFilter =(value)=>{
-        console.log("Value ", value);
-
-        var newArray = value.map((item)=>{
-            return ({property: 'sch_install_date', value: item})
-        })
-
-        setInstallDateFilters(newArray);
-        handleCloseSelectMenu();
-        handleRefreshView()
-    }
-
-    const handleCloseSelectMenu = (event)=>{
-        setSelectInstallDateMenuOpen(false);
-    }
-
-    const handleOpenSelectMenu = (event)=>{
-        setSelectInstallDateMenuOpen(true);
-    }
     
     
     return(
@@ -648,44 +596,11 @@ const TaskListFilter = (props) => {
                 <div className={classes.numItemsDiv}>
                     {filteredItems ? filteredItems.length : 0}&nbsp;Item(s)
                 </div>
-                {installDateFilterOpen && taskListTasksSaved ? 
-                <div className={classes.filterInstallDateDiv}>
-                    <Select  multiple
-                            id={"installDateFilter"}
-                            className={classes.selectBox}
-                            value={(installDateFilters?.map((item)=> (item.value))
-                            )}
-                            open={selectInstallDateMenuOpen}
-                            onOpen={handleOpenSelectMenu}
-                            onClose={handleCloseSelectMenu}
-                            className={classes.filterInstallDate}
-                            onChange={event => handleUpdateInstallDateFilter(event.target.value)}
-                            >
-                        {(()=> {
-                            var array = [...taskListTasksSaved].map((task)=> task["sch_install_date"])
-                                           .filter((v, i, array)=> array.indexOf(v)===i && v != null )
-                            var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
-                            return newArray.map((item,i)=>{
-                                return( 
-                                <MenuItem value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
-                                );
-                            }) ;
-                        })()}
-                    </Select> 
-                    <span>
-                        <DeleteIcon className={classes.clearInstallDateFilterIcon} onClick={event => handleClearAndCloseInstallDateFilter(event)}/>
-                    </span>
-                </div> : 
-                <Button className={classes.installDateFilterButton}
-                    onClick={event => handleOpenInstallDateFilter(event)}
-                    variant="text"
-                    color="secondary"
-                    size="medium"
-                >
-                    <DateIcon/>
-                    <Box display={{ xs: 'none', md: 'inline' }}  component="span">Install Date Filter</Box>
-                </Button>
-                }
+                
+                <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} drillDateFilters={drillDateFilters}
+                      setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />
+                <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} installDateFilters={installDateFilters}
+                      setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />
             </div> 
             <Modal aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"
@@ -1241,46 +1156,6 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'start',
         alignItems: 'center',
     },
-    filterInstallDate: {
-      
-        padding: '0px',
-        background: '#fff',
-        color: '#19253a',
-        '&& .MuiSelect-select':{
-            padding: '8px 20px 8px 10px',
-            minWidth: '100px',
-        },
-    },
-    filterInstallDateDiv:{
-        margin: '0px 10px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        background: '#d7ffef',
-        padding: '2px 4px',
-        borderRadius: '3px',
-    },
-    installDateFilterButton:{
-        color: '#152f24',
-        border: '1px solid #385248',
-        margin: '0px 10px',
-        fontWeight: 500,
-        backgroundColor: '#d7ffef',
-        '&:hover':{
-            backgroundColor: '#85d1b3',
-            color: '#222',
-        }
-        
-    },
-    clearInstallDateFilterIcon:{
-        margin: '2px',
-        marginTop: '4px',
-        '&:hover':{
-            color: '#000',
-            background: '#b7b7b75c',
-            borderRadius: '8px',
-        }
-    }
 
       
   }));

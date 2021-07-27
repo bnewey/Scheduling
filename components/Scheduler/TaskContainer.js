@@ -45,6 +45,7 @@ const TaskContainer = function(props) {
     const [filterAndOr, setFilterAndOr] = useState(null);
     const [sorters, setSorters] = useState(null);
     const [installDateFilters, setInstallDateFilters] = useState([]);
+    const [drillDateFilters, setDrillDateFilters] = useState([])
     const [activeTaskView,setActiveTaskView] = useState(1)
 
     const taskViews = [
@@ -215,6 +216,26 @@ const TaskContainer = function(props) {
     
   }, [installDateFilters]);
 
+  //Save and/or Fetch filters to local storage
+  useEffect(() => {
+    if(filters == null){
+      var tmp = window.localStorage.getItem('drillDateFilters');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(Array.isArray(tmpParsed)){
+        setDrillDateFilters(tmpParsed);
+      }else{
+        setDrillDateFilters([]);
+      }
+    }
+    if(Array.isArray(drillDateFilters)){
+      window.localStorage.setItem('drillDateFilters', JSON.stringify(drillDateFilters));
+    }
+    
+  }, [drillDateFilters]);
+
   
   //Save and/or Fetch tabValue to local storage
   useEffect(() => {
@@ -282,7 +303,7 @@ const TaskContainer = function(props) {
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,activeTaskView, setActiveTaskView,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
-                             sorters, setSorters, installDateFilters, setInstallDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
+                             sorters, setSorters, installDateFilters, setInstallDateFilters, drillDateFilters, setDrillDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
                              user, refreshView, setRefreshView, taskViews, job_types} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 

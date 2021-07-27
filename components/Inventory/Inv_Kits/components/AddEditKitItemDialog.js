@@ -2,9 +2,6 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 
 import {makeStyles,withStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Dialog, DialogActions,
          DialogContent, DialogTitle, Grid, TextField, Stepper, Step, StepLabel} from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
-import LinkIcon from '@material-ui/icons/Link'
 
 import InventoryKits from '../../../../js/InventoryKits';
 import Inventory from '../../../../js/Inventory';
@@ -14,20 +11,8 @@ import cogoToast from 'cogo-toast';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
 
-import DateFnsUtils from '@date-io/date-fns';
-import {
-    DatePicker,
-    TimePicker,
-    DateTimePicker,
-    MuiPickersUtilsProvider,
-  } from '@material-ui/pickers';
-
-  import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
 import { AutoSizer, Column, Table } from 'react-virtualized';
 import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 

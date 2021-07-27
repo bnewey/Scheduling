@@ -62,7 +62,7 @@ const MapContainer = (props) => {
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
           filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, refreshView,
-          installDateFilters , setInstallDateFilters, job_types} = useContext(TaskContext);
+          installDateFilters , setInstallDateFilters, drillDateFilters, job_types} = useContext(TaskContext);
 
     const { crewJobDateRange, setShouldResetCrewState, crewJobDateRangeActive} = useContext(CrewContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
@@ -184,7 +184,7 @@ const MapContainer = (props) => {
 
     //useEffect for mapRows
     useEffect( () =>{ 
-      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null){
+      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null && drillDateFilters != null){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
             if(mapRowsRefetch == true){
               setMapRowsRefetch(false);
@@ -250,8 +250,15 @@ const MapContainer = (props) => {
                   tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
                 }
 
+                if(drillDateFilters.length > 0){
+                  if(tmpData.length <= 0 && filters && !filters.length){
+                      tmpData = [...data];
+                  }  
+                  tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
+                }
+
                 //No filters 
-                if(filters && !filters.length && installDateFilters && !installDateFilters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
                   //no change to tmpData
                   tmpData = [...data];
                 }
@@ -293,7 +300,7 @@ const MapContainer = (props) => {
 
       return () => { //clean up
       }
-    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters]);
+    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters, drillDateFilters]);
 
     //Sort
     useEffect(()=>{

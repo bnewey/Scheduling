@@ -48,7 +48,7 @@ const KitsItemization = function(props) {
       if(refetchKitItem){
         setRefetchKitItem(false);
       }
-      console.log("activeKit", activeKit);
+      
       InventoryKits.getKitItems(activeKit.rainey_id)
       .then( async (data) => {
         console.log("data",data); 
@@ -61,7 +61,6 @@ const KitsItemization = function(props) {
             console.log("item.cost_each ", item.cost_each );
             return item;
           }
-          
           throw "No item type";
         })
 

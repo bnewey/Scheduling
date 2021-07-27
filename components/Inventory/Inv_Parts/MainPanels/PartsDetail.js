@@ -140,9 +140,9 @@ const PartsDetail = function(props) {
                     <AddEditManfItemDialog user={user} activePart={activePart} partManItems={partManItems} setPartManItems={setPartManItems} addNewManDialogOpen={addNewManDialogOpen} setAddNewManDialogOpen={setAddNewManDialogOpen}
                        editDialogMode={editDialogMode} setEditDialogMode={setEditDialogMode} refreshFunction={()=>setPartManItems(null)}
                        manfItemId={manfItemId} setManfItemId={setManfItemId}/>
-                      <PartManufactureList partManItems={partManItems} setPartManItems={setPartManItems} setAddNewManDialogOpen={setAddNewManDialogOpen}
+                      <PartManufactureList user={user} partManItems={partManItems} setPartManItems={setPartManItems} setAddNewManDialogOpen={setAddNewManDialogOpen}
                       part={activePart} detailPartId={detailPartId} setEditDialogMode={setEditDialogMode} manfItemId={manfItemId} setManfItemId={setManfItemId}
-                       resetFunction={()=> setActivePart(null) } 
+                       resetFunction={()=> { setActivePart(null); setPartManItems(null) } } 
                       manNames={manNames} setManNames={setManNames} />
                       
                     </div>
