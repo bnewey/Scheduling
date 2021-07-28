@@ -76,6 +76,10 @@ const InvKitsContainer = function(props) {
   const [editKitItemModalOpen,setEditKitItemModalOpen] = useState(false);
   const [ activeKitItemItem, setActiveKitItemItem] = React.useState(null);
 
+  const [importKitModalOpen,setImportKitModalOpen] = useState(false);
+  const [ activeImportItem, setActiveImportItem] = React.useState(null);
+   
+
 
   const classes = useStyles();
 
@@ -293,7 +297,7 @@ const InvKitsContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{user, kits, setKits, setKitsRefetch, kitsSearchRefetch,setKitsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailKitId,  setDetailKitId,editKitModalMode,setEditKitModalMode, activeKit, setActiveKit, editKitModalOpen,setEditKitModalOpen,
-         recentKits, setRecentKits, sorters, setSorters,  kitsSaved, setKitsSaved, 
+         recentKits, setRecentKits, sorters, setSorters,  kitsSaved, setKitsSaved, importKitModalOpen,setImportKitModalOpen, activeImportItem, setActiveImportItem
         } } >
       <DetailContext.Provider value={{ editKitItemModalOpen,setEditKitItemModalOpen,editKitItemDialogMode,setEditKitItemDialogMode,
         activeKitItemItem, setActiveKitItemItem}} >
