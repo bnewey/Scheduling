@@ -50,7 +50,7 @@ export default function InventoryTabs({children}) {
   const classes = useStyles();
   const theme = useTheme();
  
-  const {currentView , setCurrentView, views} = useContext(InventoryContext);
+  const {currentView , setCurrentView, views, user} = useContext(InventoryContext);
   
 
   const handleChange = (event, newValue) => {
@@ -60,6 +60,14 @@ export default function InventoryTabs({children}) {
   if(currentView?.index == null){
     return(<></>);
   }
+
+  const tabs = views.filter((item)=> {
+    if(item.adminOnly == false || item.adminOnly == undefined){
+      return true;
+    }
+
+    return user.isAdmin == item.adminOnly 
+  })
 
   return (
     <div className={classes.root}>
@@ -73,7 +81,7 @@ export default function InventoryTabs({children}) {
           aria-label="full width tabs example"
           className={classes.tabRoot}
         >
-            { views?.map((view,i)=>{
+            { tabs?.map((view,i)=>{
                     const selectedView = view.value === currentView?.value;
                     return (
                         <Tab className={selectedView ? classes.selectedTabSmall : classes.nonSelectedTabSmall} 

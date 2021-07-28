@@ -3,8 +3,9 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles,withStyles, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Dialog, DialogActions,
          DialogContent, DialogTitle, Grid, TextField, Stepper, Step, StepLabel} from '@material-ui/core';
 
-import InventoryKits from '../../../../js/InventoryKits';
+import InventoryPartsRequest from '../../../../js/InventoryPartsRequest';
 import Inventory from '../../../../js/Inventory';
+import InventoryKits from '../../../../js/InventoryKits';
 import Util from '../../../../js/Util';
 import cogoToast from 'cogo-toast';
 
@@ -16,7 +17,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import { AutoSizer, Column, Table } from 'react-virtualized';
 import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
-import { ListContext } from '../../Inv_Kits/InvKitsContainer';
+import { ListContext } from '../../Inv_PartsRequest/InvPartsRequestContainer';
 import clsx from 'clsx';
 import PartsAndKitsSearch from '../../Inv_OrdersOut/components/PartsAndKitsSearch';
 import _ from 'lodash';
@@ -25,9 +26,12 @@ import _ from 'lodash';
 const AddEditOrdersOutItemDialog = (props) => {
  
     //PROPS
-    const { editKitItemModalOpen, setEditKitItemModalOpen,setKitItems, editKitItemDialogMode, setEditKitItemDialogMode,
-       activeKitItemItem, setActiveKitItemItem } = props;
-    const { user, currentView, setCurrentView, activeKit,setActiveKit, views} = useContext(ListContext);
+    const { user ,partsRequestItems, setPartsRequestItems, setPartsRequestItemsRefetch,
+      partsRequestItemsSearchRefetch,setPartsRequestItemsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState,
+      activePRItem, editPartsRequestModalOpen,setEditPartsRequestModalOpen,
+      sorters, setSorters,  partsRequestItemsSaved, setPartsRequestItemsSaved,
+       editPRIDialogMode, setEditPRIDialogMode, editPRIModalOpen, setEditPRIModalOpen,
+      setActivePRItem} = useContext(ListContext);
 
     //STATE
     const [partId, setPartId] = useState(null)
@@ -40,28 +44,28 @@ const AddEditOrdersOutItemDialog = (props) => {
 
     const [validationErrors , setValidationErrors] = useState([]);
     
-    //const [activeKitItemItem, setActiveKitItemItem] = useState(null)
+    //const [activePartsRequestItemItem, setActivePartsRequestItemItem] = useState(null)
     const saveRef = React.createRef();
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
     useEffect(()=>{
-        if(editKitItemDialogMode == "add"){
-            setActiveKitItemItem({})
+        if(editPRIDialogMode == "add"){
+            setActivePRItem({})
         }
 
-    },[editKitItemDialogMode])
+    },[editPRIDialogMode])
 
 
 
     useEffect(()=>{      
       //selects item in list on edit
-      if( editKitItemModalOpen == true && editKitItemDialogMode == "edit" && activeKitItemItem && partsList && selectedPart == null ){
+      if( editPRIModalOpen == true && editPRIDialogMode == "edit" && activePRItem && partsList && selectedPart == null ){
  
         let editSP;
         partsList.forEach((item, index)=> {
-          if(item.rainey_id === activeKitItemItem?.rainey_id){
+          if(item.rainey_id === activePRItem?.rainey_id){
             editSP = {...item, index};
           }
         })
@@ -74,16 +78,16 @@ const AddEditOrdersOutItemDialog = (props) => {
       }
     }
 
-    },[editKitItemModalOpen, activeKitItemItem, editKitItemDialogMode, partsList, selectedPart])
+    },[editPRIModalOpen, activePRItem, editPRIDialogMode, partsList, selectedPart])
 
     const handleDialogClose = () => {
-        setEditKitItemModalOpen(false);
+        setEditPRIModalOpen(false);
         setPartId(0);
         setValidationErrors([]);
         setActiveStep(0)
         setSelectedPart(null);
         setPartsList(null);
-        setActiveKitItemItem({});
+        setActivePRItem({});
         setShouldUpdate(false);
     };
 
@@ -125,94 +129,96 @@ const AddEditOrdersOutItemDialog = (props) => {
     const fields = [
         //type: select must be hyphenated ex select-type
         {field: 'qty_in_kit', label: 'Qty in Order', type: 'number', updateBy: 'ref', required: true},
+        {field: 'work_order_name', label: 'Work Order', type: 'text', updateBy: 'ref', required: true},
+        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref'},
     ];
 
-    const handleSave = (og_kit_item, updateKitItem, addOrEdit, add_and_continue)=>{
+    const handleSave = (og_pr_item, updatePRItem, addOrEdit, add_and_continue)=>{
         return new Promise((resolve, reject)=>{
-            if(!updateKitItem){
+            if(!updatePRItem){
                 console.error("Bad item");
                 reject("Bad item");
             }
-            console.log("updateKitItem item", updateKitItem)
-            console.log("og_kit_item item", og_kit_item)
+            console.log("updatePRItem item", updatePRItem)
+            console.log("og_pr_item item", og_pr_item)
     
             if(selectedPart.item_type === "part" ){
 
-                  updateKitItem["rainey_id"] = selectedPart.rainey_id;
-                  //updateKitItem["item_type"] = selectedPart.item_type;
+                  updatePRItem["rainey_id"] = selectedPart.rainey_id;
+                  //updatePRItem["item_type"] = selectedPart.item_type;
                   //Add Id to this new object
                   if(addOrEdit == "edit"){
-                      if(!og_kit_item){
-                          console.error("Bad og_kit_item in edit")
-                          reject("Bad og_kit_item");
+                      if(!og_pr_item){
+                          console.error("Bad og_pr_item in edit")
+                          reject("Bad og_pr_item");
                       }
 
-                      updateKitItem["id"] = og_kit_item.id;
+                      updatePRItem["id"] = og_pr_item.id;
                       
-                      InventoryKits.updateKitPart( updateKitItem, user )
+                      InventoryPartsRequest.updatePartsRequestItem( updatePRItem, user )
                       .then( (data) => {
                           //Refetch our data on save
-                          cogoToast.success(`Kit Item ${og_kit_item.id} has been updated!`, {hideAfter: 4});
-                          setKitItems(null);
+                          cogoToast.success(`Kit Item ${og_pr_item.id} has been updated!`, {hideAfter: 4});
+                          setPartsRequestItemsRefetch(true)
                           handleDialogClose();
                           resolve(data)
                       })
                       .catch( error => {
                           console.warn(error);
-                          cogoToast.error(`Error updating activeKit item. ` , {hideAfter: 4});
+                          cogoToast.error(`Error updating activePRItem item. ` , {hideAfter: 4});
                           reject(error)
                       })
                   }
                   if(addOrEdit == "add"){
-                      updateKitItem["kit_rainey_id"] = activeKit.rainey_id;
+                      updatePRItem["item_type"] = 'part';
 
-                      InventoryKits.addNewKitPart( updateKitItem, user )
+                      InventoryPartsRequest.addNewPartsRequestItem( updatePRItem, user )
                       .then( (data) => {
-                          //Get id of new workorder and activeKit view to detail
+                          //Get id of new workorder and activePRItem view to detail
                           cogoToast.success(`Kit item has been added!`, {hideAfter: 4});
                           //setPartsRefetch(true);
                           setActiveStep(0);
                           handleDialogClose()
                           if(add_and_continue){
                             console.log('add_and_continue',add_and_continue);
-                              setActiveKitItemItem({});
-                              setEditKitItemModalOpen(true);
+                              setActivePRItem({});
+                              setEditPRIModalOpen(true);
                           }else{
                             
                           }
-                          setKitItems(null)
+                          setPartsRequestItemsRefetch(true)
                           
                           resolve(data)
                       })
                       .catch( error => {
                           console.warn(error);
-                          cogoToast.error(`Error adding activeKit item. ` , {hideAfter: 4});
+                          cogoToast.error(`Error adding activePRItem item. ` , {hideAfter: 4});
                           reject(error)
                       })
                   }
             }
             if(selectedPart.item_type === "kit"){
                     
-                    updateKitItem["rainey_id"] = selectedPart.rainey_id;
-                    //updateKitItem["item_type"] = selectedPart.item_type;
+                    updatePRItem["rainey_id"] = selectedPart.rainey_id;
+                    //updatePRItem["item_type"] = selectedPart.item_type;
                     
                     //Add Id to this new object
                     if(addOrEdit == "edit"){
-                        if(!og_kit_item){
-                            console.error("Bad og_kit_item in edit")
-                            reject("Bad og_kit_item");
+                        if(!og_pr_item){
+                            console.error("Bad og_pr_item in edit")
+                            reject("Bad og_pr_item");
                         }
 
-                        updateKitItem["id"] = og_kit_item.id;
+                        updatePRItem["id"] = og_pr_item.id;
 
-                        InventoryKits.updateKitKit( updateKitItem , user)
+                        InventoryPartsRequest.updatePartsRequestItem( updatePRItem , user)
                         .then( (data) => {
                             if(data.error){
                               throw data.error;
                             }
                             //Refetch our data on save
-                            cogoToast.success(`Kit ${og_kit_item.id} has been updated!`, {hideAfter: 4});
-                            setKitItems(null)
+                            cogoToast.success(`Kit ${og_pr_item.id} has been updated!`, {hideAfter: 4});
+                            setPartsRequestItemsRefetch(true)
                             handleDialogClose()
                             resolve(data)
                         })
@@ -224,26 +230,28 @@ const AddEditOrdersOutItemDialog = (props) => {
                     }
                     if(addOrEdit == "add"){
                         //Filter out unselected Parts
-                        //updateKitItem["kit_items"] = updateKitItem["kit_items"].filter((item)=> item.selected);
-                        updateKitItem["kit_rainey_id"] = activeKit.rainey_id;
+                        //updatePRItem["kit_items"] = updatePRItem["kit_items"].filter((item)=> item.selected);
+                        //updatePRItem["kit_rainey_id"] = activePRItem.rainey_id;
 
-                        InventoryKits.addNewKitKit( updateKitItem, user  )
+                        updatePRItem["item_type"] = 'kit';
+
+                        InventoryPartsRequest.addNewPartsRequestItem( updatePRItem, user  )
                         .then( (data) => {
                             if(data.error){
                               throw data.error;
                             }
-                            //Get id of new workorder and activeKit view to detail
-                            cogoToast.success(`Kit items has been added!`, {hideAfter: 4});
+                            //Get id of new workorder and activePRItem view to detail
+                            cogoToast.success(`Part has been requested!`, {hideAfter: 4});
                             //setPartsRefetch(true);
                             setActiveStep(0);
                             handleDialogClose()
                             if(add_and_continue){
-                                setActiveKitItemItem({});
-                                setEditKitItemModalOpen(true);
+                                setActivePRItem({});
+                                setEditPRIModalOpen(true);
                             }else{
                               
                             }
-                            setKitItems(null)
+                            setPartsRequestItemsRefetch(true)
                             
                             resolve(data)
                         })
@@ -262,20 +270,20 @@ const AddEditOrdersOutItemDialog = (props) => {
       //check if item is kit or part
       if(item && item.item_type == "kit"){
           if( !item.id){
-            console.error("Bad kit in delete kit from kit");
+            console.error("Bad kit in delete kit from parts request");
             return;
           } 
 
           const deleteEnt = () =>{
-              InventoryKits.deleteKitKit(item.id, user)
+              InventoryPartsRequest.deletePartsRequestItem(item.id, user)
               .then((data)=>{
-                  setKitItems(null);
+                  setPartsRequestItemsRefetch(true);
                   handleDialogClose();
-                  cogoToast.success("Deleted kit from kit: " + item.id);
+                  cogoToast.success("Deleted kit from parts request: " + item.id);
               })
               .catch((error)=>{
-                  cogoToast.error("Failed to Delete kit from kit")
-                  console.error("Failed to delete kit from kit", error);
+                  cogoToast.error("Failed to Delete kit from parts request")
+                  console.error("Failed to delete kit from parts request", error);
               })
           }
 
@@ -294,15 +302,15 @@ const AddEditOrdersOutItemDialog = (props) => {
           }
 
           const deleteEnt = () =>{
-              InventoryKits.deleteKitPart(item.id, user)
+              InventoryPartsRequest.deletePartsRequestItem(item.id, user)
               .then((data)=>{
-                  setKitItems(null);
+                  setPartsRequestItemsRefetch(true);
                   handleDialogClose();
-                  cogoToast.success("Deleted Part from kit: " + item.id);
+                  cogoToast.success("Deleted Part from parts request: " + item.id);
               })
               .catch((error)=>{
-                  cogoToast.error("Failed to Delete part from kit")
-                  console.error("Failed to delete part from kit", error);
+                  cogoToast.error("Failed to Delete part from parts request")
+                  console.error("Failed to delete part from parts request", error);
               })
           }
 
@@ -321,8 +329,8 @@ const AddEditOrdersOutItemDialog = (props) => {
     return(
         <React.Fragment>     
             
-            <Dialog PaperProps={{className: classes.dialog}} open={editKitItemModalOpen } onClose={handleDialogClose}>
-            <DialogTitle className={classes.title}>{`${editKitItemDialogMode == "add" ? 'Add' : 'Edit'} Part/Kit for Kit`}</DialogTitle>
+            <Dialog PaperProps={{className: classes.dialog}} open={editPRIModalOpen } onClose={handleDialogClose}>
+            <DialogTitle className={classes.title}>{`${editPRIDialogMode == "add" ? 'Add' : 'Edit'} Part/Kit for Parts Request`}</DialogTitle>
                 <DialogContent className={classes.content}>
                     
                     {activeStep === 0 && 
@@ -359,10 +367,10 @@ const AddEditOrdersOutItemDialog = (props) => {
                                     <FormBuilder 
                                         ref={saveRef}
                                         fields={fields} 
-                                        mode={editKitItemDialogMode} 
+                                        mode={editPRIDialogMode} 
                                          classes={classes}
-                                        formObject={activeKitItemItem} 
-                                        setFormObject={setActiveKitItemItem}
+                                        formObject={activePRItem} 
+                                        setFormObject={setActivePRItem}
                                         handleClose={handleDialogClose} 
                                         handleSave={handleSave}/>
                                 </Grid>
@@ -374,9 +382,9 @@ const AddEditOrdersOutItemDialog = (props) => {
                         <span className={classes.errorSpan}>{error}</span>)}
                     </div> : <></>}
                     <DialogActions className={classes.dialogActions}>
-                            <HorizontalLinearStepper activeStep={activeStep} setActiveStep={setActiveStep} activeKitItemItem={activeKitItemItem} 
-                            setActiveKitItemItem={setActiveKitItemItem}
-                             selectedPart={selectedPart} editKitItemDialogMode={editKitItemDialogMode} 
+                            <HorizontalLinearStepper activeStep={activeStep} setActiveStep={setActiveStep} activePRItem={activePRItem} 
+                            setActivePRItem={setActivePRItem}
+                             selectedPart={selectedPart} editPRIDialogMode={editPRIDialogMode} 
                              shouldUpdate={shouldUpdate} saveRef={saveRef} handleDelete={handleDelete}/>
                     </DialogActions> 
 
@@ -527,13 +535,13 @@ const VirtualizedPartTable = withStyles(styles)(PickPartList);
 
 
 function getSteps() {
-    return ['Part/Kit', 'Kit Info'];
+    return ['Part/Kit', 'More Info'];
 }
 
 
 function HorizontalLinearStepper(props) {
     const classes = useStyles();
-    const {activeStep, setActiveStep, selectedPart,editKitItemDialogMode, saveRef, shouldUpdate, activeKitItemItem, setActiveKitItemItem, handleDelete} = props;
+    const {activeStep, setActiveStep, selectedPart,editPRIDialogMode, saveRef, shouldUpdate, activePRItem, setActivePRItem, handleDelete} = props;
     const steps = getSteps();
     
     const handleNext = (add_and_continue = false) => {
@@ -552,7 +560,7 @@ function HorizontalLinearStepper(props) {
             saveRef.current.handleShouldUpdate(shouldUpdate)
             .then((data)=>{
               console.log("handleNext add_and_continue", add_and_continue)
-              saveRef.current.handleSaveParent(activeKitItemItem, null, add_and_continue)
+              saveRef.current.handleSaveParent(activePRItem, null, add_and_continue)
             })
             .catch((error)=>{
               cogoToast.error("Failed to save");
@@ -560,7 +568,7 @@ function HorizontalLinearStepper(props) {
               return;
             }) 
           } else{
-            saveRef.current.handleSaveParent(activeKitItemItem, null,add_and_continue)
+            saveRef.current.handleSaveParent(activePRItem, null,add_and_continue)
           }          
         }else{
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -605,9 +613,9 @@ function HorizontalLinearStepper(props) {
             <div>
               {/* <span className={classes.instructions}>{getStepContent(activeStep)}</span> */}
               <div>
-                { editKitItemDialogMode === "edit" && <Button onClick={event => handleDelete(activeKitItemItem)}  className={classes.deleteButton}>
+                {editPRIDialogMode === "edit" && <Button onClick={event => handleDelete(activePRItem)}  className={classes.deleteButton}>
                   Delete
-                </Button>} 
+                </Button> }
                 <Button disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
                   Back
                 </Button>
@@ -618,9 +626,9 @@ function HorizontalLinearStepper(props) {
                   onClick={event => handleNext(false)}
                   className={classes.button}
                 >
-                  {activeStep === steps.length - 1 ? editKitItemDialogMode == 'add' ? activeKitItemItem?.rainey_id  ? "Save" : "Add" : 'Update' : 'Next'}
+                  {activeStep === steps.length - 1 ? editPRIDialogMode == 'add' ? activePRItem?.rainey_id  ? "Save" : "Add" : 'Update' : 'Next'}
                 </Button>
-                { ! activeKitItemItem?.rainey_id && activeStep === steps.length - 1 &&
+                { ! activePRItem?.rainey_id && activeStep === steps.length - 1 &&
                   <Button
                   variant="contained"
                   color="primary"

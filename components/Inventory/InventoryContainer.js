@@ -14,6 +14,7 @@ import InventoryTabs from './components/InventoryTabs';
 import InvPartsContainer from './Inv_Parts/InvPartsContainer';
 import InvKitsContainer from './Inv_Kits/InvKitsContainer';
 import InvOrdersOutContainer from './Inv_OrdersOut/InvOrdersOutContainer';
+import InvPartRequestContainer from './Inv_PartsRequest/InvPartsRequestContainer';
 //import InvOrdersInContainer from './Inv_OrdersIn/InvOrdersInContainer';
 import _ from 'lodash';
 import InvAdminContainer from './Inv_Admin/InvAdminContainer';
@@ -27,11 +28,12 @@ const InventoryContainer = function(props) {
   const {user} = props;
 
   //views used through whole inventory app, 
-  const views = [ { value: "invParts", displayName: "Inventory Parts", index: 0 },
-                  { value: "invKits", displayName: "Inventory Kits", index: 1 },
-                  { value: "invOrdersOut", displayName: "Inv Orders Out", index: 2},
-                  { value: "invOrdersIn", displayName: "Inv Orders In", index: 3},
-                  { value: "invAdmin", displayName: "Admin", index: 4 },];
+  const views = [ { value: "invParts", displayName: "Parts", index: 0, adminOnly: true },
+                  { value: "invKits", displayName: "Kits", index: 1 , adminOnly: true},
+                  { value: "invOrdersOut", displayName: "Orders Out", index: 2, adminOnly: true},
+                  { value: "invOrdersIn", displayName: "Orders In", index: 3, adminOnly: true},
+                  { value: "invPartRequest", displayName: "Parts Request", index: 4},
+                  { value: "invAdmin", displayName: "Admin", index: 5 , adminOnly: true},];
 
   const [currentView,setCurrentView] = useState(null);
 
@@ -48,10 +50,16 @@ const InventoryContainer = function(props) {
         tmpParsed = JSON.parse(tmp);
       }
       if(tmpParsed){
-        var view = views.filter((v)=> v.value == tmpParsed)[0]
-        setCurrentView(view || views[0]);
+        var view = views.find((v)=> v.value == tmpParsed);
+
+        //admin check
+        if(view.adminOnly && user.isAdmin != true ){
+          //no access - change to any allowed view
+          view = views.find((v)=> !v.isAdmin);
+        }
+        setCurrentView(view || views.find((v)=> !v.isAdmin));
       }else{
-        setCurrentView(views[0]);
+        setCurrentView(views.find((v)=> !v.isAdmin));
       }
     }
     if(currentView){
@@ -61,28 +69,42 @@ const InventoryContainer = function(props) {
   }, [currentView]);
 
 
-  const getInvPage = () =>{
-    switch(currentView.value){
-      case "invParts":
-        return <InvPartsContainer user={user}/>
-        break;
-      case "invKits":
-        return <InvKitsContainer user={user}/>
-        break;
-      case "invOrdersOut":
-        return <InvOrdersOutContainer user={user}/>
-        break;
-      case "invOrdersIn":
-        //return <InvOrdersInContainer user={user}/>
-        break;
-      case "invAdmin":
-        return <InvAdminContainer user={user}/>
-        break;
-      default: 
-        cogoToast.error("Bad view");
-        return <InvPartsContainer user={user}/>;
-        break;
-    }
+  const getInvPages = () =>{
+    let tabs = views.filter((item)=> {
+      if(item.adminOnly == false || item.adminOnly == undefined){
+        return true;
+      }
+
+      return user.isAdmin == item.adminOnly 
+    })
+    return tabs.map((tab, i)=>{
+      
+        switch(tab.value){
+          case "invParts":
+            return <InvPartsContainer key={`${i}_inv_tab`} user={user}/>
+            break;
+          case "invKits":
+            return <InvKitsContainer key={`${i}_inv_tab`} user={user}/>
+            break;
+          case "invOrdersOut":
+            return <InvOrdersOutContainer key={`${i}_inv_tab`} user={user}/>
+            break;
+          case "invOrdersIn":
+            //return <InvOrdersInContainer key={`${i}_inv_tab`} user={user}/>
+            break;
+          case "invPartRequest":
+            return <InvPartRequestContainer key={`${i}_inv_tab`} user={user}/>
+            break;
+          case "invAdmin":
+            return <InvAdminContainer key={`${i}_inv_tab`} user={user}/>
+            break;
+          default: 
+            cogoToast.error("Bad view");
+            return <InvPartsContainer key={`${i}_inv_tab`} user={user}/>;
+            break;
+        }
+    })
+    
   }
   
 
@@ -93,11 +115,7 @@ const InventoryContainer = function(props) {
         <div className={classes.containerDiv}>
         
         <InventoryTabs >
-              { currentView && getInvPage()}
-              { currentView && getInvPage()}
-              { currentView && getInvPage()}
-              { currentView && getInvPage()}
-              { currentView && getInvPage()}
+              { currentView && getInvPages()}
               {/* <InvKitsContainer/>
               <InvOrdersOutContainer/>
               <InvOrdersInContainer/> */}
