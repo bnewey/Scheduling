@@ -51,6 +51,7 @@ const InvPartsRequestContainer = function(props) {
   const [currentView,setCurrentView] = useState(null);
   const [columnState, setColumnState] = useState(null);
   const [sorters, setSorters] = useState(null);
+  const [statusSortState, setStatusSortState] = useState(null);
 
   //PRI
   const [editPRIDialogMode, setEditPRIDialogMode] = useState("add")
@@ -80,6 +81,26 @@ const InvPartsRequestContainer = function(props) {
     }
     
   }, [currentView]);
+
+  //Get View from local storage if possible || kit default
+  useEffect(() => {
+    if(statusSortState == null){
+      var tmp = window.localStorage.getItem('invPartsRequestStatusFilterState');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(tmpParsed){
+        setStatusSortState(tmpParsed );
+      }else{
+        setStatusSortState({denied: 'all', hold: 'all', filled: 'all'});
+      }
+    }
+    if(statusSortState){
+      window.localStorage.setItem('invPartsRequestStatusFilterState', JSON.stringify(statusSortState));
+    }
+    
+  }, [statusSortState]);
   
  
   //Sign Rows
@@ -99,7 +120,31 @@ const InvPartsRequestContainer = function(props) {
           tmpData = tmpData.sort(createSorter(...sorters))
         }
         //--------------------------------------------------------------------------------------------
-        setPartsRequestItems(tmpData);
+        if(statusSortState){
+
+          var deny_state = statusSortState.denied
+          var filled_state = statusSortState.filled
+          var hold_state = statusSortState.hold
+          if(deny_state && filled_state && hold_state){
+              var tmpItems = [...tmpData];
+              
+              tmpItems = tmpItems.filter( deny_state != "all" ? createFilter([{property: 'status', value: 3}], 
+                                                                deny_state == "yes" ? "in" : "out" , "or") : ()=> true);
+
+              tmpItems = tmpItems.filter( filled_state != "all" ? createFilter([{property: 'status', value: 5}], 
+                                                                filled_state == "yes" ? "in" : "out" , "or") : ()=> true);
+
+              tmpItems = tmpItems.filter( hold_state != "all" ? createFilter([{property: 'status', value: 7}], 
+                                                                hold_state == "yes" ? "in" : "out" , "or") : ()=> true);
+              
+              setPartsRequestItems(tmpItems)
+          }else{
+            console.error("Failed to filter");
+            
+          }
+        }else{
+          setPartsRequestItems(tmpData);
+        }
         setPartsRequestItemsSaved(data);
       })
       .catch( error => {
@@ -171,9 +216,9 @@ const InvPartsRequestContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{user ,partsRequestItems, setPartsRequestItems, setPartsRequestItemsRefetch,
          partsRequestItemsSearchRefetch,setPartsRequestItemsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState,
-         activePRItem,         sorters, setSorters,  partsRequestItemsSaved, setPartsRequestItemsSaved,
+          sorters, setSorters,  partsRequestItemsSaved, setPartsRequestItemsSaved,
           editPRIDialogMode, setEditPRIDialogMode, editPRIModalOpen, setEditPRIModalOpen,
-         activePRItem, setActivePRItem} } >
+         activePRItem, setActivePRItem, statusSortState, setStatusSortState} } >
       <DetailContext.Provider value={{}} >
         <div className={classes.containerDiv}>
         

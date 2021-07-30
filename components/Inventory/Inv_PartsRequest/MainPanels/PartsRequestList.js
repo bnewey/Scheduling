@@ -1,5 +1,6 @@
-import React, {useRef, useState, useEffect, useLayoutEffect,useContext} from 'react';
-import {makeStyles, withStyles, CircularProgress, Grid, IconButton, TextField} from '@material-ui/core';
+import React, {useRef, useState, useEffect, useLayoutEffect,useContext,useCallback} from 'react';
+import {makeStyles, withStyles,List as MUIList,ListItem,ListItemText, Checkbox,ListSubheader, CircularProgress, Grid, IconButton,
+  Popover, TextField} from '@material-ui/core';
 
 //import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -22,11 +23,13 @@ import moment from 'moment';
 
 import cogoToast from 'cogo-toast';
 import clsx from 'clsx';
-
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import ConfirmYesNo from '../../../UI/ConfirmYesNo';
 
 import Util from  '../../../../js/Util';
 import { ListContext } from '../InvPartsRequestContainer';
 import { InventoryContext } from '../../InventoryContainer';
+import { Delete } from '@material-ui/icons';
 
 const styles = (theme) => ({
   root: {
@@ -74,53 +77,154 @@ export default function ReactVirtualizedTable() {
 }
 
 const PartsRequestList = function(props) {
-  const {user, dimensions, rowHeight = 22, headerHeight = 30,} = props;
+  const {dimensions, rowHeight = 22, headerHeight = 30,} = props;
 
   const { partsRequestItems, currentView, setCurrentView, views, sorters, setSorters,
-    setPartsRequestSearchRefetch, } = useContext(ListContext);
+    setPartsRequestItemsRefetch, user} = useContext(ListContext);
 
   const {editInvModalOpen, setEditInvModalOpen} = useContext(InventoryContext);
+
+  const [statusTypes, setStatusTypes] = useState(null);
   
+  //Popover Add/swap crew
+  const [statusPopAnchorEl, setStatusPopAnchorEl] = React.useState(null);
+  const [statusPopItem, setStatusPopItem] = useState(null);
+
   const classes = useStyles();
 
+  useEffect(()=>{
+    if(statusTypes == null){
+      InventoryPartsRequest.getStatusTypes()
+      .then((data)=>{
+        setStatusTypes(data);
+      })
+      .catch((error)=>{
+        console.error("Failed to get status types", error);
+        cogoToast.error('Internal Server Error');
+        
+      })
+    }
+  },[statusTypes])
 
-  // const handleUpdatePartsRequest = (updateRow)=>{
 
-  //   InventoryPartsRequest.updatePartsRequest(updateRow)
-  //   .then((data)=>{
-  //     cogoToast.success("Updated ");
+  //Add/Swap Popover for crews
+  const handleOpenStatusPopover = (event, pr_item) =>{
+        
 
-  //     if(currentView.value === "partsListList"){
-  //       setPartsRequestRefetch(true);
-  //     }
-  //     if(currentView.value === "partsListSearch"){
-  //       setPartsRequestSearchRefetch(true);
-  //     }
+      setStatusPopAnchorEl(event.currentTarget);
+      setStatusPopItem(pr_item);
+      event.stopPropagation();
+  }
+  
+  const handleStatusPopoverClose = () => {
+    setStatusPopAnchorEl(null);
+    setStatusPopItem(null);
+  };
+
+  //Swap Crews  
+  const statusPopoverOpen = Boolean(statusPopAnchorEl);
+  const statusPopoverId = open ? 'add-popover' : undefined;
+
+  const handleChangeStatus = useCallback((event, new_status, old_status) => {
+      if(!new_status || !statusPopItem){
+        console.log("statusPopItem", statusPopItem)
+        cogoToast.error("Failed to change status.");
+        console.error("Bad statusPopItem for add/update.");
+        return;
+      }
+
+      if(new_status == old_status){
+        console.log("Same status");
+        handleStatusPopoverClose();
+        return;
+      }
+
+      let updateObject = statusPopItem;
+      updateObject["status"] = new_status;
+
+      InventoryPartsRequest.updatePartsRequestItemStatus(updateObject, user)
+      .then((data)=>{
+        setPartsRequestItemsRefetch(true);
+        if(statusPopoverOpen){
+          handleStatusPopoverClose();
+        }
+      })
+      .catch((error)=>{
+        cogoToast.error("Internal Server Error");
+        console.error("Failed to change status", error);
+      })
+     
       
-  //   })
-  //   .catch((error)=>{
-  //     console.error("failed to update ", error)
-  //     cogoToast.error("Failed to update ");
-  //     invUpdateArray.current =[];
-  //   })
-  // }
-    
+      
+  },[statusPopItem])
+  //// END OF Add/Swap Popover for crews
 
+  
   const columns = [
     { dataKey: 'rainey_id', label: 'Rainey ID', type: 'number', width: 120, align: 'center',
-      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableOrderOutnumber}>{value}</span> }, 
+      format: (value, row)=> <span onClick={(event)=>handleGoToPart(event,value, row.item_type)} className={classes.clickableOrderOutnumber}>{value}</span> }, 
     { dataKey: 'description', label: 'Item', type: 'text', width: 325, align: 'left' }, 
     { dataKey: 'qty', label: 'Qty', type: 'number', width: 80, align: 'center' },
     { dataKey: 'notes', label: 'Notes', type: 'text', width: 220, align: 'left' }, 
     { dataKey: 'work_order_name', label: 'Work Order', width: 180,type: 'text', align: 'center' }, 
-    { dataKey: 'status_type', label: 'Status', type: 'text', width: 170, align: 'center' }, 
+    { dataKey: 'status', label: 'Status', type: 'text', width: 170, align: 'center',
+      format: (value, row) =>(
+        user?.isAdmin ?
+         (<div className={classes.popOverDiv} 
+                                style={{ 
+                                        color: '#333',
+                                        backgroundColor: `${ '#fff'}`}}
+                                onMouseUp={event => handleOpenStatusPopover(event, row)}>
+                                  {row.status_type}
+                                </div>)
+          :
+          (<>{row.status_type}</>)
+       ) }, 
      
     { dataKey: 'date_entered', label: 'Date Entered',type: 'date', width: 130, align: 'center',
         format: (value)=> moment(value).format("MM-DD-YYYY") },
     { dataKey: 'date_updated', label: 'Date Updated',type: 'date', width: 130, align: 'center',
         format: (value)=> value ? moment(value).format("MM-DD-YYYY") : "" },
     { dataKey: 'requested_by_name', label: 'Requester',type: 'text', width: 140, align: 'center' },
+    {dataKey: 'delete', label: <Delete className={classes.deleteIcon}/> , type: 'delete', width: 100, align:'center',
+        format: (value, row)=> <Delete className={classes.deleteIconClickable} onClick={event =>handleDeleteRequestItem(row)}/>  }
   ];
+
+  const handleGoToPart = (event, rainey_id, item_type)=>{
+        //ordersOut detailWOIid in local data
+     window.localStorage.setItem(item_type == "part" ? 'detailPartId' : 'detailKitId', JSON.stringify(rainey_id));
+     
+     //set detail view in local data
+     window.localStorage.setItem(item_type == "part" ? 'currentInvPartsView' : 'currentInvKitsView', JSON.stringify(item_type == "part" ?  "partsDetail"  : 'kitsDetail'));
+     window.localStorage.setItem('currentInventoryView', JSON.stringify(item_type == "part" ?  "invParts" : "invKits"));
+     
+     window.open('/scheduling/inventory', "_blank");
+
+   }
+
+   const handleDeleteRequestItem = (item) =>{
+     const deleteFunc = ()=>{
+      InventoryPartsRequest.deletePartsRequestItem(item.id, item.item_type, user)
+      .then((data)=>{
+         setPartsRequestItemsRefetch(true);
+      })
+      .catch((error)=>{
+         setPartsRequestItemsRefetch(true);
+        console.error("Failed to delete item", error);
+        cogoToast.error('Internal Server Error');
+        
+      })
+     }
+
+     confirmAlert({
+      customUI: ({onClose}) => {
+          return(
+              <ConfirmYesNo onYes={deleteFunc} onClose={onClose} customMessage={"Delete Item permanently?"}/>
+          );
+      }
+  })
+     
+   }
 
   const getRowClassName = ({ index }) => {
     const { classes, onRowClick } = props;
@@ -222,6 +326,37 @@ const PartsRequestList = function(props) {
             })}
           </Table>
       </TableContainer>
+      <Popover
+            id={statusPopoverId}
+            open={statusPopoverOpen}
+            anchorEl={statusPopAnchorEl}
+            onClose={handleStatusPopoverClose}
+            anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+            }}
+            transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+            }}
+            className={classes.popover}
+            classes={{paper: classes.popoverPaper}}
+        >
+            <MUIList 
+                subheader={
+                    <ListSubheader className={classes.list_head} component="div" id="nested-list-subheader">
+                        Update Status
+                    </ListSubheader>
+                }>
+                {statusTypes?.filter((v)=> v.type != "Seen" && v.type != "Requested").map((type, i)=>(
+                          <ListItem className={classes.crew_list_item} 
+                                      key={`status_type+${i}`} button
+                                      onMouseUp={(event)=>handleChangeStatus(event, type.id, statusPopItem.status )}>
+                              <ListItemText primary={type.type} />
+                          </ListItem>
+                      ))}
+            </MUIList>
+        </Popover> 
     </div>
   );
 }
@@ -308,4 +443,52 @@ const useStyles = makeStyles(theme => ({
       color: '#ee3344',
     }
   },
+  popOverDiv:{
+    border: '1px solid #a9a9a9',
+    backgroundColor: '#fff',
+    '&:hover':{
+      boxShadow: '0px 0px 4px 0px black',
+      cursor: 'pointer',
+      backgroundColor: '#b1b1b159',
+    }
+  },
+  popoverPaperWoi:{
+    width: '600px',
+    borderRadius: '2px',
+    backgroundColor: '#6f6f6f',
+    maxHeight: '600px',
+    overflowY: 'auto',
+  },
+  popoverPaper:{
+    width: '200px',
+    borderRadius: '10px',
+    backgroundColor: '#6f6f6f',
+    maxHeight: '600px',
+    overflowY: 'auto',
+  },
+  crew_list_item:{
+    backgroundColor: '#fff',
+    '&:hover':{
+        backgroundColor: '#ddd',
+        color: '#222',
+    },
+    padding: '0% 5%',
+    border: '1px solid #b2b2b2',
+  },
+  list_head:{
+    lineHeight: '24px',
+    borderRadius: '2px',
+    color: '#fff',
+    backgroundColor: '#61a4a1',
+  },
+  deleteIconClickable:{
+    cursor: 'pointer',
+    color: '#777',
+    '&:hover':{
+      color: '#555',
+    },
+  },
+  deleteIcon:{
+    color: '#777',
+  }
 }));

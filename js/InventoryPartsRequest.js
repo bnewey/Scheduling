@@ -43,8 +43,7 @@ async function superSearchAllRequestedItems(tables, query){
 }
 
 
-
-async function updatePartsRequestItemStatus(item){
+async function updatePartsRequestItemStatus(item, user){
     const route = '/scheduling/inventoryPartsRequest/updatePartsRequestItemStatus';
     try{
         var data = await fetch(route,
@@ -53,7 +52,7 @@ async function updatePartsRequestItemStatus(item){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({item})
+                body: JSON.stringify({item, user})
             });
         var list = await data.json();
         return(list);
@@ -84,7 +83,7 @@ async function updatePartsRequestItem(item){
 
 
 
-async function deletePartsRequestItem(id){
+async function deletePartsRequestItem(id, item_type,user){
     const route = '/scheduling/inventoryPartsRequest/deletePartsRequestItem';
     try{
         var data = await fetch(route,
@@ -93,9 +92,9 @@ async function deletePartsRequestItem(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id,item_type, user})
             });
-        var list = await data.json();
+        var list = data.ok;
         return(list);
     }catch(error){
         throw error;
@@ -143,6 +142,27 @@ async function addNewMultplePartsRequestItem(item){
 }
 
 
+async function getStatusTypes(){
+    const route = '/scheduling/inventoryPartsRequest/getStatusTypes';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if(!data.ok){
+            throw new Error("getStatusTypes returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 
 module.exports = {
     getAllPartsRequestItems,
@@ -152,5 +172,6 @@ module.exports = {
     deletePartsRequestItem,
     addNewPartsRequestItem,
     addNewMultplePartsRequestItem,
+    getStatusTypes
 
 };

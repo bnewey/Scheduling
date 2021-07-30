@@ -20,7 +20,7 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 //import TypeFilterSelect from './components/TypeFilterSelect';
-
+import FilterStatus from './components/FilterStatus';
 
 const OrdersOutListSidebar = function(props) {
   const {user} = props;
@@ -48,6 +48,9 @@ const OrdersOutListSidebar = function(props) {
               <div>New Part Request</div>
             </Button> 
         </div>
+        <div>
+                <FilterStatus/>
+            </div>
     
           
     </div>

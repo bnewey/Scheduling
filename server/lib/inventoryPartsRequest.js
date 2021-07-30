@@ -20,7 +20,7 @@ router.post('/getAllPartsRequestItems', async (req,res) => {
 
     const sql = 
     ' SELECT * FROM ' +
-        ' ( SELECT k.rainey_id, k.status, k.work_order_name, k.requested_by, g.displayName AS requested_by_name, k.notes, ik.description, ' + 
+        ' ( SELECT k.id, k.rainey_id, k.status, k.work_order_name, k.requested_by, g.displayName AS requested_by_name, k.notes, ik.description, ' + 
         ' k.qty , \'kit\' AS item_type, stk.type AS status_type, date_format(k.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, ' + 
         ' date_format(k.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
         ' FROM inv__request_kits k ' +
@@ -28,7 +28,7 @@ router.post('/getAllPartsRequestItems', async (req,res) => {
         ' LEFT JOIN inv__request_status_types stk ON stk.id = k.status ' +
         ' LEFT JOIN google_users g ON g.id = k.requested_by ' +
         ' UNION ' + 
-        ' SELECT p.rainey_id, p.status, p.work_order_name, p.requested_by, g.displayName AS requested_by_name, p.notes, ip.description, ' + 
+        ' SELECT p.id, p.rainey_id, p.status, p.work_order_name, p.requested_by, g.displayName AS requested_by_name, p.notes, ip.description, ' + 
         ' p.qty , \'part\' AS item_type, stp.type AS status_type, date_format(p.date_updated, \'%Y-%m-%d %H:%i:%S\') as date_updated, ' + 
         ' date_format(p.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered ' + 
         ' FROM inv__request_parts p ' +
@@ -132,12 +132,19 @@ router.post('/updatePartsRequestItem', async (req,res) => {
 
 router.post('/updatePartsRequestItemStatus', async (req,res) => {
 
-    var item ;
+    var item, user;
     if(req.body){
         if(req.body.item != null){
             item = req.body.item;
+            user = req.body.user;
         }  
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     logger.info('item to update', [item]);
     const sql_for_part = 'UPDATE inv__request_parts SET status=?,date_updated=? ' +
     ' WHERE id = ?';
@@ -147,7 +154,7 @@ router.post('/updatePartsRequestItemStatus', async (req,res) => {
     var sql = item.item_type === "kit" ? sql_for_kit : sql_for_part;
 
     try{
-        const results = await database.query(sql, [ item.status, Util.convertISODateTimeToMySqlDateTime(new Date())  ]);
+        const results = await database.query(sql, [ item.status, Util.convertISODateTimeToMySqlDateTime(new Date()), item.id  ]);
         logger.info("Inventory PartsRequest  Item Status updated " + item.rainey_id);
 
         if(item.status == 3) {
@@ -157,7 +164,7 @@ router.post('/updatePartsRequestItemStatus', async (req,res) => {
             if(order.googleId){
                 //send notification to maker
                 const reject_results = await notificationSystem.sendNotification(order.googleId, "requestedInvPart",
-                `Item (${pr_item.rainey_id}) request has been denied.`, '/inventory', 'invPartRequest', 'partsRequestItemsList', item.id);
+                `Item (${item.rainey_id}) request has been denied.`, '/inventory', 'invPartRequest', 'partsRequestItemsList', item.id);
 
                 pushSystem.getUserSubscriptions(order.googleId)
                 .then((data)=>{
@@ -218,19 +225,27 @@ router.post('/updateMultiplePartsRequestItems', async (req,res) => {
 
 
 router.post('/deletePartsRequestItem', async (req,res) => {
-    var id;
+    var id,item_type, user;
 
     if(req.body){
         id = req.body.id;
+        item_type  =req.body.item_type
+        user = req.body.user;
     }
-    if(!id){
+    if(!id || !item_type){
         logger.error("Bad id param in deletePartsRequestItem");
         res.sendStatus(400);
     }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     const sql_for_part = ' DELETE FROM inv__request_parts WHERE id = ? LIMIT 1 ';
     const sql_for_kit = ' DELETE FROM inv__request_kits WHERE id = ? LIMIT 1 ';
 
-    var sql = item.item_type === "kit" ? sql_for_kit : sql_for_part;
+    var sql = item_type === "kit" ? sql_for_kit : sql_for_part;
 
     try{
         const results = await database.query(sql, [id]);
@@ -355,6 +370,23 @@ router.post('/addNewMultplePartsRequestItem', async (req,res) => {
     })
 });
 
+
+router.post('/getStatusTypes', async (req,res) => {
+
+    const sql = 
+    ' SELECT * FROM  inv__request_status_types ORDER BY id ASC ';
+
+    try{
+        const results = await database.query(sql, []);
+        logger.info("Got PartsRequest status types ");
+        res.json(results);
+
+    }
+    catch(error){
+        logger.error("PartsRequest getStatusTypes " + error);
+        res.sendStatus(400);
+    }
+});
 
 
 module.exports = router;

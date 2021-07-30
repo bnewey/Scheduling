@@ -401,18 +401,18 @@ export default AddEditOrdersOutItemDialog;
 
 const PickPartList = (props) =>{
 
-    const {user, dimensions = {height: 300, width: 700}, rowHeight = 22, headerHeight = 30, parts, setParts, setPartsRefetch,
+    const {user, dimensions = {height: 500, width: 950}, rowHeight = 30, headerHeight = 30, parts, setParts, setPartsRefetch,
          currentView, setCurrentView, views,setPartsSearchRefetch,selectedPart,setSelectedPart, setShouldUpdate} = props;
 
     
-
+    
     const classes = useStyles();
 
     const columns = [
         { dataKey: 'rainey_id', label: 'Rainey PN', type: 'number', width: 90, align: 'center' }, 
         { dataKey: 'description', label: 'Description', type: 'text', width: 350, align: 'left' }, 
         { dataKey: 'cost_each', label: 'Cost Each', type: 'number', width: 100, align: 'right',
-          format: (value)=> `$ ${value.toFixed ? value.toFixed(6) : " "}` },
+          format: (value)=> `$ ${value}` },
         { dataKey: 'type', label: 'Type', width: 150,type: 'text', align: 'center', },
         { dataKey: 'notes', label: 'Notes', width: 200,type: 'text', align: 'left' }, 
         { dataKey: 'obsolete', label: 'Obsolete',type: 'number', width: 40, align: 'center' },
@@ -435,7 +435,7 @@ const PickPartList = (props) =>{
                         component="div"
                         align={column.align}
                         variant="body"
-                        style={{ minWidth: column.width, height: rowHeight, fontSize: '.8em' }}>
+                        style={{ minWidth: column.width, height: rowHeight, fontSize: '1.1em' }}>
                   {column.format  ? column.format(cellData, rowData) : cellData}
             </TableCell>
         )
@@ -651,8 +651,8 @@ const useStyles = makeStyles(theme => ({
 
     },
     dialog:{
-        maxWidth:'800px',
-        minWidth: 700,
+        maxWidth:'1150px',
+        minWidth: 1000,
     },
     dialogActions:{
         paddingBottom: 0,
@@ -682,7 +682,7 @@ const useStyles = makeStyles(theme => ({
     },
     formGrid:{
 
-        minHeight: '200px',
+        minHeight: '300px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'start',
