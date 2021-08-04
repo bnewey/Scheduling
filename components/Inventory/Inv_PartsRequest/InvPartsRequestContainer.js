@@ -54,7 +54,7 @@ const InvPartsRequestContainer = function(props) {
   const [statusSortState, setStatusSortState] = useState(null);
 
   //PRI
-  const [editPRIDialogMode, setEditPRIDialogMode] = useState("add")
+  const [editPRIDialogMode, setEditPRIDialogMode] = useState("add");
   const [editPRIModalOpen, setEditPRIModalOpen] = React.useState(false);
   const [ activePRItem, setActivePRItem] = React.useState(null);
 
@@ -70,7 +70,7 @@ const InvPartsRequestContainer = function(props) {
         tmpParsed = JSON.parse(tmp);
       }
       if(tmpParsed){
-        var view = views.filter((v)=> v.value == tmpParsed)[0]
+        var view = views.filter((v)=> v.value == tmpParsed)[0];
         setCurrentView(view || views[0]);
       }else{
         setCurrentView(views[0]);
@@ -117,14 +117,14 @@ const InvPartsRequestContainer = function(props) {
 
         //SORT after filters -------------------------------------------------------------------------
         if(sorters && sorters.length > 0){
-          tmpData = tmpData.sort(createSorter(...sorters))
+          tmpData = tmpData.sort(createSorter(...sorters));
         }
         //--------------------------------------------------------------------------------------------
         if(statusSortState){
 
-          var deny_state = statusSortState.denied
-          var filled_state = statusSortState.filled
-          var hold_state = statusSortState.hold
+          var deny_state = statusSortState.denied;
+          var filled_state = statusSortState.filled;
+          var hold_state = statusSortState.hold;
           if(deny_state && filled_state && hold_state){
               var tmpItems = [...tmpData];
               
@@ -133,11 +133,11 @@ const InvPartsRequestContainer = function(props) {
 
               tmpItems = tmpItems.filter( filled_state != "all" ? createFilter([{property: 'status', value: 5}], 
                                                                 filled_state == "yes" ? "in" : "out" , "or") : ()=> true);
-
+              
               tmpItems = tmpItems.filter( hold_state != "all" ? createFilter([{property: 'status', value: 7}], 
                                                                 hold_state == "yes" ? "in" : "out" , "or") : ()=> true);
               
-              setPartsRequestItems(tmpItems)
+              setPartsRequestItems(tmpItems);
           }else{
             console.error("Failed to filter");
             
@@ -178,7 +178,7 @@ const InvPartsRequestContainer = function(props) {
     useEffect(()=>{
         if (Array.isArray(sorters) && sorters.length) {
             if (partsRequestItems && partsRequestItems.length) {
-                var tmpData = partsRequestItems.sort(createSorter(...sorters))
+                var tmpData = partsRequestItems.sort(createSorter(...sorters));
                 var copyObject = [...tmpData];
                 setPartsRequestItems(copyObject);
                 cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
@@ -191,7 +191,7 @@ const InvPartsRequestContainer = function(props) {
   const getMainComponent = () =>{
     switch(currentView.value){
       case "partsRequestItemsList":
-        return <PartsRequestList user={user} columnState={columnState} setColumnState={setColumnState}/>
+        return <PartsRequestList user={user} columnState={columnState} setColumnState={setColumnState}/>;
         break;
       default: 
         cogoToast.error("Bad view");
@@ -203,7 +203,7 @@ const InvPartsRequestContainer = function(props) {
   const getSidebarComponent = () =>{
     switch(currentView.value){
       case "partsRequestItemsList":
-        return <PartsRequestListSidebar/>
+        return <PartsRequestListSidebar/>;
         break;
       default: 
         cogoToast.error("Bad view");
@@ -253,7 +253,7 @@ const InvPartsRequestContainer = function(props) {
   );
 }
 
-export default InvPartsRequestContainer
+export default InvPartsRequestContainer;
 
 const useStyles = makeStyles(theme => ({
   root:{
