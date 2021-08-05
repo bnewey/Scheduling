@@ -24,6 +24,7 @@ import _ from 'lodash';
 
 //Extras
 import AddEditModal from './AddEditKit/AddEditModal';
+import ImportKitDialog from './components/ImportKitDialog';
 
 
 var today =  new Date();
@@ -328,6 +329,7 @@ const InvKitsContainer = function(props) {
 
         </div>
         {editKitModalOpen  && <AddEditModal /> }
+        {importKitModalOpen && <ImportKitDialog /> }
         </DetailContext.Provider>
       </ListContext.Provider>
     </div>

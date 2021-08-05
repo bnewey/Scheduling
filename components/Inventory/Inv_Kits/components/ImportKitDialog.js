@@ -24,7 +24,7 @@ import TableRow from '@material-ui/core/TableRow';
 import { AutoSizer, Column, Table } from 'react-virtualized';
 import FormBuilder from '../../../UI/FormComponents/FormBuilder';
 
-import { ListContext } from '../../Inv_OrdersOut/InvOrdersOutContainer';
+import { ListContext } from '../../Inv_Kits/InvKitsContainer';
 import clsx from 'clsx';
 import PartManufactureList from '../../components/PartManufactureList';
 import _ from 'lodash';
@@ -33,143 +33,62 @@ import _ from 'lodash';
 const ImportKitDialog = (props) => {
  
     //PROPS
-    const { editOOIModalOpen, setEditOOIModalOpen,setOrderOutItems, activeOOItem, setActiveOOItem } = props;
+    //const { } = props;
     const {user, currentView, setCurrentView, views,
       importKitModalOpen,setImportKitModalOpen, activeImportItem, setActiveImportItem} = useContext(ListContext);
 
     //STATE
-    const [partId, setPartId] = useState(null)
-    const [partsList,setPartsList] = useState(null);
-    const [partsListRefetch, setPartsListRefetch] = useState(false);
-    const [partsListSearchRefetch,setPartsListSearchRefetch] = useState(false)
     const [activeStep, setActiveStep] = React.useState(0);
-    const [selectedPart, setSelectedPart] = React.useState(null);
     const [partManItems,setPartManItems] = useState([]);
     const [selectedManItem, setSelectedManItem] = React.useState(null);
     const [shouldUpdate, setShouldUpdate]= React.useState(false);
 
     const [validationErrors , setValidationErrors] = useState([]);
-    const [ kitPartsManItems , setKitsPartsManItems] = useState([]);
-    const [ kitsPartsManItemsRefetch, setKitsPartsManItemsRefetch] = useState(false);
     
-    //const [activeOOItem, setActiveOOItem] = useState(null)
+
     const saveRef = React.createRef();
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
     const handleDialogClose = () => {
-        setEditOOIModalOpen(false);
-        setPartId(0);
+        setImportKitModalOpen(false);
         setValidationErrors([]);
         setActiveStep(0)
         setSelectedPart(null);
-        setSelectedManItem(null);
-        setPartsList(null);
-        setPartManItems([]);
-        setActiveOOItem({});
+        setActiveImportItem({});
         setShouldUpdate(false);
     };
 
-    //Sign Rows
-  useEffect( () =>{
-    //Gets data only on initial component mount or when rows is set to null
-    if(((partsList == null || partsListRefetch == true)) ) {
-      if(partsListRefetch == true){
-        setPartsListRefetch(false);
-      }
 
-      Inventory.getAllParts()
-      .then( data => { 
-        var tmpData = [...data];
+    // useEffect(()=>{
 
-        setPartsList(tmpData);
-      })
-      .catch( error => {
-        console.warn(error);
-        cogoToast.error(`Error getting partsList`, {hideAfter: 4});
-      })
-    }
-  },[partsList, partsListRefetch]);
-
-   //Sign Rows
-   useEffect( () =>{
-    //Gets data only on initial component mount or when rows is set to null
-    console.log("seletedpart", selectedPart)
-    if(selectedPart && selectedPart.item_type === "part" ) {
-      
-      Inventory.getPartManItems(selectedPart.rainey_id)
-      .then( data => { 
-        var tmpData = [...data];
-
-        setPartManItems(tmpData);
-        tmpData.forEach((item)=> {
-            console.log('item',item);
-            if(item.default_man && activeOOItem?.part_mf_id == null){
-                setSelectedManItem(item)
-                console.log("OrderOut default item");
-            }
-            if(item.id === activeOOItem?.part_mf_id){
-              setSelectedManItem(item);
-            }
-        })
-      })
-      .catch( error => {
-        console.warn(error);
-        cogoToast.error(`Error getting partsList`, {hideAfter: 4});
-      })
-    }
-
-    if(selectedPart && selectedPart.item_type === "kit" ){
-     
-      InventoryKits.getKitItemsWithManf(selectedPart.rainey_id)
-      .then((data)=>{
-        // console.log("data",data);
-        // // we need all parts within kit and all potential part manf items
-        // let uniqueParts = _.uniqBy(data, 'rainey_id').map((item)=> item.rainey_id);
-        // console.log("unique parts", uniqueParts);
-        let updateData = data.map((item)=> ( {...item, selected: true}))
-
-        setKitsPartsManItems(updateData);
-      })
-      .catch((error)=>{
-        console.error("Failed to get kit items",error);
-        cogoToast.error("Internal Server Error");
-      })
-    }
-  },[selectedPart, kitsPartsManItemsRefetch]);
-
-    useEffect(()=>{
-
-      if( kitsPartsManItemsRefetch && saveRef?.current ){
-          //resets the form when you change something by state
-          saveRef.current.handleResetFormToDefault()
-          setKitsPartsManItemsRefetch(false);
-      }
-    },[kitsPartsManItemsRefetch, saveRef])
+    //   if( kitsPartsManItemsRefetch && saveRef?.current ){
+    //       //resets the form when you change something by state
+    //       saveRef.current.handleResetFormToDefault()
+    //       setKitsPartsManItemsRefetch(false);
+    //   }
+    // },[kitsPartsManItemsRefetch, saveRef])
   
-    const handleGoToPart = (event)=>{
-         //set detailWOIid in local data
-      window.localStorage.setItem('detailPartId', JSON.stringify(selectedPart?.rainey_id));
+    // const handleGoToPart = (event)=>{
+    //      //set detailWOIid in local data
+    //   window.localStorage.setItem('detailPartId', JSON.stringify(selectedPart?.rainey_id));
       
-      //set detail view in local data
-      window.localStorage.setItem('currentInvPartsView', JSON.stringify("partsDetail"));
-      window.localStorage.setItem('currentInventoryView', JSON.stringify("invParts"));
+    //   //set detail view in local data
+    //   window.localStorage.setItem('currentInvPartsView', JSON.stringify("partsDetail"));
+    //   window.localStorage.setItem('currentInventoryView', JSON.stringify("invParts"));
       
-      window.open('/scheduling/inventory', "_blank");
+    //   window.open('/scheduling/inventory', "_blank");
 
-    }
+    // }
 
-    const partFields = [
+    const kitFields = [
         //type: select must be hyphenated ex select-type
         {field: 'Description', label: 'Description', type: 'number', updateBy: 'ref', required: true},
         {field: 'num_in_kit', label: 'Number in Set', type: 'number', updateBy: 'ref', required: true},
         
     ];
 
-    const setFields = [
-      {field: 'order_kit_select', label: '', type: 'order_kit_select', updateBy: 'state'},
-    ]
 
     const handleSave = (og_kit_item, updateKitItem, addOrEdit, add_and_continue)=>{
       return new Promise((resolve, reject)=>{
@@ -182,112 +101,69 @@ const ImportKitDialog = (props) => {
 
           //ADD NEW KIT AND GET ID HERE
   
-          if(selectedPart.item_type === "part" ){
-
-                updateKitItem["rainey_id"] = selectedPart.rainey_id;
-                //updateKitItem["item_type"] = selectedPart.item_type;
-                //Add Id to this new object
-                    updateKitItem["kit_rainey_id"] = activeKit.rainey_id;
-
-                    InventoryKits.addNewKitPart( updateKitItem, user )
-                    .then( (data) => {
-                        //Get id of new workorder and activeKit view to detail
-                        cogoToast.success(`Kit item has been added!`, {hideAfter: 4});
-                        //setPartsRefetch(true);
-                        setActiveStep(0);
-                        handleDialogClose()
-                        if(add_and_continue){
-                          console.log('add_and_continue',add_and_continue);
-                            setActiveKitItemItem({});
-                            setEditKitItemModalOpen(true);
-                        }else{
-                          
-                        }
-                        setKitItems(null)
-                        
-                        resolve(data)
-                    })
-                    .catch( error => {
-                        console.warn(error);
-                        cogoToast.error(`Error adding activeKit item. ` , {hideAfter: 4});
-                        reject(error)
-                    })
-                
-          }
-          if(selectedPart.item_type === "kit"){
-                  
-                  updateKitItem["rainey_id"] = selectedPart.rainey_id;
-                  //updateKitItem["item_type"] = selectedPart.item_type;
-                  
-                  //Add Id to this new object
-                      //Filter out unselected Parts
-                      //updateKitItem["kit_items"] = updateKitItem["kit_items"].filter((item)=> item.selected);
-                      updateKitItem["kit_rainey_id"] = activeKit.rainey_id;
-
-                      InventoryKits.addNewKitKit( updateKitItem, user  )
-                      .then( (data) => {
-                          if(data.error){
-                            throw data.error;
-                          }
-                          //Get id of new workorder and activeKit view to detail
-                          cogoToast.success(`Kit items has been added!`, {hideAfter: 4});
-                          //setPartsRefetch(true);
-                          setActiveStep(0);
-                          handleDialogClose()
-                          if(add_and_continue){
-                              setActiveKitItemItem({});
-                              setEditKitItemModalOpen(true);
-                          }else{
-                            
-                          }
-                          setKitItems(null)
-                          
-                          resolve(data)
-                      })
-                      .catch( error => {
-                          console.warn(error);
-                          cogoToast.error(`Error: ${error}` , {hideAfter: 6});
-                          reject(error)
-                      })
-                  
-          }
+          
           
       })
     }  
 
+
+//rainey_id, description, num_in_kit, notes, date_entered, date_updated, obsolete, inv_qty, min_inv, storage_location, part_type
+
     const handleOnDrop = (data) => {
-      console.log('---------------------------')
-      console.log(data)
-      console.log('---------------------------')
+      console.log(data);
+
+      //fill activeImportItem using data
+      let updateObject = {};
+      updateObject.description = data[0][0]?.split(" Revised")[0];
+      let id = data[1][0]?.split("          ")[0];
+      id = id.replace(/^\0/, "2");
+      id = id.replace("-", "");
+      updateObject.rainey_id = id;
+      let objectItems = [];
+      let items = data.slice(14, data.length);
+      items.forEach((item)=>{
+        let r_id = item[3].split("_")[0];
+         
+        let row = {qty_in_kit: item[1], }
+      })
+      
+
+      console.log("updateObject", updateObject);
+
+      
     }
   
     const handleOnError = (err, file, inputElem, reason) => {
-      console.log(err)
+      console.error(err, reason)
+      cogoToast.error("Failed to Import");
     }
   
     const handleOnRemoveFile = (data) => {
-      console.log('---------------------------')
-      console.log(data)
-      console.log('---------------------------')
+      console.log('remove',data)
     }
     
     return(
         <React.Fragment>     
             
-            <Dialog PaperProps={{className: classes.dialog}} open={editOOIModalOpen } onClose={handleDialogClose}>
-            <DialogTitle className={classes.title}>{`${editOOIDialogMode == "add" ? 'Add' : 'Edit'} Part/Kit to OrderOut`}</DialogTitle>
+            <Dialog PaperProps={{className: classes.dialog}} open={importKitModalOpen } onClose={handleDialogClose}>
+            <DialogTitle className={classes.title}>{`Import Kit`}</DialogTitle>
                 <DialogContent className={classes.content}>
                     
                     {activeStep === 0 && 
-                     <CSVReader
-                     onDrop={handleOnDrop}
-                     onError={handleOnError}
-                     addRemoveButton
-                     removeButtonColor='#659cef'
-                     onRemoveFile={handleOnRemoveFile}
-                   >
-                     <span>Drop CSV file here or click to upload.</span>
-                   </CSVReader>
+                    <div className={classes.csvReaderDiv}>
+                      <div className={classes.CSVReader}>
+                          <CSVReader
+                          onDrop={handleOnDrop}
+                          onError={handleOnError}
+                          addRemoveButton
+                          removeButtonColor='#659cef'
+                          onRemoveFile={handleOnRemoveFile}
+                          className={classes.CSVReader}
+                          >
+                            <span className={classes.csvSpan}>Drop CSV file here or click to upload.</span>
+                          </CSVReader>
+                    </div>
+                   </div>
                     }
                     {activeStep === 1 && 
                         <div className={classes.formGrid}>
@@ -299,14 +175,13 @@ const ImportKitDialog = (props) => {
                               </div>
                             </div>
                              <div className={classes.inputDivs}>
-                                <VirtualizedManItemTable setShouldUpdate={setShouldUpdate} partManItems={partManItems} selectedManItem={selectedManItem} setSelectedManItem={setSelectedManItem}
+                                <VirtualizedKitItemTable setShouldUpdate={setShouldUpdate} partManItems={partManItems} selectedManItem={selectedManItem} setSelectedManItem={setSelectedManItem}
                                   currentView={currentView} setCurrentView={setCurrentView} views={views}/>
                              </div>
                         </div>
                     }
                     {activeStep === 2 && 
                         <div className={classes.formGrid}>
-                          { selectedPart.item_type === "part" ? <>
                             <div className={classes.orderInfoPartContainer}>
                               <div className={classes.orderInfoPartDiv}  style={{flexBasis: '65%'}}>
                                 <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Part Selected:</span></div>
@@ -351,36 +226,18 @@ const ImportKitDialog = (props) => {
                                 <Grid item xs={12} className={classes.paperScroll}>
                                     <FormBuilder 
                                         ref={saveRef}
-                                        fields={partFields} 
-                                        mode={editOOIDialogMode} 
+                                        fields={kitFields} 
+                                        mode={'add'} 
                                          classes={classes}
-                                        formObject={activeOOItem} 
-                                        setFormObject={setActiveOOItem}
+                                        formObject={activeImportItem} 
+                                        setFormObject={setActiveImportItem}
                                         handleClose={handleDialogClose} 
                                         handleSave={handleSave}/>
                                 </Grid>
                             </Grid>
-                            </>
-                            : 
-                            <>{/* if Kit */}
-                            <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>OrderOut Info</span></div>
-                            <Grid container >  
-                                <Grid item xs={12} className={classes.paperScroll}>
-                                    <FormBuilder 
-                                        ref={saveRef}
-                                        fields={setFields} 
-                                        mode={editOOIDialogMode} 
-                                         classes={classes}
-                                        formObject={activeOOItem} 
-                                        setFormObject={setActiveOOItem}
-                                        handleClose={handleDialogClose} 
-                                        handleSave={handleSave}
-                                        kitPartsManItems={kitPartsManItems} setKitsPartsManItemsRefetch={setKitsPartsManItemsRefetch}
-                                        />
-                                </Grid>
-                            </Grid>
-                            </>}
+                            
                         </div>
+
                     }
                     {validationErrors.length > 0 ? <div className={classes.validationDiv}>
                         {validationErrors.map((error)=>
@@ -397,9 +254,9 @@ const ImportKitDialog = (props) => {
                             size="medium"
                             className={classes.saveButton} >{addSub === "add" ? "ADD" : "SUBTRACT"}
                             </Button> */}
-                            <HorizontalLinearStepper activeStep={activeStep} setActiveStep={setActiveStep} activeOOItem={activeOOItem} 
-                            setActiveOOItem={setActiveOOItem}
-                             selectedPart={selectedPart} selectedManItem={selectedManItem} editOOIDialogMode={editOOIDialogMode} 
+                            <HorizontalLinearStepper activeStep={activeStep} setActiveStep={setActiveStep} activeImportItem={activeImportItem} 
+                            setActiveImportItem={setActiveImportItem}
+                             selectedManItem={selectedManItem} 
                              shouldUpdate={shouldUpdate} saveRef={saveRef}/>
                     </DialogActions> 
 
@@ -415,7 +272,7 @@ const ImportKitDialog = (props) => {
 export default ImportKitDialog;
 
 
-const ManItemList = (props) =>{
+const KitItemList = (props) =>{
 
     const {user, dimensions = {height: 300, width: 700}, rowHeight = 42, headerHeight = 30, partManItems, 
      currentView, setCurrentView, views,setPartsSearchRefetch,selectedManItem,setSelectedManItem, setShouldUpdate} = props;
@@ -525,8 +382,29 @@ const ManItemList = (props) =>{
       );
     }
 
-    
-const VirtualizedManItemTable = withStyles(styles)(ManItemList);
+    const styles = (theme) => ({
+      root: {
+        '&:nth-of-type(odd)': {
+          backgroundColor: "#e8e8e8",
+          '&:hover':{
+            backgroundColor: "#dcdcdc",
+          }
+        },
+        '&:nth-of-type(even)': {
+          backgroundColor: '#f7f7f7',
+          '&:hover':{
+            backgroundColor: "#dcdcdc",
+          }
+        },
+        border: '1px solid #111 !important',
+        '&:first-child':{
+          border: '2px solid #992222',
+        }
+       
+      },
+    });
+
+const VirtualizedKitItemTable = withStyles(styles)(KitItemList);
 
 function getSteps() {
     return ['Part/Kit', 'Manufacturer', 'OrderOut Info'];
@@ -547,26 +425,22 @@ function getStepContent(step) {
 
 function HorizontalLinearStepper(props) {
     const classes = useStyles();
-    const {activeStep, setActiveStep, selectedPart,selectedManItem,editOOIDialogMode, saveRef, shouldUpdate, activeOOItem, setActiveOOItem} = props;
+    const {activeStep, setActiveStep, selectedPart,selectedManItem, saveRef, shouldUpdate, activeImportItem, setActiveImportItem} = props;
     const steps = getSteps();
     
     const handleNext = (add_and_continue = false) => {
-        if(activeStep == 0 &&  !selectedPart){
-            cogoToast.warn("No part/kit selected!");
+        if(activeStep == 0 &&  !activeImportItem.items){
+            cogoToast.warn("No file imported!");
             return;
         }
-        if(activeStep == 0 && selectedPart?.item_type === "kit"){
-          //skip manufacturer
-          setActiveStep(steps.length -1)
-          return;
-        }
+
         if(activeStep === steps.length -1){
           //this should update to true only
           if(shouldUpdate){
             saveRef.current.handleShouldUpdate(shouldUpdate)
             .then((data)=>{
               console.log("handleNext add_and_continue", add_and_continue)
-              saveRef.current.handleSaveParent(activeOOItem, null, add_and_continue)
+              saveRef.current.handleSaveParent(activeImportItem, null, add_and_continue)
             })
             .catch((error)=>{
               cogoToast.error("Failed to save");
@@ -574,7 +448,7 @@ function HorizontalLinearStepper(props) {
               return;
             }) 
           } else{
-            saveRef.current.handleSaveParent(activeOOItem, null,add_and_continue)
+            saveRef.current.handleSaveParent(activeImportItem, null,add_and_continue)
           }          
         }else{
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -632,9 +506,9 @@ function HorizontalLinearStepper(props) {
                   onClick={event => handleNext(false)}
                   className={classes.button}
                 >
-                  {activeStep === steps.length - 1 ? editOOIDialogMode == 'add' ? activeOOItem?.rainey_id  ? "Save" : "Add" : 'Update' : 'Next'}
+                  {activeStep === steps.length - 1 ?  'Import' : 'Next'}
                 </Button>
-                { ! activeOOItem?.rainey_id && activeStep === steps.length - 1 &&
+                { ! activeImportItem?.rainey_id && activeStep === steps.length - 1 &&
                   <Button
                   variant="contained"
                   color="primary"
@@ -804,6 +678,24 @@ const useStyles = makeStyles(theme => ({
     },
     sub_button:{
         color: '#dd0000',
+    },
+    csvReaderDiv:{
+      minHeight: '300px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    CSVReader:{
+      flexBasis: '40%',
+      margin: '20px',
+       width: '60%',
+    },
+    csvSpan:{
+      fontWeight: '600',
+      color: '#888',
+      fontFamily: 'arial',
+      
     },
     stockDiv:{
         display: 'flex',
