@@ -35,15 +35,14 @@ const ImportKitDialog = (props) => {
     //PROPS
     //const { } = props;
     const {user, currentView, setCurrentView, views,
-      importKitModalOpen,setImportKitModalOpen, activeImportItem, setActiveImportItem} = useContext(ListContext);
+      importKitModalOpen,setImportKitModalOpen, activeImportItem, setActiveImportItem, setKitsRefetch} = useContext(ListContext);
 
     //STATE
     const [activeStep, setActiveStep] = React.useState(0);
-    const [partManItems,setPartManItems] = useState([]);
-    const [selectedManItem, setSelectedManItem] = React.useState(null);
     const [shouldUpdate, setShouldUpdate]= React.useState(false);
 
     const [validationErrors , setValidationErrors] = useState([]);
+    const [checkItems, setCheckItems] = useState(false);
     
 
     const saveRef = React.createRef();
@@ -52,13 +51,53 @@ const ImportKitDialog = (props) => {
 
     //FUNCTIONS
     const handleDialogClose = () => {
+      setKitsRefetch(true);
         setImportKitModalOpen(false);
         setValidationErrors([]);
         setActiveStep(0)
-        setSelectedPart(null);
         setActiveImportItem({});
         setShouldUpdate(false);
     };
+
+    useEffect(()=>{
+      //check if rainey_ids are in DB
+      if(activeImportItem && activeImportItem.items?.length > 0 && importKitModalOpen && checkItems == true){
+        setCheckItems(false);
+
+        var promises = activeImportItem.items.map(async(item)=>{
+          let response = await Inventory.checkPartExists(item.rainey_id);
+          return response
+        })
+
+        var updateItems = [...activeImportItem.items];
+
+        Promise.all(promises).then((results)=>{
+          console.log("id check array",results);
+
+           //update item array
+           updateItems = updateItems.map((item)=>{
+             results.forEach((result)=> {
+               if(item.rainey_id == result.rainey_id){
+                item.exists = result.exists;
+               }
+             })
+             return item;
+           })
+
+          
+           setActiveImportItem((old)=> {
+            old.items = updateItems;
+            return old;
+           } )
+           if(activeStep == 0){
+              setActiveStep(1);
+           }
+        })
+        .catch((error)=>{
+          console.error("Failed to get all promises from id check", error);
+        })
+      }
+    },[activeImportItem, checkItems])
 
 
     // useEffect(()=>{
@@ -70,23 +109,24 @@ const ImportKitDialog = (props) => {
     //   }
     // },[kitsPartsManItemsRefetch, saveRef])
   
-    // const handleGoToPart = (event)=>{
-    //      //set detailWOIid in local data
-    //   window.localStorage.setItem('detailPartId', JSON.stringify(selectedPart?.rainey_id));
+    const handleGoToPart = (event)=>{
+         //set detailWOIid in local data
+      window.localStorage.setItem('detailPartId', JSON.stringify(selectedPart?.rainey_id));
       
-    //   //set detail view in local data
-    //   window.localStorage.setItem('currentInvPartsView', JSON.stringify("partsDetail"));
-    //   window.localStorage.setItem('currentInventoryView', JSON.stringify("invParts"));
+      //set detail view in local data
+      window.localStorage.setItem('currentInvPartsView', JSON.stringify("partsDetail"));
+      window.localStorage.setItem('currentInventoryView', JSON.stringify("invParts"));
       
-    //   window.open('/scheduling/inventory', "_blank");
+      window.open('/scheduling/inventory', "_blank");
 
-    // }
+    }
 
     const kitFields = [
         //type: select must be hyphenated ex select-type
-        {field: 'Description', label: 'Description', type: 'number', updateBy: 'ref', required: true},
-        {field: 'num_in_kit', label: 'Number in Set', type: 'number', updateBy: 'ref', required: true},
-        
+        {field: 'rainey_id', label: 'Rainey ID', type: 'number', updateBy: 'ref', required: true},
+        {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', required: true},
+        {field: 'num_in_kit', label: 'Number in Set', type: 'number', updateBy: 'ref', required: true, defaultValue: 1},
+        {field: 'import_kit_select', label: '', type: "import_kit_select", updateBy: 'state'},
     ];
 
 
@@ -97,10 +137,20 @@ const ImportKitDialog = (props) => {
               reject("Bad item");
           }
           console.log("updateKitItem item", updateKitItem)
-          console.log("og_kit_item item", og_kit_item)
 
           //ADD NEW KIT AND GET ID HERE
-  
+          InventoryKits.importKitObject(updateKitItem, user)
+          .then((data)=>{
+            handleDialogClose();
+            resolve(data);
+            cogoToast.success("Imported Kit "+ updateKitItem.rainey_id);
+          })
+          .catch((error)=>{
+            handleDialogClose();
+            reject(error);
+            cogoToast.error('Failed to Import Kit');
+            console.error("Failed to import kit", error);
+          })
           
           
       })
@@ -114,23 +164,51 @@ const ImportKitDialog = (props) => {
 
       //fill activeImportItem using data
       let updateObject = {};
-      updateObject.description = data[0][0]?.split(" Revised")[0];
-      let id = data[1][0]?.split("          ")[0];
-      id = id.replace(/^\0/, "2");
-      id = id.replace("-", "");
+      let id 
+      try {
+        updateObject.description = data[0].data[0]?.split(" Revised")[0];
+        id = data[1].data[0]?.split("          ")[0];
+        console.log("id", id);
+        id = id?.length > 0 ? id.replace(/^0/, "2") : id || null ;
+        id = id?.replace("-", "") || null;
+      } catch (error) {
+        console.error("Failed to pull kit data", error)
+      }
+      
+     
+      
       updateObject.rainey_id = id;
       let objectItems = [];
       let items = data.slice(14, data.length);
-      items.forEach((item)=>{
-        let r_id = item[3].split("_")[0];
-         
-        let row = {qty_in_kit: item[1], }
-      })
+
+      try {
+        items.forEach((item)=>{
+          let r_id = item.data[3]?.split("_")[0] || null;
+          let missing_nums = 8 - r_id.length ;
+          if(missing_nums > 0){
+            //works only for parts right now
+            let beginning = "1";
+            let i= 0;
+            while(i < missing_nums -1){
+              beginning += "0";
+              i++;
+            }
+            r_id = beginning + r_id;
+          }
+          objectItems.push({rainey_id: r_id, qty_in_kit: item.data[1], description: item.data[4], selected: true });
+  
+        })
+      } catch (error) {
+        console.error("Failed to parse data", error)
+      }
       
+
+      updateObject.items = [...objectItems];
 
       console.log("updateObject", updateObject);
-
-      
+      setActiveImportItem(updateObject)
+      setCheckItems(true);
+      setShouldUpdate(true);
     }
   
     const handleOnError = (err, file, inputElem, reason) => {
@@ -167,61 +245,7 @@ const ImportKitDialog = (props) => {
                     }
                     {activeStep === 1 && 
                         <div className={classes.formGrid}>
-                            <div className={classes.orderInfoPartDiv}>
-                              <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Selecting Manufacturer Item for Part:</span></div>
-                              <div className={classes.subTitleValueDiv}>
-                                  <span className={classes.subTitleValueIdSpan}><div className={classes.urlSpan} ><span onClick={handleGoToPart} >{selectedPart?.rainey_id}</span></div></span>
-                                  <span className={classes.subTitleValueDescSpan}>{selectedPart?.description}</span>
-                              </div>
-                            </div>
-                             <div className={classes.inputDivs}>
-                                <VirtualizedKitItemTable setShouldUpdate={setShouldUpdate} partManItems={partManItems} selectedManItem={selectedManItem} setSelectedManItem={setSelectedManItem}
-                                  currentView={currentView} setCurrentView={setCurrentView} views={views}/>
-                             </div>
-                        </div>
-                    }
-                    {activeStep === 2 && 
-                        <div className={classes.formGrid}>
-                            <div className={classes.orderInfoPartContainer}>
-                              <div className={classes.orderInfoPartDiv}  style={{flexBasis: '65%'}}>
-                                <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Part Selected:</span></div>
-                                <div className={classes.subTitleValueDiv}>
-                                    <span className={classes.subTitleValueIdSpan}><div className={classes.urlSpan} ><span onClick={handleGoToPart} >{selectedPart?.rainey_id}</span></div></span>
-                                    <span className={classes.subTitleValueDescSpan}>{selectedPart?.description}</span>
-                                </div>
-                                <div className={classes.subPartCostDiv}>
-                                    <span >Avg Cost: </span><span>{selectedPart.cost_each}</span>
-                                </div>
-                              </div>
-                              <div className={classes.orderInfoPartDiv} style={{flexBasis: '35%'}}>
-                                <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Manfucturer Selected:</span></div>
-                                {selectedManItem ? <>
-                                  <div className={classes.selectedManItemContainer}>
-                                    <div className={classes.subTitleValueDiv}>
-                                      <span className={clsx({[classes.manSpan]:true, [classes.subTitleValueIdSpan]: true}) }>
-                                          {selectedManItem?.manufacture_name || 'N/A'}
-                                      </span>
-                                    </div>
-                                      {selectedManItem?.url ? 
-                                        <div className={classes.manItemLink}>
-                                          <a className={clsx({[classes.aLink]:true, [classes.subTitleValueIdSpan]: true}) }
-                                            href={selectedManItem?.url} target="_blank">
-                                            <LinkIcon className={classes.linkIcon}/> <span>Product Link</span>
-                                          </a>
-                                        </div> : <></> }
-                                  </div>
-                                    <div>
-                                      <span className={classes.subTitleValueDescSpan}>Default Qty: {selectedManItem?.default_qty}</span>
-                                    </div>
-                                  </> 
-                                    :
-                                    <div className={classes.subTitleValueDiv}>
-                                      <span className={classes.subTitleValueIdSpan}><div className={classes.manErrorSpan} ><span>No Manufacturer selected</span></div></span>
-                                    </div>
-                                  }
-                              </div>
-                            </div>
-                            <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>OrderOut Info</span></div>
+                            <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>Kit Info</span></div>
                             <Grid container >  
                                 <Grid item xs={12} className={classes.paperScroll}>
                                     <FormBuilder 
@@ -256,7 +280,6 @@ const ImportKitDialog = (props) => {
                             </Button> */}
                             <HorizontalLinearStepper activeStep={activeStep} setActiveStep={setActiveStep} activeImportItem={activeImportItem} 
                             setActiveImportItem={setActiveImportItem}
-                             selectedManItem={selectedManItem} 
                              shouldUpdate={shouldUpdate} saveRef={saveRef}/>
                     </DialogActions> 
 
@@ -272,142 +295,9 @@ const ImportKitDialog = (props) => {
 export default ImportKitDialog;
 
 
-const KitItemList = (props) =>{
-
-    const {user, dimensions = {height: 300, width: 700}, rowHeight = 42, headerHeight = 30, partManItems, 
-     currentView, setCurrentView, views,setPartsSearchRefetch,selectedManItem,setSelectedManItem, setShouldUpdate} = props;
-
-    
-
-    const classes = useStyles();
-
-    const columns = [
-        { dataKey: 'id', label: 'ID', type: 'number', width: 40, align: 'center' }, 
-        {dataKey: 'manufacture_name', label: "Manf", width: 100, align: 'center'},
-        { dataKey: 'mf_part_number', label: 'Manf #', type: 'text', width: 140, align: 'left' }, 
-        { dataKey: 'url', label: 'URL', type: 'text', width: 100, align: 'right',
-          format: (value)=> value ? <div className={classes.urlSpan} ><a href={value}  target="_blank"><LinkIcon/></a></div> : <></> },
-        { dataKey: 'notes', label: 'Notes', width: 120,type: 'text', align: 'left' }, 
-        { dataKey: 'default_man', label: 'Default',type: 'number', width: 60, align: 'center' },
-      ];
-    
-      const getRowClassName = ({ index }) => {
-        const { classes, onRowClick } = props;
-    
-        return clsx(classes.tableRow, classes.flexContainer, {
-          [classes.tableRowHover]: index !== -1 && onRowClick != null,
-        });
-      };
-    
-      const cellRenderer = ({ cellData, columnIndex, rowData}) => {
-        const column = columns[columnIndex];
-        //const selected = selectedManItem?.id === rowData.id;
-
-        return(
-            <TableCell className={clsx({ [classes.tableCell]:true})} 
-                        component="div"
-                        align={column.align}
-                        variant="body"
-                        style={{ minWidth: column.width, height: rowHeight, fontSize: '1em' }}>
-                  {column.format  ? column.format(cellData, rowData) : cellData}
-            </TableCell>
-        )
-      };
-    
-      const headerRenderer = ({ label, columnIndex }) => {
-        const column = columns[columnIndex];
-        
-        return(
-        <TableCell
-          component="div"
-          variant="body"
-          className={clsx({ [classes.tableCellHead]: true })}
-          classes={{stickyHeader: classes.stickyHeader}}
-          align={column.align}
-          style={{ minWidth: column.width,height: headerHeight, color: '#000', fontWeight: '600'  }}
-          > 
-          <span>
-            <div>{label}</div>
-          </span>
-        </TableCell>)
-      };
-
-      const handleSelectPartManItem = (event) => {
-        setShouldUpdate(true);
-        setSelectedManItem({...event.rowData, index: event.index});
-      }
-
-
-    
-      
-      return (
-        <div className={classes.root}>
-            <TableContainer className={classes.container}>
-            <Table stickyHeader
-                height={dimensions?.height - 20}
-                width={dimensions?.width}
-                rowHeight={rowHeight}
-                gridStyle={{
-                  direction: 'inherit',
-                }}
-                headerHeight={headerHeight}
-                className={classes.table}
-                rowCount={partManItems ? partManItems.length : 0 }
-                rowGetter={({ index }) => partManItems ? partManItems[index] : null }
-                rowClassName={getRowClassName}
-                onRowClick={(event)=>handleSelectPartManItem(event)}
-                rowStyle={(index)=> partManItems && selectedManItem && partManItems[index.index]?.id === selectedManItem?.id ? {background: '#b7dbff', border: '1px solid #2222ff'} : {} }
-                scrollToIndex={selectedManItem?.index || 0}
-              >
-                {columns.map(({ dataKey, ...other }, index) => {
-                  return (
-                    <Column
-                      key={dataKey}
-                      headerRenderer={(headerProps) =>
-                        headerRenderer({
-                          ...headerProps,
-                          columnIndex: index,
-                        })
-                      }
-                      className={classes.flexContainer}
-                      cellRenderer={cellRenderer}
-                      dataKey={dataKey}
-                      {...other}
-                    />
-                  );
-                })}
-              </Table>
-          </TableContainer>
-        </div>
-      );
-    }
-
-    const styles = (theme) => ({
-      root: {
-        '&:nth-of-type(odd)': {
-          backgroundColor: "#e8e8e8",
-          '&:hover':{
-            backgroundColor: "#dcdcdc",
-          }
-        },
-        '&:nth-of-type(even)': {
-          backgroundColor: '#f7f7f7',
-          '&:hover':{
-            backgroundColor: "#dcdcdc",
-          }
-        },
-        border: '1px solid #111 !important',
-        '&:first-child':{
-          border: '2px solid #992222',
-        }
-       
-      },
-    });
-
-const VirtualizedKitItemTable = withStyles(styles)(KitItemList);
 
 function getSteps() {
-    return ['Part/Kit', 'Manufacturer', 'OrderOut Info'];
+    return ['Import CSV', 'Kit Info'];
 }
 
 function getStepContent(step) {
@@ -417,7 +307,7 @@ function getStepContent(step) {
     case 1:
       return 'Select Part\'s Manufacturer';
     case 2: 
-      return 'OrderOut Info'
+      return 'Kit Info'
     default:
       return 'Unknown step';
   }
@@ -425,7 +315,7 @@ function getStepContent(step) {
 
 function HorizontalLinearStepper(props) {
     const classes = useStyles();
-    const {activeStep, setActiveStep, selectedPart,selectedManItem, saveRef, shouldUpdate, activeImportItem, setActiveImportItem} = props;
+    const {activeStep, setActiveStep, saveRef, shouldUpdate, activeImportItem, setActiveImportItem} = props;
     const steps = getSteps();
     
     const handleNext = (add_and_continue = false) => {
@@ -457,10 +347,7 @@ function HorizontalLinearStepper(props) {
     };
   
     const handleBack = () => {
-      if(activeStep === steps.length -1 && selectedPart?.item_type === "kit"){
-        setActiveStep(0);
-        return;
-      }
+
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
   
@@ -508,16 +395,7 @@ function HorizontalLinearStepper(props) {
                 >
                   {activeStep === steps.length - 1 ?  'Import' : 'Next'}
                 </Button>
-                { ! activeImportItem?.rainey_id && activeStep === steps.length - 1 &&
-                  <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={event=> handleNext(true)}
-                  className={classes.button}
-                >
-                  { "Add +" }
-                </Button>
-                }
+                
               </div>
             </div>
           )}
@@ -723,8 +601,12 @@ const useStyles = makeStyles(theme => ({
 
     },
     errorSpan:{
-        color: '#030000',
+        color: '#330000',
         fontSize: '.8em',
+        fontWeight: '600',
+    },
+    errorDiv:{
+      textAlign: "center",
     },
     stepperRoot:{
         display: 'flex',
@@ -943,17 +825,20 @@ const useStyles = makeStyles(theme => ({
       alignItems: 'center',
       fontFamily: 'arial',
     },
-    headListManfDiv:{
-      flexBasis: '38%',
+    headListIDDiv:{
+      flexBasis: '23%',
+      textAlign: 'center',
     },
     headListNameDiv:{
-      flexBasis: '35%',
+      flexBasis: '45%',
+      textAlign: 'center',
+    },
+    listNameDiv:{
+      flexBasis: '45%',
     },
     headListQtyDiv:{
-      flexBasis: '13%',
-    },
-    headListPriceDiv:{
-      flexBasis: '13%',
+      flexBasis: '22%',
+      textAlign: 'center',
     },
     setDescSpan:{
       fontWeight: '600',
@@ -962,6 +847,18 @@ const useStyles = makeStyles(theme => ({
     },
     disabledSpan:{
       color: '#999',
+    },
+    existsSpan:{
+      color: '#5f3',
+    },
+    doesntExistSpan:{
+      color: '#f53',
+    },
+    rainey_id_div:{
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center'
     }
 
     

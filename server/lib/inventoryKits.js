@@ -764,5 +764,59 @@ router.post('/addNewKitKit', async (req,res) => {
 });
 
 
+router.post('/importKitObject', async (req,res) => {
+
+    var kit, user ;
+    if(req.body){
+        if(req.body.kit != null){
+            kit = req.body.kit;
+            user = req.body.user;
+        }  
+    }
+    if(!user || !user.isAdmin){
+        logger.error("Bad user or not admin", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
+    const kit_sql = ' INSERT INTO inv__kits (rainey_id, description, inv_qty, min_inv, num_in_kit, notes, storage_location, date_updated, obsolete ) ' +
+                ' VALUES (?,?,IFNULL(?, default(inv_qty)),IFNULL(?, default(min_inv)),IFNULL(?, default(num_in_kit)),?,?,IFNULL(?,default(date_updated)),IFNULL(?, default(obsolete))) ';
+
+    const sql = ' INSERT INTO inv__kits_parts (kit_rainey_id, rainey_id, qty_in_kit, ' + 
+                ' date_entered, part_mf_id) ' +
+                ' VALUES ( ?, ?, IFNULL(?, DEFAULT(qty_in_kit)), IFNULL(?, NOW()), IFNULL(?, DEFAULT(part_mf_id)) ) ';
+
+    try{
+        const kit_results = await database.query(kit_sql, [kit.rainey_id, kit.description, kit.inv_qty, kit.min_inv, kit.num_in_kit, "", "",
+             kit.date_updated, kit.obsolete ]);
+        logger.info("Inventory Kit added ", [kit]);
+
+        var kit_id = kit_results.insertId;
+
+        async.forEachOf(kit.items, async (kit_item, i, callback) => {
+
+            //will automatically call callback after successful execution
+            const results = await database.query(sql, [ kit_id, kit_item.rainey_id, kit_item.qty_in_kit,
+                Util.convertISODateTimeToMySqlDateTime(moment()), null ]);
+            logger.info("Inventory Kit Part added ", [kit_item]);            
+
+        }, err=> {
+            if(err){
+                logger.error("Failed to add item to kit: " + err);
+                //throw err;
+            }else{
+                logger.info("All items added to kit " + kit.items);
+            }
+        })
+
+        res.json(kit_results);
+    }
+    catch(error){
+        logger.error("Failed to importKitObject: " + error);
+        res.sendStatus(400);
+    }
+
+});
+
 
 module.exports = router;

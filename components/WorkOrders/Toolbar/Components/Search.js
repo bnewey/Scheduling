@@ -35,6 +35,8 @@ const Search = function(props) {
     {value: "wo.record_id", displayValue: 'Work Order #'},
     {value: "a.name", displayValue: 'Entity Name'},
     {value: "wo.job_reference", displayValue: 'Job Reference'},
+    {value: "wo.city", displayValue: 'WO City'},
+    {value: "wo.state", displayValue: 'WO State'}
   ];
 
   const classes = useStyles({searchOpen});

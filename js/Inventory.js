@@ -473,6 +473,25 @@ async function deletePartType(id, user){
 
 }
 
+async function checkPartExists(part_id){
+    const route = '/scheduling/inventory/checkPartExists';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({part_id})
+            });
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
 module.exports = {
     getAllParts,
     searchAllParts,
@@ -496,6 +515,7 @@ module.exports = {
     deleteManufacturer,
     addNewPartType,
     updatePartType,
-    deletePartType
+    deletePartType,
+    checkPartExists,
 
 };
