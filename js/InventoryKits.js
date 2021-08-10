@@ -377,6 +377,26 @@ async function addNewKitKit(kit_item, user){
 }
 
 
+async function importKitObject(kit, user){
+    const route = '/scheduling/inventoryKits/importKitObject';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({kit, user})
+            });
+        var list = await response.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+
+}
+
+
 module.exports = {
     getAllKits,
     getAllPartsAndKits,
@@ -396,4 +416,5 @@ module.exports = {
     updateKitKit,
     deleteKitKit,
     addNewKitKit,
+    importKitObject,
 };

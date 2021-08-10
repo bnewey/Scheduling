@@ -3,6 +3,7 @@ import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-
 
 import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
+import PublishIcon from '@material-ui/icons/Publish';
 
 //import FilterFinished from './components/FilterFinished'
 //import SignsPdf from './components/SignsPdf';
@@ -26,7 +27,7 @@ import RecentKits from './components/RecentKits';
 const KitsListSidebar = function(props) {
   const {user} = props;
 
-  const {  currentView, setEditKitModalMode, setEditKitModalOpen  } = useContext(ListContext);
+  const {  currentView, setEditKitModalMode, setEditKitModalOpen, setImportKitModalOpen  } = useContext(ListContext);
   
   const classes = useStyles(); 
 
@@ -36,6 +37,10 @@ const KitsListSidebar = function(props) {
     setEditKitModalMode("add");
     setEditKitModalOpen(true);
   }
+  const handleOpenImportKitModal = () =>{
+    setImportKitModalOpen(true);
+  }
+  
 
   return (
     <div className={classes.root}>
@@ -47,6 +52,14 @@ const KitsListSidebar = function(props) {
                     >
               <AddIcon className={classes.plusIcon}/>
               <div>New Kit</div>
+            </Button> 
+            <Button className={classes.newButton} 
+                    classes={{label: classes.newButtonLabel}} 
+                    variant="outlined"
+                     onClick={event=> handleOpenImportKitModal()}
+                    >
+              <PublishIcon className={classes.importIcon}/>
+              <div>Import Kit</div>
             </Button> 
         </div>
         <div className={classes.dateRangeDiv}>
@@ -76,6 +89,10 @@ const useStyles = makeStyles(theme => ({
     newButtonDiv:{
       padding: '3%',
       marginBottom: '15px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     dateRangeDiv:{
       borderTop: '1px solid #d2cece',
@@ -88,12 +105,13 @@ const useStyles = makeStyles(theme => ({
       display:'flex',
       flexDirection: 'row',
       justifyContent: 'center',
-      alignItems: 'flex-end',
+      alignItems: 'center',
       color: '#5f5f5f',
       fontWeight: 600,
     },
     newButton:{
       boxShadow: '0px 1px 1px 0px #4c4c4c',
+      margin: '5px 0px',
       padding: '4px 17px',
       borderRadius: '21px',
       fontSize: '14px',
@@ -105,6 +123,10 @@ const useStyles = makeStyles(theme => ({
     plusIcon:{
       fontSize: '30px',
       color: '#ce6a00',
+    },
+    importIcon:{
+      fontSize: '27px',
+      color: '#2f82fc',
     },
     labelDiv:{
       textAlign: 'center',

@@ -774,4 +774,29 @@ router.post('/deletePartType', async (req,res) => {
     }
 });
 
+router.post('/checkPartExists', async (req,res) => {
+
+    var part_id;
+    if(req.body){
+        if(req.body.part_id != null){
+            part_id = req.body.part_id;
+        }  
+    }
+
+    const sql = ' SELECT rainey_id FROM inv__parts WHERE rainey_id = ? ';
+
+    
+
+    try{
+        const results = await database.query(sql, [ part_id ]);
+        logger.info("Inventory checkPartExists " + part_id);
+
+        res.json({exists: results.length > 0 ? true : false, rainey_id: part_id});
+    }
+    catch(error){
+        logger.error("Failed to checkPartExists: " + error);
+        res.sendStatus(400);
+    }
+});
+
 module.exports = router;

@@ -30,7 +30,7 @@ import { ListContext } from '../../../components/WorkOrders/WOContainer';
 import { DetailContext } from '../../../components/WorkOrders/WOContainer';
 import clsx from 'clsx';
 import _ from 'lodash';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline, Cancel, CheckCircle } from '@material-ui/icons';
 import AddEditManfItemDialog from '../../Inventory/Inv_Parts/components/AddEditManfItemDialog';
 
 const FormBuilder = forwardRef((props, ref) => {
@@ -187,6 +187,36 @@ const FormBuilder = forwardRef((props, ref) => {
             }
             console.log(`${key}`, tmpObject);
  
+        }
+        if(type === "import_kit_select"){
+            let subtype = key.split('-')[0];
+            let rainey_id = parseInt(key.split('-')[1]);
+            let index = tmpObject[`items`] ?  _.findIndex(tmpObject[`items`], (item)=> item.rainey_id == rainey_id ) : null;
+
+            let updateValue;
+            switch (subtype){
+                case "qty_in_kit":
+                    updateValue =  value.target.value
+                    break;
+                default:
+                    updateValue =  value.target.value
+                    break;
+            }
+            //If item is in array
+            if(index != -1 && index != null && index != undefined){
+
+                tmpObject[`items`][index][subtype] =  updateValue;
+                
+            }else{
+                //Item not in array yet or object not defined
+                if(tmpObject[`items`] == undefined){
+                    tmpObject[`items`]= [];
+                }
+                
+                tmpObject[`items`].push({rainey_id, [subtype]: updateValue })
+       
+            }
+            console.log(`${key}`, tmpObject);
         }
 
         setFormObject(tmpObject);
@@ -387,6 +417,9 @@ const FormBuilder = forwardRef((props, ref) => {
                             break;
                         case 'order_kit_select':
                             error = updateItem["kit_items"]?.length > 0 && !(updateItem["kit_items"].filter((item)=> item.selected).every((item)=> { console.log("item", item); return ( item.part_mf_id && item.actual_cost_each && item.rainey_id && item.qty_in_order)} ))
+                            break;
+                        case 'import_kit_select':
+                            error = updateItem["items"]?.length > 0 && !(updateItem["items"].filter((item)=> item.selected).every((item)=> { console.log("item", item); return ( item.rainey_id && item.qty_in_kit && item.exists)} ))
                             break;
                     }
                     return error;
@@ -973,7 +1006,7 @@ const GetInputByType = function(props){
             const [manfItemId, setManfItemId] = useState(null);
             const [activePart, setActivePart] = useState({});
             const [addEditManfItemMode, setAddEditManfItemMode] =useState("add");
-            const [selectedParts, setSelectedParts] = useState([]);
+            //const [selectedParts, setSelectedParts] = useState([]);
 
             const handleChangeForKit = (value, shouldUpdate, type, field, part, manfItemToEdit)=>{
                 
@@ -1042,7 +1075,7 @@ const GetInputByType = function(props){
                             onChange={(event)=> handleSelectAll(event.target.checked ? 1 : 0)}
                         /></div>
                         <div className={classes.headListNameDiv}><span>Part Name</span></div>
-                        <div className={classes.headListManfDiv}><span>Manfucturer</span></div>
+                        <div className={classes.headListIDDiv}><span>Manfucturer</span></div>
                         <div className={classes.headListQtyDiv}><span>Order Qty</span></div>
                         <div className={classes.headListPriceDiv}><span>Order Price</span></div>
                     </div>
@@ -1067,7 +1100,7 @@ const GetInputByType = function(props){
                         <div className={classes.headListNameDiv}>
                             <span className={clsx({[classes.setDescSpan]:true, [classes.disabledSpan]: !partSelected})}>{part.description}</span>
                         </div>
-                        <div className={classes.headListManfDiv}>
+                        <div className={classes.headListIDDiv}>
                         <Select
                             disabled={!partSelected}
                             //error={error || valid_error}
@@ -1129,6 +1162,94 @@ const GetInputByType = function(props){
             </div> : <>No parts added to this set</>}
             </>)
             break;
+            case 'import_kit_select':
+
+                //const [selectedParts, setSelectedParts] = useState([]);
+                const kitPartItems = formObject["items"];
+    
+                const handleSelectAllImportParts = (value) => {
+                    console.log("value", value)
+                    if(formObject &&  formObject["items"]?.length > 0) {
+                        setFormObject({...formObject, items: formObject["items"].map((item)=> ({...item, selected: value}))})
+                    }
+                }
+                
+                const handleSelectImportPart = (value, row)=>{
+                    console.log("row",row)
+                    setFormObject({...formObject, items: formObject["items"] ? formObject["items"].map((item)=> {
+                        if(item.rainey_id == row.rainey_id){
+                            return ({...item, selected: value});
+                        }
+                        return item;
+                    } ) : {rainey_id: row.rainey_id, selected: value} });
+                }
+                
+                return(<>
+                    {kitPartItems?.length > 0 ? 
+                    
+                    <div style={{width: '100%'}}>
+                        {(error || valid_error) && <div className={classes.errorDiv}><span className={classes.errorSpan}>Parts Must Exist to Import</span></div> }
+                        <div className={classes.headListItemDiv}> {/*Head Item*/}
+                            <div className={classes.headListCheckDiv}><Checkbox
+                                style={{    padding: '0px 9px'}}
+                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                name="checkedI"
+                                checked={formObject ? formObject["items"] ? formObject["items"].every((item)=>item.selected)  ? true : false : true : false }
+                                onChange={(event)=> handleSelectAllImportParts(event.target.checked ? 1 : 0)}
+                            /></div>
+                            <div className={classes.headListIDDiv}><span>Rainey ID</span></div>
+                            <div className={classes.headListNameDiv}><span>Part Name</span></div>
+                            <div className={classes.headListQtyDiv}><span>Qty</span></div>
+                        </div>
+                    {_.uniqBy(kitPartItems, 'rainey_id').map((part)=> 
+                    {
+                        
+                        const updateRow = formObject ? formObject["items"]?.find((item)=> part.rainey_id == item.rainey_id) : {rainey_id: part.rainey_id};
+                        const partSelected = updateRow && updateRow[`selected`] ? true : false;
+                        return (
+                            <>
+                            
+                            
+                            
+                            <div className={clsx({[classes.inputValueKitSelect]:true, [classes.listItemDiv]:true})}>
+                            <div className={classes.headListCheckDiv}><Checkbox
+                            style={{    padding: '0px 9px'}}
+                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                name="checkedI"
+                                checked={ partSelected }
+                                onChange={(event)=> handleSelectImportPart(event.target.checked ? 1 : 0, updateRow )}
+                            /></div>
+                            <div className={clsx({ [classes.headListIDDiv]: true, [classes.rainey_id_div]: true})}>
+                                <span>{part.rainey_id}</span>
+                                <span className={clsx({[classes.existsSpan]: part.exists,
+                                            [classes.doesntExistSpan]: !part.exists})}>{part.exists ? <CheckCircle/> : <Cancel/>}</span>
+                            </div>
+                            <div className={classes.listNameDiv}>
+                                <span className={clsx({[classes.setDescSpan]:true, [classes.disabledSpan]: !partSelected})}>{part.description}</span>
+                            </div>
+                            
+                            <div className={clsx({[classes.inputValue]:true, [classes.headListQtyDiv]: true})}>
+                                <TextField id={`woi_input-qty_in_kit-${part.rainey_id}`} 
+                                        
+                                        //error={error || valid_error}
+                                        variant="outlined"
+                                        /*multiline={field.multiline}*/
+                                        name={`qty_in_kit-${part.rainey_id}`}
+                                        disabled={field.disabled || !partSelected}
+                                        inputProps={{className: classes.inputStyle}} 
+                                        classes={{root: classes.setInputRoot}}
+                                        value={updateRow &&  updateRow[`qty_in_kit`] }
+                                        onChange={value => handleInputOnChange(value, true, field.type, `qty_in_kit-${part.rainey_id}`)}  />
+                            </div>
+                            
+                            </div></> ) 
+                        } 
+                        ) }
+                </div> : <>No parts were found in import</>}
+                </>)
+                break;
         case "select-manufacturer":
             return(<div className={classes.inputValueSelect}>
                 <Select

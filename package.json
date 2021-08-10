@@ -64,6 +64,7 @@
     "react-dom": "^16.11.0",
     "react-google-maps": "^9.4.5",
     "react-keybinding-component": "^1.0.0",
+    "react-papaparse": "^3.17.0",
     "react-pdf": "^4.1.0",
     "react-spring": "^8.0.27",
     "react-swipeable-views": "^0.13.3",
