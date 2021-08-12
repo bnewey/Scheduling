@@ -319,12 +319,14 @@ const FormBuilder = forwardRef((props, ref) => {
                             updatePartId = updatePartId?.length > 0 ? updatePartId.replace(/^2/, "1") : updatePartId || null ;
                             updatePartId = updatePartId?.replace("-", "")
                             updateItem[field.field] = updatePartId;
+                            break;
                         case 'kit_rainey_id':
                             let updateKitId = textValueObject[field.field];
                             updateKitId = updateKitId?.length > 0 ? updateKitId.replace(/^0/, "2") : updateKitId || null ;
                             updateKitId = updateKitId?.length > 0 ? updateKitId.replace(/^1/, "2") : updateKitId || null ;
                             updateKitId = updateKitId?.replace("-", "");
                             updateItem[field.field] = updateKitId;
+                            break;
                         case 'entity-titles':
                             const saveEntity = (data, callback) => {
                                 console.log("Data", data);
