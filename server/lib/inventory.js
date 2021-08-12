@@ -230,11 +230,11 @@ router.post('/addNewPart', async (req,res) => {
         return;
     }
 
-    const sql = ' INSERT INTO inv__parts (description, inv_qty, min_inv, cost_each, storage_location, notes, part_type, reel_width, date_updated, obsolete ) ' +
+    const sql = ' INSERT INTO inv__parts ( description, inv_qty, min_inv, cost_each, storage_location, notes, part_type, reel_width, date_updated, obsolete ) ' +
                 ' VALUES (?,IFNULL(?, default(inv_qty)),IFNULL(?, default(min_inv)),IFNULL(?,default(cost_each)),?,?,?,?,?,IFNULL(?, default(obsolete))) ';
 
     try{
-        const results = await database.query(sql, [part.description, part.inv_qty, part.min_inv , part.cost_each, part.storage_location, part.notes,
+        const results = await database.query(sql, [ part.description, part.inv_qty, part.min_inv , part.cost_each, part.storage_location, part.notes,
             part.part_type, part.reel_width, part.date_updated, part.obsolete ]);
         logger.info("Inventory Part added ", [part]);
         res.json(results);
@@ -262,7 +262,7 @@ router.post('/updatePart', async (req,res) => {
     }
 
     logger.info('part to update', [part]);
-    const sql = ' UPDATE inv__parts SET description=?,min_inv=?,  cost_each=?, storage_location=IFNULL(?, DEFAULT(storage_location)), ' +
+    const sql = ' UPDATE inv__parts SET rainey_id=?, description=?,min_inv=?,  cost_each=?, storage_location=IFNULL(?, DEFAULT(storage_location)), ' +
         ' notes=?, part_type=?, reel_width=?, ' +
         ' date_updated=?, obsolete=? ' +
         ' WHERE rainey_id = ? ';
@@ -270,7 +270,7 @@ router.post('/updatePart', async (req,res) => {
 
     try{
         logger.info("Date updated", [Util.convertISODateTimeToMySqlDateTime(part.date_updated)])
-        const results = await database.query(sql, [part.description,part.min_inv,  part.cost_each, part.storage_location, part.notes,
+        const results = await database.query(sql, [part.new_rainey_id, part.description,part.min_inv,  part.cost_each, part.storage_location, part.notes,
             part.part_type, part.reel_width, Util.convertISODateTimeToMySqlDateTime(moment()), part.obsolete, part.rainey_id ]);
         logger.info("Inventory Part updated " + part.rainey_id);
         res.json(results);

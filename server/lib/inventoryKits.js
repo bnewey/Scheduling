@@ -247,7 +247,7 @@ router.post('/updateKit', async (req,res) => {
     }
 
     logger.info('kit to update', [kit]);
-    const sql = ' UPDATE inv__kits SET description=?, min_inv=?, num_in_kit=?, ' +
+    const sql = ' UPDATE inv__kits SET rainey_id = ? ,description=?, min_inv=?, num_in_kit=?, ' +
         ' notes=?,storage_location=?,  ' +
         ' date_updated=?, obsolete=? ' +
         ' WHERE rainey_id = ? ';
@@ -255,7 +255,7 @@ router.post('/updateKit', async (req,res) => {
 
     try{
         logger.info("Date updated", [Util.convertISODateTimeToMySqlDateTime(kit.date_updated)])
-        const results = await database.query(sql, [kit.description,kit.min_inv, kit.num_in_kit,  kit.notes, kit.storage_location,
+        const results = await database.query(sql, [kit.new_rainey_id, kit.description,kit.min_inv, kit.num_in_kit,  kit.notes, kit.storage_location,
              Util.convertISODateTimeToMySqlDateTime(moment()), kit.obsolete, kit.rainey_id ]);
         logger.info("Inventory Kit updated " + kit.rainey_id);
         res.json(results);
