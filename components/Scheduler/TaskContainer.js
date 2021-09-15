@@ -47,7 +47,7 @@ const TaskContainer = function(props) {
     const [sorters, setSorters] = useState(null);
     const [installDateFilters, setInstallDateFilters] = useState([]);
     const [drillDateFilters, setDrillDateFilters] = useState([])
-    const [activeTaskView,setActiveTaskView] = useState(1)
+    const [activeTaskView,setActiveTaskView] = useState(null)
     const [savedFilters, setSavedFilters] = React.useState(null);
 
     const taskViews = [
@@ -295,7 +295,7 @@ const TaskContainer = function(props) {
   
 
    useEffect(()=>{
-      if(isNaN(activeTaskView) ){
+      if(isNaN(activeTaskView) || activeTaskView == null ){
         return;
       }
       // activeTaskView === undefined ?
@@ -325,7 +325,7 @@ const TaskContainer = function(props) {
       console.log("Set activeTaskView", 1)
     }
   }
-  if(!isNaN(activeTaskView)){
+  if(!isNaN(activeTaskView) && activeTaskView != null){
     window.localStorage.setItem('activeTaskView', JSON.stringify(activeTaskView));
   }
   
