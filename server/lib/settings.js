@@ -209,6 +209,43 @@ router.post('/overwriteSavedTaskFilter', async (req,res) => {
   }
 });
 
+// router.post('/updateFilterTaskViewSubscribe', async (req,res) => {
+//   var filter_id, sub_types;
+//   if(req.body){
+//     filter_id = req.body.filter_id;
+//     sub_types = req.body.sub_types;
+//   }
+//   if(!filter_id){
+//     logger.error("Bad params in updateFilterTaskViewSubscribe")
+//     res.sendStatus(400);
+//   }
+
+//   let subscribed_types;
+//   if(sub_types && Array.isArray(sub_types) && sub_types.length > 0){
+//     subscribed_types = sub_types.reduce((acc, current,i)=> {
+//       return current.checked ? acc += (acc.length > 0 ? ',' : '') + current.type  : acc ;
+//     }, "")
+//   }else{
+//     subscribed_types = "";
+//   }
+
+//   logger.info("Test", [subscribed_types]);
+  
+
+//   const sql = ' UPDATE task_user_filters SET subscribed_types = ?' +
+//     ' WHERE id = ? ';
+//   try{
+//     const results = await database.query(sql, [ subscribed_types, filter_id ]);
+//     logger.info("Updated sub types task_user_filter ");
+//     res.json(results);
+//   }
+
+//   catch(error){
+//     logger.error("Settings (updateFilterTaskViewSubscribe): " + error);
+//     res.sendStatus(400);
+//   }
+// });
+
 router.post('/updateFilterTaskViewTie', async (req,res) => {
   var filter_id, task_view;
   if(req.body){

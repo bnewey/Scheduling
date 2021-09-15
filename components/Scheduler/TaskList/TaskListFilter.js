@@ -33,6 +33,7 @@ import _, { property } from 'lodash';
 import TaskListFilterTieTaskView from './TaskListFilterTieTaskView';
 import TLInstallDateFilter from './components/TLInstallDateFilter';
 import TLDrillDateFilter from './components/TLDrillDateFilter';
+import TaskListFilterSubscribeToType from './TaskListFilterSubscribeToType';
 
 const TaskListFilter = (props) => {
     //PROPS
@@ -63,6 +64,7 @@ const TaskListFilter = (props) => {
         {text: "Install Date", field: "sch_install_date", data_type: 'date'},
         {text: "Drill Completed", field: "drill_job_completed", data_type: 'number'},
         {text: "Install Completed", field: "install_job_completed", data_type: 'number'},
+        {text: "Service Completed", field: "field_job_completed", data_type: 'number'},
         {text: "Desired Date", field: "date_desired", data_type: 'date'},
         {text: "Date Entered", field: "tl_date_entered", data_type: 'date'},
         {text: "1st Game", field: "first_game", data_type: 'date'},
@@ -843,6 +845,7 @@ const TaskListFilter = (props) => {
                                                 </ListItemText>
                                                 <ListItemSecondaryAction className={classes.secondary_div}>
                                                 <TaskListFilterTieTaskView  taskViews={taskViews} taskUserFilter={item} setTaskUserFilters={setTaskUserFilters} setTaskListFiltersEdited={setTaskListFiltersEdited}/>
+                                                {/* <TaskListFilterSubscribeToType  taskViews={taskViews} taskUserFilter={item} setTaskUserFilters={setTaskUserFilters} setTaskListFiltersEdited={setTaskListFiltersEdited}/> */}
                                                     <IconButton className={classes.secondary_button} edge="end" aria-label="save" onClick={event => handleOverWriteSavedFilter(event, item)}>
                                                     <SaveIcon />
                                                     </IconButton> 

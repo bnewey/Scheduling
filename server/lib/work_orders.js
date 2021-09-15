@@ -297,7 +297,7 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
     const sql = 'SELECT woi.record_id,  woi.work_order,  woi.item_type,  woi.user_entered, date_format( woi.date_entered, \'%m-%d-%Y\') as date_entered,  woi.quantity,  woi.part_number,  woi.size,  woi.description, ' +
         '  woi.price, date_format( woi.receive_date, \'%m-%d-%Y\') as receive_date ,  woi.receive_by,  woi.packing_slip, ps.diff_ship_to, ' + 
         ' IF(ps.diff_ship_to = 1, ps.ship_to_contact, wo.customer_contact_id) AS ship_to_contact, IF(ps.diff_ship_to = 1, ps.ship_to_address, wo.customer_address_id) AS ship_to_address, ' +
-        '  woi.scoreboard_or_sign,  woi.model,  woi.color,  woi.trim , date_format( woi.scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
+        '  woi.scoreboard_or_sign,  woi.model,  woi.color,  woi.trim , date_format( woi.scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,  IFNULL(woi.scoreboard_arrival_status, 0) as scoreboard_arrival_status , '  + 
         '  woi.mount,  woi.sign_built,  woi.copy_received,  woi.sent_for_approval,  woi.final_copy_approved,  woi.artwork_completed,  woi.sign_popped_and_boxed,  woi.roy,  woi.trim_size,  woi.trim_corners, ' +
         '  woi.date_offset, date_format( woi.sign_due_date, \'%m-%d-%Y\') as sign_due_date ,  woi.ordernum,  woi.vendor, ec.name AS customer_contact_name, ea.name AS customer_address_name' + 
         ' FROM work_orders_items woi ' +
@@ -605,6 +605,7 @@ router.post('/updateMultipleWorkOrderItemDates', async (req,res) => {
     })
 });
 
+
 router.post('/addWorkOrderItem', async (req,res) => {
 
     var woi ;
@@ -744,5 +745,73 @@ router.post('/setMultipleWOIArrivalDates', async (req,res) => {
         }
     })
 });
+
+router.post('/setMultipleWOIArrivalDatesArrived', async (req,res) => {
+    var woi_ids, date, arrived;
+    if(req.body){
+        woi_ids = req.body.woi_ids;
+        date = req.body.date;
+        arrived = req.body.arrived;
+    }
+    
+    const sql = ' UPDATE work_orders_items SET scoreboard_arrival_date = ?, scoreboard_arrival_status = ? ' +
+    ' WHERE record_id = ? ';
+
+
+    async.forEachOf(woi_ids, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [Util.convertISODateTimeToMySqlDateTime(date),arrived,  id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);     
+            logger.error("Error" + error);    
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("WorkOrder (setMultipleWOIArrivalDates): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Set multiple arrival dates WorkOrderItems: " , [woi_ids] );
+            res.sendStatus(200);
+        }
+    })
+});
+
+
+router.post('/clearMultipleArrivalDates', async (req,res) => {
+    var woi_ids;
+    if(req.body){
+        woi_ids = req.body.woi_ids;
+    }
+    
+    const sql = ' UPDATE work_orders_items SET scoreboard_arrival_date = NULL, scoreboard_arrival_status = 0 ' +
+    ' WHERE record_id = ? ';
+
+
+    async.forEachOf(woi_ids, async (id, i, callback) => {
+        //will automatically call callback after successful execution
+        try{
+            const results = await database.query(sql, [ id]);
+            return;
+        }
+        catch(error){     
+            //callback(error);     
+            logger.error("Error" + error);    
+            throw error;                 
+        }
+    }, err=> {
+        if(err){
+            logger.error("WorkOrder (clearMultipleArrivalDates): " + err);
+            res.sendStatus(400);
+        }else{
+            logger.info("Clear multiple arrival dates WorkOrderItems: " , [woi_ids] );
+            res.sendStatus(200);
+        }
+    })
+});
+
 
 module.exports = router;

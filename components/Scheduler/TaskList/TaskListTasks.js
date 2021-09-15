@@ -14,6 +14,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import useWindowSize from '../../UI/useWindowSize';
 import WoiStatusCheck from './components/WoiStatusCheck'
 import TaskLists from '../../../js/TaskLists';
+import Tasks from '../../../js/Tasks';
 import Crew from '../../../js/Crew';
 import cogoToast from 'cogo-toast';
 import Util from '../../../js/Util';
@@ -401,57 +402,63 @@ const TaskListTasks = (props) =>{
     }
 
     const handleUpdateTaskDate = useCallback((value, task, fieldId) =>{
-      if(!task){
-        console.error("No task, Failed to update", task);
-      }
-
-      var updateTask = {...task};
-      let updateJobDate = Util.convertISODateToMySqlDate(value);
-      //console.log("updateJobTasj", updateTask);
-      
-      
-      let updateJobId;
-      switch(fieldId){
-        case 'install':
-          updateJobId = updateTask["install_job_id"]
-          break;
-        case 'drill':
-          updateJobId = updateTask["drill_job_id"];
-          break;
-        case 'service': 
-          updateJobId = updateTask["field_job_id"];
-          break;
-      }
-
-      if(updateJobId == null){
-        //create crew job with date
-        Crew.addCrewJobs([task.t_id], fieldId, null, updateJobDate)
-        .then((response)=>{
-            if(response){
-                cogoToast.success("Created and added to crew");
-                //setTaskListTasks(null);
-                setTaskListTasksRefetch(true);
-                setShouldResetCrewState(true);
-            }
-        })
-        .catch((err)=>{
-            console.error("Failed to add to creww", err);
-        })
-
-      }else{
-        //update existing crew job
-        //console.log("Update task", updateTask);
-        Crew.updateCrewJobDate( updateJobId, updateJobDate)
-        .then((data)=>{
-          cogoToast.success(`Updated ${fieldId} date`)
-          setTaskListTasksRefetch(true);
-        })
-        .catch((error)=>{
-          console.error("Failed to update task", error);
-          cogoToast.error("Failed to update task");
-        })
-      }
-
+      return new Promise((resolve, reject)=> {
+        if(!task){
+          console.error("No task, Failed to update", task);
+        }
+  
+        var updateTask = {...task};
+        let updateJobDate = Util.convertISODateToMySqlDate(value);
+        //console.log("updateJobTasj", updateTask);
+        
+        
+        let updateJobId;
+        switch(fieldId){
+          case 'install':
+            updateJobId = updateTask["install_job_id"]
+            break;
+          case 'drill':
+            updateJobId = updateTask["drill_job_id"];
+            break;
+          case 'service': 
+            updateJobId = updateTask["field_job_id"];
+            break;
+        }
+  
+        if(updateJobId == null){
+          //create crew job with date
+          Crew.addCrewJobs([task.t_id], fieldId, null, updateJobDate)
+          .then((response)=>{
+              if(response){
+                  cogoToast.success("Created and added to crew");
+                  //setTaskListTasks(null);
+                  setTaskListTasksRefetch(true);
+                  setShouldResetCrewState(true);
+                  console.log("response", response);
+                  resolve(response[0].insertId);
+              }
+          })
+          .catch((err)=>{
+              console.error("Failed to add to creww", err);
+              reject(err)
+          })
+  
+        }else{
+          //update existing crew job
+          //console.log("Update task", updateTask);
+          Crew.updateCrewJobDate( updateJobId, updateJobDate)
+          .then((data)=>{
+            cogoToast.success(`Updated ${fieldId} date`)
+            setTaskListTasksRefetch(true);
+            resolve(updateJobId);
+          })
+          .catch((error)=>{
+            console.error("Failed to update task", error);
+            cogoToast.error("Failed to update task");
+            reject(error);
+          })
+        }
+      })
 
     },[taskListTasks])
 
@@ -469,97 +476,224 @@ const TaskListTasks = (props) =>{
       Router.push('/scheduling/work_orders')
     }
 
-    const handleCompleteJob = (task,fieldId) =>{
+    const handleReadyJob = (task) =>{
+      if(!task ){
+        console.error("Failed to ready job, bad params");
+        return;
+      }
+
+      Crew.updateCrewJobReady(task.drill_job_id, 1)
+      .then((data)=>{
+        setTaskListTasksRefetch(true);
+        cogoToast.success("Job is ready");
+      })
+      .catch((error)=>{
+        console.error("failed to ready job", error);
+        cogoToast.error('Internal Server Error');
+        
+      })
+    }
+
+    const handleCheckTaskForOtherJobs = (task, job_id, job_type)=>{
+      return new Promise((resolve, reject)=>{
+
+        Crew.getCrewJobsByTask(task.t_id)
+        .then((data)=>{
+          if(data){
+            //returns true if other jobs besides job_id
+            // if( task.type == "Install (Drill)"){
+            //   //only case where there are two jobs in  a task to check
+            //   let a = data.find((item)=> item.job_type == 'drill');
+            //   let b = data.find((item)=> item.job_type == 'install');
+
+            //   if( ( !a || !b ) || (job_type == "drill" && b && b.completed != 1) || (job_type == "install" && a && a.completed != 1)){
+            //     //both jobs should be here if we would want to move to complete
+            //     //if one job is getting completed - check the other 
+            //     resolve(false);
+            //   }
+            // }
+
+
+            let test = data.every((item)=> {
+              if(item.id == job_id){
+                return true;
+              }
+              if(item.completed){
+                return true;
+              }
+              return false;
+            })
+            resolve(test)
+          }
+        })
+        .catch((error)=>{
+          console.error("Failed to check other jobs", error);
+          reject(error);
+        })
+
+
+      })
+    }
+
+
+    const handleCompleteJob = async(task,fieldId, new_type) =>{
       if(!task || !fieldId){
         console.error("Failed to complete job, bad params");
         return;
       }
+
+      var job_id = null
+      var crew_id = null;
+      var fieldType = null;
+
+      switch(fieldId){
+        case 'sch_install_date':
+          job_id = task.install_job_id;
+          crew_id = task.install_crew;
+          fieldType = 'install';
+          console.log("test1")
+          break;
+        case 'field_date':
+          job_id = task.field_job_id;
+          crew_id = task.field_crew;
+          fieldType = 'service';
+          console.log("test12")
+          break;
+        case 'drill_date':
+          job_id = task.drill_job_id;
+          crew_id = task.drill_crew;
+          fieldType = 'drill';
+          console.log("test123")
+          break;
+        default: 
+          cogoToast.error("Internal server error");
+          console.error("bad field id in complete job")
+          return;
+          break;
+      }
+      console.log("task", task);
+      console.log('fieldId',fieldId);
+      console.log("jobid", job_id);
+      console.log("crew_id", crew_id);
+
+      //we need to check if job_id exists, create and complete 
+      if(job_id == null){
+        try {
+          job_id = await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(new Date()), task, fieldType ) ;
+          console.log("job_id", job_id);
+        } catch (error) {
+          console.error("Failed to add new job and get id", error);
+        }
+      }
       
-      if(fieldId === "sch_install_date"){
-        //Complete job
-        Crew.updateCrewJobCompleted(1, task.install_job_id,task.install_crew)
-        .then((data)=>{
-          if(data){
-            //Move task to completed list
-            TaskLists.moveTaskToList(task.t_id, taskLists.find((tl,i)=> tl.list_name === "Completed Tasks" ).id)
+
+      //Complete job
+      Crew.updateCrewJobCompleted(1, job_id,crew_id)
+      .then(async(data)=>{
+        if(data){
+
+          //Check if other related jobs, Move task to completed list | true = other jobs | false = no other jobs
+          let check = await handleCheckTaskForOtherJobs(task, job_id, fieldType);
+
+          var sendToCompletedList = () =>{
+            return new Promise((resolve,reject)=>{
+              TaskLists.moveTaskToList(task.t_id, taskLists.find((tl,i)=> tl.list_name === "Completed Tasks" ).id)
+              .then((data)=>{
+                if(data){ 
+                  cogoToast.success("Updated Crew Job and moved to completed");
+                  resolve()
+                }else{
+                  reject("Failed to move item to completed list");
+                }
+              })
+              .catch((error)=>{
+                reject(error);
+              })
+            })
+              
+          }
+
+          if(new_type && new_type != null){
+            //send to new job type
+            Tasks.copyTaskForNewType(task.t_id, new_type)
             .then((data)=>{
-              if(data){ 
-                cogoToast.success("Updated Crew Job and moved to completed");
-                setTaskListTasksRefetch(true);
+              if(data && check){ 
+                //check is true, no other jobs so send to completed
+                sendToCompletedList().then((data)=>  setTaskListTasksRefetch(true))
               }else{
-                throw Error("Failed to move item to completed list");
+                setTaskListTasksRefetch(true);
               }
             })
             .catch((error)=>{
               console.error("Failed to move item to completed lsit", error);
               cogoToast.error("Internal server error");
             })
-          }else{
-            throw Error("Did not update crew job")
-          }
-        })
-        .catch((error)=>{
-          console.error("Failed to update job complete", error);
-          cogoToast.error("Internal server error");
-        })
-        
-      }
 
-      if(fieldId === "field_date"){
-        //Complete job
-        Crew.updateCrewJobCompleted(1, task.field_job_id,task.field_crew)
-        .then((data)=>{
-          if(data){
-            //Move task to completed list
-            TaskLists.moveTaskToList(task.t_id, taskLists.find((tl,i)=> tl.list_name === "Completed Tasks" ).id)
-            .then((data)=>{
-              if(data){ 
-                cogoToast.success("Updated Crew Job and moved to completed");
-                setTaskListTasksRefetch(true);
-              }else{
-                throw Error("Failed to move item to completed list");
-              }
-            })
-            .catch((error)=>{
-              console.error("Failed to move item to completed lsit", error);
-              cogoToast.error("Internal server error");
-            })
           }else{
-            throw Error("Did not update crew job")
+            //if no new job and check is true
+            console.log("Check", check);
+            
+            if(check){
+              console.log("sending to completed list")
+              //we actually need to do this one after copying
+              sendToCompletedList().then((data)=>  setTaskListTasksRefetch(true))
+            }else{
+              setTaskListTasksRefetch(true);
+            }
           }
-        })
-        .catch((error)=>{
-          console.error("Failed to update job complete", error);
-          cogoToast.error("Internal server error");
-        })
+          
+          
+        }else{
+          throw Error("Did not update crew job")
+        }
+      })
+      .catch((error)=>{
+        console.error("Failed to update job complete", error);
+        cogoToast.error("Internal server error");
+      })
         
-      }
-
-      if(fieldId === "drill_date"){
-        //Complete job
-        Crew.updateCrewJobCompleted(1, task.drill_job_id,task.drill_crew)
-        .then((data)=>{
-          if(data){
-            cogoToast.success("Updated Crew Job");
-            setTaskListTasksRefetch(true);
-          }else{
-            throw Error("Did not update crew job")
-          }
-        })
-        .catch((error)=>{
-          console.error("Failed to update job complete", error);
-          cogoToast.error("Internal server error");
-        })
-      }
     }
 
     const handleSetArrivalDates = (selectedWOIs, date) =>{
+
       if(!selectedWOIs?.length){
         console.log("Bad selectedWOIs in handleSetArrivalDates")
         return;
       }
 
       Work_Orders.setMultipleWOIArrivalDates(selectedWOIs.map((item)=> item.woi_id), date)
+      .then((data)=>{
+        setTaskListTasksRefetch(true);
+      })
+      .catch((error)=>{
+        console.error("Failed to set multiple arrival dates", error);
+        cogoToast.error("Internal Server Error");
+      })
+    }
+
+    const handleClearArrival =(selectedWOIs) =>{
+      if(!selectedWOIs?.length){
+        console.log("Bad selectedWOIs in handleSetArrivalDates")
+        return;
+      }
+
+      Work_Orders.clearMultipleArrivalDates(selectedWOIs.map((item)=> item.woi_id))
+      .then((data)=>{
+        setTaskListTasksRefetch(true);
+      })
+      .catch((error)=>{
+        console.error("Failed to clear multiple arrival dates", error);
+        cogoToast.error("Internal Server Error");
+      })
+    } 
+    
+    const handleSetArrived = (selectedWOIs, date, type) =>{
+      if(!selectedWOIs?.length){
+        console.log("Bad selectedWOIs in handleSetArrivalDates")
+        return;
+      }
+
+      Work_Orders.setMultipleWOIArrivalDatesArrived(selectedWOIs.map((item)=> item.woi_id), date, type)
       .then((data)=>{
         setTaskListTasksRefetch(true);
       })
@@ -665,13 +799,16 @@ const TaskListTasks = (props) =>{
                             clearable
                             inputVariant="outlined"
                             variant="modal" 
+                            type={'drill'}
                             title="Select Drill Date"
                             maxDate={new Date('01-01-2100')}
                             minDate={new Date('01-01-1970')}
                             className={classes.datePicker}
                             value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
-                            onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
-                            onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
+                            onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
+                            ready={task.drill_ready}
+                            onReadyJob={ ()=> handleReadyJob(task) }
+                            onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
                     </MuiPickersUtilsProvider></div>
               break;
             }else{
@@ -697,8 +834,8 @@ const TaskListTasks = (props) =>{
                         minDate={new Date('01-01-1970')}
                         className={classes.datePicker}
                         value={value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
-                        onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "install")} 
-                        onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
+                        onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "install")} 
+                        onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
               </MuiPickersUtilsProvider></div>
                 break;
           }else{
@@ -751,8 +888,8 @@ const TaskListTasks = (props) =>{
                             minDate={new Date('01-01-1970')}
                             className={classes.datePicker}
                             value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
-                            onChange={value => handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "service")} 
-                            onCompleteTasks={ ()=> handleCompleteJob(task,fieldId) }/>
+                            onChange={async (value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "service")} 
+                            onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
                     </MuiPickersUtilsProvider></div>
               break;
             }else{
@@ -797,8 +934,9 @@ const TaskListTasks = (props) =>{
                         minDate={new Date('01-01-1970')}
                         className={classes.datePicker}
                         value={arrivalValue ? moment(arrivalValue).format('MM-DD-YYYY hh:mm:ss') : null} 
-                        onChange={(arrivalValue, selectedWOIs) => handleSetArrivalDates(selectedWOIs, Util.convertISODateTimeToMySqlDateTime(arrivalValue))} 
-                        onItemsArrived={ (selectedWOIs)=> handleSetArrivalDates(selectedWOIs,moment() ) }
+                        onChange={(arrivalValue, selectedWOIs) => handleSetArrivalDates(selectedWOIs, Util.convertISODateTimeToMySqlDateTime(arrivalValue))}
+                        onClear={ (selectedWOIs) => handleClearArrival(selectedWOIs)} 
+                        onItemsArrived={ (selectedWOIs, type)=> handleSetArrived(selectedWOIs,moment() ,type) }
                         data={woiData?.filter((item)=>item.work_order == task.table_id)}
                         task={task} />
               </MuiPickersUtilsProvider></div>

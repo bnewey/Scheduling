@@ -9,12 +9,14 @@ import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 import clsx from 'clsx';
 import WorkOrders from '../../../../js/Work_Orders'
+import TLCompletedAddNewJobQuery from './TLCompletedAddNewJobQuery';
+import Check from '@material-ui/icons/Check';
 
 
 const TLCrewJobDatePicker = (props) => {
  
     //PROPS
-    const { ...other} = props;
+    const { ready, type,...other} = props;
 
     // you can past mostly all available props, like minDate, maxDate, autoOk and so on
     const { pickerProps, wrapperProps, inputProps } = useStaticState({
@@ -25,6 +27,7 @@ const TLCrewJobDatePicker = (props) => {
 
     //STATE
     const [inputValue,setInputValue] = React.useState(props.value);
+    const [completeDialogOpen,setCompleteDialogOpen] = React.useState(false);
 
     //CSS
     const classes = useStyles();
@@ -34,9 +37,20 @@ const TLCrewJobDatePicker = (props) => {
         props.onChange(moment().format('YYYY-MM-DD hh:mm:ss'))
     }
 
-    const handleCompleteTask = ()=>{
+    const handleOpenCompleteTask = ()=>{
         if(props.onCompleteTasks){
-            props.onCompleteTasks();
+            setCompleteDialogOpen(true);
+        }else{
+            cogoToast.error("Not able to complete");
+        }
+        wrapperProps.onDismiss();
+    }
+
+    const handleReadyJob = ()=>{
+        if(props.onReadyJob){
+            props.onReadyJob()
+        }else{
+            cogoToast.error("Not able to ready job");
         }
         wrapperProps.onDismiss();
     }
@@ -93,7 +107,10 @@ const TLCrewJobDatePicker = (props) => {
 
     return(
         <div className={classes.root}>
-            <TextField {...inputProps} onClick={inputProps.openPicker} value={ props.value ? moment(props.value).format('MM-DD-YYYY') : null} className={classes.input} variant="outlined" />
+            <div className={classes.inputRootDiv}>
+                {ready ? <Check className={classes.small_icon} /> : <></> }
+                <TextField {...inputProps} onClick={inputProps.openPicker} value={ props.value ? moment(props.value).format('MM-DD-YYYY') : null} className={classes.input} variant="outlined" />
+            </div>
             <Dialog {...wrapperProps}  maxWidth="md">
                 <ReactTooltip effect={"solid"} delayShow={500}/>
                 <DialogTitle id="customized-dialog-title" onClose={wrapperProps.onDismiss} className={classes.dialogTitle}>
@@ -113,10 +130,14 @@ const TLCrewJobDatePicker = (props) => {
                 </div>
                 <DialogActions>
                 <div className={classes.buttonDiv}>
-                    <Button className={classes.button} fullWidth onClick={handleCompleteTask}>
+                    {type && type == 'drill' ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
+                        <Button disabled={ready} data-tip="Ready job for drilling" data-place={'bottom'} className={classes.button} fullWidth onClick={handleReadyJob}>
+                        Ready
+                    </Button></>: <></>}
+                    <Button className={classes.button} data-tip="Complete Job (today)" data-place={'bottom'} fullWidth onClick={handleOpenCompleteTask}>
                         Complete
                     </Button>
-                    <Button className={classes.button} fullWidth onClick={handleTodayClick}>
+                    <Button className={classes.button} data-tip="Set Date to today" data-place={'bottom'} fullWidth onClick={handleTodayClick}>
                         Today
                     </Button>
                     <Button className={classes.button} fullWidth onClick={wrapperProps.onClear}>
@@ -129,6 +150,7 @@ const TLCrewJobDatePicker = (props) => {
                 </DialogActions>
                 </DialogContent>
             </Dialog>
+            <TLCompletedAddNewJobQuery open={completeDialogOpen} handleCloseFunction={()=> { setCompleteDialogOpen(false) }} completeFunction={props.onCompleteTasks}/>
         </div>
     );
 
@@ -160,7 +182,7 @@ const useStyles = makeStyles(theme => ({
     buttonDiv:{
         display: 'flex',
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
@@ -253,6 +275,25 @@ const useStyles = makeStyles(theme => ({
     },
     pickerDaySetArrived:{
         backgroundColor: 'rgba(0, 0, 0, 0.80)',
+    },
+    inputRootDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'start',
+        alignItems: 'center',
+    },
+    small_icon:{
+        color: '#fff',
+        background: '#05c417',
+        width: '.7em',
+        height: '.7em',
+    },
+    small_icon_inverse:{
+        background: '#fff',
+        color: '#05c417',
+        width: '1em',
+        height: '1em',
+        marginRight: '-5px',
     }
 
   }));

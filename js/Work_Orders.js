@@ -415,6 +415,46 @@ async function setMultipleWOIArrivalDates(woi_ids, date){
     }
 }
 
+async function setMultipleWOIArrivalDatesArrived(woi_ids, date, arrived){
+    const route = '/scheduling/workOrders/setMultipleWOIArrivalDatesArrived';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi_ids, date, arrived})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+async function clearMultipleArrivalDates(woi_ids){
+    const route = '/scheduling/workOrders/clearMultipleArrivalDates';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({woi_ids})
+            });
+        return response.ok;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+
+
+
+
 
 module.exports = {
     getAllWorkOrders: getAllWorkOrders,
@@ -437,5 +477,7 @@ module.exports = {
     addWorkOrderItem,
     addMultipleWorkOrderItems,
     deleteWorkOrderItem,
-    setMultipleWOIArrivalDates
+    setMultipleWOIArrivalDates,
+    setMultipleWOIArrivalDatesArrived,
+    clearMultipleArrivalDates
 };

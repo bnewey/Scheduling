@@ -167,7 +167,7 @@ router.post('/getCrewJobsByMember', async (req,res) => {
     }
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ' + 
-            ' cm.is_leader, cm.id as cm_id, ma.member_name, ma.id as ma_id,  ' +
+            ' cm.is_leader, cm.id as cm_id, ma.member_name, ma.id as ma_id, j.ready, ' +
             ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
@@ -196,7 +196,7 @@ router.post('/getCrewJobsByTask', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
+    const sql = ' SELECT j.id,j.ready, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
             ' cm.id as crew_leader_id, cc.color AS crew_color,  ' +
             ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
@@ -229,7 +229,7 @@ router.post('/getCrewJobsByTaskList', async (req,res) => {
 
 
     const sql = ' SELECT tl.id as tl_id, tl.list_name as tl_name, j.id, t.id AS task_id, j.date_assigned, j.ordernum, ' + 
-            ' j.job_type, j.num_services, j.crew_id, ma.member_name AS leader_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
+            ' j.job_type, j.num_services,j.ready, j.crew_id, ma.member_name AS leader_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
             ' cm.id as crew_leader_id, cc.color AS crew_color,  t.table_id,wo.record_id AS wo_id, wo.description, wo.notes, ' +
             ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
             '  concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ' +
@@ -269,7 +269,7 @@ router.post('/getCrewJobsByTaskIds', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id, j.num_services, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
+    const sql = ' SELECT j.id,j.ready, j.num_services, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
             ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id' + 
@@ -378,7 +378,7 @@ router.post('/deleteCrewJobMember', async (req,res) => {
 });
 
 router.post('/getAllCrewJobs', async (req,res) => {
-    const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.num_services, j.job_type, j.crew_id , j.ordernum, j.completed, j.completed_date, ' + 
+    const sql = ' SELECT j.id,j.ready, j.task_id, j.date_assigned, j.num_services, j.job_type, j.crew_id , j.ordernum, j.completed, j.completed_date, ' + 
     ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' ;
@@ -555,6 +555,28 @@ router.post('/updateCrewJobType', async (req,res) => {
     }
 });
 
+router.post('/updateCrewJobReady', async (req,res) => {
+    var ready, job_id;
+    if(req.body){
+        ready = req.body.ready;
+        job_id = req.body.job_id;
+    }
+
+    const sql = 'UPDATE crew_jobs SET ready = ? ' +
+    ' WHERE id = ? ';
+    
+    try{        
+        const response = await database.query(sql, [ready, job_id  ]);
+
+        logger.info("update crew job " + job_id + " to ready: " + ready );
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crews (updateCrewJobReady): " + error);
+        res.sendStatus(400);
+    }
+});
+
 
 router.post('/updateCrewNumServices', async (req,res) => {
     var numServices, job_id;
@@ -603,25 +625,23 @@ router.post('/updateCrewJobCompleted', async (req,res) => {
     try{
         var data;
         var max = 0;
-        if(!completed){
+        if(!completed && crew_id != null){
             data = await database.query(getMax, [ crew_id ])
             max = data[0].max_num;
         }
 
         const response = await database.query(sql, [ completed, Util.convertISODateTimeToMySqlDateTime(completed_date),max , job_id]);
 
-        if(completed){
+        if(completed && crew_id != null){
             //Reorder crew jobs to maintain correct order
-            if(crew_id){
-                logger.info("Attempting to reorder crew");
-                var reorderStatus = await reorderCrewJobsFromDB(crew_id)
-                logger.info("Reorder status " + reorderStatus)
-                if(reorderStatus == 1){
-                    logger.info("Reordered crew" + crew_id);
-                }else{
-                    if(reorderStatus == 0){  logger.info("Did not reorder on delete") };
-                    if(reorderStatus == -1){ logger.info("Error in reorderCrewJobsFromDB")}
-                }
+            logger.info("Attempting to reorder crew");
+            var reorderStatus = await reorderCrewJobsFromDB(crew_id)
+            logger.info("Reorder status " + reorderStatus)
+            if(reorderStatus == 1){
+                logger.info("Reordered crew" + crew_id);
+            }else{
+                if(reorderStatus == 0){  logger.info("Did not reorder on delete") };
+                if(reorderStatus == -1){ logger.info("Error in reorderCrewJobsFromDB")}
             }
         }
         res.sendStatus(200);

@@ -23,7 +23,6 @@ const options = {
   cert: fs.readFileSync('/etc/ssl/certificate.crt', 'utf8')
 };
 
-
 dotenv.config();
 const app = express();
 const server = https.createServer(options, app);

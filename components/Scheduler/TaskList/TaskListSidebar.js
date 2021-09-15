@@ -34,7 +34,7 @@ const TaskListSidebar = (props) => {
     const [editOpen, setEditOpen] = React.useState(false);
     const [editList, setEditList] = React.useState(null);
 
-    const [savedFilters, setSavedFilters] = React.useState(null);
+    
 
     //PROPS
     const { taskListTasks, setTaskListTasks,isPriorityOpen, setIsPriorityOpen, priorityList, setPriorityList,
@@ -43,41 +43,16 @@ const TaskListSidebar = (props) => {
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr ,
-        refreshView, setFilterAndOr, tableInfo, setTableInfo, taskViews, activeTaskView, setActiveTaskView,} = useContext(TaskContext);
+        refreshView, setFilterAndOr, tableInfo, setTableInfo, taskViews, activeTaskView, setActiveTaskView,savedFilters, setSavedFilters} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
     //CSS
     const classes = useStyles();
 
-    //Refresh
-    useEffect(()=>{
-        if(refreshView && refreshView == "taskList"){
-            setSavedFilters(null)
-        }
-    },[refreshView])
+    
 
-    useEffect(()=>{
-        if(savedFilters == null && user){
-            var user_id = user?.id;
-            Settings.getTaskUserFilters(user_id)
-            .then((data)=>{
-                if(data){
-                    var savedFilters = data?.map((item)=>{
-                        item.filter_json = JSON.parse(item.filter_json);
-                        return item;
-                    })
-                    console.log("taskUSerfilters", savedFilters);
-                    setSavedFilters(savedFilters);
-                }
-            })
-            .catch((error)=>{
-                console.error("Failed to get user filters");
-                cogoToast.error("Failed to get user filters");
-            })
-        }
-        
-    },[savedFilters, user])
+    
 
     const handleApplySavedFilter = (event, item) =>{
         if(!item){

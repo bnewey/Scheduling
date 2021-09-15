@@ -11,7 +11,7 @@ router.get('/getAllTasks', async (req,res) => {
     ' date_format(t.date_assigned, \'%Y-%m-%d\') as date_assigned, ' + 
     ' date_format(t.date_completed, \'%Y-%m-%d\') as date_completed, t.description, t.priority_order, t.task_list_id, ' + 
     ' t.task_status, t.drilling, t.sign, t.artwork, t.table_id, date_format(t.order_date, \'%Y-%m-%d\') as order_date, ' + 
-    ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location,' +
+    ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type AS wo_type, t.type, t.install_location,' +
     ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
     ' t.delivery_crew, t.delivery_order,t.install_order, e.name AS customer_name,' + 
     '  ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded , ea.record_id AS address_id , ea.entities_id, '  +
@@ -45,8 +45,8 @@ router.post('/getTask', async (req,res) => {
     const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS old_task_name, t.hours_estimate, date_format(t.date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
     ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
     ' t.description, t.notes, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
-    ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type, t.install_location, ' +
-    ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
+    ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type AS wo_type, t.install_location, ' +
+    ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, t.type, ' + 
     ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
     ' cjd.crew_id AS drill_crew, date_format(cjd.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
     ' cji.crew_id AS install_crew, cji.id AS install_job_id,  ' + 
@@ -95,7 +95,7 @@ router.post('/removeTask', async (req,res) => {
 });
 
 router.post('/updateTask', async (req,res) => {
-    var id;
+    var task;
     if(req.body){
     task = req.body.task;
     }
@@ -208,6 +208,37 @@ router.post('/addAndSaveAddress', async (req,res) => {
     }
     catch(error){
         logger.error("Tasks (addAndSaveAddress): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/copyTaskForNewType', async (req,res) => {
+    var t_id, new_type;
+    if(req.body){
+        t_id = req.body.t_id;
+        new_type = req.body.new_type;
+    }
+    if(new_type == null){
+        res.sendStatus(400);
+        logger.error("No new type in copyTaskForNewType");
+        return;
+    }
+
+    //copy task and give it new type
+    const sql = ' INSERT INTO tasks (id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, date_assigned, order_assigned, ' + 
+    '  id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, drilling, sign, artwork, order_date, ' +
+    ' first_game, account_id, work_type, install_location, notes, task_status, task_list_id, type  ) ' +
+    ' SELECT id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, date_assigned, order_assigned, ' + 
+    '  id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, drilling, sign, artwork, order_date, ' +
+    ' first_game, account_id, work_type, install_location, notes, task_status, task_list_id, ? as type FROM tasks WHERE id = ? ';
+
+    try{
+        const results = await database.query(sql, [new_type, t_id]);
+        logger.info("copyTaskForNewType " + t_id + ' new type: ' + new_type );
+        res.json(results);
+    }
+    catch(error){
+        logger.error("Tasks (copyTaskForNewType): " + error);
         res.sendStatus(400);
     }
 });

@@ -180,6 +180,29 @@ async function overwriteSavedTaskFilter( filter_id, name, user_id, filterAndOr, 
     }
 }
 
+// async function updateFilterTaskViewSubscribe( filter_id, sub_types){
+//     const route = '/scheduling/settings/updateFilterTaskViewSubscribe';
+//     try{
+//         var data = await fetch(route,
+//         {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({ filter_id, sub_types})
+//         });
+
+//         if(!data.ok){
+//             throw new Error("updateFilterTaskViewSubscribe returned empty list or bad query")
+//         }
+//         var list = await data.json();
+//         return(list);
+//     }catch(error){
+//         throw error;
+//     }
+// }
+
+
 async function updateFilterTaskViewTie( filter_id,task_view){
     const route = '/scheduling/settings/updateFilterTaskViewTie';
     try{
@@ -298,6 +321,7 @@ module.exports = {
     getTaskUserFilters,
     addSavedTaskFilter,
     overwriteSavedTaskFilter,
+    // updateFilterTaskViewSubscribe,
     updateFilterTaskViewTie,
     removedSavedFilter,
     addNotificationSetting,

@@ -229,13 +229,13 @@ router.post('/createWorkOrderPdf', async (req,res) => {
                 if(i >= 8){
                     //new page?
                 }
-                index+=i;
+                
                 doc.fontSize(10).text("X", 66 , (228 + index*13.7), {lineBreak: false});
                 doc.fontSize(8);
                 doc.text(item.receive_date ? moment(item.receive_date).format('MM   DD   YYYY') : "" , 93, (230 + index*13.5), {lineBreak: false})
                 doc.fontSize(7);
                 doc.text((item.quantity != 0 ? item.quantity : "")+ " - " + item.description, 180, (230 + index*13.5), {lineBreak: false})
-                
+                index += 1;
             })
         }
             

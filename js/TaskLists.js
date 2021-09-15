@@ -266,6 +266,27 @@ async function getAllSignScbdWOIFromTL(id){
 
 }
 
+async function copyTaskForNewType(t_id, new_type){
+    const route = '/scheduling/taskLists/copyTaskForNewType';
+    try{
+        var response = await fetch(route, 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({t_id, new_type})   
+            });
+        if(!response.ok){
+            throw new Error("copyTaskForNewType bad response or query")
+        }
+        var id = await response.json();
+        return(id[0].last_id);
+    }catch(error){
+        throw error;
+    }
+}
+
 
 module.exports = {
     getAllTaskLists: getAllTaskLists,
@@ -282,4 +303,5 @@ module.exports = {
     reorderTaskList: reorderTaskList,
     setPriorityTaskList: setPriorityTaskList,
     getAllSignScbdWOIFromTL,
+    copyTaskForNewType,
 };

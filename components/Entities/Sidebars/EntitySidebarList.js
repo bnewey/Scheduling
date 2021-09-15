@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, createContext,useContext } from 'react';
-import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-ui/core';
+import {makeStyles, CircularProgress, Grid, Typography, Button, Box} from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
@@ -35,7 +35,7 @@ const EntitySidebarList = function(props) {
     setEditModalMode("add");
     setEditEntModalOpen(true);
   }
-  
+
   return (
     <div className={classes.root}>
         <div className={classes.newButtonDiv} >
@@ -44,7 +44,7 @@ const EntitySidebarList = function(props) {
                     variant="outlined"
                     onClick={event=> handleOpenAddEntModal()}>
               <AddIcon className={classes.plusIcon}/>
-              <div>New Entity</div>
+              <Box display={{ xs: 'none', md: 'inline' }}  component="div">New Entity</Box>
             </Button>
         </div>
 

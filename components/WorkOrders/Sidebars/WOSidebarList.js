@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, createContext,useContext } from 'react';
-import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-ui/core';
+import {makeStyles, CircularProgress, Grid, Typography, Button, Box} from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
@@ -51,7 +51,7 @@ const WOSidebarList = function(props) {
                     variant="outlined"
                     onClick={event=> handleOpenAddWOModal()}>
               <AddIcon className={classes.plusIcon}/>
-              <div>New Order</div>
+              <Box display={{ xs: 'none', md: 'inline' }}  component="div">New Order</Box>
             </Button>
         </div>
         <div className={classes.dateRangeDiv}>

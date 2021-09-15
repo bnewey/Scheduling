@@ -34,13 +34,14 @@ const TLArrivalDatePicker = (props) => {
             props.onChange(value, selectedWOIs)
         }
     }
-
+    
     // you can past mostly all available props, like minDate, maxDate, autoOk and so on
     const { pickerProps, wrapperProps, inputProps } = useStaticState({
         // value,
         
         ...other,
         onChange: handleChangeDate,
+        onClear: handleClearDate,
     });
 
     useEffect(()=>{ // runs on open only
@@ -49,7 +50,6 @@ const TLArrivalDatePicker = (props) => {
         }
     },[wrapperProps?.open])
 
-    
     //console.log("other",{ ...other})
     //console.log("PickerProps", pickerProps);
     //console.log("WrapperProps", wrapperProps);
@@ -63,19 +63,19 @@ const TLArrivalDatePicker = (props) => {
         var statusListUpdate =[];
 
         //all scoreboard_arrival_date (date not passed, then display all dates and signs, else all fp scbds arrived )
-        var awaitingArrivalItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && moment(item.scoreboard_arrival_date) > moment(new Date()) )
+        var awaitingArrivalItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && item.scoreboard_arrival_status == 0   && moment(item.scoreboard_arrival_date) > moment(new Date())  )
         //console.log("awaitingArrivalItems", awaitingArrivalItems)
 
         
         if(awaitingArrivalItems?.length > 0){
             awaitingArrivalItems.forEach((item)=>{
                 statusListUpdate.push({woi_id: item.record_id,type: 'error', title: 'Arrival Date', 
-                     description: `Waiting for Arrival Date`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`})
+                     description: `Waiting for Arrival Date`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`, status: 'waiting'})
             })
         }
 
-                //all scoreboard_arrival_date (date not passed, then display all dates and signs, else all fp scbds arrived )
-        var alreadyArrivedItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && moment(item.scoreboard_arrival_date) <= moment(new Date()) )
+        //all scoreboard_arrival_date (date not passed, then display all dates and signs, else all fp scbds arrived )
+        var alreadyArrivedItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && item.scoreboard_arrival_status == 1 )
         //console.log("alreadyArrivedItems", alreadyArrivedItems)
 
         
@@ -86,20 +86,46 @@ const TLArrivalDatePicker = (props) => {
             })
         }
 
+        //all scoreboard_arrival_date ( arrived using stock )
+        var stockArrivedItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && item.scoreboard_arrival_status == 2 )
+        //console.log("stockArrivedItems", stockArrivedItems)
+
+        
+        if(stockArrivedItems?.length > 0){
+            stockArrivedItems.forEach((item)=>{
+                statusListUpdate.push({woi_id: item.record_id,type: 'error', title: 'Stock Date', 
+                     description: `Item used from stock`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`, arrived: true, stock: true})
+            })
+        }
+
         //null scoreboard_arrival_dates (if null, arrival dates not set, else )
         var nullArrivalItems = data.filter((item) => item.scoreboard_arrival_date == null && item.vendor != 2 ) //not rainey
-        //console.log("nullArrivalItems", nullArrivalItems)
 
         if(nullArrivalItems?.length > 0){
             nullArrivalItems.forEach((item)=>{
                 statusListUpdate.push({woi_id: item.record_id, type: 'error', title: 'Empty Arrival Date',
-                     description: `No Arrival Date set.`, sign: `${item.description}`, empty: true})
+                     description: `No Arrival Date set.`, sign: `${item.description}`, status: 'empty'})
+            })
+        }
+
+        //null scoreboard_arrival_dates (if date passed but not arrived )
+        var passedArrivalItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && item.scoreboard_arrival_status == 0 && moment(item.scoreboard_arrival_date) <= moment(new Date()) ) 
+
+
+        if(passedArrivalItems?.length > 0){
+            passedArrivalItems.forEach((item)=>{
+                statusListUpdate.push({woi_id: item.record_id, type: 'error', title: 'Passed Arrival Date',
+                     description: `Arrival date passed but not arrived.`, sign: `${item.description}`, status: 'empty'})
             })
         }
 
         //console.log("Status lst update", statusListUpdate);
         setStatusList(statusListUpdate);
-        setSelectedWOIs(statusListUpdate.filter((item)=> item.empty == true))
+
+        //get selected woi depending on waiting arrival or not set 
+        let selected = statusListUpdate.filter((item)=> item.status == 'empty').length > 0 ? statusListUpdate.filter((item)=> item.status == 'empty') : 
+                                statusListUpdate.filter((item)=> item.status == 'waiting').length > 0 ? statusListUpdate.filter((item)=> item.status == 'waiting') : [];
+        setSelectedWOIs(selected)
         if(statusListUpdate.length){
             setInputValue(getMinDateItem(statusListUpdate))
         }
@@ -132,8 +158,28 @@ const TLArrivalDatePicker = (props) => {
             return;
         }
         if(props.onItemsArrived){
-            props.onItemsArrived(selectedWOIs);
+            props.onItemsArrived(selectedWOIs, 1);
         }
+        wrapperProps.onDismiss();
+    }
+
+    const handleSetFromStock = ()=>{
+        if(selectedWOIs?.length == 0 ){
+            cogoToast.error("No Items selected");
+            return;
+        }
+        if(props.onItemsArrived){
+            props.onItemsArrived(selectedWOIs , 2);
+        }
+        wrapperProps.onDismiss();
+    }
+
+    const handleClearDate = ()=>{
+
+        if(props.onClear){
+            props.onClear(selectedWOIs)
+        }
+
         wrapperProps.onDismiss();
     }
 
@@ -221,7 +267,7 @@ const TLArrivalDatePicker = (props) => {
         
         //Overright regular min date return_value if one or more have arrived
         var arrivedItems = list.filter((item)=> {
-            if(item.empty == true ){
+            if(item.status == 'empty' ){
                 return false;
             }
             return item.arrived
@@ -231,9 +277,19 @@ const TLArrivalDatePicker = (props) => {
 
         if(arrivedItemsLength){
             if(arrivedItemsLength < list?.length ){
-                return_value = `Arrived (${arrivedItemsLength}/${list?.length })`
+                if(list.find((item)=>  item.stock)){
+                    return_value = `Stock (${arrivedItemsLength}/${list?.length })`
+                }else{
+                    return_value = `Arrived (${arrivedItemsLength}/${list?.length })`
+                }
+                
             }else{
-                return_value = 'Arrived';
+                if(list.find((item)=> item.stock )){
+                    return_value = 'Stock';
+                }else{
+                    return_value = 'Arrived';
+                }
+                
             }
         }
 
@@ -316,7 +372,9 @@ const TLArrivalDatePicker = (props) => {
                                         onChange={event=>handleClickCheckBox(event, item)}/>
                                      <span className={classes.liIdSpan}>{item.woi_id}</span>
                                      <span className={classes.liTitleSpan}>{item.sign}</span>
-                                     <span className={classes.liDateSpan}>{item.arrived ? `Arrived (${item.date})` : (item.date ? item.date : 'Not Set')}</span>
+                                     <span className={classes.liDateSpan}>{item.arrived ? 
+                                                                ( item.stock ?  `Stock (${item.date})` :`Arrived (${item.date})`) 
+                                                                : (item.date ? item.date : 'Not Set')}</span>
                                 </div>
                         })
                         }</>
@@ -329,7 +387,10 @@ const TLArrivalDatePicker = (props) => {
                     <Button className={classes.button} fullWidth onClick={handleSetArrived} data-tip="Set selected to arrived (today)" data-place={'bottom'}>
                         Arrived
                     </Button>
-                    <Button className={classes.button} fullWidth onClick={wrapperProps.onClear} data-tip="Clear selected dates" data-place={'bottom'}>
+                    <Button className={classes.button} fullWidth onClick={handleSetFromStock} data-tip="Set selected to arrived (today) from stock" data-place={'bottom'}>
+                        Stock
+                    </Button>
+                    <Button className={classes.button} fullWidth onClick={handleClearDate} data-tip="Clear selected dates" data-place={'bottom'}>
                         Clear
                     </Button>
                     <Button className={classes.button} fullWidth onClick={wrapperProps.onDismiss}>
@@ -383,6 +444,7 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         alignItems: 'center',
+        width: '50%',
     },
     button:{
         flexBasis: '25%',

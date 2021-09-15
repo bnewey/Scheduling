@@ -14,6 +14,7 @@ import TaskModal from './TaskModal/TaskModal';
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../js/Util';
+import Settings from '../../js/Settings';
 import HelpModal from './HelpModal/HelpModal';
 import CalendarContainer from './Calendar/CalendarContainer';
 
@@ -47,6 +48,7 @@ const TaskContainer = function(props) {
     const [installDateFilters, setInstallDateFilters] = useState([]);
     const [drillDateFilters, setDrillDateFilters] = useState([])
     const [activeTaskView,setActiveTaskView] = useState(1)
+    const [savedFilters, setSavedFilters] = React.useState(null);
 
     const taskViews = [
       {name: "Compact", value: 3,
@@ -87,7 +89,9 @@ const TaskContainer = function(props) {
               {text: "Service Crew", field: "field_crew", width: '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "field_crew_leader"},
               {text: "Service Type", field: "field_type", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
               {text: "Services", field: "field_num_services", width: '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
-             ]}]
+    ]}]
+
+    
 
     const job_types = [{type: 'install', color: "#004488", shorthand: 'IN'},
                     {type: 'drill', color: "#3c00d0", shorthand: 'DR'},
@@ -175,6 +179,35 @@ const TaskContainer = function(props) {
     }
   },[taskListToMap, taskLists]);
 
+  //Saved Filters
+  useEffect(()=>{
+    if(savedFilters == null && user){
+        var user_id = user?.id;
+        Settings.getTaskUserFilters(user_id)
+        .then((data)=>{
+            if(data){
+                var savedFilters = data?.map((item)=>{
+                    item.filter_json = JSON.parse(item.filter_json);
+                    return item;
+                })
+                console.log("taskUSerfilters", savedFilters);
+                setSavedFilters(savedFilters);
+            }
+        })
+        .catch((error)=>{
+            console.error("Failed to get user filters");
+            cogoToast.error("Failed to get user filters");
+        })
+    }
+    
+},[savedFilters, user])
+
+  //Refresh
+  useEffect(()=>{
+    if(refreshView && refreshView == "taskList"){
+        setSavedFilters(null)
+    }
+  },[refreshView])
 
   //Save and/or Fetch filters to local storage
   useEffect(() => {
@@ -276,13 +309,15 @@ const TaskContainer = function(props) {
 
   //Save and/or Fetch tableInfo to local storage
   useEffect(() => {
-  if(tableInfo == null){
+  if(tableInfo == null && savedFilters != null){
     var tmp = window.localStorage.getItem('activeTaskView');
     var tmpParsed;
     if(tmp){
       tmpParsed = JSON.parse(tmp);
     }
-    if(!isNaN(tmpParsed)){
+    console.log("tmpParsed",tmpParsed);
+    console.log("tmp", tmp);
+    if(tmpParsed != null || tmpParsed != undefined){
       setActiveTaskView(tmpParsed);
       console.log("Set activeTaskView", tmpParsed)
     }else{
@@ -294,7 +329,7 @@ const TaskContainer = function(props) {
     window.localStorage.setItem('activeTaskView', JSON.stringify(activeTaskView));
   }
   
-}, [tableInfo, activeTaskView]);
+}, [tableInfo, activeTaskView, savedFilters]);
   
 
   return (
@@ -304,7 +339,7 @@ const TaskContainer = function(props) {
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,activeTaskView, setActiveTaskView,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
                              sorters, setSorters, installDateFilters, setInstallDateFilters, drillDateFilters, setDrillDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
-                             user, refreshView, setRefreshView, taskViews, job_types} } >
+                             user, refreshView, setRefreshView, taskViews, job_types, savedFilters, setSavedFilters} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >

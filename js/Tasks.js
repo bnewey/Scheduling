@@ -167,6 +167,29 @@ async function addAndSaveAddress(addressObj, entities_id){
     }
 }
 
+async function copyTaskForNewType(t_id, new_type){
+    const route = '/scheduling/tasks/copyTaskForNewType';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({t_id, new_type})
+        });
+
+        if(!data.ok){
+            throw new Error("copyTaskForNewType returned empty list or bad query")
+        }
+        var list = await data.json();
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
 module.exports = {
     getAllTasks: getAllTasks,
     getTask: getTask,
@@ -176,4 +199,5 @@ module.exports = {
     getCoordinates: getCoordinates,
     saveCoordinates: saveCoordinates,
     addAndSaveAddress,
+    copyTaskForNewType,
 };

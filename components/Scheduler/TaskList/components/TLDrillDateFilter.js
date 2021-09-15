@@ -12,7 +12,7 @@ import moment from 'moment';
 
 import _, { property } from 'lodash';
 
-const TaskListFilter = (props) => {
+const TLDrillDateFilter = (props) => {
     //PROPS
     const { taskViews, activeTaskView, handleRefreshView, taskListTasksSaved,drillDateFilters, setDrillDateFilters,
         setRefreshView,tabValue} = props;
@@ -27,7 +27,8 @@ const TaskListFilter = (props) => {
         if(activeTaskView && taskViews?.length > 0){
             setIsVisible( !!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "drill_date" ));
         }
-    }, [activeTaskView])
+    }, [activeTaskView]);
+
 
     useEffect(() => {
         if(drillDateFilterOpen == null){
@@ -45,7 +46,7 @@ const TaskListFilter = (props) => {
         if((drillDateFilterOpen != null)){
             window.localStorage.setItem('drillDateFilterOpen', JSON.stringify(drillDateFilterOpen));
         }
-        
+                
     }, [drillDateFilterOpen]);
     
 
@@ -67,8 +68,13 @@ const TaskListFilter = (props) => {
     const handleUpdateDrillDateFilter =(value)=>{
         console.log("Value ", value);
 
+        let property = 'drill_date';
+        if(value == 0 || value == 1){
+            property = 'drill_ready';
+        }
+
         var newArray = value.map((item)=>{
-            return ({property: 'drill_date', value: item})
+            return ({property, value: item})
         })
 
         setDrillDateFilters(newArray);
@@ -92,7 +98,7 @@ const TaskListFilter = (props) => {
         <> 
                 {drillDateFilterOpen && taskListTasksSaved ? 
                 <div className={classes.filterDrillDateDiv}>
-                    <Select  multiple
+                    <Select multiple
                             id={"drillDateFilter"}
                             className={classes.selectBox}
                             value={(drillDateFilters?.map((item)=> (item.value))
@@ -107,11 +113,11 @@ const TaskListFilter = (props) => {
                             var array = [...taskListTasksSaved].map((task)=> task["drill_date"])
                                            .filter((v, i, array)=> array.indexOf(v)===i && v != null )
                             var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
-                            return newArray.map((item,i)=>{
+                            return [newArray.map((item,i)=>{
                                 return( 
                                 <MenuItem value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
                                 );
-                            }) ;
+                            }), <MenuItem value={0}>Drill Not Ready</MenuItem>, <MenuItem value={1}>Drill Ready</MenuItem>] ;
                         })()}
                     </Select> 
                     <span>
@@ -133,7 +139,7 @@ const TaskListFilter = (props) => {
 
 } 
 
-export default TaskListFilter;
+export default TLDrillDateFilter;
 
 const useStyles = makeStyles(theme => ({
     filterDrillDate: {

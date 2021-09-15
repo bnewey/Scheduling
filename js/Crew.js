@@ -280,7 +280,7 @@ async function getAllCrewJobs(){
 async function addCrewJobs(ids, job_type, crew_id,date){
     const route = '/scheduling/crew/addCrewJobs';
     try{
-        var response = await fetch(route,
+        var data = await fetch(route,
             {
                 method: 'POST',
                 headers: {
@@ -288,7 +288,11 @@ async function addCrewJobs(ids, job_type, crew_id,date){
                 },
                 body: JSON.stringify({ids, job_type, crew_id, date})
             });
-        return response.ok;
+            if(!data.ok){
+                throw new Error("addCrewJobs returned empty list or bad query")
+            }
+            var list = await data.json();
+            return(list);
     }catch(error){
         console.log(error);
         throw error;
@@ -363,6 +367,24 @@ async function updateCrewJobType( job_id, type){
         throw error;
     }
 }
+
+async function updateCrewJobReady( job_id, ready){
+    const route = '/scheduling/crew/updateCrewJobReady';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({job_id, ready})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
+
 
 async function updateCrewNumServices( job_id, numServices){
     const route = '/scheduling/crew/updateCrewNumServices';
@@ -548,6 +570,7 @@ module.exports = {
     updateCrewJobCompleted,
     updateCrewJobMember,
     updateCrewJobType,
+    updateCrewJobReady,
     updateCrewNumServices,
     updateCrewJobDate,
     addNewCrew,

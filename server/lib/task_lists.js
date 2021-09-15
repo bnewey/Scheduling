@@ -34,11 +34,11 @@ router.post('/getTaskList', async (req,res) => {
         ' date_format(t.date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
         ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
         ' t.description, t.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
-        ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, wo.type, t.install_location, ' +
+        ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, t.type, wo.type AS wo_type, t.install_location, ' +
         ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.job_reference,' + 
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
-        ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, mad.member_name AS drill_crew_leader , '  +
+        ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, cjd.ready as drill_ready, mad.member_name AS drill_crew_leader , '  +
         ' cjd.completed AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
         ' date_format(cjd.job_date, \'%Y-%m-%d\') as drill_date, cci.color AS install_crew_color,  ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
@@ -400,7 +400,7 @@ router.post('/getAllSignScbdWOIFromTL', async (req,res) => {
 
     const sql = 'SELECT DISTINCT woi.record_id, woi.work_order, woi.item_type, woi.user_entered, date_format(woi.date_entered, \'%m-%d-%Y\') as date_entered, woi.quantity, woi.part_number, woi.size, woi.description, ' +
         ' woi.price, date_format(woi.receive_date, \'%m-%d-%Y\') as receive_date , woi.receive_by, woi.packing_slip, woi.scoreboard_or_sign, woi.model, woi.color, woi.trim , date_format(woi.scoreboard_arrival_date, \'%m-%d-%Y\') as scoreboard_arrival_date,   '  + 
-        ' woi.mount, woi.sign_built, woi.copy_received, woi.sent_for_approval, woi.final_copy_approved, woi.artwork_completed, woi.sign_popped_and_boxed, woi.roy, woi.trim_size, woi.trim_corners, ' +
+        ' IFNULL(woi.scoreboard_arrival_status, 0) as scoreboard_arrival_status , woi.mount, woi.sign_built, woi.copy_received, woi.sent_for_approval, woi.final_copy_approved, woi.artwork_completed, woi.sign_popped_and_boxed, woi.roy, woi.trim_size, woi.trim_corners, ' +
         ' woi.date_offset, date_format(woi.sign_due_date, \'%m-%d-%Y\') as sign_due_date , woi.ordernum, woi.vendor ' + 
         ' FROM task_list_items tli ' +
         ' LEFT JOIN tasks t ON t.id = tli.task_id ' +
@@ -416,6 +416,31 @@ router.post('/getAllSignScbdWOIFromTL', async (req,res) => {
     }
     catch(error){
         logger.error("Task List WOI Data: " + error);
+        res.sendStatus(400);
+    }
+});
+
+
+router.post('/copyTaskForNewType', async (req,res) => {
+    
+    var t_id, new_type;
+    if(req.body){
+        t_id = req.body.t_id;
+        new_type = req.body.new_type;
+    }
+
+    const sql = 'INSERT INTO tasks (id, id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, ' +
+        ' date_assigned, order_assigned, id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, ' + 
+        ' drilling, sign, artwork, order_date, first_game, account_id, work_type, install_location, delivery_crew, delivery_order, ' +
+        ' install_date, delivery_date, notes, task_status, install_order, task_list_id ) SELECT * FROM tasks WHERE id =? ';
+    
+    try{
+        const results = await database.query(sql, list_name);
+        logger.info("Copyed task to new type " + list_name);
+        res.json(results);
+    }
+    catch(error){
+        logger.error("TasksList (copyTaskForNewType): " + error);
         res.sendStatus(400);
     }
 });
