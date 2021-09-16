@@ -476,7 +476,7 @@ const TaskListTasks = (props) =>{
       Router.push('/scheduling/work_orders')
     }
 
-    const handleReadyJob = async(task, job_id, fieldType) =>{
+    const handleReadyJob = async(task, job_id, fieldType, ready) =>{
       if(job_id == null){
         try {
           job_id = await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(new Date()), task, fieldType ) ;
@@ -486,10 +486,10 @@ const TaskListTasks = (props) =>{
         }
       }
 
-      Crew.updateCrewJobReady(job_id, 1)
+      Crew.updateCrewJobReady(job_id, ready)
       .then((data)=>{
         setTaskListTasksRefetch(true);
-        cogoToast.success("Job is ready");
+        cogoToast.success( ready ? "Job is ready" : "Removed job ready");
       })
       .catch((error)=>{
         console.error("failed to ready job", error);
@@ -504,19 +504,6 @@ const TaskListTasks = (props) =>{
         Crew.getCrewJobsByTask(task.t_id)
         .then((data)=>{
           if(data){
-            //returns true if other jobs besides job_id
-            // if( task.type == "Install (Drill)"){
-            //   //only case where there are two jobs in  a task to check
-            //   let a = data.find((item)=> item.job_type == 'drill');
-            //   let b = data.find((item)=> item.job_type == 'install');
-
-            //   if( ( !a || !b ) || (job_type == "drill" && b && b.completed != 1) || (job_type == "install" && a && a.completed != 1)){
-            //     //both jobs should be here if we would want to move to complete
-            //     //if one job is getting completed - check the other 
-            //     resolve(false);
-            //   }
-            // }
-
 
             let test = data.every((item)=> {
               if(item.id == job_id){
@@ -811,7 +798,7 @@ const TaskListTasks = (props) =>{
                             value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
                             onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
                             ready={task.drill_ready}
-                            onReadyJob={ ()=> handleReadyJob(task, task.drill_job_id, "drill") }
+                            onReadyJob={ (ready)=> handleReadyJob(task, task.drill_job_id, "drill", ready) }
                             onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
                     </MuiPickersUtilsProvider></div>
               break;
@@ -841,7 +828,7 @@ const TaskListTasks = (props) =>{
                         value={value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
                         onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "install")} 
                         ready={task.install_ready}
-                        onReadyJob={ ()=> handleReadyJob(task, task.install_job_id, "install") }
+                        onReadyJob={ (ready)=> handleReadyJob(task, task.install_job_id, "install",ready) }
                         onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
               </MuiPickersUtilsProvider></div>
                 break;
