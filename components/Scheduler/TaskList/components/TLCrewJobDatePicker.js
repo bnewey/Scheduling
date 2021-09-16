@@ -130,8 +130,8 @@ const TLCrewJobDatePicker = (props) => {
                 </div>
                 <DialogActions>
                 <div className={classes.buttonDiv}>
-                    {type && type == 'drill' ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
-                        <Button disabled={ready} data-tip="Ready job for drilling" data-place={'bottom'} className={classes.button} fullWidth onClick={handleReadyJob}>
+                    {type && (type == 'drill' || type == 'install') ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
+                        <Button disabled={ready} data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={handleReadyJob}>
                         Ready
                     </Button></>: <></>}
                     <Button className={classes.button} data-tip="Complete Job (today)" data-place={'bottom'} fullWidth onClick={handleOpenCompleteTask}>

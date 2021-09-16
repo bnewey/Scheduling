@@ -41,7 +41,7 @@ router.post('/getTaskList', async (req,res) => {
         ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, cjd.ready as drill_ready, mad.member_name AS drill_crew_leader , '  +
         ' cjd.completed AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
         ' date_format(cjd.job_date, \'%Y-%m-%d\') as drill_date, cci.color AS install_crew_color,  ' + 
-        ' cji.crew_id AS install_crew, cji.id AS install_job_id, mai.member_name AS install_crew_leader, ' + 
+        ' cji.crew_id AS install_crew, cji.id AS install_job_id, cji.ready AS install_ready, mai.member_name AS install_crew_leader, ' + 
         ' cji.completed AS install_job_completed,  date_format(cji.completed_date, \'%Y-%m-%d %H:%i:%S\') as install_job_completed_date, ' +
         ' date_format(cji.job_date, \'%Y-%m-%d\') as sch_install_date, ccd.color AS drill_crew_color,  ' + 
         ' cjf.crew_id AS field_crew, cjf.id AS field_job_id, maf.member_name AS field_crew_leader , cjf.job_type AS field_type, cjf.num_services AS field_num_services, '  +

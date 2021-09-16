@@ -82,7 +82,7 @@ const TLArrivalDatePicker = (props) => {
         if(alreadyArrivedItems?.length > 0){
             alreadyArrivedItems.forEach((item)=>{
                 statusListUpdate.push({woi_id: item.record_id,type: 'error', title: 'Arrived Date', 
-                     description: `Item Arrived`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`, arrived: true})
+                     description: `Item Arrived`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`, arrived: true,status: 'arrived'})
             })
         }
 
@@ -94,7 +94,19 @@ const TLArrivalDatePicker = (props) => {
         if(stockArrivedItems?.length > 0){
             stockArrivedItems.forEach((item)=>{
                 statusListUpdate.push({woi_id: item.record_id,type: 'error', title: 'Stock Date', 
-                     description: `Item used from stock`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`, arrived: true, stock: true})
+                     description: `Item used from stock`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`, arrived: true, stock: true,status: 'arrived'})
+            })
+        }
+
+        //all scoreboard_arrival_date ( arrived using stock )
+        var onSiteItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && item.scoreboard_arrival_status == 3 )
+        //console.log("onSiteItems", onSiteItems)
+
+        
+        if(onSiteItems?.length > 0){
+            onSiteItems.forEach((item)=>{
+                statusListUpdate.push({woi_id: item.record_id,type: 'error', title: 'On Site Date', 
+                     description: `Items on site`, sign: `${item.description}`, date: ` ${item.scoreboard_arrival_date}`, arrived: true, onSite: true})
             })
         }
 
@@ -122,9 +134,10 @@ const TLArrivalDatePicker = (props) => {
         //console.log("Status lst update", statusListUpdate);
         setStatusList(statusListUpdate);
 
-        //get selected woi depending on waiting arrival or not set 
+        //get selected woi depending on on site or waiting arrival or not set
         let selected = statusListUpdate.filter((item)=> item.status == 'empty').length > 0 ? statusListUpdate.filter((item)=> item.status == 'empty') : 
-                                statusListUpdate.filter((item)=> item.status == 'waiting').length > 0 ? statusListUpdate.filter((item)=> item.status == 'waiting') : [];
+                                statusListUpdate.filter((item)=> item.status == 'waiting').length > 0 ? statusListUpdate.filter((item)=> item.status == 'waiting') :
+                                    statusListUpdate.filter((item)=> item.status == 'arrived').length > 0 ? statusListUpdate.filter((item)=> item.status == 'arrived') : [] ;
         setSelectedWOIs(selected)
         if(statusListUpdate.length){
             setInputValue(getMinDateItem(statusListUpdate))
@@ -150,6 +163,17 @@ const TLArrivalDatePicker = (props) => {
     const handleTodayClick = () =>{
         //wrapperProps.onSetToday();
         props.onChange(moment().format('YYYY-MM-DD hh:mm:ss'))
+    }
+
+    const handleSetOnSite = ()=>{
+        if(selectedWOIs?.length == 0 ){
+            cogoToast.error("No Items selected");
+            return;
+        }
+        if(props.onItemsArrived){
+            props.onItemsArrived(selectedWOIs, 3);
+        }
+        wrapperProps.onDismiss();
     }
 
     const handleSetArrived = ()=>{
@@ -264,6 +288,25 @@ const TLArrivalDatePicker = (props) => {
 
         var return_value ="";
         return_value = getMinDateItem(list);
+
+        //Overright arrived return_value if one or more are on site
+        var onSiteItems = list.filter((item)=> {
+            if(item.status == 'empty' ){
+                return false;
+            }
+            return item.onSite
+        })
+
+        var onSiteItemsLength = onSiteItems.length;
+
+        if(onSiteItemsLength){
+            if(onSiteItemsLength < list?.length ){
+                    return_value = `On Site (${onSiteItemsLength}/${list?.length })`                
+            }else{
+                    return_value = 'On Site';
+            }
+            return return_value;
+        }
         
         //Overright regular min date return_value if one or more have arrived
         var arrivedItems = list.filter((item)=> {
@@ -372,9 +415,11 @@ const TLArrivalDatePicker = (props) => {
                                         onChange={event=>handleClickCheckBox(event, item)}/>
                                      <span className={classes.liIdSpan}>{item.woi_id}</span>
                                      <span className={classes.liTitleSpan}>{item.sign}</span>
-                                     <span className={classes.liDateSpan}>{item.arrived ? 
+                                     <span className={classes.liDateSpan}>{
+                                                                item.onSite ? `On Site (${item.date})` : (
+                                                                item.arrived ? 
                                                                 ( item.stock ?  `Stock (${item.date})` :`Arrived (${item.date})`) 
-                                                                : (item.date ? item.date : 'Not Set')}</span>
+                                                                : (item.date ? item.date : 'Not Set'))}</span>
                                 </div>
                         })
                         }</>
@@ -383,7 +428,9 @@ const TLArrivalDatePicker = (props) => {
                 </div>
                 <DialogActions>
                 <div className={classes.buttonDiv}>
-                
+                    <Button className={classes.button} fullWidth onClick={handleSetOnSite} data-tip="Set selected to on site" data-place={'bottom'}>
+                        On Site
+                    </Button>
                     <Button className={classes.button} fullWidth onClick={handleSetArrived} data-tip="Set selected to arrived (today)" data-place={'bottom'}>
                         Arrived
                     </Button>
@@ -441,10 +488,10 @@ const useStyles = makeStyles(theme => ({
     buttonDiv:{
         display: 'flex',
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '50%',
+        width: '70%',
     },
     button:{
         flexBasis: '25%',
@@ -466,6 +513,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
+        margin: '13px',
     },
     woiListItem:{
         background: 'linear-gradient(0deg, #8787878a, #6d6d6d8c)',

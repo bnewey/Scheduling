@@ -476,13 +476,17 @@ const TaskListTasks = (props) =>{
       Router.push('/scheduling/work_orders')
     }
 
-    const handleReadyJob = (task) =>{
-      if(!task ){
-        console.error("Failed to ready job, bad params");
-        return;
+    const handleReadyJob = async(task, job_id, fieldType) =>{
+      if(job_id == null){
+        try {
+          job_id = await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(new Date()), task, fieldType ) ;
+          console.log("job_id", job_id);
+        } catch (error) {
+          console.error("Failed to add new job and get id", error);
+        }
       }
 
-      Crew.updateCrewJobReady(task.drill_job_id, 1)
+      Crew.updateCrewJobReady(job_id, 1)
       .then((data)=>{
         setTaskListTasksRefetch(true);
         cogoToast.success("Job is ready");
@@ -807,7 +811,7 @@ const TaskListTasks = (props) =>{
                             value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
                             onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
                             ready={task.drill_ready}
-                            onReadyJob={ ()=> handleReadyJob(task) }
+                            onReadyJob={ ()=> handleReadyJob(task, task.drill_job_id, "drill") }
                             onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
                     </MuiPickersUtilsProvider></div>
               break;
@@ -829,12 +833,15 @@ const TaskListTasks = (props) =>{
                         clearable
                         inputVariant="outlined"
                         variant="modal" 
+                        type={'install'}
                         title="Select Install Date"
                         maxDate={new Date('01-01-2100')}
                         minDate={new Date('01-01-1970')}
                         className={classes.datePicker}
                         value={value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
                         onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "install")} 
+                        ready={task.install_ready}
+                        onReadyJob={ ()=> handleReadyJob(task, task.install_job_id, "install") }
                         onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
               </MuiPickersUtilsProvider></div>
                 break;
