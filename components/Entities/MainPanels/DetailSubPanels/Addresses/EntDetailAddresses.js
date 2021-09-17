@@ -224,7 +224,7 @@ const EntAddresses = function(props) {
           setEditAddressModalOpen={setEditAddressModalOpen} editAddressModalMode={editAddressModalMode} setEditAddressModalMode={setEditAddressModalMode}
           detailEntAddressId={detailEntAddressId} setDetailEntAddressId={setDetailEntAddressId}/>}
           <Grid container>
-                  <Grid item xs={8}>
+                  <Grid item xs={12} md={8}>
                     <div className={classes.woiDiv}>
                     { addresses && addresses.length > 0 ?
                         <MaterialTable 

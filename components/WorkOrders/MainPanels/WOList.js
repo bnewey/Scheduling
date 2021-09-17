@@ -179,7 +179,13 @@ const useStyles = makeStyles(theme => ({
   root:{
     // border: '1px solid #339933',
     padding: '1%',
-    minHeight: '730px',
+    [theme.breakpoints.down('sm')]: {
+        //minHeight: '700px',
+    },
+    [theme.breakpoints.up('md')]: {
+        minHeight: '730px',
+    },
+    
   },
   container: {
     maxHeight: 650,

@@ -60,7 +60,7 @@ const EntityDetail = function(props) {
         {activeEntity ?
         <div className={classes.container}>
             
-            <div className={classes.grid_container}>
+            <Grid item xs={12} md={6} className={classes.grid_container}>
                   
                   <div className={classes.detailInfoDiv}>
                     {activeEntity && detail_table.map((item,i)=> {
@@ -75,7 +75,7 @@ const EntityDetail = function(props) {
                       )
                     })}
                     </div>
-            </div>
+            </Grid>
             
           
         </div>
@@ -101,8 +101,8 @@ const useStyles = makeStyles(theme => ({
     boxShadow: '0 0 2px black',
     borderRadius: 8,
     padding: '23px 0px',
-    width: 'fit-content',
-    minWidth: 695,
+    //width: 'fit-content',
+    //minWidth: 695,
   },
   detailInfoDiv:{
     display: 'flex',

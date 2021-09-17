@@ -248,7 +248,7 @@ const Search = function(props) {
 
   return (
         <> 
-        <Grid item className={  classes.searchGridItem} xs={ searchOpenPermanent ? 12 : searchOpen ? 5 : 5} style={searchOpenPermanent ? {width: '47em'} :{} } >
+        <Grid item className={  classes.searchGridItem} xs={ searchOpenPermanent ? 12 : searchOpen ? 7 : 5} md={ searchOpenPermanent ? 12 : searchOpen ? 5 : 5} style={searchOpenPermanent ? {width: '47em'} :{} } >
         {searchHistory && searchOpen == true ? 
             <><Grow in={searchOpen} style={{width: '100%'}}  >
             <div><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />

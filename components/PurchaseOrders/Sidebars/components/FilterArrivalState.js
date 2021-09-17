@@ -97,7 +97,12 @@ const useStyles = makeStyles(theme => ({
     },
     rowDiv:{
         display: 'flex',
-        flexDirection: 'row',
+        [theme.breakpoints.down('sm')]: {
+            flexDirection: 'column',
+        },
+        [theme.breakpoints.up('md')]: {
+            flexDirection: 'row',
+        },
         justifyContent: 'space-between',
         alignItems:'center',
         width: '100%'
@@ -129,7 +134,13 @@ const useStyles = makeStyles(theme => ({
     },
     radioGroup:{
         flexWrap: 'nowrap',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        [theme.breakpoints.down('sm')]: {
+            flexDirection: 'column',
+        },
+        [theme.breakpoints.up('md')]: {
+            flexDirection: 'row',
+        },
     },
     radioFormControl:{
         flexBasis: '70%',

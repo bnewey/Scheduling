@@ -154,7 +154,7 @@ const EntContacts = function(props) {
           setEditContactModalOpen={setEditContactModalOpen} editContactModalMode={editContactModalMode} setEditContactModalMode={setEditContactModalMode}
           detailEntContactId={detailEntContactId} setDetailEntContactId={setDetailEntContactId}/>}
           <Grid container>
-                  <Grid item xs={8}>
+                  <Grid item xs={12} md={8}>
                     <div className={classes.woiDiv}>
                     { contacts && contacts.length > 0 ?
                         <MaterialTable 

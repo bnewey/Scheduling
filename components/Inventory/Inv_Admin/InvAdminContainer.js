@@ -153,12 +153,12 @@ const InvAdminContainer = function(props) {
         
             <Grid container>
 
-              <Grid item xs={2}>
+              <Grid item xs={3} md={2}>
                 
                 {currentView && getSidebarComponent()}
               </Grid>
 
-              <Grid item xs={10} className={classes.mainPanel}>
+              <Grid item xs={9} md={10} className={classes.mainPanel}>
                 {currentView && getMainComponent()}
                 
               </Grid>

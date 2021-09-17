@@ -7,6 +7,9 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 
+import { createTheme, ThemeProvider, useTheme } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
@@ -73,6 +76,8 @@ const FormBuilder = forwardRef((props, ref) => {
     const buildRefObject = arr => Object.assign({}, ...Array.from(arr, (k) => { return ({[k]: useRef(null)}) }));
     const [ref_object, setRef_Object] = React.useState(buildRefObject(fields.map((v)=> v.field)));
 
+    const theme = useTheme();
+    const onMobile = useMediaQuery(theme.breakpoints.down('sm'));
     
     const handleCloseParent = () =>{
         setShouldUpdate(false);
@@ -492,8 +497,8 @@ const FormBuilder = forwardRef((props, ref) => {
                     return (<></>);
                 }
                 return(
-                <div key={`${field.field}_div_key`} className={clsx(classes.inputDiv,{[classes.formColumnSeperator]: field?.second_column})}
-                    style={field?.second_column ? {gridColumn:'2'} : null}>  
+                <div key={`${field.field}_div_key`} className={clsx(classes.inputDiv,{[classes.formColumnSeperator]: field?.second_column && !onMobile})}
+                    style={field?.second_column && !onMobile ? {gridColumn:'2'} : null}>  
                     { field.label  ? <span className={classes.inputLabel}>{field.label}{field.required ? '*' : ''}</span> : <></>}
                     <GetInputByType key={`${field.field}_key`} field={field} formObject={formObject} setFormObject={setFormObject} errorFields={errorFields} validErrorFields={validErrorFields} handleShouldUpdate={handleShouldUpdate}
                     handleInputOnChange={handleInputOnChange} classes={classes} mode={mode} raineyUsers={raineyUsers} vendorTypes={vendorTypes}

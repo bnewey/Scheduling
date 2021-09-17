@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, createContext,useContext } from 'react';
-import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-ui/core';
+import {makeStyles, CircularProgress, Grid, Typography, Button, Box} from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
@@ -77,7 +77,7 @@ const WOSidebarDetail = function(props) {
             <Button className={classes.newButton} classes={{label: classes.newButtonLabel}} variant="outlined"
                 onClick={()=> handleOpenFPOrderModal()}>
                 <AddIcon className={classes.plusIcon}/>
-                <div>New Order</div>
+                <Box display={{ xs: 'none', md: 'inline' }}  component="div">New Order</Box>
             </Button>
           </div>
         )
@@ -89,7 +89,8 @@ const WOSidebarDetail = function(props) {
                     classes={{label: classes.newButtonLabel}} 
                     variant="outlined"
                     onClick={event=> handleOpenAddWOModal()}>
-                      <EditIcon className={classes.editIcon}/><div>Edit Info</div>
+                      <EditIcon className={classes.editIcon}/>
+                      <Box display={{ xs: 'none', md: 'inline' }}  component="div">Edit Info</Box>
               </Button>
           </div></>);
         break;
@@ -102,7 +103,7 @@ const WOSidebarDetail = function(props) {
                     onClick={event => handleOpenWOIModal()}
                     >
               <AddIcon className={classes.plusIcon}/>
-              <div>New Item</div>
+              <Box display={{ xs: 'none', md: 'inline' }}  component="div">New Item</Box>
             </Button>
           </div></>);
           break;
@@ -114,7 +115,7 @@ const WOSidebarDetail = function(props) {
                   variant="outlined"
                   onClick={event=> handleAddNewPackingSlip()}>
             <AddIcon className={classes.plusIcon}/>
-            <div>New Packing Slip</div>
+            <Box display={{ xs: 'none', md: 'inline' }}  component="div">New Packing Slip</Box>
           </Button>
         </div></>);
         break;
@@ -126,7 +127,7 @@ const WOSidebarDetail = function(props) {
   }
   
   return (
-    <div className={classes.root}>
+    <Grid   className={classes.root}>
         {sideBarTopButtons()}
         {/* { current view == allWorkOrders && <div className={classes.dateRangeDiv}>
             <div className={classes.labelDiv}><span className={classes.dateRangeSpan}>Date Range</span></div>
@@ -141,7 +142,7 @@ const WOSidebarDetail = function(props) {
           <CompInvTool />
         </div>
 
-    </div>
+    </Grid>
   );
 }
 

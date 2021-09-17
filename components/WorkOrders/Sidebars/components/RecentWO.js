@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {List, ListItem, ListItemText,ListItemIcon, ListSubheader, makeStyles, withStyles} from '@material-ui/core';
+import {List, ListItem, ListItemText,ListItemIcon, ListSubheader, makeStyles, withStyles, Box} from '@material-ui/core';
 
 import DetailIcon from '@material-ui/icons/Dvr';
 import PackingSlipIcon from '@material-ui/icons/Receipt';
@@ -44,7 +44,7 @@ const RecentWO = function(props) {
                 {Array.isArray(recentWO) && recentWO.map((item,i)=>{
                     return (
                     <div className={classes.itemDiv} onClick={event => handleGoRecentlyViewed(item)}>
-                        <span className={classes.woNumberSpan}>{item.wo_record_id}</span>
+                        <Box display={{ xs: 'none', md: 'inline' }}  component="span" className={classes.woNumberSpan}>{item.wo_record_id}</Box>
                         <span className={classes.itemSpan}>{item.c_name}</span>
                     </div>
                     )

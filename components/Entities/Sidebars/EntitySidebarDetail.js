@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, createContext,useContext } from 'react';
-import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-ui/core';
+import {makeStyles, CircularProgress, Grid, Typography, Button, Box} from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
@@ -64,7 +64,7 @@ const EntitySidebarDetail = function(props) {
                     classes={{label: classes.newButtonLabel}} 
                     variant="outlined"
                     onClick={event=> handleOpenAddEntModal()}>
-                      <EditIcon className={classes.editIcon}/><div>Edit Info</div>
+                      <EditIcon className={classes.editIcon}/><Box display={{ xs: 'none', md: 'inline' }}  component="div">Edit Info</Box>
               </Button>
           </div></>);
         break;
@@ -76,7 +76,7 @@ const EntitySidebarDetail = function(props) {
                     variant="outlined"
                     onClick={event=> handleOpenAddEntAddressModal()}
                     >
-                      <AddIcon className={classes.plusIcon}/><div>New Address</div>
+                      <AddIcon className={classes.plusIcon}/><Box display={{ xs: 'none', md: 'inline' }}  component="div">New Address</Box>
               </Button>
           </div></>);
         break;
@@ -88,7 +88,7 @@ const EntitySidebarDetail = function(props) {
                     variant="outlined"
                     onClick={event=> handleOpenAddEntContactModal()}
                     >
-                      <AddIcon className={classes.plusIcon}/><div>New Contact</div>
+                      <AddIcon className={classes.plusIcon}/><Box display={{ xs: 'none', md: 'inline' }}  component="div">New Contact</Box>
               </Button>
           </div></>);
         break;

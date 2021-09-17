@@ -62,7 +62,7 @@ const AdminToolbar = function(props) {
     if(backMode){
       return(
         <Slide direction="left" in={currentView.value} mountOnEnter unmountOnExit>
-        <Grid item xs={2} className={classes.toolbarLeftGrid}>
+        <Grid item xs={4} md={2} className={classes.toolbarLeftGrid}>
          <div className={classes.backContainer} onClick={event=> handleCloseView(currentView )}>
             <IconButton   className={classes.backIconButton}  size="medium" aria-label="close_search" onClick={event=> handleCloseView(currentView )}>
                   <ArrowBackIcon className={classes.backIcon} />
@@ -76,7 +76,7 @@ const AdminToolbar = function(props) {
     }
     //Default
     return(
-      <Grid item xs={2} className={classes.toolbarLeftGridPlain}>
+      <Grid item xs={6} md={2} className={classes.toolbarLeftGridPlain}>
             <img src="/static/rainey_elec.png" height='30'/>
             <span className={classes.toolbarLeftGridHeadSpan}>{currentView.displayName}</span>
       </Grid>
@@ -127,8 +127,14 @@ const useStyles = makeStyles(theme => ({
     minHeight: '56px',
   },
   toolbarLeftGridHeadSpan:{
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '14px',
+    },
+    [theme.breakpoints.up('md')]: {
+      fontSize: '21px',
+    },
     fontFamily: 'sans-serif',
-    fontSize: '21px',
+    
     color: '#4e4e4e',
     margin: '0px 10px 0px 10px'
   },

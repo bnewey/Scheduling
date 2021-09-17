@@ -159,7 +159,13 @@ const useStyles = makeStyles(theme => ({
     },  
     inputDiv:{
       display:'flex',
-      flexDirection: 'row',
+      
+      [theme.breakpoints.down('sm')]: {
+        flexDirection: 'column',
+    },
+    [theme.breakpoints.up('md')]: {
+        flexDirection: 'row',
+    },
       justifyContent: 'space-between',
       alignItems: 'center',
       width: '60%',
@@ -182,8 +188,15 @@ const useStyles = makeStyles(theme => ({
     inputField:{
       '& input':{
       backgroundColor: '#fff',
-      padding: '5px 8px',
-      width: '80px'
+      [theme.breakpoints.down('sm')]: {
+        padding: '3px 3px',
+        width: '70px'
+      },
+      [theme.breakpoints.up('md')]: {
+        padding: '5px 8px',
+        width: '80px'
+      },
+      
       }
     },
     inlineErrorText:{

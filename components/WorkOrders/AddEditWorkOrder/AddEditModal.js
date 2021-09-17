@@ -337,7 +337,7 @@ const AddEditModal = function(props) {
                     {/* BODY */}
                     
                     <Grid container >  
-                        <Grid item xs={entityDrawerOpen ? 6 : 12} className={classes.paperScroll}>
+                        <Grid item xs={entityDrawerOpen ? 2 : 12} md={entityDrawerOpen ? 6 : 12} className={classes.paperScroll}>
                             {/*FORM*/ console.log("Job types in parent", types)}
                             <FormBuilder 
                                 ref={saveRef}
@@ -357,7 +357,7 @@ const AddEditModal = function(props) {
                                 entityBillingContactEditChanged={entityBillingContactEditChanged} setEntityBillingContactEditChanged={setEntityBillingContactEditChanged}/>
                         </Grid>
                         {entityDrawerOpen && 
-                            <Grid item xs={6} className={classes.paperScroll}>
+                            <Grid item xs={10} md={6} className={classes.paperScroll}>
                                 <EntitiesDrawer  
                                      entityDrawerOpen={entityDrawerOpen} setEntityDrawerOpen={setEntityDrawerOpen} saveRef={saveRef} 
                                      setEntityShippingContacts={setEntityShippingContacts}
@@ -446,10 +446,15 @@ const useStyles = makeStyles(theme => ({
         justifyContent:'flex-end',
     },
     container: {
-        width: '70%',
+        [theme.breakpoints.down('sm')]: {
+            width: '94%',
+        },
+        [theme.breakpoints.up('md')]: {
+            width: '70%',
+        },
         minHeight: '50%',
         textAlign: 'center',
-        
+        margin: '15px 0px',
     },
     modalTitleDiv:{
         background: 'linear-gradient(0deg, #f1f1f1, white)',

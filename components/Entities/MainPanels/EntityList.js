@@ -112,7 +112,7 @@ const EntityList = function(props) {
   }))(TableRow);
 
   return (
-    <div className={classes.root}>
+    <Grid item sm={12} md={8} className={classes.root}>
         <TableContainer className={classes.container}>
         <Table stickyHeader  size="small" aria-label="sticky table">
           <TableHead>
@@ -160,7 +160,7 @@ const EntityList = function(props) {
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-    </div>
+    </Grid>
   );
 }
 
@@ -173,7 +173,6 @@ const useStyles = makeStyles(theme => ({
     // border: '1px solid #339933',
     padding: '1%',
     minHeight: '730px',
-    width: '70%',
     marginLeft: '1%',
   },
   container: {

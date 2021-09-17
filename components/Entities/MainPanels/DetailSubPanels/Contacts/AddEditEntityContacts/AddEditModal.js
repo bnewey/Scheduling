@@ -280,7 +280,12 @@ const useStyles = makeStyles(theme => ({
         justifyContent:'flex-end',
     },
     container: {
-        width: '70%',
+        [theme.breakpoints.down('sm')]: {
+            width: '94%',
+        },
+        [theme.breakpoints.up('md')]: {
+            width: '70%',
+        },
         minHeight: '50%',
         textAlign: 'center',
         

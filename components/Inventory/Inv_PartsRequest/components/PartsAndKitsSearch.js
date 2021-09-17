@@ -389,8 +389,14 @@ const useStyles = makeStyles(theme => ({
     }
   },
   toolbarLeftGridHeadSpan:{
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '14px',
+    },
+    [theme.breakpoints.up('md')]: {
+      fontSize: '21px',
+    },
     fontFamily: 'sans-serif',
-    fontSize: '21px',
+    
     color: '#4e4e4e',
     margin: '0px 10px 0px 10px'
   },

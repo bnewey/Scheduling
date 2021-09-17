@@ -25,6 +25,8 @@ const WorkOrderPdf = function(props) {
     const [pdfurl, setUrl] = useState(null);
 
     const classes = useStyles();
+
+  
     
    
     useEffect(()=>{
@@ -123,7 +125,7 @@ const WorkOrderPdf = function(props) {
             
             file={pdfurl}
             onLoadSuccess={ onDocumentLoadSuccess}>
-                <Page pageNumber={pageNumber} />
+                <Page width={500} pageNumber={pageNumber} />
           </Document>
           
          </div>
@@ -184,6 +186,11 @@ const useStyles = makeStyles(theme => ({
     display: 'inline-block',
   },
   container:{
+    [theme.breakpoints.down('sm')]: {
+      overflow: 'scroll',
+      paddingLeft: '250px',
+    },
+    
     backgroundColor: '#646464',
     padding: '15px 8px',
     borderRadius: '4px',

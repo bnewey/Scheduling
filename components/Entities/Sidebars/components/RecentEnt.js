@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {List, ListItem, ListItemText,ListItemIcon, ListSubheader, makeStyles, withStyles} from '@material-ui/core';
+import {List, ListItem, ListItemText,ListItemIcon, ListSubheader, makeStyles, withStyles, Box} from '@material-ui/core';
 
 import DetailIcon from '@material-ui/icons/Dvr';
 import PackingSlipIcon from '@material-ui/icons/Receipt';
@@ -46,7 +46,7 @@ const RecentEnt = function(props) {
                 {Array.isArray(recentEntities) && recentEntities.map((item,i)=>{
                     return (
                     <div className={classes.itemDiv} onClick={event => handleGoRecentlyViewed(item)}>
-                        <span className={classes.woNumberSpan}>{item.record_id}</span>
+                        <Box display={{ xs: 'none', md: 'inline' }}  component="span" className={classes.woNumberSpan}>{item.record_id}</Box>
                         <span className={classes.itemSpan}>{item.name}</span>
                     </div>
                     )
@@ -116,7 +116,13 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'none !important' ,
     },
     itemSpan:{
-        flexBasis: '80%',
+        [theme.breakpoints.down('sm')]: {
+            flexBasis: '100%',
+        },
+        [theme.breakpoints.up('md')]: {
+            flexBasis: '80%',
+        },
+        
         overflow: 'hidden',
         whiteSpace: 'nowrap',
         textOverflow: 'ellipsis',

@@ -103,13 +103,24 @@ const useStyles = makeStyles(theme => ({
     },
     rowDiv:{
         display: 'flex',
-        flexDirection: 'row',
+        [theme.breakpoints.down('sm')]: {
+            flexDirection: 'column',
+        },
+        [theme.breakpoints.up('md')]: {
+            flexDirection: 'row',
+        },
+        
         justifyContent: 'space-between',
         alignItems:'center',
         width: '100%'
     },
     label:{
-        fontSize: '2em',
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '1em',
+        },
+        [theme.breakpoints.up('md')]: {
+            fontSize: '2em',
+        },
         color: '#444',
         textAlign: 'right',
         flexBasis:'60%',

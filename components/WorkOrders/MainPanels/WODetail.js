@@ -73,9 +73,9 @@ const WODetail = function(props) {
    return ( 
     <div className={classes.root}>
         {activeWorkOrder ?
-        <div className={classes.container}>
+        < div className={classes.container}>
             
-            <div className={classes.grid_container}>
+            <Grid item xs={12} md={6}  className={classes.grid_container}>
                   
                   <div className={classes.detailInfoDiv}>
                     {activeWorkOrder && detail_table.map((item,i)=> {
@@ -90,7 +90,7 @@ const WODetail = function(props) {
                       )
                     })}
                     </div>
-            </div>
+            </Grid>
             
           
         </div>
@@ -107,17 +107,18 @@ const useStyles = makeStyles(theme => ({
   root:{
     // border: '1px solid #339933',
     padding: '1%',
-    minHeight: '730px',
+    //minHeight: '730px',
   },
   container: {
-    maxHeight: 650,
+    //maxHeight: 650,
   },
   grid_container:{
     boxShadow: '0 0 2px black',
     borderRadius: 8,
     padding: '23px 0px',
-    width: 'fit-content',
-    minWidth: 695,
+    marginBottom: '50px',
+    //width: 'fit-content',
+    //minWidth: 695,
 
   },
   detailInfoDiv:{
@@ -126,7 +127,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    width: '695px',
+    //width: '695px',
     margin: '2px 20px',
   },
   woiDiv:{
@@ -172,6 +173,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius:' 0px 0px 17px 17px',
     boxShadow: '0px 1px 2px #969696',
     margin: '0px 1% 0 1%',
+
   },
   accordion:{
     boxShadow: 'none',

@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import {List, ListItem, ListItemText,ListItemIcon, ListSubheader, makeStyles, withStyles} from '@material-ui/core';
+import {List, ListItem, ListItemText,ListItemIcon, ListSubheader, makeStyles, withStyles, Box} from '@material-ui/core';
 
 import DetailIcon from '@material-ui/icons/Dvr';
 import PackingSlipIcon from '@material-ui/icons/Receipt';
@@ -113,7 +113,7 @@ const useStyles = makeStyles(theme => ({
         
         color: '#333',
         marginBottom: '5px',
-        
+        padding: '5px 0px',
     },
     nonselectedExpList:{
         fontWeight: '600',
@@ -124,27 +124,51 @@ const useStyles = makeStyles(theme => ({
         },
         color: '#333',
         marginBottom: '5px',
+        padding: '5px 0px',
     },
     liText:{
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '9px',
+            fontWeight: 400,
+            textAlign: 'center',
+        },
+        [theme.breakpoints.up('md')]: {
+            fontWeight: 600,
+            fontSize: '13px',
+            textAlign: 'left',
+        },
         fontFamily: 'sans-serif',
-        fontSize: '13px',
-        fontWeight: 600,
+        
+        
         color: '#4c4c4c',
-        textAlign: 'left',
         width: '100%'
 
     },
     iconSpan:{
         width: '100%',
-        textAlign: 'right',
+        [theme.breakpoints.down('sm')]: {
+            textAlign: 'center',
+        },
+        [theme.breakpoints.up('md')]: {
+            textAlign: 'right',
+        },
+        
         margin: '0px 15px',
         flexBasis: '34%',
     },
     itemDiv:{
         display: 'flex',
-        flexDirection: 'row',
+        
+        [theme.breakpoints.down('sm')]: {
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+        [theme.breakpoints.up('md')]: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+        },
         justifyContent: 'center',
-        alignItems: 'flex-start',
+        
     },
     icon:{
         color: '#888'
