@@ -2,7 +2,7 @@ import 'isomorphic-unfetch';
 
 async function getNotificationsForUser(id){
     const route = '/scheduling/notifications/getNotificationsForUser';
-    console.log("order", id)
+    //console.log("order", id)
     try{
         var data = await fetch(route,
             {

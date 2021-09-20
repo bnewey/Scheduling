@@ -261,7 +261,7 @@ async function addNewMultpleOrderOutItem(item){
 
 async function getOrderOutApprovers(order_id){
     const route = '/scheduling/inventoryOrdersOut/getOrderOutApprovers';
-    console.log("order", order_id)
+    //console.log("order", order_id)
     try{
         var data = await fetch(route,
             {

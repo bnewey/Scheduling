@@ -46,7 +46,6 @@ const CrewContainer = function(props) {
         Crew.getCrewMembers()
         .then( (data) => {
         setCrewMembers(data);
-        console.log("crew members available ",data);
         })
         .catch( error => {
         console.warn(error);
@@ -62,7 +61,7 @@ const CrewContainer = function(props) {
             Crew.getAllCrewJobMembers()
             .then( (data) => {
             setAllCrewJobMembers(data);
-            console.log("crew job members",data);
+            
             })
             .catch( error => {
             console.warn(error);
@@ -78,7 +77,7 @@ const CrewContainer = function(props) {
             Crew.getAllCrewJobs()
             .then( (data) => {
             setAllCrewJobs(data);
-            console.log("crew jobs",data);
+            
             })
             .catch( error => {
             console.warn(error);

@@ -142,7 +142,7 @@ const TaskListDateDialog = (props) => {
         }
         return (task_array)
     }) : [];
-    console.log("Items", items);
+    //console.log("Items", items);
 
     
     return(

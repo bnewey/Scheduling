@@ -182,7 +182,7 @@ const TaskListMain = (props) => {
         if(woiData == null && taskListToMap){
             TaskLists.getAllSignScbdWOIFromTL(taskListToMap.id)
             .then((data)=>{
-                console.log("woi data", data);
+                //console.log("woi data", data);
                 setWoiData(data);
             })
             .catch((error)=>{

@@ -290,7 +290,7 @@ const TaskListSidebar = (props) => {
                         }
 
                         return(
-                            <div className={classes.singleLineDiv}>
+                            <div key={`other_tl`+index} className={classes.singleLineDiv}>
                                 <div className={classes.singleItem}>
                                     {getIcon(tl.list_name)}
                                     <span
@@ -311,10 +311,10 @@ const TaskListSidebar = (props) => {
                     savedFilters && savedFilters.map((filter, index)=>{
                         const isSelected =  filter && filters &&_.isEqual(filters ,filter.filter_json) && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and"); 
                             return(
-                            <div className={classes.singleLineDiv}>
+                            <div key={`saved_filter`+index} className={classes.singleLineDiv}>
                                 <div className={classes.singleItem}>
                                     <FilterList className={classes.icon} />
-                                    <div key={filter.id} dense button
+                                    <div key={filter.id} 
                                         onClick={event => handleApplySavedFilter(event, filter)}
                                         className={isSelected ? classes.text_button_selected : classes.text_button}
                                     >
@@ -331,11 +331,11 @@ const TaskListSidebar = (props) => {
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>
-                {taskViews?.map((view)=>{
+                {taskViews?.map((view, index)=>{
                      const isSelected = activeTaskView === view.value;
      
                     return(
-                        <div className={classes.singleLineDiv}>
+                        <div key={`task_view`+ index} className={classes.singleLineDiv}>
                             <div className={classes.singleItem}>
                                 <ViewColumn className={classes.icon} />
                                 <span

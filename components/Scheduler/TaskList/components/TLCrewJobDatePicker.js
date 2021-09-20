@@ -109,7 +109,7 @@ const TLCrewJobDatePicker = (props) => {
         <div className={classes.root}>
             <div className={classes.inputRootDiv}>
                 {ready ? <Check className={classes.small_icon} /> : <></> }
-                <TextField {...inputProps} onClick={inputProps.openPicker} value={ props.value ? moment(props.value).format('MM-DD-YYYY') : null} className={classes.input} variant="outlined" />
+                <TextField {...inputProps} onClick={inputProps.openPicker} value={ props.value ? moment(props.value).format('MM-DD-YYYY') : ""} className={classes.input} variant="outlined" />
             </div>
             <Dialog {...wrapperProps}  maxWidth="md">
                 <ReactTooltip effect={"solid"} delayShow={500}/>

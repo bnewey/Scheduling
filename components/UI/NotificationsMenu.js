@@ -32,12 +32,12 @@ const NotificationsMenu = ({user}) => {
   const [notificationsRefetch, setNotificationsRefetch] = useState(false);
 
   useEffect(()=>{
-    console.log("Listening to messages");
+    //console.log("Listening to messages");
     var refetchInterval;
 
     Subscription.askPermission()
     .then((permissionResult)=>{
-        console.log("permissionResult", permissionResult)
+        //console.log("permissionResult", permissionResult)
         if(permissionResult){
           return Util.promiseTimeout(14000, Subscription.subscribePush(user.googleId))
         }else{
@@ -45,7 +45,7 @@ const NotificationsMenu = ({user}) => {
         }
     })  
     .then((subResult)=>{
-        console.log("subResult", subResult)
+        //console.log("subResult", subResult)
         if(subResult){
           Subscription.listenServiceWorkerMessages(setNotificationsRefetch);
         }else{

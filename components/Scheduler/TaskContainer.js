@@ -100,7 +100,8 @@ const TaskContainer = function(props) {
                     {type: 'service', color: "#444", shorthand: 'SR'},
                     {type: 'wireless', color: "#fc00d2", shorthand: 'WL'},
                     {type: 'power', color: "#00af7e", shorthand: 'PR'},
-                    {type: 'marquee', color: "#5b443b", shorthand: 'MQ'}]
+                    {type: 'marquee', color: "#5b443b", shorthand: 'MQ'},
+                    {type: 'video', color: "#bb6cff", shorthand: 'VD'}]
 
   //Map Props
     const [taskListToMap, setTaskListToMap] = useState(null);
@@ -315,14 +316,11 @@ const TaskContainer = function(props) {
     if(tmp){
       tmpParsed = JSON.parse(tmp);
     }
-    console.log("tmpParsed",tmpParsed);
-    console.log("tmp", tmp);
+    
     if(tmpParsed != null || tmpParsed != undefined){
       setActiveTaskView(tmpParsed);
-      console.log("Set activeTaskView", tmpParsed)
     }else{
       setActiveTaskView(1);
-      console.log("Set activeTaskView", 1)
     }
   }
   if(!isNaN(activeTaskView) && activeTaskView != null){

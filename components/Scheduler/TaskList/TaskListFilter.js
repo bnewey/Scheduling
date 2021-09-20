@@ -577,7 +577,7 @@ const TaskListFilter = (props) => {
                     </div>
                     <div className={classes.chipDiv}>
                     {filters && filters.map((filter,i)=>{
-                        return(<>
+                        return(<div key={`chip`+i}>
                                 <Chip
                                     icon={<FilterIcon/>}
                                     size={'small'}
@@ -585,7 +585,7 @@ const TaskListFilter = (props) => {
                                     onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
                                     className={classes.chip}
                                 />
-                            </>);
+                            </div>);
                     })}
                     </div>
                     
@@ -649,7 +649,7 @@ const TaskListFilter = (props) => {
                                         </div>
                                         <div className={classes.chipDiv}>
                                         {filters && filters.map((filter,i)=>{
-                                            return(<>
+                                            return(<div key={`chips`+i }>
                                                     <Chip
                                                         icon={<FilterIcon/>}
                                                         size={'small'}
@@ -657,7 +657,7 @@ const TaskListFilter = (props) => {
                                                         onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
                                                         className={classes.chip}
                                                     />
-                                                </>);
+                                                </div>);
                                         })}
                                         </div>
                                         
@@ -940,6 +940,8 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#d3d2d6',
         padding: '5px 20px',
         borderRadius: '3px',
+        display: 'flex',
+        flexWrap: 'wrap',
     },
     chip:{
         backgroundColor: '#fff',

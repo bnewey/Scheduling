@@ -148,7 +148,7 @@ const TLArrivalDatePicker = (props) => {
     useEffect(()=>{
         
         if(!props.task?.table_id || !data){
-            console.error("Bad table id or no data");
+            //console.warn("Bad table id or no data");
             return;
         }
 
@@ -408,7 +408,7 @@ const TLArrivalDatePicker = (props) => {
 
                             {statusList.map((item,i)=> {
                             const isSelected = selectedWOIs.find((woi)=> woi.woi_id === item.woi_id) ? true : false;
-                            return <div className={clsx( classes.woiListItem, {
+                            return <div key={'checkboxFieldDiv'+i} className={clsx( classes.woiListItem, {
                                                     [classes.woiListItemSelected] : isSelected 
                                                     } ) }>
                                      <Checkbox key={'checkboxFieldLI'+i} checked={isSelected} className={clsx(classes.li_checkbox, { [classes.li_checkboxSelected] : isSelected } )}
