@@ -28,11 +28,11 @@ const InstallDateFilter = (props) => {
     const [selectInstallDateMenuOpen,setSelectInstallDateMenuOpen] = useState(false);
     const [ctrl, setCtrl] = useState(false);
     
-    const [isVisible, setIsVisible] = useState(!!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "drill_date" ));
+    const [isVisible, setIsVisible] = useState(!!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "sch_install_date" ));
 
     useEffect(()=>{
         if(activeTaskView && taskViews?.length > 0){
-            setIsVisible( !!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "drill_date" ));
+            setIsVisible( !!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "sch_install_date" ));
         }
     }, [activeTaskView])
 
