@@ -15,7 +15,7 @@ import clsx from 'clsx';
 const TLArrivalDatePicker = (props) => {
  
     //PROPS
-    const { data ,...other} = props;
+    const { data, taskListTasks,setTaskListTasks ,...other} = props;
 
     //STATE
     const [isLoadingState, setIsLoadingState] = React.useState(true);

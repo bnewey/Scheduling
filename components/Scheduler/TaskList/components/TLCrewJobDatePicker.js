@@ -104,12 +104,19 @@ const TLCrewJobDatePicker = (props) => {
         
     }
 
+    const getTextFieldValue = (value) =>{
+        if(type == 'install' && ready){
+            return "On Road";
+        }
+
+        return value ? moment(value).format('MM-DD-YYYY') : "";
+    }
 
     return(
         <div className={classes.root}>
             <div className={classes.inputRootDiv}>
-                {ready ? <Check className={classes.small_icon} /> : <></> }
-                <TextField {...inputProps} onClick={inputProps.openPicker} value={ props.value ? moment(props.value).format('MM-DD-YYYY') : ""} className={classes.input} variant="outlined" />
+                {ready && type =="drill" ? <Check className={classes.small_icon} /> : <></> }
+                <TextField {...inputProps} onClick={inputProps.openPicker} value={ getTextFieldValue(props.value) } className={classes.input} variant="outlined" />
             </div>
             <Dialog {...wrapperProps}  maxWidth="md">
                 <ReactTooltip effect={"solid"} delayShow={500}/>
@@ -130,7 +137,7 @@ const TLCrewJobDatePicker = (props) => {
                 </div>
                 <DialogActions>
                 <div className={classes.buttonDiv}>
-                    {type && (type == 'drill' || type == 'install') ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
+                    {type && type == 'drill'  ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
                         { ready ? 
                             <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(0)}>
                                  Unready
@@ -138,6 +145,15 @@ const TLCrewJobDatePicker = (props) => {
                             :
                             <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(1)}>
                                 Ready
+                            </Button> } </>: <></>}
+                    {type && type == 'install'  ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
+                        { ready ? 
+                            <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(0)}>
+                                 Un-Road
+                            </Button>
+                            :
+                            <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(1)}>
+                                Road
                             </Button> } </>: <></>}
                     <Button className={classes.button} data-tip="Complete Job (today)" data-place={'bottom'} fullWidth onClick={handleOpenCompleteTask}>
                         Complete
@@ -190,6 +206,9 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'nowrap',
         justifyContent: 'space-between',
         alignItems: 'center',
+        '& span':{
+            whiteSpace: 'nowrap',
+        }
     },
     calendarContainer:{
         display: 'flex',

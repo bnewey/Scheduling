@@ -3,6 +3,12 @@ import {makeStyles,  Button,  Box, Select,MenuItem, Tooltip } from '@material-ui
 
      import DeleteIcon from '@material-ui/icons/Clear';
      import DateIcon from '@material-ui/icons/DateRangeTwoTone'
+     import FilterIcon from '@material-ui/icons/MoreVert';
+
+const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
+    ssr: false
+  });
+  import dynamic from 'next/dynamic'
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
@@ -20,6 +26,7 @@ const TLDrillDateFilter = (props) => {
     //STATE
     const [drillDateFilterOpen, setDrillDateFilterOpen] = useState(null)
     const [selectDrillDateMenuOpen,setSelectDrillDateMenuOpen] = useState(false);
+    const [ctrl, setCtrl] = useState(false);
     
     const [isVisible, setIsVisible] = useState(!!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "drill_date" ));
 
@@ -51,7 +58,7 @@ const TLDrillDateFilter = (props) => {
     
 
     //CSS
-    const classes = useStyles();
+    const classes = useStyles({ctrl, filterLength: drillDateFilters?.length });
 
 
     const handleOpenDrillDateFilter = (event)=>{
@@ -68,17 +75,31 @@ const TLDrillDateFilter = (props) => {
     const handleUpdateDrillDateFilter =(value)=>{
         console.log("Value ", value);
 
+        if(value.find((item)=> item === "clear")){
+            setDrillDateFilters([])
+            handleCloseSelectMenu();
+            handleRefreshView()
+            return;
+        }
+
         let property = 'drill_date';
         if(value == 0 || value == 1){
             property = 'drill_ready';
-        }
+        }        
 
         var newArray = value.map((item)=>{
             return ({property, value: item})
         })
+        if(!ctrl){
+            newArray = newArray.slice(newArray.length-1)
+        }
 
         setDrillDateFilters(newArray);
-        handleCloseSelectMenu();
+        if(!ctrl){
+            handleCloseSelectMenu();
+        }else{
+            
+        }
         handleRefreshView()
     }
 
@@ -89,6 +110,32 @@ const TLDrillDateFilter = (props) => {
     const handleOpenSelectMenu = (event)=>{
         setSelectDrillDateMenuOpen(true);
     }
+
+    const handleCheckCtrlIsDown = async (keyCode, event)=>{
+        var id = event.target.id;
+        console.log("id", id);
+        console.log("keycode", keyCode)
+        if(isNaN(keyCode) || keyCode ==null ){
+          console.error("Bad keycode or element on handleCheckCtrlIsDown");
+          return;
+        }
+        if(keyCode === 17 && selectDrillDateMenuOpen){ //enter key & input element's id
+          setCtrl(true);
+        }
+    }
+
+    const handleCheckCtrlIsUp = async (keyCode, event)=>{
+        var id = event.target.id;
+        console.log("id", id);
+        console.log("keycode", keyCode)
+        if(isNaN(keyCode) || keyCode ==null  ){
+          console.error("Bad keycode or element on handleCheckCtrlIsDown");
+          return;
+        }
+        if(keyCode === 17 && selectDrillDateMenuOpen){ //enter key & input element's id
+          setCtrl(false);
+        }
+    }
     
     if(!isVisible){
         return <></>
@@ -96,9 +143,12 @@ const TLDrillDateFilter = (props) => {
 
     return(
         <> 
-                {drillDateFilterOpen && taskListTasksSaved ? 
+                {selectDrillDateMenuOpen && taskListTasksSaved ? 
                 <div className={classes.filterDrillDateDiv}>
+                    <KeyBinding type={"keydown"} onKey={ (e) => handleCheckCtrlIsDown(e.keyCode, e) } />
+                    <KeyBinding type={"keyup"} onKey={ (e) => handleCheckCtrlIsUp(e.keyCode, e) } /> 
                     <Select multiple
+                            autoWidth
                             id={"drillDateFilter"}
                             className={classes.selectBox}
                             value={(drillDateFilters?.map((item)=> (item.value))
@@ -115,24 +165,28 @@ const TLDrillDateFilter = (props) => {
                             var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
                             return [newArray.map((item,i)=>{
                                 return( 
-                                <MenuItem value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
+                                <MenuItem className={classes.menuItem} value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
                                 );
-                            }), <MenuItem value={0}>Drill Not Ready</MenuItem>, <MenuItem value={1}>Drill Ready</MenuItem>] ;
+                            }), <MenuItem className={classes.menuItem} value={0}>Drill Not Ready</MenuItem>, <MenuItem value={1}>Drill Ready</MenuItem>,
+                            , <MenuItem className={classes.menuItem} value={'clear'}>Clear</MenuItem>] ;
                         })()}
                     </Select> 
                     <span>
                         <DeleteIcon className={classes.clearDrillDateFilterIcon} onClick={event => handleClearAndCloseDrillDateFilter(event)}/>
                     </span>
                 </div> : 
-                <Button className={classes.drillDateFilterButton}
-                    onClick={event => handleOpenDrillDateFilter(event)}
-                    variant="text"
-                    color="secondary"
-                    size="medium"
-                >
-                    <DateIcon/>
-                    <Box display={{ xs: 'none', md: 'inline' }}  component="span">Drill Date Filter</Box>
-                </Button>
+                // <Button className={classes.drillDateFilterButton}
+                //     onClick={event => handleOpenDrillDateFilter(event)}
+                //     variant="text"
+                //     color="secondary"
+                //     size="medium"
+                // >
+                //     <DateIcon/>
+                //     <Box display={{ xs: 'none', md: 'inline' }}  component="span">Drill Date Filter</Box>
+                // </Button>
+                <div>
+                    <FilterIcon className={classes.icon} onClick={event => handleOpenDrillDateFilter(event)}/>
+                </div>
                 }
         </>
     );
@@ -148,18 +202,28 @@ const useStyles = makeStyles(theme => ({
         background: '#fff',
         color: '#19253a',
         '&& .MuiSelect-select':{
-            padding: '8px 20px 8px 10px',
-            minWidth: '100px',
+            // padding: '8px 20px 8px 10px',
+            // minWidth: '100px',
+            padding: '0px',
+            minWidth: '1px',
         },
+        
     },
     filterDrillDateDiv:{
-        margin: '0px 10px',
+        // margin: '0px 10px',
+        // display: 'flex',
+        // justifyContent: 'center',
+        // alignItems: 'center',
+        // background: '#ad74d9',
+        // padding: '2px 4px',
+        // borderRadius: '3px',
+        margin: '0px 0px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        background: '#ad74d9',
-        padding: '2px 4px',
-        borderRadius: '3px',
+        padding: '0px',
+        overflow: "hidden",
+        width: "1px"
     },
     drillDateFilterButton:{
         color: '#fff',
@@ -181,6 +245,15 @@ const useStyles = makeStyles(theme => ({
             background: '#b7b7b75c',
             borderRadius: '8px',
         }
+    },
+    selectBox:{
+        display: 'none',
+    },
+    menuItem:{
+        cursor: ({ctrl}) => ctrl ? 'cell': 'pointer',
+    },
+    icon:{
+        color: ({filterLength}) => filterLength > 0 ? '#ff6a1e' : '#fff'
     }
 
       

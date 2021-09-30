@@ -814,7 +814,10 @@ const TaskListTasks = (props) =>{
         }
         case 'sch_install_date':{
           if(!task.install_job_completed){
-            return_value = <div>
+            return_value = <div className={classes.install_date_div}>
+              {/* <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 
+                          task={task} 
+                          data={woiData?.filter((item)=>item.work_order == task.table_id)}/> */}
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                         <TLCrewJobDatePicker   showTodayButton
                         clearable
@@ -916,7 +919,6 @@ const TaskListTasks = (props) =>{
           break;
         case 'wo_arrival_dates':
           var arrivalValue = value;
-          if(!task.wo_arrival_dates){
             return_value = <div>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                         <TLArrivalDatePicker   showTodayButton
@@ -935,10 +937,6 @@ const TaskListTasks = (props) =>{
                         task={task} />
               </MuiPickersUtilsProvider></div>
                 break;
-          }else{
-            return_value = <span>Arrived</span>
-            break;
-          }
           break;
         default:{
           
@@ -1561,6 +1559,10 @@ const useStyles = makeStyles(theme => ({
       color: '#ee3344',
     }
   },
+  install_date_div:{
+    display: 'flex',
+    flexDirection: 'row',
+  }
   
 
 }));

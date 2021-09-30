@@ -132,7 +132,7 @@ const WoiStatusCheck = (props) => {
                   {statusList?.length > 0 ? 
                         <div onMouseUp={event => handelOpenStatusPanel(event)}
                             className={classes.openPanelSpan}>
-                         <WarningIcon className={classes.warningIcon} />&nbsp;({statusList.length}) Warnings &nbsp; <GetSpecialIconIndicators statusList={statusList}/>
+                         <WarningIcon className={classes.warningIcon} /><GetSpecialIconIndicators statusList={statusList}/>
                         </div> : <></>}
                   
                 </div> 
@@ -152,8 +152,9 @@ const useStyles = makeStyles(theme => ({
     openPanelSpan:{
         cursor: 'pointer',
         '&:hover':{
-            textDecoration: 'underline',
+            borderBottom: '1px solid #000',
         },
+        borderBottom: '1px solid rgb(0,0,0,0)',
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',

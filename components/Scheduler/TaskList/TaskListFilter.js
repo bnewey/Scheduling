@@ -599,10 +599,10 @@ const TaskListFilter = (props) => {
                     {filteredItems ? filteredItems.length : 0}&nbsp;Item(s)
                 </div>
                 
-                <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} drillDateFilters={drillDateFilters}
-                      setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />
-                <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} installDateFilters={installDateFilters}
-                      setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />
+                {/* <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} drillDateFilters={drillDateFilters}
+                      setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} /> */}
+                {/* <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} installDateFilters={installDateFilters}
+                      setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} /> */}
             </div> 
             <Modal aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"

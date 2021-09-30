@@ -3,6 +3,12 @@ import {makeStyles,  Button,  Box, Select,MenuItem, Tooltip } from '@material-ui
 
      import DeleteIcon from '@material-ui/icons/Clear';
      import DateIcon from '@material-ui/icons/DateRangeTwoTone'
+     import FilterIcon from '@material-ui/icons/MoreVert';
+
+const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
+    ssr: false
+  });
+  import dynamic from 'next/dynamic'
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../../UI/ConfirmYesNo';
@@ -12,7 +18,7 @@ import moment from 'moment';
 
 import _, { property } from 'lodash';
 
-const TaskListFilter = (props) => {
+const InstallDateFilter = (props) => {
     //PROPS
     const {activeTaskView,taskViews, handleRefreshView, taskListTasksSaved,installDateFilters, setInstallDateFilters,
         setRefreshView,tabValue} = props;
@@ -20,6 +26,7 @@ const TaskListFilter = (props) => {
     //STATE
     const [installDateFilterOpen, setInstallDateFilterOpen] = useState(null)
     const [selectInstallDateMenuOpen,setSelectInstallDateMenuOpen] = useState(false);
+    const [ctrl, setCtrl] = useState(false);
     
     const [isVisible, setIsVisible] = useState(!!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "drill_date" ));
 
@@ -28,6 +35,7 @@ const TaskListFilter = (props) => {
             setIsVisible( !!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "drill_date" ));
         }
     }, [activeTaskView])
+
 
     useEffect(() => {
         if(installDateFilterOpen == null){
@@ -50,7 +58,7 @@ const TaskListFilter = (props) => {
     
 
     //CSS
-    const classes = useStyles();
+    const classes = useStyles({ctrl, filterLength: installDateFilters?.length });
 
 
     const handleOpenInstallDateFilter = (event)=>{
@@ -67,12 +75,27 @@ const TaskListFilter = (props) => {
     const handleUpdateInstallDateFilter =(value)=>{
         console.log("Value ", value);
 
+        if(value.find((item)=> item === "clear")){
+            setInstallDateFilters([])
+            handleCloseSelectMenu();
+            handleRefreshView()
+            return;
+        }
+
         var newArray = value.map((item)=>{
             return ({property: 'sch_install_date', value: item})
         })
+        if(!ctrl){
+            newArray = newArray.slice(newArray.length-1)
+        }
 
         setInstallDateFilters(newArray);
-        handleCloseSelectMenu();
+
+        if(!ctrl){
+            handleCloseSelectMenu();
+        }else{
+            
+        }
         handleRefreshView()
     }
 
@@ -84,15 +107,44 @@ const TaskListFilter = (props) => {
         setSelectInstallDateMenuOpen(true);
     }
 
+    const handleCheckCtrlIsDown = async (keyCode, event)=>{
+        var id = event.target.id;
+        console.log("id", id);
+        console.log("keycode", keyCode)
+        if(isNaN(keyCode) || keyCode ==null ){
+          console.error("Bad keycode or element on handleCheckCtrlIsDown");
+          return;
+        }
+        if(keyCode === 17 && selectInstallDateMenuOpen){ //enter key & input element's id
+          setCtrl(true);
+        }
+    }
+
+    const handleCheckCtrlIsUp = async (keyCode, event)=>{
+        var id = event.target.id;
+        console.log("id", id);
+        console.log("keycode", keyCode)
+        if(isNaN(keyCode) || keyCode ==null  ){
+          console.error("Bad keycode or element on handleCheckCtrlIsDown");
+          return;
+        }
+        if(keyCode === 17 && selectInstallDateMenuOpen){ //enter key & input element's id
+          setCtrl(false);
+        }
+    }
+
     if(!isVisible){
         return <></>
     }
     
     return(
         <>
-                {installDateFilterOpen && taskListTasksSaved ? 
+                {selectInstallDateMenuOpen && taskListTasksSaved ? 
                 <div className={classes.filterInstallDateDiv}>
+                    <KeyBinding type={"keydown"} onKey={ (e) => handleCheckCtrlIsDown(e.keyCode, e) } />
+                    <KeyBinding type={"keyup"} onKey={ (e) => handleCheckCtrlIsUp(e.keyCode, e) } /> 
                     <Select  multiple
+                            autoWidth
                             id={"installDateFilter"}
                             className={classes.selectBox}
                             value={(installDateFilters?.map((item)=> (item.value))
@@ -107,33 +159,36 @@ const TaskListFilter = (props) => {
                             var array = [...taskListTasksSaved].map((task)=> task["sch_install_date"])
                                            .filter((v, i, array)=> array.indexOf(v)===i && v != null )
                             var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
-                            return newArray.map((item,i)=>{
+                            return [...newArray.map((item,i)=>{
                                 return( 
-                                <MenuItem value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
+                                <MenuItem className={classes.menuItem} value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
                                 );
-                            }) ;
+                            }), <MenuItem className={classes.menuItem} value={'clear'}>Clear</MenuItem> ] ;
                         })()}
                     </Select> 
                     <span>
                         <DeleteIcon className={classes.clearInstallDateFilterIcon} onClick={event => handleClearAndCloseInstallDateFilter(event)}/>
                     </span>
                 </div> : 
-                <Button className={classes.installDateFilterButton}
-                    onClick={event => handleOpenInstallDateFilter(event)}
-                    variant="text"
-                    color="secondary"
-                    size="medium"
-                >
-                    <DateIcon/>
-                    <Box display={{ xs: 'none', md: 'inline' }}  component="span">Install Date Filter</Box>
-                </Button>
+                // <Button className={classes.installDateFilterButton}
+                //     onClick={event => handleOpenInstallDateFilter(event)}
+                //     variant="text"
+                //     color="secondary"
+                //     size="medium"
+                // >
+                //     <DateIcon/>
+                //     <Box display={{ xs: 'none', md: 'inline' }}  component="span">Install Date Filter</Box>
+                // </Button>
+                <div>
+                    <FilterIcon className={classes.icon} onClick={event => handleOpenInstallDateFilter(event)}/>
+                </div>
                 }
         </>
     );
 
 } 
 
-export default TaskListFilter;
+export default InstallDateFilter;
 
 const useStyles = makeStyles(theme => ({
     filterInstallDate: {
@@ -142,18 +197,27 @@ const useStyles = makeStyles(theme => ({
         background: '#fff',
         color: '#19253a',
         '&& .MuiSelect-select':{
-            padding: '8px 20px 8px 10px',
-            minWidth: '100px',
+            // padding: '8px 20px 8px 10px',
+            // minWidth: '100px',
+            padding: '0px',
+            minWidth: '1px',
         },
     },
     filterInstallDateDiv:{
-        margin: '0px 10px',
+        // margin: '0px 10px',
+        // display: 'flex',
+        // justifyContent: 'center',
+        // alignItems: 'center',
+        // background: '#d7ffef',
+        // padding: '2px 4px',
+        // borderRadius: '3px',
+        margin: '0px 0px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        background: '#d7ffef',
-        padding: '2px 4px',
-        borderRadius: '3px',
+        padding: '0px',
+        overflow: "hidden",
+        width: "1px"
     },
     installDateFilterButton:{
         color: '#152f24',
@@ -175,6 +239,15 @@ const useStyles = makeStyles(theme => ({
             background: '#b7b7b75c',
             borderRadius: '8px',
         }
+    },
+    selectBox:{
+        display: 'none',
+    },
+    menuItem:{
+        cursor: ({ctrl}) => ctrl ? 'cell': 'pointer',
+    },
+    icon:{
+        color: ({filterLength}) => filterLength > 0 ? '#ff6a1e' : '#fff'
     }
 
       

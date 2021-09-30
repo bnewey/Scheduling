@@ -464,7 +464,7 @@ const CustomMap = compose(
             <MarkerWithLabel
             key={marker.t_id}
             title={(marker.t_id).toString()} 
-            position={{ lat: marker.lat, lng: marker.lng}}
+            position={{ lat:  parseFloat(marker.lat), lng: parseFloat(marker.lng)}}
             onClick = { props.updateActiveMarker(marker.t_id, "task") }
              labelAnchor={new google.maps.Point( `#${index}`.toString().length * 5 , 40)}
              labelStyle={{backgroundColor: "rgba(202, 69, 58, 0.8)", fontSize: "13px", padding: "2px", borderRadius: '5px', color: '#fff',}}
@@ -482,7 +482,7 @@ const CustomMap = compose(
         >
         {vehicleMarkers && visibleItems.indexOf("vehicles") != -1 && vehicleMarkers.map((vehicle,i) => (
             <MarkerWithLabel
-            position={{ lat: vehicle.latitude, lng: vehicle.longitude}}
+            position={{ lat: parseFloat(vehicle.latitude), lng: parseFloat(vehicle.longitude)}}
             onClick = { props.updateActiveMarker(vehicle.vin, "vehicle") }
             className={'marker'+i}
             id={vehicle.vin}
@@ -515,7 +515,7 @@ const CustomMap = compose(
                     opacity={0}
                     clickable={false}
                     cursor={"drag"}
-                    position={{ lat: crew.lat, lng: crew.lng}}
+                    position={{ lat: parseFloat(crew.lat), lng: parseFloat(crew.lng)}}
                     className={'marker'+i}
                     id={crew.id}
                     key={crew.id}

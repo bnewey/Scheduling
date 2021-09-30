@@ -19,6 +19,8 @@ import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
 import TaskListFilter from './TaskListFilter';
+import TLDrillDateFilter from './components/TLDrillDateFilter';
+import TLInstallDateFilter from './components/TLInstallDateFilter';
 
 import {createSorter} from '../../../js/Sort';
 import {createFilter} from '../../../js/Filter';
@@ -44,7 +46,8 @@ const TaskListMain = (props) => {
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters,
-         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView } = useContext(TaskContext);
+         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, taskViews , activeTaskView,
+         setRefreshView, setDrillDateFilters} = useContext(TaskContext);
 
 
     //CSS
@@ -268,6 +271,32 @@ const TaskListMain = (props) => {
             setSelectedTasks([]);
         }
     }
+
+    const handleRefreshView = () =>{
+        //Refreshes based on which tab is currently active
+        //only using taskList bc thats the only page with quick filter access for now
+        var viewToRefresh;
+        switch(tabValue){
+            case 0:
+                viewToRefresh = "calendar"
+                break;
+            case 1:
+                viewToRefresh = "taskList"
+                break;
+            case 2:
+                viewToRefresh = "map"
+                break;
+            // case 3:
+            //     viewToRefresh = "crew"
+            //     break;
+            // case 4:
+            //     viewToRefresh = "allTasks"
+            //     break;
+        }
+        if(viewToRefresh){
+            setRefreshView(viewToRefresh);
+        }
+    }
      
     return(
         <>
@@ -306,15 +335,22 @@ const TaskListMain = (props) => {
                                                         className={classes.listItemText} 
                                                         style={{flex: `0 0 ${item.width}`}} 
                                                         classes={{primary: classes.listItemTextPrimary}}
-                                                        onClick={event=>handleListSort(event, item)}
+                                                        
                                                         >
-                                                            <span>
+                                                            <span onClick={event=>handleListSort(event, item)}>
                                                         {item.text}
+                                                        </span>
                                                         {isSorted ?
                                                             <div>
                                                                 {isASC ? <ArrowDropDownIcon/> : <ArrowDropUpIcon/>}
                                                             </div> 
                                                             : <></>}
+                                                            
+                                                            <span>
+                                                            {item.field == "drill_date" && <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} drillDateFilters={drillDateFilters}
+                      setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
+                      {item.field == "sch_install_date" && <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} installDateFilters={installDateFilters}
+                      setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
                                                             </span>
                                         </ListItemText>
                                     )})}
@@ -397,9 +433,15 @@ const useStyles = makeStyles(theme => ({
         },
         fontWeight: '600',
         color: '#ffffff',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexWrap: 'nowrap'
      },
     listItemText:{
         textAlign: 'center',
+        
      },
      checkHead:{
 
