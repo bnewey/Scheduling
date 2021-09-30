@@ -6,6 +6,7 @@ import cogoToast from 'cogo-toast';
 import {createSorter} from '../../../js/Sort';
 import {createFilter} from '../../../js/Filter';
 
+import moment from 'moment';
 import Util from '../../../js/Util';
 import Settings from '../../../js/Settings';
 import InventoryOrdersOut from '../../../js/InventoryOrdersOut';
@@ -80,23 +81,33 @@ const InvOrdersOutContainer = function(props) {
 
   const classes = useStyles();
 
-  //Get View from local storage if possible || kit default
-  useEffect(() => {
+   //Get View from local storage if possible || set default
+   useEffect(() => {
     if(currentView == null){
       var tmp = window.localStorage.getItem('currentInvOrdersOutView');
-      var tmpParsed;
+      var tmpParsed, view, date;
       if(tmp){
-        tmpParsed = JSON.parse(tmp);
+        tmpParsed = JSON.parse(tmp)
+        let tmpParsedArray = tmpParsed.split('#date#');
+        view = tmpParsedArray[0];
+        date = tmpParsedArray[1];
       }
-      if(tmpParsed){
-        var view = views.filter((v)=> v.value == tmpParsed)[0]
-        setCurrentView(view || views[0]);
+      if(view){
+        var view = views.filter((v)=> v.value == view)[0]
+        console.log('view',view);
+        handleSetView(view || views[0]);
+
+        //if date and is older than 15 minutes
+        if(date && moment() > moment(date).add(15,'minute') ){
+          console.log("Disregard saved view, go to default", date);
+          handleSetView(views[0]);
+        }
       }else{
-        setCurrentView(views[0]);
+        handleSetView(views[0]);
       }
     }
     if(currentView){
-      window.localStorage.setItem('currentInvOrdersOutView', JSON.stringify(currentView.value));
+      window.localStorage.setItem('currentInvOrdersOutView', JSON.stringify(currentView.value + '#date#' + moment().format('YYYY-MM-DD HH:mm:ss')));
     }
     
   }, [currentView]);

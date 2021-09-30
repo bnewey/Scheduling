@@ -9,7 +9,7 @@ import {createFilter} from '../../../js/Filter';
 import Util from '../../../js/Util';
 import Settings from '../../../js/Settings';
 import InventoryKits from '../../../js/InventoryKits';
-
+import moment from 'moment';
 
 import KitsToolbar from './Toolbar/KitsToolbar';
 //Sidebars
@@ -84,23 +84,33 @@ const InvKitsContainer = function(props) {
 
   const classes = useStyles();
 
-  //Get View from local storage if possible || set default
-  useEffect(() => {
+   //Get View from local storage if possible || set default
+   useEffect(() => {
     if(currentView == null){
       var tmp = window.localStorage.getItem('currentInvKitsView');
-      var tmpParsed;
+      var tmpParsed, view, date;
       if(tmp){
-        tmpParsed = JSON.parse(tmp);
+        tmpParsed = JSON.parse(tmp)
+        let tmpParsedArray = tmpParsed.split('#date#');
+        view = tmpParsedArray[0];
+        date = tmpParsedArray[1];
       }
-      if(tmpParsed){
-        var view = views.filter((v)=> v.value == tmpParsed)[0]
-        setCurrentView(view || views[0]);
+      if(view){
+        var view = views.filter((v)=> v.value == view)[0]
+        console.log('view',view);
+        handleSetView(view || views[0]);
+
+        //if date and is older than 15 minutes
+        if(date && moment() > moment(date).add(15,'minute') ){
+          console.log("Disregard saved view, go to default", date);
+          handleSetView(views[0]);
+        }
       }else{
-        setCurrentView(views[0]);
+        handleSetView(views[0]);
       }
     }
     if(currentView){
-      window.localStorage.setItem('currentInvKitsView', JSON.stringify(currentView.value));
+      window.localStorage.setItem('currentInvKitsView', JSON.stringify(currentView.value + '#date#' + moment().format('YYYY-MM-DD HH:mm:ss')));
     }
     
   }, [currentView]);

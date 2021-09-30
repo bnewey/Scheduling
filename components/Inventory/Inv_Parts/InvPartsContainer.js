@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect, createContext} from 'react';
 import {makeStyles, CircularProgress, Grid} from '@material-ui/core';
 
-
+import moment from 'moment';
 import cogoToast from 'cogo-toast';
 import {createSorter} from '../../../js/Sort';
 import {createFilter} from '../../../js/Filter';
@@ -73,28 +73,37 @@ const InvPartsContainer = function(props) {
 
 
   const classes = useStyles();
-
-  //Get View from local storage if possible || set default
-  useEffect(() => {
+  
+   //Get View from local storage if possible || set default
+   useEffect(() => {
     if(currentView == null){
       var tmp = window.localStorage.getItem('currentInvPartsView');
-      var tmpParsed;
+      var tmpParsed, view, date;
       if(tmp){
-        tmpParsed = JSON.parse(tmp);
+        tmpParsed = JSON.parse(tmp)
+        let tmpParsedArray = tmpParsed.split('#date#');
+        view = tmpParsedArray[0];
+        date = tmpParsedArray[1];
       }
-      if(tmpParsed){
-        var view = views.filter((v)=> v.value == tmpParsed)[0]
-        setCurrentView(view || views[0]);
+      if(view){
+        var view = views.filter((v)=> v.value == view)[0]
+        console.log('view',view);
+        handleSetView(view || views[0]);
+
+        //if date and is older than 15 minutes
+        if(date && moment() > moment(date).add(15,'minute') ){
+          console.log("Disregard saved view, go to default", date);
+          handleSetView(views[0]);
+        }
       }else{
-        setCurrentView(views[0]);
+        handleSetView(views[0]);
       }
     }
     if(currentView){
-      window.localStorage.setItem('currentInvPartsView', JSON.stringify(currentView.value));
+      window.localStorage.setItem('currentInvPartsView', JSON.stringify(currentView.value + '#date#' + moment().format('YYYY-MM-DD HH:mm:ss')));
     }
     
   }, [currentView]);
-  
  
   //Sign Rows
   useEffect( () =>{
