@@ -59,21 +59,6 @@ const SignContainer = function(props) {
   const [columnState, setColumnState] = useState(null);
   const [columns, setColumns] = useState(null);
 
-  // const [detailWOid,setDetailWOid] = useState(null);
-
-  // const [editPOModalOpen, setEditPOModalOpen] = React.useState(false);
-  // const [editModalMode, setEditModalMode] = React.useState(null);
-  
-  //Extras
-  //const [raineyUsers, setRaineyUsers] = useState(null);
-
-  //Detail - FairPlay Order
-  // const [fpOrders, setFPOrders] = React.useState(null);
-  // const [fpOrders, setFPOrders] = React.useState(null);
-  // const [activeFPOrder, setActiveFPOrder] =React.useState(null);
-  // const [fpOrderModalMode,setFPOrderModalMode] = React.useState("add");
-  // const [fpOrderModalOpen, setFPOrderModalOpen] = React.useState(false);
-  // const [vendorTypes, setVendorTypes] = React.useState(null);
   
   const classes = useStyles();
 

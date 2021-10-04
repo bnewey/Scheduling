@@ -25,7 +25,7 @@ const PartsToolbar = function(props) {
   const {user} = props;
 
   
-  const { parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views, activePart} = useContext(ListContext);
+  const { parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views, activePart, backToSearch, setBackToSearch, handleSetView} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "partsList";
 
@@ -35,12 +35,10 @@ const PartsToolbar = function(props) {
   const toolBarMainGrid = () =>{
     switch(currentView.value){
       case "partsList":
-        return <Search parts={parts} setParts={setParts} partsSearchRefetch={partsSearchRefetch}
-             setPartsSearchRefetch={setPartsSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} openOnFocus/>
+        return <Search openOnFocus/>
         break
       case "partsSearch":
-        return <Search parts={parts} setParts={setParts} partsSearchRefetch={partsSearchRefetch}
-        setPartsSearchRefetch={setPartsSearchRefetch} currentView={currentView} setCurrentView={setCurrentView} views={views} openOnFocus/>
+        return <Search openOnFocus/>
         break;
       case "partsDetail":
         return <><div className={classes.woDetailToolbarDiv}>
@@ -57,11 +55,11 @@ const PartsToolbar = function(props) {
 
   const toolBarLeftGrid = ()=>{
     const handleCloseView = (view)=>{
-    
-      setCurrentView(views.find((view)=> view.value == currentView.closeToView));
+      
+      handleSetView(views.find((view)=> view.value == currentView.closeToView(backToSearch)));
       //Run onClose and onClose of parent page in case it is child
       if(view.onClose){
-        view.onClose();
+        view.onClose(backToSearch);
       }
       if(view.parent){
         var parent_view = views.find((v)=> v.value == view.parent);
@@ -81,7 +79,8 @@ const PartsToolbar = function(props) {
                   <ArrowBackIcon className={classes.backIcon} />
             </IconButton>
             <span className={clsx({[classes.toolbarLeftGridHeadSpan]:true}) } 
-                  >{views.find((view)=> currentView.closeToView == view.value).displayName }</span>
+                  >{views.find((view)=> currentView.closeToView(backToSearch) == view.value)?.displayName }</span>
+                  <span>{backToSearch ? "Search Results" : ""}</span>
             </div>
         </Grid>
         </Slide>

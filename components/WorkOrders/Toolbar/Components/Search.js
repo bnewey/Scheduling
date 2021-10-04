@@ -5,6 +5,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
 import Grow from '@material-ui/core/Grow';
 import cogoToast from 'cogo-toast';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 import Util from  '../../../../js/Util';
 import Work_Orders from  '../../../../js/Work_Orders';
@@ -26,8 +27,12 @@ const Search = function(props) {
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const {searchValue,setSearchValue, workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, previousView, handleSetView, views} = useContext(ListContext);
+  
+  const {savedSearch, setSavedSearch,searchValue,setSearchValue, workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView,
+     previousView, handleSetView, views, backToSearch, setBackToSearch, savedSearchValue, setSavedSearchValue} = useContext(ListContext);
   const searchOpen = currentView && currentView.value == "search";
+
+  const [open, setOpen] = useState(false);
 
   const searchTableObject= [
     {value: "all", displayValue: 'All'},
@@ -43,9 +48,16 @@ const Search = function(props) {
 
   useEffect(()=>{
     if(!searchOpen ){
-        setSearchValue("");
+        //setSearchValue("");
     }
   },[searchOpen])
+
+  useEffect(()=>{
+    if(currentView.value == 'search' && savedSearch?.length > 0){
+      setWorkOrders(savedSearch)
+      setBackToSearch(true);
+    }
+  }, [currentView, savedSearch])
 
   const searchRef = React.useRef(null);
   const tableRef = React.useRef(null);
@@ -190,6 +202,7 @@ const Search = function(props) {
         var response = await search(searchTable, searchValue)    
         
         setWorkOrders(response);
+        setSavedSearch(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")
         console.error("Error", error);
@@ -203,16 +216,24 @@ const Search = function(props) {
       
     }else{
       //submit search
-      setWorkOrders(await search(searchTable, searchValue));
+      let response = await search(searchTable, searchValue)
+      setWorkOrders(response);
+      setSavedSearch(response);
     }
   }
 
   const handleChangeSearchValue = (event, value, reason, submit = false)=>{
-    
     let str = value;
     str = str.replace(/^\s+/, '');
     if(str || str == '' ){
-      setSearchValue(str)
+      console.log("Setting search value", reason)
+      if(reason === "reset" && savedSearchValue){
+        setSearchValue(savedSearchValue)
+      }else{
+        setSearchValue(str)
+        setSavedSearchValue(str);
+      }
+      
     } 
   }
 
@@ -221,6 +242,14 @@ const Search = function(props) {
     console.log("higlight", option);
     console.log("highlight reason", reason);
   }
+
+  const handleOnOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickAway = () => {
+    setOpen(false);
+  };
 
   const selectSearchField = () =>{
     const handleSearchTable = event => {
@@ -249,13 +278,15 @@ const Search = function(props) {
         {searchHistory && searchOpen == true ? 
             <><Grow in={searchOpen} style={{width: '100%'}}  >
             <div><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
-            
+            <ClickAwayListener onClickAway={handleClickAway}>
             <Autocomplete
               id="wo_search_input"
               options={searchHistory}
               getOptionLabel={(option) => option.id || option}
               freeSolo
               openOnFocus
+              open={open}
+              onOpen={handleOnOpen}
               debug
               ListboxProps={
                 {ref: listRef}
@@ -272,7 +303,9 @@ const Search = function(props) {
                 handleChangeSearchValue(event, matchValue || value, reason)
                 if(matchValue){
                   setSearchTable(searchMatch.searchTable);
-                  setWorkOrders(await search(searchMatch.searchTable, matchValue ));
+                  let response = await search(searchMatch.searchTable, matchValue )
+                  setWorkOrders(response);
+                  setSavedSearch(response)
                 }
               } }
               renderInput={(params) => {  searchRef.current = params.inputProps.ref.current; return (<TextField
@@ -295,7 +328,7 @@ const Search = function(props) {
                 </div>)
             }}
             />
-            
+            </ClickAwayListener>
              </div></Grow>
             </> :
                 <><span className={classes.toolbarLeftGridHeadSpan}>Search</span></>}

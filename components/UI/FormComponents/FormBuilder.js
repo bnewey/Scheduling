@@ -586,7 +586,7 @@ const GetInputByType = function(props){
                                 }}
                                 value={formObject &&  formObject[field.field] ? Util.convertISODateTimeToMySqlDateTime(formObject[field.field]) : null}
                                 inputProps={{className: classes.inputRoot}} 
-                                format={'M/dd/yyyy'}
+                                format={'MM/dd/yyyy'}
                                 />
             </MuiPickersUtilsProvider></div>);
             break;

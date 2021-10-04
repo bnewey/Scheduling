@@ -73,6 +73,10 @@ const InventoryContainer = function(props) {
     
   }, [currentView]);
 
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+  }
+
 
   const getInvPages = () =>{
     let tabs = views.filter((item)=> {

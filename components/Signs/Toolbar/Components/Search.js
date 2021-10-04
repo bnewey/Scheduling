@@ -13,6 +13,7 @@ import { ListContext } from '../../SignContainer';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
@@ -42,7 +43,7 @@ const Search = function(props) {
 
   useEffect(()=>{
     if(!searchOpen ){
-        setSearchValue("");
+        //setSearchValue("");
     }
   },[searchOpen])
 
@@ -237,6 +238,14 @@ const Search = function(props) {
     } 
   }
 
+  const handleOnOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickAway = () => {
+    setOpen(false);
+  };
+
   const selectSearchField = () =>{
     const handleSearchTable = event => {
       setSearchTable(event.target.value);
@@ -262,13 +271,15 @@ const Search = function(props) {
         {searchHistory && searchOpen == true ? 
             <><Grow in={searchOpen} style={{width: '100%'}}  >
             <div><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
-            
+            <ClickAwayListener onClickAway={handleClickAway}>
             <Autocomplete
               id="sign_search_input"
               options={searchHistory}
               getOptionLabel={(option) => option.id || option}
               freeSolo
               openOnFocus
+              open={open}
+              onOpen={handleOnOpen}
               inputValue={searchValue }
               classes={{input: classes.actualInputElement, option: classes.optionLi, listbox: classes.optionList }}
               onInputChange={async(event, value, reason)=> {
@@ -302,7 +313,7 @@ const Search = function(props) {
                 </div>)
             }}
             />
-            
+            </ClickAwayListener>
              </div></Grow>
             </> :
                 <><span className={classes.toolbarLeftGridHeadSpan}>Search</span></>}

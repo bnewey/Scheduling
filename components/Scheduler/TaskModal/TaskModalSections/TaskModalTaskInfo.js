@@ -123,9 +123,9 @@ const TaskModalTaskInfo = (props) => {
                 <TextField className={classes.inputFieldMatUi} multiline rows="2" variant="outlined" id="input-notes" label="Notes:" inputRef={ref_object.notes} defaultValue={modalTask.notes} onChange={handleShouldUpdate(true)}/>
             </FormControl>
             
-            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Assigned Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.wo_date} onChange={value => handleInputOnChange(value, true, "datetime", "date_assigned")} /></MuiPickersUtilsProvider>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Desired Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.date_desired} onChange={value => handleInputOnChange(value, true, "datetime", "date_desired")} /></MuiPickersUtilsProvider>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="First Game" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.first_game} onChange={value => handleInputOnChange(value, true, "datetime", "first_game")} /></MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker label="Assigned Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.wo_date} onChange={value => handleInputOnChange(value, true, "datetime", "date_assigned")} /></MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker label="Desired Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.date_desired} onChange={value => handleInputOnChange(value, true, "datetime", "date_desired")} /></MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker label="First Game" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.first_game} onChange={value => handleInputOnChange(value, true, "datetime", "first_game")} /></MuiPickersUtilsProvider>
             <MuiPickersUtilsProvider utils={DateFnsUtils}><DateTimePicker label="Completed Date" className={classes.inputFieldMatUi} inputVariant="outlined"  value={modalTask.date_completed} onChange={value => handleInputOnChange(value, true, "datetime", "date_completed")} /></MuiPickersUtilsProvider>
         </>}
         </>

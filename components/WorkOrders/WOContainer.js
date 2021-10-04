@@ -49,27 +49,31 @@ const WOContainer = function(props) {
   //views used through whole app, 
   //child views with parent run parent's onClose() function
   const views = [ { value: "allWorkOrders", displayName: "Work Orders", /*onClose: ()=> {setWorkOrders(null)}*/ },
-                  {value: 'search', displayName: 'Search', closeToView: 'allWorkOrders',
-                      onClose: ()=> {setWorkOrders(null)}} ,
-                  {value: "woDetail", displayName: 'W.O. Detail', closeToView: 'allWorkOrders', 
-                      onClose: ()=>{setWorkOrders(null);setActiveWorkOrder(null); setDetailWOid(null); setWorkOrderItems(null); setShipToContactOptionsWOI(null);
+                  {value: 'search', displayName: 'Search', closeToView: ()=> 'allWorkOrders',
+                      onClose: ()=> {setWorkOrders(null); setSavedSearch(null); setSavedSearchValue(null); setBackToSearch(false)}} ,
+                  {value: "woDetail", displayName: 'W.O. Detail', closeToView: (search)=> search ? 'search' :'allWorkOrders',
+                      onClose: (search)=>{if(!search){setWorkOrders(null); setSavedSearchValue(null); setSearchValue("")} setActiveWorkOrder(null); setDetailWOid(null); setWorkOrderItems(null); setShipToContactOptionsWOI(null);
                                 setActiveWOI(null); setEditWOIModalOpen(false); setActiveFPOrder(null); setFPOrderModalOpen(false);}}, 
-                  { value: "woItems", displayName: 'Itemization', closeToView: 'allWorkOrders',
+                  { value: "woItems", displayName: 'Itemization', closeToView: (search)=> search ? 'search' :'allWorkOrders',
                         parent: 'woDetail'},
-                  { value: "packingSlip", displayName: 'Packing Slip', closeToView: 'allWorkOrders',
+                  { value: "packingSlip", displayName: 'Packing Slip', closeToView: (search)=> search ? 'search' :'allWorkOrders',
                         parent: 'woDetail'},
-                  {value: "woPdf", displayName: 'W.O. PDF', closeToView: 'allWorkOrders',
+                  {value: "woPdf", displayName: 'W.O. PDF', closeToView: (search)=> search ? 'search' :'allWorkOrders',
                         parent: 'woDetail'},
-                  { value: "pastWO", displayName: 'Past W.Os', closeToView: 'allWorkOrders',
+                  { value: "pastWO", displayName: 'Past W.Os', closeToView: (search)=> search ? 'search' :'allWorkOrders',
                         parent: 'woDetail'},
-                  { value: "woFPOrder", displayName: 'FairPlay Order', closeToView: 'allWorkOrders',
+                  { value: "woFPOrder", displayName: 'FairPlay Order', closeToView: (search)=> search ? 'search' :'allWorkOrders',
                         parent: 'woDetail'}];
 
   const [currentView,setCurrentView] = useState(null);
   const [previousView, setPreviousView] = useState(null);
   const [detailWOid,setDetailWOid] = useState(null);
   const [activeWorkOrder, setActiveWorkOrder] = useState(null);
+  
   const [searchValue,setSearchValue] = useState("");
+  const [savedSearchValue, setSavedSearchValue] = useState(null);
+  const [savedSearch, setSavedSearch] = useState(null);
+  const [backToSearch, setBackToSearch] = useState(false);
 
   const [editWOModalOpen, setEditWOModalOpen] = React.useState(false);
   const [editModalMode, setEditModalMode] = React.useState(null);
@@ -397,7 +401,7 @@ const WOContainer = function(props) {
       <ListContext.Provider value={{workOrders, setWorkOrders, rowDateRange, setDateRowRange,
           currentView, previousView, handleSetView, views, detailWOid,setDetailWOid, activeWorkOrder, setActiveWorkOrder,
           editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState,
-          searchValue,setSearchValue} } >
+          searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch, savedSearchValue, setSavedSearchValue} } >
       <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, 
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
                      shipToContactOptionsWOI, setShipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToAddressOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,

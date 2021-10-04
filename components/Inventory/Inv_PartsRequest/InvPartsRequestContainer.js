@@ -93,6 +93,10 @@ const InvPartsRequestContainer = function(props) {
     
   }, [currentView]);
 
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+  }
+
   //Get View from local storage if possible || kit default
   useEffect(() => {
     if(statusSortState == null){

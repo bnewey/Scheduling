@@ -12,6 +12,7 @@ import { ListContext } from '../../EntitiesContainer';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
@@ -20,16 +21,24 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
 const Search = function(props) {
   const {user} = props;
 
-  
-  const [searchValue,setSearchValue] = useState("");
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { entities, setEntities,
+  const { entities, setEntities, searchValue,setSearchValue,
     currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
-    editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
+    editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities,
+    savedSearch, setSavedSearch,
+    backToSearch, setBackToSearch, savedSearchValue, setSavedSearchValue} = useContext(ListContext);
     
   const searchOpen = currentView && currentView.value == "search";
+  const [open, setOpen] = useState(false);
+
+  useEffect(()=>{
+    if(currentView.value == 'search' && savedSearch?.length > 0){
+      setEntities(savedSearch)
+      setBackToSearch(true);
+    }
+  }, [currentView, savedSearch])
 
   const searchTableObject= [
     {value: "name", displayValue: 'Name'},
@@ -43,7 +52,8 @@ const Search = function(props) {
 
   useEffect(()=>{
     if(!searchOpen ){
-        setSearchValue("");
+      //idk if this is needed
+        //setSearchValue("");
     }
   },[searchOpen])
 
@@ -148,6 +158,7 @@ const Search = function(props) {
         var response = await search(searchTable, searchValue)    
 
         setEntities(response);
+        setSavedSearch(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")
         console.error("Error", error);
@@ -161,18 +172,34 @@ const Search = function(props) {
       
     }else{
       //submit search
-      setEntities(await search(searchTable, searchValue));
+      let response = await search(searchTable, searchValue)
+      setEntities(response);
+      setSavedSearch(response);
     }
   }
 
   const handleChangeSearchValue = (event, value, reason, submit = false)=>{
-    
     let str = value;
     str = str.replace(/^\s+/, '');
     if(str || str == '' ){
-      setSearchValue(str)
+      console.log("Setting search value", reason)
+      if(reason === "reset" && savedSearchValue){
+        setSearchValue(savedSearchValue)
+      }else{
+        setSearchValue(str)
+        setSavedSearchValue(str);
+      }
+      
     } 
   }
+
+  const handleOnOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickAway = () => {
+    setOpen(false);
+  };
 
   const selectSearchField = () =>{
     const handleSearchTable = event => {
@@ -199,13 +226,15 @@ const Search = function(props) {
         {searchHistory && searchOpen == true ? 
             <><Grow in={searchOpen} style={{width: '100%'}}  >
             <div><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
-            
+            <ClickAwayListener onClickAway={handleClickAway}>
             <Autocomplete
               id="wo_search_input"
               options={searchHistory}
               getOptionLabel={(option) => option.id || option}
               freeSolo
               openOnFocus
+              open={open}
+              onOpen={handleOnOpen}
               inputValue={searchValue }
               classes={{input: classes.actualInputElement, option: classes.optionLi, listbox: classes.optionList }}
               onInputChange={async(event, value, reason)=> {
@@ -216,7 +245,9 @@ const Search = function(props) {
                 handleChangeSearchValue(event, matchValue || value, reason)
                 if(matchValue){
                   setSearchTable(searchMatch.searchTable);
-                  setEntities(await search(searchMatch.searchTable, matchValue ));
+                  let response = await search(searchMatch.searchTable, matchValue )
+                  setEntities(response);
+                  setSavedSearch(response)
                 }
               } }
               renderInput={(params) => {  searchRef.current = params.inputProps.ref.current; return (<TextField
@@ -239,6 +270,7 @@ const Search = function(props) {
                 </div>)
             }}
             />
+            </ClickAwayListener>
             
              </div></Grow>
             </> :

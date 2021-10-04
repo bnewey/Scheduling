@@ -50,13 +50,13 @@ const InvPartsContainer = function(props) {
   //views used through inv parts, 
   //child views with parent run parent's onClose() function
   const views = [ { value: "partsList", displayName: "Parts List",  },
-                  {value: 'partsSearch', displayName: 'Search Parts', closeToView: 'partsList',
-                      onClose: ()=> {setPartsRefetch(true)}},
-                  {value: 'partsDetail', displayName: 'Part Detail', closeToView: 'partsList',
-                      onClose: ()=> {setPartsRefetch(true); setActivePart(null); setDetailPartId(null);}},
-                    {value: 'partsRecentOrders', displayName: 'Recent Orders', closeToView: 'partsList',
+                  {value: 'partsSearch', displayName: 'Search Parts', closeToView: ()=>  'partsList',
+                  onClose: ()=> {setPartsRefetch(true);setSavedSearch(null); setSavedSearchValue(null); setBackToSearch(false);}},
+                  {value: 'partsDetail', displayName: 'Part Detail', closeToView: (search)=> search ? 'partsSearch' : 'partsList',
+                  onClose: (search)=>{if(!search){setPartsRefetch(true);setSavedSearchValue(null); setSearchValue("");} setActivePart(null); setDetailPartId(null);}},
+                    {value: 'partsRecentOrders', displayName: 'Recent Orders', closeToView: (search)=> search ? 'partsSearch' : 'partsList',
                       parent: 'partsDetail'},
-                    {value: 'partsKits', displayName: 'Related Kits', closeToView: 'partsList',
+                    {value: 'partsKits', displayName: 'Related Kits', closeToView: (search)=> search ? 'partsSearch' : 'partsList',
                       parent: 'partsDetail'},
                 ];
 
@@ -70,6 +70,11 @@ const InvPartsContainer = function(props) {
   const [detailPartId,setDetailPartId] = useState(null);
   const [editPartModalMode, setEditPartModalMode] = React.useState("add")
   const [editPartModalOpen, setEditPartModalOpen] = React.useState(false);
+
+  const [searchValue,setSearchValue] = useState("");
+  const [savedSearchValue, setSavedSearchValue] = useState(null);
+  const [savedSearch, setSavedSearch] = useState(null);
+  const [backToSearch, setBackToSearch] = useState(false);
 
 
   const classes = useStyles();
@@ -104,6 +109,10 @@ const InvPartsContainer = function(props) {
     }
     
   }, [currentView]);
+
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+  }
  
   //Sign Rows
   useEffect( () =>{
@@ -326,7 +335,9 @@ const InvPartsContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{user, parts, setParts, setPartsRefetch, partsSearchRefetch,setPartsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailPartId,  setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
-         recentParts, setRecentParts, sorters, setSorters, typeFilter, setTypeFilter, partsSaved, setPartsSaved} } >
+         recentParts, setRecentParts, sorters, setSorters, typeFilter, setTypeFilter, partsSaved, setPartsSaved, handleSetView,
+         searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch,
+           savedSearchValue, setSavedSearchValue,} } >
       <DetailContext.Provider value={{}} >
         <div className={classes.containerDiv}>
         

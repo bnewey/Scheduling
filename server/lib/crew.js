@@ -736,7 +736,7 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
     ' cm.id as crew_leader_id, cma.member_name AS leader_name, cc.color AS crew_color, cc.id AS crew_id, ' +
     ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d\') as drill_date, date_format(j.job_date, \'%Y-%m-%d\') as sch_install_date, ' +
     ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
-    ' t.table_id, t.description ' +
+    ' t.table_id, wo.description ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' +
     ' LEFT JOIN work_orders wo ON wo.record_id = t.table_id '  + 

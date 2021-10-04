@@ -51,21 +51,26 @@ const InvKitsContainer = function(props) {
   //views used through inv kits, 
   //child views with parent run parent's onClose() function
   const views = [ { value: "kitsList", displayName: "Kits List",  },
-                  {value: 'kitsSearch', displayName: 'Search Kits', closeToView: 'kitsList',
-                      onClose: ()=> {setKitsRefetch(true)}},
-                  {value: 'kitsDetail', displayName: 'Kit Detail', closeToView: 'kitsList',
-                      onClose: ()=> {setKitsRefetch(true); setActiveKit(null); setDetailKitId(null);}},
-                      {value: 'kitsItemization', displayName: 'Itemization', closeToView: 'kitsList',
+                  {value: 'kitsSearch', displayName: 'Search Kits', closeToView: ()=>  'kitsList',
+                  onClose: ()=> {setKitsRefetch(true);setSavedSearch(null); setSavedSearchValue(null); setBackToSearch(false);}} ,
+                  {value: 'kitsDetail', displayName: 'Kit Detail', closeToView: (search)=> search ? 'kitsSearch' :  'kitsList',
+                  onClose: (search)=>{if(!search){setKitsRefetch(true);setSavedSearchValue(null); setSearchValue("");}setActiveKit(null); setDetailKitId(null);}},
+                      {value: 'kitsItemization', displayName: 'Itemization', closeToView: (search)=> search ? 'kitsSearch' :  'kitsList',
                       parent: 'kitsDetail'},
-                    {value: 'kitsRecentOrders', displayName: 'Recent Orders', closeToView: 'kitsList',
+                    {value: 'kitsRecentOrders', displayName: 'Recent Orders', closeToView: (search)=> search ? 'kitsSearch' :  'kitsList',
                       parent: 'kitsDetail'},
-                    {value: 'kitsKits', displayName: 'Related Kits', closeToView: 'kitsList',
+                    {value: 'kitsKits', displayName: 'Related Kits', closeToView: (search)=> search ? 'kitsSearch' :  'kitsList',
                       parent: 'kitsDetail'},
                 ];
 
   const [currentView,setCurrentView] = useState(null);
   const [columnState, setColumnState] = useState(null);
   const [sorters, setSorters] = useState(null);
+
+  const [searchValue,setSearchValue] = useState("");
+  const [savedSearchValue, setSavedSearchValue] = useState(null);
+  const [savedSearch, setSavedSearch] = useState(null);
+  const [backToSearch, setBackToSearch] = useState(false);
 
   const [recentKits, setRecentKits] = React.useState(null);
   const [activeKit, setActiveKit] = React.useState(null);
@@ -114,6 +119,10 @@ const InvKitsContainer = function(props) {
     }
     
   }, [currentView]);
+
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+  }
   
  
   //Sign Rows
@@ -308,7 +317,9 @@ const InvKitsContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{user, kits, setKits, setKitsRefetch, kitsSearchRefetch,setKitsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailKitId,  setDetailKitId,editKitModalMode,setEditKitModalMode, activeKit, setActiveKit, editKitModalOpen,setEditKitModalOpen,
-         recentKits, setRecentKits, sorters, setSorters,  kitsSaved, setKitsSaved, importKitModalOpen,setImportKitModalOpen, activeImportItem, setActiveImportItem
+         recentKits, setRecentKits, sorters, setSorters,  kitsSaved, setKitsSaved, importKitModalOpen,setImportKitModalOpen, activeImportItem, setActiveImportItem,
+         searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch,handleSetView,
+           savedSearchValue, setSavedSearchValue
         } } >
       <DetailContext.Provider value={{ editKitItemModalOpen,setEditKitItemModalOpen,editKitItemDialogMode,setEditKitItemDialogMode,
         activeKitItemItem, setActiveKitItemItem}} >

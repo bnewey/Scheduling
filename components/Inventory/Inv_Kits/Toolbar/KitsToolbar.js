@@ -24,7 +24,7 @@ const KitsToolbar = function(props) {
   const {user} = props;
 
   
-  const { kits, setKits,  currentView, setCurrentView, views,activeKit} = useContext(ListContext);
+  const { kits, setKits, handleSetView, currentView, setCurrentView, views,activeKit, backToSearch, setBackToSearch} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "kitsList";
 
@@ -55,11 +55,11 @@ const KitsToolbar = function(props) {
 
   const toolBarLeftGrid = ()=>{
     const handleCloseView = (view)=>{
-    
-      setCurrentView(views.find((view)=> view.value == currentView.closeToView));
+      
+      handleSetView(views.find((view)=> view.value == currentView.closeToView(backToSearch)));
       //Run onClose and onClose of parent page in case it is child
       if(view.onClose){
-        view.onClose();
+        view.onClose(backToSearch);
       }
       if(view.parent){
         var parent_view = views.find((v)=> v.value == view.parent);
@@ -79,7 +79,8 @@ const KitsToolbar = function(props) {
                   <ArrowBackIcon className={classes.backIcon} />
             </IconButton>
             <span className={clsx({[classes.toolbarLeftGridHeadSpan]:true}) } 
-                  >{views.find((view)=> currentView.closeToView == view.value).displayName }</span>
+                  >{views.find((view)=> currentView.closeToView(backToSearch) == view.value)?.displayName }</span>
+                  <span>{backToSearch ? "Search Results" : ""}</span>
             </div>
         </Grid>
         </Slide>

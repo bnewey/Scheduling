@@ -27,7 +27,7 @@ const EntityToolbar = function(props) {
   const { entities, setEntities,
     currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
     editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities,
-     setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
+     setRecentEntities, entitiesRefetch, setEntitiesRefetch, backToSearch, setBackToSearch} = useContext(ListContext);
 
   const backMode = currentView && currentView.value != "allEntities";
 
@@ -61,11 +61,11 @@ const EntityToolbar = function(props) {
 
   const toolBarLeftGrid = ()=>{
     const handleCloseView = (view)=>{
-    
-      handleSetView(views.find((view)=> view.value == currentView.closeToView));
+      
+      handleSetView(views.find((view)=> view.value == currentView.closeToView(backToSearch)));
       //Run onClose and onClose of parent page in case it is child
       if(view.onClose){
-        view.onClose();
+        view.onClose(backToSearch);
       }
       if(view.parent){
         var parent_view = views.find((v)=> v.value == view.parent);
@@ -85,7 +85,8 @@ const EntityToolbar = function(props) {
                   <ArrowBackIcon className={classes.backIcon} />
             </IconButton>
             <span className={clsx({[classes.toolbarLeftGridHeadSpan]:true}) } 
-                  >{views.find((view)=> currentView.closeToView == view.value).displayName }</span>
+                  >{views.find((view)=> currentView.closeToView(backToSearch) == view.value)?.displayName }</span>
+                  <span>{backToSearch ? "Search Results" : ""}</span>
             </div>
         </Grid>
         </Slide>

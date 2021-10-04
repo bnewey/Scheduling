@@ -51,15 +51,15 @@ const InvOrdersOutContainer = function(props) {
   //views used through inv ordersOut, 
   //child views with parent run parent's onClose() function
   const views = [ { value: "ordersOutList", displayName: "OrdersOut List",  },
-                  {value: 'ordersOutSearch', displayName: 'Search OrdersOut', closeToView: 'ordersOutList',
-                      onClose: ()=> {setOrdersOutRefetch(true)}},
-                  {value: 'ordersOutDetail', displayName: 'OrderOut Detail', closeToView: 'ordersOutList',
-                      onClose: ()=> {setOrdersOutRefetch(true); setActiveOrderOut(null); setDetailOrderOutId(null);}},
-                      { value: "orderOutItems", displayName: 'Itemization', closeToView: 'ordersOutList',
+                  {value: 'ordersOutSearch', displayName: 'Search OrdersOut', closeToView: () => 'ordersOutList',
+                  onClose: ()=> {setOrdersOutRefetch(true);setSavedSearch(null); setSavedSearchValue(null); setBackToSearch(false);}} ,
+                  {value: 'ordersOutDetail', displayName: 'OrderOut Detail', closeToView: (search)=> search ? 'ordersOutSearch' : 'ordersOutList',
+                  onClose: (search)=>{if(!search){setOrdersOutRefetch(true);setSavedSearchValue(null); setSearchValue("");} setActiveOrderOut(null); setDetailOrderOutId(null);}},
+                      { value: "orderOutItems", displayName: 'Itemization', closeToView: (search)=> search ? 'ordersOutSearch' : 'ordersOutList',
                         parent: 'ordersOutDetail'},
-                    {value: 'ordersOutRecentOrders', displayName: 'Recent Orders', closeToView: 'ordersOutList',
+                    {value: 'ordersOutRecentOrders', displayName: 'Recent Orders', closeToView: (search)=> search ? 'ordersOutSearch' : 'ordersOutList',
                       parent: 'ordersOutDetail'},
-                    {value: 'ordersOutOrdersOut', displayName: 'Related OrdersOut', closeToView: 'ordersOutList',
+                    {value: 'ordersOutOrdersOut', displayName: 'Related OrdersOut', closeToView: (search)=> search ? 'ordersOutSearch' : 'ordersOutList',
                       parent: 'ordersOutDetail'},
                 ];
 
@@ -77,6 +77,11 @@ const InvOrdersOutContainer = function(props) {
   const [editOOIDialogMode, setEditOOIDialogMode] = useState("add")
   const [editOOIModalOpen, setEditOOIModalOpen] = React.useState(false);
   const [ activeOOItem, setActiveOOItem] = React.useState(null);
+
+  const [searchValue,setSearchValue] = useState("");
+  const [savedSearchValue, setSavedSearchValue] = useState(null);
+  const [savedSearch, setSavedSearch] = useState(null);
+  const [backToSearch, setBackToSearch] = useState(false);
 
 
   const classes = useStyles();
@@ -111,6 +116,10 @@ const InvOrdersOutContainer = function(props) {
     }
     
   }, [currentView]);
+
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+  }
   
  
   //Sign Rows
@@ -304,7 +313,9 @@ const InvOrdersOutContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{user ,ordersOut, setOrdersOut, setOrdersOutRefetch, ordersOutSearchRefetch,setOrdersOutSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailOrderOutId,  setDetailOrderOutId,editOrderOutModalMode,setEditOrderOutModalMode, activeOrderOut, setActiveOrderOut, editOrderOutModalOpen,setEditOrderOutModalOpen,
-         recentOrdersOut, setRecentOrdersOut, sorters, setSorters,  ordersOutSaved, setOrdersOutSaved} } >
+         recentOrdersOut, setRecentOrdersOut, sorters, setSorters,  ordersOutSaved, setOrdersOutSaved,
+         searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch,
+           savedSearchValue, setSavedSearchValue, handleSetView} } >
       <DetailContext.Provider value={{editOOIDialogMode, setEditOOIDialogMode, editOOIModalOpen, setEditOOIModalOpen,
       activeOOItem, setActiveOOItem}} >
         <div className={classes.containerDiv}>

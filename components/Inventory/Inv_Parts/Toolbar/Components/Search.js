@@ -13,6 +13,7 @@ import { ListContext } from '../../InvPartsContainer';
 import dynamic from 'next/dynamic'
 
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
@@ -20,12 +21,24 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
 
 const Search = function(props) {
 
-  const [searchValue,setSearchValue] = useState("");
   const [searchTable, setSearchTable] = useState(null);
   const [searchHistory, setSearchHistory] = useState(null);
   
-  const { searchOpenPermanent, parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views, openOnFocus} = props// useContext(ListContext);
+  const { searchOpenPermanent, parts, setParts, partsSearchRefetch, setPartsSearchRefetch, currentView, setCurrentView, views,searchValue,setSearchValue,savedSearch, setSavedSearch,
+    backToSearch, setBackToSearch, savedSearchValue, setSavedSearchValue} = useContext(ListContext);
+
+  const {openOnFocus} = props;
+
   const searchOpen = searchOpenPermanent ||(currentView && currentView.value == "partsSearch");
+
+  const [open, setOpen] = useState(false);
+
+  useEffect(()=>{
+    if(currentView.value == 'partsSearch' && savedSearch?.length > 0){
+      setParts(savedSearch)
+      setBackToSearch(true);
+    }
+  }, [currentView, savedSearch])
 
   const searchTableObject= [
     {value: "all", displayValue: 'All'},
@@ -39,7 +52,7 @@ const Search = function(props) {
 
   useEffect(()=>{
     if(!searchOpen ){
-        setSearchValue("");
+       // setSearchValue("");
     }
   },[searchOpen])
 
@@ -201,6 +214,7 @@ const Search = function(props) {
         var response = await search(searchTable, searchValue)    
 
         setParts(response);
+        setSavedSearch(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")
         console.error("Error", error);
@@ -214,18 +228,34 @@ const Search = function(props) {
       
     }else{
       //submit search
-      setParts(await search(searchTable, searchValue));
+      let response = await search(searchTable, searchValue)
+      setParts(response);
+      setSavedSearch(response);
     }
   }
 
   const handleChangeSearchValue = (event, value, reason, submit = false)=>{
-    
     let str = value;
     str = str.replace(/^\s+/, '');
     if(str || str == '' ){
-      setSearchValue(str)
+      console.log("Setting search value", reason)
+      if(reason === "reset" && savedSearchValue){
+        setSearchValue(savedSearchValue)
+      }else{
+        setSearchValue(str)
+        setSavedSearchValue(str);
+      }
+      
     } 
   }
+
+  const handleOnOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickAway = () => {
+    setOpen(false);
+  };
 
   const selectSearchField = () =>{
     const handleSearchTable = event => {
@@ -252,13 +282,15 @@ const Search = function(props) {
         {searchHistory && searchOpen == true ? 
             <><Grow in={searchOpen} style={{width: '100%'}}  >
             <div><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
-            
+            <ClickAwayListener onClickAway={handleClickAway}>
             <Autocomplete
               id="sign_search_input"
               options={searchHistory}
               getOptionLabel={(option) => option.id || option}
               freeSolo
               openOnFocus={openOnFocus}
+              open={open}
+              onOpen={handleOnOpen}
               ListboxProps={
                 {ref: listRef}
               }
@@ -272,7 +304,9 @@ const Search = function(props) {
                 handleChangeSearchValue(event, matchValue || value, reason)
                 if(matchValue){
                   setSearchTable(searchMatch.searchTable);
-                  setParts(await search(searchMatch.searchTable, matchValue ));
+                  let response = await search(searchMatch.searchTable, matchValue )
+                  setParts(response);
+                  setSavedSearch(response)
                 }
               } }
               renderInput={(params) => {  searchRef.current = params.inputProps.ref.current; return (<TextField
@@ -295,7 +329,7 @@ const Search = function(props) {
                 </div>)
             }}
             />
-            
+            </ClickAwayListener>
              </div></Grow>
             </> :
                 <><span className={classes.toolbarLeftGridHeadSpan}>Search</span></>}

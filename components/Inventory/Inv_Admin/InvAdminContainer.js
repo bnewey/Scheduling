@@ -78,6 +78,10 @@ const InvAdminContainer = function(props) {
     }
     
   }, [currentView]);
+
+  const handleSetView = (view)=>{
+    setCurrentView(view);
+  }
   
  
   //Sign Rows

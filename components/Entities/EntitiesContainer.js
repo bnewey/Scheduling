@@ -39,15 +39,15 @@ const EntitiesContainer = function(props) {
   //views used through whole app, 
   //child views with parent run parent's onClose() function
   const views = [ { value: "allEntities", displayName: "Entities", /*onClose: ()=> {setEntities(null)}*/ },
-                  {value: 'search', displayName: 'Search', closeToView: 'allEntities',
-                      onClose: ()=> {setEntities(null)}} ,
-                  {value: "entityDetail", displayName: 'Entity Detail', closeToView: 'allEntities', 
-                      onClose: ()=>{setEntities(null);setActiveEntity(null); setDetailEntityId(null);}}, 
-                  { value: "entAddresses", displayName: 'Addresses', closeToView: 'allEntities',
+                  {value: 'search', displayName: 'Search', closeToView: ()=> 'allEntities',
+                       onClose: ()=> {setEntities(null);setSavedSearch(null); setSavedSearchValue(null); setBackToSearch(false);}} ,
+                  {value: "entityDetail", displayName: 'Entity Detail', closeToView: (search)=> search ? 'search' : 'allEntities', 
+                      onClose: (search)=>{if(!search){setEntities(null);setSavedSearchValue(null); setSearchValue("");}setActiveEntity(null); setDetailEntityId(null);}}, 
+                  { value: "entAddresses", displayName: 'Addresses', closeToView: (search)=> search ? 'search' : 'allEntities',
                     parent: 'entityDetail'},
-                  { value: "entContacts", displayName: 'Contacts', closeToView: 'allEntities',
+                  { value: "entContacts", displayName: 'Contacts', closeToView: (search)=> search ? 'search' : 'allEntities',
                     parent: 'entityDetail'},
-                  { value: "entWOs", displayName: 'Related Work Orders', closeToView: 'allEntities',
+                  { value: "entWOs", displayName: 'Related Work Orders', closeToView: (search)=> search ? 'search' : 'allEntities',
                     parent: 'entityDetail'},
                 ];
 
@@ -55,6 +55,11 @@ const EntitiesContainer = function(props) {
   const [previousView, setPreviousView] = useState(null);
   const [detailEntityId,setDetailEntityId] = useState(null);
   const [activeEntity, setActiveEntity] = useState(null);
+
+  const [searchValue,setSearchValue] = useState("");
+  const [savedSearchValue, setSavedSearchValue] = useState(null);
+  const [savedSearch, setSavedSearch] = useState(null);
+  const [backToSearch, setBackToSearch] = useState(false);
 
   const [editEntModalOpen, setEditEntModalOpen] = React.useState(false);
   const [editModalMode, setEditModalMode] = React.useState(null);
@@ -264,7 +269,8 @@ const EntitiesContainer = function(props) {
       <ListContext.Provider value={{entities, setEntities,
           currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
           editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
-          setRecentEntities, entitiesRefetch, setEntitiesRefetch} } >
+          setRecentEntities, entitiesRefetch, setEntitiesRefetch, searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch,
+           savedSearchValue, setSavedSearchValue} } >
       <DetailContext.Provider value={{ detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,
         editAddressModalMode, setEditAddressModalMode,detailEntContactId,setDetailEntContactId,activeContact, setActiveContact,editContactModalOpen,
         setEditContactModalOpen,editContactModalMode, setEditContactModalMode  }} >

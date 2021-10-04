@@ -7,9 +7,9 @@ const logger = require('../../logs');
 const database = require('./db');
 
 router.get('/getAllTasks', async (req,res) => {
-    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS old_task_name, hours_estimate, date_format(date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, '+
+    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS old_task_name, hours_estimate, date_format(wo.requested_arrival_date, \'%Y-%m-%d %H:%i:%S\') as date_desired, '+
     ' date_format(t.date_assigned, \'%Y-%m-%d\') as date_assigned, ' + 
-    ' date_format(t.date_completed, \'%Y-%m-%d\') as date_completed, t.description, t.priority_order, t.task_list_id, ' + 
+    ' date_format(t.date_completed, \'%Y-%m-%d\') as date_completed, wo.description, t.priority_order, t.task_list_id, ' + 
     ' t.task_status, t.drilling, t.sign, t.artwork, t.table_id, date_format(t.order_date, \'%Y-%m-%d\') as order_date, ' + 
     ' t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type AS wo_type, t.type, t.install_location,' +
     ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
@@ -42,9 +42,9 @@ router.post('/getTask', async (req,res) => {
         id = req.body.id;
     }
 
-    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS old_task_name, t.hours_estimate, date_format(t.date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
+    const sql = ' SELECT DISTINCT t.id AS t_id, t.name AS old_task_name, t.hours_estimate, date_format(wo.requested_arrival_date, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
     ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
-    ' t.description, t.notes, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
+    ' wo.description, wo.notes, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
     ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type AS wo_type, t.install_location, ' +
     ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, t.type, ' + 
     ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
@@ -103,10 +103,10 @@ router.post('/updateTask', async (req,res) => {
     logger.info(JSON.stringify(task));
 
 
-    const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired=date_format( ? , \'%Y-%m-%d %H:%i:%S\'),first_game=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
-    ' date_completed=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , description= ? , notes= ? , ' +
-    ' task_status= ?, drilling= ? , sign= ? , artwork= ?  ' + 
-    ' WHERE id = ? ';
+    const sql = ' UPDATE tasks t, work_orders wo SET t.name = ? , t.hours_estimate= ? , wo.requested_arrival_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\'),t.first_game=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , t.date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
+    ' t.date_completed=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , wo.description= ? , wo.notes= ? , ' +
+    ' t.task_status= ?, t.drilling= ? , t.sign= ? , t.artwork= ?  ' + 
+    ' WHERE t.table_id = wo.record_id AND t.id = ? ';
 
     const params = [task.t_name, task.hours_estimate, task.date_desired, task.first_game, task.date_assigned, task.date_completed, task.description, task.notes, 
     task.task_status, task.drilling, task.sign, task.artwork, task.t_id ];
@@ -225,12 +225,13 @@ router.post('/copyTaskForNewType', async (req,res) => {
     }
 
     //copy task and give it new type
-    const sql = ' INSERT INTO tasks (id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, date_assigned, order_assigned, ' + 
+    const sql = ' INSERT INTO tasks (id_history, name, id_users_entered, hours_estimate, date_assigned, order_assigned, ' + 
     '  id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, drilling, sign, artwork, order_date, ' +
-    ' first_game, account_id, work_type, install_location, notes, task_status, task_list_id, type  ) ' +
-    ' SELECT id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, date_assigned, order_assigned, ' + 
-    '  id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, drilling, sign, artwork, order_date, ' +
-    ' first_game, account_id, work_type, install_location, notes, task_status, task_list_id, ? as type FROM tasks WHERE id = ? ';
+    ' first_game, work_type, install_location, task_status, task_list_id, type  ) ' +
+    ' SELECT t.id_history, wo.name, t.id_users_entered, wo.description, t.hours_estimate, t.date_assigned, t.order_assigned, t.' + 
+    '  id_task_types, t.table_id, t.id_time_tracker_category, t.date_completed, t.company, t.priority_order, t.drilling, t.sign, t.artwork, t.order_date, t.' +
+    ' first_game, t.work_type, t.install_location, t.task_status, t.task_list_id, ? as type FROM tasks t ' + 
+    ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id WHERE id = ? ';
 
     try{
         const results = await database.query(sql, [new_type, t_id]);

@@ -31,9 +31,9 @@ router.post('/getTaskList', async (req,res) => {
 
     const sql =   'SELECT tl.id as tl_id, tl.list_name as tl_name, date_format(tl.date_entered, \'%Y-%m-%d %H:%i:%S\') as tl_date_entered , tl.is_priority AS tl_is_priority,  ' + 
         ' tl.linked_tl AS tl_linked_tl, t.id AS t_id, t.name AS old_task_name, tli.task_list_id, t.hours_estimate, ' + 
-        ' date_format(t.date_desired, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
+        ' date_format(wo.requested_arrival_date, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
         ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
-        ' t.description, t.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
+        ' wo.description, wo.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
         ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, t.type, wo.type AS wo_type, t.install_location, ' +
         ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.job_reference,' + 
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
@@ -423,28 +423,28 @@ router.post('/getAllSignScbdWOIFromTL', async (req,res) => {
 });
 
 
-router.post('/copyTaskForNewType', async (req,res) => {
+// router.post('/copyTaskForNewType', async (req,res) => {
     
-    var t_id, new_type;
-    if(req.body){
-        t_id = req.body.t_id;
-        new_type = req.body.new_type;
-    }
+//     var t_id, new_type;
+//     if(req.body){
+//         t_id = req.body.t_id;
+//         new_type = req.body.new_type;
+//     }
 
-    const sql = 'INSERT INTO tasks (id, id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, ' +
-        ' date_assigned, order_assigned, id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, ' + 
-        ' drilling, sign, artwork, order_date, first_game, account_id, work_type, install_location, delivery_crew, delivery_order, ' +
-        ' install_date, delivery_date, notes, task_status, install_order, task_list_id ) SELECT * FROM tasks WHERE id =? ';
+//     const sql = 'INSERT INTO tasks (id, id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, ' +
+//         ' date_assigned, order_assigned, id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, ' + 
+//         ' drilling, sign, artwork, order_date, first_game, account_id, work_type, install_location, delivery_crew, delivery_order, ' +
+//         ' install_date, delivery_date, notes, task_status, install_order, task_list_id ) SELECT * FROM tasks WHERE id =? ';
     
-    try{
-        const results = await database.query(sql, list_name);
-        logger.info("Copyed task to new type " + list_name);
-        res.json(results);
-    }
-    catch(error){
-        logger.error("TasksList (copyTaskForNewType): " + error);
-        res.sendStatus(400);
-    }
-});
+//     try{
+//         const results = await database.query(sql, list_name);
+//         logger.info("Copyed task to new type " + list_name);
+//         res.json(results);
+//     }
+//     catch(error){
+//         logger.error("TasksList (copyTaskForNewType): " + error);
+//         res.sendStatus(400);
+//     }
+// });
 
 module.exports = router;
