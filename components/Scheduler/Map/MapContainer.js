@@ -91,6 +91,7 @@ const MapContainer = (props) => {
     //const [localCrewJobs, setLocalCrewJobs] = useState(null);
     const [crewJobs, setCrewJobs] = useState(null);
     const [crewJobsRefetch, setCrewJobsRefetch] = useState(false);
+    const [crewJobsLoading, setCrewJobsLoading] = useState(false);
     const [unfilteredJobs, setUnfilteredJobs] = useState(null);
     const [showCompletedJobs, setShowCompletedJobs] = React.useState(false);
     const [crewFilters,setCrewFilters] = React.useState([]);
@@ -115,6 +116,7 @@ const MapContainer = (props) => {
           setMapRowsRefetch(true);
           //setShouldResetCrewState(true);
           setCrewJobsRefetch(true);
+          setCrewJobsLoading(false);
           //setUnfilteredJobs(null);
       }
     },[refreshView])
@@ -274,6 +276,7 @@ const MapContainer = (props) => {
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
                     setMapRows(tmpData);
+                    console.log("SETTING MAP DATA ", tmpData)
                 }
 
             })
@@ -307,7 +310,7 @@ const MapContainer = (props) => {
       if (Array.isArray(sorters) && sorters.length) {
           if (mapRows && mapRows.length) {
               var tmpData = mapRows.sort(createSorter(...sorters))
-              console.log(tmpData);
+              console.log("SETTING SORTERS", tmpData);
               var copyObject = [...tmpData];
               setMapRows(copyObject);
               cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
@@ -372,15 +375,16 @@ const MapContainer = (props) => {
 
     useEffect(()=>{
       //we get crewJobs and then filter using the mapRows (because mapRows is already filtered to what our tasklist is)
-      if( mapRows && (crewToMap || taskListToMap) && (crewJobs == null || crewJobsRefetch == true) && crewFilters && crewJobSorters ){
+      if( mapRows && (crewToMap || taskListToMap) && (crewJobs == null || crewJobsRefetch == true) && crewFilters && crewJobSorters && crewJobsLoading != true ){
+        
           if(crewJobsRefetch == true){
             setCrewJobsRefetch(false);
           }
           if(taskListToMap){
+            setCrewJobsLoading(true);
             Crew.getCrewJobsByTaskList(taskListToMap.id)
             .then((data)=>{
                 if(data){
-                    console.log("Data from crewJobsByTL", data);
                     //Filter using mapRows (ie tasks from TL + filters + sorters)
                     var updateData = data.filter((item)=>{
                       return (mapRows.find((row)=> row.t_id === item.task_id)) ? true : false
@@ -439,6 +443,7 @@ const MapContainer = (props) => {
                     console.log("Final updateData", updateData);
                     setUnfilteredJobs([...data]);
                     setCrewJobs( updateData);
+                    setCrewJobsLoading(false)
 
                     //reset activemarker with new data
                     if(activeMarker && activeMarker.type === 'crew'){
@@ -570,7 +575,7 @@ const MapContainer = (props) => {
     return (
       <MapContext.Provider value={ {showingInfoWindow, setShowingInfoWindow, activeMarker, setActiveMarker, mapRows, setMapRows,mapRowsRefetch, setMapRowsRefetch,resetBounds, setResetBounds,markedRows, setMarkedRows,noMarkerRows, setNoMarkerRows,
         multipleMarkersOneLocation,setMultipleMarkersOneLocation, infoWeather, setInfoWeather, vehicleRows, setVehicleRows, vehicleNeedsRefresh, setVehicleNeedsRefresh,
-        bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, 
+        bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, crewJobsLoading, setCrewJobsLoading,
         unfilteredJobs, setUnfilteredJobs, showCompletedJobs, setShowCompletedJobs, radarControl, setRadarControl, timestamps,setTimestamps,
         radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, visualTimestamp, setVisualTimestamp, crewFilters,setCrewFilters,
         crewJobSorters, setCrewJobSorters, getBorderColorBasedOnDate, changeStateSoMapUpdates, setChangeStateSoMapUpdates,}} >

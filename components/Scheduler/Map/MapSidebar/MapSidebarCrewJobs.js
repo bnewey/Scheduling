@@ -757,7 +757,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
     const { mapRows, setMapRows, markedRows, setMarkedRows, vehicleRows, setVehicleRows,
     activeMarker, setActiveMarker,  setResetBounds, infoWeather,setInfoWeather, bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,
     visualTimestamp, setVisualTimestamp, radarControl, setRadarControl,  radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, timestamps, setTimestamps,
-    multipleMarkersOneLocation, setMultipleMarkersOneLocation, crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, unfilteredJobs, setUnfilteredJobs,
+    multipleMarkersOneLocation, setMultipleMarkersOneLocation, crewJobs, setCrewJobs, crewJobsLoading, setCrewJobsLoaded, crewJobsRefetch, setCrewJobsRefetch, unfilteredJobs, setUnfilteredJobs,
     showCompletedJobs, setShowCompletedJobs,setShowingInfoWindow, crewJobSorters, setCrewJobSorters} = useContext(MapContext);
     
 
@@ -948,14 +948,15 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
     }
     // END DND
 
-    //Sort
+    //Sort Crew Jobs
     useEffect(()=>{
         if (Array.isArray(crewJobSorters) && crewJobSorters.length) {
             if (crewJobs && crewJobs.length) {
                 var tmpData = crewJobs.sort(createSorter(...crewJobSorters))
                 var copyObject = [...tmpData];
                 setCrewJobs(copyObject);
-
+                console.log("SETTING FORREAL SORTED DATA", copyObject)
+                console.log("using sorters", crewJobSorters)
                 cogoToast.success(`Sorting by ${crewJobSorters.map((v, i)=> v.property + ", ")}`);
             }
         }
