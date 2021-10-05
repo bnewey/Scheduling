@@ -127,7 +127,7 @@ const TaskListFilter = (props) => {
 
     //Filter
     useEffect(()=>{
-        if (Array.isArray(filters) && filters.length && filterInOrOut != null && filterAndOr != null) {
+        if (Array.isArray(filters) && filters.length && filterInOrOut != null && filterAndOr != null && installDateFilters != null && drillDateFilters != null) {
             if (taskListTasksSaved && taskListTasksSaved.length) {
 
                 var tmpData = [];
@@ -173,7 +173,23 @@ const TaskListFilter = (props) => {
                     }
                     
                     
-                })        
+                })  
+                
+                //Date filters
+                if(installDateFilters  && installDateFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length){
+                        tmpData = [...taskListTasksSaved];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
+                }
+
+                if(drillDateFilters && drillDateFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length){
+                        tmpData = [...taskListTasksSaved];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
+                }
+  
                 
                 //No filters 
                 if(filters && !filters.length){
@@ -183,9 +199,12 @@ const TaskListFilter = (props) => {
                 
                 var copyObject = [...tmpData];
                 setFilteredItems(copyObject);
+                console.log("SETTING filtered items", copyObject);
+                console.log("row for FIltered items", filteredItems);
             }
         }
         if(Array.isArray(filters) && !filters.length){
+            console.log("Setting filtered items to null");
             setFilteredItems(null);
         }
     },[filters, filterInOrOut, filterAndOr]);

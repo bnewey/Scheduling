@@ -276,7 +276,7 @@ const MapContainer = (props) => {
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
                     setMapRows(tmpData);
-                    console.log("SETTING MAP DATA ", tmpData)
+                    console.log("SETTING MAP ROWS main 279 ", tmpData)
                 }
 
             })
@@ -310,13 +310,39 @@ const MapContainer = (props) => {
       if (Array.isArray(sorters) && sorters.length) {
           if (mapRows && mapRows.length) {
               var tmpData = mapRows.sort(createSorter(...sorters))
-              console.log("SETTING SORTERS", tmpData);
+              console.log("SETTING MAP ROWS sorters 313", tmpData);
+              console.log("mapRows for sorters 313", mapRows);
               var copyObject = [...tmpData];
               setMapRows(copyObject);
               cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
           }
       }
     },[sorters]);
+
+    // //Sort
+    // useEffect(()=>{
+    //   if(!mapRows){
+    //     return;
+    //   }
+    //   if(installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
+    //     //no change
+    //     return;
+    //   }
+
+    //   var tmpData = mapRows;
+
+    //   if( installDateFilters?.length > 0){
+    //     tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
+    //   }
+
+    //   if(drillDateFilters?.length > 0){ 
+    //     tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
+    //   }
+
+
+    //   setMapRows(tmpData);
+     
+    // },[installDateFilters, drillDateFilters]);
 
     //Use effect for tasks with no locations (nomarkerrows)
     useEffect(()=>{
@@ -346,6 +372,7 @@ const MapContainer = (props) => {
               tmpRow["geocoded"] = 1;
               tmpMapRows[mapRowIndex] = tmpRow;
               setMapRows(tmpMapRows);
+              console.log("SETTING MAPROWS nomarker", tmpMapRows);
               setNoMarkerRows(tmpMapRows.filter((row, index) => !row.geocoded));
               //Save lat, lng, geocoded to db
               Tasks.saveCoordinates(row.address_id, data)
@@ -381,6 +408,7 @@ const MapContainer = (props) => {
             setCrewJobsRefetch(false);
           }
           if(taskListToMap){
+            console.log("mapRows to setCrewJobs", mapRows);
             setCrewJobsLoading(true);
             Crew.getCrewJobsByTaskList(taskListToMap.id)
             .then((data)=>{
