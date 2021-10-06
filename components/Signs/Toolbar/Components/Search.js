@@ -31,6 +31,8 @@ const Search = function(props) {
   const { signs, setSigns, currentView, previousView, handleSetView, views, signSearchRefetch, setSignSearchRefetch} = useContext(ListContext);
   const searchOpen = currentView && currentView.value == "searchSigns";
 
+  const [open, setOpen] = useState(false);
+
   const searchTableObject= [
     {value: "wo.type", displayValue: 'Type'},
     {value: "eac.state", displayValue: 'State'},
