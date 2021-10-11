@@ -38,7 +38,7 @@ router.post('/getTaskList', async (req,res) => {
         ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.job_reference,' + 
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
-        ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, cjd.ready as drill_ready, mad.member_name AS drill_crew_leader , '  +
+        ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, cjd.ready as drill_ready, date_format(cjd.located, \'%Y-%m-%d\') as drill_located,  mad.member_name AS drill_crew_leader , '  +
         ' cjd.completed AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
         ' date_format(cjd.job_date, \'%Y-%m-%d\') as drill_date, cci.color AS install_crew_color,  ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, cji.ready AS install_ready, mai.member_name AS install_crew_leader, ' + 
@@ -50,7 +50,7 @@ router.post('/getTaskList', async (req,res) => {
         ' ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
         ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, e.name AS customer_name, concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name, ' +
         //gets the min arrival date for our Arrival Date column sorting
-        ' (SELECT min( CASE WHEN scoreboard_arrival_status > 0 THEN 0 ELSE scoreboard_arrival_date END) as temp FROM work_orders_items woi WHERE woi.work_order = t.table_id AND woi.scoreboard_or_sign <> 0 ) as wo_arrival_dates ' + 
+        ' ( SELECT min( CASE WHEN scoreboard_arrival_status > 0 THEN woi.scoreboard_arrival_status ELSE scoreboard_arrival_date END) as temp FROM work_orders_items woi WHERE woi.work_order = t.table_id AND IF(vendor is not null, woi.vendor <> 2, true) ) as wo_arrival_dates ' + 
         ' FROM task_list_items tli ' +
     
     ' LEFT JOIN task_list tl ON tli.task_list_id = tl.id ' +
@@ -423,28 +423,5 @@ router.post('/getAllSignScbdWOIFromTL', async (req,res) => {
 });
 
 
-// router.post('/copyTaskForNewType', async (req,res) => {
-    
-//     var t_id, new_type;
-//     if(req.body){
-//         t_id = req.body.t_id;
-//         new_type = req.body.new_type;
-//     }
-
-//     const sql = 'INSERT INTO tasks (id, id_history, name, id_users_entered, description, hours_estimate, date_entered, date_desired, ' +
-//         ' date_assigned, order_assigned, id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, ' + 
-//         ' drilling, sign, artwork, order_date, first_game, account_id, work_type, install_location, delivery_crew, delivery_order, ' +
-//         ' install_date, delivery_date, notes, task_status, install_order, task_list_id ) SELECT * FROM tasks WHERE id =? ';
-    
-//     try{
-//         const results = await database.query(sql, list_name);
-//         logger.info("Copyed task to new type " + list_name);
-//         res.json(results);
-//     }
-//     catch(error){
-//         logger.error("TasksList (copyTaskForNewType): " + error);
-//         res.sendStatus(400);
-//     }
-// });
 
 module.exports = router;

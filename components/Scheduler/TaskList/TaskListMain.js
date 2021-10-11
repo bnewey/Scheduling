@@ -21,6 +21,7 @@ import {TaskContext} from '../TaskContainer';
 import TaskListFilter from './TaskListFilter';
 import TLDrillDateFilter from './components/TLDrillDateFilter';
 import TLInstallDateFilter from './components/TLInstallDateFilter';
+import TLArrivalDateFilter from './components/TLArrivalDateFilter';
 
 import {createSorter} from '../../../js/Sort';
 import {createFilter} from '../../../js/Filter';
@@ -45,7 +46,7 @@ const TaskListMain = (props) => {
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
-         sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters,
+         sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters, arrivalDateFilters, setArrivalDateFilters,
          taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, taskViews , activeTaskView,
          setRefreshView, setDrillDateFilters} = useContext(TaskContext);
 
@@ -67,7 +68,7 @@ const TaskListMain = (props) => {
             setTaskListTasksRefetch(true);
         }
         if(taskLists && taskListToMap && taskListToMap.id && (taskListTasks == null || taskListTasksRefetch == true)
-                 && filterInOrOut != null && filterAndOr != null  && filters != null && installDateFilters != null && drillDateFilters != null ) { 
+                 && filterInOrOut != null && filterAndOr != null  && filters != null && installDateFilters != null && drillDateFilters != null && arrivalDateFilters != null ) { 
             if(taskListTasksRefetch == true){
                 setTaskListTasksRefetch(false);
             }
@@ -132,15 +133,23 @@ const TaskListMain = (props) => {
                 }
 
                 if(drillDateFilters.length > 0){
-                    if(tmpData.length <= 0 && filters && !filters.length){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length){
                         tmpData = [...data];
                     }  
                     tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
 
                 }
 
+                if(arrivalDateFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...arrivalDateFilters], "in", "or"));
+
+                }
+
                 //No filters or sorters
-                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length && arrivalDateFilters && !arrivalDateFilters.length){
                     //no change to tmpData
                     tmpData = [...data];
                 }
@@ -175,7 +184,7 @@ const TaskListMain = (props) => {
             if(taskLists){
             }
         }
-    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch, filters, installDateFilters, drillDateFilters]);
+    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch, filters, installDateFilters, drillDateFilters, arrivalDateFilters]);
 
     //WOIDATA 
     useEffect(()=>{
@@ -351,6 +360,8 @@ const TaskListMain = (props) => {
                       setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
                       {item.field == "sch_install_date" && <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} installDateFilters={installDateFilters}
                       setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
+                      {item.field == "wo_arrival_dates" && <TLArrivalDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} arrivalDateFilters={arrivalDateFilters}
+                      setArrivalDateFilters={setArrivalDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
                                                             </span>
                                         </ListItemText>
                                     )})}

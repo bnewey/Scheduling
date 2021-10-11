@@ -304,7 +304,7 @@ const TaskListSidebar = (props) => {
                         )
                     })
                 }
-                <div className={classes.priority_info_heading}>
+                {/* <div className={classes.priority_info_heading}>
                     <span>Saved Filters</span>
                 </div>
                 {
@@ -327,7 +327,7 @@ const TaskListSidebar = (props) => {
 
                             );
                     })
-                }
+                } */}
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>

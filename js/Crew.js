@@ -385,6 +385,22 @@ async function updateCrewJobReady( job_id, ready){
     }
 }
 
+async function updateCrewJobLocated( job_id, located){
+    const route = '/scheduling/crew/updateCrewJobLocated';
+    try{
+        var response = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({job_id, located})
+            });
+        return response.ok;
+    }catch(error){
+        throw error;
+    }
+}
 
 async function updateCrewNumServices( job_id, numServices){
     const route = '/scheduling/crew/updateCrewNumServices';
@@ -571,6 +587,7 @@ module.exports = {
     updateCrewJobMember,
     updateCrewJobType,
     updateCrewJobReady,
+    updateCrewJobLocated,
     updateCrewNumServices,
     updateCrewJobDate,
     addNewCrew,

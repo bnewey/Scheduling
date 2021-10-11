@@ -131,7 +131,7 @@ const WoiStatusCheck = (props) => {
                   
                   {statusList?.length > 0 ? 
                         <div onMouseUp={event => handelOpenStatusPanel(event)}
-                            className={classes.openPanelSpan}>
+                            className={classes.openPanelSpan} >
                          <WarningIcon className={classes.warningIcon} /><GetSpecialIconIndicators statusList={statusList}/>
                         </div> : <></>}
                   

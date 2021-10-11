@@ -167,7 +167,7 @@ router.post('/getCrewJobsByMember', async (req,res) => {
     }
 
     const sql = ' SELECT j.id, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ' + 
-            ' cm.is_leader, cm.id as cm_id, ma.member_name, ma.id as ma_id, j.ready, ' +
+            ' cm.is_leader, cm.id as cm_id, ma.member_name, ma.id as ma_id, j.ready, date_format(j.located, \'%Y-%m-%d\') as located, ' +
             ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id ' +
@@ -196,7 +196,7 @@ router.post('/getCrewJobsByTask', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id,j.ready, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
+    const sql = ' SELECT j.id,j.ready, date_format(j.located, \'%Y-%m-%d\') as located, j.task_id, j.date_assigned, j.job_type, j.num_services, j.crew_id, ma.member_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
             ' cm.id as crew_leader_id, cc.color AS crew_color,  ' +
             ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
@@ -229,7 +229,7 @@ router.post('/getCrewJobsByTaskList', async (req,res) => {
 
 
     const sql = ' SELECT tl.id as tl_id, tl.list_name as tl_name, j.id, t.id AS task_id, j.date_assigned, j.ordernum, ' + 
-            ' j.job_type, j.num_services,j.ready, j.crew_id, ma.member_name AS leader_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
+            ' j.job_type, j.num_services,j.ready, date_format(j.located, \'%Y-%m-%d\') as located, j.crew_id, ma.member_name AS leader_name, j.completed, date_format(j.completed_date, \'%Y-%m-%d\') as completed_date,' + 
             ' cm.id as crew_leader_id, cc.color AS crew_color,  t.table_id,wo.record_id AS wo_id, wo.description, wo.notes, ' +
             ' ea.lat, ea.lng, ea.geocoded, ea.address, ea.city, ea.state, ea.zip, ' +
             '  concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ' +
@@ -269,7 +269,7 @@ router.post('/getCrewJobsByTaskIds', async (req,res) => {
         res.sendStatus(400);
     }
 
-    const sql = ' SELECT j.id,j.ready, j.num_services, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
+    const sql = ' SELECT j.id,j.ready, date_format(j.located, \'%Y-%m-%d\') as located, j.num_services, j.task_id, j.date_assigned, j.job_type, j.crew_members_id, m.member_name, m.id as m_id, ' + 
             ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
             ' FROM crew_jobs j ' +
             ' LEFT JOIN tasks t ON j.task_id = t.id' + 
@@ -378,7 +378,7 @@ router.post('/deleteCrewJobMember', async (req,res) => {
 });
 
 router.post('/getAllCrewJobs', async (req,res) => {
-    const sql = ' SELECT j.id,j.ready, j.task_id, j.date_assigned, j.num_services, j.job_type, j.crew_id , j.ordernum, j.completed, j.completed_date, ' + 
+    const sql = ' SELECT j.id,j.ready, date_format(j.located, \'%Y-%m-%d\') as located, j.task_id, j.date_assigned, j.num_services, j.job_type, j.crew_id , j.ordernum, j.completed, j.completed_date, ' + 
     ' t.name as t_name, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, date_format(j.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date ' +
     ' FROM crew_jobs j ' +
     ' LEFT JOIN tasks t ON j.task_id = t.id ' ;
@@ -573,6 +573,28 @@ router.post('/updateCrewJobReady', async (req,res) => {
     }
     catch(error){
         logger.error("Crews (updateCrewJobReady): " + error);
+        res.sendStatus(400);
+    }
+});
+
+router.post('/updateCrewJobLocated', async (req,res) => {
+    var located, job_id;
+    if(req.body){
+        located = req.body.located;
+        job_id = req.body.job_id;
+    }
+
+    const sql = 'UPDATE crew_jobs SET located = ? ' +
+    ' WHERE id = ? ';
+    
+    try{        
+        const response = await database.query(sql, [Util.convertISODateToMySqlDate(located), job_id  ]);
+
+        logger.info("update crew job " + job_id + " to located: " + located );
+        res.sendStatus(200);
+    }
+    catch(error){
+        logger.error("Crews (updateCrewJobLocated): " + error);
         res.sendStatus(400);
     }
 });

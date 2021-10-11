@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, Modal, Backdrop, Fade, ButtonGroup, Button, Checkbox, Chip,Collapse, ListSubheader, ListItemIcon,
-     Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControlLabel, Switch,Grid, List, Box, Select,MenuItem, Tooltip } from '@material-ui/core';
+     Paper,IconButton,ListItemSecondaryAction, ListItem, ListItemText,  FormControl,InputLabel, Switch,Grid, List, Box, Select,MenuItem, Tooltip } from '@material-ui/core';
 
      import FilterIcon from '@material-ui/icons/ShortText';
      import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
@@ -24,6 +24,7 @@ import TaskListFilterSaveDialog from './TaskListFilterSaveDialog'
 
 import TaskLists from '../../../js/TaskLists';
 import {createFilter} from '../../../js/Filter';
+import {createSorter} from '../../../js/Sort';
 import cogoToast from 'cogo-toast';
 import moment from 'moment';
 
@@ -35,12 +36,13 @@ import TLInstallDateFilter from './components/TLInstallDateFilter';
 import TLDrillDateFilter from './components/TLDrillDateFilter';
 import TaskListFilterSubscribeToType from './TaskListFilterSubscribeToType';
 
+
 const TaskListFilter = (props) => {
     //PROPS
     const { filteredItems, setFilteredItems } = props;
 
     const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,installDateFilters, setInstallDateFilters,drillDateFilters, setDrillDateFilters,
-        setRefreshView,tabValue, user, taskViews,activeTaskView,setActiveTaskView} = useContext(TaskContext);
+        setRefreshView,tabValue, user, taskViews,activeTaskView,setActiveTaskView, arrivalDateFilters, setArrivalDateFilters, sorters} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
@@ -127,7 +129,7 @@ const TaskListFilter = (props) => {
 
     //Filter
     useEffect(()=>{
-        if (Array.isArray(filters) && filters.length && filterInOrOut != null && filterAndOr != null && installDateFilters != null && drillDateFilters != null) {
+        if (Array.isArray(filters) && filters.length && filterInOrOut != null && filterAndOr != null && installDateFilters != null && drillDateFilters != null && arrivalDateFilters != null) {
             if (taskListTasksSaved && taskListTasksSaved.length) {
 
                 var tmpData = [];
@@ -176,18 +178,25 @@ const TaskListFilter = (props) => {
                 })  
                 
                 //Date filters
-                if(installDateFilters  && installDateFilters.length > 0){
+                if( installDateFilters?.length > 0){
                     if(tmpData.length <= 0 && filters && !filters.length){
                         tmpData = [...taskListTasksSaved];
                     }  
                     tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
                 }
 
-                if(drillDateFilters && drillDateFilters.length > 0){
+                if(drillDateFilters?.length > 0){
                     if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length){
                         tmpData = [...taskListTasksSaved];
                     }  
                     tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
+                }
+
+                if( arrivalDateFilters?.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
+                        tmpData = [...taskListTasksSaved];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...arrivalDateFilters], "in", "or"));
                 }
   
                 
@@ -196,6 +205,13 @@ const TaskListFilter = (props) => {
                     //no change to tmpData
                     tmpData = [...data];
                 }
+
+                //SORT after filters -------------------------------------------------------------------------
+                if(sorters && sorters.length > 0){
+                    tmpData = tmpData.sort(createSorter(...sorters))
+                }
+                //--------------------------------------------------------------------------------------------
+
                 
                 var copyObject = [...tmpData];
                 setFilteredItems(copyObject);
@@ -499,7 +515,7 @@ const TaskListFilter = (props) => {
 
     const handleApplySavedFilter = (event, item) => {
         if(!item){
-            console.error("Bad filter in handleApplySavedFilter ");
+            setFilters([]);
             return;
         }
         if(item.task_view && !isNaN(item.task_view)){ //0 = none
@@ -510,6 +526,10 @@ const TaskListFilter = (props) => {
         setFilterAndOr(item.and_or == 0 ? "and" : (item.and_or == 1 ? "or": null ));
         cogoToast.success(`Filtering by ${item.name}`)
     }
+
+    const isFilterSelected = React.useCallback((filter)=>{
+        return filter && filters &&_.isEqual(filters ,filter.filter_json) && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and") 
+    }, [filters, filterInOrOut, filterAndOr])
 
     const handleOverWriteSavedFilter = (event, item)=> {
         if(!item || !user || !filterInOrOut || !filterAndOr){
@@ -571,8 +591,34 @@ const TaskListFilter = (props) => {
                     color="secondary"
                     size="medium"
                 >   <Filter/>
-                        <Box display={{ xs: 'none', md: 'inline' }}  component="span">FILTER</Box>
+                        <Box display={{ xs: 'none', md: 'inline' }}  component="span">FILTER MENU</Box>
                 </Button>
+                {!filterModalOpen &&
+                        <div className={classes.savedFilterSelectDiv}>
+                           
+                                <Select
+                                native
+                                value={taskUserFilters?.find((filter, index)=> (
+                                     isFilterSelected(filter) ))?.id || "Select"}
+                                onChange={(event)=> { 
+                                    var tmp = taskUserFilters?.find((filter, index)=> (
+                                        event.target.value == filter.id ))
+                                    handleApplySavedFilter(event, tmp)
+                                }}
+                                className={classes.selectFilterSelect}
+                                inputProps={{
+                                    name: 'saved-filter',
+                                    id: 'saved-filter-select',
+
+                                }}
+                                >
+                                <option aria-label="None" value="Select"/>
+                                {taskUserFilters?.map((filter)=>(
+                                    <option value={filter.id}>{filter.name}</option>
+                                ))}
+                                </Select>
+                        </div>
+                    }
                 {filters && filters.length > 0 ? <>
                     <Button className={classes.clearFilterButton}
                         onClick={event=> handleClearFilters(event)}
@@ -584,29 +630,33 @@ const TaskListFilter = (props) => {
                         <Box display={{ xs: 'none', md: 'inline' }}  component="span">Clear Filters</Box>
                     </Button>
                     
-                    <div className={classes.filterTypeInfoDiv}>
-                        <span className={classes.filterTypeInfoLabel}>Filtering</span>
-                        <Tooltip classes={{tooltip: classes.tooltip}} title={"Filtering 'OUT' removes items matching filters and 'IN' shows only items matching"}>
-                        <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateInorOut(event, filterInOrOut)}>{filterInOrOut}</span>
-                        </Tooltip>
-                        <span className={classes.filterTypeInfoLabel}>USING</span>
-                        <Tooltip  classes={{tooltip: classes.tooltip}} title={"'OR' shows items matching at least one filter. 'AND' shows items matching every filter."}>
-                        <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateAndorOr(event, filterAndOr)}>{filterAndOr}</span>
-                        </Tooltip>
-                    </div>
-                    <div className={classes.chipDiv}>
-                    {filters && filters.map((filter,i)=>{
-                        return(<div key={`chip`+i}>
-                                <Chip
-                                    icon={<FilterIcon/>}
-                                    size={'small'}
-                                    label={ filter && filter.value && filter.property ? (filter.displayName ? (filter.property + ' ' +filter.displayName) :  filter.property + ' ' + filter.value) : "UnidentifiedChip" + i}
-                                    onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
-                                    className={classes.chip}
-                                />
-                            </div>);
-                    })}
-                    </div>
+                    {filterModalOpen  && 
+                        <div className={classes.filterTypeInfoDiv}>
+                            <span className={classes.filterTypeInfoLabel}>Filtering</span>
+                            <Tooltip classes={{tooltip: classes.tooltip}} title={"Filtering 'OUT' removes items matching filters and 'IN' shows only items matching"}>
+                            <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateInorOut(event, filterInOrOut)}>{filterInOrOut}</span>
+                            </Tooltip>
+                            <span className={classes.filterTypeInfoLabel}>USING</span>
+                            <Tooltip  classes={{tooltip: classes.tooltip}} title={"'OR' shows items matching at least one filter. 'AND' shows items matching every filter."}>
+                            <span className={classes.filterTypeInfoClick} onClick={event => handleAlternateAndorOr(event, filterAndOr)}>{filterAndOr}</span>
+                            </Tooltip>
+                        </div>
+                    }
+                    {filterModalOpen  &&
+                        <div className={classes.chipDiv}>
+                        {filters && filters.map((filter,i)=>{
+                            return(<div key={`chip`+i}>
+                                    <Chip
+                                        icon={<FilterIcon/>}
+                                        size={'small'}
+                                        label={ filter && filter.value && filter.property ? (filter.displayName ? (filter.property + ' ' +filter.displayName) :  filter.property + ' ' + filter.value) : "UnidentifiedChip" + i}
+                                        onDelete={filter.value && filter.property ? event=> handleRemoveFromFilters(filter): ""}
+                                        className={classes.chip}
+                                    />
+                                </div>);
+                        })}
+                        </div>
+                    }
                     
                     
                 </>
@@ -968,7 +1018,7 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: '#c5e2f3',
         },
         '& span':{
-            maxWidth: '111px',
+            maxWidth: '130px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -981,6 +1031,16 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#b5b1c7',
         borderRadius: '4px',
         boxShadow: 'inset 0 0 2px 0px #000000d9',
+        justifyContent: 'space-evenly',
+        fontSize: 'medium',
+    },
+    savedFilterSelectDiv:{
+        margin: '0px 15px',
+        display:'flex',
+        flexBasis: '10%',
+        //backgroundColor: '#b5b1c7',
+        //borderRadius: '4px',
+        //boxShadow: 'inset 0 0 2px 0px #000000d9',
         justifyContent: 'space-evenly',
         fontSize: 'medium',
     },
@@ -1180,6 +1240,31 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'start',
         alignItems: 'center',
     },
+    selectFilterSelect:{
+        background: 'linear-gradient(1deg, #62ead7, #bcf8f0)',
+        margin: '0px',
+        fontFamily: 'arial',
+        fontweight: '600',
+        padding: '0px',
+        '&& input':{
+            padding: '12px 0px 12px 15px',
+        },
+        '&& .MuiSelect-select':{
+            padding: '7px 20px 7px 12px',
+            minWidth: 'max-content',
+            fontFamily: 'arial',
+            fontSize: '1.3em',
+        },
+        '&& .MuiOutlinedInput-multiline': {
+            padding: '8.5px 12px'
+        },
+        '&& label':{
+            backgroundColor: '#fff',
+        },
+        inputSelect:{
+            width: '100%',
+        },
+    }
 
       
   }));

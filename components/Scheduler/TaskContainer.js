@@ -47,6 +47,7 @@ const TaskContainer = function(props) {
     const [sorters, setSorters] = useState(null);
     const [installDateFilters, setInstallDateFilters] = useState([]);
     const [drillDateFilters, setDrillDateFilters] = useState([])
+    const [arrivalDateFilters, setArrivalDateFilters] = useState([]);
     const [activeTaskView,setActiveTaskView] = useState(null)
     const [savedFilters, setSavedFilters] = React.useState(null);
 
@@ -81,7 +82,7 @@ const TaskContainer = function(props) {
        array: [{text: "Order", field: "priority_order", width: '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: '4%', maxWidth: 100,style: 'smallListItemText', type: 'number'},
               {text: "WO Created", field: "date_entered", width: '5%', style: 'smallListItemText', type: 'date'},
-              {text: "Desired Date", field: "date_desired", width: '5%', style: 'smallListItemText', type: 'date'},
+              {text: "Desired", field: "date_desired", width: '5%', style: 'smallListItemText', type: 'date'},
               {text: "Name", field: "t_name", width: '18%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
               {text: "State", field: "state", width: '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
               {text: "Type", field: "type", width: '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
@@ -234,7 +235,7 @@ const TaskContainer = function(props) {
 
   //Save and/or Fetch filters to local storage
   useEffect(() => {
-    if(filters == null){
+    if(installDateFilters == null){
       var tmp = window.localStorage.getItem('installDateFilters');
       var tmpParsed;
       if(tmp){
@@ -254,7 +255,7 @@ const TaskContainer = function(props) {
 
   //Save and/or Fetch filters to local storage
   useEffect(() => {
-    if(filters == null){
+    if(drillDateFilters == null){
       var tmp = window.localStorage.getItem('drillDateFilters');
       var tmpParsed;
       if(tmp){
@@ -271,6 +272,26 @@ const TaskContainer = function(props) {
     }
     
   }, [drillDateFilters]);
+
+  //Save and/or Fetch filters to local storage
+  useEffect(() => {
+    if(arrivalDateFilters == null){
+      var tmp = window.localStorage.getItem('arrivalDateFilters');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(Array.isArray(tmpParsed)){
+        setArrivalDateFilters(tmpParsed);
+      }else{
+        setArrivalDateFilters([]);
+      }
+    }
+    if(Array.isArray(arrivalDateFilters)){
+      window.localStorage.setItem('arrivalDateFilters', JSON.stringify(arrivalDateFilters));
+    }
+    
+  }, [arrivalDateFilters]);
 
   
   //Save and/or Fetch tabValue to local storage
@@ -338,7 +359,8 @@ const TaskContainer = function(props) {
                             tabValue, setTabValue, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap, setRows, filterSelectedOnly, setFilterSelectedOnly,
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,activeTaskView, setActiveTaskView,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
-                             sorters, setSorters, installDateFilters, setInstallDateFilters, drillDateFilters, setDrillDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
+                             sorters, setSorters, installDateFilters, setInstallDateFilters, drillDateFilters, setDrillDateFilters,
+                             arrivalDateFilters, setArrivalDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
                              user, refreshView, setRefreshView, taskViews, job_types, savedFilters, setSavedFilters} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 

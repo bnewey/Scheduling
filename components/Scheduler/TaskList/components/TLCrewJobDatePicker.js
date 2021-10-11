@@ -6,17 +6,21 @@ import { useStaticState, ClockView, Calendar } from "@material-ui/pickers";
 import cogoToast from 'cogo-toast';
 
 import moment from 'moment';
-import ReactTooltip from 'react-tooltip';
+import Tooltip from "react-tooltip";
+
 import clsx from 'clsx';
 import WorkOrders from '../../../../js/Work_Orders'
 import TLCompletedAddNewJobQuery from './TLCompletedAddNewJobQuery';
 import Check from '@material-ui/icons/Check';
+import NoCheck from '@material-ui/icons/IndeterminateCheckBox';
+import LocateIcon from '@material-ui/icons/MyLocation'
+
 
 
 const TLCrewJobDatePicker = (props) => {
  
     //PROPS
-    const { ready, type,...other} = props;
+    const { ready, located, type,...other} = props;
 
     // you can past mostly all available props, like minDate, maxDate, autoOk and so on
     const { pickerProps, wrapperProps, inputProps } = useStaticState({
@@ -28,6 +32,8 @@ const TLCrewJobDatePicker = (props) => {
     //STATE
     const [inputValue,setInputValue] = React.useState(props.value);
     const [completeDialogOpen,setCompleteDialogOpen] = React.useState(false);
+
+    
 
     //CSS
     const classes = useStyles();
@@ -113,13 +119,17 @@ const TLCrewJobDatePicker = (props) => {
     }
 
     return(
-        <div className={classes.root}>
+        <div className={classes.root} >
             <div className={classes.inputRootDiv}>
-                {ready && type =="drill" ? <Check className={classes.small_icon} /> : <></> }
+                {type =="drill" ?  ready ? <Check className={classes.small_icon} data-tip={'Drill is Ready'} /> :
+                                             <NoCheck className={classes.small_icon_gray} data-tip={'Drill NOT Ready'} /> : <></> }
                 <TextField {...inputProps} onClick={inputProps.openPicker} value={ getTextFieldValue(props.value) } className={classes.input} variant="outlined" />
+                {type =="drill" ?  located ? <div className={classes.locatedDiv}><LocateIcon className={classes.locate_icon} data-tip={`Located til ${moment(located).format('MM-DD-YYYY')}. (${moment(located).diff(moment(new Date()), 'days')} Days)`} />
+                                                <span>{moment(located).diff(moment(new Date()), 'days')}</span></div> :
+                                             <LocateIcon className={classes.locate_icon_gray} data-tip={'Drill NOT Ready'} /> : <></> }
             </div>
             <Dialog {...wrapperProps}  maxWidth="md">
-                <ReactTooltip effect={"solid"} delayShow={500}/>
+                
                 <DialogTitle id="customized-dialog-title" onClose={wrapperProps.onDismiss} className={classes.dialogTitle}>
                     {props.title ? props.title : "Select Date"}
                 </DialogTitle>
@@ -312,12 +322,34 @@ const useStyles = makeStyles(theme => ({
         width: '.7em',
         height: '.7em',
     },
+    locate_icon:{
+        color: '#0061fc',
+        width: '.7em',
+        height: '.7em',
+    },
+    locate_icon_gray:{
+        color: '#999',
+        width: '.7em',
+        height: '.7em',
+    },
+    small_icon_gray:{
+        color: '#fff',
+        background: '#999',
+        width: '.7em',
+        height: '.7em',
+    },
     small_icon_inverse:{
         background: '#fff',
         color: '#05c417',
         width: '1em',
         height: '1em',
         marginRight: '-5px',
+    },
+    locatedDiv:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems:'center',
     }
 
   }));

@@ -62,7 +62,7 @@ const MapContainer = (props) => {
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
           filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, refreshView,
-          installDateFilters , setInstallDateFilters, drillDateFilters, job_types} = useContext(TaskContext);
+          installDateFilters , setInstallDateFilters, drillDateFilters, arrivalDateFilters, job_types} = useContext(TaskContext);
 
     const { crewJobDateRange, setShouldResetCrewState, crewJobDateRangeActive} = useContext(CrewContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
@@ -130,7 +130,7 @@ const MapContainer = (props) => {
         .then((values)=>{
           console.log("valuies",values);
           let linuxp_loc_array = values[0]["data"]["locations"];
-          let tmpData = linuxp_loc_array.map((item,i )=> (
+          let tmpData = linuxp_loc_array?.map((item,i )=> (
                                                 { latitude: item.latitude, 
                                                   longitude: item.longitude, 
                                                   make: item.make, 
@@ -146,7 +146,7 @@ const MapContainer = (props) => {
             console.error("Custom Error from bouncie", values[1]);
             setBouncieAuthNeeded(true);
           }else{
-            tmpData2 =  values[1].map((item,i )=> ({latitude: item['stats']['location'].lat, 
+            tmpData2 =  values[1]?.map((item,i )=> ({latitude: item['stats']['location'].lat, 
                       longitude: item['stats']['location'].lon, 
                       make: item['model'].make, 
                       model: item['model'].name, 
@@ -160,7 +160,7 @@ const MapContainer = (props) => {
           locations.splice(locations.length, 0, ...tmpData2);
           setVehicleRows(locations);
           setVehicleNeedsRefresh(false);
-          console.log(locations);
+          console.log('locatons',locations);
 
           //Move our info window by resetting activeVehicle with update info
           if(activeMarker?.type === "vehicle" && activeMarker?.item){
@@ -186,7 +186,7 @@ const MapContainer = (props) => {
 
     //useEffect for mapRows
     useEffect( () =>{ 
-      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null && drillDateFilters != null){
+      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null && drillDateFilters != null && arrivalDateFilters != null){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
             if(mapRowsRefetch == true){
               setMapRowsRefetch(false);
@@ -253,14 +253,21 @@ const MapContainer = (props) => {
                 }
 
                 if(drillDateFilters.length > 0){
-                  if(tmpData.length <= 0 && filters && !filters.length){
+                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length){
                       tmpData = [...data];
                   }  
                   tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
                 }
 
+                if(arrivalDateFilters.length > 0){
+                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
+                      tmpData = [...data];
+                  }  
+                  tmpData = tmpData.filter(createFilter([...arrivalDateFilters], "in", "or"));
+                }
+
                 //No filters 
-                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length && arrivalDateFilters && !arrivalDateFilters.length){
                   //no change to tmpData
                   tmpData = [...data];
                 }
@@ -303,7 +310,7 @@ const MapContainer = (props) => {
 
       return () => { //clean up
       }
-    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters, drillDateFilters]);
+    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters, drillDateFilters, arrivalDateFilters]);
 
     //Sort
     useEffect(()=>{
@@ -319,30 +326,11 @@ const MapContainer = (props) => {
       }
     },[sorters]);
 
-    // //Sort
-    // useEffect(()=>{
-    //   if(!mapRows){
-    //     return;
-    //   }
-    //   if(installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
-    //     //no change
-    //     return;
-    //   }
-
-    //   var tmpData = mapRows;
-
-    //   if( installDateFilters?.length > 0){
-    //     tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
-    //   }
-
-    //   if(drillDateFilters?.length > 0){ 
-    //     tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
-    //   }
-
-
-    //   setMapRows(tmpData);
-     
-    // },[installDateFilters, drillDateFilters]);
+    useEffect(()=>{
+      if(mapRows && crewJobs){
+        setCrewJobsRefetch(true);
+      }
+    },[mapRows])
 
     //Use effect for tasks with no locations (nomarkerrows)
     useEffect(()=>{

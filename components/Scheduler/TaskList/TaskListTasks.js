@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect, useContext, useCallback, useLayoutEffect} from 'react';
 
 import {makeStyles, List as MUIList, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Checkbox, IconButton, CircularProgress, 
-  Popover, ListSubheader,Tooltip} from '@material-ui/core';
+  Popover, ListSubheader} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Clear';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
@@ -21,7 +21,7 @@ import Util from '../../../js/Util';
 import { select } from 'async';
 import { CrewContext } from '../Crew/CrewContextContainer';
 
-import { List } from 'react-virtualized';
+import {AutoSizer, List } from 'react-virtualized';
 import ReactDOM from 'react-dom';
 
 import DateFnsUtils from '@date-io/date-fns';
@@ -32,12 +32,20 @@ import {
     MuiPickersUtilsProvider,
   } from '@material-ui/pickers';
 
+  import { debounce } from "lodash";
+  import Tooltip from "react-tooltip";
+
+  const rebuildTooltip = debounce(() => Tooltip.rebuild(), 200, {
+    leading: false,
+    trailing: true
+  });
 import TLCrewJobDatePicker from './components/TLCrewJobDatePicker';
 import TLArrivalDatePicker from './components/TLArrivalDatePicker';
 import TLCrewJobsTypePopover from './components/TLCrewJobsTypePopover';
 import TLCrewJobsServiceCounter from './components/TLCrewJobsServiceCounter';
 
-import Work_Orders from '../../../js/Work_Orders'
+import Work_Orders from '../../../js/Work_Orders';
+
 
 const TaskListTasks = (props) =>{
 
@@ -50,6 +58,9 @@ const TaskListTasks = (props) =>{
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
+    useEffect(()=>{
+      rebuildTooltip();
+  },[taskListTasks, tableInfo])
 
     //Popover Add/swap crew
     const [addSwapCrewAnchorEl, setAddSwapCrewAnchorEl] = React.useState(null);
@@ -65,7 +76,7 @@ const TaskListTasks = (props) =>{
     //Gets size of our list container so that we can size our virtual list appropriately
     useLayoutEffect(() => {
       if (targetRef.current) {
-        
+        rebuildTooltip();
         setDimensions({
           width: targetRef.current.offsetWidth,
           height: targetRef.current.offsetHeight
@@ -785,9 +796,11 @@ const TaskListTasks = (props) =>{
           if(task.type === "Install (Drill)"){
             if(!task.drill_job_completed){
               return_value = <div>
+                
                   <MuiPickersUtilsProvider utils={DateFnsUtils}>
                           <TLCrewJobDatePicker  showTodayButton
                             clearable
+
                             inputVariant="outlined"
                             variant="modal" 
                             type={'drill'}
@@ -798,6 +811,7 @@ const TaskListTasks = (props) =>{
                             value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
                             onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
                             ready={task.drill_ready}
+                            located={task.drill_located}
                             onReadyJob={ (ready)=> handleReadyJob(task, task.drill_job_id, "drill", ready) }
                             onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
                     </MuiPickersUtilsProvider></div>
@@ -814,7 +828,8 @@ const TaskListTasks = (props) =>{
         }
         case 'sch_install_date':{
           if(!task.install_job_completed){
-            return_value = <div className={classes.install_date_div}>
+            return_value = <div className={classes.install_date_div} 
+            >
               {/* <WoiStatusCheck handleOpenWoiStatusPopover={handleOpenWoiStatusPopover} 
                           task={task} 
                           data={woiData?.filter((item)=>item.work_order == task.table_id)}/> */}
@@ -954,6 +969,7 @@ const TaskListTasks = (props) =>{
         <React.Fragment>
         { taskListTasks && taskListTasksSaved ? <>
         <div ref={targetRef}>
+          
           <TaskListTasksRows taskListTasks={taskListTasks} taskListTasksSaved={taskListTasksSaved} taskListTasksRefetch={taskListTasksRefetch}
            classes={classes} isSelected={isSelected} 
                 handleRightClick={handleRightClick} handleClick={handleClick} taskListToMap={taskListToMap} getItemStyle={getItemStyle}
@@ -1064,6 +1080,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
   return(
       <React.Fragment>
       { taskListTasks && taskListTasksSaved ? <>
+        <Tooltip type="info" effect="solid" border={true} borderColor={'#000000dd'} textColor={'#fff'} backgroundColor={'#4c4646f3'}  className={classes.tooltipClass}/>
           <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable" mode="virtual"
           renderClone={(provided, snapshot, rubric) => (
@@ -1091,6 +1108,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
               height={dimensions?.height - 20}
               rowCount={itemCount}
               rowHeight={26}
+              onRowsRendered={()=> rebuildTooltip()}
               width={dimensions?.width}
               ref={(ref) => {
                 // react-virtualized has no way to get the list's ref that I can so
@@ -1562,6 +1580,12 @@ const useStyles = makeStyles(theme => ({
   install_date_div:{
     display: 'flex',
     flexDirection: 'row',
+  },
+  tooltipClass:{
+    fontSize: '1.1em !important',
+    fontFamily: 'arial !important',
+    whiteSpace: 'nowrap',
+    fontWeight: 600,
   }
   
 
