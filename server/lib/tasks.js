@@ -1,6 +1,7 @@
 const express = require('express');
 var async = require("async");
 const router = express.Router();
+const Util = require('../../js/Util');
 
 const logger = require('../../logs');
 //Handle Database
@@ -225,16 +226,16 @@ router.post('/copyTaskForNewType', async (req,res) => {
     }
 
     //copy task and give it new type
-    const sql = ' INSERT INTO tasks (id_history, name, id_users_entered, hours_estimate, date_assigned, order_assigned, ' + 
+    const sql = ' INSERT INTO tasks (id_history, name, id_users_entered, description, hours_estimate, date_assigned, order_assigned, ' + 
     '  id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, drilling, sign, artwork, order_date, ' +
-    ' first_game, work_type, install_location, task_status, task_list_id, type  ) ' +
-    ' SELECT t.id_history, wo.name, t.id_users_entered, wo.description, t.hours_estimate, t.date_assigned, t.order_assigned, t.' + 
+    ' first_game, work_type, install_location, task_status, task_list_id, type, date_entered  ) ' +
+    ' SELECT t.id_history, t.name, t.id_users_entered, wo.description, t.hours_estimate, t.date_assigned, t.order_assigned, t.' + 
     '  id_task_types, t.table_id, t.id_time_tracker_category, t.date_completed, t.company, t.priority_order, t.drilling, t.sign, t.artwork, t.order_date, t.' +
-    ' first_game, t.work_type, t.install_location, t.task_status, t.task_list_id, ? as type FROM tasks t ' + 
+    ' first_game, t.work_type, t.install_location, t.task_status, t.task_list_id, ? as type, ? as date_entered FROM tasks t ' + 
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id WHERE id = ? ';
 
     try{
-        const results = await database.query(sql, [new_type, t_id]);
+        const results = await database.query(sql, [new_type, Util.convertISODateTimeToMySqlDateTime(new Date()) , t_id]);
         logger.info("copyTaskForNewType " + t_id + ' new type: ' + new_type );
         res.json(results);
     }
