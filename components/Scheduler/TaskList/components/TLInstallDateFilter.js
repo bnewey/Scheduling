@@ -247,7 +247,8 @@ const useStyles = makeStyles(theme => ({
         cursor: ({ctrl}) => ctrl ? 'cell': 'pointer',
     },
     icon:{
-        color: ({filterLength}) => filterLength > 0 ? '#ff6a1e' : '#fff'
+        color: ({filterLength}) => filterLength > 0 ? '#ff6a1e' : '#fff',
+        cursor: 'pointer'
     }
 
       

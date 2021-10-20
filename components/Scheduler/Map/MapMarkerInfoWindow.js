@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect} from 'react';
 
 import ReactDOM from 'react-dom';
-import {makeStyles, Avatar, Tooltip, Button} from '@material-ui/core';
+import {makeStyles, Avatar, Tooltip, Button,TextField} from '@material-ui/core';
 //import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 const {
     withScriptjs,
@@ -11,30 +11,80 @@ const {
     InfoWindow
   } = require("react-google-maps");
 
+  import CloudTwoToneIcon from '@material-ui/icons/CloudTwoTone';
+  import EditLocationSharpIcon from '@material-ui/icons/EditLocationSharp';
+
+import Tasks from '../../../js/Tasks';
+import Work_Orders from '../../../js/Work_Orders';
+
 import Util from '../../../js/Util';
+import cogoToast from 'cogo-toast';
+import moment from 'moment';
+import Router from 'next/router'
+import clsx from 'clsx';
+import { TaskContext } from '../TaskContainer';
+import { MapContext } from './MapContainer';
 
 const days=["Sunday",'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-const MapMarkerInfoWindow = (props)=>{
+const MapCrewInfoWindow = (props)=>{
 
     //PROPS
     const {taskMarkers, activeMarker, setActiveMarker, infoWeather, setInfoWeather, showingInfoWindow, setShowingInfoWindow,markerToRemap, setMarkerToRemap,
         multipleMarkersOneLocation, setMultipleMarkersOneLocation} = props;
-    //STATE
+    const {setMapRowsRefetch} = React.useContext(MapContext)
 
+        const {  job_types } = React.useContext(TaskContext);
+    //STATE
+    const [jobTask, setJobTask] = useState(null);
+    const [jobTaskRefetch, setJobTaskRefetch] = useState(false);
+    const [notesEdit, setNotesEdit] = useState(false);
+    const [notes, setNotes] = useState(null);
+    const [shouldUpdate,setShouldUpdate]  = useState(false)
+    
     //CSS
     const classes = useStyles();
 
     //FUNCTIONS
     useEffect( () =>{ //useEffect for inputText
         setInfoWeather(null);
-    },[activeMarker]);
+        setShouldUpdate(false);
+        console.log("Active marker", activeMarker);
+        if(activeMarker || jobTaskRefetch){
+            if(jobTaskRefetch){
+                console.log("From refetch");
+                setJobTaskRefetch(false);
+            }
+            Tasks.getTask(activeMarker.item?.t_id)
+            .then((data)=>{
+                if(data){
+                    setJobTask(data[0]);
+                }
+            })
+            .catch((error)=>{
+                console.error("Failed to get task for job", error);
+                cogoToast.error("Failed to get task for job");
+            })
 
+            if(notesEdit){
+                setNotesEdit(false);
+            }
+            if(notes !== activeMarker.item?.notes){
+                setNotes(null)
+            }
+        }
+    },[activeMarker, jobTaskRefetch]);
+
+    const handleShouldUpdate = (event , update) =>{
+        setNotes(event.target.value);
+        setShouldUpdate(update)
+    }
 
     const handleInfoWindowClose = () =>{
         setInfoWeather(null);
         setShowingInfoWindow(false);
         setMultipleMarkersOneLocation(null);
+        setShouldUpdate(false)
     }
 
     const getWeather = (event, lat, lng) => {
@@ -75,7 +125,12 @@ const MapMarkerInfoWindow = (props)=>{
     }
 
     const handleSetMarkerToRemap = (event)=>{
-        setMarkerToRemap(activeMarker);
+        if(!jobTask || !activeMarker){
+            cogoToast.error("Error remapping");
+            console.error("Failed to set remap marker; no jobtask")
+            return;
+        }
+        setMarkerToRemap({type: activeMarker.type , item: jobTask});
 
         //Set cursor to crosshair, maybe focus the map
     }
@@ -84,7 +139,7 @@ const MapMarkerInfoWindow = (props)=>{
     }
 
     const handleNextMultiMarker =(event)=>{
-        let index = multipleMarkersOneLocation.indexOf(activeMarker.item.t_id.toString());
+        let index = multipleMarkersOneLocation.indexOf(activeMarker.item.t_id);
         if(index >= multipleMarkersOneLocation.length-1){
             index =0;
         }else{
@@ -97,7 +152,7 @@ const MapMarkerInfoWindow = (props)=>{
     }
 
     const handlePrevMultiMarker =(event)=>{
-        let index = multipleMarkersOneLocation.indexOf(activeMarker.item.t_id.toString());
+        let index = multipleMarkersOneLocation.indexOf(activeMarker.item.t_id);
         if(index <= 0){
             index = multipleMarkersOneLocation.length-1;
         }else{
@@ -107,6 +162,61 @@ const MapMarkerInfoWindow = (props)=>{
         let newActiveMarker = taskMarkers.filter((marker, i)=> marker.t_id == newActiveId)[0]; 
         setActiveMarker({type: "task", item: newActiveMarker});
     }
+
+    const handleGoToWorkOrderId = (wo_id, event) =>{
+        //console.log("woi", wo_id);
+        //Disable Default context menu
+        event.preventDefault();
+        
+        //set detailWOIid in local data
+        window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
+        
+        //set detail view in local data
+        window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
+    
+        Router.push('/scheduling/work_orders')
+      }
+
+    const handleEditNotes = (notesEdit)=>{
+        if(notesEdit == false){
+            setNotesEdit(true);
+        }else{
+            setNotesEdit(false);
+        }
+        
+    }
+
+    const handleSaveNotes = (event, item)=>{
+        if(!shouldUpdate){
+            console.log("No changes");
+            cogoToast.info("No changes");
+            setNotesEdit(false);
+            return
+        }
+        if(!item){
+            cogoToast.error("Internal Server Error");
+            console.error("No item in handleSaveNotes")
+        }
+
+        console.log("notes", notes);
+        Work_Orders.updateWONotes(item.table_id, notes )
+        .then((data)=>{
+            cogoToast.success("Updated notes");
+            setJobTaskRefetch(true);
+            setNotesEdit(false);
+            setShouldUpdate(false);
+        })
+        .catch((error)=>{
+            cogoToast.error("Failed to update notes");
+            console.error("Failed to update notes", error);
+        })
+
+    }
+
+
+    const crewColor = React.useCallback(activeMarker?.item?.crew_color || '#555', [activeMarker]);
+    const typeColor = React.useCallback(job_types.find((type)=> type.type === activeMarker?.item?.job_type )?.color || '#222', [activeMarker]);
+
 
     return (
         <InfoWindowEx
@@ -118,7 +228,7 @@ const MapMarkerInfoWindow = (props)=>{
         {...props}
         >
         <div >
-            {activeMarker?.item ? 
+            {jobTask ? 
                 <>
                 {multipleMarkersOneLocation && 
                     <div className={classes.multipleMarkersDiv}>
@@ -129,35 +239,75 @@ const MapMarkerInfoWindow = (props)=>{
                                 className={classes.multiMarkerButton}>{"Next"}</Button>
                     </div>
                 }
-                <div className={classes.MarkerInfo}>{activeMarker.item.t_name}</div>
-                <div className={classes.MarkerSubInfo}>  ID:&nbsp;{activeMarker.item.t_id}&nbsp;&nbsp;Priority:&nbsp;{activeMarker.item.priority_order} </div>
-                <div className={classes.avatarContainer}>
-                    {!(activeMarker.item.drilling == "" || activeMarker.item.drilling == null )
-                        ? 
-                        <Tooltip title={"Drilling"}><div className={classes.avatarItem}> <Avatar src='/static/drilling-icon.png' alt="Drilling" className={classes.avatar} style={{left: '25%'}}/>{activeMarker.item.drilling} </div> 
-                        </Tooltip>: <></>}
-                    {!(activeMarker.item.sign == "" || activeMarker.item.sign == null )
-                        ? 
-                        <Tooltip title={"Sign Status"}>
-                        <div className={classes.avatarItem}><Avatar src='/static/sign-build-icon.png' alt="Sign Status" className={classes.avatar} style={{left: '25%'}}/> {activeMarker.item.sign} </div>
-                        </Tooltip>: <></>}
-                    {!(activeMarker.item.artwork == "" || activeMarker.item.artwork == null )
-                        ? 
-                        <Tooltip title={"Artwork"}>
-                        <div className={classes.avatarItem}><Avatar src='/static/art-icon.png' alt="Artwork" className={classes.avatar} style={{left: '25%'}}/> {activeMarker.item.artwork} </div> 
-                        </Tooltip>: <></>}
-                 </div>
+                <div className={classes.markerInfo}>{jobTask.t_name}</div>
+                <div className={classes.markerSubInfo}> 
+                    <div className={classes.markerSubInfoDiv}>
+                        <span className={classes.markerSubInfoLabel}>WO#:</span>
+                        <span className={clsx({[classes.markerSubInfoValue]: true, 
+                                            [classes.clickableWOnumber]: true})} 
+                                            onClick={(event)=>handleGoToWorkOrderId(jobTask?.table_id,event)}>{jobTask?.table_id}</span>
+                    </div> 
+                    <div className={classes.markerSubInfoDiv} >
+                        <span className={classes.markerSubInfoLabel}>Type:</span>
+                        <span className={classes.markerSubInfoValue} style={{fontWeight: '500', color: typeColor, textTransform: 'uppercase',  }}>{jobTask?.wo_type}</span>
+                    </div>
+                    {/* <div className={classes.markerSubInfoDiv} >
+                        <span className={classes.markerSubInfoLabel}>Crew:</span>
+                        <span  className={classes.markerSubInfoValue}
+                               style={{  fontWeight: '500',
+                                        color: '#fff',
+                                        backgroundColor: `${crewColor}`}}>{jobTask?.crew_id ? jobTask?.leader_name ? jobTask?.leader_name : 'Crew '+  jobTask?.crew_id : ''}</span>
+                    </div> */}
+                    <div className={classes.markerSubInfoDiv}>
+                        <span className={classes.markerSubInfoLabel}>Install Date:</span>
+                        <span className={classes.markerSubInfoValue}>{ jobTask?.sch_install_date ? moment(jobTask?.sch_install_date).format('MM-DD-YYYY') : ''}</span>
+                    </div>
+                    { jobTask?.drill_date ? <div className={classes.markerSubInfoDiv}>
+                        <span className={classes.markerSubInfoLabel}>Drill Date:</span>
+                        <span className={classes.markerSubInfoValue}>{ jobTask?.drill_date ? moment(jobTask?.drill_date).format('MM-DD-YYYY') : ''}</span>
+                    </div> :<></>}
+                    <div className={classes.markerSubInfoDiv}>
+                        <span className={classes.markerSubInfoLabel}>Descr:</span>
+                        <span className={classes.markerSubInfoValue}>{ jobTask?.description}</span>
+                    </div>
+                    <div className={classes.markerSubInfoDiv}>
+                        <span className={clsx({[classes.markerSubInfoLabel]: true, 
+                                            [classes.clickableWOnumber]: true})}
+                                            onClick={(event)=> handleEditNotes(notesEdit)}>Notes:</span>
+                        {!notesEdit && <span className={classes.markerSubInfoValue}>{ jobTask?.notes}</span>}
+                        
+                        {notesEdit && <div>
+                                <TextField id={`wo_notes`} 
+                                   
+                                    variant="outlined"
+                                    multiline
+                                    name={'item_notes'}
+                                    value={notes}
+                                    InputProps={{className: classes.inputRoot}} 
+                                    defaultValue={ jobTask?.notes }
+                                    onChange={(event)=>handleShouldUpdate(event,true)}  />
+                                <span className={classes.clickableWOnumber} onClick={(event)=> handleSaveNotes(event, activeMarker?.item )}>Save</span>
+                            </div>}
+                    </div>
+                </div>
+                
             </>  : <p>No Data</p>}
-        <button type="button" onClick={event => getWeather(event, activeMarker.item.lat, activeMarker.item.lng)} className={classes.infoButton}>
-            Weather {infoWeather ? "X" : ""}
-        </button>
-        <button type="button" onClick={event => handleSetMarkerToRemap(event)} className={classes.infoButton}>
-            Remap Marker
-        </button>
-        {markerToRemap ? <button type="button" onClick={event => handleCancelRemap(event)} className={classes.infoButton}>
-            Cancel Remap
-        </button> : <></>}
-        { infoWeather ? <div className={classes.weather_div}> 
+            <div className={classes.buttonContainer}>
+                <div>
+                    <CloudTwoToneIcon onClick={event => getWeather(event, activeMarker.item.lat, activeMarker.item.lng)}
+                        className={clsx({ [classes.weatherInfoButtonActive]: !!infoWeather, [classes.weatherInfoButtonInactive]: !infoWeather })}/>
+                </div>
+
+                <div>
+                    {  !markerToRemap && <EditLocationSharpIcon onClick={event => handleSetMarkerToRemap(event)} 
+                        className={clsx({ [classes.weatherInfoButtonActive]: !!markerToRemap })} /> }
+                </div>
+                {markerToRemap ? <button type="button" onClick={event => handleCancelRemap(event)} className={classes.infoButton}>
+                    Cancel Remap
+                </button> : <></>}
+            </div>
+            { infoWeather ? <div className={classes.weather_div}> 
+
             <table className={classes.weather_table}>
                 <thead>
                 <tr>
@@ -210,12 +360,13 @@ const MapMarkerInfoWindow = (props)=>{
                 </tbody>
             </table>
         </div>: <></>}
+
         </div>
         </InfoWindowEx>
     );
 }
 
-export default MapMarkerInfoWindow;
+export default MapCrewInfoWindow;
 
 
 class InfoWindowEx extends React.Component {
@@ -250,21 +401,51 @@ class InfoWindowEx extends React.Component {
        backgroundColor: '#f3f3f3',
        boxShadow: 'inset 0px 2px 1px -1px rgba(0,0,0,0.2), inset 0px 1px 1px 0px rgba(0,0,0,0.14), inset 0px 1px 3px 0px rgba(0,0,0,0.12)'
     },
-    MarkerInfo:{
+    markerInfo:{
+        minWidth: '260px',
         display: 'block',
-        fontSize: '12px',
-        fontWeight: '600',
-        color: '#16233b',
-        backgroundColor: '#abb7c93d',
-        padding: '2px',
+        color: '#293a5a',
+        display: 'block',
+        padding: 0,
+        fontSize: 12,
+        fontWeight: 600,
+        fontFamily: 'sans-serif',
 
     },
-    MarkerSubInfo:{
-        marginLeft:'5%',
-        display:'block',
-        fontSize: '11px',
-        fontWeight: '400',
-        color: '#666464',
+    markerSubInfo:{
+        width: '100%',
+        display:'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'start',
+    },
+    markerSubInfoDiv:{
+        width: '100%',
+        display:'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'start',
+    },
+    markerSubInfoLabel:{
+        color: '#555',
+        flexBasis: '35%',
+        paddingRight: '10px',
+        textAlign: 'right',
+    },
+    markerSubInfoValue:{
+        color: '#000', 
+        flexBasis: '65%',
+        paddingLeft: '10px',
+        textAlign: 'left',
+        maxWidth: '300px'
+    },
+    buttonContainer:{
+        width: '100%',
+        display:'flex',
+        padding: '5px',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'start',
     },
     weather_table:{
         fontSize: '10px',
@@ -276,6 +457,17 @@ class InfoWindowEx extends React.Component {
         '&& .dataRow td':{
             borderRight: '1px solid #b5b5b5',
         }
+    },
+    weatherInfoButtonActive:{
+        textTransform: 'uppercase',
+        color: "#00ff00",
+        '&: hover':{
+            color: "#00dd00",
+        }
+    },
+    weatherInfoButtonInactive:{
+        textTransform: 'uppercase',
+        color: "#444"
     },
     infoButton:{
         display: 'block',
@@ -292,7 +484,7 @@ class InfoWindowEx extends React.Component {
         lineHeight: '1.75',
         borderRadius: '4px',
         letterSpacing: '0.02857em',
-        textTransform: 'uppercase',
+        
     },
     avatarContainer:{
         display: 'flex',
@@ -331,5 +523,18 @@ class InfoWindowEx extends React.Component {
     },
     multiMarkerLabelDiv:{
         margin: '2%'
+    },
+    clickableWOnumber:{
+        cursor: 'pointer',
+        textDecoration: 'underline',
+        '&:hover':{
+          color: '#ee3344',
+        }
+    },
+    inputRoot:{
+        backgroundColor: '#f5fdff',
+        padding: '2px 2px',
+        fontSize: 12,
     }
+
   }));

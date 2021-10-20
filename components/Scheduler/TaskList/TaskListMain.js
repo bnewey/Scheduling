@@ -342,7 +342,7 @@ const TaskListMain = (props) => {
                                                         align="center"
                                                         key={item.field + i +'_head'}
                                                         className={classes.listItemText} 
-                                                        style={{flex: `0 0 ${item.width}`}} 
+                                                        style={{flex: `0 0 ${item.width("large")}`}} 
                                                         classes={{primary: classes.listItemTextPrimary}}
                                                         
                                                         >

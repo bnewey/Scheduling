@@ -15,8 +15,11 @@ import {makeStyles, Paper, Accordion, AccordionDetails, AccordionSummary, Select
 import MapSidebarMissingMarkers from './MapSidebarMissingMarkers';
 
 import MapSidebarCrewJobs from './MapSidebarCrewJobs';
+import MapSidebarTaskList from './MapSidebarTaskList';
 import MapSidebarVehicleRows from './MapSidebarVehicleRows';
 import MapSidebarRadarControls from './MapSidebarRadarControls';
+
+import MapSidebarMarkedTasks from './MapSidebarMarkedTasks';
 
 
 import { CrewContext } from '../../Crew/CrewContextContainer';
@@ -66,7 +69,7 @@ const MapSidebar = (props) => {
     const [expanded, setExpanded] = React.useState(false);
     const [expandedAnimDone,setExpandedAnimDone] = React.useState(false);
 
-    const [tabValue, setTabValue] = React.useState(0);
+    const [tabValue, setTabValue] = React.useState(null);
 
     const [sorterVariable, setSorterVariable] = React.useState( "priority_order");
     const [sorterState, setSorterState] = useState(0);
@@ -74,6 +77,7 @@ const MapSidebar = (props) => {
     const panelRef = useRef(null);
     const vehiclePanelRef = useRef(null);
     const crewPanelRef = useRef(null);
+    const taskPanelRef = useRef(null);
     
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
@@ -94,12 +98,12 @@ const MapSidebar = (props) => {
 
     useEffect( () =>{ //useEffect for inputText
 
-        if ( activeMarker?.type === "vehicle" && tabValue != 1 && ( activeMarker.item.vin !=  activeVehicleRef.current)){
+        if ( activeMarker?.type === "vehicle" && tabValue != 2 && ( activeMarker.item.vin !=  activeVehicleRef.current)){
             setTabValue(1);
             setExpandedAnimDone(false);    
         }
 
-        if( activeMarker?.type === "crew" && tabValue != 0){
+        if( activeMarker?.type === "crew" && tabValue != 1){
             setTabValue(0);
             setExpandedAnimDone(false);
         }
@@ -122,6 +126,20 @@ const MapSidebar = (props) => {
         }
     },[activeMarker]);
 
+    //Selects the right initial tab for Sidebar depending on visible items (tasks or crewJobs)
+    useEffect(()=>{
+        if(tabValue == null && visibleItems?.length > 0){
+            var newValue = 0;
+            if(visibleItems.indexOf("crewJobs") > 0){
+                newValue = 1;
+            }
+            if(visibleItems.indexOf("tasks") > 0){
+                newValue = 0;
+            }
+            setTabValue(newValue);
+        }
+    },[visibleItems, tabValue])
+
     //Sort
     useEffect(()=>{
         if(sorterVariable && sorterVariable != ""){
@@ -143,7 +161,7 @@ const MapSidebar = (props) => {
     //Set crewjobs as visible on crewToMap Change
     useEffect(()=>{
         if(crewToMap){
-            if(visibleItems.indexOf("crewJobs") == -1){
+            if(visibleItems?.indexOf("crewJobs") == -1){
                 toggleVisible(null, 'crewJobs')
             }
         }
@@ -173,16 +191,16 @@ const MapSidebar = (props) => {
     const toggleVisible = (event, newVisible) => {
         
         //newVisible not currently in, so add
-        if(visibleItems.indexOf(newVisible) == -1){
+        if(visibleItems?.indexOf(newVisible) == -1){
             var updateVisible = [...visibleItems, newVisible]
 
             if(newVisible === "tasks"){
-                if(visibleItems.indexOf("crewJobs") != -1){
+                if(visibleItems?.indexOf("crewJobs") != -1){
                     updateVisible = [...updateVisible.filter((item,i)=> item != "crewJobs")]
                 }
             }
             if(newVisible === "crewJobs"){
-                if(visibleItems.indexOf("tasks") != -1){
+                if(visibleItems?.indexOf("tasks") != -1){
                     updateVisible = [...updateVisible.filter((item,i)=> item != "tasks")]
                 }
             }
@@ -190,7 +208,7 @@ const MapSidebar = (props) => {
             setVisibleItems(updateVisible);
         }else{
             //newVisible is already in, so remove
-            setVisibleItems([...visibleItems.filter((item,i)=> item != newVisible)]);
+            setVisibleItems([...visibleItems?.filter((item,i)=> item != newVisible)]);
         }   
 
         if(event){
@@ -200,7 +218,7 @@ const MapSidebar = (props) => {
     };
 
     const isVisible = (item) =>{
-        return(visibleItems.indexOf(item) != -1);
+        return(visibleItems?.indexOf(item) != -1);
     }
 
     const handleChangeSorter = (event) =>{
@@ -248,19 +266,24 @@ const MapSidebar = (props) => {
             aria-label="sidebar tabs"
             >
                 {/* <Tab label="Tasks" {...a11yProps(0)} /> */}
+                <Tab label={<div className={classes.tabDiv}>Tasks {isVisible('tasks') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'tasks')} style={{ color: 'rgb(25, 109, 234)' }}/>
+                                : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'tasks')}/>} </div>}
+                    {...a11yProps(1)} >
+                    
+                </Tab>
                 <Tab label={<div className={classes.tabDiv}>Crew Jobs {isVisible('crewJobs') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')} style={{ color: 'rgb(25, 109, 234)' }}/>
                                 : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'crewJobs')}/>} </div>}
-                    {...a11yProps(1)} >
+                    {...a11yProps(2)} >
                     
                 </Tab>
                 <Tab label={<div className={classes.tabDiv}>Vehicles {isVisible('vehicles') ? <VisibilityOnIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'vehicles')} style={{ color: 'rgb(25, 109, 234)' }}/>
                                 : <VisibilityOffIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'vehicles')}/>} </div>} 
-                    {...a11yProps(2)} />
+                    {...a11yProps(3)} />
                 <Tab label={<div className={classes.tabDiv}>Weather {isVisible('radar') ? <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'radar')} style={{ color: 'rgb(25, 109, 234)' }}/>
                                 : <PowerSettingsNewIcon className={classes.iconClickable} onClick={event=> toggleVisible(event, 'radar')}/>} </div>} 
-                    {...a11yProps(3)} />
+                    {...a11yProps(4)} />
                 { noMarkerRows && noMarkerRows.length >0  ? 
-                <Tab label="No Marker" {...a11yProps(4)}/>
+                <Tab label="No Marker" {...a11yProps(5)}/>
                 : ''}
             </Tabs>
      
@@ -292,12 +315,28 @@ const MapSidebar = (props) => {
                 </Scrollbars>
         </TabPanel> */}
         <TabPanel value={tabValue} index={0}>
+               <>
+       
+                {/* <Scrollbars  ref={s => { panelRef.current = (s?.view); }}  universal autoHeight autoHeightMax={600}>
+                    <MapSidebarMarkedTasks mapRows={mapRows} setMapRows={setMapRows} activeMarker={activeMarker} setActiveMarker={setActiveMarker}
+                     setShowingInfoWindow={setShowingInfoWindow} markedRows={markedRows} setMarkedRows={setMarkedRows} 
+          setModalOpen={setModalOpen} setModalTaskId={setModalTaskId} setResetBounds={setResetBounds} infoWeather={infoWeather} setInfoWeather={setInfoWeather}
+           setTabValue={setTabValue}  sorters={sorters} panelRef={panelRef} tabValue={tabValue} 
+                                    expandedAnimDone={expandedAnimDone} setExpandedAnimDone={setExpandedAnimDone}
+                                            />
+                </Scrollbars> */}
+                                              </>
+                                              
+               <MapSidebarTaskList panelRef={taskPanelRef} />  
+
+       </TabPanel>
+        <TabPanel value={tabValue} index={1}>
                
 
                 <MapSidebarCrewJobs  panelRef={crewPanelRef} tabValue={tabValue} setTabValue={setTabValue} expandedAnimDone={expandedAnimDone} /> 
 
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
+        <TabPanel value={tabValue} index={2}>
                 <Scrollbars universal autoHeight autoHeightMax={400}>
                          <><MapSidebarVehicleRows vehiclePanelRef={vehiclePanelRef} tabValue={tabValue} setTabValue={setTabValue}
                                 expanded={expanded} setExpanded={setExpanded} expandedAnimDone={expandedAnimDone} />
@@ -313,7 +352,7 @@ const MapSidebar = (props) => {
                         </> : <></>}
                        
         </TabPanel>
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={3}>
                 { isVisible('radar') &&
                     <>
                         <MapSidebarRadarControls visibleItems={visibleItems} setVisibleItems={setVisibleItems}  visualTimestamp={visualTimestamp}
@@ -324,7 +363,7 @@ const MapSidebar = (props) => {
                 }
         </TabPanel>
         { noMarkerRows && noMarkerRows.length >0  ? 
-            <TabPanel value={tabValue} index={3}>
+            <TabPanel value={tabValue} index={4}>
                     <Scrollbars universal autoHeight autoHeightMax={600} style={{marginLeft: '20px'}}>
                         <MapSidebarMissingMarkers {...props}/>
                     </Scrollbars>

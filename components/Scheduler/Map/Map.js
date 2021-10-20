@@ -43,13 +43,26 @@ const CustomMap = compose(
     mapElement: <div style={{ height: `100%` }} />,
   }),
   withHandlers({
-    onMarkerClustererClick: () => (markerClusterer,setMultipleMarkersOneLocation, googleMap) => {
+    onMarkerClustererClick: () => (markerClusterer,setMultipleMarkersOneLocation, googleMap, visibleItems) => {
       const clickedMarkers = markerClusterer.getMarkers()
       const zoom = googleMap.current.getZoom();
-      var marker_ids = clickedMarkers.map((marker,i)=> JSON.parse(marker.getTitle())?.id);
+      var marker_ids ;
+      if(visibleItems?.indexOf("tasks") > 0) {
+        marker_ids = clickedMarkers.map((marker,i)=> JSON.parse(marker.getTitle())?.t_id);
+      }
+      if(visibleItems?.indexOf("crewJobs") > 0) {
+        marker_ids = clickedMarkers.map((marker,i)=> JSON.parse(marker.getTitle())?.id);
+      }
+
       //open menu for selecting correct marker
       if(zoom == 22){
-        setMultipleMarkersOneLocation(marker_ids);
+
+        if(marker_ids){
+            setMultipleMarkersOneLocation(marker_ids);
+        }else{
+            console.error("Failed to setMultiple", marker_ids)
+        }
+        
         //useEffect below sets marker_ids[0] to activeMarker
       }
     },
@@ -168,8 +181,23 @@ const CustomMap = compose(
 
     useEffect(()=>{
         if(multipleMarkersOneLocation && multipleMarkersOneLocation.length){
-            let newActiveMarker = crewMarkers.filter((marker,i)=> marker.id == multipleMarkersOneLocation[0])[0];
-            setActiveMarker({ type: 'crew', item: newActiveMarker});
+            let newActiveMarker;
+            let type = visibleItems?.indexOf("tasks") > 0 ? 'task' : 'crew' 
+            if(type == 'crew'){
+                newActiveMarker = crewMarkers.find((marker,i)=> marker.id == multipleMarkersOneLocation[0]);
+            }
+            if(type == 'task'){
+                newActiveMarker = taskMarkers.find((marker,i)=> {
+                    console.log("marker", marker);
+                    console.log("multipleMarkersOneLocation", multipleMarkersOneLocation)
+                    return marker.t_id == multipleMarkersOneLocation[0]
+                }
+                );
+            }
+
+            console.log("newActiveMarker", newActiveMarker)
+            
+            setActiveMarker({ type: type, item: newActiveMarker});
             setShowingInfoWindow(true);
         }
     }, multipleMarkersOneLocation)
@@ -452,7 +480,7 @@ const CustomMap = compose(
     >
        <MarkerClusterer
        
-        onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap)}
+        onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap, visibleItems)}
         averageCenter
         ignoreHidden={true}
         enableRetinaIcons
@@ -463,7 +491,8 @@ const CustomMap = compose(
             return (
             <MarkerWithLabel
             key={marker.t_id}
-            title={(marker.t_id).toString()} 
+            title={JSON.stringify(marker)} 
+            id={marker.t_id}
             position={{ lat:  parseFloat(marker.lat), lng: parseFloat(marker.lng)}}
             onClick = { props.updateActiveMarker(marker.t_id, "task") }
              labelAnchor={new google.maps.Point( `#${index}`.toString().length * 5 , 40)}
@@ -501,7 +530,7 @@ const CustomMap = compose(
 
          {changeStateSoMapUpdates && <MarkerClusterer
         onClusteringEnd={handleClusterEnd}
-        onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap)}
+        onClick={(event)=>props.onMarkerClustererClick(event, setMultipleMarkersOneLocation, googleMap, visibleItems)}
         averageCenter
         ignoreHidden={true}
         enableRetinaIcons

@@ -77,6 +77,7 @@ const MapContainer = (props) => {
     const [noMarkerRows, setNoMarkerRows] = useState(null);
     const [multipleMarkersOneLocation,setMultipleMarkersOneLocation ] = React.useState(null);
 
+    const [woiData, setWoiData] = useState(null)
     
     const [infoWeather, setInfoWeather] = useState(null);
 
@@ -85,7 +86,7 @@ const MapContainer = (props) => {
     const [vehicleRows, setVehicleRows] = useState(null);
     const [vehicleNeedsRefresh, setVehicleNeedsRefresh] = useState(true);
     const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
-    const [visibleItems, setVisibleItems] = React.useState(() => ['crewJobs' ,'vehicles']);
+    const [visibleItems, setVisibleItems] = React.useState(null);
 
     //Crew
     //const [localCrewJobs, setLocalCrewJobs] = useState(null);
@@ -183,6 +184,26 @@ const MapContainer = (props) => {
       }, 30000)
       return () => clearTimeout(timeoutId);
     }, [vehicleRows])
+
+    //Save and/or Fetch visibleItems to local storage
+    useEffect(() => {
+      if(visibleItems == null){
+        var tmp = window.localStorage.getItem('visibleItems');
+        var tmpParsed;
+        if(tmp){
+          tmpParsed = JSON.parse(tmp);
+        }
+        if(Array.isArray(tmpParsed)){
+          setVisibleItems(tmpParsed);
+        }else{
+          setVisibleItems(['crewJobs' ,'vehicles']);
+        }
+      }
+      if(Array.isArray(visibleItems)){
+        window.localStorage.setItem('visibleItems', JSON.stringify(visibleItems));
+      }
+      
+    }, [visibleItems]);
 
     //useEffect for mapRows
     useEffect( () =>{ 
@@ -285,7 +306,7 @@ const MapContainer = (props) => {
                     setMapRows(tmpData);
                     console.log("SETTING MAP ROWS main 279 ", tmpData)
                 }
-
+                setWoiData(null);
             })
             .catch( error => {
                 cogoToast.error(`Error getting Task List`, {hideAfter: 4});
@@ -594,7 +615,7 @@ const MapContainer = (props) => {
         bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, crewJobsLoading, setCrewJobsLoading,
         unfilteredJobs, setUnfilteredJobs, showCompletedJobs, setShowCompletedJobs, radarControl, setRadarControl, timestamps,setTimestamps,
         radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, visualTimestamp, setVisualTimestamp, crewFilters,setCrewFilters,
-        crewJobSorters, setCrewJobSorters, getBorderColorBasedOnDate, changeStateSoMapUpdates, setChangeStateSoMapUpdates,}} >
+        crewJobSorters, setCrewJobSorters, getBorderColorBasedOnDate, changeStateSoMapUpdates, setChangeStateSoMapUpdates,woiData, setWoiData}} >
       <div>
         <Grid container spacing={1}>
           <Grid item xs={12}>

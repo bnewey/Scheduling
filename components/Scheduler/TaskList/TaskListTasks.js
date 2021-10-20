@@ -21,7 +21,7 @@ import Util from '../../../js/Util';
 import { select } from 'async';
 import { CrewContext } from '../Crew/CrewContextContainer';
 
-import {AutoSizer, List } from 'react-virtualized';
+import {AutoSizer, List, WindowScroller } from 'react-virtualized';
 import ReactDOM from 'react-dom';
 
 import DateFnsUtils from '@date-io/date-fns';
@@ -54,7 +54,8 @@ const TaskListTasks = (props) =>{
     //PROPS
     const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, tableInfo,
               priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved, setTaskListTasksSaved,
-              sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch, taskLists} = props;
+              sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch, taskLists, sizeOfTable, scrollToIndex, setScrollToIndex,
+              handleTaskClick, handleTaskContextMenu} = props;
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
@@ -103,6 +104,7 @@ const TaskListTasks = (props) =>{
         //unselected tasks on any change to filter
         setSelectedTasks([]);
       },[filters])
+
     
 
     //Modal
@@ -978,7 +980,9 @@ const TaskListTasks = (props) =>{
           handleAddMemberPopoverClose={handleAddMemberPopoverClose} allCrews={allCrews} handleAddSwapCrew={handleAddSwapCrew}
           onDragEnd={onDragEnd} selectedTasks={selectedTasks} dimensions={dimensions}
           woiStatusAnchorEl={woiStatusAnchorEl} woiStatusPopoverId={woiStatusPopoverId} woiStatusRows={woiStatusRows}
-           woistatusPopoverOpen={woistatusPopoverOpen} handleWoiStatusPopoverClose={handleWoiStatusPopoverClose} woiData={woiData}/>
+           woistatusPopoverOpen={woistatusPopoverOpen} handleWoiStatusPopoverClose={handleWoiStatusPopoverClose} woiData={woiData} sizeOfTable={sizeOfTable}
+           setScrollToIndex={setScrollToIndex} scrollToIndex={scrollToIndex}
+           handleTaskClick={handleTaskClick} handleTaskContextMenu={handleTaskContextMenu}/>
           </div> </>
      : <></>}
         </React.Fragment>
@@ -991,7 +995,8 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
   handleRightClick, handleClick, taskListToMap, getItemStyle,
   tableInfo, handleSpecialTableValues, addSwapCrewAnchorEl, addSwapCrewJob, addSwapCrewPopoverId, addSwapCrewPopoverOpen,
   handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks, dimensions,
-  woiStatusAnchorEl, woiStatusPopoverId, woiStatusRows, woistatusPopoverOpen, handleWoiStatusPopoverClose, woiData})=>{
+  woiStatusAnchorEl, woiStatusPopoverId, woiStatusRows, woistatusPopoverOpen, handleWoiStatusPopoverClose, woiData, sizeOfTable, scrollToIndex,  setScrollToIndex,
+  handleTaskClick, handleTaskContextMenu})=>{
 
   const getListStyle =  isDraggingOver => ({
     background: isDraggingOver ? "lightblue" : "rgba(0,0,0,0)",
@@ -999,12 +1004,20 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
     width: 'auto'
   });
 
+  const clearScrollToIndex = ()=> {
+    setScrollToIndex(-1 );
+  }
+
+  const handleScrollToIndex = (value)=> {
+    setScrollToIndex(value);
+  }
+
   const grid = 8;
 
   //For generating keys, so that the list will rerender on crewJobs and crewJobsRefetch
   const getRand = React.useMemo(() => Math.floor((Math.random() * 100) + 1),[taskListTasks, taskListTasksRefetch]);
 
-  const getRowRender = (tasks) => ({ index, style }) => {
+  const getRowRender = (tasks) => ({ index, style , isScrolling}) => {
     const row = tasks[index];
 
     if (!row) {
@@ -1024,7 +1037,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                   index={index} 
                   isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }>
         {(provided, snapshot) => (
-          <div key={taskListTasksSaved[index]?.t_id + 321321 } 
+          <div id={"mapMarkedListItem"+row.t_id} key={taskListTasksSaved[index]?.t_id + 321321 } 
                     role={undefined} dense button 
                     
                     //onMouseUp={event => handleClick(event, row.t_id)}
@@ -1040,7 +1053,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                          provided.draggableProps.style),
                          ...style}}
                     >
-          { taskListToMap 
+          { taskListToMap && sizeOfTable != 'small'
           ? <div className={classes.checkBoxDiv}>
               <Checkbox checked={isItemSelected} className={classes.tli_checkbox} onClick={event => handleClick(event, row.t_id)}/>
             </div>
@@ -1052,7 +1065,9 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
             <div id={labelId}
                           key={item.field + i}
                           className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
-                          style={{flex: `0 0 ${item.width}`}}
+                          onClick={(event)=> handleTaskClick ? handleTaskClick(event, row) : null}
+                          onContextMenu={(event)=> handleTaskContextMenu ? handleTaskContextMenu(event, row) : null}
+                          style={{flex: `0 0 ${item.width(sizeOfTable ? sizeOfTable : "large")}`}}
                           classes={item.style ?  {primary: classes[item.style]} : {}}>
                            <span> { handleSpecialTableValues(item.field, value, item.type,row)}</span>
             </div>
@@ -1074,7 +1089,6 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
       </Draggable>
     );
   };
-
 
 
   return(
@@ -1104,25 +1118,31 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
               ? taskListTasks.length + 1
               : taskListTasks.length;
             return(
-              <List
-              height={dimensions?.height - 20}
-              rowCount={itemCount}
-              rowHeight={26}
-              onRowsRendered={()=> rebuildTooltip()}
-              width={dimensions?.width}
-              ref={(ref) => {
-                // react-virtualized has no way to get the list's ref that I can so
-                // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
-                if (ref) {
-                  // eslint-disable-next-line react/no-find-dom-node
-                  const whatHasMyLifeComeTo = ReactDOM.findDOMNode(ref);
-                  if (whatHasMyLifeComeTo) {
-                    provided.innerRef(whatHasMyLifeComeTo);
-                  }
-                }
-              }}
-              rowRenderer={getRowRender(taskListTasks)}
-            />);
+              <WindowScroller onScroll={clearScrollToIndex}>
+                {({ height, isScrolling, onChildScroll, scrollTop }) => (
+                    <List
+                    height={dimensions?.height - 20}
+                    rowCount={itemCount}
+                    rowHeight={26}
+                    onRowsRendered={()=> rebuildTooltip()}
+                    width={dimensions?.width}
+                    ref={(ref) => {
+                      // react-virtualized has no way to get the list's ref that I can so
+                      // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
+                      if (ref) {
+                        // eslint-disable-next-line react/no-find-dom-node
+                        const whatHasMyLifeComeTo = ReactDOM.findDOMNode(ref);
+                        if (whatHasMyLifeComeTo) {
+                          provided.innerRef(whatHasMyLifeComeTo);
+                        }
+                      }
+                    }}
+                    rowRenderer={getRowRender(taskListTasks)}
+                    scrollToIndex={scrollToIndex}
+                  />
+                  )}
+                  </WindowScroller>
+            );
           }
         } 
       </Droppable>
