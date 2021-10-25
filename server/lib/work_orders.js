@@ -97,12 +97,12 @@ router.post('/getWorkOrderByIdForPDF', async (req,res) => {
     ' organization AS account, wo.city AS wo_city, wo.state AS wo_state, wo.description, wo.customer, wo.account_id,wo.customer_id AS customer_id, ' +
     ' wo.requestor, wo.maker, wo.job_reference, wo.notes, wo.po_number, date_format( IFNULL(cj.job_date, wo.requested_arrival_date), \'%Y-%m-%d\') as requested_arrival_date,   ' +
     //Shipping Info
-    ' enc.name AS c_entity_name,  eac.address AS c_address, eac.state AS c_state, eac.city AS c_city,eac.zip AS c_zip,   ' +
+    ' enc.name AS c_entity_name, enc.on_hold AS c_on_hold,  eac.address AS c_address, eac.state AS c_state, eac.city AS c_city,eac.zip AS c_zip,   ' +
     ' eac.name AS c_address_name, eac.to_name AS c_address_to_name, ' +
     ' eac.residence AS c_residence, ecc.name AS c_contact_name, ecc.work_phone AS c_work_phone, ecc.cell AS c_cell_phone, ecc.home_phone AS c_other_phone, ' +
     ' ecc.title AS c_contact_title, ' +
     //Billing Info
-    ' ena.name AS a_entity_name, ena.account_number AS a_account_number, eaa.address AS a_address, eaa.state AS a_state, eaa.city AS a_city,eaa.zip AS a_zip, ' +
+    ' ena.name AS a_entity_name, ena.account_number AS a_account_number,  ena.on_hold AS a_on_hold, eaa.address AS a_address, eaa.state AS a_state, eaa.city AS a_city,eaa.zip AS a_zip, ' +
     ' ena.purchase_order_required, eaa.name AS a_address_name, eaa.to_name AS a_address_to_name, ' +
     ' eca.name AS a_contact_name, eca.work_phone AS a_work_phone,  eca.fax AS a_fax, ' +
     ' eca.title AS a_contact_title, ' + 

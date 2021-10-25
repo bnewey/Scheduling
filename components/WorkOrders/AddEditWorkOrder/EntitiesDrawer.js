@@ -133,7 +133,7 @@ const EntitiesDrawer = function(props) {
                         onChange={(event)=> handleInputOnChange([entity.record_id, entity.name], true, "entity", ["account_id", "a_name"])}
                     />
                 </div>
-                <span className={classes.entityIdSpan}>{entity.record_id}</span>
+                <span className={classes.entityHoldSpan}> {entity.on_hold ? "ON HOLD" : ''}</span>
                 {/*<span className={classes.entityCountyOrParishSpan}>{entity.county_or_parish}</span>*/}
                 <span className={classes.entityCountyOrParishSpan}>{entity.city}</span>
                 <span className={classes.entityIdSpan}>{entity.state}</span>
@@ -239,7 +239,7 @@ const EntitiesDrawer = function(props) {
                             <div className={classes.entityDiv}>
                             <span className={classes.entityNameSpan}>Name</span>
                             <span className={classes.entityCheckSpan}>Assign</span>
-                            <span className={classes.entityIdSpan}>ID</span>
+                            <span className={classes.entityIdSpan}>Hold</span>
                             {/*<span className={classes.entityCountyOrParishSpan}>County</span>*/}
                             <span className={classes.entityCountyOrParishSpan}>City</span>
                             <span className={classes.entityIdSpan}>State</span>
@@ -320,6 +320,16 @@ const useStyles = makeStyles(theme => ({
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         maxWidth: '100%',
+        fontFamily: 'sans-serif',
+        fontSize: '10px',
+        flexBasis: '10%',
+        textOverflow: 'ellipsis',
+    },
+    entityHoldSpan:{
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        maxWidth: '100%',
+        color: '#ff4444',
         fontFamily: 'sans-serif',
         fontSize: '10px',
         flexBasis: '10%',

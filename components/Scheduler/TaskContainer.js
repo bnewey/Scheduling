@@ -39,6 +39,7 @@ const TaskContainer = function(props) {
     //TaskListTasks is in TaskListMain
     const [tableInfo ,setTableInfo] = useState(null);
     const [taskListTasksSaved, setTaskListTasksSaved] = useState([]);
+    const [tLTasksExtraSaved, setTLTasksExtraSaved] = useState([]);
     const [taskLists, setTaskLists] = useState();
     const [priorityList, setPriorityList] = useState(null);
     const [filters, setFilters] = useState(null);
@@ -48,6 +49,8 @@ const TaskContainer = function(props) {
     const [installDateFilters, setInstallDateFilters] = useState([]);
     const [drillDateFilters, setDrillDateFilters] = useState([])
     const [arrivalDateFilters, setArrivalDateFilters] = useState([]);
+    const [drillCrewFilters, setDrillCrewFilters] = useState([]);
+    const [installCrewFilters, setInstallCrewFilters] = useState([]);
     const [activeTaskView,setActiveTaskView] = useState(null)
     const [savedFilters, setSavedFilters] = React.useState(null);
 
@@ -61,11 +64,11 @@ const TaskContainer = function(props) {
               {text: "Description", field: "description", width: (size)=> size == "small" ? '' : '17%', maxWidth: 170, style: 'smallListItemText', type: 'text',dontShowInSmall: true},
               // {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '' : '8%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Arrival Date", field: "wo_arrival_dates", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
-              {text: "Drill Date", field: "drill_date", width: (size)=> size == "small" ? '14%' : '7%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
-              {text: "Drill Crew", field: "drill_crew", width: (size)=> size == "small" ? '12%' : '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
+              {text: "Drill Date", field: "drill_date", width: (size)=> size == "small" ? '18%' : '7%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
+              {text: "Drill Crew", field: "drill_crew", width: (size)=> size == "small" ? '9%' : '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '6%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
-              {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '10%' : '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}]},
+              {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '9%' : '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}]},
     {name: "Compact(No Drill)", value: 1,
        array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '4%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number',dontShowInSmall: true},
@@ -294,6 +297,48 @@ const TaskContainer = function(props) {
     
   }, [arrivalDateFilters]);
 
+  //Save and/or Fetch filters to local storage
+  useEffect(() => {
+    if(drillCrewFilters == null){
+      var tmp = window.localStorage.getItem('drillCrewFilters');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(Array.isArray(tmpParsed)){
+        setDrillCrewFilters(tmpParsed);
+      }else{
+        setDrillCrewFilters([]);
+      }
+    }
+    if(Array.isArray(drillCrewFilters)){
+      window.localStorage.setItem('drillCrewFilters', JSON.stringify(drillCrewFilters));
+    }
+    
+  }, [drillCrewFilters]);
+
+
+  //Save and/or Fetch filters to local storage
+  useEffect(() => {
+    if(installCrewFilters == null){
+      var tmp = window.localStorage.getItem('installCrewFilters');
+      var tmpParsed;
+      if(tmp){
+        tmpParsed = JSON.parse(tmp);
+      }
+      if(Array.isArray(tmpParsed)){
+        setInstallCrewFilters(tmpParsed);
+      }else{
+        setInstallCrewFilters([]);
+      }
+    }
+    if(Array.isArray(installCrewFilters)){
+      window.localStorage.setItem('installCrewFilters', JSON.stringify(installCrewFilters));
+    }
+    
+  }, [installCrewFilters]);
+
+
   
   //Save and/or Fetch tabValue to local storage
   useEffect(() => {
@@ -361,7 +406,9 @@ const TaskContainer = function(props) {
                             filterScoreboardsAndSignsOnly, setFilterScoreboardsAndSignsOnly,tableInfo ,setTableInfo,activeTaskView, setActiveTaskView,
                             modalOpen, setModalOpen, modalTaskId, setModalTaskId, filters, setFilters,filterInOrOut, setFilterInOrOut, filterAndOr, setFilterAndOr,
                              sorters, setSorters, installDateFilters, setInstallDateFilters, drillDateFilters, setDrillDateFilters,
-                             arrivalDateFilters, setArrivalDateFilters, taskListTasksSaved, setTaskListTasksSaved, 
+                             arrivalDateFilters, setArrivalDateFilters, drillCrewFilters, setDrillCrewFilters,
+                             installCrewFilters, setInstallCrewFilters, taskListTasksSaved, setTaskListTasksSaved, 
+                             tLTasksExtraSaved, setTLTasksExtraSaved,
                              user, refreshView, setRefreshView, taskViews, job_types, savedFilters, setSavedFilters} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 

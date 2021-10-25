@@ -61,8 +61,8 @@ const MapContainer = (props) => {
     //const {} = props;
 
     const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
-          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, refreshView,
-          installDateFilters , setInstallDateFilters, drillDateFilters, arrivalDateFilters, job_types} = useContext(TaskContext);
+          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, setTLTasksExtraSaved, refreshView,
+          installDateFilters , setInstallDateFilters, drillDateFilters, arrivalDateFilters, drillCrewFilters, installCrewFilters, job_types} = useContext(TaskContext);
 
     const { crewJobDateRange, setShouldResetCrewState, crewJobDateRangeActive} = useContext(CrewContext);
     const [showingInfoWindow, setShowingInfoWindow] = useState(false);
@@ -207,7 +207,8 @@ const MapContainer = (props) => {
 
     //useEffect for mapRows
     useEffect( () =>{ 
-      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null && drillDateFilters != null && arrivalDateFilters != null){
+      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null &&
+             drillDateFilters != null && arrivalDateFilters != null && drillCrewFilters != null && installCrewFilters != null ){
           if(taskLists && taskListToMap && taskListToMap.id ) { 
             if(mapRowsRefetch == true){
               setMapRowsRefetch(false);
@@ -265,6 +266,8 @@ const MapContainer = (props) => {
                 }
                 
                 setTaskListTasksSaved(data);
+                //Save after initial filters
+                setTLTasksExtraSaved(tmpData);
 
                 if(installDateFilters.length > 0){
                   if(tmpData.length <= 0 && filters && !filters.length){
@@ -287,8 +290,25 @@ const MapContainer = (props) => {
                   tmpData = tmpData.filter(createFilter([...arrivalDateFilters], "in", "or"));
                 }
 
+                if(drillCrewFilters.length > 0){
+                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
+                    && arrivalDateFilters && !arrivalDateFilters.length ){
+                      tmpData = [...data];
+                  }  
+                  tmpData = tmpData.filter(createFilter([...drillCrewFilters], "in", "or"));
+                }
+
+                if(installCrewFilters.length > 0){
+                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
+                    && arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length ){
+                      tmpData = [...data];
+                  }  
+                  tmpData = tmpData.filter(createFilter([...installCrewFilters], "in", "or"));
+                }
+
                 //No filters 
-                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length && arrivalDateFilters && !arrivalDateFilters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length &&
+                   arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length && installCrewFilters && !installCrewFilters.length){
                   //no change to tmpData
                   tmpData = [...data];
                 }
@@ -297,7 +317,6 @@ const MapContainer = (props) => {
                 if(sorters && sorters.length > 0){
                   tmpData = tmpData.sort(createSorter(...sorters))
                   //Set saved for filter list 
-                  //setTaskListTasksSaved(data);
                 }
                 //--------------------------------------------------------------------------------------------
 
@@ -331,7 +350,8 @@ const MapContainer = (props) => {
 
       return () => { //clean up
       }
-    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters, drillDateFilters, arrivalDateFilters]);
+    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters, drillDateFilters,
+         arrivalDateFilters, drillCrewFilters, installCrewFilters]);
 
     //Sort
     useEffect(()=>{

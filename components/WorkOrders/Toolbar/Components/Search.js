@@ -47,11 +47,6 @@ const Search = function(props) {
 
   const classes = useStyles({searchOpen});
 
-  useEffect(()=>{
-    if(!searchOpen ){
-        //setSearchValue("");
-    }
-  },[searchOpen])
 
   useEffect(()=>{
     if(currentView.value == 'search' && savedSearch?.length > 0){
@@ -201,7 +196,7 @@ const Search = function(props) {
     if(keyCode === 13 && id ==  "wo_search_input"){ //enter key & input element's id
       try {
         var response = await search(searchTable, searchValue)    
-        
+        setOpen(false);
         setWorkOrders(response);
         setSavedSearch(response);
       } catch (error) {

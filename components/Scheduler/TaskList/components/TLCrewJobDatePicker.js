@@ -14,13 +14,14 @@ import TLCompletedAddNewJobQuery from './TLCompletedAddNewJobQuery';
 import Check from '@material-ui/icons/Check';
 import NoCheck from '@material-ui/icons/IndeterminateCheckBox';
 import LocateIcon from '@material-ui/icons/MyLocation'
+import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
 
 
 
 const TLCrewJobDatePicker = (props) => {
  
     //PROPS
-    const { ready, located, type,...other} = props;
+    const { ready, located, diagram, type,...other} = props;
 
     // you can past mostly all available props, like minDate, maxDate, autoOk and so on
     const { pickerProps, wrapperProps, inputProps } = useStaticState({
@@ -126,7 +127,10 @@ const TLCrewJobDatePicker = (props) => {
                 <TextField {...inputProps} onClick={inputProps.openPicker} value={ getTextFieldValue(props.value) } className={classes.input} variant="outlined" />
                 {type =="drill" ?  located ? <div className={classes.locatedDiv}><LocateIcon className={classes.locate_icon} data-tip={`Located til ${moment(located).format('MM-DD-YYYY')}. (${moment(located).diff(moment(new Date()), 'days')} Days)`} />
                                                 <span>{moment(located).diff(moment(new Date()), 'days')}</span></div> :
-                                             <LocateIcon className={classes.locate_icon_gray} data-tip={'Drill NOT Ready'} /> : <></> }
+                                             <LocateIcon className={classes.locate_icon_gray} data-tip={'Not Located'} /> : <></> }
+                {type =="drill" ?  diagram ? <div className={classes.locatedDiv}><DeveloperBoardIcon className={classes.diagram_icon} data-tip={`Diagramed on ${moment(diagram).format('MM-DD-YYYY')}`} />
+                                                </div> :
+                                             <DeveloperBoardIcon className={classes.diagram_icon_gray} data-tip={'Not Diagramed'} /> : <></> }
             </div>
             <Dialog {...wrapperProps}  maxWidth="md">
                 
@@ -328,6 +332,16 @@ const useStyles = makeStyles(theme => ({
         height: '.7em',
     },
     locate_icon_gray:{
+        color: '#999',
+        width: '.7em',
+        height: '.7em',
+    },
+    diagram_icon:{
+        color: '#6431f6',
+        width: '.7em',
+        height: '.7em',
+    },
+    diagram_icon_gray:{
         color: '#999',
         width: '.7em',
         height: '.7em',

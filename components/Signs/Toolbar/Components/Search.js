@@ -194,7 +194,7 @@ const Search = function(props) {
     if(keyCode === 13 && id ==  "sign_search_input"){ //enter key & input element's id
       try {
         var response = await search(searchTable, searchValue)    
-
+        setOpen(false);
         setSigns(response);
       } catch (error) {
         cogoToast.error("Failed to search wo")

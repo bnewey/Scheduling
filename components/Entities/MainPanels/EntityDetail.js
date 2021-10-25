@@ -52,6 +52,7 @@ const EntityDetail = function(props) {
     {value: 'purchase_order_required', displayName: 'Purchase Order Required', type: 'text', format: (value,row)=> value ? "Yes" : "No"},
     {value: 'prepayment_required', displayName: 'Prepayment Required', type: 'text', format: (value,row)=> value  ? "Yes" : "No"},
     {value: 'notes', displayName: 'Notes', type: 'text'},
+    {value: 'on_hold', displayName: 'On Hold', type: 'text', format: (value,row)=> value  ? "Yes" : "No"},
   ];
 
    

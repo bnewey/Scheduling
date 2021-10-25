@@ -42,7 +42,8 @@ const TaskListFilter = (props) => {
     const { filteredItems, setFilteredItems } = props;
 
     const {taskListToMap, taskListTasksSaved,filterInOrOut,setFilterInOrOut,filterAndOr, setFilterAndOr, filters, setFilters,installDateFilters, setInstallDateFilters,drillDateFilters, setDrillDateFilters,
-        setRefreshView,tabValue, user, taskViews,activeTaskView,setActiveTaskView, arrivalDateFilters, setArrivalDateFilters, sorters} = useContext(TaskContext);
+        setRefreshView,tabValue, user, taskViews,activeTaskView,setActiveTaskView, arrivalDateFilters, setArrivalDateFilters,
+        drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters, sorters, setTLTasksExtraSaved} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
     //STATE
@@ -129,7 +130,8 @@ const TaskListFilter = (props) => {
 
     //Filter
     useEffect(()=>{
-        if (Array.isArray(filters) && filters.length && filterInOrOut != null && filterAndOr != null && installDateFilters != null && drillDateFilters != null && arrivalDateFilters != null) {
+        if (Array.isArray(filters) && filters.length && filterInOrOut != null && filterAndOr != null && installDateFilters != null && 
+                drillDateFilters != null && arrivalDateFilters != null && drillCrewFilters != null && installCrewFilters != null) {
             if (taskListTasksSaved && taskListTasksSaved.length) {
 
                 var tmpData = [];
@@ -176,6 +178,9 @@ const TaskListFilter = (props) => {
                     
                     
                 })  
+
+                setTLTasksExtraSaved(tmpData);
+                console.log("setting tmpdata for extra filter", tmpData);
                 
                 //Date filters
                 if( installDateFilters?.length > 0){
@@ -198,10 +203,27 @@ const TaskListFilter = (props) => {
                     }  
                     tmpData = tmpData.filter(createFilter([...arrivalDateFilters], "in", "or"));
                 }
+
+                if(drillCrewFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
+                      && arrivalDateFilters && !arrivalDateFilters.length ){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...drillCrewFilters], "in", "or"));
+                  }
+  
+                  if(installCrewFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
+                      && arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length ){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...installCrewFilters], "in", "or"));
+                  }
   
                 
                 //No filters 
-                if(filters && !filters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length &&
+                    arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length && installCrewFilters && !installCrewFilters.length){
                     //no change to tmpData
                     tmpData = [...data];
                 }
@@ -223,7 +245,8 @@ const TaskListFilter = (props) => {
             console.log("Setting filtered items to null");
             setFilteredItems(null);
         }
-    },[filters, filterInOrOut, filterAndOr]);
+    },[filters, filterInOrOut, filterAndOr, installDateFilters, drillDateFilters,
+        arrivalDateFilters, drillCrewFilters, installCrewFilters]);
 
     useEffect(()=>{
         if(taskUserFilters == null){

@@ -156,7 +156,7 @@ const Search = function(props) {
     if(keyCode === 13 && id ==  "wo_search_input"){ //enter key & input element's id
       try {
         var response = await search(searchTable, searchValue)    
-
+        setOpen(false);
         setEntities(response);
         setSavedSearch(response);
       } catch (error) {

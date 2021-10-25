@@ -20,8 +20,8 @@ import _, { property } from 'lodash';
 
 const InstallDateFilter = (props) => {
     //PROPS
-    const {activeTaskView,taskViews, handleRefreshView, taskListTasksSaved,installDateFilters, setInstallDateFilters,
-        setRefreshView,tabValue} = props;
+    const {activeTaskView,taskViews, handleRefreshView, taskListTasksSaved, tLTasksExtraSaved , installDateFilters, setInstallDateFilters,
+        setRefreshView,tabValue, taskListTasks} = props;
  
     //STATE
     const [installDateFilterOpen, setInstallDateFilterOpen] = useState(null)
@@ -139,7 +139,7 @@ const InstallDateFilter = (props) => {
     
     return(
         <>
-                {selectInstallDateMenuOpen && taskListTasksSaved ? 
+                {selectInstallDateMenuOpen && tLTasksExtraSaved ? 
                 <div className={classes.filterInstallDateDiv}>
                     <KeyBinding type={"keydown"} onKey={ (e) => handleCheckCtrlIsDown(e.keyCode, e) } />
                     <KeyBinding type={"keyup"} onKey={ (e) => handleCheckCtrlIsUp(e.keyCode, e) } /> 
@@ -156,7 +156,7 @@ const InstallDateFilter = (props) => {
                             onChange={event => handleUpdateInstallDateFilter(event.target.value)}
                             >
                         {(()=> {
-                            var array = [...taskListTasksSaved].map((task)=> task["sch_install_date"])
+                            var array = [...tLTasksExtraSaved].map((task)=> task["sch_install_date"])
                                            .filter((v, i, array)=> array.indexOf(v)===i && v != null )
                             var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
                             return [...newArray.map((item,i)=>{

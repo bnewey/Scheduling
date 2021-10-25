@@ -20,7 +20,7 @@ import _, { property } from 'lodash';
 
 const TLDrillDateFilter = (props) => {
     //PROPS
-    const { taskViews, activeTaskView, handleRefreshView, taskListTasksSaved,drillDateFilters, setDrillDateFilters,
+    const { taskViews, activeTaskView, handleRefreshView, taskListTasksSaved,tLTasksExtraSaved, drillDateFilters, setDrillDateFilters,
         setRefreshView,tabValue} = props;
  
     //STATE
@@ -143,7 +143,7 @@ const TLDrillDateFilter = (props) => {
 
     return(
         <> 
-                {selectDrillDateMenuOpen && taskListTasksSaved ? 
+                {selectDrillDateMenuOpen && tLTasksExtraSaved ? 
                 <div className={classes.filterDrillDateDiv}>
                     <KeyBinding type={"keydown"} onKey={ (e) => handleCheckCtrlIsDown(e.keyCode, e) } />
                     <KeyBinding type={"keyup"} onKey={ (e) => handleCheckCtrlIsUp(e.keyCode, e) } /> 
@@ -160,7 +160,7 @@ const TLDrillDateFilter = (props) => {
                             onChange={event => handleUpdateDrillDateFilter(event.target.value)}
                             >
                         {(()=> {
-                            var array = [...taskListTasksSaved].map((task)=> task["drill_date"])
+                            var array = [...tLTasksExtraSaved].map((task)=> task["drill_date"])
                                            .filter((v, i, array)=> array.indexOf(v)===i && v != null )
                             var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
                             return [newArray.map((item,i)=>{

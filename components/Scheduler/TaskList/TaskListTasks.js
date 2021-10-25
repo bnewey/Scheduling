@@ -501,8 +501,18 @@ const TaskListTasks = (props) =>{
 
       Crew.updateCrewJobReady(job_id, ready)
       .then((data)=>{
-        setTaskListTasksRefetch(true);
-        cogoToast.success( ready ? "Job is ready" : "Removed job ready");
+        
+
+        if(fieldType == "install"){
+          //we want to remove date when set to 'on road' or ready
+          handleUpdateTaskDate(null,task, fieldType).then((data)=>{
+            setTaskListTasksRefetch(true);
+            cogoToast.success( ready ? "On road" : "Removed on road");
+          })
+        }else{
+          setTaskListTasksRefetch(true);
+          cogoToast.success( ready ? "Job is ready" : "Removed job ready");
+        }
       })
       .catch((error)=>{
         console.error("failed to ready job", error);
@@ -814,6 +824,7 @@ const TaskListTasks = (props) =>{
                             onChange={async(value) => await handleUpdateTaskDate(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
                             ready={task.drill_ready}
                             located={task.drill_located}
+                            diagram={task.drill_diagram}
                             onReadyJob={ (ready)=> handleReadyJob(task, task.drill_job_id, "drill", ready) }
                             onCompleteTasks={ (new_type)=> handleCompleteJob(task,fieldId, new_type) }/>
                     </MuiPickersUtilsProvider></div>

@@ -210,7 +210,7 @@ const Search = function(props) {
     if(keyCode === 13 && id ==  "sign_search_input"){ //enter key & input element's id
       try {
         var response = await search(searchTable, searchValue)    
-
+        setOpen(false);
         setOrdersOut(response);
         setSavedSearch(response);
       } catch (error) {

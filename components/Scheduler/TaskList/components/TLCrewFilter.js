@@ -18,78 +18,79 @@ import moment from 'moment';
 
 import _, { property } from 'lodash';
 
-const ArrivalDateFilter = (props) => {
+const CrewFilter = (props) => {
     //PROPS
-    const {activeTaskView,taskViews, handleRefreshView, taskListTasksSaved,tLTasksExtraSaved, arrivalDateFilters, setArrivalDateFilters,
-        setRefreshView,tabValue} = props;
+    const {activeTaskView,taskViews, handleRefreshView, taskListTasksSaved,crewFilters, setCrewFilters,
+        setRefreshView,tabValue, fieldId, tLTasksExtraSaved} = props;
  
     //STATE
-    const [arrivalDateFilterOpen, setArrivalDateFilterOpen] = useState(null)
-    const [selectArrivalDateMenuOpen,setSelectArrivalDateMenuOpen] = useState(false);
+    const [crewFilterOpen, setCrewFilterOpen] = useState(null)
+    const [selectCrewFilterMenuOpen,setSelectCrewFilterMenuOpen] = useState(false);
     const [ctrl, setCtrl] = useState(false);
+    const [filterType, setFilterType] = useState(fieldId);
     
-    const [isVisible, setIsVisible] = useState(!!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "wo_arrival_dates" ));
+    const [isVisible, setIsVisible] = useState(!!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === filterType ));
 
     useEffect(()=>{
         if(activeTaskView && taskViews?.length > 0){
-            setIsVisible( !!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === "wo_arrival_dates" ));
+            setIsVisible( !!taskViews.find((view)=> view.value == activeTaskView)?.array?.find((item)=> item.field === filterType ));
         }
     }, [activeTaskView])
 
 
     useEffect(() => {
-        if(arrivalDateFilterOpen == null){
-            var tmp = window.localStorage.getItem('arrivalDateFilterOpen');
+        if(crewFilterOpen == null){
+            var tmp = window.localStorage.getItem('crewFilterOpen');
             var tmpParsed;
             if(tmp != null && tmp != undefined){
                 tmpParsed = JSON.parse(tmp);
             }
             if(tmpParsed != null){
-                setArrivalDateFilterOpen(tmpParsed);
+                setCrewFilterOpen(tmpParsed);
             }else{
-                setArrivalDateFilterOpen(false);
+                setCrewFilterOpen(false);
             }
         }
-        if((arrivalDateFilterOpen != null)){
-            window.localStorage.setItem('arrivalDateFilterOpen', JSON.stringify(arrivalDateFilterOpen));
+        if((crewFilterOpen != null)){
+            window.localStorage.setItem('crewFilterOpen', JSON.stringify(crewFilterOpen));
         }
         
-    }, [arrivalDateFilterOpen]);
+    }, [crewFilterOpen]);
     
 
     //CSS
-    const classes = useStyles({ctrl, filterLength: arrivalDateFilters?.length });
+    const classes = useStyles({ctrl, filterLength: crewFilters?.length });
 
 
-    const handleOpenArrivalDateFilter = (event)=>{
-        setArrivalDateFilterOpen(true);
-        setSelectArrivalDateMenuOpen(true);
+    const handleOpenCrewFilter = (event)=>{
+        setCrewFilterOpen(true);
+        setSelectCrewFilterMenuOpen(true);
     }
 
-    const handleClearAndCloseArrivalDateFilter = (event)=>{
-        setArrivalDateFilterOpen(false);
-        setArrivalDateFilters([]);
+    const handleClearAndCloseCrewFilter = (event)=>{
+        setCrewFilterOpen(false);
+        setCrewFilters([]);
         handleRefreshView()
     }
 
-    const handleUpdateArrivalDateFilter =(value)=>{
+    const handleUpdateInstallDateFilter =(value)=>{
         console.log("Value ", value);
 
         if(value.find((item)=> item === "clear")){
-            setArrivalDateFilters([])
+            setCrewFilters([])
             handleCloseSelectMenu();
             handleRefreshView()
             return;
         }
 
         var newArray = value.map((item)=>{
-            return ({property: 'wo_arrival_dates', value: item})
+            return ({property: filterType, value: item})
         })
         if(!ctrl){
             newArray = newArray.slice(newArray.length-1)
         }
 
-        setArrivalDateFilters(newArray);
+        setCrewFilters(newArray);
 
         if(!ctrl){
             handleCloseSelectMenu();
@@ -100,11 +101,11 @@ const ArrivalDateFilter = (props) => {
     }
 
     const handleCloseSelectMenu = (event)=>{
-        setSelectArrivalDateMenuOpen(false);
+        setSelectCrewFilterMenuOpen(false);
     }
 
     const handleOpenSelectMenu = (event)=>{
-        setSelectArrivalDateMenuOpen(true);
+        setSelectCrewFilterMenuOpen(true);
     }
 
     const handleCheckCtrlIsDown = async (keyCode, event)=>{
@@ -115,7 +116,7 @@ const ArrivalDateFilter = (props) => {
           console.error("Bad keycode or element on handleCheckCtrlIsDown");
           return;
         }
-        if(keyCode === 17 && selectArrivalDateMenuOpen){ //enter key & input element's id
+        if(keyCode === 17 && selectCrewFilterMenuOpen){ //enter key & input element's id
           setCtrl(true);
         }
     }
@@ -128,7 +129,7 @@ const ArrivalDateFilter = (props) => {
           console.error("Bad keycode or element on handleCheckCtrlIsDown");
           return;
         }
-        if(keyCode === 17 && selectArrivalDateMenuOpen){ //enter key & input element's id
+        if(keyCode === 17 && selectCrewFilterMenuOpen){ //enter key & input element's id
           setCtrl(false);
         }
     }
@@ -139,45 +140,40 @@ const ArrivalDateFilter = (props) => {
     
     return(
         <>
-                {selectArrivalDateMenuOpen && tLTasksExtraSaved ? 
+                {selectCrewFilterMenuOpen && tLTasksExtraSaved ? 
                 <div className={classes.filterInstallDateDiv}>
                     <KeyBinding type={"keydown"} onKey={ (e) => handleCheckCtrlIsDown(e.keyCode, e) } />
                     <KeyBinding type={"keyup"} onKey={ (e) => handleCheckCtrlIsUp(e.keyCode, e) } /> 
                     <Select  multiple
                             autoWidth
-                            id={"arrivalDateFilter"}
+                            id={"crewFilter"}
                             className={classes.selectBox}
-                            value={(arrivalDateFilters?.map((item)=> (item.value))
+                            value={(crewFilters?.map((item)=> (item.value))
                             )}
-                            open={selectArrivalDateMenuOpen}
+                            open={selectCrewFilterMenuOpen}
                             onOpen={handleOpenSelectMenu}
                             onClose={handleCloseSelectMenu}
                             className={classes.filterInstallDate}
-                            onChange={event => handleUpdateArrivalDateFilter(event.target.value)}
+                            onChange={event => handleUpdateInstallDateFilter(event.target.value)}
                             >
                         {(()=> {
-                            var array = [...tLTasksExtraSaved].map((task)=> task["wo_arrival_dates"])
+                            var array = [...tLTasksExtraSaved].map((task)=> task[filterType])
                                            .filter((v, i, array)=> array.indexOf(v)===i && v != null )
-                                           .filter((item)=> (item != -1 && item != 0 && item != 1 && item != 2 && item != 3))
-                            var newArray = array.sort((a, b) => { return new moment(a).format('YYYYMMDD') - new moment(b).format('YYYYMMDD') })
+                            var newArray = array.sort((a, b) => { return a - b })
                             return [...newArray.map((item,i)=>{
+                                var crew_leader_name = tLTasksExtraSaved.find((task)=> item == task[filterType])[ filterType == "install_crew" ? 'install_crew_leader' : 'drill_crew_leader' ]
                                 return( 
-                                <MenuItem className={classes.menuItem} value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
+                                <MenuItem className={classes.menuItem} value={item}>{crew_leader_name ? crew_leader_name : `Crew ${item}`}</MenuItem>
                                 );
-                            }),                            
-                            // , <MenuItem className={classes.menuItem} value={0}>Not Set</MenuItem>
-                            , <MenuItem className={classes.menuItem} value={1}>Arrived</MenuItem> 
-                            , <MenuItem className={classes.menuItem} value={2}>Stock</MenuItem> 
-                            , <MenuItem className={classes.menuItem} value={3}>On Site</MenuItem>,
-                            <MenuItem className={classes.menuItem} value={'clear'}>*Clear*</MenuItem>  ] ;
+                            }), <MenuItem className={classes.menuItem} value={'clear'}>Clear</MenuItem> ] ;
                         })()}
                     </Select> 
                     <span>
-                        <DeleteIcon className={classes.clearArrivalDateFilterIcon} onClick={event => handleClearAndCloseArrivalDateFilter(event)}/>
+                        <DeleteIcon className={classes.clearInstallDateFilterIcon} onClick={event => handleClearAndCloseCrewFilter(event)}/>
                     </span>
                 </div> : 
-                // <Button className={classes.arrivalDateFilterButton}
-                //     onClick={event => handleOpenArrivalDateFilter(event)}
+                // <Button className={classes.installDateFilterButton}
+                //     onClick={event => handleOpenCrewFilter(event)}
                 //     variant="text"
                 //     color="secondary"
                 //     size="medium"
@@ -186,7 +182,7 @@ const ArrivalDateFilter = (props) => {
                 //     <Box display={{ xs: 'none', md: 'inline' }}  component="span">Install Date Filter</Box>
                 // </Button>
                 <div>
-                    <FilterIcon className={classes.icon} onClick={event => handleOpenArrivalDateFilter(event)}/>
+                    <FilterIcon className={classes.icon} onClick={event => handleOpenCrewFilter(event)}/>
                 </div>
                 }
         </>
@@ -194,7 +190,7 @@ const ArrivalDateFilter = (props) => {
 
 } 
 
-export default ArrivalDateFilter;
+export default CrewFilter;
 
 const useStyles = makeStyles(theme => ({
     filterInstallDate: {
@@ -225,7 +221,7 @@ const useStyles = makeStyles(theme => ({
         overflow: "hidden",
         width: "1px"
     },
-    arrivalDateFilterButton:{
+    installDateFilterButton:{
         color: '#152f24',
         border: '1px solid #385248',
         margin: '0px 10px',
@@ -237,7 +233,7 @@ const useStyles = makeStyles(theme => ({
         }
         
     },
-    clearArrivalDateFilterIcon:{
+    clearInstallDateFilterIcon:{
         margin: '2px',
         marginTop: '4px',
         '&:hover':{

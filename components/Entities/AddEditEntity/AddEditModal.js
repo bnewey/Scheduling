@@ -95,6 +95,7 @@ const AddEditEntity = function(props) {
         {field: 'purchase_order_required', label: 'Purchase Order Required', type: 'check', updateBy: 'ref'},
         {field: 'prepayment_required', label: 'Prepayment Required', type: 'check', updateBy: 'ref'},
         {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
+        {field: 'on_hold', label: "On Hold", type: 'check', updateBy: 'ref' }
     ];
 
 

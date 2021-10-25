@@ -100,14 +100,14 @@ router.post('/updateEntity', async (req,res) => {
 
     const sql = ' UPDATE entities SET name = ?, company = IFNULL(? , 2 ), other_organization =?, account_number=?,purchase_order_required=?, purchase_order=?, ' +
     ' notes=?, county_or_parish=?, entities_types_id=?, class=?, prepayment_required=?, phone=?, fax=?, website=?, shipping=?, billing=?, mailing=?, ' +
-    ' city = ?, state=? ' +
+    ' city = ?, state=?, on_hold=? ' +
     ' WHERE record_id = ? ';
 
     try{
         const results = await database.query(sql, [entity.name, entity.company, entity.other_organization, entity.account_number,
                 entity.purchase_order_required, entity.purchase_order, entity.notes, entity.county_or_parish, entity.entities_types_id,
                  entity.class, entity.prepayment_required, entity.phone, entity.fax, entity.website, entity.shipping, entity.billing,
-                  entity.mailing, entity.city, entity.state, entity.record_id]);
+                  entity.mailing, entity.city, entity.state, entity.on_hold, entity.record_id]);
 
         logger.info("Update Entity " + entity.record_id);
         res.json(results);
@@ -132,13 +132,13 @@ router.post('/addEntity', async (req,res) => {
 
     const sql = ' INSERT INTO entities (name, company, other_organization, account_number, purchase_order_required, purchase_order, ' + 
     ' notes, county_or_parish, entities_types_id, class, prepayment_required, phone, fax, website, shipping, billing, mailing, ' + 
-    ' city, state)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?) ';
+    ' city, state, on_hold)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?, ?) ';
 
     try{
         const results = await database.query(sql, [entity.name, entity.company, entity.other_organization, entity.account_number,
                 entity.purchase_order_required, entity.purchase_order, entity.notes, entity.county_or_parish, entity.entities_types_id,
                  entity.class, entity.prepayment_required, entity.phone, entity.fax, entity.website, entity.shipping, entity.billing,
-                  entity.mailing, entity.city, entity.state]);
+                  entity.mailing, entity.city, entity.state, entity.on_hold]);
                   
         logger.info("Added Entity");
         res.json(results);

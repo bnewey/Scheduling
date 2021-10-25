@@ -22,6 +22,7 @@ import TaskListFilter from './TaskListFilter';
 import TLDrillDateFilter from './components/TLDrillDateFilter';
 import TLInstallDateFilter from './components/TLInstallDateFilter';
 import TLArrivalDateFilter from './components/TLArrivalDateFilter';
+import TLCrewFilter from './components/TLCrewFilter'
 
 import {createSorter} from '../../../js/Sort';
 import {createFilter} from '../../../js/Filter';
@@ -47,8 +48,8 @@ const TaskListMain = (props) => {
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters, arrivalDateFilters, setArrivalDateFilters,
-         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, taskViews , activeTaskView,
-         setRefreshView, setDrillDateFilters} = useContext(TaskContext);
+         taskListTasksSaved, setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, taskViews , activeTaskView,
+         setRefreshView, setDrillDateFilters, drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters} = useContext(TaskContext);
 
 
     //CSS
@@ -68,7 +69,8 @@ const TaskListMain = (props) => {
             setTaskListTasksRefetch(true);
         }
         if(taskLists && taskListToMap && taskListToMap.id && (taskListTasks == null || taskListTasksRefetch == true)
-                 && filterInOrOut != null && filterAndOr != null  && filters != null && installDateFilters != null && drillDateFilters != null && arrivalDateFilters != null ) { 
+                 && filterInOrOut != null && filterAndOr != null  && filters != null && installDateFilters != null &&
+                  drillDateFilters != null && arrivalDateFilters != null && drillCrewFilters != null && installCrewFilters != null ) { 
             if(taskListTasksRefetch == true){
                 setTaskListTasksRefetch(false);
             }
@@ -124,6 +126,11 @@ const TaskListMain = (props) => {
                     })   
                 }
 
+                //Save after initial filters
+                setTLTasksExtraSaved(tmpData);
+                console.log("tmpData for extra saved", tmpData);
+                
+
                 if(installDateFilters.length > 0){
                     if(tmpData.length <= 0 && filters && !filters.length){
                         tmpData = [...data];
@@ -148,8 +155,25 @@ const TaskListMain = (props) => {
 
                 }
 
+                if(drillCrewFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
+                      && arrivalDateFilters && !arrivalDateFilters.length ){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...drillCrewFilters], "in", "or"));
+                  }
+  
+                  if(installCrewFilters.length > 0){
+                    if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
+                      && arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length ){
+                        tmpData = [...data];
+                    }  
+                    tmpData = tmpData.filter(createFilter([...installCrewFilters], "in", "or"));
+                  }
+
                 //No filters or sorters
-                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length && arrivalDateFilters && !arrivalDateFilters.length){
+                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length &&
+                     arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length && installCrewFilters && !installCrewFilters.length){
                     //no change to tmpData
                     tmpData = [...data];
                 }
@@ -160,13 +184,13 @@ const TaskListMain = (props) => {
                 if(sorters && sorters.length > 0){
                     tmpData = tmpData.sort(createSorter(...sorters))
                     //Set saved for filter list 
-                    //setTaskListTasksSaved(data);
                 }
                 //--------------------------------------------------------------------------------------------
                
 
                 //Save all originally fetched data
                 setTaskListTasksSaved(data);
+                
 
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
@@ -184,7 +208,8 @@ const TaskListMain = (props) => {
             if(taskLists){
             }
         }
-    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch, filters, installDateFilters, drillDateFilters, arrivalDateFilters]);
+    },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch, filters, installDateFilters,
+         drillDateFilters, arrivalDateFilters, drillCrewFilters, installCrewFilters]);
 
     //WOIDATA 
     useEffect(()=>{
@@ -356,12 +381,16 @@ const TaskListMain = (props) => {
                                                             : <></>}
                                                             
                                                             <span>
-                                                            {item.field == "drill_date" && <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} drillDateFilters={drillDateFilters}
+                                                            {item.field == "drill_date" && <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} drillDateFilters={drillDateFilters}
                       setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
-                      {item.field == "sch_install_date" && <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} installDateFilters={installDateFilters}
+                      {item.field == "sch_install_date" && <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} installDateFilters={installDateFilters}
                       setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
-                      {item.field == "wo_arrival_dates" && <TLArrivalDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} arrivalDateFilters={arrivalDateFilters}
+                      {item.field == "wo_arrival_dates" && <TLArrivalDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} arrivalDateFilters={arrivalDateFilters}
                       setArrivalDateFilters={setArrivalDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
+                      {item.field == "install_crew" && <TLCrewFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} crewFilters={installCrewFilters}
+                      setCrewFilters={setInstallCrewFilters} setRefreshView={setRefreshView} tabValue={tabValue} fieldId={"install_crew"}/>}
+                      {item.field == "drill_crew" && <TLCrewFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} crewFilters={drillCrewFilters}
+                      setCrewFilters={setDrillCrewFilters} setRefreshView={setRefreshView} tabValue={tabValue} fieldId={"drill_crew"} />}
                                                             </span>
                                         </ListItemText>
                                     )})}

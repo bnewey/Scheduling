@@ -34,6 +34,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import TLDrillDateFilter from '../../TaskList/components/TLDrillDateFilter'
 import TLInstallDateFilter from '../../TaskList/components/TLInstallDateFilter';
 import TLArrivalDateFilter from '../../TaskList/components/TLArrivalDateFilter';
+import TLCrewFilter from '../../TaskList/components/TLCrewFilter'
 import TaskListTasks from '../../TaskList/TaskListTasks';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SwapIcon from '@material-ui/icons/SwapHoriz';
@@ -52,9 +53,10 @@ const MapSiderbarTaskList = (props) =>{
     //PROPS
     const {taskListToMap, setTaskListToMap,  modalOpen, setModalOpen, setModalTaskId, taskLists,
         installDateFilters, setInstallDateFilters, drillDateFilters, setDrillDateFilters,
+        drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters,
         arrivalDateFilters, setArrivalDateFilters,tableInfo ,setTableInfo, activeTaskView,setRefreshView, tabValue,
         taskListTasks, setTaskListTasks, taskListTasksRefetch, setTaskListTasksRefetch,
-         taskListTasksSaved , setTaskListTasksSaved, sorters, sorterState,setSorters, filters, taskViews, setSelectedIds} = useContext(TaskContext);
+         taskListTasksSaved , setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, sorters, sorterState,setSorters, filters, taskViews, setSelectedIds} = useContext(TaskContext);
     const {mapRows, setMapRows, markedRows, setMarkedRows,  mapRowsRefetch, setMapRowsRefetch, activeMarker,setActiveMarker,expandedAnimDone,
         setShowingInfoWindow, woiData, setWoiData} = useContext(MapContext);
     
@@ -268,12 +270,16 @@ const MapSiderbarTaskList = (props) =>{
                                                     </span>
                                                 
                                                     
-                                                    {item.field == "drill_date" && <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} drillDateFilters={drillDateFilters}
+                                                    {item.field == "drill_date" && <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} drillDateFilters={drillDateFilters}
                 setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
-                {item.field == "sch_install_date" && <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} installDateFilters={installDateFilters}
+                {item.field == "sch_install_date" && <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} installDateFilters={installDateFilters}
                 setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
-                {item.field == "wo_arrival_dates" && <TLArrivalDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  taskListTasksSaved={taskListTasksSaved} arrivalDateFilters={arrivalDateFilters}
+                {item.field == "wo_arrival_dates" && <TLArrivalDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} arrivalDateFilters={arrivalDateFilters}
                 setArrivalDateFilters={setArrivalDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
+                {item.field == "install_crew" && <TLCrewFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} crewFilters={installCrewFilters}
+                      setCrewFilters={setInstallCrewFilters} setRefreshView={setRefreshView} tabValue={tabValue} fieldId={"install_crew"}/>}
+                {item.field == "drill_crew" && <TLCrewFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} crewFilters={drillCrewFilters}
+                setCrewFilters={setDrillCrewFilters} setRefreshView={setRefreshView} tabValue={tabValue} fieldId={"drill_crew"} />}
 
                                                     {isSorted ?
                                                     <div>

@@ -180,6 +180,10 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         doc.text(woObject.c_work_phone, 43, 148 , {lineBreak: false});
         doc.text(woObject.c_cell_phone, 135, 148 , {lineBreak: false});
         doc.text(woObject.c_other_phone ? woObject.c_other_phone : '', 220, 148 , {lineBreak: false});
+        if( woObject.c_on_hold){
+            doc.save().opacity(.3).fontSize(50).rotate(20, {origin: [75, 60]}).text('On Hold', 75, 60, {lineBreak: false}).restore().fontSize(11);
+        }
+        
 
         //Bill To
         doc.text(woObject.a_address_to_name, 328, 71 , {lineBreak: false});
@@ -192,6 +196,9 @@ router.post('/createWorkOrderPdf', async (req,res) => {
         doc.text(woObject.a_contact_title ? woObject.a_contact_title : "", 470, 130 , {lineBreak: false});
         doc.text(woObject.a_work_phone, 328, 148 , {lineBreak: false});
         doc.text(woObject.a_fax ? woObject.a_fax : "", 470, 148 , {lineBreak: false});
+        if(  woObject.a_on_hold ){
+            doc.save().opacity(.3).fontSize(50).rotate(20, {origin: [360, 60]}).text('On Hold', 360, 60, {lineBreak: false}).restore().fontSize(11);
+        }
         
         doc.text(woObject.job_reference, 43, 167 , {lineBreak: false});
 

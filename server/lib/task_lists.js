@@ -38,7 +38,7 @@ router.post('/getTaskList', async (req,res) => {
         ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.job_reference,' + 
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
         ' t.delivery_crew, t.delivery_order, date_format(t.delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
-        ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, cjd.ready as drill_ready, date_format(cjd.located, \'%Y-%m-%d\') as drill_located,  mad.member_name AS drill_crew_leader , '  +
+        ' cjd.crew_id AS drill_crew, cjd.id AS drill_job_id, cjd.ready as drill_ready, date_format(cjd.located, \'%Y-%m-%d\') as drill_located, date_format(cjd.diagram, \'%Y-%m-%d\') as drill_diagram,  mad.member_name AS drill_crew_leader , '  +
         ' cjd.completed AS drill_job_completed,  date_format(cjd.completed_date, \'%Y-%m-%d %H:%i:%S\') as drill_job_completed_date, ' +
         ' date_format(cjd.job_date, \'%Y-%m-%d\') as drill_date, cci.color AS install_crew_color,  ' + 
         ' cji.crew_id AS install_crew, cji.id AS install_job_id, cji.ready AS install_ready, mai.member_name AS install_crew_leader, ' + 
