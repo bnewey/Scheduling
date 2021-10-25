@@ -26,11 +26,11 @@ import FormBuilder from '../../../../../UI/FormComponents/FormBuilder';
 
 
 const AddEditEntityAddress = function(props) {
-    const {setAddresses,user, activeAddress, setActiveAddress, editAddressModalOpen,  setEditAddressModalOpen,
+    const {setAddresses, activeAddress, setActiveAddress, editAddressModalOpen,  setEditAddressModalOpen,
          editAddressModalMode,setEditAddressModalMode , detailEntAddressId,setDetailEntAddressId} = props;
 
     const { entities, setEntities,
-        currentView, previousView, handleSetView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
+        currentView, previousView, handleSetView, views,  recentEntities, setRecentEntities, activeEntity, user} = useContext(ListContext);
 
     useEffect(()=>{
         if(detailEntAddressId){
@@ -105,7 +105,7 @@ const AddEditEntityAddress = function(props) {
             if(addOrEdit == "edit"){
                 updateAddress["record_id"] = address.record_id;
 
-                Entities.updateEntityAddress( updateAddress )
+                Entities.updateEntityAddress( updateAddress , user)
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Address ${address.record_id} has been updated!`, {hideAfter: 4});
@@ -121,7 +121,7 @@ const AddEditEntityAddress = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                Entities.addEntityAddress( updateAddress )
+                Entities.addEntityAddress( updateAddress, user )
                 .then( (data) => {
                 
                     cogoToast.success(`Address has been added!`, {hideAfter: 4});

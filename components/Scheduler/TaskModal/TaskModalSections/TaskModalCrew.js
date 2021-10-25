@@ -15,7 +15,7 @@ import TaskListAddCrewDialog from '../../TaskList/TaskListAddCrewDialog';
 export default function TaskModalCrew(props){
     const classes = useStyles();
 
-    const { modalTask,  modalOpen, setModalOpen, setShouldReFetch, setTaskLists} = props;
+    const { modalTask,  modalOpen, setModalOpen, setShouldReFetch, setTaskLists, user} = props;
     const {crewMembers, setCrewMembers, allCrewJobs, setAllCrewJobs, 
         setShouldResetCrewState, setMemberJobs} = useContext(CrewContext);
 
@@ -60,7 +60,7 @@ export default function TaskModalCrew(props){
             cogoToast.error("Couldn't remove");
             console.error("Taskid or j_id is null in remove crew member")
         }
-        Crew.deleteCrewJob(j_id, c_id)
+        Crew.deleteCrewJob(j_id, c_id, user)
         .then((response)=>{
             setShouldResetCrewState(true);
             setModalCrewJobs(null);

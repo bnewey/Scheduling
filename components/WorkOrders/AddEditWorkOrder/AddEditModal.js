@@ -33,10 +33,10 @@ import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 
 const AddEditModal = function(props) {
-    const {user, editModalMode} = props;
+    const {editModalMode} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
-    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers, user} = useContext(ListContext);
 
     const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
     const [entityShippingContacts, setEntityShippingContacts] = useState(null);
@@ -243,7 +243,7 @@ const AddEditModal = function(props) {
             if(addOrEdit == "edit"){
                 updateWorkOrder["record_id"] = work_order.wo_record_id;
 
-                Work_Orders.updateWorkOrder( updateWorkOrder )
+                Work_Orders.updateWorkOrder( updateWorkOrder , user)
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
@@ -259,7 +259,7 @@ const AddEditModal = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                Work_Orders.addWorkOrder( updateWorkOrder )
+                Work_Orders.addWorkOrder( updateWorkOrder , user)
                 .then( (data) => {
                     //Get id of new workorder and set view to detail
                     if(data && data.insertId){
@@ -288,7 +288,7 @@ const AddEditModal = function(props) {
         }
 
         const deleteWOI = () =>{
-            Work_Orders.deleteWorkOrder(wo.wo_record_id)
+            Work_Orders.deleteWorkOrder(wo.wo_record_id, user)
             .then((data)=>{
                 setWorkOrders(null)
                 handleSetView(views.filter((v)=>v.value == "allWorkOrders")[0]);

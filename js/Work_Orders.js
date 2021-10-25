@@ -167,7 +167,7 @@ async function getAllWorkOrderSignArtItems(id){
 
 }
 
-async function reorderWOI(woi_array, work_order_id){
+async function reorderWOI(woi_array, work_order_id, user){
     const route = '/scheduling/workOrders/reorderWOI';
     try{
         var response = await fetch(route,
@@ -176,7 +176,7 @@ async function reorderWOI(woi_array, work_order_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi_array,  work_order_id})
+                body: JSON.stringify({woi_array,  work_order_id, user})
             });
         return response.ok;
     }catch(error){
@@ -186,7 +186,7 @@ async function reorderWOI(woi_array, work_order_id){
 
 }
 
-async function updateWorkOrderItemArrivalDate(woi_id, date){
+async function updateWorkOrderItemArrivalDate(woi_id, date, user){
     const route = '/scheduling/workOrders/updateWorkOrderItemArrivalDate';
     try{
         var data = await fetch(route,
@@ -195,7 +195,7 @@ async function updateWorkOrderItemArrivalDate(woi_id, date){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi_id, date})
+                body: JSON.stringify({woi_id, date, user})
             });
         var list = await data.json();
         return(list);
@@ -205,7 +205,7 @@ async function updateWorkOrderItemArrivalDate(woi_id, date){
 
 }
 
-async function updateWONotes(wo_id, notes){
+async function updateWONotes(wo_id, notes, user){
     const route = '/scheduling/workOrders/updateWONotes';
     try{
         var data = await fetch(route,
@@ -214,7 +214,7 @@ async function updateWONotes(wo_id, notes){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({wo_id, notes})
+                body: JSON.stringify({wo_id, notes, user})
             });
         var list = await data.json();
         return(list);
@@ -226,7 +226,7 @@ async function updateWONotes(wo_id, notes){
 
 
 
-async function updateWorkOrderItemVendor(woi_id, vendor){
+async function updateWorkOrderItemVendor(woi_id, vendor, user){
     const route = '/scheduling/workOrders/updateWorkOrderItemVendor';
     try{
         var data = await fetch(route,
@@ -235,7 +235,7 @@ async function updateWorkOrderItemVendor(woi_id, vendor){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi_id, vendor})
+                body: JSON.stringify({woi_id, vendor, user})
             });
         var list = await data.json();
         return(list);
@@ -245,7 +245,7 @@ async function updateWorkOrderItemVendor(woi_id, vendor){
 
 }
 
-async function updateWorkOrder(workOrder){
+async function updateWorkOrder(workOrder, user){
     const route = '/scheduling/workOrders/updateWorkOrder';
     try{
         var data = await fetch(route,
@@ -254,7 +254,7 @@ async function updateWorkOrder(workOrder){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({workOrder})
+                body: JSON.stringify({workOrder, user})
             });
         var list = await data.json();
         return(list);
@@ -265,7 +265,7 @@ async function updateWorkOrder(workOrder){
 }
 
 
-async function deleteWorkOrder(wo_id){
+async function deleteWorkOrder(wo_id, user){
     const route = '/scheduling/workOrders/deleteWorkOrder';
     try{
         var data = await fetch(route,
@@ -274,7 +274,7 @@ async function deleteWorkOrder(wo_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({wo_id})
+                body: JSON.stringify({wo_id, user})
             });
         var list = await data.json();
         return(list);
@@ -284,7 +284,7 @@ async function deleteWorkOrder(wo_id){
 
 }
 
-async function addWorkOrder(workOrder){
+async function addWorkOrder(workOrder, user){
     const route = '/scheduling/workOrders/addWorkOrder';
     try{
         var data = await fetch(route,
@@ -293,7 +293,7 @@ async function addWorkOrder(workOrder){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({workOrder})
+                body: JSON.stringify({workOrder, user})
             });
         var list = await data.json();
         return(list);
@@ -303,7 +303,7 @@ async function addWorkOrder(workOrder){
 
 }
 
-async function updateWorkOrderItem(woi){
+async function updateWorkOrderItem(woi, user){
     const route = '/scheduling/workOrders/updateWorkOrderItem';
     try{
         var data = await fetch(route,
@@ -312,7 +312,7 @@ async function updateWorkOrderItem(woi){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi})
+                body: JSON.stringify({woi, user})
             });
         var list = await data.json();
         return(list);
@@ -323,7 +323,7 @@ async function updateWorkOrderItem(woi){
 }
 
 
-async function updateMultipleWorkOrderItemDates(wo_ids){
+async function updateMultipleWorkOrderItemDates(wo_ids, user){
     const route = '/scheduling/workOrders/updateMultipleWorkOrderItemDates';
     try{
         var response = await fetch(route,
@@ -332,7 +332,7 @@ async function updateMultipleWorkOrderItemDates(wo_ids){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({wo_ids})
+                body: JSON.stringify({wo_ids, user})
             });
         var list = response.ok;
         return(list);
@@ -342,7 +342,7 @@ async function updateMultipleWorkOrderItemDates(wo_ids){
 }
 
 
-async function addWorkOrderItem(woi){
+async function addWorkOrderItem(woi, sign){
     const route = '/scheduling/workOrders/addWorkOrderItem';
     try{
         var data = await fetch(route,
@@ -351,7 +351,7 @@ async function addWorkOrderItem(woi){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi})
+                body: JSON.stringify({woi, sign})
             });
         var list = await data.json();
         return(list);
@@ -360,7 +360,7 @@ async function addWorkOrderItem(woi){
     }
 }
 
-async function addMultipleWorkOrderItems(wo_id, woi_array){
+async function addMultipleWorkOrderItems(wo_id, woi_array, user){
     const route = '/scheduling/workOrders/addMultipleWorkOrderItems';
     try{
         var response = await fetch(route,
@@ -369,7 +369,7 @@ async function addMultipleWorkOrderItems(wo_id, woi_array){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({wo_id, woi_array})
+                body: JSON.stringify({wo_id, woi_array, user})
             });
         var list = response.ok;
         return(list);
@@ -378,7 +378,7 @@ async function addMultipleWorkOrderItems(wo_id, woi_array){
     }
 }
 
-async function deleteWorkOrderItem(woi_id){
+async function deleteWorkOrderItem(woi_id, user){
     const route = '/scheduling/workOrders/deleteWorkOrderItem';
     try{
         var data = await fetch(route,
@@ -387,7 +387,7 @@ async function deleteWorkOrderItem(woi_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi_id})
+                body: JSON.stringify({woi_id, user})
             });
         var list = await data.json();
         return(list);
@@ -397,7 +397,7 @@ async function deleteWorkOrderItem(woi_id){
 
 }
 
-async function setMultipleWOIArrivalDates(woi_ids, date){
+async function setMultipleWOIArrivalDates(woi_ids, date, user){
     const route = '/scheduling/workOrders/setMultipleWOIArrivalDates';
     try{
         var response = await fetch(route,
@@ -406,7 +406,7 @@ async function setMultipleWOIArrivalDates(woi_ids, date){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi_ids, date})
+                body: JSON.stringify({woi_ids, date, user})
             });
         return response.ok;
     }catch(error){
@@ -415,7 +415,7 @@ async function setMultipleWOIArrivalDates(woi_ids, date){
     }
 }
 
-async function setMultipleWOIArrivalDatesArrived(woi_ids, date, arrived){
+async function setMultipleWOIArrivalDatesArrived(woi_ids, date, arrived, user){
     const route = '/scheduling/workOrders/setMultipleWOIArrivalDatesArrived';
     try{
         var response = await fetch(route,
@@ -424,7 +424,7 @@ async function setMultipleWOIArrivalDatesArrived(woi_ids, date, arrived){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi_ids, date, arrived})
+                body: JSON.stringify({woi_ids, date, arrived, user})
             });
         return response.ok;
     }catch(error){
@@ -433,7 +433,7 @@ async function setMultipleWOIArrivalDatesArrived(woi_ids, date, arrived){
     }
 }
 
-async function clearMultipleArrivalDates(woi_ids){
+async function clearMultipleArrivalDates(woi_ids,user){
     const route = '/scheduling/workOrders/clearMultipleArrivalDates';
     try{
         var response = await fetch(route,
@@ -442,7 +442,7 @@ async function clearMultipleArrivalDates(woi_ids){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi_ids})
+                body: JSON.stringify({woi_ids, user})
             });
         return response.ok;
     }catch(error){

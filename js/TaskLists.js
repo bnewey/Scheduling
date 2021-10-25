@@ -133,7 +133,7 @@ async function addTaskToList(task_id, taskList_id){
     }
 }
 
-async function addMultipleTasksToList(task_ids, taskList_id){
+async function addMultipleTasksToList(task_ids, taskList_id, user){
     const route = '/scheduling/taskLists/addMultipleTasksToList';
     try{
         var response = await fetch(route,
@@ -142,7 +142,7 @@ async function addMultipleTasksToList(task_ids, taskList_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids: task_ids, tl_id: taskList_id})
+                body: JSON.stringify({ids: task_ids, tl_id: taskList_id, user})
             });
             return response.ok;
     }catch(error){
@@ -171,7 +171,7 @@ async function removeTaskFromList(task_id, taskList_id){
 
 }
 
-async function moveTaskToList(task_id, taskList_id){
+async function moveTaskToList(task_id, taskList_id, user){
     const route = '/scheduling/taskLists/moveTaskToList';
     try{
         var response = await fetch(route,
@@ -180,7 +180,7 @@ async function moveTaskToList(task_id, taskList_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id: task_id, tl_id: taskList_id})
+                body: JSON.stringify({id: task_id, tl_id: taskList_id, user})
             });
         return response.ok;
     }catch(error){
@@ -190,7 +190,7 @@ async function moveTaskToList(task_id, taskList_id){
 
 }
 
-async function removeMultipleFromList(task_ids, taskList_id){
+async function removeMultipleFromList(task_ids, taskList_id, user){
     const route = '/scheduling/taskLists/removeMultipleFromList';
     try{
         var response = await fetch(route,
@@ -199,7 +199,7 @@ async function removeMultipleFromList(task_ids, taskList_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids: task_ids, tl_id: taskList_id})
+                body: JSON.stringify({ids: task_ids, tl_id: taskList_id, user})
             });
         return response.ok;
     }catch(error){
@@ -210,7 +210,7 @@ async function removeMultipleFromList(task_ids, taskList_id){
 }
 
 //Maybe move call this in AddTaskToTaskList instead of calling in frontend
-async function reorderTaskList(task_ids, taskList_id){
+async function reorderTaskList(task_ids, taskList_id, user){
     const route = '/scheduling/taskLists/reorderTaskList';
     try{
         var response = await fetch(route,
@@ -219,7 +219,7 @@ async function reorderTaskList(task_ids, taskList_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids: task_ids, tl_id: taskList_id})
+                body: JSON.stringify({ids: task_ids, tl_id: taskList_id, user})
             });
         return response.ok;
     }catch(error){

@@ -367,7 +367,7 @@ const SignContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{signs, setSigns, setSignRefetch,currentView, previousView,handleSetView, views, signsSaved, setSignsSaved,filters, setFilters,
+      <ListContext.Provider value={{user,signs, setSigns, setSignRefetch,currentView, previousView,handleSetView, views, signsSaved, setSignsSaved,filters, setFilters,
       filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState, keyState, setKeyState, columnState, setColumnState, 
       columns, setColumns, signSearchRefetch, setSignSearchRefetch} } >
       

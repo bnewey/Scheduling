@@ -266,12 +266,12 @@ const EntitiesContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{entities, setEntities,
+      <ListContext.Provider value={{user, entities, setEntities,
           currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
           editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
           setRecentEntities, entitiesRefetch, setEntitiesRefetch, searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch,
            savedSearchValue, setSavedSearchValue} } >
-      <DetailContext.Provider value={{ detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,
+      <DetailContext.Provider value={{user, detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,
         editAddressModalMode, setEditAddressModalMode,detailEntContactId,setDetailEntContactId,activeContact, setActiveContact,editContactModalOpen,
         setEditContactModalOpen,editContactModalMode, setEditContactModalMode  }} >
         <div className={classes.containerDiv}>

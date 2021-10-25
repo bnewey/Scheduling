@@ -36,10 +36,10 @@ import { DetailContext } from '../WOContainer';
 
 
 const AddEditWOIModal = function(props) {
-    const {user } = props;
+    
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
-    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers, user} = useContext(ListContext);
 
     const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
         setEditWOIModalOpen, vendorTypes, shipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToContactOptionsWOI} = useContext(DetailContext)
@@ -155,7 +155,7 @@ const AddEditWOIModal = function(props) {
             if(addOrEdit == "edit"){
                 updateItem["record_id"] = woi.record_id;
 
-                Work_Orders.updateWorkOrderItem( updateItem )
+                Work_Orders.updateWorkOrderItem( updateItem, user )
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Work Order Item ${woi.record_id} has been updated!`, {hideAfter: 4});
@@ -176,7 +176,7 @@ const AddEditWOIModal = function(props) {
             }
             if(addOrEdit == "add"){
                 updateItem["work_order"] = activeWorkOrder.wo_record_id;
-                Work_Orders.addWorkOrderItem( updateItem )
+                Work_Orders.addWorkOrderItem( updateItem , user)
                 .then( (data) => {
                     //Get id of new workorder item 
                     if(data && data.insertId){
@@ -238,7 +238,7 @@ const AddEditWOIModal = function(props) {
         }
 
         const deleteWOI = () =>{
-            Work_Orders.deleteWorkOrderItem(woi.record_id)
+            Work_Orders.deleteWorkOrderItem(woi.record_id, user)
             .then((data)=>{
                 setWorkOrderItems(null);
                 setSaveButtonDisabled(false)

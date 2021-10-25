@@ -68,12 +68,12 @@ import AddEditEntityContacts from './AddEditEntityContacts/AddEditModal';
 
 
 const EntContacts = function(props) {
-  const {user} = props;
+  
 
   const { entities, setEntities,
     currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
     editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
-    setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
+    setRecentEntities, entitiesRefetch, setEntitiesRefetch, user} = useContext(ListContext);
 
   const {detailEntContactId,setDetailEntContactId, activeContact, setActiveContact,editContactModalOpen, setEditContactModalOpen,
       editContactModalMode, setEditContactModalMode,} = useContext(DetailContext);
@@ -113,7 +113,7 @@ const EntContacts = function(props) {
         return;
       }
       const deleteSlip = ()=>{
-        Entities.deleteEntityContact(row.record_id)
+        Entities.deleteEntityContact(row.record_id, user)
         .then((data)=>{
           if(data){
             setContacts(null);
@@ -150,7 +150,7 @@ const EntContacts = function(props) {
     <div className={classes.root}>
         {activeEntity ?
         <div className={classes.container}>
-          {editContactModalOpen && <AddEditEntityContacts setContacts={setContacts} activeContact={activeContact} setActiveContact={setActiveContact} editContactModalOpen={editContactModalOpen} 
+          {editContactModalOpen && <AddEditEntityContacts  setContacts={setContacts} activeContact={activeContact} setActiveContact={setActiveContact} editContactModalOpen={editContactModalOpen} 
           setEditContactModalOpen={setEditContactModalOpen} editContactModalMode={editContactModalMode} setEditContactModalMode={setEditContactModalMode}
           detailEntContactId={detailEntContactId} setDetailEntContactId={setDetailEntContactId}/>}
           <Grid container>

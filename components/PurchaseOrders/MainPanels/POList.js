@@ -28,9 +28,8 @@ import moment from 'moment';
 
 
 const POrdersList = function(props) {
-  const {user} = props;
 
-  const { purchaseOrders, setPurchaseOrders, rowDateRange, setDateRowRange, activeFPOrder, setActiveFPOrder,fpOrders,setFPOrders,
+  const { user, purchaseOrders, setPurchaseOrders, rowDateRange, setDateRowRange, activeFPOrder, setActiveFPOrder,fpOrders,setFPOrders,
     currentView,setCurrentView, previousView, handleSetView, views, detailWOid,setDetailWOid, fpOrderModalMode, setFPOrderModalMode,fpOrderModalOpen, setFPOrderModalOpen,vendorTypes,
     setVendorTypes,raineyUsers, setRaineyUsers, arrivedState, setArrivedState, resetFPForm, setResetFPForm,
     } = useContext(ListContext);
@@ -139,7 +138,7 @@ const POrdersList = function(props) {
     var updateFPI = {...fpi};
     updateFPI[table_to_update] = Util.convertISODateToMySqlDate(value);
     console.log("Update", updateFPI);
-    WorkOrderDetail.updateFPOrderItem(updateFPI)
+    WorkOrderDetail.updateFPOrderItem(updateFPI, user)
     .then((data)=>{
         if(data){
             setPurchaseOrders(null);
@@ -241,7 +240,7 @@ const POrdersList = function(props) {
     <div className={classes.root}>
       {fpOrderModalOpen && activeFPOrder ? <>
 
-        <AddEditFPOrder  fpOrderModalMode={fpOrderModalMode} setFPOrderModalMode={setFPOrderModalMode} activeFPOrder={activeFPOrder} setActiveFPOrder={setActiveFPOrder} fpOrders={fpOrders} setFPOrders={setFPOrders}
+        <AddEditFPOrder user={user}  fpOrderModalMode={fpOrderModalMode} setFPOrderModalMode={setFPOrderModalMode} activeFPOrder={activeFPOrder} setActiveFPOrder={setActiveFPOrder} fpOrders={fpOrders} setFPOrders={setFPOrders}
         purchaseOrders={purchaseOrders} setPurchaseOrders={setPurchaseOrders} currentView={currentView} setCurrentView={setCurrentView} views={views}  vendorTypes={vendorTypes} setVendorTypes={setVendorTypes}
         fpOrderModalOpen={fpOrderModalOpen} setFPOrderModalOpen={setFPOrderModalOpen} raineyUsers={raineyUsers} setRaineyUsers={setRaineyUsers} arrivedState={arrivedState} setArrivedState={setArrivedState} resetFPForm={resetFPForm} setResetFPForm={setResetFPForm} />
         </> : <></>}

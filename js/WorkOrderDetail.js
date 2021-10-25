@@ -23,7 +23,7 @@ async function getPackingSlipsById(wo_id){
     }
 }
 
-async function updatePackingSlip(psObject){
+async function updatePackingSlip(psObject, user){
     const route = '/scheduling/workOrderDetail/updatePackingSlip';
     try{
         var data = await fetch(route,
@@ -32,7 +32,7 @@ async function updatePackingSlip(psObject){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({psObject})
+                body: JSON.stringify({psObject, user})
             });
         var list = await data.json();
         return(list);
@@ -42,7 +42,7 @@ async function updatePackingSlip(psObject){
 
 }
 
-async function addPackingSlip(id){
+async function addPackingSlip(id, user){
     const route = '/scheduling/workOrderDetail/addPackingSlip';
     try{
         var data = await fetch(route,
@@ -51,7 +51,7 @@ async function addPackingSlip(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({wo_id: id})
+                body: JSON.stringify({wo_id: id, user})
             });
         var list = await data.json();
         return(list);
@@ -60,7 +60,7 @@ async function addPackingSlip(id){
     }
 }
 
-async function deletePackingSlip(id){
+async function deletePackingSlip(id, user){
     const route = '/scheduling/workOrderDetail/deletePackingSlip';
     try{
         var data = await fetch(route,
@@ -69,7 +69,7 @@ async function deletePackingSlip(id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({id})
+                body: JSON.stringify({id, user})
             });
         var list = await data.json();
         return(list);
@@ -78,7 +78,7 @@ async function deletePackingSlip(id){
     }
 }
 
-async function removePackingSlipFromWOI(slip_id, woi_id){
+async function removePackingSlipFromWOI(slip_id, woi_id, user){
     const route = '/scheduling/workOrderDetail/removePackingSlipFromWOI';
     try{
         var data = await fetch(route,
@@ -87,7 +87,7 @@ async function removePackingSlipFromWOI(slip_id, woi_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({slip_id, woi_id})
+                body: JSON.stringify({slip_id, woi_id, user})
             });
         var list = await data.json();
         return(list);
@@ -97,7 +97,7 @@ async function removePackingSlipFromWOI(slip_id, woi_id){
 }
 
 
-async function addWOIToPackingSlip(slip_id, woi_id){
+async function addWOIToPackingSlip(slip_id, woi_id, user){
     const route = '/scheduling/workOrderDetail/addWOIToPackingSlip';
     try{
         var data = await fetch(route,
@@ -106,7 +106,7 @@ async function addWOIToPackingSlip(slip_id, woi_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({slip_id, woi_id})
+                body: JSON.stringify({slip_id, woi_id, user})
             });
         var list = await data.json();
         return(list);
@@ -246,7 +246,7 @@ async function getFPOrderById(fp_id){
 }
 
 
-async function addNewFPOrder(fp_data){
+async function addNewFPOrder(fp_data, user){
     if(!fp_data){
         throw new Error("Bad id for addNewFPOrder");
     }
@@ -259,7 +259,7 @@ async function addNewFPOrder(fp_data){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({fp_data})
+                body: JSON.stringify({fp_data, user})
             });
         var list = await data.json();
         return(list);
@@ -268,7 +268,7 @@ async function addNewFPOrder(fp_data){
     }
 }
 
-async function updateFPOrder(fp_data){
+async function updateFPOrder(fp_data, user){
     if(!fp_data){
         throw new Error("Bad id for updateFPOrder");
     }
@@ -281,7 +281,7 @@ async function updateFPOrder(fp_data){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({fp_data})
+                body: JSON.stringify({fp_data, user})
             });
         var list = await data.json();
         return(list);
@@ -290,7 +290,7 @@ async function updateFPOrder(fp_data){
     }
 }
 
-async function deleteFPOrder(fpo_id){
+async function deleteFPOrder(fpo_id, user){
     if(!fpo_id){
         throw new Error("Bad id for deleteFPOrder");
     }
@@ -302,7 +302,7 @@ async function deleteFPOrder(fpo_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({fpo_id})
+                body: JSON.stringify({fpo_id, user})
             });
         var list = await data.json();
         return(list);
@@ -371,7 +371,7 @@ async function searchAllFPOrderItems(table, query){
 
 }
 
-async function addNewFPOrderItem(fpi_data){
+async function addNewFPOrderItem(fpi_data, user){
     if(!fpi_data){
         throw new Error("Bad id for addNewFPOrderItem");
     }
@@ -383,7 +383,7 @@ async function addNewFPOrderItem(fpi_data){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({fpi_data})
+                body: JSON.stringify({fpi_data, user})
             });
         var list = await data.json();
         return(list);
@@ -393,7 +393,7 @@ async function addNewFPOrderItem(fpi_data){
 }
 
 
-async function addMultipleFPOrderItems(fpi_array){
+async function addMultipleFPOrderItems(fpi_array, user){
     if(!fpi_array){
         throw new Error("Bad array for addMultipleFPOrderItems");
     }
@@ -405,7 +405,7 @@ async function addMultipleFPOrderItems(fpi_array){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({fpi_array})
+                body: JSON.stringify({fpi_array, user})
             });
 
         return(data);
@@ -414,7 +414,7 @@ async function addMultipleFPOrderItems(fpi_array){
     }
 }
 
-async function updateFPOrderItem(fpi_data){
+async function updateFPOrderItem(fpi_data, user){
     if(!fpi_data){
         throw new Error("Bad id for updateFPOrderItem");
     }
@@ -426,7 +426,7 @@ async function updateFPOrderItem(fpi_data){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({fpi_data})
+                body: JSON.stringify({fpi_data, user})
             });
         var list = await data.json();
         return(list);
@@ -435,7 +435,7 @@ async function updateFPOrderItem(fpi_data){
     }
 }
 
-async function deleteFPOrderItem(fpi_id){
+async function deleteFPOrderItem(fpi_id, user){
     if(!fpi_id){
         throw new Error("Bad id for deleteFPOrderItem");
     }
@@ -447,7 +447,7 @@ async function deleteFPOrderItem(fpi_id){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({fpi_id})
+                body: JSON.stringify({fpi_id, user})
             });
         var list = await data.json();
         return(list);

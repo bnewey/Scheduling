@@ -87,7 +87,8 @@ async function getUser (database, slug) {
 };
 
 async function  getUserByGoogleId (database, google_id) {
-  const sql = 'select * from google_users u LEFT JOIN google_token gt ON u.googleTokenId = gt.id WHERE u.googleId = ? ;';
+  const sql = 'select *, (SELECT GROUP_CONCAT(DISTINCT up.page SEPARATOR \',\') FROM user_permissions up WHERE u.id = up.user_id) AS permissions from google_users u  ' + 
+              'LEFT JOIN google_token gt ON u.googleTokenId = gt.id WHERE u.googleId = ? ;';
 
   try{
       const results = await database.query(sql, [google_id]);
@@ -102,7 +103,8 @@ async function  getUserByGoogleId (database, google_id) {
 };
 
 async function  getUserById (database, id) {
-  const sql = 'select * from google_users u LEFT JOIN google_token gt ON u.googleTokenId = gt.id WHERE u.id = ? ;';
+  const sql = 'select * , (SELECT GROUP_CONCAT(DISTINCT up.page SEPARATOR \',\') FROM user_permissions up WHERE u.id = up.user_id) AS permissions from google_users u ' +
+   ' LEFT JOIN google_token gt ON u.googleTokenId = gt.id WHERE u.id = ? ;';
 
   try{
       const results = await database.query(sql, [id]);

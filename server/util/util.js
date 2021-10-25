@@ -22,8 +22,26 @@ function getParam(req, name, optional) {
 	throw ("Missing Param: " + name + " for Request: " + JSON.stringify(req.url) + ":" + JSON.stringify(req.body));
 }
 
+const checkPermission = (perm_string, page) =>{
+	console.log("perm_string", perm_string);
+	console.log("page", page);
+    if(perm_string == null || perm_string == undefined){
+        return false;
+    }
+    if(page == null || page == undefined){
+        console.log("Bad page supplied to checkPermission")
+        return false;
+    }
+
+    var perm_array = perm_string.split(",");
+    //some == at least 1
+    return perm_array.some((item)=> item === page);
+
+}
+
 
 
 module.exports = { 
     getParam: getParam,
+	checkPermission,
 }

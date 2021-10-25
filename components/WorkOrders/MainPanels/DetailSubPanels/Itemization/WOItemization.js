@@ -27,10 +27,9 @@ import { DetailContext } from '../../../WOContainer';
 import AddEditWOIModal from '../../../AddEditWOI/AddEditWOIModal';
 
 const WOItemization = function(props) {
-  const {user} = props;
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers, user} = useContext(ListContext);
 
   const {editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, setWorkOrderItems,editWOIModalOpen,
         setEditWOIModalOpen, vendorTypes, shipToContactOptionsWOI} = useContext(DetailContext)
@@ -111,7 +110,7 @@ const WOItemization = function(props) {
       return;
     }
 
-    WorkOrderDetail.removePackingSlipFromWOI(slip_id, woi_id)
+    WorkOrderDetail.removePackingSlipFromWOI(slip_id, woi_id, user)
     .then((data)=>{
       setWorkOrderItems(null);
 
@@ -196,7 +195,7 @@ const WOItemization = function(props) {
 
   const handleAddPackingSlip = (value, woi_id) =>{
 
-    WorkOrderDetail.addWOIToPackingSlip(value, woi_id)
+    WorkOrderDetail.addWOIToPackingSlip(value, woi_id, user)
     .then((data)=>{
       setWorkOrderItems(null);
     })
@@ -258,7 +257,7 @@ const WOItemization = function(props) {
       )
     })
     
-    Work_Orders.reorderWOI(updatedWOI, rowData.work_order)
+    Work_Orders.reorderWOI(updatedWOI, rowData.work_order, user)
     .then((data)=>{
       setWorkOrderItems(woiReorder);
     })

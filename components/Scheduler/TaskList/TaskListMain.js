@@ -49,7 +49,7 @@ const TaskListMain = (props) => {
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters, arrivalDateFilters, setArrivalDateFilters,
          taskListTasksSaved, setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, taskViews , activeTaskView,
-         setRefreshView, setDrillDateFilters, drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters} = useContext(TaskContext);
+         setRefreshView, setDrillDateFilters, drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters, user} = useContext(TaskContext);
 
 
     //CSS
@@ -398,6 +398,7 @@ const TaskListMain = (props) => {
                                     </ListItem>
                                 
                                 <TaskListTasks 
+                                    user={user}
                                     selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
                                     taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
                                     taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}

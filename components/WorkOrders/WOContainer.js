@@ -398,11 +398,11 @@ const WOContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{workOrders, setWorkOrders, rowDateRange, setDateRowRange,
+      <ListContext.Provider value={{user, workOrders, setWorkOrders, rowDateRange, setDateRowRange,
           currentView, previousView, handleSetView, views, detailWOid,setDetailWOid, activeWorkOrder, setActiveWorkOrder,
           editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState,
           searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch, savedSearchValue, setSavedSearchValue} } >
-      <DetailContext.Provider value={{editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems, 
+      <DetailContext.Provider value={{user, editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems,
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
                      shipToContactOptionsWOI, setShipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToAddressOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,
                      fpOrderModalOpen, setFPOrderModalOpen, fpOrders, setFPOrders, resetFPForm, setResetFPForm}} >

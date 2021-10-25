@@ -26,7 +26,7 @@ const MapSiderbarMarkedTasks = (props) =>{
           setModalOpen, setModalTaskId, setResetBounds, infoWeather, setInfoWeather, panelRef, tabValue, setTabValue, 
           expandedAnimDone, setExpandedAnimDone, sorters } = props;
     
-    const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved} = useContext(TaskContext);
+    const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved, user} = useContext(TaskContext);
     //CSS
     const classes = useStyles();
     //FUNCTIONS
@@ -143,7 +143,7 @@ const MapSiderbarMarkedTasks = (props) =>{
       var items = reorderMultiple(taskListTasksSaved, [mapRows[result.source.index].t_id], mapRows[result.destination.index].priority_order-1);     
       
       var newTaskIds = items.map((item, i)=> item.t_id);
-      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id)
+      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id, user)
         .then( (ok) => {
                 if(!ok){
                   throw new Error("Could not reorder tasklist" + taskListToMap.id);

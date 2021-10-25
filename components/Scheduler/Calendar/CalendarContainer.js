@@ -32,7 +32,7 @@ const CalendarContainer = (props) => {
 
     const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved,setTLTasksExtraSaved, filterInOrOut, filterAndOr, taskListToMap, filters,
         installDateFilters, setInstallDateFilters, drillDateFilters, drillCrewFilters, installCrewFilters,
-        setModalTaskId, setModalOpen, refreshView } = useContext(TaskContext);
+        setModalTaskId, setModalOpen, refreshView, user } = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
    
@@ -446,10 +446,10 @@ const CalendarContainer = (props) => {
 
         async function getFunction(method) {
             if(method == "delete"){
-                return await Crew.deleteCrewJob(job_id, crew_job.crew_id);
+                return await Crew.deleteCrewJob(job_id, crew_job.crew_id, user);
             }
             if(method == "update"){
-                return  await Crew.updateCrewJob( groups[newGroupOrder].id,job_id, crew_job.crew_id);
+                return  await Crew.updateCrewJob( groups[newGroupOrder].id,job_id, crew_job.crew_id, user);
             }
             if(method == "nothing"){
                 return  ;
@@ -459,7 +459,7 @@ const CalendarContainer = (props) => {
             }
         }
 
-        Promise.all([Tasks.updateMultipleTaskDates([id], date, crew_job.job_type),  getFunction(what_to_run)  ])
+        Promise.all([Tasks.updateMultipleTaskDates([id], date, crew_job.job_type, user),  getFunction(what_to_run)  ])
         .then((values)=>{
             console.log(values);
             //setCalendarRows(null);

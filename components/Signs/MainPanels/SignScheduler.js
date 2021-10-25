@@ -52,9 +52,9 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 // }
 
 const SignSchedulerList = function(props) {
-  const {user, keyState, setKeyState, columnState, setColumnState} = props;
+  const { keyState, setKeyState, columnState, setColumnState} = props;
 
-  const { signs, setSigns, setSignRefetch, currentView, previousView, handleSetView, views , columns,setColumns, signSearchRefetch, setSignSearchRefetch   } = useContext(ListContext);
+  const { signs, setSigns, setSignRefetch, currentView, previousView, handleSetView, views , columns,setColumns, signSearchRefetch, setSignSearchRefetch, user   } = useContext(ListContext);
   const classes = useStyles();
 
   const [pendingDateChangesSaved,setPendingDateChangesSaved] = React.useState(true);
@@ -327,7 +327,7 @@ const SignSchedulerList = function(props) {
 
   const handleUpdateDate = React.useCallback(
 
-    debounce((updateRows) => Work_Orders.updateMultipleWorkOrderItemDates(updateRows)
+    debounce((updateRows) => Work_Orders.updateMultipleWorkOrderItemDates(updateRows, user)
     .then((data)=>{
       cogoToast.success("Updated ");
 

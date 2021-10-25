@@ -210,8 +210,8 @@ router.post('/addNewKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -240,8 +240,8 @@ router.post('/updateKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -275,8 +275,8 @@ router.post('/updateKitInv', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -352,8 +352,8 @@ router.post('/deleteKit', async (req,res) => {
         logger.error("Bad rainey_id param in deleteKit");
         res.sendStatus(400);
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -570,8 +570,8 @@ router.post('/updateKitPart', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -603,8 +603,8 @@ router.post('/deleteKitPart', async (req,res) => {
         logger.error("Bad id param in deleteKitPart");
         res.sendStatus(400);
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -634,8 +634,8 @@ router.post('/addNewKitPart', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -666,8 +666,8 @@ router.post('/updateKitKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -704,8 +704,8 @@ router.post('/deleteKitKit', async (req,res) => {
         logger.error("Bad id param in deleteKitKit");
         res.sendStatus(400);
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -735,8 +735,8 @@ router.post('/addNewKitKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -773,8 +773,8 @@ router.post('/importKitObject', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
