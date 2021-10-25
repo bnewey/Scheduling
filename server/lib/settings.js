@@ -24,8 +24,9 @@ router.get('/getRaineyUsers', async (req,res) => {
  });
 
  router.get('/getGoogleUsers', async (req,res) => {
-  const sql = ' SELECT id, googleId AS user_id, displayName AS name, email  ' + 
-  ' FROM google_users ' +
+  const sql = ' SELECT gu.id, gu.googleId AS user_id, gu.displayName AS name, gu.email, gu.isAdmin,  ' + 
+  ' (SELECT GROUP_CONCAT(DISTINCT up.page SEPARATOR \',\') FROM user_permissions up WHERE gu.id = up.user_id) AS permissions ' +
+  ' FROM google_users gu ' +
   ' ORDER BY user_id ASC ' +
   'limit 1000';
  try{

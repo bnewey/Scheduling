@@ -13,7 +13,7 @@ const TaskListActionAdd = (props) => {
  
     //PROPS
     const { selectedTasks, setSelectedTasks, setTaskListTasks, setTaskListTasksRefetch,parentClasses} = props;
-    const {taskLists, setTaskLists, taskListToMap, setTaskListToMap } = useContext(TaskContext);
+    const {taskLists, setTaskLists, taskListToMap, setTaskListToMap, user } = useContext(TaskContext);
 
     //STATE
 
@@ -31,11 +31,11 @@ const TaskListActionAdd = (props) => {
             return;
         }
 
-        TaskLists.addMultipleTasksToList(selectedTasks, selectedTaskList.id)
+        TaskLists.addMultipleTasksToList(selectedTasks, selectedTaskList.id, user)
         .then((response)=>{
             console.log("response", response)
             if(response === true){
-                TaskLists.removeMultipleFromList(selectedTasks, taskListToMap.id)
+                TaskLists.removeMultipleFromList(selectedTasks, taskListToMap.id, user)
                 .then((data)=>{
                     if(data){
                         cogoToast.success("Successfully moved tasks");

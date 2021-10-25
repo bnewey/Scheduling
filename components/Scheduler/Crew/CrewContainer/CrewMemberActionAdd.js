@@ -11,7 +11,7 @@ import cogoToast from 'cogo-toast';
 const CrewMemberActionAdd = (props) => {
  
     //PROPS
-    const {  } = props;
+    const { user } = props;
     const {crewMembers, setCrewMembers } = useContext(CrewContext);
 
     //STATE
@@ -37,7 +37,7 @@ const CrewMemberActionAdd = (props) => {
           if(!name){
               return;
           }
-        Crew.addCrewMember(name)
+        Crew.addCrewMember(name, user)
                 .then((reponse) => {
                     console.log(reponse);
                     if(!reponse){

@@ -231,7 +231,7 @@ const POContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{purchaseOrders, setPurchaseOrders, fpOrders, setFPOrders, activeFPOrder, setActiveFPOrder,
+      <ListContext.Provider value={{user, purchaseOrders, setPurchaseOrders, fpOrders, setFPOrders, activeFPOrder, setActiveFPOrder,
           currentView, previousView, handleSetView, views, vendorTypes, setVendorTypes,
           fpOrderModalOpen, setFPOrderModalOpen, raineyUsers, setRaineyUsers, fpOrderModalMode, setFPOrderModalMode, arrivedState, setArrivedState,
           resetFPForm, setResetFPForm} } >

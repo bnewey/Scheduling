@@ -19,6 +19,7 @@ import {Box, Drawer,List,Divider,ListItem, ListItemIcon, ListItemText} from '@ma
 `*/
 
 const Nav = (props) => {
+  const {user} = props;
 
   const useStyles = makeStyles(theme => ({
     root: {
@@ -65,7 +66,16 @@ const Nav = (props) => {
           </IconButton>
           <Drawer anchor={'left'} open={drawerOpen} onClose={event => closeDrawer(event)}>
             <List className={classes.list}>
-                {props.navButtons.map((button,i) => (
+                {props.navButtons.filter((item)=> {
+                   if(item.adminOnly){
+                      if(user?.isAdmin ){
+                        return true;
+                      }else{
+                        return false
+                      }
+                    }
+                    return true;
+                }).map((button,i) => (
                   <ListItem key={`button_${i}`} className={classes.listItem}>
                       <Link href={button.path} as={`/scheduling/${button.path}`}><h3>{button.label}</h3></Link>
                   </ListItem>

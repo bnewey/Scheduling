@@ -44,7 +44,7 @@ const TaskListMain = (props) => {
         modalOpen, setModalOpen, priorityList, setPriorityList, setSelectedIds, 
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters,
-         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView } = useContext(TaskContext);
+         taskListTasksSaved, setTaskListTasksSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, user } = useContext(TaskContext);
 
 
     //CSS
@@ -322,6 +322,7 @@ const TaskListMain = (props) => {
                                     </ListItem>
                                 
                                 <TaskListTasks 
+                                    user={user}
                                     selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
                                     taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
                                     taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}

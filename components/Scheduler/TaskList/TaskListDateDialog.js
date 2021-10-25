@@ -27,7 +27,7 @@ const TaskListDateDialog = (props) => {
  
     //PROPS
     const { selectedTasks,setSelectedTasks, parentClasses} = props;
-    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved } = useContext(TaskContext);
+    const {taskLists, setTaskLists, taskListTasksSaved, setTaskListTasksSaved , user} = useContext(TaskContext);
     const {setShouldResetCrewState, crewMembers, setCrewMembers, crewModalOpen, setCrewModalOpen, allCrewJobs, 
         allCrewJobMembers, setAllCrewJobMembers, setAllCrewJobs, memberJobs,setMemberJobs, allCrews, setAllCrews} = useContext(CrewContext);
 
@@ -72,7 +72,7 @@ const TaskListDateDialog = (props) => {
         }
         const conv_date = Util.convertISODateToMySqlDate(date);
 
-        Tasks.updateMultipleTaskDates(selectedTasks, conv_date, date_type)
+        Tasks.updateMultipleTaskDates(selectedTasks, conv_date, date_type, user)
                 .then((reponse) => {
                     if(!reponse){
                         console.error("Bad response from updateMultipleTaskDates");

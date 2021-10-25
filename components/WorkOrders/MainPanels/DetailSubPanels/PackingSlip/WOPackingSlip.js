@@ -69,10 +69,10 @@ import { DetailContext, ListContext } from '../../../WOContainer';
 
 
 const WOPackingSlip = function(props) {
-  const {user} = props;
+  
 
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-    currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder, setEditWOModalOpen, raineyUsers, user} = useContext(ListContext);
 
   const {shipToContactOptionsWOI, shipToAddressOptionsWOI} = useContext(DetailContext);
   const classes = useStyles();
@@ -217,7 +217,7 @@ const WOPackingSlip = function(props) {
 
     const handleUpdatePackingSlip = (newData, oldData) => {
         return new Promise((resolve, reject)=>{
-            WorkOrderDetail.updatePackingSlip(newData)
+            WorkOrderDetail.updatePackingSlip(newData, user)
             .then((data)=>{
               cogoToast.success("Updated Packing Slip");
               setPackingSlips(null);
@@ -255,7 +255,7 @@ const WOPackingSlip = function(props) {
         return;
       }
       const deleteSlip = ()=>{
-        WorkOrderDetail.deletePackingSlip(row.record_id)
+        WorkOrderDetail.deletePackingSlip(row.record_id, user)
         .then((data)=>{
           if(data){
             setPackingSlips(null);

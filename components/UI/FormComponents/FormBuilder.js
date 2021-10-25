@@ -64,7 +64,8 @@ const FormBuilder = forwardRef((props, ref) => {
             dontCloseOnNoChangesSave = false,
             partTypes,
             kitPartsManItems, setKitsPartsManItemsRefetch,
-            manufacturers
+            manufacturers,
+            user
         } = props;
         console.log("Props", props);
         
@@ -342,7 +343,7 @@ const FormBuilder = forwardRef((props, ref) => {
                                         if(title.title_change && title.title_change == "remove"){
                                             if(title?.title_attached != 0){
                                                 //Delete from entities_contacts_titles
-                                                Entities.deleteContactTitle(title.title_attached)
+                                                Entities.deleteContactTitle(title.title_attached, user)
                                                 .then((data)=>{
                                                     console.log("Deleted title", title.title_attached)
                                                     if(callback){
@@ -369,7 +370,7 @@ const FormBuilder = forwardRef((props, ref) => {
                                             
                                             if(title?.title_attached == 0){
                                                 //Add to entities_contacts_titles
-                                                Entities.addContactTitle( updatedTitle )
+                                                Entities.addContactTitle( updatedTitle, user )
                                                 .then((data)=>{
                                                     if(callback){
                                                         callback()

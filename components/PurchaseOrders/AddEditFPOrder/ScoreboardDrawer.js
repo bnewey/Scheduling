@@ -77,7 +77,7 @@ const ScoreboardDrawer = function(props) {
                 updateFPOItem["record_id"] = fpoItem.record_id;
                 //edit and refetch
                 if(fpOrderModalMode =="edit"){
-                    WorkOrderDetail.updateFPOrderItem(updateFPOItem)
+                    WorkOrderDetail.updateFPOrderItem(updateFPOItem, user)
                     .then((data)=>{
                         if(data){
                             //refetch
@@ -128,7 +128,7 @@ const ScoreboardDrawer = function(props) {
                 if(fpOrderModalMode =="edit"){
                     updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
                     //record_id exists so we can add item immediately
-                    WorkOrderDetail.addNewFPOrderItem(updateFPOItem)
+                    WorkOrderDetail.addNewFPOrderItem(updateFPOItem, user)
                     .then((data)=>{
                         if(data){
                             //refetch
@@ -172,7 +172,7 @@ const ScoreboardDrawer = function(props) {
         }
         //In DB
         if(deleteItem.record_id){
-            WorkOrderDetail.deleteFPOrderItem(deleteItem.record_id)
+            WorkOrderDetail.deleteFPOrderItem(deleteItem.record_id, user)
             .then((data)=>{
                 if(data){
                     setFPOrderItems(null)

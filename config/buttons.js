@@ -32,6 +32,11 @@ const navButtons = [
     {
         label: "Search Items",
         path: "search_items"
+    },
+    {
+        label: "Admin",
+        path: 'admin',
+        adminOnly: true
     }
 ];
 

@@ -2,6 +2,7 @@ const express = require('express');
 var async = require("async");
 const router = express.Router();
 
+const {checkPermission} = require("../util/util");
 const logger = require('../../logs');
 //Handle Database
 const database = require('./db');
@@ -95,13 +96,25 @@ router.post('/removeTask', async (req,res) => {
 });
 
 router.post('/updateTask', async (req,res) => {
-    var task;
+    var task, user;
     if(req.body){
     task = req.body.task;
+    user = req.body.user;
     }
 
     logger.info(JSON.stringify(task));
 
+    if(!user){
+        logger.error("Bad user", [user]);
+        res.sendStatus(400);
+        return;
+    }
+    if(!checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
+    }
+    
 
     const sql = ' UPDATE tasks SET name = ? , hours_estimate= ? , date_desired=date_format( ? , \'%Y-%m-%d %H:%i:%S\'),first_game=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , date_assigned=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , ' + 
     ' date_completed=date_format( ? , \'%Y-%m-%d %H:%i:%S\') , description= ? , notes= ? , ' +
@@ -125,11 +138,18 @@ router.post('/updateTask', async (req,res) => {
 });
 
 router.post('/updateMultipleTaskDates', async (req,res) => {
-    var ids, date, job_type;
+    var ids, date, job_type, user;
     if(req.body){
         ids = req.body.ids;
         date = req.body.date;
         job_type = req.body.job_type;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' UPDATE crew_jobs SET  job_date=date_format( ? , \'%Y-%m-%d %H:%i:%S\') ' + 
@@ -190,11 +210,19 @@ router.post('/saveCoordinates', async (req,res) => {
 });
 
 router.post('/addAndSaveAddress', async (req,res) => {
-    var addressObj, entities_id;
+    var addressObj, entities_id, user;
     if(req.body){
         addressObj = req.body.addressObj;
         entities_id = req.body.entities_id;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
+    }
+    
     //Add a new address to entities_addresses and set task = 1, remove task =1 from all others
     const sql = ' UPDATE entities_addresses set task = 0 WHERE entities_id = ? ; ' + 
     ' INSERT INTO entities_addresses (name,to_name, address, city, state,zip, residence, geocoded, task, entities_id, lat, lng) ' + 

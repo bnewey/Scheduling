@@ -7,6 +7,7 @@ const logger = require('../../logs');
 //Handle Database
 const database = require('./db');
 const Util = require('../../js/Util');
+const {checkPermission} = require('../util/util');
 
 const reorderCrewJobsFromDB = async function(crew_id){
     return new Promise(async function (resolve, reject) {
@@ -50,9 +51,16 @@ const reorderCrewJobsFromDB = async function(crew_id){
 
 
 router.post('/addCrewMember', async (req,res) => {
-    var name;
+    var name, user;
     if(req.body){
         name = req.body.name;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' INSERT INTO crew_members_available (member_name) VALUES (?)';
@@ -69,11 +77,20 @@ router.post('/addCrewMember', async (req,res) => {
 });
 
 router.post('/deleteCrewMember', async (req,res) => {
-    const sql = 'DELETE FROM crew_members_available WHERE id = ? LIMIT 1';
-    var id;
+   
+    var id, user;
     if(req.body){
         id = req.body.id;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
+    const sql = 'DELETE FROM crew_members_available WHERE id = ? LIMIT 1';
     
     try{
         const results = await database.query(sql, id);
@@ -87,10 +104,17 @@ router.post('/deleteCrewMember', async (req,res) => {
 });
 
 router.post('/updateCrewMember', async (req,res) => {
-    var name, id;
+    var name, id, user;
     if(req.body){
         name = req.body.name;
         id = req.body.id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = 'UPDATE crew_members_available SET member_name = ? ' +
@@ -331,11 +355,18 @@ router.post('/getAllCrewJobMembers', async (req,res) => {
 });
 
 router.post('/addNewCrewJobMember', async (req,res) => {
-    var member_id, crew_id,is_leader;
+    var member_id, crew_id,is_leader, user;
     if(req.body){
         member_id = req.body.member_id || null;
         crew_id = req.body.crew_id || null;
         is_leader = req.body.is_leader || 0; 
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     if(member_id == null || crew_id == null){
@@ -360,10 +391,17 @@ router.post('/addNewCrewJobMember', async (req,res) => {
 
 router.post('/deleteCrewJobMember', async (req,res) => {
     const sql = 'DELETE FROM crew_members WHERE id = ? AND crew_id = ? LIMIT 1';
-    var m_id, crew_id;
+    var m_id, crew_id, user;
     if(req.body){
         m_id = req.body.m_id;
         crew_id = req.body.crew_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
     
     try{
@@ -395,16 +433,23 @@ router.post('/getAllCrewJobs', async (req,res) => {
 });
 
 router.post('/addCrewJobs', async (req,res) => {
-    var ids, job_type, crew_id;
+    var ids, job_type, crew_id, user;
     if(req.body){
         ids = req.body.ids;
         job_type = req.body.job_type;
         crew_id = req.body.crew_id;
         date = req.body.date;
+        user = req.body.user;
     }
     if(!ids || !job_type ){
         logger.error("Id, jobtype, or crew is not valid in addCrewJobs");
         res.sendStatus(400);
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj WHERE crew_id = ?; "
@@ -439,10 +484,17 @@ router.post('/addCrewJobs', async (req,res) => {
 
 router.post('/deleteCrewJob', async (req,res) => {
     const sql = 'DELETE FROM crew_jobs WHERE id = ? LIMIT 1';
-    var id, crew_id;
+    var id, crew_id, user;
     if(req.body){
         id = req.body.id;
         crew_id = req.body.crew_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
     
     try{
@@ -471,11 +523,18 @@ router.post('/deleteCrewJob', async (req,res) => {
 });
 
 router.post('/updateCrewJob', async (req,res) => {
-    var crew_id, job_id, old_crew_id;
+    var crew_id, job_id, old_crew_id, user;
     if(req.body){
         crew_id = req.body.crew_id;
         job_id = req.body.job_id;
         old_crew_id = req.body.old_crew_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj WHERE crew_id = ? AND completed = 0; "
@@ -512,11 +571,19 @@ router.post('/updateCrewJob', async (req,res) => {
 });
 
 router.post('/updateCrewJobDate', async (req,res) => {
-    var date, job_id;
+    var date, job_id, user;
     if(req.body){
         date = req.body.date;
         job_id = req.body.job_id;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
 
     const sql = 'UPDATE crew_jobs SET job_date = ? ' +
     ' WHERE id = ? ';
@@ -534,10 +601,17 @@ router.post('/updateCrewJobDate', async (req,res) => {
 });
 
 router.post('/updateCrewJobType', async (req,res) => {
-    var type, job_id;
+    var type, job_id, user;
     if(req.body){
         type = req.body.type;
         job_id = req.body.job_id;
+        user = req.body.user;
+    }
+    
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = 'UPDATE crew_jobs SET job_type = ? ' +
@@ -556,10 +630,17 @@ router.post('/updateCrewJobType', async (req,res) => {
 });
 
 router.post('/updateCrewJobReady', async (req,res) => {
-    var ready, job_id;
+    var ready, job_id, user;
     if(req.body){
         ready = req.body.ready;
         job_id = req.body.job_id;
+        user= req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = 'UPDATE crew_jobs SET ready = ? ' +
@@ -579,10 +660,17 @@ router.post('/updateCrewJobReady', async (req,res) => {
 
 
 router.post('/updateCrewNumServices', async (req,res) => {
-    var numServices, job_id;
+    var numServices, job_id, user;
     if(req.body){
         numServices = req.body.numServices;
         job_id = req.body.job_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = 'UPDATE crew_jobs SET num_services = ? ' +
@@ -603,12 +691,20 @@ router.post('/updateCrewNumServices', async (req,res) => {
 router.post('/updateCrewJobCompleted', async (req,res) => {
     //if completing job, remove its ordernum and set comp date
     //if uncompleting job, find max and set ordernum and remove comp date
-    var  job_id, completed, crew_id;
+    var  job_id, completed, crew_id, user;
     if(req.body){
         completed = req.body.completed;
         job_id = req.body.job_id;
         crew_id = req.body.crew_id;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     var completed_date;
     if(completed){
         completed_date = new Date();
@@ -653,12 +749,19 @@ router.post('/updateCrewJobCompleted', async (req,res) => {
 });
 
 router.post('/updateCrewJobMember', async (req,res) => {
-    var crew_id, member_id, is_leader, job_id;
+    var crew_id, member_id, is_leader, job_id, user;
     if(req.body){
         crew_id = req.body.crew_id;
         member_id = req.body.member_id;
         is_leader = req.body.is_leader;
         job_id = req.body.job_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = 'UPDATE crew_members SET crew_id = ?, member_id = ?, is_leader = ? ' +
@@ -676,6 +779,16 @@ router.post('/updateCrewJobMember', async (req,res) => {
 });
 
 router.post('/addNewCrew', async (req,res) => {
+    var user;
+    if(req.body){
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
+    }
 
     var sql = ' INSERT INTO crew_crews () VALUES ()';
 
@@ -692,9 +805,16 @@ router.post('/addNewCrew', async (req,res) => {
 
 router.post('/deleteCrew', async (req,res) => {
     const sql = 'DELETE FROM crew_crews WHERE id = ? LIMIT 1';
-    var crew_id;
+    var crew_id, user;
     if(req.body){
         crew_id = req.body.crew_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
     
     try{
@@ -761,10 +881,17 @@ router.post('/getCrewJobsByCrew', async (req,res) => {
 });
 
 router.post('/reorderCrewJobs', async (req,res) => {
-    var crew_id, cj_array;
+    var crew_id, cj_array, user;
     if(req.body){
         crew_id = req.body.crew_id;
         cj_array = req.body.cj_array;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
     
     const sql = ' UPDATE crew_jobs SET ordernum = ? ' +
@@ -793,10 +920,17 @@ router.post('/reorderCrewJobs', async (req,res) => {
 });
 
 router.post('/updateCrewColor', async (req,res) => {
-    var color, id;
+    var color, id, user;
     if(req.body){
         color = req.body.color;
         id = req.body.id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = 'UPDATE crew_crews SET color = ? ' +

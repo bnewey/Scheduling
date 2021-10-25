@@ -22,7 +22,7 @@ import { CrewContext } from '../CrewContextContainer';
 const CrewMembers = (props) => {
 
     //const {} = props;
-    const {setModalTaskId, setModalOpen} = useContext(TaskContext);
+    const {setModalTaskId, setModalOpen, user} = useContext(TaskContext);
     const {crewMembers, setCrewMembers, allCrewJobs, 
                 setAllCrewJobs, memberJobs,setMemberJobs, setShouldResetCrewState, allCrewJobMembers, setAllCrewJobMembers} = useContext(CrewContext); 
 
@@ -77,7 +77,7 @@ const CrewMembers = (props) => {
         }
 
         const deleteMember = () => {
-            Crew.deleteCrewMember(memberId)
+            Crew.deleteCrewMember(memberId, user)
                 .then( (data) => {
                         setShouldResetCrewState(true);
                         cogoToast.success(`Removed member ${memberId} from crew members`, {hideAfter: 4});
@@ -112,7 +112,7 @@ const CrewMembers = (props) => {
         }
 
         const deleteMember = () => {
-            Crew.deleteCrewJob(id, crew_id)
+            Crew.deleteCrewJob(id, crew_id, user)
                 .then( (data) => {
                         setShouldResetCrewState(true);
                         cogoToast.success(`Removed job ${id} from crew jobs`, {hideAfter: 4});
@@ -159,7 +159,7 @@ const CrewMembers = (props) => {
     //             if(!(data.every((item)=> !(item.id == swapJob.id)))) {
     //                 cogoToast.warn("This job already exists for selected member");
     //             }else{ // if not
-    //                 Crew.updateCrewJobMember( swapJob.crew_id, member.id, swapJob.is_leader,  swapJob.cm_id )
+    //                 Crew.updateCrewJobMember( swapJob.crew_id, member.id, swapJob.is_leader,  swapJob.cm_id, user )
     //                 .then((data)=>{
     //                     setShouldResetCrewState(true);
                         
@@ -179,7 +179,7 @@ const CrewMembers = (props) => {
     //         console.warn("Failed on check job exist for member", error)
     //         cogoToast.warn("Failed check if job already exists for member");
     //         // run anyway
-    //         Crew.updateCrewJobMember( swapJob.crew_id, member.id, swapJob.is_leader,  swapJob.cm_id )
+    //         Crew.updateCrewJobMember( swapJob.crew_id, member.id, swapJob.is_leader,  swapJob.cm_id , user)
     //         .then((data)=>{
     //             setShouldResetCrewState(true);
                 
@@ -252,7 +252,7 @@ const CrewMembers = (props) => {
                 // );
                 
                 // var temp = items.map((item, i)=> item.t_id);
-                // TaskLists.reorderTaskList(temp,taskListToMap.id)
+                // TaskLists.reorderTaskList(temp,taskListToMap.id, user)
                 // .then( (ok) => {
                 //         if(!ok){
                 //             throw new Error("Could not reorder tasklist" + taskListToMap.id);
@@ -305,7 +305,7 @@ const CrewMembers = (props) => {
                     )})}
                     <ListItem className={classes.text_button_li}>
                         <div className={classes.singleLineDiv}>
-                            <CrewMemberActionAdd />
+                            <CrewMemberActionAdd user={user}/>
                          </div>
                     </ListItem>
                 </List>

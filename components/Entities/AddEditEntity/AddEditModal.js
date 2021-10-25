@@ -29,11 +29,11 @@ import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 
 const AddEditEntity = function(props) {
-    const {user, editModalMode} = props;
+    const {editModalMode} = props;
 
     const { entities, setEntities,
         currentView, previousView, handleSetView,views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,setEntitiesRefetch,
-        editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities} = useContext(ListContext);
+        editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, setRecentEntities, user} = useContext(ListContext);
 
 
     const saveRef = React.createRef();
@@ -124,7 +124,7 @@ const AddEditEntity = function(props) {
             if(addOrEdit == "edit"){
                 updateEntity["record_id"] = entity.record_id;
 
-                Entities.updateEntity( updateEntity )
+                Entities.updateEntity( updateEntity, user )
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Entity ${entity.record_id} has been updated!`, {hideAfter: 4});
@@ -140,7 +140,7 @@ const AddEditEntity = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                Entities.addEntity( updateEntity )
+                Entities.addEntity( updateEntity, user )
                 .then( (data) => {
                     //Get id of new workorder and set view to detail
                     if(data && data.insertId){
@@ -169,7 +169,7 @@ const AddEditEntity = function(props) {
         }
 
         const deleteEnt = () =>{
-            Entities.deleteEntity(entity.record_id)
+            Entities.deleteEntity(entity.record_id, user)
             .then((data)=>{
                 setEntitiesRefetch(true);
                 handleCloseModal();

@@ -169,7 +169,7 @@ const WOFairPlayOrders = function(props) {
         return;
       }
       const deleteSlip = ()=>{
-        WorkOrderDetail.deleteFPOrder(row.record_id)
+        WorkOrderDetail.deleteFPOrder(row.record_id, user)
         .then((data)=>{
           if(data){
             setFPOrders(null);
@@ -197,7 +197,7 @@ const WOFairPlayOrders = function(props) {
     <div className={classes.root}>
         {activeWorkOrder ?
         <div className={classes.container}> <>
-          <AddEditFPOrder  activeWorkOrder={activeWorkOrder} raineyUsers={raineyUsers}
+          <AddEditFPOrder user={user} activeWorkOrder={activeWorkOrder} raineyUsers={raineyUsers}
         fpOrderModalMode={fpOrderModalMode} setFPOrderModalMode={setFPOrderModalMode} activeFPOrder={activeFPOrder} setActiveFPOrder={setActiveFPOrder} resetFPForm={resetFPForm}
          setResetFPForm={setResetFPForm} workOrderItems={workOrderItems} setWorkOrderItems={setWorkOrderItems} fpOrderModalOpen={fpOrderModalOpen}
         setFPOrderModalOpen={setFPOrderModalOpen} fpOrders={fpOrders} setFPOrders={setFPOrders}/>

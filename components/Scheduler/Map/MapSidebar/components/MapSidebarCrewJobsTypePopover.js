@@ -23,7 +23,7 @@ const MapSidebarCrewJobsTypePopover = (props) =>{
 
     //PROPS
     //activeMarkerId / setActiveMarkerId / markedRows passed from MapContainer => MapSidebar => Here
-    const { crewJob } = props;
+    const { crewJob , user} = props;
     
     const {job_types} = useContext(TaskContext);
     const {  setCrewJobsRefetch, setActiveMarker } = useContext(MapContext);
@@ -60,7 +60,7 @@ const MapSidebarCrewJobsTypePopover = (props) =>{
        //might need to check other jobs in crew to see if type already exists
 
        if(new_type !== old_job_type){
-        Crew.updateCrewJobType(crewJob.id, new_type)
+        Crew.updateCrewJobType(crewJob.id, new_type, user)
         .then((data)=>{
          cogoToast.success("Updated Job Type to " + new_type)
          setCrewJobsRefetch(true);

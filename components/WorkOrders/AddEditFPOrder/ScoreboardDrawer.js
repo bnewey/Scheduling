@@ -114,7 +114,7 @@
 //                 if(fpOrderModalMode =="edit"){
 //                     updateFPOItem["fairplay_order"] = activeFPOrder.record_id;
 //                     //record_id exists so we can add item immediately
-//                     WorkOrderDetail.addNewFPOrderItem(updateFPOItem)
+//                     WorkOrderDetail.addNewFPOrderItem(updateFPOItem, user)
 //                     .then((data)=>{
 //                         if(data){
 //                             //refetch

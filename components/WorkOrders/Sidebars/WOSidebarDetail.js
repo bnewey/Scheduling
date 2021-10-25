@@ -16,12 +16,12 @@ import CompInvTool from './components/CompInvTool';
 
 
 const WOSidebarDetail = function(props) {
-  const {user} = props;
+  
 
 
 
   const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, setEditWOModalOpen, setEditModalMode, currentView,previousView, handleSetView, views,
-    activeWorkOrder } = useContext(ListContext);
+    activeWorkOrder, user } = useContext(ListContext);
 
   const {setEditWOIModalMode,setEditWOIModalOpen, setFPOrderModalOpen, setFPOrderModalMode} = useContext(DetailContext);
   
@@ -48,7 +48,7 @@ const WOSidebarDetail = function(props) {
       return;
     }
 
-    WorkOrderDetail.addPackingSlip(activeWorkOrder.wo_record_id)
+    WorkOrderDetail.addPackingSlip(activeWorkOrder.wo_record_id, user)
     .then((data)=>{
       handleSetView(views.find((v)=> v.value === "packingSlip"))
       //setPackingSlips(null);

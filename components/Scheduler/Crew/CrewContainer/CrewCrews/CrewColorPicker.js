@@ -22,7 +22,7 @@ const DEFAULT_COLOR = '#bbb'
 
 const CrewColorPicker = (props) => {
 
-    const {crew, setShouldResetCrewState} = props;
+    const {crew, setShouldResetCrewState, user} = props;
 
     const [newColor, setNewColor] = React.useState( crew?.crew_color || DEFAULT_COLOR)
     const [pickerOpen, setPickerOpen] = React.useState(false);
@@ -59,7 +59,7 @@ const CrewColorPicker = (props) => {
             console.error("Bad crew");
             return;
         }
-        Crew.updateCrewColor(crew.id, color.hex)
+        Crew.updateCrewColor(crew.id, color.hex, user)
         .then((data)=>{
             cogoToast.success("Updated crew's color");
             setShouldResetCrewState(true);

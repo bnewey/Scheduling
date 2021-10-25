@@ -22,7 +22,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 const CrewCrewsCrews = (props) => {
 
     const {selectedCrew, setSelectedCrew, localCrewJobs, setLocalCrewJobs, selectedCrewMembers, setSelectedCrewMembers, selectedJob, setSelectedJob} = props;
-    const {setModalTaskId, setModalOpen} = useContext(TaskContext);
+    const {setModalTaskId, setModalOpen, user} = useContext(TaskContext);
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
         setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState} = useContext(CrewContext);
@@ -128,7 +128,7 @@ const CrewCrewsCrews = (props) => {
             return;
         }
 
-        Crew.deleteCrewJobMember(m_id, crew_id)
+        Crew.deleteCrewJobMember(m_id, crew_id, user)
         .then((data)=>{
             if(data){
                 cogoToast.success("Deleted crew member from crew");
@@ -178,7 +178,7 @@ const CrewCrewsCrews = (props) => {
                                 
                                 <div disableTypography className={classes.crew_text}>
                                     <span className={classes.colorSpan}>
-                                        <CrewColorPicker setShouldResetCrewState={setShouldResetCrewState} crew={crew} />
+                                        <CrewColorPicker user={user} setShouldResetCrewState={setShouldResetCrewState} crew={crew} />
                                     </span>
                                     <span className={classes.leaderSpan}>{crew && crew.crew_leader_name ? crew.crew_leader_name : 'Crew ' + crew.id}</span>
                                     <div className={classes.otherMemberDiv}>

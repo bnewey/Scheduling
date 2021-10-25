@@ -30,7 +30,7 @@ const AddEditEntityContact = function(props) {
         editContactModalMode, setEditContactModalMode, setContacts} = props;
 
     const { entities, setEntities,
-        currentView, previousView, handleSetView, views,  recentEntities, setRecentEntities, activeEntity} = useContext(ListContext);
+        currentView, previousView, handleSetView, views,  recentEntities, setRecentEntities, activeEntity, user} = useContext(ListContext);
     
     const [defaultAddresses, setDefaultAddresses] = useState(null);
     const [entContactTitles, setEntContactTitles] = useState(null);
@@ -129,7 +129,7 @@ const AddEditEntityContact = function(props) {
             if(addOrEdit == "edit"){
                 updateContact["record_id"] = contact.record_id;
 
-                Entities.updateEntityContact( updateContact )
+                Entities.updateEntityContact( updateContact , user)
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Contact ${contact.record_id} has been updated!`, {hideAfter: 4});
@@ -148,7 +148,7 @@ const AddEditEntityContact = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                Entities.addEntityContact( updateContact )
+                Entities.addEntityContact( updateContact, user )
                 .then( (data) => {
                 
                     cogoToast.success(`Contact has been added!`, {hideAfter: 4});
@@ -198,6 +198,7 @@ const AddEditEntityContact = function(props) {
                         <Grid item xs={12} className={classes.paperScroll}>
                             {/*FORM*/}
                             {activeContact && defaultAddresses && <FormBuilder 
+                                user={user}
                                 ref={saveRef}
                                 fields={fields} 
                                 mode={editContactModalMode} 

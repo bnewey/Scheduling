@@ -58,7 +58,7 @@ async function removeTask(t_id){
 
 }
 
-async function updateTask(task){
+async function updateTask(task, user){
     const route = '/scheduling/tasks/updateTask';
     try{
         var response = await fetch(route,
@@ -67,7 +67,7 @@ async function updateTask(task){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({task: task})
+                body: JSON.stringify({task: task, user})
             });
             return response.ok;
     }catch(error){
@@ -76,7 +76,7 @@ async function updateTask(task){
 
 }
 
-async function updateMultipleTaskDates(ids, date, job_type){
+async function updateMultipleTaskDates(ids, date, job_type, user){
     const route = '/scheduling/tasks/updateMultipleTaskDates';
     try{
         var response = await fetch(route,
@@ -85,7 +85,7 @@ async function updateMultipleTaskDates(ids, date, job_type){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids,date, job_type})
+                body: JSON.stringify({ids,date, job_type, user})
             });
             return response.ok;
     }catch(error){
@@ -145,7 +145,7 @@ async function saveCoordinates(record_id, coordinates){
     }
 }
 
-async function addAndSaveAddress(addressObj, entities_id){
+async function addAndSaveAddress(addressObj, entities_id, user){
     const route = '/scheduling/tasks/addAndSaveAddress';
     try{
         var data = await fetch(route,
@@ -154,7 +154,7 @@ async function addAndSaveAddress(addressObj, entities_id){
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({addressObj, entities_id})
+            body: JSON.stringify({addressObj, entities_id, user})
         });
 
         if(!data.ok){

@@ -34,7 +34,7 @@ const MapCrewInfoWindow = (props)=>{
         multipleMarkersOneLocation, setMultipleMarkersOneLocation} = props;
     const {setCrewJobsRefetch} = React.useContext(MapContext)
 
-        const {  job_types } = React.useContext(TaskContext);
+        const {  job_types, user } = React.useContext(TaskContext);
     //STATE
     const [jobTask, setJobTask] = useState(null);
     const [notesEdit, setNotesEdit] = useState(false);
@@ -193,7 +193,7 @@ const MapCrewInfoWindow = (props)=>{
         }
 
         console.log("notes", notes);
-        Work_Orders.updateWONotes(item.wo_id, notes )
+        Work_Orders.updateWONotes(item.wo_id, notes, user )
         .then((data)=>{
             cogoToast.success("Updated notes");
             setCrewJobsRefetch(true);

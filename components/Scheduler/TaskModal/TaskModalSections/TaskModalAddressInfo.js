@@ -9,7 +9,7 @@ import Tasks from '../../../../js/Tasks';
 const TaskModalAddressInfo = (props) => {
 
     const { classes, modalTask, handleInputOnChange, handleSave, ref_object, editAddressInfo, setEditAddressInfo,setShouldReFetch,
-        shouldUpdateAddressInfo, setShouldUpdateAddressInfo } = props;
+        shouldUpdateAddressInfo, setShouldUpdateAddressInfo, user } = props;
     const [addressState, setAddressState] = React.useState(
         {
             address_name: modalTask.address_name,
@@ -40,7 +40,7 @@ const TaskModalAddressInfo = (props) => {
         //Add a new address to entities_addresses and set task = 1, remove task =1 from all others
         console.log("AddressState",addressState);
 
-        Tasks.addAndSaveAddress(addressState, modalTask.entities_id)
+        Tasks.addAndSaveAddress(addressState, modalTask.entities_id, user)
         .then((data)=>{
             console.log('data',data);
             setShouldReFetch(true);

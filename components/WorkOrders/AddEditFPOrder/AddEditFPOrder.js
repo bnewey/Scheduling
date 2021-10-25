@@ -189,7 +189,7 @@
 //             if(addOrEdit == "edit"){
 //                 updateItem["record_id"] = fpOrder.record_id;
 
-//                 WorkOrderDetail.updateFPOrder( updateItem )
+//                 WorkOrderDetail.updateFPOrder( updateItem, user )
 //                 .then( (data) => {
 //                     //Refetch our data on save
 //                     cogoToast.success(`Work Order Item ${fpOrder.record_id} has been updated!`, {hideAfter: 4});
@@ -205,7 +205,7 @@
 //             }
 //             if(addOrEdit == "add"){
 //                 updateItem["work_order"] = activeWorkOrder.wo_record_id;
-//                 WorkOrderDetail.addNewFPOrder( updateItem )
+//                 WorkOrderDetail.addNewFPOrder( updateItem, user )
 //                 .then( (data) => {
 //                     //Get id of new workorder item 
 //                     if(data && data.insertId){
@@ -215,7 +215,7 @@
 //                         if(fpOrderItems && Array.isArray(fpOrderItems)){
 //                             var updatedFPIarray = fpOrderItems.map((item)=> {item.fairplay_order = data.insertId; return item;})
 
-//                             WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray)
+//                             WorkOrderDetail.addMultipleFPOrderItems(updatedFPIarray, user)
 //                             .then((data)=>{
 //                                 if(data){
 //                                     //refetch

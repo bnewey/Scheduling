@@ -2,7 +2,7 @@ const express = require('express');
 var async = require("async");
 
 const router = express.Router();
-
+const {checkPermission} = require('../util/util');
 const logger = require('../../logs');
 //Handle Database
 const database = require('./db');
@@ -191,10 +191,17 @@ router.post('/addTasktoList', async (req,res) => {
 });
 
 router.post('/addMultipleTaskstoList', async (req,res) => {
-    var taskList_id, task_ids;
+    var taskList_id, task_ids, user;
     if(req.body){
         taskList_id = req.body.tl_id;
         task_ids = req.body.ids;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     //Filter our ids that already exists
@@ -270,11 +277,19 @@ router.post('/removeTaskFromList', async (req,res) => {
 });
 
 router.post('/moveTaskToList', async (req,res) => {
-    var taskList_id, task_id;
+    var taskList_id, task_id, user;
     if(req.body){
     task_id = req.body.id;
     taskList_id = req.body.tl_id;
+    user = req.body.user;
     }
+
+    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
+    }
+
     //we need to reorder priority_order in the list
     const sql_select = ' select max(priority_order) AS max_priority from task_list_items where task_list_id = ? ' ; 
     
@@ -295,10 +310,17 @@ router.post('/moveTaskToList', async (req,res) => {
 });
 
 router.post('/removeMultipleFromList', async (req,res) => {
-    var taskList_id, task_ids;
+    var taskList_id, task_ids, user;
     if(req.body){
     task_ids = req.body.ids;
     taskList_id = req.body.tl_id;
+    user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
 
     const sql = ' DELETE from task_list_items ' +
@@ -326,10 +348,17 @@ router.post('/removeMultipleFromList', async (req,res) => {
 });
 
 router.post('/reorderTaskList', async (req,res) => {
-    var taskList_id, task_ids;
+    var taskList_id, task_ids, user;
     if(req.body){
         taskList_id = req.body.tl_id;
         task_ids = req.body.ids;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.sendStatus(400);
+        return;
     }
     
     const sql = ' UPDATE task_list_items SET priority_order = ?, date_updated = now() ' +
@@ -360,6 +389,7 @@ router.post('/reorderTaskList', async (req,res) => {
 
 
 router.post('/setPriorityTaskList', async (req,res) => {
+    //unused method
     var task_list_id, tl_name;
     if(req.body){
         task_list_id = req.body.task_list_id;

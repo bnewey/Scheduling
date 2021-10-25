@@ -193,8 +193,8 @@ router.post('/deleteOrderOut', async (req,res) => {
         logger.error("Bad id param in deleteOrderOut");
         res.sendStatus(400);
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
@@ -557,8 +557,8 @@ router.post('/deleteOrderOutApprover', async (req,res) => {
         logger.error("Bad id param in deleteOrderOutApprover");
         res.sendStatus(400);
     }
-    if(!user || !user.isAdmin){
-        logger.error("Bad user or not admin", [user]);
+    if(user && !checkPermission(user.permissions, 'inventory') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
         res.sendStatus(400);
         return;
     }
