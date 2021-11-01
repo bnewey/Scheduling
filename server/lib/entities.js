@@ -132,7 +132,7 @@ router.post('/addEntity', async (req,res) => {
 
     const sql = ' INSERT INTO entities (name, company, other_organization, account_number, purchase_order_required, purchase_order, ' + 
     ' notes, county_or_parish, entities_types_id, class, prepayment_required, phone, fax, website, shipping, billing, mailing, ' + 
-    ' city, state, on_hold)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?,  IFNULL(?, DEFAULT(on_hold)) ';
+    ' city, state, on_hold)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?,  IFNULL(?, DEFAULT(on_hold))) ';
 
     try{
         const results = await database.query(sql, [entity.name, entity.company, entity.other_organization, entity.account_number,
