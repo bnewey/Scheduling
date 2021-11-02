@@ -5,6 +5,7 @@ var async = require("async");
 const logger = require('../../logs');
 
 const Util = require('../../js/Util');
+const {checkPermission} = require('../util/util');
 //Handle Database
 const database = require('./db');
 
@@ -88,14 +89,22 @@ router.post('/getEntityById', async (req,res) => {
 });
 
 router.post('/updateEntity', async (req,res) => {
-    var entity;
+    var entity, user;
 
     if(req.body){
         entity = req.body.entity;
+        user = req.body.user;
     }
     if(!entity){
         logger.error("Bad entity param in updateEntity");
         res.sendStatus(400);
+        return;
+    }
+    
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' UPDATE entities SET name = ?, company = IFNULL(? , 2 ), other_organization =?, account_number=?,purchase_order_required=?, purchase_order=?, ' +
@@ -120,19 +129,27 @@ router.post('/updateEntity', async (req,res) => {
 });
 
 router.post('/addEntity', async (req,res) => {
-    var entity;
+    var entity, user;
 
     if(req.body){
         entity = req.body.entity;
+        user = req.body.user;
     }
     if(!entity){
         logger.error("Bad entity param in addEntity");
-        res.sendStatus(400);
+        res.status(400).json({error: 'Bad entity param in addEntity'});
     }
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
+    
 
     const sql = ' INSERT INTO entities (name, company, other_organization, account_number, purchase_order_required, purchase_order, ' + 
     ' notes, county_or_parish, entities_types_id, class, prepayment_required, phone, fax, website, shipping, billing, mailing, ' + 
-    ' city, state, on_hold)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?,  IFNULL(?, DEFAULT(on_hold))) ';
+    ' city, state, on_hold)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?,  IFNULL(?, DEFAULT(on_hold)) ) ';
+
 
     try{
         const results = await database.query(sql, [entity.name, entity.company, entity.other_organization, entity.account_number,
@@ -151,12 +168,18 @@ router.post('/addEntity', async (req,res) => {
 });
 
 router.post('/deleteEntity', async (req,res) => {
-    var ent_id;
+    var ent_id, user;
 
     if(req.body){
         ent_id = req.body.ent_id;
+        user = req.body.user;
     }
     
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
 
     const sql = ' DELETE FROM entities WHERE record_id = ? LIMIT 1 ';
 
@@ -320,14 +343,20 @@ router.post('/getEntAddressById', async (req,res) => {
 
 
 router.post('/updateEntityAddress', async (req,res) => {
-    var ent_add;
+    var ent_add, user;
 
     if(req.body){
         ent_add = req.body.ent_add;
+        user = req.body.user;
     }
     if(!ent_add){
         logger.error("Bad ent_add param in updateEntity");
         res.sendStatus(400);
+    }
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql_resetmain = ' UPDATE entities_addresses SET main = 0 WHERE entities_id = ? ';
@@ -357,15 +386,22 @@ router.post('/updateEntityAddress', async (req,res) => {
 });
 
 router.post('/addEntityAddress', async (req,res) => {
-    var ent_add;
+    var ent_add, user;
 
     if(req.body){
         ent_add = req.body.ent_add;
+        user = req.body.user;
     }
     if(!ent_add){
         logger.error("Bad ent_add param in addEntity");
         res.sendStatus(400);
     }
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
+
     const sql_resetmain = ' UPDATE entities_addresses SET main = 0 WHERE entities_id = ? ';
     const sql = ' INSERT INTO entities_addresses (main, shipping, billing, mailing, entities_id, name, to_name, address, address2, city, ' + 
     ' state, zip, residence, lat, lng, geocoded, task ) ' + 
@@ -392,14 +428,20 @@ router.post('/addEntityAddress', async (req,res) => {
 });
 
 router.post('/deleteEntityAddress', async (req,res) => {
-    var ent_add_id;
+    var ent_add_id, user;
 
     if(req.body){
         ent_add_id = req.body.ent_add_id;
+        user = req.body.user;
     }
     if(!ent_add_id){
         logger.error("Bad ent_add_id param in deleteEntityAddress");
         res.sendStatus(400);
+    }
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' DELETE FROM entities_addresses WHERE record_id = ? LIMIT 1 ';
@@ -467,14 +509,20 @@ router.post('/getEntContactById', async (req,res) => {
 
 
 router.post('/updateEntityContact', async (req,res) => {
-    var ent_cont;
+    var ent_cont, user;
 
     if(req.body){
         ent_cont = req.body.ent_cont;
+        user = req.body.user;
     }
     if(!ent_cont){
         logger.error("Bad ent_cont param in updateEntity");
         res.sendStatus(400);
+    }
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' UPDATE entities_contacts SET name = ?, work_phone =?, home_phone=?, cell=?,fax=?,email=?, title=?, shipping=?, billing=?, ' +
@@ -496,14 +544,20 @@ router.post('/updateEntityContact', async (req,res) => {
 });
 
 router.post('/addEntityContact', async (req,res) => {
-    var ent_cont;
+    var ent_cont, user;
 
     if(req.body){
         ent_cont = req.body.ent_cont;
+        user = req.body.user;
     }
     if(!ent_cont){
         logger.error("Bad ent_cont param in addEntity");
         res.sendStatus(400);
+    }
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
    
     const sql = ' INSERT INTO entities_contacts (entities_id, name, work_phone, home_phone, cell, fax, email, title, shipping, billing, mailing, cc_type, ' +
@@ -526,14 +580,20 @@ router.post('/addEntityContact', async (req,res) => {
 });
 
 router.post('/deleteEntityContact', async (req,res) => {
-    var ent_cont_id;
+    var ent_cont_id, user;
 
     if(req.body){
         ent_cont_id = req.body.ent_cont_id;
+        user = req.body.user;
     }
     if(!ent_cont_id){
         logger.error("Bad ent_cont_id param in deleteEntityContact");
         res.sendStatus(400);
+    }
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' DELETE FROM entities_contacts WHERE record_id = ? LIMIT 1 ';
@@ -576,10 +636,17 @@ router.post('/getEntContactTitles', async (req,res) => {
 });
 
 router.post('/deleteContactTitle', async (req,res) => {
-    var title_id;
+    var title_id, user;
 
     if(req.body){
         title_id = req.body.title_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' DELETE FROM entities_contacts_titles WHERE record_id = ? LIMIT 1 ';
@@ -597,10 +664,17 @@ router.post('/deleteContactTitle', async (req,res) => {
 });
 
 router.post('/addContactTitle', async (req,res) => {
-    var title_data;
+    var title_data, user;
 
     if(req.body){
         title_data = req.body.title_data;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' INSERT INTO entities_contacts_titles (contact, title, old_title) VALUES (?,?, IFNULL(?, DEFAULT(old_title))) ';

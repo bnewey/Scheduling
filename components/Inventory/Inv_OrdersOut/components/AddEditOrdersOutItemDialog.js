@@ -184,7 +184,11 @@ const AddEditOrdersOutItemDialog = (props) => {
       })
       .catch((error)=>{
         console.error("Failed to get kit items",error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+          cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     }
   },[selectedPart, kitsPartsManItemsRefetch]);

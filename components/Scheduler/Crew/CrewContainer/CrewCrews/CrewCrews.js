@@ -55,7 +55,7 @@ function arraysEqual(_arr1, _arr2) {
 const CrewCrews = (props) => {
 
     const {} = props;
-    const {setModalTaskId, setModalOpen, setTabValue, filters, setFilters, setFilterInOrOut, setFilterAndOr, crewToMap, setCrewToMap, refreshView} = useContext(TaskContext);
+    const {setModalTaskId, setModalOpen, setTabValue, filters, setFilters, setFilterInOrOut, setFilterAndOr, crewToMap, setCrewToMap, refreshView, user} = useContext(TaskContext);
 
     const { crewMembers,setCrewMembers, allCrewJobs, allCrews, setAllCrews,
         setAllCrewJobs, allCrewJobMembers, setAllCrewJobMembers, setShouldResetCrewState,
@@ -163,7 +163,7 @@ const CrewCrews = (props) => {
         }
 
         const deleteMember = () => {
-            Crew.deleteCrewMember(memberId)
+            Crew.deleteCrewMember(memberId, user)
                 .then( (data) => {
                         setCrewMembers(null);
                         cogoToast.success(`Removed member ${memberId} from crew members`, {hideAfter: 4});
@@ -198,7 +198,7 @@ const CrewCrews = (props) => {
         }
 
         const deleteMember = () => {
-            Crew.deleteCrewJob(id, crew_id)
+            Crew.deleteCrewJob(id, crew_id, user)
                 .then( (data) => {
                         //setLocalCrewJobs(null);
                         setLocalCrewJobsRefetch(true)
@@ -243,7 +243,7 @@ const CrewCrews = (props) => {
             return;
         }
         
-        Crew.updateCrewJob(crew.id, swapJobId, old_crew_id)
+        Crew.updateCrewJob(crew.id, swapJobId, old_crew_id, user)
         .then((data)=>{
             //setLocalCrewJobs(null);
             setLocalCrewJobsRefetch(true);
@@ -418,7 +418,7 @@ const CrewCrews = (props) => {
     const handleUpdateJobCompleted =(event, job_id, crew_id)=>{
         var completed = event.target.checked ? 1 : 0;
 
-        Crew.updateCrewJobCompleted(completed, job_id, crew_id )
+        Crew.updateCrewJobCompleted(completed, job_id, crew_id, user )
         .then((data)=>{
             
             //setLocalCrewJobs(null);

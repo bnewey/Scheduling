@@ -44,7 +44,7 @@ import WoiStatusCheck from '../TaskList/components/WoiStatusCheck.js';
 export default function TaskModal(props){
 
     const {modalOpen, setModalOpen, modalTaskId, setModalTaskId} = props;
-    const {taskLists, setTaskLists, setRows, setRefreshView, tabValue, taskListToMap} = useContext(TaskContext);
+    const {taskLists, setTaskLists, setRows, setRefreshView, tabValue, taskListToMap, user} = useContext(TaskContext);
 
     const classes = useStyles();
 
@@ -220,7 +220,7 @@ export default function TaskModal(props){
             updateModalTask["t_id"] = task.t_id;
             
             console.log("UPDATE", updateModalTask);
-            Tasks.updateTask(updateModalTask)
+            Tasks.updateTask(updateModalTask, user)
             .then( (data) => {
                 //Refetch our data on save
                 cogoToast.success(`Task ${task.t_name} has been updated!`, {hideAfter: 4});
@@ -244,11 +244,11 @@ export default function TaskModal(props){
             return;
         }
 
-        TaskLists.addMultipleTasksToList([modalTask.t_id], tl_id)
+        TaskLists.addMultipleTasksToList([modalTask.t_id], tl_id, user)
         .then((response)=>{
             console.log("response", response)
             if(response === true){
-                TaskLists.removeMultipleFromList([modalTask.t_id], taskListToMap.id)
+                TaskLists.removeMultipleFromList([modalTask.t_id], taskListToMap.id, user)
                 .then((data)=>{
                     if(data){
                         cogoToast.success("Successfully moved task");
@@ -308,6 +308,7 @@ export default function TaskModal(props){
                 
                     
                 <TaskModalAddressInfo  classes={classes} 
+                                    user={user}
                                     modalTask={modalTask} 
                                     handleInputOnChange={handleInputOnChange} 
                                     handleShouldUpdate={handleShouldUpdate}
@@ -320,7 +321,7 @@ export default function TaskModal(props){
                     <hr className={classes.hr}/>
                 
                     
-                <TaskModalWOSignArtItems modalTask={modalTask} taskId={modalTask.table_id}/>
+                <TaskModalWOSignArtItems user={user} modalTask={modalTask} taskId={modalTask.table_id}/>
                         
                 </Grid>
                 <Grid item xs={3} className={classes.paper}>
@@ -336,9 +337,9 @@ export default function TaskModal(props){
                     <MuiPickersUtilsProvider utils={DateFnsUtils}><DatePicker clearable showTodayButton format="MM/dd/yyyy" className={classes.inputDate} inputVariant="outlined"  value={modalTask.sch_install_date} onChange={value => handleInputOnChange(value, true, "datetime", "sch_install_date")} /></MuiPickersUtilsProvider>
                 </div>
                 
-                <TaskModalCrew modalTask={modalTask} modalOpen={modalOpen} setModalOpen={setModalOpen} setTaskLists={setTaskLists} setShouldReFetch={setShouldReFetch} />
+                <TaskModalCrew user={user} modalTask={modalTask} modalOpen={modalOpen} setModalOpen={setModalOpen} setTaskLists={setTaskLists} setShouldReFetch={setShouldReFetch} />
                 { taskLists ?
-                    <TaskModalTaskList taskLists={taskLists} setTaskLists={setTaskLists} 
+                    <TaskModalTaskList user={user} taskLists={taskLists} setTaskLists={setTaskLists} 
                                         modalTask={modalTask}
                                         setShouldReFetch={setShouldReFetch}
                                         modalOpen={modalOpen} setModalOpen={setModalOpen} 

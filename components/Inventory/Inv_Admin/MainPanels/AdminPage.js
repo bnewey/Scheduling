@@ -114,7 +114,11 @@ const AdminPage = function(props) {
       })
       .catch((error)=>{
         console.error("Failed to get settings", error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     }
 
@@ -252,7 +256,11 @@ const AdminPage = function(props) {
           })
           .catch((error)=>{
               
-            cogoToast.error("Failed to delete Manufacturer")
+            if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             console.error("Failed to delete Manufacturer", error);
             setManItemsRefetch(true);
           })
@@ -276,7 +284,11 @@ const AdminPage = function(props) {
             }
           })
           .catch((error)=>{
-            cogoToast.error("Failed to delete PartTypes")
+            if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             console.error("Failed to delete PartTypes", error);
             setPartTypesRefetch(true);
           })

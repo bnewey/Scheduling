@@ -5,6 +5,7 @@ var async = require("async");
 const logger = require('../../logs');
 
 const Util = require('../../js/Util');
+const {checkPermission} = require('../util/util');
 //Handle Database
 const database = require('./db');
 
@@ -43,11 +44,18 @@ router.post('/getPackingSlipsById', async (req,res) => {
 
 router.post('/updatePackingSlip', async (req,res) => {
 
-    var ps ;
+    var ps, user ;
     if(req.body){
         if(req.body.psObject != null){
             ps = req.body.psObject;
+            user = req.body.user;
         }  
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' UPDATE packing_slip SET ship_date = ?, shipped = ?, diff_ship_to =?, ship_to_contact =?, ship_to_address =? WHERE record_id = ? ';
@@ -66,11 +74,18 @@ router.post('/updatePackingSlip', async (req,res) => {
 });
 
 router.post('/addPackingSlip', async (req,res) => {
-    var wo_id ;
+    var wo_id, user;
     if(req.body){
         if(req.body.wo_id != null){
             wo_id = req.body.wo_id;
+            user = req.body.user;
         }
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' INSERT INTO packing_slip (ship_date, date_entered,shipped, work_order) values (?,?,?,?) ';
@@ -88,11 +103,18 @@ router.post('/addPackingSlip', async (req,res) => {
 });
 
 router.post('/deletePackingSlip', async (req,res) => {
-    var id ;
+    var id, user;
     if(req.body){
         if(req.body.id != null){
             id = req.body.id;
+            user = req.body.user;
         }
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' DELETE FROM packing_slip WHERE record_id = ? ';
@@ -111,16 +133,22 @@ router.post('/deletePackingSlip', async (req,res) => {
 
 router.post('/addWOIToPackingSlip', async (req,res) => {
 
-    var slip_id, woi_id;
+    var slip_id, woi_id, user;
     if(req.body){
         if(req.body.woi_id != null){
             woi_id = req.body.woi_id;
             slip_id =req.body.slip_id;
+            user = req.body.user;
         } else{
             res.sendStatus(400);
         }
     }
-    
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }    
 
     const sql = ' UPDATE work_orders_items set packing_slip = ? WHERE record_id = ? ';
 
@@ -137,11 +165,18 @@ router.post('/addWOIToPackingSlip', async (req,res) => {
 });
 
 router.post('/removePackingSlipFromWOI', async (req,res) => {
-    var slip_id, woi_id ;
+    var slip_id, woi_id, user ;
     if(req.body){
         slip_id = req.body.slip_id;
         woi_id = req.body.woi_id;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }  
 
     const sql = ' UPDATE work_orders_items woi SET packing_slip = NULL WHERE woi.record_id = ? AND woi.packing_slip = ? ';
 
@@ -307,9 +342,17 @@ router.post('/getFPOrderById', async (req,res) => {
 
 router.post('/addNewFPOrder', async (req,res) => {
     var fp_data = {};
+    var user;
     if(req.body){
         fp_data = req.body.fp_data;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    } 
 
     const sql = ' INSERT INTO fairplay_orders ( work_order, order_date, ship_to, bill_to, user_entered, discount, special_instructions, sales_order_id ) ' +
     ' VALUES ( ?, IFNULL(? ,DEFAULT(order_date)), ?, ?, IFNULL(? ,DEFAULT(user_entered)), IFNULL(? ,DEFAULT(discount)),  ' + 
@@ -328,10 +371,17 @@ router.post('/addNewFPOrder', async (req,res) => {
 });
 
 router.post('/updateFPOrder', async (req,res) => {
-    var fp_data = {};
+    var fp_data, user ;
     if(req.body){
         fp_data = req.body.fp_data;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    } 
 
     if(!fp_data.record_id){
         logger.error("Bad/no record id for update fp order");
@@ -355,12 +405,19 @@ router.post('/updateFPOrder', async (req,res) => {
 });
 
 router.post('/deleteFPOrder', async (req,res) => {
-    var fpo_id ;
+    var fpo_id , user ;
     if(req.body){
         if(req.body.fpo_id != null){
             fpo_id = req.body.fpo_id;
+            user = req.body.user;
         }
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    } 
 
     const sql = ' DELETE FROM fairplay_orders WHERE record_id = ? ';
 
@@ -463,10 +520,17 @@ router.post('/searchAllFPOrderItems', async (req,res) => {
 
 
 router.post('/addNewFPOrderItem', async (req,res) => {
-    var fpi_data = {};
+    var fpi_data, user ;
     if(req.body){
         fpi_data = req.body.fpi_data;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    } 
 
     const sql = ' INSERT INTO fairplay_orders_items ( fairplay_order, model, model_quantity, color, trim, controller, controller_quantity, ctrl_case, horn ) ' +
     ' VALUES ( ?, ?, IFNULL(? ,DEFAULT(model_quantity)), ?, ? , ?, IFNULL(? ,DEFAULT(controller_quantity)), ?, ?) ';
@@ -485,10 +549,17 @@ router.post('/addNewFPOrderItem', async (req,res) => {
 });
 
 router.post('/addMultipleFPOrderItems', async (req,res) => {
-    var fpi_array;
+    var fpi_array, user ;
     if(req.body){
         fpi_array = req.body.fpi_array;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    } 
 
     const sql = ' INSERT INTO fairplay_orders_items ( fairplay_order, model, model_quantity, color, trim, controller, controller_quantity, ctrl_case, horn ) ' +
     ' VALUES ( ?, ?, IFNULL(? ,DEFAULT(model_quantity)), ?, ? , ?, IFNULL(? ,DEFAULT(controller_quantity)), ?, ?) ';
@@ -517,10 +588,17 @@ router.post('/addMultipleFPOrderItems', async (req,res) => {
 });
 
 router.post('/updateFPOrderItem', async (req,res) => {
-    var fpi_data = {};
+    var fpi_data , user ;
     if(req.body){
         fpi_data = req.body.fpi_data;
+        user = req.body.user;
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    } 
 
     if(!fpi_data.record_id){
         logger.error("Bad/no record id for updateFPOrderItem")
@@ -546,12 +624,19 @@ router.post('/updateFPOrderItem', async (req,res) => {
 });
 
 router.post('/deleteFPOrderItem', async (req,res) => {
-    var fpi_id ;
+    var fpi_id , user ;
     if(req.body){
         if(req.body.fpi_id != null){
             fpi_id = req.body.fpi_id;
+            user = req.body.user;
         }
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    } 
 
     const sql = ' DELETE FROM fairplay_orders_items WHERE record_id = ? ';
 

@@ -25,7 +25,7 @@ const TLCrewJobsTypePopover = (props) =>{
     const { crewJob, setTaskListTasksRefetch } = props;
     
 
-    const {  job_types } = useContext(TaskContext);
+    const {  job_types, user } = useContext(TaskContext);
 
     //Popover Add/swap crew
     const [typeAnchorEl, setTypeAnchorEl] = React.useState(null);
@@ -59,7 +59,7 @@ const TLCrewJobsTypePopover = (props) =>{
        //might need to check other jobs in crew to see if type already exists
 
        if(new_type !== old_job_type){
-        Crew.updateCrewJobType(crewJob.field_job_id, new_type)
+        Crew.updateCrewJobType(crewJob.field_job_id, new_type, user)
         .then((data)=>{
          cogoToast.success("Updated Job Type to " + new_type)
          setTaskListTasksRefetch(true);

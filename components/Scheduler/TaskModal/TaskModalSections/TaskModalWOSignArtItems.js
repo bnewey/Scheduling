@@ -28,7 +28,7 @@ import { set } from 'lodash';
 const vendors  = []
 
 const TaskModalWOSignArtItems = (props) =>{
-    const {taskId, modalTask} = props;
+    const {taskId, modalTask, user} = props;
     //const {} = useContext(TaskContext);
 
     //css
@@ -87,7 +87,7 @@ const TaskModalWOSignArtItems = (props) =>{
             console.error("Bad value in handleUpdateArrivalDate");
             return;
         }
-        WorkOrders.updateWorkOrderItemArrivalDate(woi.record_id, Util.convertISODateToMySqlDate(value))
+        WorkOrders.updateWorkOrderItemArrivalDate(woi.record_id, Util.convertISODateToMySqlDate(value), user)
         .then((data)=>{
             if(data){
                 setSignItems(null);
@@ -107,7 +107,7 @@ const TaskModalWOSignArtItems = (props) =>{
             return;
         }
         console.log(value.target);
-        WorkOrders.updateWorkOrderItemVendor(woi_id, value.target.value)
+        WorkOrders.updateWorkOrderItemVendor(woi_id, value.target.value, user)
         .then((data)=>{
             if(data){
                 setSignItems(null);

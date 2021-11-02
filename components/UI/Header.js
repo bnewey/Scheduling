@@ -49,7 +49,7 @@ function Header(props) {
                 />
                 </Link>
             )} */}
-            <StyledNav navButtons={navButtons} />
+            <StyledNav user={user} navButtons={navButtons} />
             </Grid>
             <Grid item sm={1} xs={3} style={{ textAlign: 'right' }}>
             {user ? ( <div className={classes.userDiv}>

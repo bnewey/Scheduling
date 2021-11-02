@@ -68,12 +68,11 @@ import AddEditEntityAddress from './AddEditEntityAddress/AddEditModal';
 
 
 const EntAddresses = function(props) {
-  const {user} = props;
 
   const { entities, setEntities,
     currentView, previousView, handleSetView, views, detailEntityId,setDetailEntityId, activeEntity, setActiveEntity,
     editEntModalOpen, setEditEntModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentEntities, 
-    setRecentEntities, entitiesRefetch, setEntitiesRefetch} = useContext(ListContext);
+    setRecentEntities, entitiesRefetch, setEntitiesRefetch, user} = useContext(ListContext);
 
   const {detailEntAddressId,setDetailEntAddressId, activeAddress, setActiveAddress,editAddressModalOpen, setEditAddressModalOpen,
       editAddressModalMode, setEditAddressModalMode} = useContext(DetailContext);
@@ -160,7 +159,7 @@ const EntAddresses = function(props) {
 
     const handleUpdateEntityAddress = (newData, oldData) => {
         return new Promise((resolve, reject)=>{
-            Entities.updateEntityAddress(newData)
+            Entities.updateEntityAddress(newData, user)
             .then((data)=>{
               cogoToast.success("Updated Entity Address");
               setAddresses(null);
@@ -168,7 +167,11 @@ const EntAddresses = function(props) {
             })
             .catch((error)=>{
               console.error("Failed to update Entity Address", error);
-              cogoToast.error("Failed to update Entity Address");
+              if(error?.user_error){
+                  cogoToast.error(error.user_error);
+              }else{
+                  cogoToast.error("Internal Server Error");
+              }
               setAddresses(null);
               reject();
             })
@@ -183,7 +186,7 @@ const EntAddresses = function(props) {
         return;
       }
       const deleteSlip = ()=>{
-        Entities.deleteEntityAddress(row.record_id)
+        Entities.deleteEntityAddress(row.record_id, user)
         .then((data)=>{
           if(data){
             setAddresses(null);
@@ -192,7 +195,11 @@ const EntAddresses = function(props) {
         })
         .catch((error)=>{
             cogoToast.error("Failed to delete entity address")
-            console.error("Failed to delete entity address", error);
+            if(error?.user_error){
+                    cogoToast.error(error.user_error);
+            }else{
+                cogoToast.error("Internal Server Error");
+            }
         })
       }
 

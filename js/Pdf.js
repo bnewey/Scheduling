@@ -59,6 +59,9 @@ async function fetchWOPdf(){
             throw new Error("fetchWOPdf returned bad response from server")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

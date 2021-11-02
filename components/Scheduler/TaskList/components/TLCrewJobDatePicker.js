@@ -122,15 +122,16 @@ const TLCrewJobDatePicker = (props) => {
     return(
         <div className={classes.root} >
             <div className={classes.inputRootDiv}>
+                {type =="drill" ?  diagram ? <div className={classes.locatedDiv}><DeveloperBoardIcon className={classes.diagram_icon} data-tip={`Diagramed on ${moment(diagram).format('MM-DD-YYYY')}`} />
+                                                </div> :
+                                             <DeveloperBoardIcon className={classes.diagram_icon_gray} data-tip={'Not Diagramed'} /> : <></> }
                 {type =="drill" ?  ready ? <Check className={classes.small_icon} data-tip={'Drill is Ready'} /> :
                                              <NoCheck className={classes.small_icon_gray} data-tip={'Drill NOT Ready'} /> : <></> }
                 <TextField {...inputProps} onClick={inputProps.openPicker} value={ getTextFieldValue(props.value) } className={classes.input} variant="outlined" />
                 {type =="drill" ?  located ? <div className={classes.locatedDiv}><LocateIcon className={classes.locate_icon} data-tip={`Located til ${moment(located).format('MM-DD-YYYY')}. (${moment(located).diff(moment(new Date()), 'days')} Days)`} />
                                                 <span>{moment(located).diff(moment(new Date()), 'days')}</span></div> :
                                              <LocateIcon className={classes.locate_icon_gray} data-tip={'Not Located'} /> : <></> }
-                {type =="drill" ?  diagram ? <div className={classes.locatedDiv}><DeveloperBoardIcon className={classes.diagram_icon} data-tip={`Diagramed on ${moment(diagram).format('MM-DD-YYYY')}`} />
-                                                </div> :
-                                             <DeveloperBoardIcon className={classes.diagram_icon_gray} data-tip={'Not Diagramed'} /> : <></> }
+                
             </div>
             <Dialog {...wrapperProps}  maxWidth="md">
                 

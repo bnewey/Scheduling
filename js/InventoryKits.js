@@ -16,6 +16,9 @@ async function getAllPartsAndKits(){
             throw new Error("getAllPartsAndKits returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -38,6 +41,9 @@ async function getAllKits(){
             throw new Error("getAllKits returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -57,6 +63,9 @@ async function searchAllKits(table, query){
                 body: JSON.stringify({table: table, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -76,6 +85,9 @@ async function superSearchAllKits(tables, query){
                 body: JSON.stringify({tables: tables, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -99,6 +111,9 @@ async function getKitById(rainey_id){
                 body: JSON.stringify({rainey_id: rainey_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -139,6 +154,9 @@ async function updateKit(kit, user){
                 body: JSON.stringify({kit, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -159,6 +177,9 @@ async function updateKitInv(kit, user){
                 body: JSON.stringify({kit, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -204,6 +225,9 @@ async function getKitItems(rainey_id){
                 body: JSON.stringify({rainey_id: rainey_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -226,6 +250,9 @@ async function getKitItemsCostData(rainey_id){
                 body: JSON.stringify({rainey_id: rainey_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -249,6 +276,9 @@ async function getKitItemsWithManf(rainey_id){
                 body: JSON.stringify({rainey_id: rainey_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -269,6 +299,9 @@ async function updateKitPart(item, user){
                 body: JSON.stringify({item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -289,6 +322,9 @@ async function deleteKitPart(id, user){
                 body: JSON.stringify({id, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -309,6 +345,9 @@ async function addNewKitPart(kit_item, user){
                 body: JSON.stringify({kit_item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -329,6 +368,9 @@ async function updateKitKit(item, user){
                 body: JSON.stringify({item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -349,6 +391,9 @@ async function deleteKitKit(id, user){
                 body: JSON.stringify({id, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -369,6 +414,9 @@ async function addNewKitKit(kit_item, user){
                 body: JSON.stringify({kit_item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

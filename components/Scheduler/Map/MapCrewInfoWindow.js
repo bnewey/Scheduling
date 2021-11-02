@@ -34,7 +34,7 @@ const MapCrewInfoWindow = (props)=>{
         multipleMarkersOneLocation, setMultipleMarkersOneLocation} = props;
     const {setCrewJobsRefetch} = React.useContext(MapContext)
 
-        const {  job_types } = React.useContext(TaskContext);
+        const {  job_types, user } = React.useContext(TaskContext);
     //STATE
     const [jobTask, setJobTask] = useState(null);
     const [notesEdit, setNotesEdit] = useState(false);
@@ -188,12 +188,16 @@ const MapCrewInfoWindow = (props)=>{
             return
         }
         if(!item){
-            cogoToast.error("Internal Server Error");
+            if(error?.user_error){
+                cogoToast.error(error.user_error);
+            }else{
+                cogoToast.error("Internal Server Error");
+            }
             console.error("No item in handleSaveNotes")
         }
 
         console.log("notes", notes);
-        Work_Orders.updateWONotes(item.wo_id, notes )
+        Work_Orders.updateWONotes(item.wo_id, notes, user )
         .then((data)=>{
             cogoToast.success("Updated notes");
             setCrewJobsRefetch(true);

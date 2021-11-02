@@ -82,7 +82,7 @@ const TaskListSidebar = (props) => {
 
     const handleRemoveMultipleTasks = (event, selectedTasks, task_list) =>{
         const remove = () => {
-            TaskLists.removeMultipleFromList(selectedTasks, task_list.id)
+            TaskLists.removeMultipleFromList(selectedTasks, task_list.id, user)
             .then((response)=>{
                 const filtered_rows = taskListTasks.filter((task, i)=> (    !(selectedTasks.includes(task.t_id))   ));
                 //Set Tasks to all but ones weve deleted
@@ -128,7 +128,7 @@ const TaskListSidebar = (props) => {
         console.log(newTaskIds);
 
         const reorder = () => {
-            TaskLists.reorderTaskList(newTaskIds,taskList.id)
+            TaskLists.reorderTaskList(newTaskIds,taskList.id, user)
             .then( (ok) => {
                     if(!ok){
                     throw new Error("Could not reorder tasklist" + taskListToMap.id);

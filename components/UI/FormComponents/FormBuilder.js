@@ -64,7 +64,9 @@ const FormBuilder = forwardRef((props, ref) => {
             dontCloseOnNoChangesSave = false,
             partTypes,
             kitPartsManItems, setKitsPartsManItemsRefetch,
-            manufacturers
+            manufacturers,
+            user,
+            userPermData
         } = props;
         console.log("Props", props);
         
@@ -342,7 +344,7 @@ const FormBuilder = forwardRef((props, ref) => {
                                         if(title.title_change && title.title_change == "remove"){
                                             if(title?.title_attached != 0){
                                                 //Delete from entities_contacts_titles
-                                                Entities.deleteContactTitle(title.title_attached)
+                                                Entities.deleteContactTitle(title.title_attached, user)
                                                 .then((data)=>{
                                                     console.log("Deleted title", title.title_attached)
                                                     if(callback){
@@ -351,7 +353,11 @@ const FormBuilder = forwardRef((props, ref) => {
                                                 })
                                                 .catch((error)=>{
                                                     console.error("Failed to delete contact title")
-                                                    cogoToast.error("Internal Server Error");
+                                                    if(error?.user_error){
+                                                        cogoToast.error(error.user_error);
+                                                    }else{
+                                                        cogoToast.error("Internal Server Error");
+                                                    }
                                                     if(callback){
                                                         callback()
                                                     }
@@ -369,7 +375,7 @@ const FormBuilder = forwardRef((props, ref) => {
                                             
                                             if(title?.title_attached == 0){
                                                 //Add to entities_contacts_titles
-                                                Entities.addContactTitle( updatedTitle )
+                                                Entities.addContactTitle( updatedTitle, user )
                                                 .then((data)=>{
                                                     if(callback){
                                                         callback()
@@ -377,7 +383,11 @@ const FormBuilder = forwardRef((props, ref) => {
                                                 })
                                                 .catch((error)=>{
                                                     console.error("Failed to delete contact title")
-                                                    cogoToast.error("Internal Server Error");
+                                                    if(error?.user_error){
+                                                        cogoToast.error(error.user_error);
+                                                    }else{
+                                                        cogoToast.error("Internal Server Error");
+                                                    }
                                                     if(callback){
                                                         callback()
                                                     }
@@ -467,8 +477,12 @@ const FormBuilder = forwardRef((props, ref) => {
                         }
                     })
                     .catch((error)=>{
+                        if(error?.user_error){
+                            cogoToast.error(`${error.user_error} ` , {hideAfter: 4});
+                        }else{
+                            cogoToast.error(`Internal Server Error. ` , {hideAfter: 4});
+                        }
                         console.error("Failed to save in FormBuilder", error);
-                        cogoToast.info("Failed to save in FormBuilde");
                     })
                 }
 
@@ -505,7 +519,7 @@ const FormBuilder = forwardRef((props, ref) => {
                     shipToContactOptionsWOI={shipToContactOptionsWOI} shipToAddressOptionsWOI={shipToAddressOptionsWOI} scbd_or_sign_radio_options={scbd_or_sign_radio_options}
                     item_type_radio_options={item_type_radio_options} setShouldUpdate={setShouldUpdate} ref_object={ref_object}
                     dataGetterFunc={field.dataGetterFunc} entityTypes={entityTypes} partTypes={partTypes} kitPartsManItems={kitPartsManItems} setKitsPartsManItemsRefetch={setKitsPartsManItemsRefetch}
-                     defaultAddresses={defaultAddresses}
+                     defaultAddresses={defaultAddresses} userPermData={userPermData}
                      entContactTitles={entContactTitles} entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts}
                      entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
                      entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts}
@@ -525,7 +539,7 @@ const GetInputByType = function(props){
 
     const {field,dataGetterFunc , formObject,setFormObject, errorFields, validErrorFields, handleShouldUpdate, handleInputOnChange, classes, mode, raineyUsers, vendorTypes, id_pretext,
         shipToContactOptionsWOI , shipToAddressOptionsWOI, scbd_or_sign_radio_options, item_type_radio_options, setShouldUpdate, ref_object, entityTypes, partTypes, kitPartsManItems, setKitsPartsManItemsRefetch,
-         defaultAddresses,
+         defaultAddresses,userPermData,
         entContactTitles, entityShippingContacts, setEntityShippingContacts, entityShippingAddresses, setEntityShippingAddresses,
         entityBillingContacts, setEntityBillingContacts, entityBillingAddresses, setEntityBillingAddresses, manufacturers} = props;
 

@@ -80,7 +80,11 @@ const AddEditManfItemDialog = (props) => {
             })
             .catch((error)=>{
                 console.error("Failed to get part manf item by id", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }
     },[manfItemId]);

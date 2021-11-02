@@ -55,7 +55,7 @@ const TaskListTasks = (props) =>{
     const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, tableInfo,
               priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved, setTaskListTasksSaved,
               sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch, taskLists, sizeOfTable, scrollToIndex, setScrollToIndex,
-              handleTaskClick, handleTaskContextMenu} = props;
+              handleTaskClick, handleTaskContextMenu, user} = props;
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
@@ -182,7 +182,7 @@ const TaskListTasks = (props) =>{
 
       var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [taskListTasks[result.source.index].t_id], taskListTasks[result.destination.index].priority_order-1);     
       var newTaskIds = items.map((item, i)=> item.t_id);
-      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id)
+      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id, user)
         .then( (ok) => {
                 if(!ok){
                   throw Error("Could not reorder tasklist" + taskListToMap.id);
@@ -271,7 +271,7 @@ const TaskListTasks = (props) =>{
           }
           //Update Function
           const updateJob = (id, old_crew_id)=>{
-              Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id)
+              Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id, user)
                       .then((data)=>{
                           setShouldResetCrewState(true);
                           setTaskListTasksRefetch(true)
@@ -284,7 +284,7 @@ const TaskListTasks = (props) =>{
 
           //Dalete Function
           const deleteJob = (id, old_crew_id)=>{
-            Crew.deleteCrewJob(id, old_crew_id)
+            Crew.deleteCrewJob(id, old_crew_id, user)
                     .then((data)=>{
                         setShouldResetCrewState(true);
                         //setTaskListTasks(null);
@@ -459,7 +459,7 @@ const TaskListTasks = (props) =>{
         }else{
           //update existing crew job
           //console.log("Update task", updateTask);
-          Crew.updateCrewJobDate( updateJobId, updateJobDate)
+          Crew.updateCrewJobDate( updateJobId, updateJobDate, user)
           .then((data)=>{
             cogoToast.success(`Updated ${fieldId} date`)
             setTaskListTasksRefetch(true);
@@ -499,7 +499,7 @@ const TaskListTasks = (props) =>{
         }
       }
 
-      Crew.updateCrewJobReady(job_id, ready)
+      Crew.updateCrewJobReady(job_id, ready, user)
       .then((data)=>{
         
 
@@ -602,7 +602,7 @@ const TaskListTasks = (props) =>{
       
 
       //Complete job
-      Crew.updateCrewJobCompleted(1, job_id,crew_id)
+      Crew.updateCrewJobCompleted(1, job_id,crew_id, user)
       .then(async(data)=>{
         if(data){
 
@@ -611,7 +611,7 @@ const TaskListTasks = (props) =>{
 
           var sendToCompletedList = () =>{
             return new Promise((resolve,reject)=>{
-              TaskLists.moveTaskToList(task.t_id, taskLists.find((tl,i)=> tl.list_name === "Completed Tasks" ).id)
+              TaskLists.moveTaskToList(task.t_id, taskLists.find((tl,i)=> tl.list_name === "Completed Tasks" ).id, user)
               .then((data)=>{
                 if(data){ 
                   cogoToast.success("Updated Crew Job and moved to completed");
@@ -675,13 +675,17 @@ const TaskListTasks = (props) =>{
         return;
       }
 
-      Work_Orders.setMultipleWOIArrivalDates(selectedWOIs.map((item)=> item.woi_id), date)
+      Work_Orders.setMultipleWOIArrivalDates(selectedWOIs.map((item)=> item.woi_id), date, user)
       .then((data)=>{
         setTaskListTasksRefetch(true);
       })
       .catch((error)=>{
         console.error("Failed to set multiple arrival dates", error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     }
 
@@ -691,13 +695,17 @@ const TaskListTasks = (props) =>{
         return;
       }
 
-      Work_Orders.clearMultipleArrivalDates(selectedWOIs.map((item)=> item.woi_id))
+      Work_Orders.clearMultipleArrivalDates(selectedWOIs.map((item)=> item.woi_id), user)
       .then((data)=>{
         setTaskListTasksRefetch(true);
       })
       .catch((error)=>{
         console.error("Failed to clear multiple arrival dates", error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     } 
     
@@ -707,13 +715,17 @@ const TaskListTasks = (props) =>{
         return;
       }
 
-      Work_Orders.setMultipleWOIArrivalDatesArrived(selectedWOIs.map((item)=> item.woi_id), date, type)
+      Work_Orders.setMultipleWOIArrivalDatesArrived(selectedWOIs.map((item)=> item.woi_id), date, type, user)
       .then((data)=>{
         setTaskListTasksRefetch(true);
       })
       .catch((error)=>{
         console.error("Failed to set multiple arrival dates", error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     }
 

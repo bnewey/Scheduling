@@ -5,6 +5,7 @@ var async = require("async");
 const logger = require('../../logs');
 
 const Util = require('../../js/Util');
+const {checkPermission} = require('../util/util');
 //Handle Database
 const database = require('./db');
 
@@ -322,10 +323,17 @@ router.post('/getAllWorkOrderSignArtItems', async (req,res) => {
 });
 
 router.post('/reorderWOI', async (req,res) => {
-    var work_order_id, woi_array;
+    var work_order_id, woi_array, user;
     if(req.body){
         work_order_id = req.body.work_order_id;
         woi_array = req.body.woi_array;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
     
     const sql = ' UPDATE work_orders_items SET ordernum = ? ' +
@@ -355,12 +363,19 @@ router.post('/reorderWOI', async (req,res) => {
 
 router.post('/updateWorkOrderItemArrivalDate', async (req,res) => {
 
-    var woi_id, date;
+    var woi_id, date, user;
     if(req.body){
         if(req.body.woi_id != null){
             woi_id = req.body.woi_id;
             date =req.body.date;
+            user = req.body.user;
         }  
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
     
 
@@ -380,14 +395,20 @@ router.post('/updateWorkOrderItemArrivalDate', async (req,res) => {
 
 router.post('/updateWONotes', async (req,res) => {
 
-    var wo_id, notes;
+    var wo_id, notes, user;
     if(req.body){
         if(req.body.wo_id != null){
             wo_id = req.body.wo_id;
             notes =req.body.notes;
+            user = req.body.user; 
         }  
     }
     
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
 
     const sql = ' UPDATE work_orders set notes = ? WHERE record_id = ? ';
 
@@ -405,12 +426,19 @@ router.post('/updateWONotes', async (req,res) => {
 
 router.post('/updateWorkOrderItemVendor', async (req,res) => {
 
-    var woi_id, vendor;
+    var woi_id, vendor, user;
     if(req.body){
         if(req.body.woi_id != null){
             woi_id = req.body.woi_id;
             vendor =req.body.vendor;
+            user = req.body.user;
         }  
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
     
 
@@ -436,12 +464,20 @@ router.post('/updateWorkOrderItemVendor', async (req,res) => {
 
 router.post('/updateWorkOrder', async (req,res) => {
 
-    var wo ;
+    var wo, user ;
     if(req.body){
         if(req.body.workOrder != null){
             wo = req.body.workOrder;
+            user = req.body.user;
         }  
     }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
+
     const sql = ' UPDATE work_orders set customer_id = ?, customer_contact_id = ?, customer_address_id=?, account_id = ?, account_contact_id=?, account_address_id=?, ' + 
     '  date = ?, requestor = ? , maker = ?, type = ?, ' +
     '  job_reference = ? , description = ?, notes = ?, po_number = ?, requested_arrival_date = ?, completed = ?, invoiced = ?, advertising_notes=? ' +
@@ -466,11 +502,18 @@ router.post('/updateWorkOrder', async (req,res) => {
 
 router.post('/deleteWorkOrder', async (req,res) => {
     //SQL has triggers to remove task and task_list_item thats associated with the workorder
-    var wo_id ;
+    var wo_id, user;
     if(req.body){
         if(req.body.wo_id != null){
             wo_id = req.body.wo_id;
+            user = req.body.user;
         }  
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' DELETE FROM work_orders WHERE record_id = ? LIMIT 1 ';
@@ -489,11 +532,18 @@ router.post('/deleteWorkOrder', async (req,res) => {
 
 router.post('/addWorkOrder', async (req,res) => {
 
-    var wo ;
+    var wo, user ;
     if(req.body){
         if(req.body.workOrder != null){
             wo = req.body.workOrder;
+            user = req.body.user;
         }  
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' INSERT INTO work_orders (company, id_work_orders_types, customer_id, customer_contact_id, customer_address_id,  ' + 
@@ -522,13 +572,19 @@ router.post('/addWorkOrder', async (req,res) => {
 
 router.post('/updateWorkOrderItem', async (req,res) => {
 
-    var woi ;
+    var woi, user ;
     if(req.body){
         if(req.body.woi != null){
             woi = req.body.woi;
+            user = req.body.user;
         }  
     }
 
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
 
     const sql = ' UPDATE work_orders_items SET item_type = IFNULL(? ,DEFAULT(item_type)), quantity = IFNULL(? ,DEFAULT(quantity)), ' + 
     ' part_number = ?, size = ?, description = ?, price = IFNULL(? ,DEFAULT(price)), receive_date =?, ' +
@@ -559,13 +615,20 @@ router.post('/updateWorkOrderItem', async (req,res) => {
     }
 });
 
-
+// only permissed to signs users for now
 router.post('/updateMultipleWorkOrderItemDates', async (req,res) => {
-    var wo_ids;
+    var wo_ids, user;
     if(req.body){
         wo_ids = req.body.wo_ids;
+        user = req.body.user;
     }
     
+    if(user && !checkPermission(user.perm_strings, 'signs') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
+
     const sql = ' UPDATE work_orders_items SET item_type = IFNULL(? ,DEFAULT(item_type)), quantity = IFNULL(? ,DEFAULT(quantity)), ' + 
     ' part_number = ?, size = ?, description = ?, price = IFNULL(? ,DEFAULT(price)), receive_date =?, ' +
     ' receive_by =?, scoreboard_or_sign= IFNULL(? ,DEFAULT(scoreboard_or_sign)), model=?,color=? ,' +
@@ -608,11 +671,18 @@ router.post('/updateMultipleWorkOrderItemDates', async (req,res) => {
 
 router.post('/addWorkOrderItem', async (req,res) => {
 
-    var woi ;
+    var woi, user ;
     if(req.body){
         if(req.body.woi != null){
             woi = req.body.woi;
+            user =req.body.user;
         }  
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
 
@@ -644,10 +714,17 @@ router.post('/addWorkOrderItem', async (req,res) => {
 });
 
 router.post('/addMultipleWorkOrderItems', async (req,res) => {
-    var wo_id, woi_array;
+    var wo_id, woi_array, user;
     if(req.body){
         wo_id = req.body.wo_id;
         woi_array = req.body.woi_array;
+        user  = req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
     
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM work_orders_items woi WHERE work_order = ?; "
@@ -691,11 +768,18 @@ router.post('/addMultipleWorkOrderItems', async (req,res) => {
 
 router.post('/deleteWorkOrderItem', async (req,res) => {
 
-    var woi_id ;
+    var woi_id, user ;
     if(req.body){
         if(req.body.woi_id != null){
             woi_id = req.body.woi_id;
+            user = req.body.user;
         }  
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = ' DELETE FROM work_orders_items WHERE record_id = ? LIMIT 1 ';
@@ -714,10 +798,17 @@ router.post('/deleteWorkOrderItem', async (req,res) => {
 
 
 router.post('/setMultipleWOIArrivalDates', async (req,res) => {
-    var woi_ids, date;
+    var woi_ids, date, user;
     if(req.body){
         woi_ids = req.body.woi_ids;
         date = req.body.date;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
     
     const sql = ' UPDATE work_orders_items SET scoreboard_arrival_date = ? ' +
@@ -747,11 +838,18 @@ router.post('/setMultipleWOIArrivalDates', async (req,res) => {
 });
 
 router.post('/setMultipleWOIArrivalDatesArrived', async (req,res) => {
-    var woi_ids, date, arrived;
+    var woi_ids, date, arrived, user;
     if(req.body){
         woi_ids = req.body.woi_ids;
         date = req.body.date;
         arrived = req.body.arrived;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
     
     const sql = ' UPDATE work_orders_items SET scoreboard_arrival_date = ?, scoreboard_arrival_status = ? ' +
@@ -782,13 +880,20 @@ router.post('/setMultipleWOIArrivalDatesArrived', async (req,res) => {
 
 
 router.post('/clearMultipleArrivalDates', async (req,res) => {
-    var woi_ids;
+    var woi_ids, user;
     if(req.body){
         woi_ids = req.body.woi_ids;
+        user = req.body.user;
     }
     
     const sql = ' UPDATE work_orders_items SET scoreboard_arrival_date = NULL, scoreboard_arrival_status = 0 ' +
     ' WHERE record_id = ? ';
+
+    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
 
 
     async.forEachOf(woi_ids, async (id, i, callback) => {

@@ -6,6 +6,7 @@ const router = express.Router();
 const logger = require('../../logs');
 //Handle Database
 const database = require('./db');
+const {checkPermission} = require('../util/util');
 
 router.get('/getRaineyUsers', async (req,res) => {
     const sql = ' SELECT user_id, name, initials  ' + 
@@ -24,8 +25,10 @@ router.get('/getRaineyUsers', async (req,res) => {
  });
 
  router.get('/getGoogleUsers', async (req,res) => {
-  const sql = ' SELECT id, googleId AS user_id, displayName AS name, email  ' + 
-  ' FROM google_users ' +
+  const sql = ' SELECT gu.id, gu.googleId AS user_id, gu.displayName AS name, gu.email, gu.isAdmin,  ' + 
+  ' up.id AS perm_id, up.perm_string ' +
+  ' FROM google_users gu ' +
+  ' LEFT JOIN user_permissions up ON up.user_id = gu.id ' +
   ' ORDER BY user_id ASC ' +
   'limit 1000';
  try{
@@ -35,6 +38,55 @@ router.get('/getRaineyUsers', async (req,res) => {
  }
  catch(error){
    logger.error("Settings (getGoogleUsers): " + error);
+   res.sendStatus(400);
+ }
+});
+
+
+router.post('/getGoogleUserById', async (req,res) => {
+  var id;
+  if(req.body){
+    id = req.body.id ;
+  }
+
+  const sql = ' SELECT gu.id, gu.googleId AS user_id, gu.displayName AS name, gu.email, gu.isAdmin,  ' + 
+  ' up.id AS perm_id, up.perm_string ' +
+  ' FROM google_users gu ' +
+  ' LEFT JOIN user_permissions up ON up.user_id = gu.id ' +
+  ' WHERE gu.id = ?';
+ try{
+   const results = await database.query(sql, [id]);
+   logger.info("Got Rainey Users ");
+   res.json(results);
+ }
+ catch(error){
+   logger.error("Settings (getGoogleUserById): " + error);
+   res.sendStatus(400);
+ }
+});
+
+router.post('/updateUserPermissions', async (req,res) => {
+  var perm_string,id, user;
+  if(req.body){
+    perm_string = req.body.perm_string;
+    id = req.body.id ;
+    user = req.body.user;
+  }
+
+  if(user && !user.isAdmin){
+    logger.error("Bad permission", [user]);
+    res.status(400).json({user_error: 'Failed permission check'});
+    return;
+  } 
+
+  const sql = ' UPDATE user_permissions SET perm_string = ? WHERE user_id = ? ';
+ try{
+   const results = await database.query(sql, [perm_string, id]);
+   logger.info("Updated user permission to  " + perm_string);
+   res.json(results);
+ }
+ catch(error){
+   logger.error("Settings (updateUserPermissions): " + error);
    res.sendStatus(400);
  }
 });

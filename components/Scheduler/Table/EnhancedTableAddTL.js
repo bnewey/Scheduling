@@ -14,7 +14,7 @@ import {TaskContext} from '../TaskContainer';
 function EnhancedTableAddTL(props) {
     //PROPS
     //const { numSelected, onRequestSort, rows } = props;
-    const { selectedIds, taskLists, setTaskLists, priorityList, setTaskListToMap} = useContext(TaskContext);
+    const { selectedIds, taskLists, setTaskLists, priorityList, setTaskListToMap, user} = useContext(TaskContext);
     //STATE
     const [open, setOpen] = React.useState(false);
     const [taskListToAdd, setTaskListToAdd] = React.useState(null);
@@ -55,7 +55,7 @@ function EnhancedTableAddTL(props) {
             return;
         }
         //add multiple to task list 
-        TaskLists.addMultipleTasksToList(selectedIds, tl_id)
+        TaskLists.addMultipleTasksToList(selectedIds, tl_id, user)
         .then((response)=> {
             if(!response){
                 throw new Error("Bad response from addMultipleTasksToList call");

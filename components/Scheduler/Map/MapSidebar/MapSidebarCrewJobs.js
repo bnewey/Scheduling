@@ -69,7 +69,7 @@ const MapSiderbarCrewJobs = (props) =>{
         } = useContext(CrewContext);
 
   const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved,crewToMap, setCrewToMap,
-     setModalOpen, setModalTaskId,   sorters, setSorters,job_types} = useContext(TaskContext);
+     setModalOpen, setModalTaskId,   sorters, setSorters,job_types, user} = useContext(TaskContext);
 
   const { mapRows, setMapRows, markedRows, setMarkedRows, vehicleRows, setVehicleRows,
     activeMarker, setActiveMarker,  setResetBounds, infoWeather,setInfoWeather, bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,
@@ -137,7 +137,7 @@ const MapSiderbarCrewJobs = (props) =>{
           return;
       }
       
-      Crew.updateCrewJob(crew.id, swapJobId, old_crew_id)
+      Crew.updateCrewJob(crew.id, swapJobId, old_crew_id, user)
       .then((data)=>{
           //setCrewJobs(null);
           setCrewJobsRefetch(true);
@@ -316,7 +316,7 @@ const MapSiderbarCrewJobs = (props) =>{
           }
           //Update Function
           const updateJob = (id, old_crew_id)=>{
-              Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id)
+              Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id, user)
                       .then((data)=>{
                           setShouldResetCrewState(true);
                           setCrewJobsRefetch(true)
@@ -330,7 +330,7 @@ const MapSiderbarCrewJobs = (props) =>{
           //Dalete Function
           //we dont delete anymore because we can set crew_id to NULL now
         //   const deleteJob = (id, old_crew_id)=>{
-        //     Crew.deleteCrewJob(id, old_crew_id)
+        //     Crew.deleteCrewJob(id, old_crew_id, user)
         //             .then((data)=>{
         //                 setShouldResetCrewState(true);
         //                 //setTaskListTasks(null);
@@ -420,7 +420,7 @@ const MapSiderbarCrewJobs = (props) =>{
     const handleUpdateJobCompleted =(event, job_id, crew_id)=>{
         var completed = event.target.checked ? 1 : 0;
 
-        Crew.updateCrewJobCompleted(completed, job_id, crew_id )
+        Crew.updateCrewJobCompleted(completed, job_id, crew_id, user )
         .then((data)=>{
             
             setCrewJobsRefetch(true)
@@ -752,7 +752,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
         } = useContext(CrewContext);
 
     const { selectedIds, setSelectedIds, taskListToMap, setTaskListToMap, taskListTasksSaved,crewToMap, setCrewToMap,
-     setModalOpen, setModalTaskId,   sorters, setSorters, job_types} = useContext(TaskContext);
+     setModalOpen, setModalTaskId,   sorters, setSorters, job_types, user} = useContext(TaskContext);
 
     const { mapRows, setMapRows, markedRows, setMarkedRows, vehicleRows, setVehicleRows,
     activeMarker, setActiveMarker,  setResetBounds, infoWeather,setInfoWeather, bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,
@@ -840,7 +840,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
 
         }else{
             //update existing crew job
-            Crew.updateCrewJobDate( updateJobId, updateJobDate)
+            Crew.updateCrewJobDate( updateJobId, updateJobDate, user)
             .then((data)=>{
                 cogoToast.success(`Updated ${fieldId} date`)
                 setCrewJobsRefetch(true);
@@ -1035,7 +1035,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
                                     <div className={classes.task_name_div}><span>{row.t_name}</span></div>
                                     <div className={classes.job_list_task_info}>
                                         <span className={classes.jobTypeSpan}>
-                                            <MapSidebarCrewJobsTypePopover crewJob={row}/>
+                                            <MapSidebarCrewJobsTypePopover user={user} crewJob={row}/>
                                         </span>
                                     </div>
                                     <div className={classes.job_list_task_info}> {handleGetChangeCrewDiv(row) }</div>

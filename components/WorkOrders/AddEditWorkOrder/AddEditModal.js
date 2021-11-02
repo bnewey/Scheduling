@@ -33,10 +33,10 @@ import FormBuilder from '../../UI/FormComponents/FormBuilder';
 
 
 const AddEditModal = function(props) {
-    const {user, editModalMode} = props;
+    const {editModalMode} = props;
 
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, detailWOid, setDetailWOid,
-    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+    currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder, editWOModalOpen, setEditWOModalOpen, raineyUsers, user} = useContext(ListContext);
 
     const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
     const [entityShippingContacts, setEntityShippingContacts] = useState(null);
@@ -134,7 +134,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get shipping contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.customer_id && entityShippingContacts){
@@ -158,7 +162,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get shipping contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.customer_contact_id && entityShippingAddresses){
@@ -186,7 +194,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get billing contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.account_id && entityBillingContacts){
@@ -213,7 +225,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get billing contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.account_contact_id && entityBillingAddresses){
@@ -243,7 +259,7 @@ const AddEditModal = function(props) {
             if(addOrEdit == "edit"){
                 updateWorkOrder["record_id"] = work_order.wo_record_id;
 
-                Work_Orders.updateWorkOrder( updateWorkOrder )
+                Work_Orders.updateWorkOrder( updateWorkOrder , user)
                 .then( (data) => {
                     //Refetch our data on save
                     cogoToast.success(`Work Order ${work_order.wo_record_id} has been updated!`, {hideAfter: 4});
@@ -259,7 +275,7 @@ const AddEditModal = function(props) {
                 })
             }
             if(addOrEdit == "add"){
-                Work_Orders.addWorkOrder( updateWorkOrder )
+                Work_Orders.addWorkOrder( updateWorkOrder , user)
                 .then( (data) => {
                     //Get id of new workorder and set view to detail
                     if(data && data.insertId){
@@ -288,7 +304,7 @@ const AddEditModal = function(props) {
         }
 
         const deleteWOI = () =>{
-            Work_Orders.deleteWorkOrder(wo.wo_record_id)
+            Work_Orders.deleteWorkOrder(wo.wo_record_id, user)
             .then((data)=>{
                 setWorkOrders(null)
                 handleSetView(views.filter((v)=>v.value == "allWorkOrders")[0]);

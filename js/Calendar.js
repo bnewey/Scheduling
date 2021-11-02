@@ -4,7 +4,6 @@ import 'isomorphic-unfetch';
 
 //BOUNCIE STUFF
 async function getCalendar(){
-    console.log("at least here");
     const route = '/scheduling/calendar/getCalendar';
     try{
         var data = await fetch(route,
@@ -19,6 +18,9 @@ async function getCalendar(){
         }
         //console.log("data from getCalendar", await data.json());
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

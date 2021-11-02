@@ -13,10 +13,9 @@ import { ListContext } from '../../WOContainer';
 
 
 const CompInvTool = function(props) {
-    const {user} = props;
   
     const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
-      currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers} = useContext(ListContext);
+      currentView, previousView, handleSetView, views, activeWorkOrder,setActiveWorkOrder,  setEditWOModalOpen, raineyUsers, user} = useContext(ListContext);
     const classes = useStyles();
 
     const [completed, setCompleted] = useState(activeWorkOrder ? (activeWorkOrder["completed"] == 1 ? true : false ) : false )
@@ -44,7 +43,7 @@ const CompInvTool = function(props) {
         updateWorkOrder['record_id'] = activeWorkOrder.wo_record_id;
 
 
-        Work_Orders.updateWorkOrder(updateWorkOrder)
+        Work_Orders.updateWorkOrder(updateWorkOrder, user)
         .then((data)=>{
             if(data){
                 cogoToast.success("Updated " + field)
