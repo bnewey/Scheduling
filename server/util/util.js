@@ -35,7 +35,10 @@ const checkPermission = (perm_string, page) =>{
 
     var perm_array = perm_string.split(",");
     //some == at least 1
-    return perm_array.some((item)=> item === page);
+    return perm_array.some((item)=> {
+
+		return Array.isArray(page) ? page.some((v)=> item === page ) : item === page
+	});
 
 }
 

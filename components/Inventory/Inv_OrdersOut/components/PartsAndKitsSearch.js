@@ -75,7 +75,11 @@ const PartsAndKitsSearch = function(props) {
       })
       .catch((error)=>{
         console.error("Failed to research")
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     }
 

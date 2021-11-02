@@ -101,9 +101,9 @@ router.post('/updateEntity', async (req,res) => {
         return;
     }
     
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -137,18 +137,18 @@ router.post('/addEntity', async (req,res) => {
     }
     if(!entity){
         logger.error("Bad entity param in addEntity");
-        res.sendStatus(400);
+        res.status(400).json({error: 'Bad entity param in addEntity'});
     }
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     
 
     const sql = ' INSERT INTO entities (name, company, other_organization, account_number, purchase_order_required, purchase_order, ' + 
     ' notes, county_or_parish, entities_types_id, class, prepayment_required, phone, fax, website, shipping, billing, mailing, ' + 
-    ' city, state, on_hold)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?, ?) ';
+    ' city, state, on_hold)  VALUES (?, IFNULL(? , 2 ), ?, ?,?, ?, ?, ?,?,?, ?, ?, ?,?, IFNULL(? ,DEFAULT(shipping)), IFNULL(? ,DEFAULT(billing)), IFNULL(? ,DEFAULT(mailing)) ,?, ?,  IFNULL(?, DEFAULT(on_hold)) ) ';
 
     try{
         const results = await database.query(sql, [entity.name, entity.company, entity.other_organization, entity.account_number,
@@ -174,9 +174,9 @@ router.post('/deleteEntity', async (req,res) => {
         user = req.body.user;
     }
     
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -352,9 +352,9 @@ router.post('/updateEntityAddress', async (req,res) => {
         logger.error("Bad ent_add param in updateEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -395,9 +395,9 @@ router.post('/addEntityAddress', async (req,res) => {
         logger.error("Bad ent_add param in addEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -437,9 +437,9 @@ router.post('/deleteEntityAddress', async (req,res) => {
         logger.error("Bad ent_add_id param in deleteEntityAddress");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -518,9 +518,9 @@ router.post('/updateEntityContact', async (req,res) => {
         logger.error("Bad ent_cont param in updateEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -553,9 +553,9 @@ router.post('/addEntityContact', async (req,res) => {
         logger.error("Bad ent_cont param in addEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
    
@@ -589,9 +589,9 @@ router.post('/deleteEntityContact', async (req,res) => {
         logger.error("Bad ent_cont_id param in deleteEntityContact");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -642,9 +642,9 @@ router.post('/deleteContactTitle', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -670,9 +670,9 @@ router.post('/addContactTitle', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 

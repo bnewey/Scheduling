@@ -9,6 +9,9 @@ async function getAllTasks(){
             throw new Error("GetTaskList returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -32,6 +35,9 @@ async function getTask(t_id){
             throw new Error("GetTaskList returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -161,6 +167,9 @@ async function addAndSaveAddress(addressObj, entities_id, user){
             throw new Error("addAndSaveAddress returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -183,6 +192,9 @@ async function copyTaskForNewType(t_id, new_type){
             throw new Error("copyTaskForNewType returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

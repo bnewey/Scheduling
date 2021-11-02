@@ -57,9 +57,9 @@ router.post('/addCrewMember', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -84,9 +84,9 @@ router.post('/deleteCrewMember', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -111,9 +111,9 @@ router.post('/updateCrewMember', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -363,9 +363,9 @@ router.post('/addNewCrewJobMember', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -398,9 +398,9 @@ router.post('/deleteCrewJobMember', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     
@@ -446,9 +446,9 @@ router.post('/addCrewJobs', async (req,res) => {
         res.sendStatus(400);
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -491,9 +491,9 @@ router.post('/deleteCrewJob', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     
@@ -531,9 +531,9 @@ router.post('/updateCrewJob', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -578,9 +578,9 @@ router.post('/updateCrewJobDate', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -608,9 +608,9 @@ router.post('/updateCrewJobType', async (req,res) => {
         user = req.body.user;
     }
     
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -637,9 +637,9 @@ router.post('/updateCrewJobReady', async (req,res) => {
         user= req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -659,10 +659,17 @@ router.post('/updateCrewJobReady', async (req,res) => {
 });
 
 router.post('/updateCrewJobLocated', async (req,res) => {
-    var located, job_id;
+    var located, job_id, user;
     if(req.body){
         located = req.body.located;
         job_id = req.body.job_id;
+        user= req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, ['crew', 'drill']) && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = 'UPDATE crew_jobs SET located = ? ' +
@@ -681,10 +688,17 @@ router.post('/updateCrewJobLocated', async (req,res) => {
 });
 
 router.post('/updateCrewJobDiagram', async (req,res) => {
-    var diagram, job_id;
+    var diagram, job_id, user;
     if(req.body){
         diagram = req.body.diagram;
         job_id = req.body.job_id;
+        user= req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_strings, ['crew', 'drill']) && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
     }
 
     const sql = 'UPDATE crew_jobs SET diagram = ? ' +
@@ -711,9 +725,9 @@ router.post('/updateCrewNumServices', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -743,9 +757,9 @@ router.post('/updateCrewJobCompleted', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -802,9 +816,9 @@ router.post('/updateCrewJobMember', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -828,9 +842,9 @@ router.post('/addNewCrew', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -855,9 +869,9 @@ router.post('/deleteCrew', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     
@@ -932,9 +946,9 @@ router.post('/reorderCrewJobs', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     
@@ -971,9 +985,9 @@ router.post('/updateCrewColor', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'crew') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'crew') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 

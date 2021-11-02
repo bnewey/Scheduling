@@ -681,7 +681,11 @@ const TaskListTasks = (props) =>{
       })
       .catch((error)=>{
         console.error("Failed to set multiple arrival dates", error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     }
 
@@ -697,7 +701,11 @@ const TaskListTasks = (props) =>{
       })
       .catch((error)=>{
         console.error("Failed to clear multiple arrival dates", error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     } 
     
@@ -713,7 +721,11 @@ const TaskListTasks = (props) =>{
       })
       .catch((error)=>{
         console.error("Failed to set multiple arrival dates", error);
-        cogoToast.error("Internal Server Error");
+        if(error?.user_error){
+            cogoToast.error(error.user_error);
+        }else{
+            cogoToast.error("Internal Server Error");
+        }
       })
     }
 

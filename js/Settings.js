@@ -9,6 +9,9 @@ async function getRaineyUsers(){
             throw new Error("GetRaineyUsers returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -23,12 +26,64 @@ async function getGoogleUsers(){
             throw new Error("getGoogleUsers returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
     }
 }
 
+async function getGoogleUserById(id){
+    const route = '/scheduling/settings/getGoogleUserById';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id})
+            });
+        if(!data.ok){
+            throw new Error("getGoogleUserById returned empty list or bad query")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
+async function updateUserPermissions( perm_string, id, user){
+    const route = '/scheduling/settings/updateUserPermissions';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ perm_string, id, user })
+        });
+
+        if(!data.ok){
+            throw new Error("updateUserPermissions returned empty list or bad query")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
 
 async function getEntities(){
     const route = '/scheduling/settings/getEntities';
@@ -38,6 +93,9 @@ async function getEntities(){
             throw new Error("getEntities returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -61,6 +119,9 @@ async function getEntitiesSearch(query){
             throw new Error("getEntitiesSearch returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -83,6 +144,9 @@ async function getEntityNameById(id){
             throw new Error("getEntityNameById returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -108,6 +172,9 @@ async function getPastScoreboardParams(column){
             throw new Error("getPastScoreboardParams returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -129,6 +196,9 @@ async function getTaskUserFilters(user_id){
             throw new Error("getTaskUserFilters returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -151,6 +221,9 @@ async function addSavedTaskFilter( name, user_id, filterAndOr, filterInOrOut, fi
             throw new Error("addSavedTaskFilter returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -174,6 +247,9 @@ async function overwriteSavedTaskFilter( filter_id, name, user_id, filterAndOr, 
             throw new Error("overwriteSavedTaskFilter returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -219,6 +295,9 @@ async function updateFilterTaskViewTie( filter_id,task_view){
             throw new Error("updateFilterTaskViewTie returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -241,6 +320,9 @@ async function removedSavedFilter( filter_id){
             throw new Error("removedSavedFilter returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -263,6 +345,9 @@ async function addNotificationSetting( setting){
             throw new Error("addNotificationSetting returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -285,6 +370,9 @@ async function updateNotificationSetting( setting){
             throw new Error("updateNotificationSetting returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -304,6 +392,9 @@ async function getNotificationSettings( googleId, page){
         });
 
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -314,6 +405,8 @@ async function getNotificationSettings( googleId, page){
 module.exports = {
     getRaineyUsers,
     getGoogleUsers,
+    getGoogleUserById,
+    updateUserPermissions,
     getEntities,
     getEntityNameById,
     getEntitiesSearch,

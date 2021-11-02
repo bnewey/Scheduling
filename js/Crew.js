@@ -68,6 +68,9 @@ async function getCrewMembers(){
             throw new Error("getCrewMembers returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -89,6 +92,9 @@ async function getCrewMembersByTask(id){
             throw new Error("getCrewMembersByTask returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -110,6 +116,9 @@ async function getCrewMembersByCrew(crew_id){
             throw new Error("getCrewMembersByCrew returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -131,6 +140,9 @@ async function getCrewJobsByMember(id){
             throw new Error("getCrewJobsByMember returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -152,6 +164,9 @@ async function getCrewJobsByTask(id){
             throw new Error("getCrewJobsByTask returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -173,6 +188,9 @@ async function getCrewJobsByTaskList(tl_id){
             throw new Error("getCrewJobsByTaskList returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -194,6 +212,9 @@ async function getCrewJobsByTaskIds(ids, job_type){
             throw new Error("getCrewJobsByTaskIds returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -215,6 +236,9 @@ async function getAllCrewJobMembers(){
             throw new Error("getAllCrewJobMembers returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -271,6 +295,9 @@ async function getAllCrewJobs(){
             throw new Error("getAllCrewJobs returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -385,7 +412,7 @@ async function updateCrewJobReady( job_id, ready, user){
     }
 }
 
-async function updateCrewJobLocated( job_id, located){
+async function updateCrewJobLocated( job_id, located, user){
     const route = '/scheduling/crew/updateCrewJobLocated';
     try{
         var response = await fetch(route,
@@ -394,7 +421,7 @@ async function updateCrewJobLocated( job_id, located){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({job_id, located})
+                body: JSON.stringify({job_id, located, user})
             });
         return response.ok;
     }catch(error){
@@ -402,7 +429,7 @@ async function updateCrewJobLocated( job_id, located){
     }
 }
 
-async function updateCrewJobDiagram( job_id, diagram){
+async function updateCrewJobDiagram( job_id, diagram, user){
     const route = '/scheduling/crew/updateCrewJobDiagram';
     try{
         var response = await fetch(route,
@@ -411,7 +438,7 @@ async function updateCrewJobDiagram( job_id, diagram){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({job_id, diagram})
+                body: JSON.stringify({job_id, diagram, user})
             });
         return response.ok;
     }catch(error){
@@ -520,6 +547,9 @@ async function getAllCrews(){
             throw new Error("getAllCrews returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -541,6 +571,9 @@ async function getCrewJobsByCrew(id){
             throw new Error("getCrewJobsByCrew returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

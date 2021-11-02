@@ -167,7 +167,11 @@ const EntAddresses = function(props) {
             })
             .catch((error)=>{
               console.error("Failed to update Entity Address", error);
-              cogoToast.error("Failed to update Entity Address");
+              if(error?.user_error){
+                  cogoToast.error(error.user_error);
+              }else{
+                  cogoToast.error("Internal Server Error");
+              }
               setAddresses(null);
               reject();
             })
@@ -191,7 +195,11 @@ const EntAddresses = function(props) {
         })
         .catch((error)=>{
             cogoToast.error("Failed to delete entity address")
-            console.error("Failed to delete entity address", error);
+            if(error?.user_error){
+                    cogoToast.error(error.user_error);
+            }else{
+                cogoToast.error("Internal Server Error");
+            }
         })
       }
 

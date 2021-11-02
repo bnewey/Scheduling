@@ -16,6 +16,9 @@ async function getAllSignsForScheduler(){
             throw new Error("getAllSignsForScheduler returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -34,6 +37,9 @@ async function searchAllSignItems(table, query){
                 body: JSON.stringify({table: table, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

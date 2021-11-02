@@ -200,9 +200,9 @@ router.post('/addMultipleTaskstoList', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'scheduling') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -286,9 +286,9 @@ router.post('/moveTaskToList', async (req,res) => {
     user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'scheduling') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -319,9 +319,9 @@ router.post('/removeMultipleFromList', async (req,res) => {
     user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'scheduling') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -357,9 +357,9 @@ router.post('/reorderTaskList', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'scheduling') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     

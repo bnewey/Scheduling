@@ -9,6 +9,9 @@ async function getAllTaskLists(){
             throw new Error("GetTaskList returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -30,6 +33,9 @@ async function getTaskList(id){
             throw new Error("GetTaskList returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -51,6 +57,9 @@ async function getAllTaskListPerTask(t_id){
             throw new Error("getAllTaskListPerTask returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -259,6 +268,9 @@ async function getAllSignScbdWOIFromTL(id){
                 body: JSON.stringify({tl_id: id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

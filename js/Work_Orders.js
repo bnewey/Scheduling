@@ -16,6 +16,9 @@ async function getAllWorkOrders(dateRange){
                 body: JSON.stringify({dateRange: dateRange})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -38,6 +41,9 @@ async function getWorkOrderById(wo_id){
                 body: JSON.stringify({wo_id: wo_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -60,6 +66,9 @@ async function getWorkOrderByIdForPDF(wo_id){
                 body: JSON.stringify({wo_id: wo_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -82,6 +91,9 @@ async function getEmployeeNameFromId(id){
                 body: JSON.stringify({id: id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -101,6 +113,9 @@ async function searchAllWorkOrders(table, query){
                 body: JSON.stringify({table: table, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -120,6 +135,9 @@ async function superSearchAllWorkOrders(tables, query){
                 body: JSON.stringify({tables: tables, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -140,6 +158,9 @@ async function getAllWorkOrderItems(table, query){
                 body: JSON.stringify({table: table, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -160,6 +181,9 @@ async function getAllWorkOrderSignArtItems(id){
                 body: JSON.stringify({wo_id: id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -198,6 +222,9 @@ async function updateWorkOrderItemArrivalDate(woi_id, date, user){
                 body: JSON.stringify({woi_id, date, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -217,6 +244,9 @@ async function updateWONotes(wo_id, notes, user){
                 body: JSON.stringify({wo_id, notes, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -238,6 +268,9 @@ async function updateWorkOrderItemVendor(woi_id, vendor, user){
                 body: JSON.stringify({woi_id, vendor, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -257,6 +290,9 @@ async function updateWorkOrder(workOrder, user){
                 body: JSON.stringify({workOrder, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -277,6 +313,9 @@ async function deleteWorkOrder(wo_id, user){
                 body: JSON.stringify({wo_id, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -296,6 +335,9 @@ async function addWorkOrder(workOrder, user){
                 body: JSON.stringify({workOrder, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -315,6 +357,9 @@ async function updateWorkOrderItem(woi, user){
                 body: JSON.stringify({woi, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -342,7 +387,7 @@ async function updateMultipleWorkOrderItemDates(wo_ids, user){
 }
 
 
-async function addWorkOrderItem(woi, sign){
+async function addWorkOrderItem(woi, sign, user){
     const route = '/scheduling/workOrders/addWorkOrderItem';
     try{
         var data = await fetch(route,
@@ -351,9 +396,12 @@ async function addWorkOrderItem(woi, sign){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({woi, sign})
+                body: JSON.stringify({woi, sign, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -390,6 +438,9 @@ async function deleteWorkOrderItem(woi_id, user){
                 body: JSON.stringify({woi_id, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

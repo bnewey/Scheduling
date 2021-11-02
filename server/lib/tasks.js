@@ -110,9 +110,9 @@ router.post('/updateTask', async (req,res) => {
         res.sendStatus(400);
         return;
     }
-    if(!checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+    if(!checkPermission(user.perm_strings, 'scheduling') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     
@@ -147,9 +147,9 @@ router.post('/updateMultipleTaskDates', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'scheduling') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
 
@@ -218,9 +218,9 @@ router.post('/addAndSaveAddress', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.permissions, 'scheduling') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_strings, 'scheduling') && !user.isAdmin){
         logger.error("Bad permission", [user]);
-        res.sendStatus(400);
+        res.status(400).json({user_error: 'Failed permission check'});
         return;
     }
     

@@ -15,6 +15,9 @@ async function getAllOrdersOut(){
             throw new Error("getAllOrdersOut returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -33,6 +36,9 @@ async function searchAllOrdersOut(table, query){
                 body: JSON.stringify({table: table, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -51,6 +57,9 @@ async function superSearchAllOrdersOut(tables, query){
                 body: JSON.stringify({tables: tables, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -73,6 +82,9 @@ async function getOrderOutById(id){
                 body: JSON.stringify({id: id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -114,6 +126,9 @@ async function updateOrderOut(orderOut){
                 body: JSON.stringify({orderOut})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -154,6 +169,9 @@ async function getOrderOutItems(order_id){
                 body: JSON.stringify({order_id: order_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -174,6 +192,9 @@ async function updateOrderOutItem(item){
                 body: JSON.stringify({item})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -213,6 +234,9 @@ async function deleteOrderOutItem(id){
                 body: JSON.stringify({id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -232,6 +256,9 @@ async function addNewOrderOutItem(orderOut_item){
                 body: JSON.stringify({orderOut_item})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -272,6 +299,9 @@ async function getOrderOutApprovers(order_id){
                 body: JSON.stringify({order_id: order_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -292,6 +322,9 @@ async function updateOrderOutApprover(item, nav_item){
                 body: JSON.stringify({item, nav_item})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -311,6 +344,9 @@ async function deleteOrderOutApprover(id, user){
                 body: JSON.stringify({id, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -330,6 +366,9 @@ async function addNewOrderOutApprover(orderOut_item, nav_item){
                 body: JSON.stringify({orderOut_item,nav_item})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

@@ -72,7 +72,7 @@ export default Users
 const useStyles = makeStyles(theme => ({
   root:{
     // border: '1px solid #339933',
-    padding: '1%',
+    padding: '2%',
     minHeight: '730px',
   },
   settingsContainer:{

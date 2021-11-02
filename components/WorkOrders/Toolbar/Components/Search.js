@@ -42,7 +42,8 @@ const Search = function(props) {
     {value: "c.name", displayValue: 'Entity Name'},
     {value: "wo.job_reference", displayValue: 'Job Reference'},
     {value: "wo.city", displayValue: 'WO City'},
-    {value: "wo.state", displayValue: 'WO State'}
+    {value: "wo.state", displayValue: 'WO State'},
+    {value: 'wo.organization', displayValue: 'Account/Org'},
   ];
 
   const classes = useStyles({searchOpen});

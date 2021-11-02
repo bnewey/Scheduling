@@ -194,7 +194,11 @@ const MapCrewInfoWindow = (props)=>{
             return
         }
         if(!item){
-            cogoToast.error("Internal Server Error");
+            if(error?.user_error){
+                cogoToast.error(error.user_error);
+            }else{
+                cogoToast.error("Internal Server Error");
+            }
             console.error("No item in handleSaveNotes")
         }
 

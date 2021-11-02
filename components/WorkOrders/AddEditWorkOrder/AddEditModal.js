@@ -134,7 +134,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get shipping contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.customer_id && entityShippingContacts){
@@ -158,7 +162,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get shipping contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.customer_contact_id && entityShippingAddresses){
@@ -186,7 +194,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get billing contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.account_id && entityBillingContacts){
@@ -213,7 +225,11 @@ const AddEditModal = function(props) {
             })
             .catch((error)=>{
                 console.error("Failed to get billing contacts", error);
-                cogoToast.error("Internal Server Error");
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
             })
         }else{
             if(!activeWorkOrder?.account_contact_id && entityBillingAddresses){

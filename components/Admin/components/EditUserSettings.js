@@ -12,6 +12,7 @@ import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
 import { AutoSizer, Column, Table } from 'react-virtualized';
 import FormBuilder from '../../UI/FormComponents/FormBuilder'
+import Settings from '../../../js/Settings'
 
 import { AdminContext } from '../AdminContainer';
 import clsx from 'clsx';
@@ -22,18 +23,45 @@ const EditUserSettings = (props) => {
  
     //PROPS
     const {dialogOpen, setDialogOpen} = props;
-    const {  currentView,previousView, handleSetView, views, user } = useContext(AdminContext);
+    const {  currentView,previousView, handleSetView, views , user } = useContext(AdminContext);
 
     //STATE
+    const [userObject, setUserObject] = useState(null);
     const [shouldUpdate, setShouldUpdate]= React.useState(false);
-    const [settingsObject, setSettingsObject] = useState(null);
     const [saveButtonDisabled, setSaveButtonDisabled] = React.useState(false);
     const saveRef = React.createRef();
 
     //CSS
     const classes = useStyles();
 
+    useEffect(()=>{
+        if(dialogOpen == false){
+            setUserObject(null);
+            setSaveButtonDisabled(false);
+        }
+    },[dialogOpen])
 
+    useEffect(()=>{
+        if(userObject == null){
+            Settings.getGoogleUserById(user.user_id)
+            .then((data)=>{
+                if(data?.user_error || data?.error){
+                    throw data
+                }
+                var tmp = convertToFormDataObject(data[0]?.perm_string)
+                console.log("tmp",tmp);
+                setUserObject(tmp);
+            })
+            .catch((error)=>{
+                console.error("Failed to get user", error);
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
+            })
+        }
+    }, [userObject])
     
 
     const handleDialogClose = () => {
@@ -44,12 +72,31 @@ const EditUserSettings = (props) => {
 
     const fields = [
         //type: select must be hyphenated ex select-type
-        {field: 'permission-work_orders', label: 'Work Orders', type: 'check', updateBy: 'state'},
-        {field: 'permission-signs', label: 'Signs', type: 'check', updateBy: 'state'},
-        {field: 'permission-scheduling', label: 'Scheduling', type: 'check', updateBy: 'state'},
-        {field: 'permission-inventory', label: 'Inventory', type: 'check', updateBy: 'state'},
-        {field: 'permission-entities', label: 'Entities', type: 'check', updateBy: 'state'},
+        {field: 'work_orders', label: 'Work Orders', type: 'check', updateBy: 'state'},
+        {field: 'signs', label: 'Signs', type: 'check', updateBy: 'state'},
+        {field: 'crew', label: 'Crew', type: 'check', updateBy: 'state'},
+        {field: 'drill', label: 'Drill', type: 'check', updateBy: 'state'},
+        {field: 'inventory', label: 'Inventory', type: 'check', updateBy: 'state'},
+        {field: 'entities', label: 'Entities', type: 'check', updateBy: 'state'},
+        
     ];
+
+    const convertToFormDataObject = (perm_string) => {
+        if(!perm_string){
+            return ;
+        }
+        return _.reduce(perm_string.split(',') , function(obj,param) {
+            obj[param] = true
+            return obj;
+           }, {});
+    }
+
+    const convertToObjectToString = (objectToConvert) => {
+        if(!objectToConvert){
+            return "";
+        }
+        return _.chain(objectToConvert).pickBy((v, k)=> v == true).keysIn().join(',').value();
+    }
 
     const handleSave = (og_user_settings, updateSettings, addOrEdit, add_and_continue)=>{
         if (saveButtonDisabled) {
@@ -64,13 +111,27 @@ const EditUserSettings = (props) => {
                 console.error("Bad item");
                 reject("Bad item");
             }
-            console.log("updateSettings item", updateSettings)
-            console.log("og_user_settings item", og_user_settings)
     
             if(!og_user_settings){
               console.error("Bad og_user_settings in edit")
               reject("Bad og_user_settings");
             }
+
+            Settings.updateUserPermissions(convertToObjectToString(updateSettings), user.user_id, user)
+            .then((data)=>{
+                cogoToast.success("Updated Permissions")
+                setDialogOpen(false);
+                setUserObject(null);
+                
+            })
+            .catch((error)=>{
+                console.error("failed to update user perm string" , error);
+                if(error?.user_error){
+                    cogoToast.error(error.user_error);
+                }else{
+                    cogoToast.error("Internal Server Error");
+                }
+            })
             
         })
     }
@@ -90,10 +151,10 @@ const EditUserSettings = (props) => {
                                     <FormBuilder 
                                         ref={saveRef}
                                         fields={fields} 
-                                        mode={'add'} 
+                                        mode={'edit'} 
                                          classes={classes}
-                                        formObject={settingsObject} 
-                                        setFormObject={setSettingsObject}
+                                        formObject={userObject} 
+                                        setFormObject={setUserObject}
                                         handleClose={handleDialogClose} 
                                         handleSave={handleSave}/>
                                 </Grid>
@@ -106,7 +167,7 @@ const EditUserSettings = (props) => {
                     </div> : <></>} */}
                     <DialogActions className={classes.dialogActions}>
                         <Grid item xs={12} className={classes.paper_footer}>
-                             <ButtonGroup className={classes.buttonGroup}>
+                             {/* <ButtonGroup className={classes.buttonGroup}>
                                 <Button
                                         //onClick={() => handleDeleteWO(activeWorkOrder)}
                                         variant="contained"
@@ -114,7 +175,7 @@ const EditUserSettings = (props) => {
                                         className={classes.deleteButton}
                                     >
                                         <DeleteIcon />Delete
-                            </Button></ButtonGroup> 
+                            </Button></ButtonGroup>  */}
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
                                         onClick={() => handleDialogClose()}
@@ -128,7 +189,7 @@ const EditUserSettings = (props) => {
                                 <ButtonGroup className={classes.buttonGroup}>
                                     <Button
                                         disabled={saveButtonDisabled}
-                                        onClick={ () => { saveRef.current.handleSaveParent(settingsObject) }}
+                                        onClick={ () => { saveRef.current.handleSaveParent(userObject) }}
                                         variant="contained"
                                         color="primary"
                                         size="large"

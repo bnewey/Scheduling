@@ -18,6 +18,9 @@ async function getCalendar(){
         }
         //console.log("data from getCalendar", await data.json());
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

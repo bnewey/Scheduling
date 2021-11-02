@@ -198,7 +198,11 @@ const PartManufactureList = function(props) {
             }
           })
           .catch((error)=>{
-            cogoToast.error("Failed to delete part manufacture item")
+            if(error?.user_error){
+                cogoToast.error(error.user_error);
+            }else{
+                cogoToast.error("Internal Server Error");
+            }
             console.error("Failed to delete part manufacture item", error);
             if(resetFunction){
                 resetFunction();

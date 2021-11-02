@@ -15,6 +15,9 @@ async function getAllPartsRequestItems(){
             throw new Error("getAllPartsRequestItems returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -35,6 +38,9 @@ async function superSearchAllRequestedItems(tables, query){
                 body: JSON.stringify({tables: tables, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -55,6 +61,9 @@ async function updatePartsRequestItemStatus(item, user){
                 body: JSON.stringify({item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -74,6 +83,9 @@ async function updatePartsRequestItem(item){
                 body: JSON.stringify({item})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -114,6 +126,9 @@ async function addNewPartsRequestItem(pr_item, user){
                 body: JSON.stringify({pr_item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -157,6 +172,9 @@ async function getStatusTypes(){
             throw new Error("getStatusTypes returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;

@@ -15,6 +15,9 @@ async function getAllParts(){
             throw new Error("getAllParts returned empty list or bad query")
         }
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -33,6 +36,9 @@ async function searchAllParts(table, query){
                 body: JSON.stringify({table: table, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -51,6 +57,9 @@ async function superSearchAllParts(tables, query){
                 body: JSON.stringify({tables: tables, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -70,6 +79,9 @@ async function superSearchAllPartsAndKits(tables, query){
                 body: JSON.stringify({tables: tables, search_query: query})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -94,6 +106,9 @@ async function getPartById(rainey_id){
                 body: JSON.stringify({rainey_id: rainey_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -113,6 +128,9 @@ async function getPartTypes(){
                 body: JSON.stringify({})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -132,6 +150,9 @@ async function getManufactures(){
                 body: JSON.stringify({})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -151,6 +172,9 @@ async function addNewPart(part, user){
                 body: JSON.stringify({part, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -170,6 +194,9 @@ async function updatePart(part, user){
                 body: JSON.stringify({part, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -189,6 +216,9 @@ async function updatePartInv(part, user){
                 body: JSON.stringify({part, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -249,6 +279,9 @@ async function getPartManItems(rainey_id){
                 body: JSON.stringify({rainey_id: rainey_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -271,6 +304,9 @@ async function getPartManItemById(id){
                 body: JSON.stringify({id: id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -294,6 +330,9 @@ async function getPartManItemsForMultiple(rainey_id){
                 body: JSON.stringify({rainey_ids: rainey_ids})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -314,6 +353,9 @@ async function updatePartManItem(item, user){
                 body: JSON.stringify({item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -333,6 +375,9 @@ async function deletePartManItem(id, user){
                 body: JSON.stringify({id, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -352,6 +397,9 @@ async function addNewPartManItem(part_item, user){
                 body: JSON.stringify({part_item, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -390,6 +438,9 @@ async function updateManufacturer(manf, user){
                 body: JSON.stringify({manf, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -447,6 +498,9 @@ async function updatePartType(part_type, user){
                 body: JSON.stringify({part_type, user})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
@@ -485,6 +539,9 @@ async function checkPartExists(part_id){
                 body: JSON.stringify({part_id})
             });
         var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
         return(list);
     }catch(error){
         throw error;
