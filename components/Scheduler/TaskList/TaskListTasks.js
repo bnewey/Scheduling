@@ -314,7 +314,8 @@ const TaskListTasks = (props) =>{
           }else{
             if(new_crew.id == -2){
               //Delete
-              deleteJob(addSwapCrewJob.job_id, old_crew_id)
+              //deleteJob(addSwapCrewJob.job_id, old_crew_id)
+              updateJob(null, old_crew_id);
             }else{
               //Just Update
               updateJob(new_crew.id, old_crew_id);

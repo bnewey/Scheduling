@@ -134,7 +134,6 @@ const TLCrewJobDatePicker = (props) => {
                 
             </div>
             <Dialog {...wrapperProps}  maxWidth="md">
-                
                 <DialogTitle id="customized-dialog-title" onClose={wrapperProps.onDismiss} className={classes.dialogTitle}>
                     {props.title ? props.title : "Select Date"}
                 </DialogTitle>
