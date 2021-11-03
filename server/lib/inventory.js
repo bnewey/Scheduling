@@ -11,6 +11,7 @@ const Util = require('../../js/Util');
 const database = require('./db');
 const notificationSystem = require('./notifications');
 const pushSystem = require('./webPush');
+const {checkPermission} = require('../util/util');
 
 
 router.post('/getAllParts', async (req,res) => {

@@ -56,6 +56,7 @@ const EditPartInvDialog = (props) => {
   
 
     const handleUpdatePartInv = (event, addSub) =>{
+        console.log("What", addSub);
 
         let updatePart = {...part};
 
