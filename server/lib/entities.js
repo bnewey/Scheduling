@@ -101,7 +101,7 @@ router.post('/updateEntity', async (req,res) => {
         return;
     }
     
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -175,7 +175,7 @@ router.post('/deleteEntity', async (req,res) => {
         user = req.body.user;
     }
     
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -353,7 +353,7 @@ router.post('/updateEntityAddress', async (req,res) => {
         logger.error("Bad ent_add param in updateEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -396,7 +396,7 @@ router.post('/addEntityAddress', async (req,res) => {
         logger.error("Bad ent_add param in addEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -438,7 +438,7 @@ router.post('/deleteEntityAddress', async (req,res) => {
         logger.error("Bad ent_add_id param in deleteEntityAddress");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -519,7 +519,7 @@ router.post('/updateEntityContact', async (req,res) => {
         logger.error("Bad ent_cont param in updateEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -554,7 +554,7 @@ router.post('/addEntityContact', async (req,res) => {
         logger.error("Bad ent_cont param in addEntity");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -590,7 +590,7 @@ router.post('/deleteEntityContact', async (req,res) => {
         logger.error("Bad ent_cont_id param in deleteEntityContact");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -643,7 +643,7 @@ router.post('/deleteContactTitle', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -671,7 +671,7 @@ router.post('/addContactTitle', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'entities') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'entities') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;

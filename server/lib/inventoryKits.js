@@ -211,7 +211,7 @@ router.post('/addNewKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -241,7 +241,7 @@ router.post('/updateKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -276,7 +276,7 @@ router.post('/updateKitInv', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -353,7 +353,7 @@ router.post('/deleteKit', async (req,res) => {
         logger.error("Bad rainey_id param in deleteKit");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -571,7 +571,7 @@ router.post('/updateKitPart', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -604,7 +604,7 @@ router.post('/deleteKitPart', async (req,res) => {
         logger.error("Bad id param in deleteKitPart");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -635,7 +635,7 @@ router.post('/addNewKitPart', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -667,7 +667,7 @@ router.post('/updateKitKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -705,7 +705,7 @@ router.post('/deleteKitKit', async (req,res) => {
         logger.error("Bad id param in deleteKitKit");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -736,7 +736,7 @@ router.post('/addNewKitKit', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -774,7 +774,7 @@ router.post('/importKitObject', async (req,res) => {
             user = req.body.user;
         }  
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;

@@ -52,7 +52,7 @@ router.post('/updatePackingSlip', async (req,res) => {
         }  
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -82,7 +82,7 @@ router.post('/addPackingSlip', async (req,res) => {
         }
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -111,7 +111,7 @@ router.post('/deletePackingSlip', async (req,res) => {
         }
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -144,7 +144,7 @@ router.post('/addWOIToPackingSlip', async (req,res) => {
         }
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -172,7 +172,7 @@ router.post('/removePackingSlipFromWOI', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -348,7 +348,7 @@ router.post('/addNewFPOrder', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -377,7 +377,7 @@ router.post('/updateFPOrder', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -413,7 +413,7 @@ router.post('/deleteFPOrder', async (req,res) => {
         }
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -526,7 +526,7 @@ router.post('/addNewFPOrderItem', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -555,7 +555,7 @@ router.post('/addMultipleFPOrderItems', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -594,7 +594,7 @@ router.post('/updateFPOrderItem', async (req,res) => {
         user = req.body.user;
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -632,7 +632,7 @@ router.post('/deleteFPOrderItem', async (req,res) => {
         }
     }
 
-    if(user && !checkPermission(user.perm_strings, 'work_orders') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'work_orders') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;

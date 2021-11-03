@@ -194,7 +194,7 @@ router.post('/deleteOrderOut', async (req,res) => {
         logger.error("Bad id param in deleteOrderOut");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
@@ -558,7 +558,7 @@ router.post('/deleteOrderOutApprover', async (req,res) => {
         logger.error("Bad id param in deleteOrderOutApprover");
         res.sendStatus(400);
     }
-    if(user && !checkPermission(user.perm_strings, 'inventory') && !user.isAdmin){
+    if(user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin){
         logger.error("Bad permission", [user]);
         res.status(400).json({user_error: 'Failed permission check'});
         return;
