@@ -22,7 +22,7 @@ import _ from 'lodash';
 const EditUserSettings = (props) => {
  
     //PROPS
-    const {dialogOpen, setDialogOpen} = props;
+    const {dialogOpen, setDialogOpen, userToEdit, setUserToEdit} = props;
     const {  currentView,previousView, handleSetView, views , user } = useContext(AdminContext);
 
     //STATE
@@ -38,12 +38,13 @@ const EditUserSettings = (props) => {
         if(dialogOpen == false){
             setUserObject(null);
             setSaveButtonDisabled(false);
+            setUserToEdit(null);
         }
     },[dialogOpen])
 
     useEffect(()=>{
-        if(userObject == null){
-            Settings.getGoogleUserById(user.id)
+        if(userObject == null && userToEdit){
+            Settings.getGoogleUserById(userToEdit?.id)
             .then((data)=>{
                 if(data?.user_error || data?.error){
                     throw data
@@ -61,7 +62,7 @@ const EditUserSettings = (props) => {
                 }
             })
         }
-    }, [userObject])
+    }, [userObject, userToEdit])
     
 
     const handleDialogClose = () => {
@@ -117,7 +118,7 @@ const EditUserSettings = (props) => {
               reject("Bad og_user_settings");
             }
 
-            Settings.updateUserPermissions(convertToObjectToString(updateSettings), user.id, user)
+            Settings.updateUserPermissions(convertToObjectToString(updateSettings), userToEdit.id, user)
             .then((data)=>{
                 cogoToast.success("Updated Permissions")
                 setDialogOpen(false);

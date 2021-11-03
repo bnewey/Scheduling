@@ -28,6 +28,7 @@ const Users = function(props) {
   const classes = useStyles();
 
   const [users, setUsers] = React.useState(null);
+  const [userToEdit, setUserToEdit] = React.useState(null);
   const [dialogOpen, setDialogOpen]= React.useState(false);
 
   useEffect(()=>{
@@ -45,17 +46,19 @@ const Users = function(props) {
     }
   },[users])
 
-  const handleDialogOpen = ()=>{
+  const handleDialogOpen = (user)=>{
     setDialogOpen(true);
+    setUserToEdit(user);
   }
 
   return (
     <div className={classes.root}>
-        <EditUserSettings dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} />
+        <EditUserSettings dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} userToEdit={userToEdit} setUserToEdit={setUserToEdit} />
         <Grid container xs={12} md={8} className={classes.settingsContainer}>
           {users?.map((user, i)=>{
+            console.log("user", user);
             return <div className={classes.settingDiv} key={i}>
-                      <div className={classes.edit} onClick={handleDialogOpen}><Edit className={classes.icon}/></div>
+                      <div className={classes.edit} onClick={(event)=>handleDialogOpen(user)}><Edit className={classes.icon}/></div>
                       <span className={classes.spanName}>{user.name}</span>
                       <span className={classes.spanAdmin}>{user.isAdmin ? "Admin": ""}</span>
                     </div>
