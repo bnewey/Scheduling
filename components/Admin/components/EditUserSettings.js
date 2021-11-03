@@ -43,7 +43,7 @@ const EditUserSettings = (props) => {
 
     useEffect(()=>{
         if(userObject == null){
-            Settings.getGoogleUserById(user.user_id)
+            Settings.getGoogleUserById(user.id)
             .then((data)=>{
                 if(data?.user_error || data?.error){
                     throw data
@@ -117,7 +117,7 @@ const EditUserSettings = (props) => {
               reject("Bad og_user_settings");
             }
 
-            Settings.updateUserPermissions(convertToObjectToString(updateSettings), user.user_id, user)
+            Settings.updateUserPermissions(convertToObjectToString(updateSettings), user.id, user)
             .then((data)=>{
                 cogoToast.success("Updated Permissions")
                 setDialogOpen(false);
@@ -142,16 +142,14 @@ const EditUserSettings = (props) => {
             <Dialog PaperProps={{className: classes.dialog}} open={dialogOpen } onClose={handleDialogClose}>
             <DialogTitle className={classes.title}>{'User Settings'}</DialogTitle>
                 <DialogContent className={classes.content}>
-
                         <div className={classes.formGrid}>
-                       
                             <div className={classes.subTitleDiv}><span className={classes.subTitleSpan}>User Settings</span></div>
                             <Grid container >  
                                 <Grid item xs={12} className={classes.paperScroll}>
                                     <FormBuilder 
                                         ref={saveRef}
                                         fields={fields} 
-                                        mode={'edit'} 
+                                        mode={ 'edit'} 
                                          classes={classes}
                                         formObject={userObject} 
                                         setFormObject={setUserObject}

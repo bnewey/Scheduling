@@ -25,10 +25,8 @@ router.get('/getRaineyUsers', async (req,res) => {
  });
 
  router.get('/getGoogleUsers', async (req,res) => {
-  const sql = ' SELECT gu.id, gu.googleId AS user_id, gu.displayName AS name, gu.email, gu.isAdmin,  ' + 
-  ' up.id AS perm_id, up.perm_string ' +
+  const sql = ' SELECT gu.id, gu.googleId AS user_id, gu.displayName AS name, gu.email, gu.isAdmin,  gu.perm_string ' +
   ' FROM google_users gu ' +
-  ' LEFT JOIN user_permissions up ON up.user_id = gu.id ' +
   ' ORDER BY user_id ASC ' +
   'limit 1000';
  try{
@@ -50,9 +48,8 @@ router.post('/getGoogleUserById', async (req,res) => {
   }
 
   const sql = ' SELECT gu.id, gu.googleId AS user_id, gu.displayName AS name, gu.email, gu.isAdmin,  ' + 
-  ' up.id AS perm_id, up.perm_string ' +
+  ' gu.perm_string ' +
   ' FROM google_users gu ' +
-  ' LEFT JOIN user_permissions up ON up.user_id = gu.id ' +
   ' WHERE gu.id = ?';
  try{
    const results = await database.query(sql, [id]);
@@ -79,7 +76,7 @@ router.post('/updateUserPermissions', async (req,res) => {
     return;
   } 
 
-  const sql = ' UPDATE user_permissions SET perm_string = ? WHERE user_id = ? ';
+  const sql = ' UPDATE google_users SET perm_string = ? WHERE id = ? ';
  try{
    const results = await database.query(sql, [perm_string, id]);
    logger.info("Updated user permission to  " + perm_string);
