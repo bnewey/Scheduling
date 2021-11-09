@@ -304,7 +304,7 @@ async function getAllCrewJobs(){
     }
 }
 
-async function addCrewJobs(ids, job_type, crew_id,date){
+async function addCrewJobs(ids, job_data, user){
     const route = '/scheduling/crew/addCrewJobs';
     try{
         var data = await fetch(route,
@@ -313,7 +313,7 @@ async function addCrewJobs(ids, job_type, crew_id,date){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids, job_type, crew_id, date})
+                body: JSON.stringify({ids, job_data, user})
             });
             if(!data.ok){
                 throw new Error("addCrewJobs returned empty list or bad query")
@@ -344,7 +344,7 @@ async function deleteCrewJob(id, crew_id, user){
     }
 }
 
-async function updateCrewJob(  crew_id,job_id, old_crew_id, user){
+async function updateCrewJob(  job_data, user){
     const route = '/scheduling/crew/updateCrewJob';
     try{
         var response = await fetch(route,
@@ -353,7 +353,7 @@ async function updateCrewJob(  crew_id,job_id, old_crew_id, user){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({job_id,  crew_id, old_crew_id, user})
+                body: JSON.stringify({job_data, user})
             });
         return response.ok;
     }catch(error){

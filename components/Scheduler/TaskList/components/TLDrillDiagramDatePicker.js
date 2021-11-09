@@ -16,17 +16,17 @@ import NoCheck from '@material-ui/icons/IndeterminateCheckBox';
 import LocateIcon from '@material-ui/icons/MyLocation'
 import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
 
+import ReactTooltip from 'react-tooltip';
 
-
-const TLCrewJobDatePicker = (props) => {
+const TLDrillDiagramDatePicker = (props) => {
  
     //PROPS
-    const { ready, viewOnly, located, diagram, type,...other} = props;
+    const { type, viewOnly, diagram, ...other} = props;
 
     // you can past mostly all available props, like minDate, maxDate, autoOk and so on
     const { pickerProps, wrapperProps, inputProps } = useStaticState({
         // value,
-        // onChange: handleDateChange,
+         //onChange: handleDateChange,
         ...other
     });
 
@@ -34,33 +34,16 @@ const TLCrewJobDatePicker = (props) => {
     const [inputValue,setInputValue] = React.useState(props.value);
     const [completeDialogOpen,setCompleteDialogOpen] = React.useState(false);
 
-    
 
     //CSS
     const classes = useStyles();
 
     const handleTodayClick = () =>{
         //wrapperProps.onSetToday();
-        props.onChange(moment().format('YYYY-MM-DD hh:mm:ss'))
+        props.onChange(moment().endOf('day').format('YYYY-MM-DD hh:mm:ss'))
     }
 
-    const handleOpenCompleteTask = ()=>{
-        if(props.onCompleteTasks){
-            setCompleteDialogOpen(true);
-        }else{
-            cogoToast.error("Not able to complete");
-        }
-        wrapperProps.onDismiss();
-    }
 
-    const handleReadyJob = (value)=>{
-        if(props.onReadyJob){
-            props.onReadyJob(value)
-        }else{
-            cogoToast.error("Not able to ready job");
-        }
-        wrapperProps.onDismiss();
-    }
 
 
     const handleOnMonthChange = (date, num)=>{
@@ -98,7 +81,7 @@ const TLCrewJobDatePicker = (props) => {
                             )} 
                             className={clsx( classes.pickerDay, classes.pickerIconButton, classes.pickerButtonBase,
                                            { /*[classes.pickerDaySelected]: selected && !futureMonth, */
-                                            [classes.pickerDaySet]: selected ,
+                                            [classes.pickerDaySet]: selected 
                                             })}
                             tabindex="0" type="button">
                         <span class="MuiIconButton-label">
@@ -112,26 +95,16 @@ const TLCrewJobDatePicker = (props) => {
     }
 
     const getTextFieldValue = (value) =>{
-        if(type == 'install' && ready){
-            return "On Road";
-        }
-
         return value ? moment(value).format('MM-DD-YYYY') : "";
     }
 
     return(
         <div className={classes.root} >
             <div className={classes.inputRootDiv}>
-                {type =="drill" ?  diagram ? <div className={classes.locatedDiv}><DeveloperBoardIcon className={classes.diagram_icon} data-tip={`Diagramed on ${moment(diagram).format('MM-DD-YYYY')}`} />
-                                                </div> :
-                                             <DeveloperBoardIcon className={classes.diagram_icon_gray} data-tip={'Not Diagramed'} /> : <></> }
-                {type =="drill" ?  ready ? <Check className={classes.small_icon} data-tip={'Drill is Ready'} /> :
-                                             <NoCheck className={classes.small_icon_gray} data-tip={'Drill NOT Ready'} /> : <></> }
+                
                 {viewOnly ? <div className={classes.viewOnlyDiv}><span className={classes.viewOnlySpan}>{getTextFieldValue(props.value)}</span></div>
                     : <TextField {...inputProps} onClick={inputProps.openPicker} value={ getTextFieldValue(props.value) } className={classes.input} variant="outlined" /> }
-                {type =="drill" ?  located ? <div className={classes.locatedDiv}><LocateIcon className={classes.locate_icon} data-tip={`Located til ${moment(located).format('MM-DD-YYYY')}. (${moment(located).diff(moment(new Date()), 'days')} Days)`} />
-                                                <span>{moment(located).diff(moment(new Date()), 'days')}</span></div> :
-                                             <LocateIcon className={classes.locate_icon_gray} data-tip={'Not Located'} /> : <></> }
+        
                 
             </div>
             { !viewOnly && <Dialog {...wrapperProps}  maxWidth="md">
@@ -152,27 +125,6 @@ const TLCrewJobDatePicker = (props) => {
                 </div>
                 <DialogActions>
                 <div className={classes.buttonDiv}>
-                    {type && type == 'drill'  ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
-                        { ready ? 
-                            <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(0)}>
-                                 Unready
-                            </Button>
-                            :
-                            <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(1)}>
-                                Ready
-                            </Button> } </>: <></>}
-                    {type && type == 'install'  ?  <> {ready ?  <Check className={classes.small_icon_inverse}/> : <></> }
-                        { ready ? 
-                            <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(0)}>
-                                 Un-Road
-                            </Button>
-                            :
-                            <Button data-tip="Ready job" data-place={'bottom'} className={classes.button} fullWidth onClick={()=>handleReadyJob(1)}>
-                                Road
-                            </Button> } </>: <></>}
-                    <Button className={classes.button} data-tip="Complete Job (today)" data-place={'bottom'} fullWidth onClick={handleOpenCompleteTask}>
-                        Complete
-                    </Button>
                     <Button className={classes.button} data-tip="Set Date to today" data-place={'bottom'} fullWidth onClick={handleTodayClick}>
                         Today
                     </Button>
@@ -192,7 +144,7 @@ const TLCrewJobDatePicker = (props) => {
     );
 
 } 
-export default TLCrewJobDatePicker;
+export default TLDrillDiagramDatePicker;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -210,7 +162,7 @@ const useStyles = makeStyles(theme => ({
             textAlign: 'center',
             cursor: 'pointer',
             padding: '1px 0px 0px 0px',
-            backgroundColor: '#f5fdff',
+            backgroundColor: '#f9e2ff',
             padding: '0px 5px',
             fontSize: 13,
         }
@@ -315,6 +267,15 @@ const useStyles = makeStyles(theme => ({
     },
     pickerDaySetArrived:{
         backgroundColor: 'rgba(0, 0, 0, 0.80)',
+    },
+    dateInRange:{
+        background: '#3d8b6e',
+        color: '#fff',
+        borderRadius: '50%',
+        '&:hover':{
+            color: '#000',
+            backgroundColor: 'rgba(0, 0, 0, 0.80)',
+        }
     },
     inputRootDiv:{
         display: 'flex',

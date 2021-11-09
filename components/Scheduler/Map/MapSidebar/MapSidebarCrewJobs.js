@@ -316,7 +316,7 @@ const MapSiderbarCrewJobs = (props) =>{
           }
           //Update Function
           const updateJob = (id, old_crew_id)=>{
-              Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id, user)
+              Crew.updateCrewJob( {crew_id : id, job_id: addSwapCrewJob.job_id, old_crew_id: old_crew_id}  , user)
                       .then((data)=>{
                           setShouldResetCrewState(true);
                           setCrewJobsRefetch(true)
@@ -376,7 +376,7 @@ const MapSiderbarCrewJobs = (props) =>{
         if(addSwapCrewJob.crew_id == -1){
           //add job function
           const addJobs = (id) => {
-            Crew.addCrewJobs([addSwapCrewJob.task_id], addSwapCrewJob.job_type, id)
+            Crew.addCrewJobs([addSwapCrewJob.task_id], { job_type: addSwapCrewJob.job_type, crew_id: id }, user )
                 .then((response)=>{
                     if(response){
                         cogoToast.success("Created and added to crew");
@@ -825,7 +825,7 @@ const CrewJobsRows = React.memo( ({handleRightClick,handleOpenAddMemberPopover, 
 
         if(updateJobId == null){
             //create crew job with date
-            Crew.addCrewJobs([crewJob.task_id], fieldId, null, updateJobDate)
+            Crew.addCrewJobs([crewJob.task_id], {job_type: fieldId, crew_id: null, date: updateJobDate}, user )
             .then((response)=>{
                 if(response){
                     cogoToast.success("Created and added to crew");

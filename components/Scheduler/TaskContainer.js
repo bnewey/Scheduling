@@ -10,6 +10,7 @@ import FullWidthTabs from './Tabs/FullWidthTabs';
 import Tasks from '../../js/Tasks';
 import TaskLists from '../../js/TaskLists';
 import TaskModal from './TaskModal/TaskModal';
+import UtilServer from '../../server/util/util.js'
 
 import cogoToast from 'cogo-toast';
 
@@ -54,8 +55,9 @@ const TaskContainer = function(props) {
     const [activeTaskView,setActiveTaskView] = useState(null)
     const [savedFilters, setSavedFilters] = React.useState(null);
 
+
     const taskViews = [
-      {name: "Compact", value: 3,
+      {name: "Compact", value: 3, permission_access: ["crew"],
       array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '3%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number', dontShowInSmall: true},
               {text: "Name", field: "t_name", width: (size)=> size == "small" ? '20%' : '24%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
@@ -69,7 +71,7 @@ const TaskContainer = function(props) {
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '6%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '9%' : '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}]},
-    {name: "Compact(No Drill)", value: 1,
+    {name: "Compact(No Drill)", value: 1, permission_access: ["crew"],
        array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '4%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number',dontShowInSmall: true},
               {text: "Name", field: "t_name", width: (size)=> size == "small" ? '26%' : '32%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
@@ -81,7 +83,7 @@ const TaskContainer = function(props) {
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '10%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '17%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '11%' : '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},
-    {name: "Service Dept", value: 2,
+    {name: "Service Dept", value: 2, permission_access: ["service"],
        array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '6%' : '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '4%', maxWidth: 100,style: 'smallListItemText', type: 'number',dontShowInSmall: true},
               {text: "WO Created", field: "date_entered", width: (size)=> size == "small" ? '' : '5%', style: 'smallListItemText', type: 'date',dontShowInSmall: true},
@@ -95,7 +97,21 @@ const TaskContainer = function(props) {
               {text: "Service Crew", field: "field_crew", width: (size)=> size == "small" ? '11%' : '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "field_crew_leader"},
               {text: "Service Type", field: "field_type", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
               {text: "Services", field: "field_num_services", width: (size)=> size == "small" ? '15%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
-    ]}]
+    ]},
+    {name: "Steve's List", value: 4, disableReorder: true, permission_access: ["drill"],
+    array: [
+            {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number', dontShowInSmall: true},
+            {text: "Name", field: "t_name", width: (size)=> size == "small" ? '20%' : '24%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+            {text: "State", field: "state", width: (size)=> size == "small" ? '4%' : '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+            {text: "Type", field: "type", width: (size)=> size == "small" ? '7%' : '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+            {text: "Description", field: "description", width: (size)=> size == "small" ? '' : '17%', maxWidth: 170, style: 'smallListItemText', type: 'text',dontShowInSmall: true},
+            
+            {text: "Dr Diagram", field: "drill_diagram", width: (size)=> size == "small" ? '18%' : '9%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
+            {text: "Dr Located", field: "drill_located", width: (size)=> size == "small" ? '18%' : '9%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
+            {text: "Drill Date", field: "drill_date", width: (size)=> size == "small" ? '18%' : '9%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date', viewOnly: true},
+            // {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '6%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+            {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date',  viewOnly: true},
+            ]},]
 
     
 
@@ -370,10 +386,17 @@ const TaskContainer = function(props) {
       }
       // activeTaskView === undefined ?
 
-      var viewArray = [...taskViews.find((item)=> item.value === activeTaskView)?.array];
-      console.log("viewArray",viewArray)
-      if( viewArray && Array.isArray(viewArray)){
-        setTableInfo(viewArray)
+      var view = taskViews.find((item)=> item.value === activeTaskView);
+      console.log("view",view)
+
+      if(view?.permission_access && user && !UtilServer.checkPermission(user.perm_string, view?.permission_access) && !user.isAdmin){
+        cogoToast.error('Does not have permissions');
+        
+        return;
+      }
+      
+      if( view?.array && Array.isArray(view?.array)){
+        setTableInfo(view?.array)
       }
   } ,[activeTaskView])
 

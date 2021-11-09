@@ -24,7 +24,7 @@ const TaskListAddCrewDialog = (props) => {
  
     //PROPS
     const { selectedTasks, onClose ,parentClasses} = props;
-    const { taskLists, setTaskLists, taskListTasksSaved } = useContext(TaskContext);
+    const { taskLists, setTaskLists, taskListTasksSaved, user } = useContext(TaskContext);
     const { allCrews, crewMembers, setShouldResetCrewState } = useContext(CrewContext);
 
     //STATE
@@ -122,7 +122,7 @@ const TaskListAddCrewDialog = (props) => {
                 if(!isNaN(data)){
                     var id = data;
                     //Add Jobs
-                    Crew.addCrewJobs(selectedTasks, type, id)
+                    Crew.addCrewJobs(selectedTasks, { job_type: type, crew_id: id}, user)
                     .then((response)=>{
                         if(response){
                             cogoToast.success("Created and added to crew");
@@ -158,7 +158,7 @@ const TaskListAddCrewDialog = (props) => {
             })
         }else{
             //Just Add
-            Crew.addCrewJobs(selectedTasks, type, crew_id)
+            Crew.addCrewJobs(selectedTasks, {job_type: type, crew_id: crew_id}, user)
             .then((response)=>{
                 if(response){
                     cogoToast.success("Created and added to crew");

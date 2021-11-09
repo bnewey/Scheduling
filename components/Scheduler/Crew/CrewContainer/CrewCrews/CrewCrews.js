@@ -243,7 +243,7 @@ const CrewCrews = (props) => {
             return;
         }
         
-        Crew.updateCrewJob(crew.id, swapJobId, old_crew_id, user)
+        Crew.updateCrewJob( {crew_id: crew.id, job_id: swapJobId, old_crew_id:old_crew_id} ,user)
         .then((data)=>{
             //setLocalCrewJobs(null);
             setLocalCrewJobsRefetch(true);

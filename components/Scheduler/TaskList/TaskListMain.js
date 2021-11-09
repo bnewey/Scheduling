@@ -224,11 +224,7 @@ const TaskListMain = (props) => {
             })
             .catch((error)=>{
                 console.error("Failed to get Sign WOI Data", error);
-                if(error?.user_error){
-                    cogoToast.error(error.user_error);
-                }else{
-                    cogoToast.error("Internal Server Error");
-                }
+                cogoToast.error("Internal Server Error");
             })
         }
     },[woiData, taskListToMap])
@@ -403,6 +399,7 @@ const TaskListMain = (props) => {
                                 
                                 <TaskListTasks 
                                     user={user}
+                                    activeTaskView={activeTaskView}
                                     selectedTasks={selectedTasks} setSelectedTasks={setSelectedTasks}
                                     taskListTasks={taskListTasks} setTaskListTasks={setTaskListTasks}
                                     taskListToMap={taskListToMap} setTaskListToMap={setTaskListToMap}

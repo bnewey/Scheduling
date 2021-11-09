@@ -40,6 +40,8 @@ import {
     trailing: true
   });
 import TLCrewJobDatePicker from './components/TLCrewJobDatePicker';
+import TLDrillLocatedDatePicker from './components/TLDrillLocatedDatePicker';
+import TLDrillDiagramDatePicker from './components/TLDrillDiagramDatePicker';
 import TLArrivalDatePicker from './components/TLArrivalDatePicker';
 import TLCrewJobsTypePopover from './components/TLCrewJobsTypePopover';
 import TLCrewJobsServiceCounter from './components/TLCrewJobsServiceCounter';
@@ -55,7 +57,7 @@ const TaskListTasks = (props) =>{
     const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, tableInfo,
               priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved, setTaskListTasksSaved,
               sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch, taskLists, sizeOfTable, scrollToIndex, setScrollToIndex,
-              handleTaskClick, handleTaskContextMenu, user} = props;
+              handleTaskClick, handleTaskContextMenu, user, activeTaskView} = props;
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
@@ -180,6 +182,11 @@ const TaskListTasks = (props) =>{
         return;
       }  
 
+      if(activeTaskView?.disableReorder){
+        cogoToast.warn("Reorder not allowed for this taskview");
+        return;
+      }
+
       var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [taskListTasks[result.source.index].t_id], taskListTasks[result.destination.index].priority_order-1);     
       var newTaskIds = items.map((item, i)=> item.t_id);
       TaskLists.reorderTaskList(newTaskIds,taskListToMap.id, user)
@@ -271,7 +278,7 @@ const TaskListTasks = (props) =>{
           }
           //Update Function
           const updateJob = (id, old_crew_id)=>{
-              Crew.updateCrewJob(id, addSwapCrewJob.job_id, old_crew_id, user)
+              Crew.updateCrewJob( {crew_id: id, job_id: addSwapCrewJob.job_id, old_crew_id: old_crew_id} , user)
                       .then((data)=>{
                           setShouldResetCrewState(true);
                           setTaskListTasksRefetch(true)
@@ -330,7 +337,7 @@ const TaskListTasks = (props) =>{
         if(addSwapCrewJob.job_id == -1){
           //add job function
           const addJobs = (id) => {
-            Crew.addCrewJobs([addSwapCrewJob.task_id], addSwapCrewJob.job_type === 'field' ? 'service' : addSwapCrewJob.job_type, id)
+            Crew.addCrewJobs([addSwapCrewJob.task_id], {job_type: addSwapCrewJob.job_type === 'field' ? 'service' : addSwapCrewJob.job_type, crew_id: id}, user)
                 .then((response)=>{
                     if(response){
                         cogoToast.success("Created and added to crew");
@@ -441,7 +448,7 @@ const TaskListTasks = (props) =>{
   
         if(updateJobId == null){
           //create crew job with date
-          Crew.addCrewJobs([task.t_id], fieldId, null, updateJobDate)
+          Crew.addCrewJobs([task.t_id], {job_type: fieldId, crew_id: null, date: updateJobDate} , user)
           .then((response)=>{
               if(response){
                   cogoToast.success("Created and added to crew");
@@ -463,6 +470,108 @@ const TaskListTasks = (props) =>{
           Crew.updateCrewJobDate( updateJobId, updateJobDate, user)
           .then((data)=>{
             cogoToast.success(`Updated ${fieldId} date`)
+            setTaskListTasksRefetch(true);
+            resolve(updateJobId);
+          })
+          .catch((error)=>{
+            console.error("Failed to update task", error);
+            cogoToast.error("Failed to update task");
+            reject(error);
+          })
+        }
+      })
+
+    },[taskListTasks])
+
+    const handleUpdateDrillLocated = useCallback((value, task, fieldId) =>{
+      return new Promise((resolve, reject)=> {
+        if(!task){
+          console.error("No task, Failed to update", task);
+        }
+  
+        var updateTask = {...task};
+        let updateJobDate = Util.convertISODateToMySqlDate(moment(value).add(10, 'days'));
+        //console.log("updateJobTasj", updateTask);
+        
+        
+        let updateJobId =  updateTask["drill_job_id"];
+
+  
+        if(updateJobId == null){
+          //create crew job with date
+          Crew.addCrewJobs([task.t_id], {job_type: fieldId, crew_id: null, date: null, located: updateJobDate } ,user)
+          .then((response)=>{
+              if(response){
+                  cogoToast.success("Created and added crew job");
+                  //setTaskListTasks(null);
+                  setTaskListTasksRefetch(true);
+                  setShouldResetCrewState(true);
+                  console.log("response", response);
+                  resolve(response[0].insertId);
+              }
+          })
+          .catch((err)=>{
+              console.error("Failed to locate", err);
+              reject(err)
+          })
+  
+        }else{
+          //update existing crew job
+          //console.log("Update task", updateTask);
+          Crew.updateCrewJobLocated( updateJobId, updateJobDate, user)
+          .then((data)=>{
+            cogoToast.success(`Updated Located date`)
+            setTaskListTasksRefetch(true);
+            resolve(updateJobId);
+          })
+          .catch((error)=>{
+            console.error("Failed to update task", error);
+            cogoToast.error("Failed to update task");
+            reject(error);
+          })
+        }
+      })
+
+    },[taskListTasks])
+
+    const handleUpdateDrillDiagram = useCallback((value, task, fieldId) =>{
+      return new Promise((resolve, reject)=> {
+        if(!task){
+          console.error("No task, Failed to update", task);
+        }
+  
+        var updateTask = {...task};
+        let updateJobDate = Util.convertISODateToMySqlDate(value);
+        //console.log("updateJobTasj", updateTask);
+        
+        
+        let updateJobId =  updateTask["drill_job_id"];
+
+  
+        if(updateJobId == null){
+          //create crew job with date
+          Crew.addCrewJobs([task.t_id], {job_type: fieldId, crew_id: null, date: null, diagram: updateJobDate } ,user)
+          .then((response)=>{
+              if(response){
+                  cogoToast.success("Created and added crew job");
+                  //setTaskListTasks(null);
+                  setTaskListTasksRefetch(true);
+                  setShouldResetCrewState(true);
+                  console.log("response", response);
+                  resolve(response[0].insertId);
+              }
+          })
+          .catch((err)=>{
+              console.error("Failed to locate", err);
+              reject(err)
+          })
+  
+        }else{
+          //update existing crew job
+          //console.log("Update task", updateTask);
+          Crew.updateCrewJobDiagram( updateJobId, updateJobDate, user)
+          .then((data)=>{
+            cogoToast.success(`Updated Diagram date`)
             setTaskListTasksRefetch(true);
             resolve(updateJobId);
           })
@@ -731,7 +840,7 @@ const TaskListTasks = (props) =>{
     }
 
 
-    const handleSpecialTableValues = useCallback((fieldId, value, type, task) =>{
+    const handleSpecialTableValues = useCallback((fieldId, value, type, task, tableItem) =>{
       if(fieldId == null || task == null){
         console.error("Bad fieldId or task in handleSpecialTableValues");
         return;
@@ -820,12 +929,12 @@ const TaskListTasks = (props) =>{
         case 'drill_date':{
           if(task.type === "Install (Drill)"){
             if(!task.drill_job_completed){
-              return_value = <div>
+              return_value = <div className={classes.install_date_div}>
                 
                   <MuiPickersUtilsProvider utils={DateFnsUtils}>
                           <TLCrewJobDatePicker  showTodayButton
                             clearable
-
+                            viewOnly={tableItem.viewOnly}
                             inputVariant="outlined"
                             variant="modal" 
                             type={'drill'}
@@ -862,6 +971,7 @@ const TaskListTasks = (props) =>{
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                         <TLCrewJobDatePicker   showTodayButton
                         clearable
+                        viewOnly={tableItem.viewOnly}
                         inputVariant="outlined"
                         variant="modal" 
                         type={'install'}
@@ -950,6 +1060,70 @@ const TaskListTasks = (props) =>{
                           task={task} 
                           data={woiData?.filter((item)=>item.work_order == task.table_id)}/>
           break;
+        }
+        case 'drill_located':{
+          if(task.type === "Install (Drill)"){
+            if(!task.drill_job_completed){
+              return_value = <div className={classes.install_date_div}>
+                
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                          <TLDrillLocatedDatePicker  showTodayButton
+                            clearable
+                            viewOnly={tableItem.viewOnly}
+                            inputVariant="outlined"
+                            variant="modal" 
+                            type={'drill'}
+                            title="Select Drill Date"
+                            maxDate={new Date('01-01-2100')}
+                            minDate={new Date('01-01-1970')}
+                            className={classes.datePickerLocated}
+                            value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
+                            onChange={async(value) => await handleUpdateDrillLocated(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
+                            located={task.drill_located}
+                            />
+                    </MuiPickersUtilsProvider></div>
+              break;
+            }else{
+              return_value = <span>Completed</span>
+              break;
+            }
+          }else{
+            return_value = <></>;
+            break;
+          }
+          
+        }
+        case 'drill_diagram':{
+          if(task.type === "Install (Drill)"){
+            if(!task.drill_job_completed){
+              return_value = <div className={classes.install_date_div}>
+                
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                          <TLDrillDiagramDatePicker  showTodayButton
+                            clearable
+                            viewOnly={tableItem.viewOnly}
+                            inputVariant="outlined"
+                            variant="modal" 
+                            type={'drill'}
+                            title="Select Drill Date"
+                            maxDate={new Date('01-01-2100')}
+                            minDate={new Date('01-01-1970')}
+                            className={classes.datePickerDiagram}
+                            value={ value ? moment(value).format('MM-DD-YYYY hh:mm:ss') : null} 
+                            onChange={async(value) => await handleUpdateDrillDiagram(Util.convertISODateTimeToMySqlDateTime(value), task, "drill")} 
+                            diagram={task.drill_diagram}
+                            />
+                    </MuiPickersUtilsProvider></div>
+              break;
+            }else{
+              return_value = <span>Completed</span>
+              break;
+            }
+          }else{
+            return_value = <></>;
+            break;
+          }
+          
         }
         case 'table_id':
           return_value = <span onContextMenu={(event)=>handleGoToWorkOrderId(value,event)} 
@@ -1093,7 +1267,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                           onContextMenu={(event)=> handleTaskContextMenu ? handleTaskContextMenu(event, row) : null}
                           style={{flex: `0 0 ${item.width(sizeOfTable ? sizeOfTable : "large")}`}}
                           classes={item.style ?  {primary: classes[item.style]} : {}}>
-                           <span> { handleSpecialTableValues(item.field, value, item.type,row)}</span>
+                           <span> { handleSpecialTableValues(item.field, value, item.type,row, item)}</span>
             </div>
             
           )})}
@@ -1555,6 +1729,22 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#f5fdff',
     }
   },
+  datePickerDiagram:{
+    '& input':{
+        textAlign: 'center',
+        cursor: 'pointer',
+        padding: '1px 0px 0px 0px',
+        backgroundColor: '#f6ebff',
+    }
+  },
+  datePickerLocated:{
+    '& input':{
+        textAlign: 'center',
+        cursor: 'pointer',
+        padding: '1px 0px 0px 0px',
+        backgroundColor: '#f5fdff',
+    }
+  },
   woiPopoverContainer:{
     padding: 13,
     background: '#fff'
@@ -1624,6 +1814,7 @@ const useStyles = makeStyles(theme => ({
   install_date_div:{
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'center'
   },
   tooltipClass:{
     fontSize: '1.1em !important',

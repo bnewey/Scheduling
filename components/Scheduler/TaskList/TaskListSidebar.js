@@ -20,6 +20,8 @@ import Util from '../../../js/Util';
 import Settings from '../../../js/Settings';
 import cogoToast from 'cogo-toast';
 
+import UtilServer from '../../../server/util/util.js'
+
 import {TaskContext} from '../TaskContainer';
 
 import PDF from '../../../js/Pdf';
@@ -331,7 +333,12 @@ const TaskListSidebar = (props) => {
                 <div className={classes.priority_info_heading}>
                     <span>TaskViews</span>
                 </div>
-                {taskViews?.map((view, index)=>{
+                {taskViews?.filter((item)=> {
+                    //filter out unpermissed items
+                   
+                    //we should throw a useCallback on this
+                    return !(item?.permission_access && user && !UtilServer.checkPermission(user.perm_string, item?.permission_access) && !user.isAdmin)
+                }).map((view, index)=>{
                      const isSelected = activeTaskView === view.value;
      
                     return(

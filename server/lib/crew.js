@@ -433,15 +433,13 @@ router.post('/getAllCrewJobs', async (req,res) => {
 });
 
 router.post('/addCrewJobs', async (req,res) => {
-    var ids, job_type, crew_id, user;
+    var ids, job_data, user;
     if(req.body){
         ids = req.body.ids;
-        job_type = req.body.job_type;
-        crew_id = req.body.crew_id;
-        date = req.body.date;
+        job_data = req.body.job_data;
         user = req.body.user;
     }
-    if(!ids || !job_type ){
+    if(!ids || !job_data ){
         logger.error("Id, jobtype, or crew is not valid in addCrewJobs");
         res.sendStatus(400);
     }
@@ -454,18 +452,19 @@ router.post('/addCrewJobs', async (req,res) => {
 
     const getMax = " SELECT MAX(ordernum)+1 as max_num  FROM crew_jobs cj WHERE crew_id = ?; "
 
-    const sql = ' INSERT INTO crew_jobs (task_id, job_type, crew_id, ordernum, job_date) VALUES (? , ? , ?, ?,?)  ' + 
+    const sql = ' INSERT INTO crew_jobs (task_id, job_type, crew_id, ordernum, job_date, ready, located, diagram) ' +
+            ' VALUES (? , ? , ?, ?,?, IFNULL(?, DEFAULT(ready)) , IFNULL(?, DEFAULT(located)) ,IFNULL(?, DEFAULT(diagram)))  ' + 
             ' ON DUPLICATE KEY UPDATE crew_id = VALUES(crew_id) '  ;
     
     var all_results = [];
 
-    const data = await database.query(getMax, [ crew_id ])
+    const data = await database.query(getMax, [ job_data.crew_id ])
     var max = data[0].max_num || 0;
 
     async.forEachOf(ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            all_results.push(await database.query(sql, [id, job_type, crew_id, max+i, date]));
+            all_results.push(await database.query(sql, [id, job_data.job_type, job_data.crew_id, max+i, job_data.date, job_data.ready, job_data.located, job_data.diagram]));
             return;
         }
         catch(error){
@@ -473,10 +472,10 @@ router.post('/addCrewJobs', async (req,res) => {
         }
     }, err=> {
         if(err){
-            logger.error("Crews (addCrewJobs): "+ ids+ " "+ job_type +"  , " + err);
+            logger.error("Crews (addCrewJobs): "+ ids+ " "+ job_data.job_type +"  , " + err);
             res.sendStatus(400);
         }else{
-            logger.info("Added by task ids: " + ids + " , job_type: " + job_type + " , crew_id:" + crew_id + ', date: ' + date);
+            logger.info("Added by task ids: " + ids + " , job_type: " + job_data.job_type + " , crew_id:" + job_data.crew_id + ', date: ' + job_data.date);
             res.json(all_results);
         }
     })
@@ -523,11 +522,9 @@ router.post('/deleteCrewJob', async (req,res) => {
 });
 
 router.post('/updateCrewJob', async (req,res) => {
-    var crew_id, job_id, old_crew_id, user;
+    var job_data, user; //crew_id, job_id, old_crew_id
     if(req.body){
-        crew_id = req.body.crew_id;
-        job_id = req.body.job_id;
-        old_crew_id = req.body.old_crew_id;
+        job_data = req.body.job_data;
         user = req.body.user;
     }
 
@@ -543,25 +540,25 @@ router.post('/updateCrewJob', async (req,res) => {
     ' WHERE id = ? ';
     
     try{
-        var data = await database.query(getMax, [ crew_id ]);
+        var data = await database.query(getMax, [ job_data.crew_id ]);
         var max = data[0].max_num || 0;
         
-        const response = await database.query(sql, [crew_id, max, job_id  ]);
+        const response = await database.query(sql, [job_data.crew_id, max, job_data.job_id  ]);
 
         //Reorder crew jobs to maintain correct order
-        if(old_crew_id){
+        if(job_data.old_crew_id){
             logger.info("Attempting to reorder crew");
-            var reorderStatus = await reorderCrewJobsFromDB(old_crew_id)
+            var reorderStatus = await reorderCrewJobsFromDB(job_data.old_crew_id)
             logger.info("Reorder status " + reorderStatus)
             if(reorderStatus == 1){
-                logger.info("Reordered crew" + old_crew_id);
+                logger.info("Reordered crew" + job_data.old_crew_id);
             }else{
                 if(reorderStatus == 0){  logger.info("Did not reorder on delete") };
                 if(reorderStatus == -1){ logger.info("Error in reorderCrewJobsFromDB")}
             }
         }
 
-        logger.info("Updated crew job " + job_id + " to crew: " + crew_id + " from crew: " + old_crew_id);
+        logger.info("Updated crew job " + job_data.job_id + " to crew: " + job_data.crew_id + " from crew: " + job_data.old_crew_id);
         res.sendStatus(200);
     }
     catch(error){

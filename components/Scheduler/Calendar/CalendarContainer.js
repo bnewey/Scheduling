@@ -449,13 +449,13 @@ const CalendarContainer = (props) => {
                 return await Crew.deleteCrewJob(job_id, crew_job.crew_id, user);
             }
             if(method == "update"){
-                return  await Crew.updateCrewJob( groups[newGroupOrder].id,job_id, crew_job.crew_id, user);
+                return  await Crew.updateCrewJob( {crew_id: groups[newGroupOrder].id,job_id: job_id, old_crew_id: crew_job.crew_id }, user);
             }
             if(method == "nothing"){
                 return  ;
             }
             if(method == "create"){
-                return  await Crew.addCrewJobs([id], [job_id_type], groups[newGroupOrder].id)
+                return  await Crew.addCrewJobs([id], {job_type: job_id_type, crew_id: groups[newGroupOrder].id } , user)
             }
         }
 

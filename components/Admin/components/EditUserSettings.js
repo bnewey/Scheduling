@@ -76,7 +76,11 @@ const EditUserSettings = (props) => {
         {field: 'work_orders', label: 'Work Orders', type: 'check', updateBy: 'state'},
         {field: 'signs', label: 'Signs', type: 'check', updateBy: 'state'},
         {field: 'crew', label: 'Crew', type: 'check', updateBy: 'state'},
+        //Crew gives acces to Mark's taskviews
+        {field: 'service', label: 'Service', type: 'check', updateBy: 'state'},
+        //service gives access to service TaskView
         {field: 'drill', label: 'Drill', type: 'check', updateBy: 'state'},
+        //drill gives access to Steves List Task View
         {field: 'inventory', label: 'Inventory', type: 'check', updateBy: 'state'},
         {field: 'entities', label: 'Entities', type: 'check', updateBy: 'state'},
         
