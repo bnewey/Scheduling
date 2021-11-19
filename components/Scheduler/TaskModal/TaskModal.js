@@ -44,7 +44,7 @@ import WoiStatusCheck from '../TaskList/components/WoiStatusCheck.js';
 export default function TaskModal(props){
 
     const {modalOpen, setModalOpen, modalTaskId, setModalTaskId} = props;
-    const {taskLists, setTaskLists, setRows, setRefreshView, tabValue, taskListToMap, user} = useContext(TaskContext);
+    const {taskLists, setTaskLists, setRows, setRefreshView, tabValue, taskListToMap, user, activeTVOrder} = useContext(TaskContext);
 
     const classes = useStyles();
 
@@ -343,7 +343,8 @@ export default function TaskModal(props){
                                         modalTask={modalTask}
                                         setShouldReFetch={setShouldReFetch}
                                         modalOpen={modalOpen} setModalOpen={setModalOpen} 
-                                        setModalTaskId={setModalTaskId}/> 
+                                        setModalTaskId={setModalTaskId}
+                                        activeTVOrder={activeTVOrder}/> 
                     :
                     <div>
                         <CircularProgress />

@@ -88,20 +88,34 @@ const TLDrillDateFilter = (props) => {
         }        
 
         var newArray = value.map((item)=>{
+            if(item === "located"){
+                return {property: 'drill_located', value: 1, compare_type: 'notnull'}
+            }
+            if(item === "not_located"){
+                return {property: 'drill_located', value: 0, compare_type: 'isnull'}
+            }
+            if(item === "diagram"){
+                console.log("ASS")
+                return {property: 'drill_diagram', value: 1, compare_type: 'notnull'}
+            }
+            if(item === "not_diagram"){
+                return {property: 'drill_diagram', value: 0, compare_type: 'isnull'}
+            }
             return ({property, value: item})
         })
         if(!ctrl){
             newArray = newArray.slice(newArray.length-1)
         }
-
+        console.log("newArray", newArray);
         setDrillDateFilters(newArray);
+
         if(!ctrl){
             handleCloseSelectMenu();
         }else{
             
         }
         handleRefreshView()
-    }
+    }  
 
     const handleCloseSelectMenu = (event)=>{
         setSelectDrillDateMenuOpen(false);
@@ -151,8 +165,16 @@ const TLDrillDateFilter = (props) => {
                             autoWidth
                             id={"drillDateFilter"}
                             className={classes.selectBox}
-                            value={(drillDateFilters?.map((item)=> (item.value))
-                            )}
+                            value={(drillDateFilters?.map((item)=> {
+                                if(item.property === "drill_located" ){
+                                    return item.value ? "located" : 'not_located'
+                                }
+                                if(item.property === "drill_diagram" ){
+                                    return item.value ? "diagram" : 'not_diagram'
+                                }
+                                return (item.value)
+                            }))}
+                            
                             open={selectDrillDateMenuOpen}
                             onOpen={handleOpenSelectMenu}
                             onClose={handleCloseSelectMenu}
@@ -168,6 +190,10 @@ const TLDrillDateFilter = (props) => {
                                 <MenuItem className={classes.menuItem} value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
                                 );
                             }), <MenuItem className={classes.menuItem} value={0}>Drill Not Ready</MenuItem>, <MenuItem value={1}>Drill Ready</MenuItem>,
+                            , <MenuItem className={classes.menuItem} value={'diagram'}>Diagramed</MenuItem>
+                            , <MenuItem className={classes.menuItem} value={'not_diagram'}>Not Diagramed</MenuItem>
+                            , <MenuItem className={classes.menuItem} value={'located'}>Located</MenuItem>
+                            , <MenuItem className={classes.menuItem} value={'not_located'}>Not Located</MenuItem>
                             , <MenuItem className={classes.menuItem} value={'clear'}>Clear</MenuItem>] ;
                         })()}
                     </Select> 

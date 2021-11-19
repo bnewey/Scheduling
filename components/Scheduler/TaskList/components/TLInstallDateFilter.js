@@ -82,7 +82,16 @@ const InstallDateFilter = (props) => {
             return;
         }
 
+        
+
         var newArray = value.map((item)=>{
+            if(item === "road"){
+                return {property: 'install_ready', value: 1, compare_type: 'notnull'}
+            }
+            if(item === "not_road"){
+                return {property: 'install_ready', value: 0, compare_type: 'isnull'}
+            }
+
             return ({property: 'sch_install_date', value: item})
         })
         if(!ctrl){
@@ -147,8 +156,12 @@ const InstallDateFilter = (props) => {
                             autoWidth
                             id={"installDateFilter"}
                             className={classes.selectBox}
-                            value={(installDateFilters?.map((item)=> (item.value))
-                            )}
+                            value={(installDateFilters?.map((item)=> {
+                                if(item.property === "install_ready" ){
+                                    return item.value ? "road" : 'not_road'
+                                }
+                                return (item.value)
+                            }))}
                             open={selectInstallDateMenuOpen}
                             onOpen={handleOpenSelectMenu}
                             onClose={handleCloseSelectMenu}
@@ -163,7 +176,9 @@ const InstallDateFilter = (props) => {
                                 return( 
                                 <MenuItem className={classes.menuItem} value={item}>{moment(item).format('MM/DD/YYYY')}</MenuItem>
                                 );
-                            }), <MenuItem className={classes.menuItem} value={'clear'}>Clear</MenuItem> ] ;
+                            }), <MenuItem className={classes.menuItem} value={'road'}>On Road</MenuItem>
+                            , <MenuItem className={classes.menuItem} value={'not_road'}>Not On Road</MenuItem>
+                            , <MenuItem className={classes.menuItem} value={'clear'}>Clear</MenuItem> ] ;
                         })()}
                     </Select> 
                     <span>

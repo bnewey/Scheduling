@@ -7,9 +7,25 @@ const doFilter = (item, filter, outOrIn) => {
     let tmpValue = value;
   
     if (!(tmpValue instanceof RegExp)) {
-      tmpValue = new RegExp(tmpValue.toString().replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_'), 'i');
+      tmpValue = new RegExp(tmpValue?.toString()?.replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_'), 'i');
     }
     var tmpp;
+    if(compare_type === "notnull"){
+      if(item[ property ] ){
+        tmpp = true
+      }else{
+        tmpp = false;
+      }
+    }
+
+    if(compare_type === "isnull"){
+      if(item[ property ] ){
+        tmpp = false
+      }else{
+        tmpp = true;
+      }
+    }
+
     if(compare_type === "equal"){
       if(item[ property ] == null ){
         tmpp = tmpValue.test( "nonassignedValue" )

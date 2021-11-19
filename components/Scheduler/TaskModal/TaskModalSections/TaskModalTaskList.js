@@ -13,7 +13,7 @@ import TaskLists from '../../../../js/TaskLists';
 export default function TaskModalTaskList(props){
     const classes = useStyles();
 
-    const {taskLists, setTaskLists, modalTask, setShouldReFetch, modalOpen, setModalOpen, setModalTaskId, user} = props;
+    const {taskLists, setTaskLists, modalTask, setShouldReFetch, modalOpen, setModalOpen, setModalTaskId, user, activeTVOrder} = props;
     const [taskListToAdd, setTaskListToAdd] = useState(null);
     const [relatedTaskLists, setRelatedTaskLists] = useState(null);
     const [open, setOpen] = React.useState(false);
@@ -65,7 +65,7 @@ export default function TaskModalTaskList(props){
                 throw new Error("Bad data from getTaskList before Reorder");
             }
             var task_ids = data.map((item, i)=> item.t_id);
-            TaskLists.reorderTaskList(task_ids, tl_id, user)
+            TaskLists.reorderTaskList(task_ids, tl_id, user, activeTVOrder)
             .then( (ok) => {      
                 if(!ok)
                     console.warn("Failed to Reorder before Adding to TaskList");
@@ -115,7 +115,7 @@ export default function TaskModalTaskList(props){
                     throw new Error("Bad data from getTaskList before Reorder");
                 }
                 var task_ids = data.map((item, i)=> item.t_id);
-                TaskLists.reorderTaskList(task_ids, tl_id, user)
+                TaskLists.reorderTaskList(task_ids, tl_id, user, activeTVOrder)
                 .then( (ok) => {      
                     if(!ok)
                         console.warn("Failed to Reorder before Adding to TaskList");

@@ -54,11 +54,12 @@ const TaskContainer = function(props) {
     const [installCrewFilters, setInstallCrewFilters] = useState([]);
     const [activeTaskView,setActiveTaskView] = useState(null)
     const [savedFilters, setSavedFilters] = React.useState(null);
+    const [activeTVOrder, setActiveTVOrder] = useState(null);
 
 
     const taskViews = [
-      {name: "Compact", value: 3, permission_access: ["crew"],
-      array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '3%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+      {name: "Drill", value: 3, permission_access: ["crew"], order: 'drill_order',
+      array: [{text: "Order", field: "drill_order", width: (size)=> size == "small" ? '3%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number', dontShowInSmall: true},
               {text: "Name", field: "t_name", width: (size)=> size == "small" ? '20%' : '24%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
               {text: "State", field: "state", width: (size)=> size == "small" ? '4%' : '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
@@ -69,9 +70,9 @@ const TaskContainer = function(props) {
               {text: "Drill Date", field: "drill_date", width: (size)=> size == "small" ? '18%' : '9%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
               {text: "Drill Crew", field: "drill_crew", width: (size)=> size == "small" ? '9%' : '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '6%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
-              {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
+              {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date', viewOnly: true},
               {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '9%' : '5%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}]},
-    {name: "Compact(No Drill)", value: 1, permission_access: ["crew"],
+    {name: "Install(No Drill)", value: 1, permission_access: ["crew"],order: 'priority_order',
        array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '4%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number',dontShowInSmall: true},
               {text: "Name", field: "t_name", width: (size)=> size == "small" ? '26%' : '32%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
@@ -83,8 +84,8 @@ const TaskContainer = function(props) {
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '10%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '17%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '11%' : '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},
-    {name: "Service Dept", value: 2, permission_access: ["service"],
-       array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '6%' : '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+    {name: "Service Dept", value: 2, permission_access: ["service"], order: 'service_order',
+       array: [{text: "Order", field: "service_order", width: (size)=> size == "small" ? '6%' : '4%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
               {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '4%', maxWidth: 100,style: 'smallListItemText', type: 'number',dontShowInSmall: true},
               {text: "WO Created", field: "date_entered", width: (size)=> size == "small" ? '' : '5%', style: 'smallListItemText', type: 'date',dontShowInSmall: true},
               {text: "Desired", field: "date_desired", width: (size)=> size == "small" ? '8%' : '5%', style: 'smallListItemText', type: 'date'},
@@ -98,8 +99,9 @@ const TaskContainer = function(props) {
               {text: "Service Type", field: "field_type", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
               {text: "Services", field: "field_num_services", width: (size)=> size == "small" ? '15%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'text'},
     ]},
-    {name: "Steve's List", value: 4, disableReorder: true, permission_access: ["drill"],
-    array: [
+    {name: "Steve's List", value: 4, disableReorder: true, permission_access: ["drill"],order: 'drill_order',
+    array: [ 
+            {text: "Order", field: "drill_order", width: (size)=> size == "small" ? '3%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
             {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number', dontShowInSmall: true},
             {text: "Name", field: "t_name", width: (size)=> size == "small" ? '20%' : '24%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
             {text: "State", field: "state", width: (size)=> size == "small" ? '4%' : '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
@@ -397,6 +399,8 @@ const TaskContainer = function(props) {
       
       if( view?.array && Array.isArray(view?.array)){
         setTableInfo(view?.array)
+        setActiveTVOrder(view?.order);
+        setSorters([{"property":view?.order,"direction":"ASC"}]);
       }
   } ,[activeTaskView])
 
@@ -420,7 +424,7 @@ const TaskContainer = function(props) {
   }
   
 }, [tableInfo, activeTaskView, savedFilters]);
-  
+
 
   return (
     <div className={classes.root}>
@@ -432,7 +436,8 @@ const TaskContainer = function(props) {
                              arrivalDateFilters, setArrivalDateFilters, drillCrewFilters, setDrillCrewFilters,
                              installCrewFilters, setInstallCrewFilters, taskListTasksSaved, setTaskListTasksSaved, 
                              tLTasksExtraSaved, setTLTasksExtraSaved,
-                             user, refreshView, setRefreshView, taskViews, job_types, savedFilters, setSavedFilters} } >
+                             user, refreshView, setRefreshView, taskViews, job_types, savedFilters, setSavedFilters,
+                             activeTVOrder} } >
       <CrewContextContainer tabValue={tabValue}/* includes crew context */>
           <FullWidthTabs tabValue={tabValue } setTabValue={setTabValue} 
                         numSelected={selectedIds.length} activeTask={taskListToMap ? taskListToMap : null}  >

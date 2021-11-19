@@ -44,8 +44,6 @@ const TLDrillLocatedDatePicker = (props) => {
     }
 
 
-
-
     const handleOnMonthChange = (date, num)=>{
         //num: 1 == left calendar | 2 == right calendar
         return new Promise((resolve, reject)=>{

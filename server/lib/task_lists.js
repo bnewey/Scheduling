@@ -33,7 +33,8 @@ router.post('/getTaskList', async (req,res) => {
         ' tl.linked_tl AS tl_linked_tl, t.id AS t_id, t.name AS old_task_name, tli.task_list_id, t.hours_estimate, ' + 
         ' date_format(wo.requested_arrival_date, \'%Y-%m-%d %H:%i:%S\') as date_desired, ' +
         ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
-        ' wo.description, wo.notes, tli.priority_order, tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
+        ' wo.description, wo.notes, tli.priority_order, tli.drill_order, tli.service_order,  ' +
+        ' tli.id AS tli_id, tli.date_updated as tli_date_updated, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
         ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, t.type, wo.type AS wo_type, t.install_location, ' +
         ' wo.completed as completed_wo, wo.invoiced as invoiced_wo,  date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.job_reference,' + 
         ' date_format(wo.date_entered, \'%Y-%m-%d %H:%i:%S\') as date_entered, ' +
@@ -70,7 +71,7 @@ router.post('/getTaskList', async (req,res) => {
     ' LEFT JOIN crew_members_available maf ON maf.id = cmf.member_id  ' + 
     ' LEFT JOIN entities e ON wo.customer_id = e.record_id '  +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id  ' +
-    ' WHERE tli.task_list_id = ? ORDER BY tli.priority_order ASC ' ;
+    ' WHERE tli.task_list_id = ? ORDER BY t.date_entered, tli.priority_order ASC ' ;
 
     try{
         const results = await database.query(sql, id);
@@ -91,7 +92,7 @@ router.post('/getAllTaskListPerTask', async (req,res) => {
 
     const sql =    
      'SELECT tl.id as tl_id, tl.list_name as tl_name, tl.is_priority AS tl_is_priority, tl.linked_tl AS tl_linked_tl,  ' +   
-        ' tli.priority_order, tli.id AS tli_id, tli.date_updated AS tli_date, tl.date_entered AS tl_date ' +  
+        ' tli.priority_order, tli.drill_order, tli.service_order, tli.id AS tli_id, tli.date_updated AS tli_date, tl.date_entered AS tl_date ' +  
     ' FROM task_list tl  ' +
     ' LEFT JOIN task_list_items tli ON tli.task_list_id = tl.id ' +
     ' WHERE tli.task_id = ? ORDER BY tli.date_updated DESC' ;
@@ -175,14 +176,17 @@ router.post('/addTasktoList', async (req,res) => {
     taskList_id = req.body.tl_id;
     }
 
-    const sql_select = ' select max(priority_order) AS max_priority from task_list_items where task_list_id = ? ' ; 
+    const sql_select = ' select max(priority_order) AS max_priority , max(drill_order) AS max_drill, max(service_order) AS max_service ' +
+                        '  from task_list_items where task_list_id = ? ' ; 
 
-    const sql = ' INSERT into task_list_items (task_list_id, priority_order, task_id) VALUES (?, ?, ?) ';
+    const sql = ' INSERT into task_list_items (task_list_id, priority_order, service_order, drill_order, task_id) VALUES (?, ?, ?, ?, ?) ';
 
     try{
         const select_results = await database.query(sql_select, taskList_id);
         const max_priority = select_results[0]["max_priority"] + 1;
-        const results = await database.query(sql, [taskList_id, max_priority, task_id]);
+        const max_service = select_results[0]["max_service"] + 1;
+        const max_drill = select_results[0]["max_drill"] + 1;
+        const results = await database.query(sql, [taskList_id, max_priority, max_service, max_drill, task_id]);
         logger.info("Add Task: " + task_id +" to TaskList with priority: " + max_priority);
         res.sendStatus(200);
     }
@@ -222,10 +226,11 @@ router.post('/addMultipleTaskstoList', async (req,res) => {
         throw error;
     }
 
-    const sql_select_max = ' select max(priority_order) AS max_priority from task_list_items where task_list_id = ? ' ; 
+    const sql_select_max = ' select max(priority_order) AS max_priority, max(drill_order) AS max_drill, max(service_order) AS max_service ' + 
+                            ' from task_list_items where task_list_id = ? ' ; 
 
     //Update tasks normally except if task is already in TaskList
-    const sql = ' INSERT INTO task_list_items (task_list_id, priority_order, task_id ) VALUES ( ? , ? , ? ) ' ;
+    const sql = ' INSERT INTO task_list_items (task_list_id, priority_order, drill_order, service_order, task_id ) VALUES ( ? , ? , ? , ?, ? ) ' ;
 
     var select_max_results;
     try{
@@ -238,7 +243,9 @@ router.post('/addMultipleTaskstoList', async (req,res) => {
         //will automatically call callback after successful execution
         try{
             const priority = select_max_results[0]["max_priority"] ? select_max_results[0]["max_priority"] + 1 + i  :   i+1;
-            const results = await database.query(sql, [taskList_id, priority, id]);
+            const service = select_max_results[0]["max_service"] ? select_max_results[0]["max_service"] + 1 + i  :   i+1;
+            const drill = select_max_results[0]["max_drill"] ? select_max_results[0]["max_drill"] + 1 + i  :   i+1;
+            const results = await database.query(sql, [taskList_id, priority, drill, service, id]);
             return;
         }
         catch(error){     
@@ -293,15 +300,18 @@ router.post('/moveTaskToList', async (req,res) => {
     }
 
     //we need to reorder priority_order in the list
-    const sql_select = ' select max(priority_order) AS max_priority from task_list_items where task_list_id = ? ' ; 
+    const sql_select = ' select max(priority_order) AS max_priority, max(drill_order) AS max_drill, max(service_order) AS max_service ' + 
+                        ' from task_list_items where task_list_id = ? ' ; 
     
     const sql = ' UPDATE task_list_items ' +
-    ' SET task_list_id = ?, priority_order =?  WHERE task_id = ? LIMIT 1 ';
+    ' SET task_list_id = ?, priority_order =?, service_order=?, drill_order=?  WHERE task_id = ? LIMIT 1 ';
 
     try{
         const select_results = await database.query(sql_select, taskList_id);
         const max_priority = select_results[0]["max_priority"] + 1;
-        const results = await database.query(sql, [taskList_id, max_priority, task_id]);
+        const max_service = select_results[0]["max_service"] + 1;
+        const max_drill = select_results[0]["max_drill"] + 1;
+        const results = await database.query(sql, [taskList_id, max_priority,max_service, max_drill, task_id]);
         logger.info("Move Task: " + task_id +" to TaskList " + taskList_id);
         res.sendStatus(200);
     }
@@ -350,10 +360,11 @@ router.post('/removeMultipleFromList', async (req,res) => {
 });
 
 router.post('/reorderTaskList', async (req,res) => {
-    var taskList_id, task_ids, user;
+    var taskList_id, task_ids, user, order;
     if(req.body){
         taskList_id = req.body.tl_id;
         task_ids = req.body.ids;
+        order = req.body.order;
         user = req.body.user;
     }
 
@@ -363,7 +374,7 @@ router.post('/reorderTaskList', async (req,res) => {
         return;
     }
     
-    const sql = ' UPDATE task_list_items SET priority_order = ?, date_updated = now() ' +
+    const sql = ' UPDATE task_list_items SET ?? = ?, date_updated = now() ' +
     ' WHERE task_id = ? AND task_list_id = ?; ' +
     ' UPDATE task_list SET date_entered = now() WHERE id = ? ';
 
@@ -371,7 +382,7 @@ router.post('/reorderTaskList', async (req,res) => {
     async.forEachOf(task_ids, async (id, i, callback) => {
         //will automatically call callback after successful execution
         try{
-            const results = await database.query(sql, [i+1, id, taskList_id, taskList_id]);
+            const results = await database.query(sql, [order, i+1, id, taskList_id, taskList_id]);
             return;
         }
         catch(error){     

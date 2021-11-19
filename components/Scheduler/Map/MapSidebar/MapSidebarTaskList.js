@@ -56,7 +56,8 @@ const MapSiderbarTaskList = (props) =>{
         drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters,
         arrivalDateFilters, setArrivalDateFilters,tableInfo ,setTableInfo, activeTaskView,setRefreshView, tabValue,
         taskListTasks, setTaskListTasks, taskListTasksRefetch, setTaskListTasksRefetch,
-         taskListTasksSaved , setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, sorters, sorterState,setSorters, filters, taskViews, setSelectedIds} = useContext(TaskContext);
+         taskListTasksSaved , setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, sorters, sorterState,setSorters,
+          filters, taskViews, setSelectedIds, activeTVOrder} = useContext(TaskContext);
     const {mapRows, setMapRows, markedRows, setMarkedRows,  mapRowsRefetch, setMapRowsRefetch, activeMarker,setActiveMarker,expandedAnimDone,
         setShowingInfoWindow, woiData, setWoiData} = useContext(MapContext);
     
@@ -131,7 +132,7 @@ const MapSiderbarTaskList = (props) =>{
         if(Array.isArray(tmpParsed)){
             setSorters(tmpParsed);
         }else{
-            setSorters([{"property":"priority_order","direction":"ASC"}]);
+            setSorters([{"property":activeTVOrder,"direction":"ASC"}]);
         }
         }
         if(Array.isArray(sorters)){
@@ -310,7 +311,8 @@ const MapSiderbarTaskList = (props) =>{
                             taskLists={taskLists} 
                             sizeOfTable={'small'}
                             scrollToIndex={scrollToIndex} setScrollToIndex={setScrollToIndex}
-                            handleTaskClick={handleTaskClick} handleTaskContextMenu={handleTaskContextMenu}/>
+                            handleTaskClick={handleTaskClick} handleTaskContextMenu={handleTaskContextMenu}
+                            activeTVOrder={activeTVOrder}/>
                         </List>
                 </>
                 : <>

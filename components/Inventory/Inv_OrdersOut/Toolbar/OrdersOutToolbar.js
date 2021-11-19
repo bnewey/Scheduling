@@ -61,7 +61,7 @@ const OrdersOutToolbar = function(props) {
       if(view.parent){
         var parent_view = views.find((v)=> v.value == view.parent);
         if(parent_view?.onClose){
-          parent_view.onClose()
+          parent_view.onClose(backToSearch)
         }
       }
     }

@@ -49,7 +49,7 @@ const TaskListMain = (props) => {
         filters, setFilters,filterInOrOut, setFilterInOrOut,filterAndOr,
          sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters, arrivalDateFilters, setArrivalDateFilters,
          taskListTasksSaved, setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, taskViews , activeTaskView,
-         setRefreshView, setDrillDateFilters, drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters, user} = useContext(TaskContext);
+         setRefreshView, setDrillDateFilters, drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters, user, activeTVOrder} = useContext(TaskContext);
 
 
     //CSS
@@ -240,7 +240,7 @@ const TaskListMain = (props) => {
         if(Array.isArray(tmpParsed)){
             setSorters(tmpParsed);
         }else{
-            setSorters([{"property":"priority_order","direction":"ASC"}]);
+            setSorters([{"property":activeTVOrder,"direction":"ASC"}]);
         }
         }
         if(Array.isArray(sorters)){
@@ -409,7 +409,8 @@ const TaskListMain = (props) => {
                                     priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
                                     taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
                                     woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}
-                                    taskLists={taskLists}/>
+                                    taskLists={taskLists}
+                                    activeTVOrder={activeTVOrder}/>
                                 </List>
                         </>
                         : <>

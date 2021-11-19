@@ -338,13 +338,8 @@ const MapContainer = (props) => {
         console.log("else on mapRows == null && filterInOrOut != null && filterAndOr != null")
       }
       if(mapRows){
-        //filter geocoded, then sort by priority_order
+        //filter geocoded
         var tmp = mapRows.filter((row, index) => row.geocoded)
-        /*.sort((a,b)=>{
-          if(a.priority_order > b.priority_order) return 1;
-          if(b.priority_order > a.priority_order) return -1;
-          return 0; 
-        });*/
         setMarkedRows(tmp);
       }
 

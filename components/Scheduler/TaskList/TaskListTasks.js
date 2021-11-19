@@ -57,7 +57,7 @@ const TaskListTasks = (props) =>{
     const { taskListTasks, setTaskListTasks, taskListToMap , setModalOpen, setModalTaskId, tableInfo,
               priorityList, setTaskListToMap, setSelectedIds, selectedTasks, setSelectedTasks, taskListTasksSaved, setTaskListTasksSaved,
               sorters, filters, woiData, taskListTasksRefetch, setTaskListTasksRefetch, taskLists, sizeOfTable, scrollToIndex, setScrollToIndex,
-              handleTaskClick, handleTaskContextMenu, user, activeTaskView} = props;
+              handleTaskClick, handleTaskContextMenu, user, activeTaskView, activeTVOrder} = props;
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
 
@@ -107,6 +107,7 @@ const TaskListTasks = (props) =>{
         setSelectedTasks([]);
       },[filters])
 
+    
     
 
     //Modal
@@ -177,7 +178,7 @@ const TaskListTasks = (props) =>{
         return;
       }
       
-      if( !(sorters.length == 0 || (sorters[0]['property'] == "priority_order" && sorters[0]['direction'] == "ASC"))){
+      if( !(sorters.length == 0 || (sorters[0]['property'] == activeTVOrder && sorters[0]['direction'] == "ASC"))){
         cogoToast.error("Cannot reorder with a sorted list. Please order by priority.");
         return;
       }  
@@ -187,9 +188,9 @@ const TaskListTasks = (props) =>{
         return;
       }
 
-      var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [taskListTasks[result.source.index].t_id], taskListTasks[result.destination.index].priority_order-1);     
+      var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [taskListTasks[result.source.index].t_id], taskListTasks[result.destination.index][activeTVOrder]-1);     
       var newTaskIds = items.map((item, i)=> item.t_id);
-      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id, user)
+      TaskLists.reorderTaskList(newTaskIds,taskListToMap.id, user, activeTVOrder)
         .then( (ok) => {
                 if(!ok){
                   throw Error("Could not reorder tasklist" + taskListToMap.id);
@@ -400,7 +401,7 @@ const TaskListTasks = (props) =>{
     const isSelected = useCallback((record_id) => selectedTasks.indexOf(record_id) !== -1,[taskListTasks, selectedTasks]);
 
     const indexFromPriorityOrder = priority => {
-      var ind = taskListTasksSaved.map((task,i)=>task.priority_order).indexOf(priority);
+      var ind = taskListTasksSaved.map((task,i)=>task[activeTVOrder]).indexOf(priority);
 
       return ind;
     }
@@ -413,7 +414,7 @@ const TaskListTasks = (props) =>{
       // console.log("dndindex", dndIndex);
       // console.log("tasklisttasks, could be diff order", taskListTasks);
       // console.log("task from indexfromdndlist", taskListTasks[dndIndex])
-      let dndTask = taskListTasks[dndIndex].priority_order;
+      let dndTask = taskListTasks[dndIndex][activeTVOrder];
       if(isNaN(dndTask)){
         console.error("Error in indexFromDnDList")
         return -1;
@@ -1180,7 +1181,7 @@ const TaskListTasks = (props) =>{
           woiStatusAnchorEl={woiStatusAnchorEl} woiStatusPopoverId={woiStatusPopoverId} woiStatusRows={woiStatusRows}
            woistatusPopoverOpen={woistatusPopoverOpen} handleWoiStatusPopoverClose={handleWoiStatusPopoverClose} woiData={woiData} sizeOfTable={sizeOfTable}
            setScrollToIndex={setScrollToIndex} scrollToIndex={scrollToIndex}
-           handleTaskClick={handleTaskClick} handleTaskContextMenu={handleTaskContextMenu}/>
+           handleTaskClick={handleTaskClick} handleTaskContextMenu={handleTaskContextMenu} activeTVOrder={activeTVOrder}/>
           </div> </>
      : <></>}
         </React.Fragment>
@@ -1194,7 +1195,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
   tableInfo, handleSpecialTableValues, addSwapCrewAnchorEl, addSwapCrewJob, addSwapCrewPopoverId, addSwapCrewPopoverOpen,
   handleAddMemberPopoverClose, allCrews, handleAddSwapCrew,onDragEnd, selectedTasks, dimensions,
   woiStatusAnchorEl, woiStatusPopoverId, woiStatusRows, woistatusPopoverOpen, handleWoiStatusPopoverClose, woiData, sizeOfTable, scrollToIndex,  setScrollToIndex,
-  handleTaskClick, handleTaskContextMenu})=>{
+  handleTaskClick, handleTaskContextMenu, activeTVOrder})=>{
 
   const getListStyle =  isDraggingOver => ({
     background: isDraggingOver ? "lightblue" : "rgba(0,0,0,0)",
@@ -1231,7 +1232,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
 
     return (
       <Draggable key={row.t_id + getRand} 
-                  draggableId={(row.priority_order-1).toString()} 
+                  draggableId={(row[activeTVOrder]-1).toString()} 
                   index={index} 
                   isDragDisabled={ selectedTasks.length > 0 ? (isItemSelected ? false : true ) : false }>
         {(provided, snapshot) => (
@@ -1293,7 +1294,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
       <React.Fragment>
       { taskListTasks && taskListTasksSaved ? <>
         <Tooltip type="info" effect="solid" border={true} borderColor={'#000000dd'} textColor={'#fff'} backgroundColor={'#4c4646f3'}  className={classes.tooltipClass}/>
-          <DragDropContext onDragEnd={onDragEnd}>
+          <DragDropContext onDragEnd={(result)=>onDragEnd(result)}>
           <Droppable droppableId="droppable" mode="virtual"
           renderClone={(provided, snapshot, rubric) => (
             <div
@@ -1319,7 +1320,7 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
               <WindowScroller onScroll={clearScrollToIndex}>
                 {({ height, isScrolling, onChildScroll, scrollTop }) => (
                     <List
-                    height={dimensions?.height - 20}
+                    height={sizeOfTable != 'small' ? dimensions?.height - 20 : dimensions?.height - 40}
                     rowCount={itemCount}
                     rowHeight={26}
                     onRowsRendered={()=> rebuildTooltip()}

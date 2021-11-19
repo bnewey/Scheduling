@@ -45,7 +45,7 @@ const TaskListSidebar = (props) => {
     const { taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
         modalOpen, setModalOpen, setSorters, filters, setFilters, user, filterInOrOut, setFilterInOrOut,filterAndOr ,
-        refreshView, setFilterAndOr, tableInfo, setTableInfo, taskViews, activeTaskView, setActiveTaskView,savedFilters, setSavedFilters} = useContext(TaskContext);
+        refreshView, setFilterAndOr, tableInfo, setTableInfo, taskViews, activeTaskView, setActiveTaskView,savedFilters, setSavedFilters, activeTVOrder} = useContext(TaskContext);
 
     const {} = useContext(CrewContext);
 
@@ -110,32 +110,45 @@ const TaskListSidebar = (props) => {
         })
     }
 
-    const handlePrioritizeByInstallDate = (event, taskList) => {
+    const handlePrioritizeByDate = (event, taskList) => {
         if(taskListTasks == null || taskListTasks.length <= 0){
-            console.error("Bad tasklisttasks on reprioritize by install date");
+            console.error(`Bad tasklisttasks on reprioritize by ${prop_to_order}`);
             return;
         }
         if(!taskList.id){
-            console.error("Bad taskListId in handlePrioritizeByInstallDate");
+            console.error("Bad taskListId in handlePrioritizeByDate");
             return;
+        }
+
+        var prop_to_order ;
+        switch(activeTVOrder){
+            case "priority_order":
+                prop_to_order = "sch_install_date";
+                break;
+            case "service_order":
+                prop_to_order = "field_date";
+                break;
+            case "drill_order":
+                prop_to_order = "drill_date";
+                break;
         }
 
         var tmpArray = taskListTasks.sort(createSorter({property: 'sch_install_date', 
             direction: "ASC"}))
         
-        var tmpNoInstall = tmpArray.filter((v,i)=> v.sch_install_date == null || v.sch_install_date == "0000-00-00 00:00:00" || v.sch_install_date == "1970-01-01 00:00:00")
-        var tmpInstall = tmpArray.filter((v,i)=> v.sch_install_date != null || v.sch_install_date != "0000-00-00 00:00:00" || v.sch_install_date != "1970-01-01 00:00:00")
+        var tmpNoInstall = tmpArray.filter((v,i)=> v[prop_to_order] == null || v[prop_to_order] == "0000-00-00 00:00:00" || v[prop_to_order] == "1970-01-01 00:00:00")
+        var tmpInstall = tmpArray.filter((v,i)=> v[prop_to_order] != null || v[prop_to_order] != "0000-00-00 00:00:00" || v[prop_to_order] != "1970-01-01 00:00:00")
         var newTaskIds = [...tmpInstall, ...tmpNoInstall ].map((task,i)=> task.t_id);
         
         console.log(newTaskIds);
 
         const reorder = () => {
-            TaskLists.reorderTaskList(newTaskIds,taskList.id, user)
+            TaskLists.reorderTaskList(newTaskIds,taskList.id, user, activeTVOrder)
             .then( (ok) => {
                     if(!ok){
                     throw new Error("Could not reorder tasklist" + taskListToMap.id);
                     }
-                    cogoToast.success(`Reordered Task List by Install Date`, {hideAfter: 4});
+                    cogoToast.success(`Reordered Task List by ${prop_to_order}`, {hideAfter: 4});
                     //setTaskListTasks(null);
                     setTaskListTasksRefetch(true);
                     //Set sorters back to priority
@@ -151,7 +164,7 @@ const TaskListSidebar = (props) => {
         confirmAlert({
             customUI: ({onClose}) => {
                 return(
-                    <ConfirmYesNo onYes={reorder} onClose={onClose} customMessage={"Reprioritize by Install Date? This cannot be undone."}/>
+                    <ConfirmYesNo onYes={reorder} onClose={onClose} customMessage={`Reprioritize by ${prop_to_order}? This cannot be undone.`}/>
                 );
             }
         })
@@ -177,7 +190,7 @@ const TaskListSidebar = (props) => {
         if(!taskList){
             console.error("Bad tasklist in handleChangeTaskListToMap");
         }
-        setSorters([{property: 'priority_order', 
+        setSorters([{property: activeTVOrder, 
                         direction: "ASC"}]);
         //TODO: add task_list_id to filters objects that are saved, so we can remember filters on tl switches
         // implement if we add more task_list switching functionality
@@ -215,8 +228,8 @@ const TaskListSidebar = (props) => {
                              <Update className={classes.icon} />
                             <span
                                 className={classes.text_button} 
-                                onClick={event => handlePrioritizeByInstallDate(event, taskListToMap)}>
-                                RePrioritize by Install Date
+                                onClick={event => handlePrioritizeByDate(event, taskListToMap)}>
+                                Reorder {activeTVOrder} to date
                             </span>
                         </div>
                     </div>

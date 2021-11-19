@@ -219,7 +219,7 @@ async function removeMultipleFromList(task_ids, taskList_id, user){
 }
 
 //Maybe move call this in AddTaskToTaskList instead of calling in frontend
-async function reorderTaskList(task_ids, taskList_id, user){
+async function reorderTaskList(task_ids, taskList_id, user, order){
     const route = '/scheduling/taskLists/reorderTaskList';
     try{
         var response = await fetch(route,
@@ -228,7 +228,7 @@ async function reorderTaskList(task_ids, taskList_id, user){
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ids: task_ids, tl_id: taskList_id, user})
+                body: JSON.stringify({ids: task_ids, tl_id: taskList_id, user, order})
             });
         return response.ok;
     }catch(error){

@@ -23,8 +23,8 @@ function getParam(req, name, optional) {
 }
 
 const checkPermission = (perm_string, page) =>{
-	console.log("perm_string", perm_string);
-	console.log("page", page);
+	//console.log("perm_string", perm_string);
+	//console.log("page", page);
     if(perm_string == null || perm_string == undefined){
         return false;
     }
