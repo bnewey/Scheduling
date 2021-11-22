@@ -17,6 +17,7 @@ import TaskListActionAdd from './TaskListActionAdd';
 import TaskListDateDialog from './TaskListDateDialog';
 import {createSorter} from '../../../js/Sort';
 import Util from '../../../js/Util';
+import UtilFrontEndOnly from '../../../js/UtilFrontEndOnly';
 import Settings from '../../../js/Settings';
 import cogoToast from 'cogo-toast';
 
@@ -111,48 +112,31 @@ const TaskListSidebar = (props) => {
     }
 
     const handlePrioritizeByDate = (event, taskList) => {
-        if(taskListTasks == null || taskListTasks.length <= 0){
-            console.error(`Bad tasklisttasks on reprioritize by ${prop_to_order}`);
-            return;
-        }
-        if(!taskList.id){
-            console.error("Bad taskListId in handlePrioritizeByDate");
-            return;
-        }
 
         var prop_to_order ;
-        switch(activeTVOrder){
-            case "priority_order":
-                prop_to_order = "sch_install_date";
-                break;
-            case "service_order":
-                prop_to_order = "field_date";
-                break;
-            case "drill_order":
-                prop_to_order = "drill_date";
-                break;
-        }
-
-        var tmpArray = taskListTasks.sort(createSorter({property: 'sch_install_date', 
-            direction: "ASC"}))
-        
-        var tmpNoInstall = tmpArray.filter((v,i)=> v[prop_to_order] == null || v[prop_to_order] == "0000-00-00 00:00:00" || v[prop_to_order] == "1970-01-01 00:00:00")
-        var tmpInstall = tmpArray.filter((v,i)=> v[prop_to_order] != null || v[prop_to_order] != "0000-00-00 00:00:00" || v[prop_to_order] != "1970-01-01 00:00:00")
-        var newTaskIds = [...tmpInstall, ...tmpNoInstall ].map((task,i)=> task.t_id);
-        
-        console.log(newTaskIds);
+      switch(activeTVOrder){
+          case "priority_order":
+              prop_to_order = "sch_install_date";
+              break;
+          case "service_order":
+              prop_to_order = "field_date";
+              break;
+          case "drill_order":
+              prop_to_order = "drill_date";
+              break;
+      }
 
         const reorder = () => {
-            TaskLists.reorderTaskList(newTaskIds,taskList.id, user, activeTVOrder)
+            UtilFrontEndOnly.reorderListByDate(TaskLists.reorderTaskList, taskList, taskListTasks, activeTVOrder,prop_to_order, user)
             .then( (ok) => {
                     if(!ok){
                     throw new Error("Could not reorder tasklist" + taskListToMap.id);
                     }
-                    cogoToast.success(`Reordered Task List by ${prop_to_order}`, {hideAfter: 4});
+                    cogoToast.success(`Reordered Task List`, {hideAfter: 4});
                     //setTaskListTasks(null);
                     setTaskListTasksRefetch(true);
                     //Set sorters back to priority
-                    setSorters([{property: 'priority_order', 
+                    setSorters([{property: activeTVOrder, 
                         direction: "ASC"}]);
                 })
             .catch( error => {
@@ -164,7 +148,7 @@ const TaskListSidebar = (props) => {
         confirmAlert({
             customUI: ({onClose}) => {
                 return(
-                    <ConfirmYesNo onYes={reorder} onClose={onClose} customMessage={`Reprioritize by ${prop_to_order}? This cannot be undone.`}/>
+                    <ConfirmYesNo onYes={reorder} onClose={onClose} customMessage={`Reprioritize? This cannot be undone.`}/>
                 );
             }
         })
@@ -359,8 +343,9 @@ const TaskListSidebar = (props) => {
                             <div className={classes.singleItem}>
                                 <ViewColumn className={classes.icon} />
                                 <span
-                                    className={isSelected ? classes.text_button_selected : classes.text_button}
-                                    onClick={event => setActiveTaskView(view.value)}>
+                                    className={isSelected ? classes.task_view_selected : classes.task_view}
+                                    //onClick={event => setActiveTaskView(view.value)}
+                                    >
                                     {view.name}
                                 </span>
                             </div>
@@ -576,6 +561,25 @@ const useStyles = makeStyles(theme => ({
             textDecoration: 'underline',
 
         },
+    },
+    task_view:{
+        flexBasis: '80%',
+        textAlign: 'left',
+        fontSize: '12px',
+        color: '#677fb3',
+        margin: '0% 3% 0% 0%',
+        whiteSpace: 'normal',
+    },
+    task_view_selected:{
+        flexBasis: '80%',
+        textAlign: 'left',
+        fontSize: '12px',
+        color: '#222',
+        margin: '0% 3% 0% 0%',
+        whiteSpace: 'normal',
+        background: '#70aaff70',
+        padding: '0px 3px',
+        borderRadius: 2,
     },
     fieldListItemText:{
         '& span':{

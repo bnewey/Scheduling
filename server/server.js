@@ -17,7 +17,6 @@ const MySQLStore = require('express-mysql-session')(session);
 const auth = require('./google');
 const {bouncie} = require('./lib/bouncie');
 
-logger.info(__dirname + '/key.pem');
 const options = {
   key: fs.readFileSync('/etc/ssl/private/private.key', 'utf8'),
   cert: fs.readFileSync('/etc/ssl/certificate.crt', 'utf8')

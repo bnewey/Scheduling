@@ -245,6 +245,7 @@ const promiseTimeout = function(ms, promise){
     ])
   }
 
+  
 module.exports = { 
     convertISODateTimeToMySqlDateTime,
     convertISODateToMySqlDate,
@@ -255,5 +256,5 @@ module.exports = {
     getCurrentDetailNameByType,
     getCurrentViewNameByType,
     getSubCurrentViewNameByType,
-    promiseTimeout
+    promiseTimeout,
 }
