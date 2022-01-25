@@ -63,6 +63,14 @@ self.addEventListener('push', function (event) {
   }
 });
 
+self.addEventListener( 'visibilitychange' , function() {
+  if (self.hidden) {
+      console.log('bye');
+  } else {
+      console.log('well back');
+  }
+}, false );
+
 // A common UX pattern for progressive web apps is to show a banner when a service worker has updated and waiting to install.
 // NOTE: MUST set skipWaiting to false in next.config.js pwa object
 // https://developers.google.com/web/tools/workbox/guides/advanced-recipes#offer_a_page_reload_for_users

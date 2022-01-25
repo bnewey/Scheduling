@@ -51,6 +51,7 @@ const inventoryKits = require('./lib/inventoryKits.js');
 const inventoryOrdersOut = require('./lib/inventoryOrdersOut.js');
 const inventoryPartsRequest = require('./lib/inventoryPartsRequest.js');
 const notifications = require('./lib/notifications.js');
+const {imageRouter} = require('./lib/images.js');
 const webPush = require('./lib/webPush');
 
 const {emailRouter} = require('./lib/email');
@@ -95,6 +96,7 @@ nextApp
     app.use('/scheduling/inventoryPartsRequest', inventoryPartsRequest);
     app.use('/scheduling/notifications', notifications.router);
     app.use('/scheduling/webPush', webPush.router);
+    app.use('/images', imageRouter);
     ///
 
     //Session   ////
