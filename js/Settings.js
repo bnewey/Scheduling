@@ -196,9 +196,10 @@ async function getTaskUserFilters(user_id){
             throw new Error("getTaskUserFilters returned empty list or bad query")
         }
         var list = await data.json();
-        if(list?.user_error || list?.error){
-            throw list;
-        }
+        // if(list?.user_error || list?.error){
+        //     throw list;
+        // }
+        console.log("list", list);
         return(list);
     }catch(error){
         throw error;
