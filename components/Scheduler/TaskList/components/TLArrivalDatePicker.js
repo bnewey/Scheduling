@@ -15,7 +15,7 @@ import clsx from 'clsx';
 const TLArrivalDatePicker = (props) => {
  
     //PROPS
-    const { data, taskListTasks,setTaskListTasks ,...other} = props;
+    const { data,viewOnly, taskListTasks,setTaskListTasks ,...other} = props;
 
     //STATE
     const [isLoadingState, setIsLoadingState] = React.useState(true);
@@ -123,15 +123,14 @@ const TLArrivalDatePicker = (props) => {
         //null scoreboard_arrival_dates (if date passed but not arrived )
         var passedArrivalItems = data.filter((item) => item.scoreboard_arrival_date != null && item.vendor != 2 && item.scoreboard_arrival_status == 0 && moment(item.scoreboard_arrival_date) <= moment(new Date()) ) 
 
-
         if(passedArrivalItems?.length > 0){
             passedArrivalItems.forEach((item)=>{
-                statusListUpdate.push({woi_id: item.record_id, type: 'error', title: 'Passed Arrival Date',
-                     description: `Arrival date passed but not arrived.`, sign: `${item.description}`, status: 'empty'})
+                statusListUpdate.push({woi_id: item.record_id, type: 'error', title: 'Passed Arrival Date', date: item.scoreboard_arrival_date,
+                     description: `Arrival date passed but not arrived.`, sign: `${item.description}`, status: 'late'})
             })
         }
 
-        //console.log("Status lst update", statusListUpdate);
+        console.log("Status lst update", statusListUpdate);
         setStatusList(statusListUpdate);
 
         //get selected woi depending on on site or waiting arrival or not set
@@ -279,8 +278,9 @@ const TLArrivalDatePicker = (props) => {
             if( current.date == null){
                 return prev;
             }
-            return (prev.date < current.date) ? prev : current
+            return moment(prev.date).isBefore(moment(current.date)) ? prev : current
         })
+        console.log("getMinDateitem", minDateItem);
         return minDateItem?.date ? moment(minDateItem.date).format('MM-DD-YYYY') : ''
     }
 
@@ -335,6 +335,7 @@ const TLArrivalDatePicker = (props) => {
                 
             }
         }
+        
 
         return return_value;
     }
@@ -377,9 +378,11 @@ const TLArrivalDatePicker = (props) => {
 
     return(
         <div className={classes.root}>
-            
-            <TextField {...inputProps} onClick={handleOpenPicker} value={  handleGetInputValue(statusList) } className={classes.input} variant="outlined" />
-            <Dialog  {...wrapperProps}  maxWidth="md" >
+            {viewOnly ? <div className={classes.viewOnlyDiv}><span className={classes.viewOnlySpan}>{handleGetInputValue(statusList)}</span></div>
+            :
+
+            <TextField {...inputProps} onClick={handleOpenPicker} value={  handleGetInputValue(statusList) } className={classes.input} variant="outlined" />}
+            { !viewOnly && <Dialog  {...wrapperProps}  maxWidth="md" >
                 <ReactTooltip effect={"solid"} delayShow={500}/>
                 <DialogTitle id="customized-dialog-title" onClose={wrapperProps.onDismiss} className={classes.dialogTitle}>
                     {props.title ? props.title : "Select Date"}
@@ -446,7 +449,7 @@ const TLArrivalDatePicker = (props) => {
                 </div>
                 </DialogActions>
                 </DialogContent>
-            </Dialog>
+            </Dialog>}
         </div>
     );
 
@@ -700,6 +703,19 @@ const useStyles = makeStyles(theme => ({
     },
     pickerDaySetArrived:{
         backgroundColor: 'rgba(0, 0, 0, 0.80)',
+    },
+    viewOnlyDiv:{
+        display: 'flex',
+        flexDirection: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: '0px 5%',
+    },
+    viewOnlySpan:{
+        fontFamily: 'arial',
+        fontWeight: '500',
+        fontSize: '1.3em !important',
+
     }
 
   }));

@@ -1139,6 +1139,7 @@ const TaskListTasks = (props) =>{
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                         <TLArrivalDatePicker   showTodayButton
                         clearable
+                        viewOnly={tableItem.viewOnly}
                         inputVariant="outlined"
                         variant="modal" 
                         title="Select Arrival Date"

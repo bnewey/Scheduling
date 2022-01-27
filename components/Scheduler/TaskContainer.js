@@ -66,7 +66,7 @@ const TaskContainer = function(props) {
               {text: "Type", field: "type", width: (size)=> size == "small" ? '7%' : '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
               {text: "Description", field: "description", width: (size)=> size == "small" ? '' : '17%', maxWidth: 170, style: 'smallListItemText', type: 'text',dontShowInSmall: true},
               // {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '' : '8%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
-              {text: "Arrival Date", field: "wo_arrival_dates", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+              {text: "Arrival Date", field: "wo_arrival_dates", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true,viewOnly: true},
               {text: "Drill Date", field: "drill_date", width: (size)=> size == "small" ? '18%' : '9%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date'},
               {text: "Drill Crew", field: "drill_crew", width: (size)=> size == "small" ? '9%' : '6%', maxWidth: 100, style: 'drillSmallListItemText', type: 'text', pdfField: 'drill_crew_leader'}, 
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '6%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
@@ -80,7 +80,7 @@ const TaskContainer = function(props) {
               {text: "Type", field: "type", width: (size)=> size == "small" ? '10%' : '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
               {text: "Description", field: "description", width: (size)=> size == "small" ? '' : '21%', maxWidth: 170, style: 'smallListItemText', type: 'text',dontShowInSmall: true},
               //{text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '' : '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
-              {text: "Arrival Date", field: "wo_arrival_dates", width: (size)=> size == "small" ? '14%' : '8%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+              {text: "Arrival Date", field: "wo_arrival_dates", width: (size)=> size == "small" ? '14%' : '8%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true,viewOnly: true},
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '10%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '17%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '11%' : '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},
@@ -113,7 +113,19 @@ const TaskContainer = function(props) {
             {text: "Drill Date", field: "drill_date", width: (size)=> size == "small" ? '18%' : '9%', maxWidth: 100, style: 'drillSmallListItemText', type: 'date', viewOnly: true},
             // {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '6%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
             {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '12%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date',  viewOnly: true},
-            ]},]
+            ]},
+    {name: "FP Arrival", value: 5, permission_access: ["crew"],order: 'priority_order',
+      array: [{text: "Order", field: "priority_order", width: (size)=> size == "small" ? '4%' : '2%', maxWidth: 150,style: 'smallListItemText', type: 'number'},
+          {text: "WO #", field: "table_id", width: (size)=> size == "small" ? '' : '3%', maxWidth: 100,style: 'smallListItemText', type: 'number',dontShowInSmall: true},
+          {text: "Name", field: "t_name", width: (size)=> size == "small" ? '26%' : '32%', maxWidth: 170, style: 'boldListItemText', type: 'text'},
+          {text: "State", field: "state", width: (size)=> size == "small" ? '8%' : '3%', maxWidth: 100, style: 'smallListItemText', type: 'text'},
+          {text: "Type", field: "type", width: (size)=> size == "small" ? '10%' : '5%', maxWidth: 100,style: 'smallListItemText', type: 'text'},
+          {text: "Description", field: "description", width: (size)=> size == "small" ? '' : '21%', maxWidth: 170, style: 'smallListItemText', type: 'text',dontShowInSmall: true},
+          //{text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '' : '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+          {text: "Arrival Date", field: "wo_arrival_dates", width: (size)=> size == "small" ? '14%' : '8%', maxWidth: 50, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+          {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '10%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
+          {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '17%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date',viewOnly: true},
+          {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '11%' : '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},]
 
     
 

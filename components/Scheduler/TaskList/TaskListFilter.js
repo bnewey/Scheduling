@@ -551,7 +551,9 @@ const TaskListFilter = (props) => {
     }
 
     const isFilterSelected = React.useCallback((filter)=>{
-        return filter && filters &&_.isEqual(filters ,filter.filter_json) && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and") 
+        console.log("Filter", filter);
+
+        return filter && filters &&_.isEqual(filters ,filter.filter_json) && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and") && activeTaskView === filter.task_view
     }, [filters, filterInOrOut, filterAndOr])
 
     const handleOverWriteSavedFilter = (event, item)=> {
