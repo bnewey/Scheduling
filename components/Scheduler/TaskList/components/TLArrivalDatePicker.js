@@ -134,10 +134,8 @@ const TLArrivalDatePicker = (props) => {
         setStatusList(statusListUpdate);
 
         //get selected woi depending on on site or waiting arrival or not set
-        let selected = statusListUpdate.filter((item)=> item.status == 'empty').length > 0 ? statusListUpdate.filter((item)=> item.status == 'empty') : 
-                                statusListUpdate.filter((item)=> item.status == 'waiting').length > 0 ? statusListUpdate.filter((item)=> item.status == 'waiting') :
-                                    statusListUpdate.filter((item)=> item.status == 'arrived').length > 0 ? statusListUpdate.filter((item)=> item.status == 'arrived') : [] ;
-        setSelectedWOIs(selected)
+        //let selected = statusListUpdate.filter((item)=> true) ;
+        setSelectedWOIs(statusListUpdate)
         if(statusListUpdate.length){
             setInputValue(getMinDateItem(statusListUpdate))
         }
@@ -282,12 +280,15 @@ const TLArrivalDatePicker = (props) => {
         })
         console.log("getMinDateitem", minDateItem);
         return minDateItem?.date ? moment(minDateItem.date).format('MM-DD-YYYY') : ''
+        
     }
 
     const handleGetInputValue =  (list) =>{
 
-        var return_value ="";
-        return_value = getMinDateItem(list);
+        var return_value =getMinDateItem(list);
+        if(return_value == ''){
+            return_value = '*Not Set*';
+        }
 
         //Overright arrived return_value if one or more are on site
         var onSiteItems = list.filter((item)=> {
