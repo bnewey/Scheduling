@@ -289,7 +289,7 @@ const TLArrivalDatePicker = (props) => {
         if(return_value == ''){
             return_value = '*Not Set*';
         }
-
+ 
         //Overright arrived return_value if one or more are on site
         var onSiteItems = list.filter((item)=> {
             if(item.status == 'empty' ){
