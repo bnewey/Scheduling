@@ -39,7 +39,9 @@ async function signInOrSignUp({ database, googleId, email, googleToken, displayN
       return user;
     }
 
-    if(!(await updateUserGoogleToken( database, googleId , modifier))){
+    var a = await updateUserGoogleToken( database, googleId , modifier);
+    console.log("updateUserTokenvar", a)
+    if(!(a)){
       console.error("Failed to update GoogleToken");
     }
 
@@ -119,23 +121,26 @@ async function  getUserById (database, id) {
 };
 
 async function updateUserGoogleToken (database, googleId, modifier) {
-  var accessToken ,refreshToken;
-  accessToken = modifier.access_token ? modifier.access_token : null;
-  refreshToken = modifier.refresh_token ? modifier.refresh_token : null;
+  return new Promise(async(resolve, reject)=>{
 
-  const sql = 'UPDATE google_token gt SET gt.accessToken=?, gt.refreshToken=? WHERE gt.id = (SELECT u.googleTokenId FROM google_users u WHERE u.googleId = ? ) ';
+      var accessToken ,refreshToken;
+      accessToken = modifier.access_token ? modifier.access_token : null;
+      refreshToken = modifier.refresh_token ? modifier.refresh_token : null;
+    
+      const sql = 'UPDATE google_token gt SET gt.accessToken=?, gt.refreshToken=IFNULL(NULL, ?) WHERE gt.id = (SELECT u.googleTokenId FROM google_users u WHERE u.googleId = ? ) ';
+    
+      try{
+          const results = await database.query(sql, [accessToken, refreshToken, googleId]);
+    
+          resolve(results);
+      }
+      catch(error){
+          console.log("User (updateUserGoogleToken) error: " + error);
+          reject(0);
+    }
+  })
 
-  try{
-      const results = await database.query(sql, [accessToken, refreshToken, googleId]);
-      logger.info("Update UserGoogleToken", modifier);
-
-      var response = await json(results);
-      return (response);
-  }
-  catch(error){
-      logger.error("User (updateUserGoogleToken): " + error);
-      return 0;
-  }
+  
 };
 
 async function createUser ({database, createdAt, googleId,email,googleToken,displayName,avatarUrl,slug,isAdmin}) {
