@@ -21,7 +21,7 @@ import _, { property } from 'lodash';
 const InstallDateFilter = (props) => {
     //PROPS
     const {activeTaskView,taskViews, handleRefreshView, taskListTasksSaved, tLTasksExtraSaved , installDateFilters, setInstallDateFilters,
-        setRefreshView,tabValue, taskListTasks} = props;
+        setRefreshView,tabValue, taskListTasks, setSorters, activeTVOrder} = props;
  
     //STATE
     const [installDateFilterOpen, setInstallDateFilterOpen] = useState(null)
@@ -99,6 +99,8 @@ const InstallDateFilter = (props) => {
         }
 
         setInstallDateFilters(newArray);
+        setSorters([{property: activeTVOrder, 
+            direction: "ASC"}])
 
         if(!ctrl){
             handleCloseSelectMenu();

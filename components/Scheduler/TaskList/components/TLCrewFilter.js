@@ -21,7 +21,7 @@ import _, { property } from 'lodash';
 const CrewFilter = (props) => {
     //PROPS
     const {activeTaskView,taskViews, handleRefreshView, taskListTasksSaved,crewFilters, setCrewFilters,
-        setRefreshView,tabValue, fieldId, tLTasksExtraSaved} = props;
+        setRefreshView,tabValue, fieldId, tLTasksExtraSaved, setSorters, activeTVOrder} = props;
  
     //STATE
     const [crewFilterOpen, setCrewFilterOpen] = useState(null)
@@ -91,6 +91,8 @@ const CrewFilter = (props) => {
         }
 
         setCrewFilters(newArray);
+        setSorters([{property: activeTVOrder, 
+            direction: "ASC"}])
 
         if(!ctrl){
             handleCloseSelectMenu();

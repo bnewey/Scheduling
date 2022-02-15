@@ -14,12 +14,14 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import useWindowSize from '../../UI/useWindowSize';
 import WoiStatusCheck from './components/WoiStatusCheck'
 import TaskLists from '../../../js/TaskLists';
+import UtilFrontEndOnly from '../../../js/UtilFrontEndOnly';
 import Tasks from '../../../js/Tasks';
 import Crew from '../../../js/Crew';
 import cogoToast from 'cogo-toast';
 import Util from '../../../js/Util';
 import { select } from 'async';
 import { CrewContext } from '../Crew/CrewContextContainer';
+import { TaskContext } from '../TaskContainer';
 
 import {AutoSizer, List, WindowScroller } from 'react-virtualized';
 import ReactDOM from 'react-dom';
@@ -60,6 +62,8 @@ const TaskListTasks = (props) =>{
               handleTaskClick, handleTaskContextMenu, user, activeTaskView, activeTVOrder} = props;
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
+    const {arrivalDateFilters, drillDateFilters, installDateFilters, drillCrewFilters, installCrewFilters, setSorters,
+      tLTasksExtraSaved, setTLTasksExtraSaved} = useContext(TaskContext)
 
     useEffect(()=>{
       rebuildTooltip();
@@ -121,19 +125,12 @@ const TaskListTasks = (props) =>{
     ////
 
     //// DRAG N DROP
+    const reorderMultiple = (list, ids, endIndex, orderBy = 'list') =>{
+      var result = Array.from(list);       
+      var removedArray = [];
 
-    // a little function to help us with reordering the result
-    // const reorder = (list, startIndex, endIndex) => {
-    //   const result = Array.from(list);
-    //   const [removed] = result.splice(startIndex, 1);
-    //   result.splice(endIndex, 0, removed);
-
-    //   return result;
-    // };
-
-    const reorderMultiple = (list, ids, endIndex) =>{
-      var result = Array.from(list); 
-      const removedArray = [];
+      //FUNCTIONALITY -- remove all ids and insert removed after
+      
       result = result.filter((task, i)=>{
         //check if in our selectedids and remove if so
         if(ids.filter((id, p)=> ( task.t_id == id) ).length){
@@ -142,11 +139,20 @@ const TaskListTasks = (props) =>{
         }
         return true;
       })
+
+      //order by ids instead of by list
+      if(orderBy == 'ids'){
+        removedArray = removedArray.sort((first, second)=>{
+          return (ids.indexOf(first.t_id) - ids.indexOf(second.t_id) )
+        })
+      }
+      
       //Add tasks back in, in the appro spot
       result.splice(endIndex , 0, ...removedArray);
       
       return result;
     }
+    
 
     const grid = 8;
 
@@ -172,7 +178,6 @@ const TaskListTasks = (props) =>{
     });
 
     const onDragEnd = useCallback((result) => {
-      //console.log(result);
       // dropped outside the list
       if (!result.destination) {
         return;
@@ -188,15 +193,31 @@ const TaskListTasks = (props) =>{
         return;
       }
 
-      var items = reorderMultiple(taskListTasksSaved, selectedTasks.length > 1 ? selectedTasks : [taskListTasks[result.source.index].t_id], taskListTasks[result.destination.index][activeTVOrder]-1);     
+      var items;
+      var list_to_reorder = [];
+      if(arrivalDateFilters?.length > 0 || drillDateFilters?.length > 0 ||  installDateFilters?.length > 0 || drillCrewFilters?.length > 0 || installCrewFilters?.length > 0){
+        //reorder within list, instead of full tLTasksExtraSaved
+        var firstIndex = taskListTasks[0][activeTVOrder];
+        list_to_reorder = taskListTasks.map((item, index)=>{
+          item[activeTVOrder] = index+1;
+          return item;
+        });
+        var specificItems = reorderMultiple(list_to_reorder, selectedTasks.length > 1 ? selectedTasks : [list_to_reorder[result.source.index].t_id], list_to_reorder[result.destination.index][activeTVOrder]-1);  
+        //then reorder using those specific items -- use "ids" to specify keeping order of the specific items, instead of tlTaskExtraSaved
+        items = reorderMultiple(tLTasksExtraSaved, specificItems.map((item)=> item.t_id), firstIndex -1 , "ids");
+      }else{
+        list_to_reorder = tLTasksExtraSaved;
+        items = reorderMultiple(list_to_reorder, selectedTasks.length > 1 ? selectedTasks : [list_to_reorder[result.source.index].t_id], list_to_reorder[result.destination.index][activeTVOrder]-1);  
+      }
+
+      
       var newTaskIds = items.map((item, i)=> item.t_id);
+
       TaskLists.reorderTaskList(newTaskIds,taskListToMap.id, user, activeTVOrder)
         .then( (ok) => {
                 if(!ok){
                   throw Error("Could not reorder tasklist" + taskListToMap.id);
                 }
-                cogoToast.success(`Reordered Task List`, {hideAfter: 4});
-                //setTaskListTasks(null);
                 setTaskListTasksRefetch(true);
                 
             })

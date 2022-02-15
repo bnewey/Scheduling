@@ -21,7 +21,7 @@ import _, { property } from 'lodash';
 const TLDrillDateFilter = (props) => {
     //PROPS
     const { taskViews, activeTaskView, handleRefreshView, taskListTasksSaved,tLTasksExtraSaved, drillDateFilters, setDrillDateFilters,
-        setRefreshView,tabValue} = props;
+        setRefreshView,tabValue,setSorters, activeTVOrder} = props;
  
     //STATE
     const [drillDateFilterOpen, setDrillDateFilterOpen] = useState(null)
@@ -108,6 +108,8 @@ const TLDrillDateFilter = (props) => {
         }
         console.log("newArray", newArray);
         setDrillDateFilters(newArray);
+        setSorters([{property: activeTVOrder, 
+            direction: "ASC"}])
 
         if(!ctrl){
             handleCloseSelectMenu();

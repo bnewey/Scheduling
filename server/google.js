@@ -70,6 +70,7 @@ function auth({ ROOT_URL, app, database }) {
     '/oauth2callback',
     passport.authenticate('google', {
       failureRedirect: '/login',
+      failureFlash: 'Invalid Google credentials. Try clearing site data in browser.'
     }),
     (req, res) => {
       res.redirect('/');

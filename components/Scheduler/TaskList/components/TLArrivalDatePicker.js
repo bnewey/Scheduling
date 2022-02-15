@@ -130,7 +130,6 @@ const TLArrivalDatePicker = (props) => {
             })
         }
 
-        console.log("Status lst update", statusListUpdate);
         setStatusList(statusListUpdate);
 
         //get selected woi depending on on site or waiting arrival or not set
@@ -278,7 +277,6 @@ const TLArrivalDatePicker = (props) => {
             }
             return moment(prev.date).isBefore(moment(current.date)) ? prev : current
         })
-        console.log("getMinDateitem", minDateItem);
         return minDateItem?.date ? moment(minDateItem.date).format('MM-DD-YYYY') : ''
         
     }
