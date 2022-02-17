@@ -547,6 +547,12 @@ const TaskListFilter = (props) => {
         setFilters(item.filter_json);
         setFilterInOrOut(item.in_out == 0 ? "in" : (item.in_out == 1 ? "out": null ) );
         setFilterAndOr(item.and_or == 0 ? "and" : (item.and_or == 1 ? "or": null ));
+
+        setInstallDateFilters([]);
+        setInstallCrewFilters([]);
+        setArrivalDateFilters([]);
+        setDrillDateFilters([]);
+        setDrillCrewFilters([]);
         cogoToast.success(`Filtering by ${item.name}`)
     }
 
