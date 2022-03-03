@@ -42,3 +42,6 @@ git reset <commit hash #>   //git log will give hash#'s
 
 // How to remove files from remote but keep locally
 ex: git rm --cached .env
+
+//How to set token to local repo
+git remote set-url origin https://<githubtoken>@github.com/<username>/<repositoryname>.git

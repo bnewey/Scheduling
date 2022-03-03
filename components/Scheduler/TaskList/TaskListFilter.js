@@ -556,6 +556,14 @@ const TaskListFilter = (props) => {
         cogoToast.success(`Filtering by ${item.name}`)
     }
 
+    const handleClearToolbarFiltersOnly = (event) =>{
+        setInstallDateFilters([]);
+        setInstallCrewFilters([]);
+        setArrivalDateFilters([]);
+        setDrillDateFilters([]);
+        setDrillCrewFilters([]);
+    }
+
     const isFilterSelected = React.useCallback((filter)=>{
        
 
@@ -695,6 +703,18 @@ const TaskListFilter = (props) => {
                 <>
                     
                 </>}
+                {(installDateFilters?.length > 0 ||  installCrewFilters?.length > 0 ||  arrivalDateFilters?.length > 0 ||  drillDateFilters?.length > 0 || 
+                        drillCrewFilters?.length > 0) &&  
+                    <Button className={classes.clearTFilterButton}
+                        onClick={event=> handleClearToolbarFiltersOnly(event)}
+                        variant="text"
+                        color="secondary"
+                        size="medium"
+                    >
+                        <DeleteForeverIcon/>
+                        <Box display={{ xs: 'none', md: 'inline' }}  component="span">Clear Toolbar Filters</Box>
+                    </Button>
+                }
                 <div className={classes.numItemsDiv}>
                     {filteredItems ? filteredItems.length : 0}&nbsp;Item(s)
                 </div>
@@ -1027,6 +1047,17 @@ const useStyles = makeStyles(theme => ({
         border: '1px solid #a17000',
         '&&:hover':{
             backgroundColor: '#97bec9',
+            color: '#000',
+        }
+    },
+    clearTFilterButton:{
+        margin: '0px 10px',
+        backgroundColor:  '#ffa65a' ,
+        color: '#393938',
+        fontWeight: '500',
+        border: '1px solid #a17000',
+        '&&:hover':{
+            backgroundColor: '#ff973f',
             color: '#000',
         }
     },

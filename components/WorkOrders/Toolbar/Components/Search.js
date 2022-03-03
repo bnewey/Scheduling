@@ -38,6 +38,7 @@ const Search = function(props) {
     {value: "all", displayValue: 'All'},
     {value: "wo.description", displayValue: 'Description'},
     {value: "wo.record_id", displayValue: 'Work Order #'},
+    {value: "wo.po_number", displayValue: 'Purchase Order #'},
     {value: "a.name", displayValue: 'Billing Name'},
     {value: "c.name", displayValue: 'Entity Name'},
     {value: "wo.job_reference", displayValue: 'Job Reference'},

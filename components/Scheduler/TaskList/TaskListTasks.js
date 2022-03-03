@@ -48,6 +48,8 @@ import TLArrivalDatePicker from './components/TLArrivalDatePicker';
 import TLCrewJobsTypePopover from './components/TLCrewJobsTypePopover';
 import TLCrewJobsServiceCounter from './components/TLCrewJobsServiceCounter';
 
+import TLFpOrderPicker from './components/TLFpOrderPicker';
+
 import Work_Orders from '../../../js/Work_Orders';
 
 
@@ -1174,8 +1176,11 @@ const TaskListTasks = (props) =>{
                         data={woiData?.filter((item)=>item.work_order == task.table_id)}
                         task={task} />
               </MuiPickersUtilsProvider></div>
-                break;
+            break;
+        case 'fp_order_number':
+          return_value = <TLFpOrderPicker task={task} viewOnly={tableItem.viewOnly} setTaskListTasksRefetch={setTaskListTasksRefetch} user={user} />
           break;
+        
         default:{
           
         }

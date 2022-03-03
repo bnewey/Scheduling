@@ -48,7 +48,7 @@ router.post('/getTask', async (req,res) => {
     ' date_format(t.date_assigned, \'%Y-%m-%d %H:%i:%S\') as date_assigned, date_format(t.date_completed, \'%Y-%m-%d %H:%i:%S\') as date_completed, ' + 
     ' wo.description, wo.notes, t.priority_order, t.task_list_id, t.task_status, t.drilling, t.sign, t.artwork, t.table_id,  ' + 
     ' date_format(t.order_date, \'%Y-%m-%d %H:%i:%S\') as order_date, t.first_game, date_format(wo.date, \'%Y-%m-%d\') as wo_date, wo.type AS wo_type, t.install_location, ' +
-    ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, t.type, ' + 
+    ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, t.type, t.fp_order_number, ' + 
     ' t.delivery_crew, t.delivery_order, date_format(delivery_date, \'%Y-%m-%d %H:%i:%S\') as delivery_date,t.install_order, ' + 
     ' cjd.crew_id AS drill_crew, date_format(cjd.job_date, \'%Y-%m-%d %H:%i:%S\') as drill_date, ' + 
     ' cji.crew_id AS install_crew, cji.id AS install_job_id,  ' + 
@@ -256,10 +256,10 @@ router.post('/copyTaskForNewType', async (req,res) => {
     //copy task and give it new type
     const sql = ' INSERT INTO tasks (id_history, name, id_users_entered, description, hours_estimate, date_assigned, order_assigned, ' + 
     '  id_task_types, table_id, id_time_tracker_category, date_completed, company, priority_order, drilling, sign, artwork, order_date, ' +
-    ' first_game, work_type, install_location, task_status, task_list_id, type, date_entered  ) ' +
+    ' first_game, work_type, install_location, task_status, task_list_id, type, date_entered, fp_order_number  ) ' +
     ' SELECT t.id_history, t.name, t.id_users_entered, wo.description, t.hours_estimate, t.date_assigned, t.order_assigned, t.' + 
     '  id_task_types, t.table_id, t.id_time_tracker_category, t.date_completed, t.company, t.priority_order, t.drilling, t.sign, t.artwork, t.order_date, t.' +
-    ' first_game, t.work_type, t.install_location, t.task_status, t.task_list_id, ? as type, ? as date_entered FROM tasks t ' + 
+    ' first_game, t.work_type, t.install_location, t.task_status, t.task_list_id, ? as type, ? as date_entered, t.fp_order_number FROM tasks t ' + 
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id WHERE id = ? ';
 
     try{
@@ -273,6 +273,33 @@ router.post('/copyTaskForNewType', async (req,res) => {
     }
 });
 
+
+router.post('/updateFpOrderNumber', async (req,res) => {
+    var order_number, task_id, user;
+    if(req.body){
+        order_number = req.body.order_number;
+        task_id = req.body.task_id;
+        user = req.body.user;
+    }
+
+    if(user && !checkPermission(user.perm_string, 'scheduling') && !user.isAdmin){
+        logger.error("Bad permission", [user]);
+        res.status(400).json({user_error: 'Failed permission check'});
+        return;
+    }
+    
+    const sql = ' UPDATE tasks set fp_order_number=? WHERE id = ?  ';
+
+    try{
+        const results = await database.query(sql, [order_number, task_id]);
+        logger.info("updateFpOrderNumber " + order_number + " for task: " + task_id );
+        res.json(results);
+    }
+    catch(error){
+        logger.error("Tasks (updateFpOrderNumber): " + error);
+        res.sendStatus(400);
+    }
+});
 
 
 

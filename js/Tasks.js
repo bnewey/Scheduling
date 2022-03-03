@@ -201,6 +201,30 @@ async function copyTaskForNewType(t_id, new_type){
     }
 }
 
+async function updateFpOrderNumber(order_number, task_id, user){
+    const route = '/scheduling/tasks/updateFpOrderNumber';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({order_number, task_id, user})
+        });
+
+        if(!data.ok){
+            throw new Error("updateFpOrderNumber returned empty list or bad query")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
 
 module.exports = {
     getAllTasks: getAllTasks,
@@ -212,4 +236,5 @@ module.exports = {
     saveCoordinates: saveCoordinates,
     addAndSaveAddress,
     copyTaskForNewType,
+    updateFpOrderNumber
 };
