@@ -412,7 +412,7 @@ const TaskListMain = (props) => {
                                     setModalOpen={setModalOpen} 
                                     setModalTaskId={setModalTaskId}
                                     tableInfo={tableInfo}
-                                    priorityList={priorityList} setTaskListToMap={setTaskListToMap} setSelectedIds={setSelectedIds}
+                                    priorityList={priorityList} setSelectedIds={setSelectedIds}
                                     taskListTasksSaved={taskListTasksSaved} setTaskListTasksSaved={setTaskListTasksSaved} sorters={sorters} filters={filters}
                                     woiData={woiData} taskListTasksRefetch={taskListTasksRefetch} setTaskListTasksRefetch={setTaskListTasksRefetch}
                                     taskLists={taskLists}

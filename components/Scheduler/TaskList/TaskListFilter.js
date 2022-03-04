@@ -637,8 +637,8 @@ const TaskListFilter = (props) => {
                            {taskUserFilters && activeTaskView &&
                                 <Select
                                 native
-                                value={taskUserFilters.find((filter, index)=> (
-                                    isFilterSelected(filter) )).id || "Select"}
+                                value={taskUserFilters?.find((filter, index)=> (
+                                    isFilterSelected(filter) ))?.id || "Select"}
                                 onChange={(event)=> { 
                                     var tmp = taskUserFilters?.find((filter, index)=> (
                                         event.target.value == filter.id ))
