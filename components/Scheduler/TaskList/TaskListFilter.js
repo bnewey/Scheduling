@@ -35,6 +35,7 @@ import TaskListFilterTieTaskView from './TaskListFilterTieTaskView';
 import TLInstallDateFilter from './components/TLInstallDateFilter';
 import TLDrillDateFilter from './components/TLDrillDateFilter';
 import TaskListFilterSubscribeToType from './TaskListFilterSubscribeToType';
+import ArrivalDateFilter from './components/TLArrivalDateFilter';
 
 
 const TaskListFilter = (props) => {
@@ -566,9 +567,8 @@ const TaskListFilter = (props) => {
 
     const isFilterSelected = React.useCallback((filter)=>{
        
-
         return filter && filters &&_.isEqual(filters ,filter.filter_json) && filterInOrOut === (filter.in_out ? "out" : "in" )&& filterAndOr === (filter.and_or ? "or" : "and") && activeTaskView === filter.task_view
-    }, [filters, filterInOrOut, filterAndOr])
+    }, [filters, filterInOrOut, filterAndOr,activeTaskView])
 
     const handleOverWriteSavedFilter = (event, item)=> {
         if(!item || !user || !filterInOrOut || !filterAndOr){
@@ -634,11 +634,11 @@ const TaskListFilter = (props) => {
                 </Button>
                 {!filterModalOpen &&
                         <div className={classes.savedFilterSelectDiv}>
-                           
+                           {taskUserFilters && activeTaskView &&
                                 <Select
                                 native
-                                value={taskUserFilters?.find((filter, index)=> (
-                                     isFilterSelected(filter) ))?.id || "Select"}
+                                value={taskUserFilters.find((filter, index)=> (
+                                    isFilterSelected(filter) )).id || "Select"}
                                 onChange={(event)=> { 
                                     var tmp = taskUserFilters?.find((filter, index)=> (
                                         event.target.value == filter.id ))
@@ -651,11 +651,11 @@ const TaskListFilter = (props) => {
 
                                 }}
                                 >
-                                <option aria-label="None" value="Select"/>
+                                <option aria-label="None" value="Select">Select</option>
                                 {taskUserFilters?.map((filter)=>(
                                     <option value={filter.id}>{filter.name}</option>
                                 ))}
-                                </Select>
+                                </Select>}
                         </div>
                     }
                 {filters && filters.length > 0 ? <>
