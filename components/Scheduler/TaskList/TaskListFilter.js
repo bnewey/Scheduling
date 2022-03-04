@@ -651,7 +651,7 @@ const TaskListFilter = (props) => {
 
                                 }}
                                 >
-                                <option aria-label="None" value="Select">Select</option>
+                                <option aria-label="None" value="Select"></option>
                                 {taskUserFilters?.map((filter)=>(
                                     <option value={filter.id}>{filter.name}</option>
                                 ))}
