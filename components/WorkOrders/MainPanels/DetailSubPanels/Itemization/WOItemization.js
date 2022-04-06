@@ -349,7 +349,7 @@ const useStyles = makeStyles(theme => ({
     maxHeight: 700,
   },
   container_small:{
-    maxHeight: 300
+    maxHeight: 400
   },
   detailInfoDiv:{
     display: 'flex',
@@ -362,7 +362,7 @@ const useStyles = makeStyles(theme => ({
     maxHeight: '200px',
   },
   addWoiDiv:{
-    margin: '2%',
+    margin: '1%',
   },
   woiDiv:{
     display: 'flex',
