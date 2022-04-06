@@ -61,13 +61,13 @@ function auth({ ROOT_URL, app, database }) {
   app.use(passport.session());
 
   // Express routes
-  app.get('/auth/google', passport.authenticate('google', {
+  app.get('/scheduling/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email', 'https://www.googleapis.com/scheduling/auth/calendar'],
     prompt: 'select_account',
   }));
 
   app.get(
-    '/oauth2callback',
+    '/scheduling/oauth2callback',
     passport.authenticate('google', {
       failureRedirect: '/scheduling/login',
       failureFlash: 'Invalid Google credentials. Try clearing site data in browser.'
