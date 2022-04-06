@@ -375,7 +375,7 @@ const useStyles = makeStyles(theme => ({
     paperScroll: {
         // backgroundColor: theme.palette.background.paper,
         // boxShadow: theme.shadows[5],
-        padding: '3% !important',
+        padding: '1% !important',
         position: 'relative',
         overflowY: 'auto',
         maxHeight: '650px',
@@ -458,7 +458,6 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         minHeight: '25px',
     //   padding: '4px 0px 4px 0px',
-        borderBottom: '1px solid #eee'
     },
     inputStyle:{
         padding: '2px 7px',
