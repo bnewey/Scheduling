@@ -62,7 +62,7 @@ function auth({ ROOT_URL, app, database }) {
 
   // Express routes
   app.get('/auth/google', passport.authenticate('google', {
-    scope: ['profile', 'email', 'https://www.googleapis.com/auth/calendar'],
+    scope: ['profile', 'email', 'https://www.googleapis.com/scheduling/auth/calendar'],
     prompt: 'select_account',
   }));
 
