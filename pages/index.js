@@ -31,4 +31,4 @@ Index.defaultProps = {
   settings: null,
 };
 
-export default withAuth(Index);
+export default(Index);

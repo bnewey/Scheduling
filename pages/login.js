@@ -31,4 +31,8 @@ const Login = () => (
   </div>
 );
 
+<<<<<<< HEAD
 export default withAuth(Login, { logoutRequired: true });
+=======
+export default(Login);
+>>>>>>> 98258d225e76d8a58b4141c64bb17dbdd9ee3b46

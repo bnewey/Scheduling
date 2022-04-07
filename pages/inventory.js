@@ -31,4 +31,4 @@ Inventory.defaultProps = {
   settings: null,
 };
 
-export default withAuth(Inventory);
+export default(Inventory);

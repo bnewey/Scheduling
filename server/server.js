@@ -80,6 +80,7 @@ nextApp
 
     app.use(cors({ origin: '*' }));
     //Custom Routes//
+<<<<<<< HEAD
     app.use('/scheduling/tasks', tasks);
     app.use('/workOrders', workOrders);
     app.use('/scheduling/workOrderDetail', workOrderDetail);
@@ -96,6 +97,24 @@ nextApp
     app.use('/scheduling/inventoryPartsRequest', inventoryPartsRequest);
     app.use('/scheduling/notifications', notifications.router);
     app.use('/scheduling/webPush', webPush.router);
+=======
+    app.use('/tasks', tasks);
+    app.use('/workOrders', workOrders);
+    app.use('/workOrderDetail', workOrderDetail);
+    app.use('/signs', signs);
+    app.use('/taskLists', taskLists);
+    app.use('/pdf', pdf);
+    app.use('/email', emailRouter);
+    app.use('/crew', crew);
+    app.use('/entities', entities);
+    app.use('/settings', settings);
+    app.use('/inventory', inventory);
+    app.use('/inventoryKits', inventoryKits);
+    app.use('/inventoryOrdersOut', inventoryOrdersOut);
+    app.use('/inventoryPartsRequest', inventoryPartsRequest);
+    app.use('/notifications', notifications.router);
+    app.use('/webPush', webPush.router);
+>>>>>>> 98258d225e76d8a58b4141c64bb17dbdd9ee3b46
     app.use('/images', imageRouter);
     ///
 
@@ -133,8 +152,8 @@ nextApp
     
     // Custom Routes with session
       //Place vehicles here, because we need to access session.passport.user 
-    app.use('/scheduling/vehicles', vehicles);
-    app.use('/scheduling/calendar', calendar);
+    app.use('/vehicles', vehicles);
+    app.use('/calendar', calendar);
     //
 
     app.get('*', (req, res) => {

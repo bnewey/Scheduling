@@ -31,4 +31,4 @@ Signs.defaultProps = {
   settings: null,
 };
 
-export default withAuth(Signs);
+export default(Signs);
