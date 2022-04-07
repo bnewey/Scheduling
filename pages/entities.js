@@ -31,4 +31,4 @@ Entities.defaultProps = {
   settings: null,
 };
 
-export default withAuth(Entities);
+export default(Entities);

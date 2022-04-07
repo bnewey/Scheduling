@@ -31,4 +31,4 @@ WorkOrders.defaultProps = {
   settings: null,
 };
 
-export default withAuth(WorkOrders);
+export default(WorkOrders);

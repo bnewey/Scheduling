@@ -31,4 +31,4 @@ Admin.defaultProps = {
   settings: null,
 };
 
-export default withAuth(Admin);
+export default(Admin);
