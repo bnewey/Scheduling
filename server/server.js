@@ -81,7 +81,7 @@ nextApp
     app.use(cors({ origin: '*' }));
     //Custom Routes//
     app.use('/scheduling/tasks', tasks);
-    app.use('/scheduling/workOrders', workOrders);
+    app.use('/workOrders', workOrders);
     app.use('/scheduling/workOrderDetail', workOrderDetail);
     app.use('/scheduling/signs', signs);
     app.use('/scheduling/taskLists', taskLists);
