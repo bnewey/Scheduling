@@ -47,17 +47,16 @@ function withAuth(BaseComponent, { loginRequired = true, logoutRequired = false 
       return props;
     }
 
-    render() {
-        const { user } = this.props;
+    render() {const { user } = this.props;
 
         if (loginRequired && !logoutRequired && !user) {
           return null;
         }
-  
+
         if (logoutRequired && user) {
           return null;
         }
-  
+
         return <BaseComponent {...this.props} />;
     }
   }
@@ -66,3 +65,5 @@ function withAuth(BaseComponent, { loginRequired = true, logoutRequired = false 
 }
 
 export default withAuth;
+
+

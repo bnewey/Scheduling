@@ -3,7 +3,7 @@ import React from "react";
 const navButtons = [
     {
         label: "Home",
-        path: ""
+        path: "/"
     },
     {
         label: "Work Orders",

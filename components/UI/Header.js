@@ -65,7 +65,7 @@ function Header(props) {
                           </div>
                       </div>
             ) : (
-              <Link href="/login">
+              <Link href="/scheduling/login">
               <Avatar
                   src="https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg?sz=128"
                   alt="Default Google logo"
@@ -84,7 +84,7 @@ function Header(props) {
 const optionsMenu = [
     {
       text: 'Log out',
-      href: '/logout',
+      href: '/scheduling/logout',
     },
   ];
 

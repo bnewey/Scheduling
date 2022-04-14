@@ -35,7 +35,7 @@ function auth({ ROOT_URL, app, database }) {
     {
       clientID: process.env.NODE_ENV == 'production' ? process.env.Google_clientID : process.env.Google_clientIDDEV,
       clientSecret: process.env.NODE_ENV == 'production' ? process.env.Google_clientSecret : process.env.Google_clientSecretDEV,
-      callbackURL: `${ROOT_URL}/oauth2callback`,
+      callbackURL: `${ROOT_URL}/scheduling/oauth2callback`,
     },
     verify,
   ));
@@ -69,17 +69,17 @@ function auth({ ROOT_URL, app, database }) {
   app.get(
     '/oauth2callback',
     passport.authenticate('google', {
-      failureRedirect: '/login',
+      failureRedirect: '/scheduling/login',
       failureFlash: 'Invalid Google credentials. Try clearing site data in browser.'
     }),
     (req, res) => {
-      res.redirect('/');
+      res.redirect('/scheduling/');
     },
   );
 
   app.get('/logout', (req, res) => {
     req.logout();
-    res.redirect('/login');
+    res.redirect('/scheduling/login');
   });
 }
 
