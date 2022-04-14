@@ -1,7 +1,6 @@
 {
   "name": "next-mysql",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "node server/server.js",
@@ -37,7 +36,7 @@
     "googleapis": "^52.1.0",
     "html-pdf": "^2.2.0",
     "interactjs": "^1.9.22",
-    "isomorphic-fetch": "^2.2.1",
+    "isomorphic-fetch": "^3.0.0",
     "isomorphic-unfetch": "^3.0.0",
     "lodash": "^4.17.19",
     "material-table": "^1.69.1",
@@ -50,6 +49,7 @@
     "next-pwa": "^3.1.1",
     "node-fetch": "^2.6.0",
     "nodemailer": "^6.4.10",
+    "npm": "^6.14.6",
     "nprogress": "^0.2.0",
     "passport": "^0.4.1",
     "passport-google-oauth": "^2.0.0",
@@ -92,5 +92,15 @@
     "nodemon": "^1.19.4",
     "react-addons-test-utils": "^15.6.2",
     "react-test-renderer": "^16.4.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/bnewey/Scheduling.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/bnewey/Scheduling/issues"
+  },
+  "homepage": "https://github.com/bnewey/Scheduling#readme",
+  "description": ""
 }
