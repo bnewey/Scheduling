@@ -78,8 +78,15 @@ const WorkOrderPdf = function(props) {
               default:
                 temp.sort((a,b) => a[orderBy]-b[orderBy]);
             }
+            
+            const modifiedTemp = temp.map(row => {
+              if (row.description) {
+                  row.descriptionLines = row.description.split(',').map(line => line.trim());
+                }
+                return row;
+            });
 
-            Pdf.createPackingSlipPdf({},[])//createWOPdf(temp)
+            Pdf.createPackingSlipPdf({},modifiedTemp)//createWOPdf(temp)
             .then( (data) => {
                 setLoaded(true);
                 setLoading(false);
