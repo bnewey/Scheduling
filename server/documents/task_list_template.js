@@ -4,6 +4,10 @@ const Util = require('../../js/Util')
 module.exports = (tasks, columns) => {
     const today = moment().format('MMM-DD-YYYY');
 
+    if (!columns) {
+      throw new Error("No columns provided to task_list_template module");
+    }
+
     var columns = columns.filter((col)=> !col.dontShowInPdf);
 
     var rows = "";

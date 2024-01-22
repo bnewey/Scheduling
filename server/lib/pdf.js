@@ -40,20 +40,19 @@ router.post('/createWOPdf', async (req,res) => {
     })
 
 });
-
+/*
  router.post('/createTLPdf', async (req,res) => {
      if(!req.body.data){
          res.sendStatus(400);
      }
      var data = req.body.data;
+     var columns = req.body.columns;
 
      const options = {
          orientation: 'landscape'
      };
 
-    
-
-     pdf.create(taskListTemplate(data), options).toFile(`${process.env.PWD}/public/static/task_list.pdf`, (err)=> {
+     pdf.create(taskListTemplate(data, columns), options).toFile(`${process.env.PWD}/public/static/task_list.pdf`, (err)=> {
          logger.info(process.env.PWD);
          if(err){
              res.sendStatus(400);
@@ -64,7 +63,7 @@ router.post('/createWOPdf', async (req,res) => {
      })
 
  });
-
+*/
 router.post('/createTLPdf', async (req,res) => {
     if( !req.body.data){
         res.sendStatus(400);
