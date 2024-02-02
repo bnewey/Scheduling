@@ -84,7 +84,7 @@ function Header(props) {
 const optionsMenu = [
     {
       text: 'Log out',
-      href: '/logout',
+      href: 'scheduling/logout',
     },
   ];
 
