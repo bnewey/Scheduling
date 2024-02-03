@@ -69,7 +69,7 @@ function auth({ ROOT_URL, app, database }) {
   app.get(
     '/oauth2callback',
     passport.authenticate('google', {
-      failureRedirect: '/login',
+      failureRedirect: '/scheduling/login',
       failureFlash: 'Invalid Google credentials. Try clearing site data in browser.'
     }),
     (req, res) => {
@@ -79,7 +79,7 @@ function auth({ ROOT_URL, app, database }) {
 
   app.get('/logout', (req, res) => {
     req.logout();
-    res.redirect('/login');
+    res.redirect('/scheduling/login');
   });
 }
 
