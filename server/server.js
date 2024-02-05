@@ -80,22 +80,22 @@ nextApp
 
     app.use(cors({ origin: '*' }));
     //Custom Routes//
-    app.use('/tasks', tasks);
-    app.use('/workOrders', workOrders);
-    app.use('/workOrderDetail', workOrderDetail);
-    app.use('/signs', signs);
-    app.use('/taskLists', taskLists);
-    app.use('/pdf', pdf);
-    app.use('/email', emailRouter);
-    app.use('/crew', crew);
-    app.use('/entities', entities);
-    app.use('/settings', settings);
-    app.use('/inventory', inventory);
-    app.use('/inventoryKits', inventoryKits);
-    app.use('/inventoryOrdersOut', inventoryOrdersOut);
-    app.use('/inventoryPartsRequest', inventoryPartsRequest);
-    app.use('/notifications', notifications.router);
-    app.use('/webPush', webPush.router);
+    app.use('/scheduling/tasks', tasks);
+    app.use('/scheduling/workOrders', workOrders);
+    app.use('/scheduling/workOrderDetail', workOrderDetail);
+    app.use('/scheduling/signs', signs);
+    app.use('/scheduling/taskLists', taskLists);
+    app.use('/scheduling/pdf', pdf);
+    app.use('/scheduling/email', emailRouter);
+    app.use('/scheduling/crew', crew);
+    app.use('/scheduling/entities', entities);
+    app.use('/scheduling/settings', settings);
+    app.use('/scheduling/inventory', inventory);
+    app.use('/scheduling/inventoryKits', inventoryKits);
+    app.use('/scheduling/inventoryOrdersOut', inventoryOrdersOut);
+    app.use('/scheduling/inventoryPartsRequest', inventoryPartsRequest);
+    app.use('/scheduling/notifications', notifications.router);
+    app.use('/scheduling/webPush', webPush.router);
     app.use('/images', imageRouter);
     ///
 
