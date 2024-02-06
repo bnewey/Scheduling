@@ -327,7 +327,7 @@ const WOContainer = function(props) {
     setCurrentView(view);
     setPreviousView(currentView ? currentView : null);
   }
-    
+
 
   const getMainComponent = () =>{
     switch(currentView.value){

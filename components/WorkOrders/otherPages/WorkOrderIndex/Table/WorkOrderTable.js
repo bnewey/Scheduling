@@ -48,6 +48,8 @@ function WorkOrderTable(props) {
     const [dense, setDense] = React.useState(true);
     const [rowsPerPage, setRowsPerPage] = React.useState(20);
     const [filteredRows, setFilteredRows] = React.useState(rows);
+    const [scrollPos, setScrollPos] = React.useState(0);
+    
 
     const handleRequestSort = (event, property) => {
         const isDesc = orderBy === property && order === 'desc';
