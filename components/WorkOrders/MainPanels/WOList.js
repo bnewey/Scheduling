@@ -1,5 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
+import {useRouter} from 'next/router'
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -8,6 +9,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+
 
 
 
@@ -27,12 +29,14 @@ const OrdersList = function(props) {
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(null);
-
-
+  const scrollRef = React.useRef(null);
+  const router = useRouter();
 
   useEffect(()=>{
     setPage(0);
   },[workOrders])
+
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -42,6 +46,63 @@ const OrdersList = function(props) {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const resetScrollPosition = () => {
+    localStorage.removeItem('tableScrollPosition');
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
+
+  useEffect(() => {
+    const handleRouterChange = (url) => {
+      if (!url.includes('/work-orders')) {
+        resetScrollPosition();
+      }
+    };
+
+    router.events.on('routeChangeStart', handleRouterChange);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouterChange);
+    };
+  }, [router.events, resetScrollPosition]);
+
+  useEffect( () => {
+
+    const restoreScrollPosition = () => {
+        const savedScrollPos = localStorage.getItem('tableScrollPosition');
+
+        if (savedScrollPos && scrollRef.current) {
+            scrollRef.current.scrollTop = parseInt(savedScrollPos, 10);
+        }
+    };
+
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            const scrollPosition = scrollRef.current.scrollTop;
+            localStorage.setItem('tableScrollPosition', scrollPosition.toString());
+        }
+    };
+
+    const scrollableElement = scrollRef.current;
+    if(scrollableElement) {
+        scrollableElement.addEventListener('scroll', handleScroll);
+        restoreScrollPosition();
+    }
+
+    if (workOrders && workOrders.length > 0) {
+      restoreScrollPosition();
+    }
+
+    return () => {
+        if(scrollableElement) {
+            scrollableElement.removeEventListener('scroll', handleScroll);
+        }
+    };
+}, [workOrders]);
+
+
 
   //Save and/or Fetch rowsPerPage to local storage
   useEffect(() => {
@@ -120,7 +181,7 @@ const OrdersList = function(props) {
 
   return (
     <div className={classes.root}>
-        <TableContainer className={classes.container}>
+        <TableContainer className={classes.container} ref={scrollRef} style ={{overflowY: 'auto'}}>
         <Table stickyHeader  size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>
