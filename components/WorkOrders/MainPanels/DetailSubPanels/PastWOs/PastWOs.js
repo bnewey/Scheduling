@@ -1,5 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
+import {useRouter} from 'next/router';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -30,6 +31,80 @@ const PastWOs = function(props) {
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const scrollRef = React.useRef(null);
+  const router = useRouter();
+  const [pastWOids, setPastWOids] = useState(() => {
+    const saved = localStorage.getItem('pastWOids');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const resetScrollPosition = () => {
+    localStorage.removeItem('tableScrollPosition');
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
+
+  const addWOPastSelection = (wo_id) => {
+    setPastWOids((prev) => {
+      const updated = [...new Set([...prev, wo_id])]; // Ensure uniqueness
+      localStorage.setItem('pastWOids', JSON.stringify(updated)); // Save to localStorage
+      return updated;
+    });
+  };
+
+
+  useEffect(() => {
+    const handleRouterChange = (url) => {
+      if (!url.includes('/work-orders')) {
+        resetScrollPosition();
+        localStorage.removeItem('pastWOids');
+      }
+    };
+
+    router.events.on('routeChangeStart', handleRouterChange);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouterChange);
+    };
+  }, [router.events, resetScrollPosition]);
+
+
+  useEffect( () => {
+
+    const restoreScrollPosition = () => {
+        const savedScrollPos = localStorage.getItem('tableScrollPosition');
+
+        if (savedScrollPos && scrollRef.current) {
+            scrollRef.current.scrollTop = parseInt(savedScrollPos, 10);
+        }
+    };
+
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            const scrollPosition = scrollRef.current.scrollTop;
+            localStorage.setItem('tableScrollPosition', scrollPosition.toString());
+        }
+    };
+
+    const scrollableElement = scrollRef.current;
+    if(scrollableElement) {
+        scrollableElement.addEventListener('scroll', handleScroll);
+        restoreScrollPosition();
+    }
+
+    if (workOrders && workOrders.length > 0) {
+      restoreScrollPosition();
+    }
+
+    return () => {
+        if(scrollableElement) {
+            scrollableElement.removeEventListener('scroll', handleScroll);
+        }
+    };
+}, [workOrders]);
+
+
 
 
   useEffect(()=>{
@@ -66,6 +141,7 @@ const PastWOs = function(props) {
       console.error("Bad id");
       return;
     }
+    addWOPastSelection(wo_id);
     handleSetView(views && views.find((view, i)=> view.value == "woDetail"));
     setDetailWOid(wo_id);
 
@@ -73,7 +149,17 @@ const PastWOs = function(props) {
   
   const columns = [
     { id: 'wo_record_id', label: 'WO#', minWidth: 20, align: 'center',
-      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableWOnumber}>{value}</span> },
+    format: (value)=> {
+      const prevSelected = pastWOids.includes(value);
+      return (
+        <span
+          onClick={() => handleShowDetailView(value)}
+          className={prevSelected ? classes.prevWOnumber : classes.clickableWOnumber}
+        >
+          {value}
+        </span>
+      )
+    } },
     { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
     {
       id: 'wo_type',
@@ -215,7 +301,15 @@ const useStyles = makeStyles(theme => ({
     textDecoration: 'underline',
     '&:hover':{
       color: '#ee3344',
-    }
+    },
+  },
+  prevWOnumber:{
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    color: 'purple',
+    '&:hover':{
+      color: '#9174B6',
+    },
   },
   infoSpan:{
     fontSize: '20px'
