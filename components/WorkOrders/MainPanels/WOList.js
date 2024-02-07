@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
 import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
-import {useRouter} from 'next/router'
+import {useRouter} from 'next/router';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -31,12 +31,14 @@ const OrdersList = function(props) {
   const [rowsPerPage, setRowsPerPage] = React.useState(null);
   const scrollRef = React.useRef(null);
   const router = useRouter();
+  const [pastWOids, setPastWOids] = useState(() => {
+    const saved = localStorage.getItem('pastWOids');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(()=>{
     setPage(0);
-  },[workOrders])
-
-
+  },[workOrders]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -54,10 +56,19 @@ const OrdersList = function(props) {
     }
   };
 
+  const addWOPastSelection = (wo_id) => {
+    setPastWOids((prev) => {
+      const updated = [...new Set([...prev, wo_id])]; // Ensure uniqueness
+      localStorage.setItem('pastWOids', JSON.stringify(updated)); // Save to localStorage
+      return updated;
+    });
+  };
+
   useEffect(() => {
     const handleRouterChange = (url) => {
       if (!url.includes('/work-orders')) {
         resetScrollPosition();
+        localStorage.removeItem('pastWOids');
       }
     };
 
@@ -130,6 +141,8 @@ const OrdersList = function(props) {
       console.error("Bad id");
       return;
     }
+
+    addWOPastSelection(wo_id);
     handleSetView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
     setDetailWOid(wo_id);
 
@@ -137,7 +150,17 @@ const OrdersList = function(props) {
   
   const columns = [
     { id: 'wo_record_id', label: 'WO#', minWidth: 20, align: 'center',
-      format: (value)=> <span onClick={()=>handleShowDetailView(value)} className={classes.clickableWOnumber}>{value}</span> },
+      format: (value)=> {
+        const prevSelected = pastWOids.includes(value);
+        return (
+          <span
+            onClick={() => handleShowDetailView(value)}
+            className={prevSelected ? classes.prevWOnumber : classes.clickableWOnumber}
+          >
+            {value}
+          </span>
+        )
+      } },
     { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
     {
       id: 'wo_type',
@@ -280,6 +303,14 @@ const useStyles = makeStyles(theme => ({
     textDecoration: 'underline',
     '&:hover':{
       color: '#ee3344',
-    }
+    },
+  },
+  prevWOnumber:{
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    color: 'purple',
+    '&:hover':{
+      color: '#9174B6',
+    },
   },
 }));
