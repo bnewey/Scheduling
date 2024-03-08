@@ -18,6 +18,48 @@ async function getRaineyUsers(){
     }
 }
 
+async function getVisibleRaineyUsers(){
+    const route = '/scheduling/settings/getVisibleRaineyUsers';
+    try{
+        var data = await fetch(route);
+        if(!data.ok){
+            throw new Error("GetVisibleRaineyUsers returned empty list or bad query")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+
+async function getRaineyUserByID(user_id){
+    const route = '/scheduling/settings/getRaineyUserByID';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({user_id})
+            });
+        if(!data.ok){
+            throw new Error("getRaineyUserByID returned empty or bad list")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 async function getGoogleUsers(){
     const route = '/scheduling/settings/getGoogleUsers';
     try{
@@ -81,6 +123,81 @@ async function updateUserPermissions( perm_string, id, user){
         }
         return(list);
     }catch(error){
+        throw error;
+    }
+}
+
+async function updateRaineyUser( user_id, is_visible, user){
+    const route = '/scheduling/settings/updateRaineyUser';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_id, is_visible, user })
+        });
+        
+        if(!data.ok){
+            throw new Error("updateRauneyUserV returned empty list or bad query")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function updateRaineyUserVisibility( vis, id, user){
+    const route = '/scheduling/settings/updateRaineyUserVisibility';
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ vis, id, user })
+        });
+        
+        if(!data.ok){
+            throw new Error("updateRauneyUserVisibility returned empty list or bad query")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
+async function addRaineyUser(internal_user, user){
+    const route = '/scheduling/settings/addRaineyUser';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({internal_user, user})
+            });
+            if(!data.ok){
+                throw new Error("addRaineyUser returned empty list or bad query")
+            }
+            var list = await data.json();
+            if(list?.user_error || list?.error){
+                throw list;
+            }
+            return(list);
+    }
+    catch(error){
         throw error;
     }
 }
@@ -405,6 +522,11 @@ async function getNotificationSettings( googleId, page){
 
 module.exports = {
     getRaineyUsers,
+    getVisibleRaineyUsers,
+    getRaineyUserByID,
+    updateRaineyUser,
+    updateRaineyUserVisibility,
+    addRaineyUser,
     getGoogleUsers,
     getGoogleUserById,
     updateUserPermissions,

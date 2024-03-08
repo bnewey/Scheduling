@@ -7,7 +7,7 @@ import cogoToast from 'cogo-toast';
 import Util from  '../../../../js/Util';
 import Work_Orders from  '../../../../js/Work_Orders';
 import { AdminContext } from '../../AdminContainer';
-import { SupervisedUserCircleOutlined } from '@material-ui/icons';
+import { SupervisedUserCircleOutlined, Face } from '@material-ui/icons';
 
 
 const SidebarPages = function(props) {
@@ -17,7 +17,8 @@ const SidebarPages = function(props) {
     const classes = useStyles();
 
     const pages = [
-        "users"
+        "users",
+        "raineyUsers",
     ];
 
     const handleChangePage = (view) =>{
@@ -28,6 +29,10 @@ const SidebarPages = function(props) {
         switch(page){
             case 'users':{
                 return(<SupervisedUserCircleOutlined className={classes.icon}/>)
+                break;
+            }
+            case 'raineyUsers':{
+                return(<Face className={classes.icon}/>)
                 break;
             }
         }

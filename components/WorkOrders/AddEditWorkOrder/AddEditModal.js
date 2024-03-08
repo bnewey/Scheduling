@@ -43,6 +43,7 @@ const AddEditModal = function(props) {
     const [entityShippingAddresses, setEntityShippingAddresses] = useState(null);
     const [entityBillingContacts, setEntityBillingContacts] = useState(null);
     const [entityBillingAddresses, setEntityBillingAddresses] = useState(null);
+    const [entityVisibleUsers, setEntityVisibleUsers] = useState(null);
 
     //state variables for shipping and billing logic
     const [entityShippingEntityEditChanged, setEntityShippingEntityEditChanged ] = useState(false);
@@ -73,6 +74,19 @@ const AddEditModal = function(props) {
     const handleOpenEntityDraw = ()=>{
         setEntityDrawerOpen(true);
     }
+
+    useEffect(()=>{
+        if(entityVisibleUsers == null){
+          Settings.getVisibleRaineyUsers()
+          .then((data)=>{
+            setEntityVisibleUsers(data);
+          })
+          .catch((error)=>{
+            cogoToast.error("Failed to get visible rainey users");
+            console.error("failed to get visible rainey users", error)
+          })
+        }
+      },[entityVisibleUsers])
    
     const fields = [
         //type: select must be hyphenated ex select-type
@@ -364,7 +378,7 @@ const AddEditModal = function(props) {
                                 setFormObject={setActiveWorkOrder}
                                 handleClose={handleCloseModal} 
                                 handleSave={handleSave}
-                                raineyUsers={raineyUsers} jobTypes={types}
+                                raineyUsers={entityVisibleUsers} jobTypes={types}
                                 entityShippingContacts={entityShippingContacts} setEntityShippingContacts={setEntityShippingContacts} 
                                 entityShippingAddresses={entityShippingAddresses} setEntityShippingAddresses={setEntityShippingAddresses}
                                 entityBillingContacts={entityBillingContacts} setEntityBillingContacts={setEntityBillingContacts} 
