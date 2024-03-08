@@ -76,10 +76,12 @@ router.get('/getRaineyUsers', async (req,res) => {
   }
 
   var name = `${internal_user.first_name} ${internal_user.last_name}`;
+  var usrname = `${internal_user.first_name.charAt(0)}${internal_user.last_name}`.toLowerCase();
+  var initials = `${internal_user.first_name.charAt(0).toUpperCase()}${internal_user.last_name.charAt(0).toUpperCase()}`;
   var psswrd = 'score1';
 
-  const sql = ' INSERT INTO users (user_login, user_password, name, first, last) ' +
-  ' VALUES  (?, ?, ?, ?, ?) ';
+  const sql = ' INSERT INTO users (user_login, user_password, name, first, last, initials) ' +
+  ' VALUES  (?, ?, ?, ?, ?, ?) ';
 
   if(user && !user.isAdmin){
     logger.error("Bad permission", [user]);
@@ -88,7 +90,7 @@ router.get('/getRaineyUsers', async (req,res) => {
   }
 
   try {
-    const results = await database.query(sql, [internal_user.first_name, psswrd, name, internal_user.first_name, internal_user.last_name]);
+    const results = await database.query(sql, [usrname, psswrd, name, internal_user.first_name, internal_user.last_name, initials]);
     logger.info("added Internal User " + internal_user.first_name + " " + internal_user.last_name);
     if (results > 0) {
       res.status(201).json(result.rows[0]);
