@@ -7,9 +7,10 @@ const logger = require('../../logs');
 //Handle Database
 const database = require('./db');
 const {checkPermission} = require('../util/util');
+const { da } = require('date-fns/locale');
 
 router.get('/getRaineyUsers', async (req,res) => {
-    const sql = ' SELECT user_id, name, initials  ' + 
+    const sql = ' SELECT user_id, name, initials, is_visible  ' + 
     ' FROM users ' +
     ' ORDER BY user_id ASC ' +
     'limit 1000';
@@ -22,6 +23,82 @@ router.get('/getRaineyUsers', async (req,res) => {
      logger.error("Settings (getRaineyUsers): " + error);
      res.sendStatus(400);
    }
+ });
+
+ router.get('/getVisibleRaineyUsers', async (req,res) => {
+  const sql = ' SELECT user_id, name, initials ' + 
+  ' FROM users ' +
+  ' WHERE is_visible = 1' +
+  ' ORDER BY user_id ASC ' +
+  ' limit 1000 ';
+ try{
+   const results = await database.query(sql, []);
+   logger.info("Got Visible Rainey Users ");
+   res.json(results);
+ }
+ catch(error){
+   logger.error("Settings (getVisibleRaineyUsers): " + error);
+   res.sendStatus(400);
+ }
+ });
+
+
+ router.post('/getRaineyUserByID', async (req, res) => {
+  var user_id;
+  if(req.body){
+    user_id = req.body.user_id;
+  }
+
+  const sql = ' SELECT user_id, name, is_visible ' +
+  ' FROM users ' +
+  ' WHERE user_id = ? ';
+
+  try {
+    const results = await database.query(sql, [user_id]);
+    logger.info("Got User " + user_id);
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.status(404).json({ message: "User not found"});
+    }
+  } catch (error) {
+    logger.error("Settings (getRaineyUserByID): " + error);
+    res.sendStatus(500);
+  }
+ });
+
+ router.post('/addRaineyUser', async (req, res) => {
+  var internal_user;
+  var user;
+  if(req.body){
+    internal_user = req.body.internal_user;
+    user = req.body.user;
+  }
+
+  var name = `${internal_user.first_name} ${internal_user.last_name}`;
+  var psswrd = 'score1';
+
+  const sql = ' INSERT INTO users (user_login, user_password, name, first, last) ' +
+  ' VALUES  (?, ?, ?, ?, ?) ';
+
+  if(user && !user.isAdmin){
+    logger.error("Bad permission", [user]);
+    res.status(400).json({user_error: "Failed permission check"});
+    return;
+  }
+
+  try {
+    const results = await database.query(sql, [internal_user.first_name, psswrd, name, internal_user.first_name, internal_user.last_name]);
+    logger.info("added Internal User " + internal_user.first_name + " " + internal_user.last_name);
+    if (results > 0) {
+      res.status(201).json(result.rows[0]);
+    }
+  }
+  catch{
+    console.error('Error adding user:', error);
+    res.status(500).send('Server error');
+  }
+
  });
 
  router.get('/getGoogleUsers', async (req,res) => {
@@ -86,6 +163,57 @@ router.post('/updateUserPermissions', async (req,res) => {
    logger.error("Settings (updateUserPermissions): " + error);
    res.sendStatus(400);
  }
+});
+
+router.post('/updateRaineyUser', async (req,res) => {
+  var user_id, is_visible, user;
+  if(req.body){
+    user_id = req.body.user_id;
+    user = req.body.user;
+    is_visible = req.body.is_visible;
+  }
+
+  if(user && !user.isAdmin){
+    logger.error("Bad permission", [user])
+    res.status(400).json({user_error: "Failed permission check"});
+    return;
+  }
+
+  const sql = ' UPDATE users SET is_visible = ? WHERE user_id = ? ';
+  try{
+    const results = await database.query(sql, [is_visible, user_id]);
+    logger.info("Updated Rainey User " + user_id);
+    res.json(results);
+  }catch(error){
+    logger.error('Settings (updateRaineyUser): ' + error);
+    res.sendStatus(400);
+  }
+});
+
+router.post('/updateRaineyUserVisiblity', async (req,res) => {
+  var vis, id, user;
+  if(req.body){
+    vis = req.body.vis;
+    id = req.body.id;
+    user = req.body.user;
+  }
+
+  if(user && !user.isAdmin){
+    logger.error("Bad permission", [user]);
+    res.status(400).json({user_error: "Failed permission check"});
+    return;
+  }
+
+  const sql = ' UPDATE users SET vis = ? WHERE id = ? ';
+  try{
+    const results = await database.query(sql, [perm_string, id]);
+    logger.info("Updated rainey user visibilit to " + vis)
+    res.json(results);
+  }
+  catch(error){
+    logger.error("Settings (updateRaineyUserVisibility): " + error);
+    res.sendStatus(400);
+  }
 });
 
  router.get('/getEntities', async (req,res) => {

@@ -14,6 +14,7 @@ import AdminToolbar from './Toolbar/AdminToolbar';
 
 //Main Panels
 import Users from './MainPanels/Users';
+import RaineyUsers from './MainPanels/RaineyUsers';
 
 
 //Extras
@@ -30,10 +31,12 @@ export const DetailContext = createContext(null);
 //Contains all important props that all tabs use
 const AdminContainer = function(props) {
   const {user} = props;
+  const {raineyUser} = props;
 
   //views used through whole app, 
   //child views with parent run parent's onClose() function
-  const views = [ { value: "users", displayName: 'Users'},
+  const views = [ { value: "users", displayName: 'Google Users'},
+                  { value: "raineyUsers", displayName: 'Internal Users'},
                   ];
 
   const [currentView,setCurrentView] = useState(null);
@@ -79,6 +82,9 @@ const AdminContainer = function(props) {
       case "users":
         return <Users />
         break;
+      case "raineyUsers":
+        return <RaineyUsers />
+        break;
       default: 
         cogoToast.error("Bad view");
         return <Users />;
@@ -90,7 +96,10 @@ const AdminContainer = function(props) {
     switch(currentView.value){
       case "users":
         return <AdminSidebar />
-        break
+        break;
+      case "raineyUsers":
+        return <AdminSidebar />
+        break;
       default: 
         cogoToast.error("Bad view");
         return <AdminSidebar />

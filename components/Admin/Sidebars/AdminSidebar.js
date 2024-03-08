@@ -14,7 +14,7 @@ import SidebarPages from './components/SidebarPages';
 
 const AdminSidebar = function(props) {
   
-  const {  currentView,previousView, handleSetView, views, user } = useContext(AdminContext);
+  const {  currentView,previousView, handleSetView, views, raineyUser } = useContext(AdminContext);
   
   const classes = useStyles();
   
@@ -25,8 +25,10 @@ const AdminSidebar = function(props) {
     switch(currentView.value){
       case "users":
         //return <Search />
-        break
-      
+        break;
+      case "raineyUsers":
+        //return <Search />
+        break;
       default: 
         cogoToast.error("Bad view");
         return <></>;

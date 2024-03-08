@@ -28,6 +28,11 @@ const AdminToolbar = function(props) {
                   <span className={classes.woLabelSpan}>{currentView.displayName}</span>
                 </Grid>);
         break;
+      case "raineyUsers":
+        return (<Grid item className={classes.woDetailToolbarDiv} xs={ 7} md={5}>
+          <span className={classes.woLabelSpan}>{currentView.displayName}</span>
+        </Grid>);
+        break;
       default: 
         cogoToast.error("Bad view");
         return <></>;
