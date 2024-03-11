@@ -167,6 +167,31 @@ router.post('/updateUserPermissions', async (req,res) => {
  }
 });
 
+router.post('/deleteRaineyUser', async (req,res) => {
+  var user_id;
+  var user;
+  if(req.body){
+    user_id = req.body.user_id;
+    user = req.body.user;
+  }
+
+  if(user && !user.isAdmin){
+    logger.error("Bad permission", [user])
+    res.status(400).json({user_error: "Failed permission check"});
+    return;
+  }
+
+  const sql = ' DELETE FROM users WHERE user_id = ? LIMIT 1 ';
+  try{
+    const results = await database.query(sql, [user_id]);
+    logger.info("Deleted Internal User " + user_id);
+    res.json(results);
+  }catch(error){
+    logger.error("Settings (deleteRaineyUser): " + error);
+    res.sendStatus(400);
+  }
+});
+
 router.post('/updateRaineyUser', async (req,res) => {
   var user_id, is_visible, user;
   if(req.body){

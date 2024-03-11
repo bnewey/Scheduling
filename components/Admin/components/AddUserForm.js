@@ -54,8 +54,7 @@ const AddUserForm = (props) => {
                 reject("Bad internal user");
             }
 
-            //saveUser["first_name"] = newUser.first;
-            //saveUser["last_name"] = newUser.last;
+            
 
             Settings.addRaineyUser(updateInternalUser, user)
             .then( (data) => {
