@@ -202,6 +202,27 @@ async function addRaineyUser(internal_user, user){
     }
 }
 
+async function deleteRaineyUser(user_id, user){
+    const route = '/scheduling/settings/deleteRaineyUser';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({user_id, user})
+            });
+            var list = await data.json();
+            if(list?.user_error || list?.error){
+                throw list;
+            }
+            return(list);
+        }catch(error){
+            throw error;
+        }
+}
+
 async function getEntities(){
     const route = '/scheduling/settings/getEntities';
     try{
@@ -527,6 +548,7 @@ module.exports = {
     updateRaineyUser,
     updateRaineyUserVisibility,
     addRaineyUser,
+    deleteRaineyUser,
     getGoogleUsers,
     getGoogleUserById,
     updateUserPermissions,

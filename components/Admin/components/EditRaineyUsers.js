@@ -75,6 +75,37 @@ const EditRaineyUserSettings = (props) => {
         
     ];
 
+    const handleDeleteInternalUser = (internal_user) => {
+        if(!internal_user || !internal_user.user_id){
+            console.error("Bad user in delete internal user");
+            return;
+        }
+
+        handleDialogClose();
+
+        const deleteIU = () =>{
+            Settings.deleteRaineyUser(internal_user.user_id, user)
+            .then((data)=>{
+                setDialogOpen(false);
+                setShouldUpdate(false);
+                setSaveButtonDisabled(false);
+                setRaineyUserToEdit(null);
+            })
+            .catch((error)=>{
+                cogoToast.error("Failed to Delete internal user")
+                console.error("Failed to delete internal user", error);
+            })
+        }
+
+        confirmAlert({
+            customUI: ({onClose}) => {
+                return(
+                    <ConfirmYesNo onYes={deleteIU} onClose={onClose} customMessage={"Delete this Internal User permanently?"}/>
+                );
+            }
+        })
+    }
+
     const handleSave = (og_user_settings, updateSettings, addOrEdit, add_and_continue)=>{
         if (saveButtonDisabled) {
             return;
@@ -118,7 +149,7 @@ const EditRaineyUserSettings = (props) => {
     return(
         <React.Fragment>     
             
-            <Dialog PaperProps={{className: classes.dialog}} open={dialogOpen } onClose={handleDialogClose}>
+            <Dialog PaperProps={{className: classes.dialog}} open={dialogOpen} onClose={handleDialogClose}>
             <DialogTitle className={classes.title}>{'Rainey User Settings'}</DialogTitle>
                 <DialogContent className={classes.content}>
                         <div className={classes.formGrid}>
@@ -139,6 +170,15 @@ const EditRaineyUserSettings = (props) => {
                         </div>
                     <DialogActions className={classes.dialogActions}>
                         <Grid item xs={12} className={classes.paper_footer}>
+                        <ButtonGroup className={classes.buttonGroup}>
+                            <Button
+                                    onClick={() => handleDeleteInternalUser(raineyUserObject)}
+                                    variant="contained"
+                                    size="large"
+                                    className={classes.deleteButton}
+                                >
+                                    <DeleteIcon />Delete
+                        </Button></ButtonGroup> :<></>
                             <ButtonGroup className={classes.buttonGroup}>
                                 <Button
                                         onClick={() => handleDialogClose()}
