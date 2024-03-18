@@ -498,7 +498,13 @@ const FormBuilder = forwardRef((props, ref) => {
                 }
                 
             }
-        }
+        },
+        focusField: (fieldName) => {
+            const fieldRef = ref_object[fieldName];
+            if (fieldRef && fieldRef.current) {
+              fieldRef.current.focus();
+            }
+          }
     }));
 
 
