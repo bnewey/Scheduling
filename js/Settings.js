@@ -127,7 +127,7 @@ async function updateUserPermissions( perm_string, id, user){
     }
 }
 
-async function updateRaineyUser( user_id, is_visible, user){
+async function updateRaineyUser( internal_user, updateSettings, user){
     const route = '/scheduling/settings/updateRaineyUser';
     try{
         var data = await fetch(route,
@@ -136,7 +136,7 @@ async function updateRaineyUser( user_id, is_visible, user){
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ user_id, is_visible, user })
+            body: JSON.stringify({ internal_user, updateSettings, user })
         });
         
         if(!data.ok){
