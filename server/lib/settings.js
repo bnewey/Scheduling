@@ -49,7 +49,7 @@ router.get('/getRaineyUsers', async (req,res) => {
     user_id = req.body.user_id;
   }
 
-  const sql = ' SELECT user_id, name, is_visible ' +
+  const sql = ' SELECT * ' +
   ' FROM users ' +
   ' WHERE user_id = ? ';
 
@@ -193,12 +193,18 @@ router.post('/deleteRaineyUser', async (req,res) => {
 });
 
 router.post('/updateRaineyUser', async (req,res) => {
-  var user_id, is_visible, user;
+  var user_id, first, last, is_visible, user;
   if(req.body){
-    user_id = req.body.user_id;
+    user_id = req.body.internal_user.user_id;
     user = req.body.user;
-    is_visible = req.body.is_visible;
+    is_visible = req.body.updateSettings.is_visible;
+    first = req.body.updateSettings.first;
+    last = req.body.updateSettings.last;
   }
+
+  var name = `${first} ${last}`
+  var usrname = `${first.charAt(0)}${last}`.toLowerCase();
+  var initials = `${first.charAt(0).toUpperCase()}${last.charAt(0).toUpperCase()}`;
 
   if(user && !user.isAdmin){
     logger.error("Bad permission", [user])
@@ -206,9 +212,9 @@ router.post('/updateRaineyUser', async (req,res) => {
     return;
   }
 
-  const sql = ' UPDATE users SET is_visible = ? WHERE user_id = ? ';
+  const sql = ' UPDATE users SET first = ?, last = ?, name = ?, user_login = ?, initials = ?, is_visible = ? WHERE user_id = ? ';
   try{
-    const results = await database.query(sql, [is_visible, user_id]);
+    const results = await database.query(sql, [first, last, name, usrname, initials, is_visible, user_id]);
     logger.info("Updated Rainey User " + user_id);
     res.json(results);
   }catch(error){
