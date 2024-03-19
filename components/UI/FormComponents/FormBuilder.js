@@ -96,16 +96,16 @@ const FormBuilder = forwardRef((props, ref) => {
     }
 
 
-    // useEffect(()=>{
-    //     if(formObject){
-    //         //reset fields to either defaultValue or blank
-    //         for( const ref in ref_object){
-    //             if(ref_object[ref].current){
-    //                 ref_object[ref].current.value = formObject[ref] || fields.find((f)=> f.field == ref)?.defaultValue || null
-    //             }
-    //         }
-    //     }
-    // },[formObject])
+     useEffect(()=>{
+         if(formObject){
+             //reset fields to either defaultValue or blank
+             for( const ref in ref_object){
+                 if(ref_object[ref].current){
+                     ref_object[ref].current.value = formObject[ref] || fields.find((f)=> f.field == ref)?.defaultValue || null
+                 }
+             }
+         }
+     },[formObject])
 
     
 

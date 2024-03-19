@@ -42,7 +42,6 @@ const AddUserForm = (props) => {
     //},[editModalMode])
 
     const handleSave = (internalUser, updateInternalUser, addOrEdit) => {
-        console.log('Printed Form data:', updateInternalUser);
         if (saveButtonDisabled) {
             return;
         }
