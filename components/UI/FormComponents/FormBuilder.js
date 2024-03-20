@@ -262,6 +262,13 @@ const FormBuilder = forwardRef((props, ref) => {
             })
             
         },
+        forceUpdateFields: () => {
+            for(const ref in ref_object){
+                if(ref_object[ref].current){
+                    ref_object[ref].current.value = formObject[ref] || fields.find(f => f.field === ref)?.defaultValue || "";
+                }
+            }
+        },
         handleSaveParent: (itemToSave, event, add_and_continue) =>{
             if(event){
                 console.log("Prevent default");

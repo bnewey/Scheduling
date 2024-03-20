@@ -63,6 +63,12 @@ const EditRaineyUserSettings = (props) => {
         }
     }, [raineyUserObject, raineyUserToEdit])
 
+    useEffect(() => {
+        if (raineyUserObject && saveRef.current) {
+            saveRef.current.forceUpdateFields();
+        }
+    }, [raineyUserObject]);
+
     const handleDialogClose = () => {
         setDialogOpen(false);
         setShouldUpdate(false);
