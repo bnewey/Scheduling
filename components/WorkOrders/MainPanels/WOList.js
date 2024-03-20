@@ -213,9 +213,9 @@ const OrdersList = function(props) {
     },
     { id: 'customer_city', label: 'City', minWidth: 45, align: 'left' },
     { id: 'customer_state', label: 'State', minWidth: 35, align: 'left' },
-    { id: 'description', label: 'Description', minWidth: 150, maxWidth: 270, align: 'left' },
+    { id: 'description', label: 'Description', minWidth: 150, maxWidth: 250, align: 'left' },
     { id: 'job_reference', label: 'Job Reference', minWidth: 150, maxWidth: 250, align: 'left' },
-    { id: 'a_name', label: 'Bill Goes To', minWidth: 200, maxWidth: 300, align: 'left' },
+    { id: 'a_name', label: 'Bill Goes To', minWidth: 200, maxWidth: 250, align: 'left' },
   ];
 
   const StyledTableRow = withStyles((theme) => ({
