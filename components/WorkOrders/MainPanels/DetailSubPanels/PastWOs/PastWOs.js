@@ -146,18 +146,45 @@ const PastWOs = function(props) {
     setDetailWOid(wo_id);
 
   }
+
+  const renderStatus = (value) => {
+    // Handle numeric values (0 or 1)
+    if (typeof value === "number") {
+      return value === 1 ? "✓" : null;
+    }
+    
+    // Handle string values ("Completed" or "Invoiced")
+    if (typeof value === "string") {
+      return (value === "Completed" || value === "Invoiced") ? "✓" : null;
+    }
+    
+    // Fallback for unexpected data types
+    return null;
+  };
   
   const columns = [
-    { id: 'wo_record_id', label: 'WO#', minWidth: 20, align: 'center',
-    format: (value)=> {
-      const prevSelected = pastWOids.includes(value);
-      return (
-        <span
-          onClick={() => handleShowDetailView(value)}
-          className={prevSelected ? classes.prevWOnumber : classes.clickableWOnumber}
-        >
-          {value}
-        </span>
+    { id: 'wo_record_id', label: 'WO#', minWidth: 20, maxWidth: 150, align: 'center',
+      format: (value)=> {
+        const prevSelected = pastWOids.includes(value);
+        return (
+          <span
+            onClick={() => handleShowDetailView(value)}
+            className={prevSelected ? classes.prevWOnumber : classes.clickableWOnumber}
+          >
+            {value}
+          </span>
+        )
+      } },
+    { id: "completed", label: 'C', maxWidth: 10, align: 'center',
+    format: (value) => {
+      return(
+        renderStatus(value)
+      )
+    } },
+    { id: "invoiced", label: 'I', maxWidth: 10, align: 'center',
+    format: (value) => {
+      return(
+        renderStatus(value)
       )
     } },
     { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
@@ -165,20 +192,22 @@ const PastWOs = function(props) {
       id: 'wo_type',
       label: 'Type',
       minWidth: 50,
+      maxWidth: 150,
+      align: 'center',
+    },
+    {
+      id: 'c_name',
+      label: 'Product Goes To',
+      minWidth: 250,
       align: 'left',
     },
-    { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
-    { id: 'acc_city', label: 'City', minWidth: 45, align: 'left' },
-    { id: 'acc_state', label: 'State', minWidth: 35, align: 'left' },
-    { id: 'description', label: 'Description', minWidth: 400, align: 'left' },
-    
-    {
-        id: 'c_name',
-        label: 'Product Goes To',
-        minWidth: 250,
-        align: 'left',
-      },
+    { id: 'customer_city', label: 'City', minWidth: 45, align: 'left' },
+    { id: 'customer_state', label: 'State', minWidth: 35, align: 'left' },
+    { id: 'description', label: 'Description', minWidth: 150, maxWidth: 300, align: 'left' },
+    { id: 'job_reference', label: 'Job Reference', minWidth: 150, maxWidth: 250, align: 'left' },
+    { id: 'a_name', label: 'Bill Goes To', minWidth: 200, maxWidth: 300, align: 'left' },
   ];
+
 
   const StyledTableRow = withStyles((theme) => ({
     root: {
@@ -215,7 +244,7 @@ const PastWOs = function(props) {
                 classes={{stickyHeader: classes.stickyHeader}}
                   key={column.id}
                   align={column.align}
-                  style={{ minWidth: column.minWidth }}
+                  style={{ minWidth: column.minWidth, maxWidth: column.maxWidth }}
                 >
                   {column.label}
                 </TableCell>
@@ -232,8 +261,8 @@ const PastWOs = function(props) {
                       <TableCell className={classes.tableCell} 
                                 key={column.id}
                                  align={column.align}
-                                 style={{ minWidth: column.minWidth }}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
+                                 style={{ minWidth: column.minWidth, maxWidth: column.maxWidth }}>
+                                 {column.format ? column.format(value) : value}
                       </TableCell>
                     );
                   })}

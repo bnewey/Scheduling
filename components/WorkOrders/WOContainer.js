@@ -335,7 +335,7 @@ const WOContainer = function(props) {
         return <WOList />
         break;
       case "search":
-        return <WOList/>
+        return <WOList />
         break;
       case "woDetail":
         return <WODetail />
