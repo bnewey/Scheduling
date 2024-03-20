@@ -40,6 +40,11 @@ const OrdersList = function(props) {
     setPage(0);
   },[workOrders]);
 
+  useEffect(() => {
+    // Log to check structure and values of workOrders
+    console.log(workOrders);
+  }, [workOrders]);
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -64,6 +69,7 @@ const OrdersList = function(props) {
     });
   };
 
+  //Resets past woids and scroll position
   useEffect(() => {
     const handleRouterChange = (url) => {
       if (!url.includes('/work-orders')) {
@@ -79,6 +85,8 @@ const OrdersList = function(props) {
     };
   }, [router.events, resetScrollPosition]);
 
+
+  //Tracks scroll position
   useEffect( () => {
 
     const restoreScrollPosition = () => {
@@ -147,9 +155,24 @@ const OrdersList = function(props) {
     setDetailWOid(wo_id);
 
   }
+
+  const renderStatus = (value) => {
+    // Handle numeric values (0 or 1)
+    if (typeof value === "number") {
+      return value === 1 ? "✓" : null;
+    }
+    
+    // Handle string values ("Completed" or "Invoiced")
+    if (typeof value === "string") {
+      return (value === "Completed" || value === "Invoiced") ? "✓" : null;
+    }
+    
+    // Fallback for unexpected data types
+    return null;
+  };
   
   const columns = [
-    { id: 'wo_record_id', label: 'WO#', minWidth: 20, align: 'center',
+    { id: 'wo_record_id', label: 'WO#', minWidth: 20, maxWidth: 150, align: 'center',
       format: (value)=> {
         const prevSelected = pastWOids.includes(value);
         return (
@@ -161,11 +184,24 @@ const OrdersList = function(props) {
           </span>
         )
       } },
+    { id: "completed", label: 'C', maxWidth: 10, align: 'center',
+    format: (value) => {
+      return(
+        renderStatus(value)
+      )
+    } },
+    { id: "invoiced", label: 'I', maxWidth: 10, align: 'center',
+    format: (value) => {
+      return(
+        renderStatus(value)
+      )
+    } },
     { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
     {
       id: 'wo_type',
       label: 'Type',
       minWidth: 50,
+      maxWidth: 150,
       align: 'center',
     },
     {
@@ -176,9 +212,9 @@ const OrdersList = function(props) {
     },
     { id: 'customer_city', label: 'City', minWidth: 45, align: 'left' },
     { id: 'customer_state', label: 'State', minWidth: 35, align: 'left' },
-    { id: 'description', label: 'Description', minWidth: 350, align: 'left' },
-    { id: 'job_reference', label: 'Job Reference', minWidth: 200, align: 'left' },
-    { id: 'a_name', label: 'Bill Goes To', minWidth: 250, align: 'left' },
+    { id: 'description', label: 'Description', minWidth: 150, maxWidth: 300, align: 'left' },
+    { id: 'job_reference', label: 'Job Reference', minWidth: 150, maxWidth: 250, align: 'left' },
+    { id: 'a_name', label: 'Bill Goes To', minWidth: 200, maxWidth: 300, align: 'left' },
   ];
 
   const StyledTableRow = withStyles((theme) => ({
@@ -214,7 +250,7 @@ const OrdersList = function(props) {
                 classes={{stickyHeader: classes.stickyHeader}}
                   key={column.id}
                   align={column.align}
-                  style={{ minWidth: column.minWidth }}
+                  style={{ minWidth: column.minWidth, maxWidth: column.maxWidth }}
                 >
                   {column.label}
                 </TableCell>
@@ -230,9 +266,9 @@ const OrdersList = function(props) {
                     return (
                       <TableCell className={classes.tableCell} 
                                 key={column.id}
-                                 align={column.align}
-                                 style={{ minWidth: column.minWidth }}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
+                                align={column.align}
+                                style={{ minWidth: column.minWidth, maxWidth: column.maxWidth }}>
+                        {column.format ? column.format(value) : value}
                       </TableCell>
                     );
                   })}
@@ -291,7 +327,6 @@ const useStyles = makeStyles(theme => ({
     },
     whiteSpace: 'nowrap',
     overflow: 'hidden',
-    maxWidth: '150px',
     textOverflow: 'ellipsis',
     padding: "4px 6px",
   },
