@@ -208,7 +208,7 @@ const OrdersList = function(props) {
       id: 'c_name',
       label: 'Product Goes To',
       minWidth: 200,
-      maxWidth: 300,
+      maxWidth: 250,
       align: 'left',
     },
     { id: 'customer_city', label: 'City', minWidth: 45, align: 'left' },
