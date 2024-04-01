@@ -142,13 +142,13 @@ const AddEditWOIModal = function(props) {
         }
     },[editWOIModalMode, editWOIModalOpen])
 
-    useEffect(() => {
-        if(editWOIModalOpen) {
-            // Assuming the field you want to focus on is 'quantity'
-            // Ensure your FormBuilder component can accept and process this method call.
-            saveRef.current.focusField('quantity');
-        }
-    }, [editWOIModalOpen, saveRef]);
+    //useEffect(() => {
+    //    if(editWOIModalOpen) {
+    //        // Assuming the field you want to focus on is 'quantity'
+    //        // Ensure your FormBuilder component can accept and process this method call.
+    //        saveRef.current.focusField('quantity');
+    //    }
+    //}, [editWOIModalOpen, saveRef]);
 
 
     const handleSave = (woi, updateItem, addOrEdit) => {
@@ -204,6 +204,7 @@ const AddEditWOIModal = function(props) {
                     reject(error)
                 })
             }
+            saveRef.current.focusField('quantity');
         })
     }
 
