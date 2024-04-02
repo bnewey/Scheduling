@@ -92,9 +92,7 @@ router.get('/getRaineyUsers', async (req,res) => {
   try {
     const results = await database.query(sql, [usrname, psswrd, name, internal_user.first_name, internal_user.last_name, initials]);
     logger.info("added Internal User " + internal_user.first_name + " " + internal_user.last_name);
-    if (results > 0) {
-      res.status(201).json(result.rows[0]);
-    }
+    res.json(results);
   }
   catch{
     console.error('Error adding user:', error);
