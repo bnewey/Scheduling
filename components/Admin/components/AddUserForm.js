@@ -2,6 +2,7 @@ import React, {useRef, useState, useEffect, useContext} from 'react';
 import { Modal, Backdrop, Fade, Button, ButtonGroup, Grid, makeStyles } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 
+
 import cogoToast from 'cogo-toast';
 import FormBuilder from '../../UI/FormComponents/FormBuilder';
 import Settings from '../../../js/Settings';
@@ -12,11 +13,6 @@ const AddUserForm = (props) => {
     const {open, onClose, editModalMode} = props;
 
     const [newUser, setNewUser] = React.useState(null);
-
-    //const [newUser, setNewUser] = useState({
-    //    first_name: '',
-    //    last_name: '',
-    //  });
 
     const classes = useStyles();
     const saveRef = React.useRef(null);
@@ -35,12 +31,6 @@ const AddUserForm = (props) => {
         setSaveButtonDisabled(false);
     };
 
-    //useEffect(()=>{
-    //    if(editModalMode == "add"){
-    //        setNewUser({});
-    //    }
-    //},[editModalMode])
-
     const handleSave = (internalUser, updateInternalUser, addOrEdit) => {
         if (saveButtonDisabled) {
             return;
@@ -53,18 +43,17 @@ const AddUserForm = (props) => {
                 reject("Bad internal user");
             }
 
-            
-
             Settings.addRaineyUser(updateInternalUser, user)
             .then( (data) => {
-                cogoToast.success(`New Internal User has been added!`, {hideAfter: 4});
-                resolve(data)
+                cogoToast.success(`New Internal User ${updateInternalUser.first_name} ${updateInternalUser.last_name} has been added!`, {hideAfter: 4});
+                resolve(data);
             })
             .catch( error => {
                 console.warn(error);
                 cogoToast.error(`Error adding internal user. ` , {hideAfter: 4});
                 reject(error)
             })
+            setNewUser(null);
             handleDialogClose();
     });
 };
