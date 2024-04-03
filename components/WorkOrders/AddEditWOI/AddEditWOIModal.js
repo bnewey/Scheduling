@@ -82,19 +82,19 @@ const AddEditWOIModal = function(props) {
         //Scoreboard OR Sign
         {field: 'vendor', label: 'Vendor', type: 'select-vendor', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign == 0,second_column: true},
         //Scoreboard
-        {field: 'model', label: 'Model', type: 'auto', updateBy: 'state',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
-            dataGetterFunc: async () =>{
-                return new Promise(async function (resolve, reject) {
-                     try{
-                         var results = await Settings.getPastScoreboardParams("model")
-                         resolve(results);
-                     }
-                     catch(error){
-                         reject(error);
-                         console.error("Failed to get models", error)
-                     }
-                })
-            }},
+        {field: 'model', label: 'Model', type: 'text', updateBy: 'state',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, //ref: React.useRef(null),
+            //dataGetterFunc: async () =>{
+            //    return new Promise(async function (resolve, reject) {
+            //         try{
+            //             var results = await Settings.getPastScoreboardParams("model")
+            //             resolve(results);
+            //         }
+            //         catch(error){
+            //             reject(error);
+            //             console.error("Failed to get models", error)
+            //         }
+            //    })}
+            },
         {field: 'color', label: 'Color', type: 'auto',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
             dataGetterFunc: async () =>{
                 return new Promise(async function (resolve, reject) {
