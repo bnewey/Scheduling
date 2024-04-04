@@ -95,19 +95,20 @@ const AddEditWOIModal = function(props) {
             //         }
             //    })}
             },
-        {field: 'color', label: 'Color', type: 'auto',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
-            dataGetterFunc: async () =>{
-                return new Promise(async function (resolve, reject) {
-                    try{
-                        var results = await Settings.getPastScoreboardParams("color")
-                        resolve(results);
-                    }
-                    catch(error){
-                        reject(error);
-                        console.error("Failed to get colors", error)
-                    }
-               })
-            }},
+        {field: 'color', label: 'Color', type: 'text',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, //ref: React.useRef(null),
+            //dataGetterFunc: async () =>{
+            //    return new Promise(async function (resolve, reject) {
+            //        try{
+            //            var results = await Settings.getPastScoreboardParams("color")
+            //            resolve(results);
+            //        }
+            //        catch(error){
+            //            reject(error);
+            //            console.error("Failed to get colors", error)
+            //        }
+            //   })
+            //}
+            },
         {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
         {field: 'scoreboard_arrival_date', label: 'Arrival Date', type: 'date',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
         {field: 'scoreboard_arrival_status', label: 'Arrival Status', type: 'text',second_column: true, updateBy: 'ref', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
