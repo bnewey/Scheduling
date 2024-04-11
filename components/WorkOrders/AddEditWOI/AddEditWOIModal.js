@@ -83,31 +83,31 @@ const AddEditWOIModal = function(props) {
         {field: 'vendor', label: 'Vendor', type: 'select-vendor', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign == 0,second_column: true},
         //Scoreboard
         {field: 'model', label: 'Model', type: 'text', updateBy: 'state',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, //ref: React.useRef(null),
-            //dataGetterFunc: async () =>{
-            //    return new Promise(async function (resolve, reject) {
-            //         try{
-            //             var results = await Settings.getPastScoreboardParams("model")
-            //             resolve(results);
-            //         }
-            //         catch(error){
-            //             reject(error);
-            //             console.error("Failed to get models", error)
-            //         }
-            //    })}
+            dataGetterFunc: async () =>{
+                return new Promise(async function (resolve, reject) {
+                     try{
+                         var results = await Settings.getPastScoreboardParams("model")
+                         resolve(results);
+                     }
+                     catch(error){
+                         reject(error);
+                         console.error("Failed to get models", error)
+                     }
+                })}
             },
         {field: 'color', label: 'Color', type: 'text',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, //ref: React.useRef(null),
-            //dataGetterFunc: async () =>{
-            //    return new Promise(async function (resolve, reject) {
-            //        try{
-            //            var results = await Settings.getPastScoreboardParams("color")
-            //            resolve(results);
-            //        }
-            //        catch(error){
-            //            reject(error);
-            //            console.error("Failed to get colors", error)
-            //        }
-            //   })
-            //}
+            dataGetterFunc: async () =>{
+                return new Promise(async function (resolve, reject) {
+                    try{
+                        var results = await Settings.getPastScoreboardParams("color")
+                        resolve(results);
+                    }
+                    catch(error){
+                        reject(error);
+                        console.error("Failed to get colors", error)
+                    }
+               })
+            }
             },
         {field: 'trim', label: 'Trim', type: 'text', updateBy: 'ref',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
         {field: 'scoreboard_arrival_date', label: 'Arrival Date', type: 'date',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1},
@@ -209,36 +209,20 @@ const AddEditWOIModal = function(props) {
         })
     }
 
-    const handleEnterSearch = async (keyCode, event)=>{
-        var id = event.target.id;
-
-        if(saveButtonDisabled){
-            cogoToast.warn("Save disabled");
-            console.error("Cannot save by enter, save was disabled");
-            return;
-        }
-    
-        if(isNaN(keyCode) || keyCode ==null || !id ){
-          console.error("Bad keycode or element on handleClearSelectedTasksOnEsc");
-          return;
-        }
-        if(keyCode === 13 && id.split('-')[0] === "woi_input"){ //enter key & input element's id
-          try {
-            if(saveRef && saveRef.current){
-                saveRef.current.handleSaveParent(activeWOI)
-            }else{
-                cogoToast.error("Internal Server Error");
-                console.error("Save ref not defined in handleSave");
-                
-            }
-
-          } catch (error) {
-            cogoToast.error("Failed to search wo")
-            console.error("Error", error);
+    const handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+          // Prevent the default form submit behavior
+          event.preventDefault();
+      
+          // Check if save is not disabled then call your save function
+          if (!saveButtonDisabled) {
+            // Trigger your save logic
+            console.log("Enter pressed, trigger save");
+            // Assuming saveRef.current.handleSaveParent(activeWOI) is your save method
+            saveRef.current.handleSaveParent(activeWOI);
           }
         }
-      }
-        
+      };
     
 
     const handleDeleteWOI = (woi) => {
@@ -298,11 +282,12 @@ const AddEditWOIModal = function(props) {
 
                     {/* BODY */}
                     <form onSubmit={ (event)=>saveRef.current.handleSaveParent(activeWOI, event) } >
+                    <div onKeyDown={handleKeyPress}>
                     <Grid container className={classes.grid_container} >  
                         <Grid item xs={ 12 } className={classes.paperScroll}>
                             {/*FORM*/}
                             { editWOIModalOpen &&
-                            <><KeyBinding onKey={ (e) => handleEnterSearch(e.keyCode, e) } />
+                            <>
                             
                             <FormBuilder 
                                 ref={saveRef}
@@ -322,6 +307,7 @@ const AddEditWOIModal = function(props) {
 
                         </Grid>
                     </Grid>
+                    </div>
                     
 
                     {/* FOOTER */}
