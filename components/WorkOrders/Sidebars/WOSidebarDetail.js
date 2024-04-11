@@ -67,6 +67,8 @@ const WOSidebarDetail = function(props) {
       case "search":
         return <Search />
         break;
+      case "woModel":
+        break;
       case "woPdf":
         break;
       case "pastWO":  

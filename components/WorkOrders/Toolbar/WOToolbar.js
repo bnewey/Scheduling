@@ -13,6 +13,7 @@ import Work_Orders from  '../../../js/Work_Orders';
 import { ListContext } from '../WOContainer';
 
 import Search from './Components/Search';
+import ModelTabs from '../otherPages/ModelsAndColor/Table/ModelToolbar';
 
 import dynamic from 'next/dynamic'
 import clsx from 'clsx';
@@ -20,8 +21,7 @@ const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
   ssr: false
 });
 
-const OrdersToolbar = function(props) {
-  const {user} = props;
+const OrdersToolbar = ({activeTab, setActiveTab}) => {
 
   
   const { workOrders, setWorkOrders, rowDateRange, setDateRowRange,
@@ -39,6 +39,9 @@ const OrdersToolbar = function(props) {
         break
       case "search":
         return <Search />
+        break;
+      case "woModel":
+        return <ModelTabs activeTab={activeTab} setActiveTab={setActiveTab}/>
         break;
       case "woItems":
       case "woPdf":
