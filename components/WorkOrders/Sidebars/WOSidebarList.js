@@ -2,6 +2,7 @@ import React, {useRef, useState, useEffect, createContext,useContext } from 'rea
 import {makeStyles, CircularProgress, Grid, Typography, Button, Box} from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
 import cogoToast from 'cogo-toast';
 
 import Util from  '../../../js/Util';
@@ -23,7 +24,7 @@ const WOSidebarList = function(props) {
 
 
   const { workOrders,setWorkOrders, rowDateRange, setDateRowRange, currentView, previousView, handleSetView, 
-      editWOModalOpen, setEditWOModalOpen, setEditModalMode} = useContext(ListContext);
+      editWOModalOpen, setEditWOModalOpen, setEditModalMode, views} = useContext(ListContext);
   
   const classes = useStyles();
  
@@ -91,7 +92,7 @@ const WOSidebarList = function(props) {
             {workOrders && workOrders.length >= 2000 ? <span className={classes.inlineErrorText}>The data has been limited to 2000 items, please select a smaller date range</span> : <></>}
             </div>
 
-            
+        
         </div>}
           { !searchOpen && 
             <div>
@@ -103,6 +104,16 @@ const WOSidebarList = function(props) {
             
             <RecentWO />
           </div>
+
+          <div className={classes.newButtonDiv} >
+            <Button className={classes.newButton} 
+                    classes={{label: classes.newButtonLabel}} 
+                    variant="outlined"
+                    onClick={event=> handleSetView(views && views.filter((view, i)=> view.value == "woModel")[0])}>
+              <EditIcon className={classes.plusIcon}/>
+              <Box display={{ xs: 'none', md: 'inline' }}  component="div">Edit Models</Box>
+            </Button>
+        </div>
     </div>
   );
 }

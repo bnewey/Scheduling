@@ -22,6 +22,7 @@ import WOPackingSlip from './MainPanels/DetailSubPanels/PackingSlip/WOPackingSli
 import WorkOrderPdf from './MainPanels/DetailSubPanels/WorkOrderPdf/WorkOrderPdf';
 import PastWOs from './MainPanels/DetailSubPanels/PastWOs/PastWOs';
 import WOFairPlayOrders from './MainPanels/DetailSubPanels/FairPlayOrders/WOFairPlayOrders'
+import ModelContainer from './otherPages/ModelsAndColor/ModelContainer';
 
 //Extras
 import AddEditModal from './AddEditWorkOrder/AddEditModal'
@@ -63,7 +64,9 @@ const WOContainer = function(props) {
                   { value: "pastWO", displayName: 'Past W.Os', closeToView: (search)=> search ? 'search' :'allWorkOrders',
                         parent: 'woDetail'},
                   { value: "woFPOrder", displayName: 'FairPlay Order', closeToView: (search)=> search ? 'search' :'allWorkOrders',
-                        parent: 'woDetail'}];
+                        parent: 'woDetail'},
+                  { value: "woModel", displayName: "Edit Models", closeToView: ()=> 'allWorkOrders',
+                        onClose: ()=> {setWorkOrders(null); setSavedSearch(null); setSavedSearchValue(null); setBackToSearch(false)}}];
 
   const [currentView,setCurrentView] = useState(null);
   const [previousView, setPreviousView] = useState(null);
@@ -77,6 +80,8 @@ const WOContainer = function(props) {
 
   const [editWOModalOpen, setEditWOModalOpen] = React.useState(false);
   const [editModalMode, setEditModalMode] = React.useState(null);
+
+  const [activeTab, setActiveTab] = React.useState('model');
 
   const [recentWO, setRecentWO] = React.useState(null);
   
@@ -355,6 +360,9 @@ const WOContainer = function(props) {
       case "woFPOrder":
         return <WOFairPlayOrders />
         break;
+      case "woModel":
+        return <ModelContainer activeTab={activeTab} setActiveTab={setActiveTab}/>
+        break;
       default: 
         cogoToast.error("Bad view");
         return <WOList />;
@@ -388,6 +396,9 @@ const WOContainer = function(props) {
       case "woFPOrder":
         return <WOSidebarDetail />
         break;
+      case "woModel":
+        return <WOSidebarList />
+        break;
       default: 
         cogoToast.error("Bad view");
         return <WOSidebarList />;
@@ -411,7 +422,7 @@ const WOContainer = function(props) {
         <Grid container>
 
           <Grid item xs={12}>
-            {currentView && <WOToolbar />}
+            {currentView && <WOToolbar activeTab={activeTab} setActiveTab={setActiveTab}/>}
           </Grid>
 
         </Grid>

@@ -292,6 +292,29 @@ async function getEntityNameById(id){
 }
 
 
+async function updatePastScoreboardParams(old_string, new_string, column){
+    const route = '/scheduling/settings/updatePastScoreboardParams'
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({old_string, new_string, column})
+            });
+
+            if(!data.ok){
+                throw new Error("updatePastScoreboardParams returned a bad query or empty list")
+            }
+            var list = await data.json();
+            if(list?.user_error || list?.error){
+                throw list;
+            }
+    }catch(error){
+        throw error;
+    }
+}
 
 
 async function getPastScoreboardParams(column){
@@ -555,6 +578,7 @@ module.exports = {
     getEntities,
     getEntityNameById,
     getEntitiesSearch,
+    updatePastScoreboardParams,
     getPastScoreboardParams,
     getTaskUserFilters,
     addSavedTaskFilter,

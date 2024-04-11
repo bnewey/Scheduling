@@ -310,6 +310,32 @@ router.post('/getEntityNameById', async (req,res) => {
   }
 });
 
+router.post('/updatePastScoreboardParams', async (req,res) => {
+  var column;
+  var old_string;
+  var new_string;
+  if(req.body){
+    column = req.body.column;
+    old_string = req.body.old_string.stringField;
+    new_string = req.body.new_string.stringField;
+  }
+
+  console.log(column);
+  console.log(old_string);
+  console.log(new_string);
+
+  const sql = 'UPDATE work_orders_items ' +
+  'SET ?? = REPLACE(??, ?, ?) WHERE ?? LIKE ?';
+
+  try{
+    const results = await database.query(sql, [column, column, old_string, new_string, column, `%${old_string}%`]);
+    logger.info("Updated Past Scbd Param. Column: " + column + "\n" + "Replaced '" + old_string + "' with '" + new_string + "'");
+    res.json(results);
+  }catch(error){
+    logger.error("Settings (updatePastScoreboardParams): " + error);
+    res.sendStatus(400);
+  }
+});
 
 router.post('/getPastScoreboardParams', async (req,res) => {
   var column;
