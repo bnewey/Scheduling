@@ -70,7 +70,18 @@ const AddEditWOIModal = function(props) {
         {field: 'quantity', label: 'Quantity', type: 'number', updateBy: 'ref',required: true},
         {field: 'part_number', label: 'Part Number', type: 'text', updateBy: 'ref'},
         {field: 'size', label: 'Size', type: 'text', updateBy: 'ref'},
-        {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
+        {field: 'description', label: 'Description', type: 'auto', updateBy: 'ref', multiline: true, ref: React.useRef(null),
+            dataGetterFunc: async () =>{
+                return new Promise(async function (resolve, reject) {
+                    try{
+                        var results = await Settings.getPastScoreboardParams("description")
+                        resolve(results);
+                    }
+                    catch(error){
+                        reject(error);
+                        console.error("Failed to get descriptions", error)
+                    }
+                })}},
         {field: 'price', label: 'Price', type: 'text', updateBy: 'ref',defaultValue: (0.00).toFixed(2) ,},
         //Repair or Loaner
         {field: 'receive_date', label: 'Receive Date', type: 'date', updateBy: 'state', hidden: (current_wo)=> current_wo?.item_type == 3 },
@@ -82,7 +93,7 @@ const AddEditWOIModal = function(props) {
         //Scoreboard OR Sign
         {field: 'vendor', label: 'Vendor', type: 'select-vendor', updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign == 0,second_column: true},
         //Scoreboard
-        {field: 'model', label: 'Model', type: 'text', updateBy: 'state',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, //ref: React.useRef(null),
+        {field: 'model', label: 'Model', type: 'auto', updateBy: 'state',second_column: true, hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
             dataGetterFunc: async () =>{
                 return new Promise(async function (resolve, reject) {
                      try{
@@ -95,7 +106,7 @@ const AddEditWOIModal = function(props) {
                      }
                 })}
             },
-        {field: 'color', label: 'Color', type: 'text',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, //ref: React.useRef(null),
+        {field: 'color', label: 'Color', type: 'auto',second_column: true, updateBy: 'state', hidden: (current_wo)=> current_wo?.scoreboard_or_sign != 1, ref: React.useRef(null),
             dataGetterFunc: async () =>{
                 return new Promise(async function (resolve, reject) {
                     try{
