@@ -316,6 +316,32 @@ async function updatePastScoreboardParams(old_string, new_string, column){
     }
 }
 
+async function searchPastScoreboardParams(searchVal, column){
+    const route = '/scheduling/settings/searchPastScoreboardParams'
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({searchVal, column})
+        });
+
+        if(!data.ok){
+            throw new Error("searchPastScoreboardParams returned a bad query or empty list")
+        }
+        var list = await data.json();
+        console.log(list);
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+    }
+}
+
 
 async function getPastScoreboardParams(column){
     const route = '/scheduling/settings/getPastScoreboardParams';
@@ -583,6 +609,7 @@ module.exports = {
     getTaskUserFilters,
     addSavedTaskFilter,
     overwriteSavedTaskFilter,
+    searchPastScoreboardParams,
     // updateFilterTaskViewSubscribe,
     updateFilterTaskViewTie,
     removedSavedFilter,

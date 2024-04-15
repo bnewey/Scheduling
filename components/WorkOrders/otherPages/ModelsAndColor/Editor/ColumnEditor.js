@@ -15,6 +15,7 @@ import FormBuilder from '../../../../UI/FormComponents/FormBuilder'
 import Settings from '../../../../../js/Settings'
 
 import { ParamContext } from '../ModelContainer';
+import { ListContext } from '../../../WOContainer';
 
 
 import clsx from 'clsx';
@@ -78,7 +79,7 @@ const EditScoreboardParams = (props) => {
         {field: 'stringField', label: `Scoreboard Paramater`, type: 'text', updateBy: 'ref', required: true},
     ];
 
-    //const handleDeleteInternalUser = (internal_user) => {
+    //const handleDeleteScoreboardParam = (internal_user) => {
     //    if(!internal_user || !internal_user.user_id){
     //        console.error("Bad user in delete internal user");
     //        return;

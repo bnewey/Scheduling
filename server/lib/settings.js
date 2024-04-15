@@ -310,6 +310,29 @@ router.post('/getEntityNameById', async (req,res) => {
   }
 });
 
+router.post('/searchPastScoreboardParams', async (req, res) => {
+  var column;
+  var searchVal;
+  if(req.body){
+    column = req.body.column;
+    searchVal = req.body.searchVal;
+  }
+
+  const sql = `SELECT DISTINCT ?? 
+    FROM work_orders_items 
+    WHERE ?? IS NOT NULL AND ?? LIKE ? 
+    ORDER BY ?? DESC`;
+  
+  try {
+      const results = await database.query(sql, [column, column, column, `%${searchVal}%`, column]);
+      logger.info("Searched Past Scbd Param. Column: " + column);
+      res.json(results);
+  }catch (error) {
+      logger.error("SQL Error: ", error);
+      res.status(400).send("Failed to retrieve data");
+  }
+});
+
 router.post('/updatePastScoreboardParams', async (req,res) => {
   var column;
   var old_string;
@@ -319,10 +342,6 @@ router.post('/updatePastScoreboardParams', async (req,res) => {
     old_string = req.body.old_string.stringField;
     new_string = req.body.new_string.stringField;
   }
-
-  console.log(column);
-  console.log(old_string);
-  console.log(new_string);
 
   const sql = 'UPDATE work_orders_items ' +
   'SET ?? = REPLACE(??, ?, ?) WHERE ?? LIKE ?';
