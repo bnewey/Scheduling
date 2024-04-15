@@ -15,6 +15,7 @@ import { ListContext } from '../WOContainer';
 import Search from './Components/Search';
 import ModelTabs from '../otherPages/ModelsAndColor/Table/ModelToolbar';
 
+import TableSearch from '../otherPages/ModelsAndColor/Editor/TableSearch';
 import dynamic from 'next/dynamic'
 import clsx from 'clsx';
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
@@ -41,7 +42,12 @@ const OrdersToolbar = ({activeTab, setActiveTab}) => {
         return <Search />
         break;
       case "woModel":
-        return <ModelTabs activeTab={activeTab} setActiveTab={setActiveTab}/>
+        return( 
+          <Grid item className={classes.woDetailToolbarDiv} xs={ 7} md={5}>
+            <ModelTabs activeTab={activeTab} setActiveTab={setActiveTab}/>
+            <TableSearch />
+          </Grid>
+        ) 
         break;
       case "woItems":
       case "woPdf":

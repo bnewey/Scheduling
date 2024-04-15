@@ -78,6 +78,8 @@ const WOContainer = function(props) {
   const [savedSearch, setSavedSearch] = useState(null);
   const [backToSearch, setBackToSearch] = useState(false);
 
+  const [saveParamSearch, setSaveParamSearch] = React.useState(null);
+
   const [editWOModalOpen, setEditWOModalOpen] = React.useState(false);
   const [editModalMode, setEditModalMode] = React.useState(null);
 
@@ -412,7 +414,7 @@ const WOContainer = function(props) {
       <ListContext.Provider value={{user, workOrders, setWorkOrders, rowDateRange, setDateRowRange,
           currentView, previousView, handleSetView, views, detailWOid,setDetailWOid, activeWorkOrder, setActiveWorkOrder,
           editWOModalOpen, setEditWOModalOpen, raineyUsers, setRaineyUsers, setEditModalMode, recentWO, setRecentWO, compInvState, setCompInvState,
-          searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch, savedSearchValue, setSavedSearchValue} } >
+          searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch, savedSearchValue, setSavedSearchValue, saveParamSearch, setSaveParamSearch}} >
       <DetailContext.Provider value={{user, editWOIModalMode,setEditWOIModalMode, activeWOI, setActiveWOI, resetWOIForm, setResetWOIForm, workOrderItems,
                     setWorkOrderItems,editWOIModalOpen,setEditWOIModalOpen, vendorTypes, setVendorTypes,
                      shipToContactOptionsWOI, setShipToContactOptionsWOI, shipToAddressOptionsWOI, setShipToAddressOptionsWOI, fpOrderModalMode,setFPOrderModalMode, activeFPOrder, setActiveFPOrder,

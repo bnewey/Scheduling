@@ -6,11 +6,15 @@ import ColorTable from './Table/ColorTable';
 import DescTable from './Table/DescTable';
 
 import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
+import { ListContext } from '../../WOContainer';
 
 export const ParamContext = React.createContext(null);
 
 
+
 const ModelContainer = ({ activeTab }) => {
+
+    const {saveParamSearch, setSaveParamSearch} = React.useContext(ListContext);
 
     const [desc, setDesc] = React.useState(null);
     const [models, setModels] = React.useState(null);
@@ -55,7 +59,7 @@ const ModelContainer = ({ activeTab }) => {
     }}, [colors]);
 
     useEffect(() => {
-        if(models == null){
+        if(models == null && saveParamSearch == null){
             Settings.getPastScoreboardParams("model")
             .then( data => {
                 setModels(data);

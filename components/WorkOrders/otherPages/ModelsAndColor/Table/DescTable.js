@@ -9,13 +9,19 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 
+import Settings from '../../../../../js/Settings'
+
 import EditScoreboardParams from '../Editor/ColumnEditor';
 import {ParamContext} from "../ModelContainer"
+
+import { ListContext } from '../../../WOContainer';
 
 import cogoToast from 'cogo-toast';
 
 const DescTable = () => {
-    const { desc } = React.useContext(ParamContext);
+    const { desc, masterUpdater } = React.useContext(ParamContext);
+
+    const { saveParamSearch } = React.useContext(ListContext);
 
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(null);
@@ -23,7 +29,7 @@ const DescTable = () => {
     const [dialogOpen, setDialogOpen]= React.useState(false);
 
     const [itemProperty, setItemProperty] = React.useState(null);
-    const [itemColumn, setItemColumn] = React.useState('Description');
+    const [itemColumn, setItemColumn] = React.useState('description');
 
     const classes = useStyles();
 
@@ -54,6 +60,18 @@ const DescTable = () => {
         }
         
       }, [rowsPerPage]);
+
+      useEffect(() => {
+        if (saveParamSearch !== null) {
+            console.log('Fetching with new search param:', saveParamSearch);
+            Settings.searchPastScoreboardParams(saveParamSearch, 'description')
+                .then( data => {
+                    masterUpdater(data, 'description');
+                }).catch( error => {
+                    console.error("Error updating param table:", error);
+                });
+        }
+    }, [saveParamSearch]); 
 
     const handleDialogOpen = (edit_value) => {
         setDialogOpen(true);

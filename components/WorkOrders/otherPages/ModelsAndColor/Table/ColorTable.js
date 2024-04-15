@@ -9,14 +9,20 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 
+import Settings from '../../../../../js/Settings'
+
 import EditScoreboardParams from '../Editor/ColumnEditor';
 import {ParamContext} from "../ModelContainer"
+
+import { ListContext } from '../../../WOContainer';
 
 import cogoToast from 'cogo-toast';
 
 
 const ColorTable = () => {
-    const { colors } = React.useContext(ParamContext);
+    const { colors, masterUpdater } = React.useContext(ParamContext);
+
+    const { saveParamSearch } = React.useContext(ListContext);
 
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(null);
@@ -55,6 +61,18 @@ const ColorTable = () => {
         }
         
       }, [rowsPerPage]);
+
+      useEffect(() => {
+        if (saveParamSearch !== null) {
+            console.log('Fetching with new search param:', saveParamSearch);
+            Settings.searchPastScoreboardParams(saveParamSearch, 'color')
+                .then( data => {
+                    masterUpdater(data, 'color');
+                }).catch( error => {
+                    console.error("Error updating param table:", error);
+                });
+        }
+    }, [saveParamSearch]); 
 
     const handleDialogOpen = (edit_value) => {
         setDialogOpen(true);
