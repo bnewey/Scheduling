@@ -70,7 +70,7 @@ const AddEditWOIModal = function(props) {
         {field: 'quantity', label: 'Quantity', type: 'number', updateBy: 'ref',required: true},
         {field: 'part_number', label: 'Part Number', type: 'text', updateBy: 'ref'},
         {field: 'size', label: 'Size', type: 'text', updateBy: 'ref'},
-        {field: 'description', label: 'Description', type: 'auto', updateBy: 'ref', multiline: true}, //ref: React.useRef(null),
+        {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true}, //ref: React.useRef(null),
             //dataGetterFunc: async () =>{
             //    return new Promise(async function (resolve, reject) {
             //        try{
