@@ -74,7 +74,7 @@ const AddEditWOIModal = function(props) {
             dataGetterFunc: async () =>{
                 return new Promise(async function (resolve, reject) {
                     try{
-                        var results = await Settings.getPastScoreboardParams("description")
+                        var results = await Settings.getPastScoreboardParams("description");
                         resolve(results);
                     }
                     catch(error){
