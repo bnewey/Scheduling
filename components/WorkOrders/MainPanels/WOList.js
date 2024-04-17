@@ -101,6 +101,7 @@ const OrdersList = function(props) {
         if (scrollRef.current) {
             const scrollPosition = scrollRef.current.scrollTop;
             localStorage.setItem('tableScrollPosition', scrollPosition.toString());
+            console.log(scrollPosition.toString());
         }
     };
 
@@ -111,7 +112,7 @@ const OrdersList = function(props) {
     }
 
     if (workOrders && workOrders.length > 0) {
-      restoreScrollPosition();
+      setTimeout(restoreScrollPosition, 50);
     }
 
     return () => {
