@@ -101,7 +101,6 @@ const OrdersList = function(props) {
         if (scrollRef.current) {
             const scrollPosition = scrollRef.current.scrollTop;
             localStorage.setItem('tableScrollPosition', scrollPosition.toString());
-            console.log(scrollPosition.toString());
         }
     };
 
