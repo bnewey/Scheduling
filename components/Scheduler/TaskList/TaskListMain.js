@@ -443,10 +443,10 @@ export default TaskListMain;
 const useStyles = makeStyles(theme => ({
     root: {
         padding: '.62% .3% .3% .3%',
-        margin: '0px 0px 5px 5px',
+        margin: '-5px 0px 5px 5px',
         backgroundColor: '#fff',
         height: '100%',
-
+        //marginBottom: '15px',
     },
     HeadListItem:{
         backgroundColor: '#293a5a !important',
