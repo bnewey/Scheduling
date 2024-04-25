@@ -133,8 +133,8 @@ nextApp
     
     // Custom Routes with session
       //Place vehicles here, because we need to access session.passport.user 
-    app.use('/scheduling/vehicles', vehicles);
-    app.use('/scheduling/calendar', calendar);
+    app.use('/vehicles', vehicles);
+    app.use('/calendar', calendar);
     //
 
     app.get('*', (req, res) => {
