@@ -96,7 +96,7 @@ function ItemizationTable(props) {
 
 
     localStorage.setItem('newTabInfo', JSON.stringify(newTabInfo));
-    window.open('/scheduling/work_orders', '_blank');
+    window.open('/work_orders', '_blank');
   };
 
   const isSelected = record_id => selected === record_id;
