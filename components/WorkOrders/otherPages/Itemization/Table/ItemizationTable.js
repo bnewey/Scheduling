@@ -88,6 +88,17 @@ function ItemizationTable(props) {
     setDense(event.target.checked);
   };
 
+  const handleOpenWorkOrder = (workOrderId) => {
+    const newTabInfo = {
+      view: "woItems",
+      workOrderId: workOrderId
+    };
+
+
+    localStorage.setItem('newTabInfo', JSON.stringify(newTabInfo));
+    window.open('/scheduling/work_orders', '_blank');
+  };
+
   const isSelected = record_id => selected === record_id;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, (filteredRows ? filteredRows.length : rows.length  ) - page * rowsPerPage);
@@ -131,7 +142,7 @@ function ItemizationTable(props) {
                       className={isItemSelected ? classes.selectedRow : classes.nonSelectedRow}
                     >
                       
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
+                      <TableCell component="th" id={labelId} scope="row" padding="none" className={classes.clickableWOnumber} onClick={() => handleOpenWorkOrder(row.work_order)}>
                         {row.work_order /*if you change t_id, change it above */}
                       </TableCell>
                       <TableCell align="right">{row.date}</TableCell>
@@ -205,6 +216,13 @@ const useStyles = makeStyles(theme => ({
   tableHead:{
     fontSize: 11,
     fontWeight: 600,
+  },
+  clickableWOnumber:{
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    '&:hover':{
+      color: '#ee3344',
+    },
   },
   tableFilter: {
     margin: '50px',

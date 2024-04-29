@@ -15,7 +15,13 @@ export default function ItemizationSearch({inputText, setInputText, searchTable,
     function handleInput () {
         setInputText(formInputText.current.children[0].value);
         setShouldFetch(true);
-    }
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            handleInput();
+        }
+    };
 
     useEffect(() =>{ //useEffect for inputText
         if(inputText){
@@ -39,7 +45,7 @@ export default function ItemizationSearch({inputText, setInputText, searchTable,
                 <MenuItem value={'woi.work_order'}>Work Order #</MenuItem>
                 <MenuItem value={'e.name'}>Entity Name</MenuItem>
             </Select>
-            <InputBase type="text" placeholder={'Search'} ref={formInputText} className={classes.input} />
+            <InputBase type="text" placeholder={'Search'} ref={formInputText} className={classes.input}  onKeyDown={handleKeyDown}/>
             <Button onClick={handleInput} variant="contained" className={classes.button}>
                  Send
             </Button>
