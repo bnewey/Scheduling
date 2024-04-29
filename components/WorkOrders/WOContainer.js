@@ -141,6 +141,19 @@ const WOContainer = function(props) {
     
   }, [currentView]);
 
+  useEffect(() => {
+    const newTabData = localStorage.getItem('newTabInfo');
+    
+    if (newTabData) {
+        const { view, workOrderId } = JSON.parse(newTabData);
+        var newView = views.filter((v)=> v.value == view)[0]
+        console.log('view',newView);
+        handleSetView(newView || views[0]);
+        setDetailWOid(workOrderId);
+        localStorage.removeItem('newTabInfo');
+    }
+}, [currentView, detailWOid]);
+
   
   //OrderRows
   useEffect( () =>{
