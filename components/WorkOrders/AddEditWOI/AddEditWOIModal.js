@@ -561,6 +561,7 @@ const useStyles = makeStyles(theme => ({
     optionLi:{
         padding: 0,
         borderBottom: '1px solid #ececec',
+        minWidth: '100%',
         '&:last-child':{
             borderBottom: '1px solid #fff'
         },
@@ -573,6 +574,7 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         flexDirection: 'column-reverse',
         alignItems: 'stretch',
+        minWidth: '100%'
     },
     optionDiv:{
         display: 'flex',
@@ -591,7 +593,7 @@ const useStyles = makeStyles(theme => ({
         fontFamily: 'sans-serif',
         color: '#000',
         overflow: 'hidden',
-        maxWidth: '200px',
+        maxWidth: 'auto',
         whiteSpace: 'nowrap',
         textOverflow: 'ellipsis',
         padding: '1px 5px 1px 5px',

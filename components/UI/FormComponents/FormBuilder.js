@@ -10,6 +10,8 @@ import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import { createTheme, ThemeProvider, useTheme } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
+import { createFilterOptions } from '@material-ui/lab/Autocomplete';
+
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import ConfirmYesNo from '../../UI/ConfirmYesNo';
 
@@ -561,6 +563,10 @@ const GetInputByType = function(props){
         return;
     }
 
+    const filterOptions = createFilterOptions({
+        limit: 100,
+      });
+
     var error = errorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
     var valid_error = validErrorFields?.filter((v)=> v.field == field.field).length > 0 ? true : false;
     
@@ -1001,7 +1007,7 @@ const GetInputByType = function(props){
                 onClose={() => {
                     setOpen(false);
                 }}
-                
+                filterOptions={filterOptions}
                 options={options}
                 loading={loading}
                 getOptionLabel={(option) => (option[field.field] || "").toString()}
