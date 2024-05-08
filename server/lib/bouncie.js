@@ -17,7 +17,7 @@ const exhangeCodeForToken = async (ROOT_URL, code)=>{
             },
             body: JSON.stringify({
                 client_id: "scheduling",
-                client_secret:"9NBi5xLH9MwXAB8VVZ93vvPYiPCJlxmlZjZIyaPfC0Qw78oaX0",
+                client_secret:"7heZf6gdpA1356uCt8W9FvF8qDfMn70iisxzJqBrGAoT3PVBRF",
                 grant_type: "authorization_code",
                 code: code,
                 redirect_uri: ROOT_URL + '/bouncieAuth/callback'
