@@ -30,7 +30,7 @@ function Header(props) {
   return (
     <div>
       <Toolbar className={classes.toolbar} >
-        <Grid className={classes.grid_container} container direction="row" justify="space-around"  alignItems="center">
+        <Grid className={classes.grid_container} container direction="row" justifyContent="space-around"  alignItems="center">
         <Grid item sm={11} xs={9} style={{ textAlign: 'left' }}>
             {/* {user ? (
                 <div>

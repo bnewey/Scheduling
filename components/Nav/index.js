@@ -76,7 +76,7 @@ const Nav = (props) => {
                     }
                     return true;
                 }).map((button,i) => (
-                  <ListItem key={`button_${i}`} className={classes.listItem}>
+                  <ListItem key={button.path} className={classes.listItem}>
                       <Link href={button.path} as={`/scheduling/${button.path}`}><h3>{button.label}</h3></Link>
                   </ListItem>
                 ))}
@@ -84,7 +84,7 @@ const Nav = (props) => {
           </Drawer>
           </Box>
           {props.navButtons.map(button => (
-            <Box display={{ xs: 'none', md: 'inline' }}  component="span">
+            <Box key={button.path} display={{ xs: 'none', md: 'inline' }}  component="span">
           <NavButton className={classes.button}
             key={button.path}
             path={button.path}
