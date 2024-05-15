@@ -139,7 +139,7 @@ const SignSchedulerList = function(props) {
                   { id: 'state', label: 'Ship Group', minWidth: 25, align: 'center' , hideRepeats: true},
                   { id: 'work_order', label: 'WO#', minWidth: 40, align: 'center', hideRepeats: true,
                     format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>},
-                  { id: 'product_to', label: 'Product Goes To', minWidth: 150, align: 'left', hideRepeats: true},
+                  { id: 'job_reference', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
                   { id: 'description', label: 'Description', minWidth: 200, align: 'left', hideRepeats: false},
                   { id: 'sign_built', label: 'Built', minWidth: 30, align: 'center', type: 'date',pdfType: 'checkbox', hideRepeats: false,
                     format: (value,row)=> {return(
@@ -225,7 +225,7 @@ const SignSchedulerList = function(props) {
               { id: 'state', label: 'Ship Group', minWidth: 35, align: 'center' , hideRepeats: true},
               { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
                 format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span>},
-              { id: 'product_to', label: 'Product Goes To', minWidth: 150, align: 'left', hideRepeats: true},
+              { id: 'job_reference', label: 'Product Goes To', minWidth: 200, align: 'left', hideRepeats: true},
               { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: false},
               { id: 'sign_built', label: 'Built', minWidth: 50, align: 'center', type: 'date', pdfType: 'checkbox', hideRepeats: false,
                 format: (value,row)=> {return(
