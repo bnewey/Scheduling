@@ -13,7 +13,7 @@ import Pdf from  '../../../../js/Pdf';
 
 import { ListContext } from '../../SignContainer';
 
-const views = ["Description", "Install Date", "Signs + Artwork"]
+const views = ["Size", "Install Date", "Signs + Artwork"]
 
 const SignsSortOrder = function(props) {
     const {user} = props;
