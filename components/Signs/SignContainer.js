@@ -9,6 +9,7 @@ import moment from 'moment';
 import Util from '../../js/Util';
 import Settings from '../../js/Settings';
 import Signs from  '../../js/Signs';
+import Work_Orders from '../../js/Work_Orders';
 
 import SignToolbar from './Toolbar/SignToolbar';
 //Sidebars
@@ -160,7 +161,31 @@ const SignContainer = function(props) {
 
       Signs.getAllSignsForScheduler()
       .then( data => { 
-  
+
+        const attachJobReference = async (sign) => {
+          const updatedSign = { ...sign };
+          updatedSign.job_reference = null;
+      
+          try {
+              const workOrder = await Work_Orders.getWorkOrderById(sign.work_order);
+              if (workOrder && workOrder[0].job_reference) {
+                  console.log(workOrder[0].job_reference);
+                  updatedSign.job_reference = workOrder[0].job_reference;
+              }
+          } catch (error) {
+              console.error("Failed to fetch work order job reference for sign", sign.work_order, error);
+          }
+          return updatedSign;
+      };
+      
+      Promise.all(data.map(sign => attachJobReference(sign)))
+          .then(updatedSigns => {
+              setSigns(updatedSigns); 
+              console.log("Updated signs with job references:", updatedSigns);
+          })
+          .catch(error => {
+              console.error("Error processing job references:", error);
+          });
         const sortArray = (array, direction, value) =>{
           return array.sort(createSorter(...[{
             property: value, 
