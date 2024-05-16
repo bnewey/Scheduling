@@ -160,32 +160,7 @@ const SignContainer = function(props) {
       }
 
       Signs.getAllSignsForScheduler()
-      .then( data => { 
-
-        const attachJobReference = async (sign) => {
-          const updatedSign = { ...sign };
-          updatedSign.job_reference = null;
-      
-          try {
-              const workOrder = await Work_Orders.getWorkOrderById(sign.work_order);
-              if (workOrder && workOrder[0].job_reference) {
-                  console.log(workOrder[0].job_reference);
-                  updatedSign.job_reference = workOrder[0].job_reference;
-              }
-          } catch (error) {
-              console.error("Failed to fetch work order job reference for sign", sign.work_order, error);
-          }
-          return updatedSign;
-      };
-      
-      Promise.all(data.map(sign => attachJobReference(sign)))
-          .then(updatedSigns => {
-              setSigns(updatedSigns); 
-              console.log("Updated signs with job references:", updatedSigns);
-          })
-          .catch(error => {
-              console.error("Error processing job references:", error);
-          });
+      .then( data => {       
         const sortArray = (array, direction, value) =>{
           return array.sort(createSorter(...[{
             property: value, 
@@ -247,15 +222,44 @@ const SignContainer = function(props) {
         }else{
           setSigns(setSignsData);
         }
-
       })
       .catch( error => {
         console.warn(error);
         cogoToast.error(`Error getting signs`, {hideAfter: 4});
       })
     }
-
   },[signs, signRefetch, finishedState, keys]);
+
+  useEffect(() => {
+    const safeSigns = signs || [];
+    const allJobReferencesMissing = safeSigns.every(sign => sign.job_reference == null);
+
+    if (safeSigns.length > 0 && allJobReferencesMissing) {
+        const fetchAndAttachJobReferences = async () => {
+            const updatedSigns = await Promise.all(signs.map(async (sign) => {
+                if (!sign.work_order) {
+                    console.error("Missing work_order ID for sign:", sign);
+                    return sign;
+                }
+
+                try {
+                    const workOrder = await Work_Orders.getWorkOrderById(sign.work_order);
+                    if (workOrder && workOrder[0] && workOrder[0].job_reference) {
+                        return { ...sign, job_reference: workOrder[0].job_reference };
+                    } else {
+                        return sign;
+                    }
+                } catch (error) {
+                    return sign;
+                }
+            }));
+
+            setSigns(updatedSigns);
+        };
+
+        fetchAndAttachJobReferences();
+    }
+}, [signs]);
 
   //Save and/or Fetch filters to local storage
   useEffect(() => {
