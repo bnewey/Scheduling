@@ -370,27 +370,27 @@ router.post('/createCrewJobPdf', async (req,res) => {
 
 });
 
-router.post('/createSignSchedulePdf', async (req,res) => {
-    if( !req.body.signs){
+router.post('/createSignSchedulePdf', async (req, res) => {
+    if (!req.body.signs) {
         res.sendStatus(400);
+        return;
     }
-    var signs = req.body.signs;
-    var columns = req.body.columns;
-    
+
+    const signs = req.body.signs;
+    const columns = req.body.columns;
     const options = {
         orientation: 'landscape'
     };
 
-    pdf.create(signScheduleTemplate( signs, columns), options).toStream(function(err, stream){
-        if(err){
+    pdf.create(signScheduleTemplate(signs, columns), options).toStream((err, stream) => {
+        if (err) {
             res.sendStatus(400);
+            return;
         }
-       
+
         res.set('Content-type', 'application/pdf');
-        stream.pipe(res)
-
-    })
-
+        stream.pipe(res);
+    });
 });
 
 

@@ -1,25 +1,28 @@
 const moment = require('moment');
-const Util = require('../../js/Util')
+const Util = require('../../js/Util');
 
 module.exports = (signs, columns) => {
     const today = moment().format('MMM-DD-YYYY');
-    //Get total number of signs, sum of each quantity 
-    const numSigns = (signs.reduce((acc, current)=> { return {quantity: acc.quantity + current.quantity}} )).quantity
+    // Get total number of signs, sum of each quantity 
+    const numSigns = (signs.reduce((acc, current) => { return { quantity: acc.quantity + current.quantity } })).quantity;
 
     var rows = "";
-    var columns = columns.filter((col)=> !col.dontShowInPdf);
+    columns = columns.filter((col) => !col.dontShowInPdf);
 
-    const checkAllLastColumns = (columns, lastRow, row, columnIndex) =>{
-      return (columns.slice(0, columnIndex+1).every((column)=> {
-        return  (lastRow && column && lastRow[column.id] == row[column.id])
-      }))
+    const checkAllLastColumns = (columns, lastRow, row, columnIndex) => {
+        return (columns.slice(0, columnIndex + 1).every((column) => {
+            return (lastRow && column && lastRow[column.id] == row[column.id])
+        }));
     }
 
-    signs.forEach((sign, i)=> {
-      var pageNumber =  1+(Math.floor((i+1)/46));
-      var maxPages = 1+(Math.floor((signs.length)/46))
-      if(i != 0 && i%46 === 0){
-        rows += `<tr></tr>
+    const maxColumns = 12; // maximum number of columns to fit in the page width
+    const columnWidth = 80 / Math.min(columns.length, maxColumns); // percentage width of each column, considering 80% total width
+
+    signs.forEach((sign, i) => {
+        var pageNumber = 1 + (Math.floor((i + 1) / 46));
+        var maxPages = 1 + (Math.floor((signs.length) / 46));
+        if (i != 0 && i % 46 === 0) {
+            rows += `<tr></tr>
         </tbody>
         </table>
         <div class="titleDiv">
@@ -30,50 +33,48 @@ module.exports = (signs, columns) => {
          </div>
         <table class="minimalistBlack">
           <thead><tr>`;
-          columns.forEach((column, colI)=> {
-           rows+=`<th style='text-align: ${column.align}; width: ${column.minWidth}px'>${column.label}</th>`
-          })
-            rows+= `</tr>
+            columns.forEach((column, colI) => {
+                rows += `<th style='text-align: ${column.align}; width: ${columnWidth}%;'>${column.label}</th>`;
+            })
+            rows += `</tr>
           </thead>
           <tbody>`;
-      }
-
-      const lastRow = i > 0 ? signs[i-1] : null;
-
-      rows +=`<tr>`
-      columns.forEach((column, colI)=> {
-
-        var topBorder = lastRow && sign[columns[0].id] != lastRow[columns[0].id];
-        
-        var value;
-        //This hides repeat values in table for easier viewing
-        if(column.hideRepeats &&  checkAllLastColumns(columns, lastRow, sign, colI) && i%46 !== 0){
-          value = null;
-        }else{
-          if((column.id === "install_date") && sign[column.id] == null){
-            value = "****";
-          }else{
-            if(column.pdfType != "checkbox" && column.type == 'date'){
-              value = Util.convertISODateToMySqlDate(sign[column.id])
-            }else{
-              if(column.pdfType == "checkbox" || column.type == "checkbox"){
-                value = sign[column.id] ? '[&nbsp;X&nbsp;]' : '[&nbsp;&nbsp;&nbsp;]';
-              }else{
-                value = sign[column.id];
-              }
-              
-            }
-          }
         }
-        rows+= `<td ${topBorder ? `style='border-top: 1px solid #aaa; text-align: ${column.align}; width: ${column.minWidth}px;'` :
-                     `style='text-align: ${column.align}; width: ${column.minWidth}px;'`}>
+
+        const lastRow = i > 0 ? signs[i - 1] : null;
+
+        rows += `<tr>`;
+        columns.forEach((column, colI) => {
+            var topBorder = lastRow && sign[columns[0].id] != lastRow[columns[0].id];
+
+            var value;
+            // This hides repeat values in table for easier viewing
+            if (column.hideRepeats && checkAllLastColumns(columns, lastRow, sign, colI) && i % 46 !== 0) {
+                value = null;
+            } else {
+                if ((column.id === "install_date") && sign[column.id] == null) {
+                    value = "****";
+                } else {
+                    if (column.pdfType != "checkbox" && column.type == 'date') {
+                        value = Util.convertISODateToMySqlDate(sign[column.id]);
+                    } else {
+                        if (column.pdfType == "checkbox" || column.type == "checkbox") {
+                            value = sign[column.id] ? '[&nbsp;X&nbsp;]' : '[&nbsp;&nbsp;&nbsp;]';
+                        } else {
+                            value = sign[column.id];
+                        }
+                    }
+                }
+            }
+            rows += `<td ${topBorder ? `style='border-top: 1px solid #aaa; text-align: ${column.align}; width: ${columnWidth}%;'` :
+                `style='text-align: ${column.align}; width: ${columnWidth}%;'`}>
                     ${value != null ? value : ""}
                 </td>`
-      
-        }) 
+        })
     });
-var maxPages = 1+(Math.floor((signs.length)/46))
-var returnString = `
+
+    var maxPages = 1 + (Math.floor((signs.length) / 46))
+    var returnString = `
     <!doctype html>
     <html>
        <head>
@@ -81,33 +82,30 @@ var returnString = `
           table.minimalistBlack {
             margin: 5px 25px 15px 25px;
             border: .8px solid #888;
-            width: 95%;
-            table-layout:fixed;
-            max-width:95%;
+            width: 80%; /* Adjusted to 80% to fit within the page */
+            table-layout: fixed;
             text-align: left;
             border-collapse: collapse;
           }
           table.minimalistBlack td, table.minimalistBlack th {
             border-right: 1px solid #aaa;
-            
-            padding: 0px 2px;
+            padding: 0px 1px; /* Reduced padding */
+            width: ${columnWidth}%;
           }
-          
-          table.minimalistBlack td:first-child{
+
+          table.minimalistBlack td:first-child {
             border-left: 1px solid #aaa;
           }
           table.minimalistBlack tbody tr:last-child {
             border-bottom: 1px solid #aaa;
           }
-          
-          table.minimalistBlack tbody td {
-            font-size: 5px;
-            overflow: hidden;
 
+          table.minimalistBlack tbody td {
+            font-size: 4px; /* Reduced font size */
+            overflow: hidden;
           }
           table.minimalistBlack tbody tr {
-            height:.7em;
-
+            height: .6em; /* Reduced row height */
           }
           table.minimalistBlack tr:nth-child(even) {
             background: #F3F3F3;
@@ -120,7 +118,7 @@ var returnString = `
             border-bottom: 1px solid #858585;
           }
           table.minimalistBlack thead th {
-            font-size: 6px;
+            font-size: 5px; /* Reduced font size */
             font-weight: bold;
             color: #212121;
             text-align: left;
@@ -132,10 +130,10 @@ var returnString = `
 
           table.minimalistBlack td {
             font-family: sans-serif;
-            font-size:1em;
+            font-size: 1em;
             font-weight: bold;
           }
-          .tiny{
+          .tiny {
             width: 15px;
           }
           .small {
@@ -147,20 +145,19 @@ var returnString = `
           .large {
             width: 100px;
           }
-          .body:{
+          .body {
             width: 1000px;
-
           }
           .titleDiv {
             text-align: justify;
           }
-          
+
           .titleDiv:after {
             content: '';
             display: inline-block;
             width: 100%;
           }
-          
+
           .item {
             display: inline-block;
           }
@@ -174,11 +171,11 @@ var returnString = `
          <span class="item">(1 of ${maxPages})</span>
          </div>
           <table class="minimalistBlack">
-          <thead><tr>` ;
-          columns.forEach((column, colI)=> {
-            returnString+=`<th style='text-align: ${column.align}; width: ${column.minWidth}px;'>${column.label}</th>`
-          })
-            returnString+=`</tr>
+          <thead><tr>`;
+    columns.forEach((column, colI) => {
+        returnString += `<th style='text-align: ${column.align}; width: ${columnWidth}%;'>${column.label}</th>`
+    })
+    returnString += `</tr>
           </thead>
             <tbody>
             ${rows}
