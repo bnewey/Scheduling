@@ -11,50 +11,47 @@ module.exports = (signs, columns) => {
 
     const checkAllLastColumns = (columns, lastRow, row, columnIndex) => {
         return (columns.slice(0, columnIndex + 1).every((column) => {
-            return (lastRow && column && lastRow[column.id] == row[column.id])
+            return (lastRow && column && lastRow[column.id] == row[column.id]);
         }));
-    }
+    };
 
     const totalColumnWidth = columns.reduce((acc, col) => acc + col.minWidth, 0);
     const adjustedColumnWidths = columns.map(col => ({
         ...col,
-        adjustedWidth: Math.max((col.minWidth / totalColumnWidth) * 80, 5) // Ensure minimum width of 15%
+        adjustedWidth: Math.max((col.minWidth / totalColumnWidth) * 80, 5) // Ensure minimum width of 5%
     }));
 
-    const generateTableHeader = (pageNumber, maxPages) => {
-      let header = `
-      <div class="titleDiv">
-          <span class="item">${today}</span>
-          <span class="item">Open Job Status Sheet</span>
-          <span class="item">${numSigns} Sign(s)</span>
-          <span class="item">(${pageNumber} of ${maxPages})</span>
-      </div>
-      <table class="minimalistBlack">
-          <thead><tr>`;
-      adjustedColumnWidths.forEach((column) => {
-          header += `<th style='text-align: ${column.align}; width: ${column.adjustedWidth}%;'>${column.label}</th>`;
-      });
-      header += `</tr></thead><tbody>`;
-      return header;
-  };
+    const maxRowsPerPage = 40; // Set maximum rows per page to avoid bleeding onto the next page
 
-    const maxRowsPerPage = 25; // Set maximum rows per page to avoid bleeding onto the next page
+    const generateTableHeader = (pageNumber, maxPages) => {
+        let header = `
+        <div class="titleDiv">
+            <span class="item">${today}</span>
+            <span class="item">Open Job Status Sheet</span>
+            <span class="item">${numSigns} Sign(s)</span>
+            <span class="item">(${pageNumber} of ${maxPages})</span>
+        </div>
+        <table class="minimalistBlack">
+            <thead><tr>`;
+        adjustedColumnWidths.forEach((column) => {
+            header += `<th style='text-align: ${column.align}; width: ${column.adjustedWidth}%;'>${column.label}</th>`;
+        });
+        header += `</tr></thead><tbody>`;
+        return header;
+    };
+
     let pageNumber = 1;
     let rowCount = 0;
     let maxPages = Math.ceil(signs.length / maxRowsPerPage);
-
-    const startNewPage = () => {
-        rows += `</tbody></table>`;
-        rows += `<div style="page-break-before: always;"></div>`;
-        rows += generateTableHeader(pageNumber, maxPages);
-    };
 
     rows += generateTableHeader(pageNumber, maxPages);
 
     signs.forEach((sign, i) => {
         if (rowCount === maxRowsPerPage) {
+            rows += `</tbody></table>`;
             pageNumber++;
-            startNewPage();
+            rows += `<div style="page-break-before: always;"></div>`;
+            rows += generateTableHeader(pageNumber, maxPages);
             rowCount = 0;
         }
 
@@ -81,8 +78,8 @@ module.exports = (signs, columns) => {
                     }
                 }
             }
-            rows += `<td ${topBorder ? `style='border-top: 1px solid #aaa; text-align: ${column.align}; width: ${column.adjustedWidth}%; word-wrap: break-word;'` :
-                `style='text-align: ${column.align}; width: ${column.adjustedWidth}%; word-wrap: break-word;'`}>
+            rows += `<td ${topBorder ? `style='border-top: 1px solid #aaa; text-align: ${column.align}; width: ${column.adjustedWidth}%;'` :
+                `style='text-align: ${column.align}; width: ${column.adjustedWidth}%;'`}>
                     ${value != null ? value : ""}
                 </td>`;
         });
@@ -100,7 +97,7 @@ module.exports = (signs, columns) => {
           table.minimalistBlack {
             margin: 5px 25px 15px 25px;
             border: .8px solid #888;
-            width: 78%; /* Adjusted to 80% to fit within the page */
+            width: 80%; /* Adjusted to 80% to fit within the page */
             table-layout: fixed;
             text-align: left;
             border-collapse: collapse;
@@ -108,7 +105,6 @@ module.exports = (signs, columns) => {
           table.minimalistBlack td, table.minimalistBlack th {
             border-right: 1px solid #aaa;
             padding: 0px 1px; /* Reduced padding */
-            word-wrap: break-word; /* Wrap text to fit column width */
           }
 
           table.minimalistBlack td:first-child {
@@ -119,7 +115,7 @@ module.exports = (signs, columns) => {
           }
 
           table.minimalistBlack tbody td {
-            font-size: 5px; /* Reduced font size */
+            font-size: 4px; /* Reduced font size */
             overflow: hidden;
           }
           table.minimalistBlack tbody tr {
@@ -136,7 +132,7 @@ module.exports = (signs, columns) => {
             border-bottom: 1px solid #858585;
           }
           table.minimalistBlack thead th {
-            font-size: 6px; /* Reduced font size */
+            font-size: 5px; /* Reduced font size */
             font-weight: bold;
             color: #212121;
             text-align: left;
