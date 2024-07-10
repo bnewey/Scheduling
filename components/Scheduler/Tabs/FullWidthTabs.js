@@ -65,7 +65,7 @@ export default function FullWidthTabs({children, tabValue , setTabValue, numSele
     <div className={classes.root}>
       <AppBar position="static" color="default">
         <Tabs
-          tabValue={tabValue}
+          tabvalue={tabValue}
           onChange={handleChange}
           indicatorColor="primary"
           textColor="primary"
@@ -187,7 +187,7 @@ const useStyles = makeStyles(theme => ({
     background: 'linear-gradient(0deg, #c2c2c2, white)',
   },
   tab:{
-    // backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5',
 
     // margin: '1% 2%',
   },

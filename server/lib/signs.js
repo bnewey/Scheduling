@@ -87,4 +87,33 @@ router.post('/searchAllSignItems', async (req,res) => {
 });
 
 
+router.post('/addSigntoInventory', async (req, res) => {
+    if (req.body) {
+        console.log("Request Body: ", req.body);
+
+        var sign = req.body.sign;
+        var user = req.body.user;  // Assuming 'user' is also a required field
+
+        // Basic validation
+        if (!sign || !user) {
+            console.log("Missing required fields");
+            return res.status(400).send("Bad Request: Missing required fields");
+        }
+
+        const sql = `INSERT INTO work_orders_items (quantity, size, description, scoreboard_or_sign, item_type, sign_built) VALUES (?, ?, ?, 2, 3, CURRENT_DATE);`
+
+        try {
+            const results = await database.query(sql, [sign.quantity, sign.size, sign.description]);
+            logger.info("Added Sign to Inventory", sign);
+            return res.status(200).json({ message: 'OK' });
+        } catch (error) {
+            logger.error("Add Sign to Inventory: " + error);
+            return res.status(400).json({ error: "Failed to add sign to inventory" });
+        }
+    } else {
+        return res.status(400).send("Bad Request: Empty body");
+    }
+});
+
+
 module.exports = router;

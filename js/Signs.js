@@ -44,13 +44,61 @@ async function searchAllSignItems(table, query){
     }catch(error){
         throw error;
     }
-
 }
 
+async function getSignInventory(sign, user){
+    const route = "/scheduling/signs/getSignInventory";
+    try{
+        var data = await fetch(route,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({sign, user})
+        });
 
+        if(!data.ok){
+            throw new Error("getAllSignsForScheduler returned empty list or bad query")
+        }
+        var list = await data.json();
+        if(list?.user_error || list?.error){
+            throw list;
+        }
+        return(list);
+    }catch(error){
+        throw error;
+        }
+    }
+
+async function addSigntoInventory(sign, user){
+    const route = '/scheduling/signs/addSigntoInventory';
+    try{
+        var data = await fetch(route,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': "application/json"
+                },
+                body: JSON.stringify({sign, user})
+            });
+
+            if(!data.ok){
+                throw new Error("addSigntoInventory returned empty list or bad query")
+            }
+            var list = await data.json();
+            if(list?.user_error || list?.error){
+                throw list;
+            }
+            return(list);
+    }catch(error){
+        throw error;
+    }
+}
 
 module.exports = {
     getAllSignsForScheduler,
-    searchAllSignItems
-
+    searchAllSignItems,
+    getSignInventory,
+    addSigntoInventory
 };

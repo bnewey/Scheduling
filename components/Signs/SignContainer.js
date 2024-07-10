@@ -18,6 +18,7 @@ import SignSidebarScheduler from './Sidebars/SignSidebarScheduler';
 //Main Panels
 import SignScheduler from './MainPanels/SignScheduler';
 import _ from 'lodash';
+import SignInventory from './MainPanels/SignInventory';
 
 //Extras
 
@@ -26,6 +27,7 @@ import _ from 'lodash';
 var today =  new Date();
 
 export const ListContext = createContext(null);
+export const DetailContext = createContext(null);
 
 //This is the highest component for the Task Page
 //Contains all important props that all tabs use
@@ -51,7 +53,9 @@ const SignContainer = function(props) {
   const views = [ { value: "signScheduler", displayName: "Sign Scheduler",  },
                   { value: "allSigns", displayName: "Sign List",  },
                   {value: 'searchSigns', displayName: 'Search Signs', closeToView: 'signScheduler',
-                      onClose: ()=> {setSignRefetch(true)}} ];
+                      onClose: ()=> {setSignRefetch(true)}},
+                  {value: 'invSign', displayName: 'Signs Inventory', closeToView: 'signScheduler',
+                      onclose: ()=> (setSignRefetch(true))} ];
 
   const [currentView,setCurrentView] = useState(null);
   const [previousView, setPreviousView] = useState(null);
@@ -59,6 +63,18 @@ const SignContainer = function(props) {
   const [keyState, setKeyState] = useState(null);
   const [columnState, setColumnState] = useState(null);
   const [columns, setColumns] = useState(null);
+
+  const [editWOModalOpen, setEditWOModalOpen] = React.useState(false);
+  const [editModalMode, setEditModalMode] = React.useState(null);
+
+  const [workOrderItems, setWorkOrderItems] = React.useState(null);
+  const [editSignModalMode, setEditSignModalMode] = React.useState("add")
+  const [activeSign, setActiveSign] = React.useState(null);
+  const [resetSignForm, setResetSignForm] = React.useState(null);
+  const [editSignModalOpen, setEditSignModalOpen] = React.useState(false);
+  const [vendorTypes, setVendorTypes] = React.useState(null);
+  const [shipToContactOptionsSign,setShipToContactOptionsSign] = React.useState(null);
+  const [shipToAddressOptionsSign,setShipToAddressOptionsSign] = React.useState(null);
 
   
   const classes = useStyles();
@@ -283,8 +299,8 @@ const SignContainer = function(props) {
 
   // //Work Order for detail views
   // useEffect(()=>{
-  //   if(detailWOid && activeWorkOrder == null){
-  //     Work_Orders.getWorkOrderById(detailWOid)
+  //   if(detailSignd && activeWorkOrder == null){
+  //     Work_Orders.getWorkOrderById(detailSignd)
   //     .then((data)=>{
   //       if(data){
   //         setActiveWorkOrder(data[0]);
@@ -295,31 +311,31 @@ const SignContainer = function(props) {
   //       cogoToast.error("Failed to get work order");
   //     })
   //   }
-  // },[detailWOid, activeWorkOrder])
+  // },[detailSignd, activeWorkOrder])
 
   
 
-  //Save and/or Fetch detailWOid to local storage
+  //Save and/or Fetch detailSignd to local storage
   // useEffect(() => {
-  //   if(detailWOid == null && currentView && (currentView.value == "woDetail" || currentView.parent == "woDetail")){
-  //     var tmp = window.localStorage.getItem('detailWOid');
+  //   if(detailSignd == null && currentView && (currentView.value == "woDetail" || currentView.parent == "woDetail")){
+  //     var tmp = window.localStorage.getItem('detailSignd');
   //     var tmpParsed;
   //     if(tmp){
   //       tmpParsed = JSON.parse(tmp);
   //     }
   //     if(tmpParsed){
-  //       setDetailWOid(tmpParsed);
+  //       setDetailSignd(tmpParsed);
   //     }else{
-  //       setDetailWOid(null);
+  //       setDetailSignd(null);
   //     }
   //   }
     
   //   //set even if null
   //   if(currentView){
-  //     window.localStorage.setItem('detailWOid', JSON.stringify(detailWOid || null));
+  //     window.localStorage.setItem('detailSignd', JSON.stringify(detailSignd || null));
   //   }
     
-  // }, [detailWOid, currentView]);
+  // }, [detailSignd, currentView]);
 
   // useEffect(()=>{
   //   if(raineyUsers == null){
@@ -354,6 +370,7 @@ const SignContainer = function(props) {
    
   const handleSetView = (view)=>{
     setCurrentView(view);
+    console.log(currentView)
     setPreviousView(currentView ? currentView : null);
   }
 
@@ -368,6 +385,8 @@ const SignContainer = function(props) {
       case "searchSigns":
         return <SignScheduler keyState={keyState} setKeyState={setKeyState} columnState={columnState} setColumnState={setColumnState}/>
         break;
+      case "invSign":
+        return <SignInventory keyState={keyState} setKeyState={setKeyState} columnState={columnState} setColumnState={setColumnState}/>
       default: 
         cogoToast.error("Bad view");
         return <SignScheduler keyState={keyState} setKeyState={setKeyState} columnState={columnState} setColumnState={setColumnState}/>;
@@ -386,6 +405,8 @@ const SignContainer = function(props) {
       case "searchSigns":
         return <SignSidebarScheduler />
         break;
+      case 'invSign':
+        return <SignSidebarScheduler />
       default: 
         cogoToast.error("Bad view");
         return <SignSidebarScheduler />;
@@ -396,9 +417,13 @@ const SignContainer = function(props) {
 
   return (
     <div className={classes.root}>
-      <ListContext.Provider value={{user,signs, setSigns, setSignRefetch,currentView, previousView,handleSetView, views, signsSaved, setSignsSaved,filters, setFilters,
+      <ListContext.Provider value={{user,signs, setSigns, editWOModalOpen, setEditWOModalOpen, editModalMode, setEditModalMode, setSignRefetch,currentView, previousView,handleSetView, views, signsSaved, setSignsSaved,filters, setFilters,
       filterInOrOut, setFilterInOrOut,filterAndOr, setFilterAndOr, finishedState, setFinishedState, keyState, setKeyState, columnState, setColumnState, 
       columns, setColumns, signSearchRefetch, setSignSearchRefetch} } >
+      
+      <DetailContext.Provider value={{user, editSignModalMode,setEditSignModalMode, activeSign, setActiveSign, resetSignForm, setResetSignForm, workOrderItems,
+      setWorkOrderItems,editSignModalOpen,setEditSignModalOpen, vendorTypes, setVendorTypes,
+      shipToContactOptionsSign, setShipToContactOptionsSign, shipToAddressOptionsSign, setShipToAddressOptionsSign}} >
       
         <div className={classes.containerDiv}>
         
@@ -426,6 +451,7 @@ const SignContainer = function(props) {
         
 
         </div>
+        </DetailContext.Provider>
       </ListContext.Provider>
     </div>
   );

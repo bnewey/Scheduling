@@ -18,6 +18,7 @@ import {
 import RecentWO from './components/RecentWO';
 import FilterCompInv from './components/FilterCompInv';
 
+
 const WOSidebarList = function(props) {
   const {user} = props;
 
@@ -43,6 +44,8 @@ const WOSidebarList = function(props) {
     setEditModalMode("add");
     setEditWOModalOpen(true);
   }
+
+  console.log(user?.isAdmin);
   
   return (
     <div className={classes.root}>

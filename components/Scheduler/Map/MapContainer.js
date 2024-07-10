@@ -129,11 +129,11 @@ const MapContainer = (props) => {
         //Get all vehicle locations and combine into vehicleRows
         Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations()])
         .then((values)=>{
-          console.log("valuies",values);
+          console.log("linxup lacations",values);
           let linuxp_loc_array = values[0]["data"]["locations"];
           let tmpData = linuxp_loc_array?.map((item,i )=> (
                                                 { latitude: item.latitude, 
-                                                  longitude: item.longitude, 
+                                                 longitude: item.longitude, 
                                                   make: item.make, 
                                                   model: item.model, 
                                                   name: item.firstName+' '+item.lastName,
@@ -160,6 +160,7 @@ const MapContainer = (props) => {
            
           locations.splice(locations.length, 0, ...tmpData2);
           setVehicleRows(locations);
+          localStorage.setItem('vehicleLocations', locations);
           setVehicleNeedsRefresh(false);
           console.log('locatons',locations);
 
