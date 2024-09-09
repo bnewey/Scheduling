@@ -29,12 +29,12 @@ const InventoryContainer = function(props) {
   const {user} = props;
 
   //views used through whole inventory app, 
-  const views = [ { value: "invParts", displayName: "Parts", index: 0, adminOnly: true },
-                  { value: "invKits", displayName: "Kits", index: 1 , adminOnly: true},
-                  { value: "invOrdersOut", displayName: "Orders Out", index: 2, adminOnly: true},
-                  { value: "invOrdersIn", displayName: "Orders In", index: 3, adminOnly: true},
+  const views = [ { value: "invParts", displayName: "Parts", index: 0, adminOnly: false },
+                  { value: "invKits", displayName: "Kits", index: 1 , adminOnly: false},
+                  { value: "invOrdersOut", displayName: "Orders Out", index: 2, adminOnly: false},
+                  { value: "invOrdersIn", displayName: "Orders In", index: 3, adminOnly: false},
                   { value: "invPartRequest", displayName: "Parts Request", index: 4},
-                  { value: "invAdmin", displayName: "Admin", index: 5 , adminOnly: true},];
+                  { value: "invAdmin", displayName: "Admin", index: 5 , adminOnly: false},];
 
   const [currentView,setCurrentView] = useState(null);
 
