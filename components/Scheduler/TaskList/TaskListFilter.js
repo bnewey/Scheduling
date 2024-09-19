@@ -75,7 +75,7 @@ const TaskListFilter = (props) => {
         {text: "Name", field: "t_name", data_type: 'text'},
         {text: "WO #", field: "table_id", data_type: 'number'},
         {text: "Description", field: "description",  data_type: 'text'}, 
-        {text: "Order", field: "priority_order", data_type: 'number'}
+        //{text: "Order", field: "priority_order", data_type: 'number'}
     ]);
 
     const [taskUserFilters, setTaskUserFilters] = React.useState(null);
