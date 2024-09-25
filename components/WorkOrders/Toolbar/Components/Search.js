@@ -46,7 +46,8 @@ const Search = function(props) {
     {value: "wo.state", displayValue: 'WO State'},
     {value: 'wo.organization', displayValue: 'Account/Org'},
     {value: 'sc.city', displayValue: 'Customer City'},
-    {value: 'sc.state', displayValue: 'Customer State'}
+    {value: 'sc.state', displayValue: 'Customer State'},
+    {value: 'searchWithinSearch', displayValue: 'Search Within Search'}
   ];
 
   const classes = useStyles({searchOpen});
@@ -116,79 +117,137 @@ const Search = function(props) {
     }
     
   }, [searchHistory]);
+
+  const updateSearchHistory = (searchValue, searchTable, resultsCount) => {
+    if (searchValue != "") {
+      var updateArray = searchHistory ? [...searchHistory] : [];
+      var a = searchHistory[searchHistory.length - 1];
+      if (
+        searchHistory.length == 0 ||
+        (searchHistory.length > 0 && (a.searchValue != searchValue || a.searchTable != searchTable))
+      ) {
+        if (updateArray.length > 15) {
+          // remove first index
+          updateArray.shift();
+        }
+        setSearchHistory([
+          ...updateArray,
+          {
+            id: searchValue + Math.floor(Math.random() * 10000 + 1),
+            searchValue: searchValue,
+            searchTable: searchTable,
+            results: resultsCount,
+          },
+        ]);
+      }
+    }
+  };  
   
-  const search =(searchTable, searchValue)=>{
-    return new Promise((resolve,reject)=>{
-      if((!searchValue && searchValue != "") || !searchTable){
+  const search = (searchTable, searchValue) => {
+    return new Promise((resolve, reject) => {
+      if ((!searchValue && searchValue != "") || !searchTable) {
         console.error("Bad search value or search table on search");
         reject();
       }
-      if(searchTable === "all"){
-        Work_Orders.superSearchAllWorkOrders(searchTableObject.filter((j)=>j.value !== "all").map((v)=> v.value), searchValue)
-          .then((data)=>{
-            if(data){
-              
-              //Update search history
-              if(searchValue != ""){
-                var updateArray = searchHistory ?  [...searchHistory] : [];
-
-                var a = searchHistory[searchHistory.length -1];
-               
-                if(searchHistory.length == 0 || (searchHistory.length >0 && (a.searchValue != searchValue || a.searchTable != searchTable))){
-
-                  if(updateArray.length > 15){
-                      //remove first index
-                      updateArray.shift();
-                  }
-                  setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
-                      searchValue: searchValue, searchTable: "all", results: data?.length || 0 }])
-                }
-              }
-              
-              resolve(data)
+  
+      if (searchTable === "all") {
+        // Exclude 'searchWithinSearch' from the fields
+        const fieldsToSearch = searchTableObject
+          .filter((j) => j.value !== "all" && j.value !== "searchWithinSearch")
+          .map((v) => v.value);
+  
+        Work_Orders.superSearchAllWorkOrders(fieldsToSearch, searchValue)
+          .then((data) => {
+            if (data) {
+              // Update search history
+              updateSearchHistory(searchValue, searchTable, data?.length || 0);
+              resolve(data);
             }
           })
-          .catch((error)=>{
+          .catch((error) => {
             cogoToast.error("Failed to search work orders");
             reject(error);
-            
-          })
-      }else{
-        Work_Orders.searchAllWorkOrders(searchTable, searchValue)
-          .then((data)=>{
-            if(data){
-              //console.log(data);
-              //Update search history
-              if(searchValue != ""){
-                var updateArray = searchHistory ?  [...searchHistory] : [];
-
-                //check if current matches last, if so no need to add
-                var a = searchHistory[searchHistory.length -1];
-               console.log("A",a);
-                if(searchHistory.length == 0 || (searchHistory.length >0 && (a.searchValue != searchValue || a.searchTable != searchTable))){
-
-                  if(updateArray.length > 15){
-                      //remove first index
-                      updateArray.shift();
-                  }
-                  setSearchHistory([...updateArray, { id: searchValue + Math.floor((Math.random() * 10000) + 1),
-                      searchValue: searchValue, searchTable: searchTable, results: data?.length || 0 }])
-                }
-              }
-              
-              resolve(data)
-            }
-          })
-          .catch((error)=>{
-            cogoToast.error("Failed to search work orders");
-            reject(error);
-            
-          })
+          });
+      } else if (searchTable === "searchWithinSearch") {
+        // New code for search within search
+        if (!Array.isArray(workOrders) || workOrders.length === 0) {
+          console.error("No work orders to search within");
+          cogoToast.error("No work orders to search within");
+          resolve([]);
+          return;
         }
-      
-    })
-    
-  }
+  
+        // Field mapping from database fields to workOrder object properties
+        const fieldMapping = {
+          "wo.description": "description",
+          "wo.record_id": "record_id",
+          "wo.po_number": "po_number",
+          "a.name": "billing_name",
+          "c.name": "entity_name",
+          "wo.job_reference": "job_reference",
+          "wo.city": "city",
+          "wo.state": "state",
+          "wo.organization": "organization",
+          "sc.city": "customer_city",
+          "sc.state": "customer_state",
+          // Add any other necessary mappings
+        };
+  
+        // Get the fields to search in, mapping to workOrder properties
+        const fieldsToSearch = searchTableObject
+          .filter((item) => item.value !== "all" && item.value !== "searchWithinSearch")
+          .map((item) => fieldMapping[item.value])
+          .filter(Boolean); // Remove undefined mappings
+  
+        // Define getNestedValue function
+        const getNestedValue = (obj, path) => {
+          const keys = path.split('.');
+          return keys.reduce((value, key) => {
+            if (value && value[key] !== undefined) {
+              return value[key];
+            } else {
+              return null;
+            }
+          }, obj);
+        };
+  
+        // Filter 'workOrders'
+        const filteredWorkOrders = workOrders.filter((workOrder) => {
+          return fieldsToSearch.some((field) => {
+            const fieldValue = getNestedValue(workOrder, field);
+            if (fieldValue && fieldValue.toString().toLowerCase().includes(searchValue.toLowerCase())) {
+              return true;
+            }
+            return false;
+          });
+        });
+  
+        // Now, resolve with 'filteredWorkOrders'
+        resolve(filteredWorkOrders);
+  
+        // Update search history
+        updateSearchHistory(searchValue, searchTable, filteredWorkOrders?.length || 0);
+      } else {
+        // Normal search using selected field
+        Work_Orders.searchAllWorkOrders(searchTable, searchValue)
+          .then((data) => {
+            if (data) {
+              // Update search history
+              updateSearchHistory(searchValue, searchTable, data?.length || 0);
+              resolve(data);
+            }
+          })
+          .catch((error) => {
+            cogoToast.error("Failed to search work orders");
+            reject(error);
+          });
+      }
+    });
+  };
+  
+ 
+
+
   const handleEnterSearch = async (keyCode, event)=>{
     var id = event.target.id;
     console.log("Enter hit and searching")
