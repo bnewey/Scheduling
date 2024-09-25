@@ -141,6 +141,26 @@ const Search = function(props) {
         ]);
       }
     }
+  };
+   
+
+  const objectContainsSearchValue = (obj, searchValue) => {
+    const lowerSearchValue = searchValue.toLowerCase();
+  
+    const checkValue = (value) => {
+      if (value == null) {
+        return false;
+      }
+      if (typeof value === 'string' || typeof value === 'number') {
+        return value.toString().toLowerCase().includes(lowerSearchValue);
+      } else if (typeof value === 'object') {
+        return Object.values(value).some(checkValue);
+      } else {
+        return false;
+      }
+    };
+  
+    return checkValue(obj);
   };  
   
   const search = (searchTable, searchValue) => {
@@ -151,7 +171,7 @@ const Search = function(props) {
       }
   
       if (searchTable === "all") {
-        // Exclude 'searchWithinSearch' from the fields
+        // Existing logic for 'all' search
         const fieldsToSearch = searchTableObject
           .filter((j) => j.value !== "all" && j.value !== "searchWithinSearch")
           .map((v) => v.value);
@@ -169,7 +189,7 @@ const Search = function(props) {
             reject(error);
           });
       } else if (searchTable === "searchWithinSearch") {
-        // New code for search within search
+        // New code for 'Search Within Search'
         if (!Array.isArray(workOrders) || workOrders.length === 0) {
           console.error("No work orders to search within");
           cogoToast.error("No work orders to search within");
@@ -177,49 +197,9 @@ const Search = function(props) {
           return;
         }
   
-        // Field mapping from database fields to workOrder object properties
-        const fieldMapping = {
-          "wo.description": "description",
-          "wo.record_id": "record_id",
-          "wo.po_number": "po_number",
-          "a.name": "billing_name",
-          "c.name": "entity_name",
-          "wo.job_reference": "job_reference",
-          "wo.city": "city",
-          "wo.state": "state",
-          "wo.organization": "organization",
-          "sc.city": "customer_city",
-          "sc.state": "customer_state",
-          // Add any other necessary mappings
-        };
-  
-        // Get the fields to search in, mapping to workOrder properties
-        const fieldsToSearch = searchTableObject
-          .filter((item) => item.value !== "all" && item.value !== "searchWithinSearch")
-          .map((item) => fieldMapping[item.value])
-          .filter(Boolean); // Remove undefined mappings
-  
-        // Define getNestedValue function
-        const getNestedValue = (obj, path) => {
-          const keys = path.split('.');
-          return keys.reduce((value, key) => {
-            if (value && value[key] !== undefined) {
-              return value[key];
-            } else {
-              return null;
-            }
-          }, obj);
-        };
-  
-        // Filter 'workOrders'
+        // Filter 'workOrders' using the recursive search function
         const filteredWorkOrders = workOrders.filter((workOrder) => {
-          return fieldsToSearch.some((field) => {
-            const fieldValue = getNestedValue(workOrder, field);
-            if (fieldValue && fieldValue.toString().toLowerCase().includes(searchValue.toLowerCase())) {
-              return true;
-            }
-            return false;
-          });
+          return objectContainsSearchValue(workOrder, searchValue);
         });
   
         // Now, resolve with 'filteredWorkOrders'
@@ -228,7 +208,7 @@ const Search = function(props) {
         // Update search history
         updateSearchHistory(searchValue, searchTable, filteredWorkOrders?.length || 0);
       } else {
-        // Normal search using selected field
+        // Normal search using selected field (existing logic)
         Work_Orders.searchAllWorkOrders(searchTable, searchValue)
           .then((data) => {
             if (data) {
@@ -244,8 +224,6 @@ const Search = function(props) {
       }
     });
   };
-  
- 
 
 
   const handleEnterSearch = async (keyCode, event)=>{
