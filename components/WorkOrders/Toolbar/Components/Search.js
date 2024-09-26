@@ -47,7 +47,7 @@ const Search = function(props) {
     {value: 'wo.organization', displayValue: 'Account/Org'},
     {value: 'sc.city', displayValue: 'Customer City'},
     {value: 'sc.state', displayValue: 'Customer State'},
-    {value: 'searchWithinSearch', displayValue: 'Search Within Search'}
+    {value: 'searchWithinSearch', displayValue: 'Search Results'}
   ];
 
   const classes = useStyles({searchOpen});
