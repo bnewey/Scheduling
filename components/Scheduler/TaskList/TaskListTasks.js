@@ -1710,7 +1710,7 @@ const useStyles = makeStyles(theme => ({
     '& span':{
       fontFamily: 'sans-serif',
       fontWeight: 600,
-      fontSize: 'x-small',
+      fontSize: 'small',
       backgroundColor: '#ffffff00',
       color: '#0e0e0e'
     },
