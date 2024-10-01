@@ -1698,6 +1698,23 @@ const useStyles = makeStyles(theme => ({
       color: '#0e0e0e'
     },
   },
+  installBoldSmallListItemText: {
+    flex: '0 0 11%',
+    textAlign: 'center',
+    margin: '0px',
+    padding: '4px 0 4px 0',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    // backgroundColor: '#ffb87b73',
+    '& span':{
+      fontFamily: 'sans-serif',
+      fontWeight: 600,
+      fontSize: 'x-small',
+      backgroundColor: '#ffffff00',
+      color: '#0e0e0e'
+    },
+  },
   no_tasks_info_div:{
     padding: '2%',
     backgroundColor: '#ffc7c7b8',
