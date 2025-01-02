@@ -4,6 +4,7 @@ import {makeStyles, CircularProgress, Grid, Typography, Button} from '@material-
 import AddIcon from '@material-ui/icons/Add';
 import cogoToast from 'cogo-toast';
 
+import InvButton from './components/SignInvButton';
 import FilterFinished from './components/FilterFinished'
 import SignsPdf from './components/SignsPdf';
 import SignsSortOrder from './components/SignsSortOrder';
@@ -32,6 +33,9 @@ const SignSidebarScheduler = function(props) {
  
 
   const searchOpen = currentView && currentView.value == "searchSigns";
+  //const invOpen = currentView && currentView.value == 'invSign';
+
+  const sideOpen = searchOpen;
 
   
   return (
@@ -46,7 +50,7 @@ const SignSidebarScheduler = function(props) {
             </Button> */}
         </div>
         <div className={classes.dateRangeDiv}>
-          { !searchOpen && 
+          { !sideOpen && 
           <>
             <div>
                 { <FilterFinished /> }
@@ -56,7 +60,17 @@ const SignSidebarScheduler = function(props) {
 
         </div>
         <div className={classes.dateRangeDiv}>
-          { !searchOpen && 
+          { !sideOpen && 
+          <>
+            <div>
+                { <InvButton/> }
+            </div>
+          </>
+          }
+
+        </div>
+        <div className={classes.dateRangeDiv}>
+          { !sideOpen && 
           <>
             <div>
                 {<SignsPdf/>}
@@ -66,7 +80,7 @@ const SignSidebarScheduler = function(props) {
 
         </div>
         <div className={classes.dateRangeDiv}>
-          { !searchOpen && 
+          { !sideOpen && 
           <>
             <div>
                 {<SignsSortOrder/>}

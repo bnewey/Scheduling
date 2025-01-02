@@ -39,6 +39,9 @@ const SignToolbar = function(props) {
       case "searchSigns":
         return <Search />
         break;
+      case "invSign":
+        return <></>;
+        break;
       default: 
         cogoToast.error("Bad view");
         return <></>;
