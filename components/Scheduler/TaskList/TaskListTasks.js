@@ -1293,7 +1293,14 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                           className={item.style ?   classes[item.style] : classes.listItemTextStyle} 
                           onClick={(event)=> handleTaskClick ? handleTaskClick(event, row) : null}
                           onContextMenu={(event)=> handleTaskContextMenu ? handleTaskContextMenu(event, row) : null}
-                          style={{flex: `0 0 ${item.width(sizeOfTable ? sizeOfTable : "large")}`}}
+                          style={{
+                              flex: `0 0 ${item.width ? item.width(sizeOfTable ? sizeOfTable : "large") : 'auto'}`,
+                              maxWidth: item.maxWidth ? `${item.maxWidth}px` : undefined,
+                              minWidth: item.minWidth ? `${item.minWidth}px` : undefined,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                          }}
                           classes={item.style ?  {primary: classes[item.style]} : {}}>
                            <span> { handleSpecialTableValues(item.field, value, item.type,row, item)}</span>
             </div>

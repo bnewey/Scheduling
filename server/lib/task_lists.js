@@ -49,7 +49,7 @@ router.post('/getTaskList', async (req,res) => {
         ' cjf.completed AS field_job_completed,  date_format(cjf.completed_date, \'%Y-%m-%d %H:%i:%S\') as field_job_completed_date, ' +
         ' date_format(cjf.job_date, \'%Y-%m-%d\') as field_date, ccf.color AS field_crew_color,  ' + 
         ' ea.name AS address_name, ea.address, ea.city, ea.state, ea.record_id AS address_id, ' + 
-        ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, e.name AS customer_name, concat(e.name, \', \', ea.city, \', \', ea.state  ) AS t_name, ' +
+        ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.entities_id, e.name AS customer_name, concat(e.name, \', \', ea.city  ) AS t_name, ' +
         //gets the min arrival date for our Arrival Date column sorting
         ' ( SELECT min( CASE WHEN scoreboard_arrival_status > 0 THEN woi.scoreboard_arrival_status ELSE scoreboard_arrival_date END) as temp FROM work_orders_items woi WHERE woi.work_order = t.table_id AND IF(vendor is not null, woi.vendor <> 2, true) ) as wo_arrival_dates ' + 
         ' FROM task_list_items tli ' +
