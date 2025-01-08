@@ -373,7 +373,14 @@ const TaskListMain = (props) => {
                                                         align="center"
                                                         key={item.field + i +'_head'}
                                                         className={classes.listItemText} 
-                                                        style={{flex: `0 0 ${item.width("large")}`}} 
+                                                        style={{
+                                                            flex: `0 0 ${item.width("large")}`,
+                                                            maxWidth: item.maxWidth ? `${item.maxWidth}px` : undefined,
+                                                            minWidth: item.minWidth ? `${item.minWidth}px` : 'auto',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap',
+                                                        }}
                                                         classes={{primary: classes.listItemTextPrimary}}
                                                         
                                                         >
