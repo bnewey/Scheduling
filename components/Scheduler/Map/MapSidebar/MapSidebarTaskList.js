@@ -56,8 +56,8 @@ const MapSiderbarTaskList = (props) =>{
         drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters,
         arrivalDateFilters, setArrivalDateFilters,tableInfo ,setTableInfo, activeTaskView,setRefreshView, tabValue,
         taskListTasks, setTaskListTasks, taskListTasksRefetch, setTaskListTasksRefetch,
-         taskListTasksSaved , setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, sorters, sorterState,setSorters,
-          filters, taskViews, setSelectedIds, activeTVOrder} = useContext(TaskContext);
+        taskListTasksSaved , setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, sorters, sorterState,setSorters,
+        filters, taskViews, setSelectedIds, activeTVOrder} = useContext(TaskContext);
     const {mapRows, setMapRows, markedRows, setMarkedRows,  mapRowsRefetch, setMapRowsRefetch, activeMarker,setActiveMarker,expandedAnimDone,
         setShowingInfoWindow, woiData, setWoiData} = useContext(MapContext);
     
@@ -275,14 +275,14 @@ const MapSiderbarTaskList = (props) =>{
                                                     </span>
                                                 
                                                     
-                                                    {item.field == "drill_date" && <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} drillDateFilters={drillDateFilters}
+                {item.field == "drill_date" && <TLDrillDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} drillDateFilters={drillDateFilters}
                 setDrillDateFilters={setDrillDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
                 {item.field == "sch_install_date" && <TLInstallDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} installDateFilters={installDateFilters}
                 setInstallDateFilters={setInstallDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
                 {item.field == "wo_arrival_dates" && <TLArrivalDateFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} arrivalDateFilters={arrivalDateFilters}
                 setArrivalDateFilters={setArrivalDateFilters} setRefreshView={setRefreshView} tabValue={tabValue} />}
                 {item.field == "install_crew" && <TLCrewFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} crewFilters={installCrewFilters}
-                      setCrewFilters={setInstallCrewFilters} setRefreshView={setRefreshView} tabValue={tabValue} fieldId={"install_crew"}/>}
+                setCrewFilters={setInstallCrewFilters} setRefreshView={setRefreshView} tabValue={tabValue} fieldId={"install_crew"}/>}
                 {item.field == "drill_crew" && <TLCrewFilter taskViews={taskViews} activeTaskView={activeTaskView} handleRefreshView={handleRefreshView}  tLTasksExtraSaved={tLTasksExtraSaved} crewFilters={drillCrewFilters}
                 setCrewFilters={setDrillCrewFilters} setRefreshView={setRefreshView} tabValue={tabValue} fieldId={"drill_crew"} />}
 
