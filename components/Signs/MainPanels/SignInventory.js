@@ -11,7 +11,7 @@ import TableRow from '@material-ui/core/TableRow';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 
-import {debounce} from 'lodash';
+import {debounce, groupBy} from 'lodash';
 import AddEditSignModal from './addEdit/AddEditSign';
 
 import clsx from 'clsx';
@@ -74,7 +74,7 @@ const SignInventory = function(props) {
  const viewArray = [
     { id: 'size', label: 'Size', minWidth: 40, align: 'left'},
     { id: 'description', label: 'Description', minWidth: 300, align: 'left', hideRepeats: true},
-    { id: 'type', label: 'WO Type',minWidth: 35, type: 'text',align: 'center', hideRepeats: true },
+    //{ id: 'type', label: 'WO Type',minWidth: 35, type: 'text',align: 'center', hideRepeats: true },
     { id: 'work_order', label: 'WO#', minWidth: 50, align: 'center', hideRepeats: true,
       format: (value, row)=> <span onClick={()=>handleGoToWorkOrderId(value, row)} className={classes.clickableWOnumber}>{value}</span> },
     { id: 'art_stage', label: 'Art Stage', minWidth: 100, align: 'center', hideRepeats: false,
@@ -84,18 +84,18 @@ const SignInventory = function(props) {
     { id: 'quantity', label: 'Qty', minWidth: 30, align: 'center', hideRepeats: false},
   ];
 
-  useEffect(() => {
+  //useEffect(() => {
     // Filter the data to get only the items where built is true
-    const filterBuiltItems = (data) => {
-        return data.filter(item => item.sign_built !== null);
-    };
+    //const filterBuiltItems = (data) => {
+    //    return data.filter(item => item.sign_built !== null);
+    //};
   
-    if (signs && signs.some(item => item.sign_built === null)) {
+    //if (signs && signs.some(item => item.sign_built === null)) {
         // Set the filtered items to the state
-        const filteredSigns = filterBuiltItems(signs);
-        setSigns(filteredSigns);
-    }
-  }, [signs, setSigns]);
+        //const filteredSigns = filterBuiltItems(signs);
+        //setSigns(filteredSigns);
+    //}
+  //}, [signs, setSigns]);
 
 
    //Save and/or Fetch columns to local storage
