@@ -1,666 +1,651 @@
+import { makeStyles, Grid } from "@material-ui/core";
+import ActiveVehicleIcon from "@material-ui/icons/PlayArrow";
+import StoppedVehicleIcon from "@material-ui/icons/Stop";
+import { useState, useEffect, useContext, createContext } from "react";
+import moment from "moment";
+import cogoToast from "cogo-toast";
 
-//import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
+import MapSidebar from "./MapSidebar/MapSidebar";
+import CustomMap from "./Map"; // <-- Make sure this is also updated to @react-google-maps/api internally
 
-import {makeStyles, Paper, Grid, Button} from '@material-ui/core';
-import ActiveVehicleIcon from '@material-ui/icons/PlayArrow';
-import StoppedVehicleIcon from '@material-ui/icons/Stop';
-import MapSidebar from './MapSidebar/MapSidebar';
-import CustomMap from './Map';
-import { useState, useEffect, useMemo, useCallback, useContext , createContext} from 'react';
-import moment from 'moment';
+import Tasks from "../../../js/Tasks";
+import Crew from "../../../js/Crew";
+import TaskLists from "../../../js/TaskLists";
+import Util from "../../../js/Util";
+import Vehicles from "../../../js/Vehicles";
+import TaskListFilter from "../TaskList/TaskListFilter";
+import { TaskContext } from "../TaskContainer";
+import { confirmAlert } from "react-confirm-alert"; // Import
+import ConfirmYesNo from "../../UI/ConfirmYesNo";
 
-const fetch = require("isomorphic-fetch");
-const { compose, withProps, withHandlers } = require("recompose");
-const {
-  withScriptjs,
-  withGoogleMap,
-  GoogleMap,
-  Marker,
-} = require("react-google-maps");
-const { MarkerClusterer } = require("react-google-maps/lib/components/addons/MarkerClusterer");
-const { MarkerWithLabel } = require("react-google-maps/lib/components/addons/MarkerWithLabel");
-
-import cogoToast from 'cogo-toast';
-import MapMarkerInfoWindow from './MapMarkerInfoWindow';
-import MapVehicleInfoWindow from './MapVehicleInfoWindow';
-
-import Tasks from '../../../js/Tasks';
-import Crew from '../../../js/Crew';
-import TaskLists from '../../../js/TaskLists';
-import Util from '../../../js/Util';
-import Vehicles from '../../../js/Vehicles';
-import TaskListFilter from '../TaskList/TaskListFilter';
-import { TaskContext } from '../TaskContainer';
-import { confirmAlert } from 'react-confirm-alert'; // Import
-import ConfirmYesNo from '../../UI/ConfirmYesNo';
+import { createFilter } from "../../../js/Filter";
+import { createSorter } from "../../../js/Sort";
+import { CrewContext } from "../Crew/CrewContextContainer";
+import _ from "lodash";
 
 export const MapContext = createContext(null);
 
-import {createFilter} from '../../../js/Filter';
-import {createSorter} from '../../../js/Sort';
-import { use } from 'passport';
-import { CrewContext } from '../Crew/CrewContextContainer';
-import _ from 'lodash';
-
-const useStyles = makeStyles(theme => ({
-    root: {
-
-    },
-    map:{
-    },
-    infoWindow: {
-      backgroundColor: '#000'
-    },
-    mainContainer:{
-    }
-  }));
+const useStyles = makeStyles((theme) => ({
+  root: {},
+  map: {},
+  infoWindow: {
+    backgroundColor: "#000",
+  },
+  mainContainer: {},
+}));
 
 const MapContainer = (props) => {
-    const classes = useStyles();
+  const classes = useStyles();
 
-    //const {} = props;
+  const {
+    modalOpen,
+    setModalOpen,
+    setModalTaskId,
+    taskLists,
+    setTaskLists,
+    taskListToMap,
+    setTaskListToMap,
+    crewToMap,
+    setCrewToMap,
+    filters,
+    setFilter,
+    sorters,
+    setSorters,
+    filterInOrOut,
+    filterAndOr,
+    setTaskListTasksSaved,
+    setTLTasksExtraSaved,
+    refreshView,
+    installDateFilters,
+    setInstallDateFilters,
+    drillDateFilters,
+    arrivalDateFilters,
+    drillCrewFilters,
+    installCrewFilters,
+    job_types,
+  } = useContext(TaskContext);
 
-    const { modalOpen, setModalOpen, setModalTaskId, taskLists, setTaskLists, taskListToMap, setTaskListToMap, crewToMap, setCrewToMap,
-          filters, setFilter, sorters, setSorters, filterInOrOut, filterAndOr, setTaskListTasksSaved, setTLTasksExtraSaved, refreshView,
-          installDateFilters , setInstallDateFilters, drillDateFilters, arrivalDateFilters, drillCrewFilters, installCrewFilters, job_types} = useContext(TaskContext);
+  const { crewJobDateRange, setShouldResetCrewState, crewJobDateRangeActive } =
+    useContext(CrewContext);
 
-    const { crewJobDateRange, setShouldResetCrewState, crewJobDateRangeActive} = useContext(CrewContext);
-    const [showingInfoWindow, setShowingInfoWindow] = useState(false);
-    const [activeMarker, setActiveMarker] = useState(null);
-    
-    const [changeStateSoMapUpdates, setChangeStateSoMapUpdates] = React.useState(1);
+  const [showingInfoWindow, setShowingInfoWindow] = useState(false);
+  const [activeMarker, setActiveMarker] = useState(null);
 
-    const [mapRows, setMapRows] = useState(null); 
-    const [mapRowsRefetch, setMapRowsRefetch] = useState(false);
-    const [resetBounds, setResetBounds] = React.useState(true);
-    const [markedRows, setMarkedRows] = useState([]);
-    const [noMarkerRows, setNoMarkerRows] = useState(null);
-    const [multipleMarkersOneLocation,setMultipleMarkersOneLocation ] = React.useState(null);
+  const [changeStateSoMapUpdates, setChangeStateSoMapUpdates] = useState(1);
 
-    const [woiData, setWoiData] = useState(null)
-    
-    const [infoWeather, setInfoWeather] = useState(null);
+  const [mapRows, setMapRows] = useState(null);
+  const [mapRowsRefetch, setMapRowsRefetch] = useState(false);
+  const [resetBounds, setResetBounds] = useState(true);
+  const [markedRows, setMarkedRows] = useState([]);
+  const [noMarkerRows, setNoMarkerRows] = useState(null);
+  const [multipleMarkersOneLocation, setMultipleMarkersOneLocation] =
+    useState(null);
 
+  const [woiData, setWoiData] = useState(null);
+  const [infoWeather, setInfoWeather] = useState(null);
 
-    //Vehicle
-    const [vehicleRows, setVehicleRows] = useState(null);
-    const [vehicleNeedsRefresh, setVehicleNeedsRefresh] = useState(true);
-    const [bouncieAuthNeeded,setBouncieAuthNeeded] = useState(false);
-    const [visibleItems, setVisibleItems] = React.useState(null);
+  // Vehicles
+  const [vehicleRows, setVehicleRows] = useState(null);
+  const [vehicleNeedsRefresh, setVehicleNeedsRefresh] = useState(true);
+  const [bouncieAuthNeeded, setBouncieAuthNeeded] = useState(false);
+  const [visibleItems, setVisibleItems] = useState(null);
 
-    //Crew
-    //const [localCrewJobs, setLocalCrewJobs] = useState(null);
-    const [crewJobs, setCrewJobs] = useState(null);
-    const [crewJobsRefetch, setCrewJobsRefetch] = useState(false);
-    const [crewJobsLoading, setCrewJobsLoading] = useState(false);
-    const [unfilteredJobs, setUnfilteredJobs] = useState(null);
-    const [showCompletedJobs, setShowCompletedJobs] = React.useState(false);
-    const [crewFilters,setCrewFilters] = React.useState([]);
-    const [crewJobSorters, setCrewJobSorters] = useState([{property: "job_date", direction: 'ASC' }]);
+  // Crew
+  const [crewJobs, setCrewJobs] = useState(null);
+  const [crewJobsRefetch, setCrewJobsRefetch] = useState(false);
+  const [crewJobsLoading, setCrewJobsLoading] = useState(false);
+  const [unfilteredJobs, setUnfilteredJobs] = useState(null);
+  const [showCompletedJobs, setShowCompletedJobs] = useState(false);
+  const [crewFilters, setCrewFilters] = useState([]);
+  const [crewJobSorters, setCrewJobSorters] = useState([
+    { property: "job_date", direction: "ASC" },
+  ]);
 
+  const [mapHeight, setMapHeight] = useState("400px");
 
+  // Radar
+  const [radarControl, setRadarControl] = useState(null);
+  const [timestamps, setTimestamps] = useState([]);
+  const [radarOpacity, setRadarOpacity] = useState(0.5);
+  const [radarSpeed, setRadarSpeed] = useState(400);
+  const [visualTimestamp, setVisualTimestamp] = useState(null);
 
-    const [mapHeight,setMapHeight] = useState('400px');
+  // Refresh logic
+  useEffect(() => {
+    if (refreshView && refreshView === "map") {
+      setMapRowsRefetch(true);
+      setCrewJobsRefetch(true);
+      setCrewJobsLoading(false);
+    }
+  }, [refreshView]);
 
-    //Radar
-    const [radarControl, setRadarControl] = useState(null);
-    const [timestamps,setTimestamps] =React.useState([]);
-    const [radarOpacity, setRadarOpacity] = React.useState(.5);
-    const [radarSpeed, setRadarSpeed] = React.useState(400);
-    const [visualTimestamp, setVisualTimestamp] = useState(null);
+  // Vehicles
+  useEffect(() => {
+    if (vehicleNeedsRefresh) {
+      const locations = [];
+      Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations()])
+        .then((values) => {
+          const linuxp_loc_array = values[0]?.data?.locations || [];
+          const tmpData =
+            linuxp_loc_array?.map((item) => ({
+              latitude: item.latitude,
+              longitude: item.longitude,
+              make: item.make,
+              model: item.model,
+              name: item.firstName + " " + item.lastName,
+              vin: item.vin,
+              service: "linxup",
+              active: item.speed > 0,
+              direction: item.direction,
+            })) || [];
 
-   
+          locations.push(...tmpData);
 
-    //Refresh state for components outside scope
-    useEffect(()=>{
-      if(refreshView && refreshView == "map"){
-          setMapRowsRefetch(true);
-          //setShouldResetCrewState(true);
-          setCrewJobsRefetch(true);
-          setCrewJobsLoading(false);
-          //setUnfilteredJobs(null);
-      }
-    },[refreshView])
-
-    //useEffect for vehicleRows
-    useEffect(()=>{
-      if(vehicleNeedsRefresh == true){
-        var locations = [];
-        //Get all vehicle locations and combine into vehicleRows
-        Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations()])
-        .then((values)=>{
-          console.log("valuies",values);
-          let linuxp_loc_array = values[0]["data"]["locations"];
-          let tmpData = linuxp_loc_array?.map((item,i )=> (
-                                                { latitude: item.latitude, 
-                                                  longitude: item.longitude, 
-                                                  make: item.make, 
-                                                  model: item.model, 
-                                                  name: item.firstName+' '+item.lastName,
-                                                  vin: item.vin,
-                                                  service: 'linxup',
-                                                  active: item.speed > 0 ? true : false,
-                                                  direction:  item.direction }))
-          locations.splice(locations.length, 0, ...tmpData);
-          let tmpData2 =[];
-          if(values[1]["error"] || !Array.isArray(values[1])){
+          if (values[1]?.error || !Array.isArray(values[1])) {
             console.error("Custom Error from bouncie", values[1]);
             setBouncieAuthNeeded(true);
-          }else{
-            tmpData2 =  values[1]?.map((item,i )=> ({latitude: item['stats']['location'].lat, 
-                      longitude: item['stats']['location'].lon, 
-                      make: item['model'].make, 
-                      model: item['model'].name, 
-                      name: item.nickName,
-                      vin: item.vin,
-                      service: 'bouncie',
-                      active: item['stats'].isRunning,
-                      direction: item['stats']['location'].heading }))
+          } else {
+            const tmpData2 =
+              values[1]?.map((item) => ({
+                latitude: item.stats.location.lat,
+                longitude: item.stats.location.lon,
+                make: item.model.make,
+                model: item.model.name,
+                name: item.nickName,
+                vin: item.vin,
+                service: "bouncie",
+                active: item.stats.isRunning,
+                direction: item.stats.location.heading,
+              })) || [];
+            locations.push(...tmpData2);
           }
-           
-          locations.splice(locations.length, 0, ...tmpData2);
+
           setVehicleRows(locations);
           setVehicleNeedsRefresh(false);
-          console.log('locatons',locations);
 
-          //Move our info window by resetting activeVehicle with update info
-          if(activeMarker?.type === "vehicle" && activeMarker?.item){
-            var refreshedActive = locations.filter((v, i)=> v.vin == activeMarker.item.vin)[0];
-            setActiveMarker({type: 'vehicle', item: refreshedActive});
-          }
-        })
-        .catch((error)=>{
-          console.error("Vehicle error", error);
-        })
-      }
-    },[vehicleNeedsRefresh]);
-
-    
-    //Refetches vehicle Rows every 30 seconds
-    useEffect(()=>{
-      const timeoutId = setTimeout(()=>{
-        setVehicleNeedsRefresh(true);
-
-      }, 30000)
-      return () => clearTimeout(timeoutId);
-    }, [vehicleRows])
-
-    //Save and/or Fetch visibleItems to local storage
-    useEffect(() => {
-      if(visibleItems == null){
-        var tmp = window.localStorage.getItem('visibleItems');
-        var tmpParsed;
-        if(tmp){
-          tmpParsed = JSON.parse(tmp);
-        }
-        if(Array.isArray(tmpParsed)){
-          setVisibleItems(tmpParsed);
-        }else{
-          setVisibleItems(['crewJobs' ,'vehicles']);
-        }
-      }
-      if(Array.isArray(visibleItems)){
-        window.localStorage.setItem('visibleItems', JSON.stringify(visibleItems));
-      }
-      
-    }, [visibleItems]);
-
-    //useEffect for mapRows
-    useEffect( () =>{ 
-      if( (mapRows == null || mapRowsRefetch == true) && filterInOrOut != null && filterAndOr != null && filters != null && installDateFilters != null &&
-             drillDateFilters != null && arrivalDateFilters != null && drillCrewFilters != null && installCrewFilters != null ){
-          if(taskLists && taskListToMap && taskListToMap.id ) { 
-            if(mapRowsRefetch == true){
-              setMapRowsRefetch(false);
+          // Update active marker if it's a vehicle
+          if (activeMarker?.type === "vehicle" && activeMarker?.item) {
+            const refreshedActive = locations.find(
+              (v) => v.vin === activeMarker.item.vin
+            );
+            if (refreshedActive) {
+              setActiveMarker({ type: "vehicle", item: refreshedActive });
             }
-
-            TaskLists.getTaskList(taskListToMap.id)
-            .then( (data) => {
-                if(!Array.isArray(data)){
-                    console.error("Bad tasklist data",data);
-                    return;
-                }
-                var tmpData = [];
-
-                if(filters && filters.length > 0){
-                  //If more than one property is set, we need to filter seperately
-                  let properties = new Set([...filters].map((v,i)=>v.property));
-                  
-                  properties.forEach((index,property)=>{
-                    
-                    let tmpFilter = filters.filter((v,i)=> v.property == property);
-                    let tmpTmpData;
-
-                    //On or use taskListTasksSaved to filter from to add to 
-                    if((filterAndOr == "or" && filterInOrOut == "in") || (filterAndOr == "and" && filterInOrOut == "out") ){
-                        if(tmpFilter.length > 1){
-                            //Always use 'or' on same property
-                            tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                        }
-                        if(tmpFilter.length <= 1){
-                            tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                            //console.log("MapContainer tmpData in loop", tmpData);
-                        }
-                        //Add to our big array
-                        tmpData.splice(tmpData.length, 0, ...tmpTmpData);
-                        //Remove duplicates
-                        tmpData.splice(0, tmpData.length, ...(new Set(tmpData)));
-                    }
-
-                    //On and use tmpData to filter from
-                    if((filterAndOr == "and" && filterInOrOut == "in") || (filterAndOr == "or" && filterInOrOut == "out")){
-                        if(tmpData.length <= 0){
-                          tmpData = [...data];
-                        }  
-                        if(tmpFilter.length > 1){
-                            //Always use 'or' on same property
-                            tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                        }
-                        if(tmpFilter.length <= 1){
-                            tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                        }
-                    }
-                    
-                  })              
-                }else{
-                }
-                
-                setTaskListTasksSaved(data);
-                //Save after initial filters
-                setTLTasksExtraSaved(tmpData);
-
-                if(installDateFilters.length > 0){
-                  if(tmpData.length <= 0 && filters && !filters.length){
-                      tmpData = [...data];
-                  }  
-                  tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
-                }
-
-                if(drillDateFilters.length > 0){
-                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length){
-                      tmpData = [...data];
-                  }  
-                  tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
-                }
-
-                if(arrivalDateFilters.length > 0){
-                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length){
-                      tmpData = [...data];
-                  }  
-                  tmpData = tmpData.filter(createFilter([...arrivalDateFilters], "in", "or"));
-                }
-
-                if(drillCrewFilters.length > 0){
-                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
-                    && arrivalDateFilters && !arrivalDateFilters.length ){
-                      tmpData = [...data];
-                  }  
-                  tmpData = tmpData.filter(createFilter([...drillCrewFilters], "in", "or"));
-                }
-
-                if(installCrewFilters.length > 0){
-                  if(tmpData.length <= 0 && filters && !filters.length && installDateFilters && !installDateFilters.length
-                    && arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length ){
-                      tmpData = [...data];
-                  }  
-                  tmpData = tmpData.filter(createFilter([...installCrewFilters], "in", "or"));
-                }
-
-                //No filters 
-                if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length &&
-                   arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length && installCrewFilters && !installCrewFilters.length){
-                  //no change to tmpData
-                  tmpData = [...data];
-                }
-
-                //SORT after filters -------------------------------------------------------------------------
-                if(sorters && sorters.length > 0){
-                  tmpData = tmpData.sort(createSorter(...sorters))
-                  //Set saved for filter list 
-                }
-                //--------------------------------------------------------------------------------------------
-
-                //Set TaskListTasks
-                if(Array.isArray(tmpData)){
-                    setMapRows(tmpData);
-                    console.log("SETTING MAP ROWS main 279 ", tmpData)
-                }
-                setWoiData(null);
-            })
-            .catch( error => {
-                cogoToast.error(`Error getting Task List`, {hideAfter: 4});
-                console.error("Error getting tasklist", error);
-            })
-        }else{
-          console.log("else on taskLists && taskListToMap && taskListToMap.id ");
-        }
-      }else{
-        console.log("else on mapRows == null && filterInOrOut != null && filterAndOr != null")
-      }
-      if(mapRows){
-        //filter geocoded
-        var tmp = mapRows.filter((row, index) => row.geocoded)
-        setMarkedRows(tmp);
-      }
-
-      return () => { //clean up
-      }
-    },[mapRows,mapRowsRefetch, filterInOrOut, filterAndOr,taskLists, taskListToMap, filters, installDateFilters, drillDateFilters,
-         arrivalDateFilters, drillCrewFilters, installCrewFilters]);
-
-    //Sort
-    useEffect(()=>{
-      if (Array.isArray(sorters) && sorters.length) {
-          if (mapRows && mapRows.length) {
-              var tmpData = mapRows.sort(createSorter(...sorters))
-              console.log("SETTING MAP ROWS sorters 313", tmpData);
-              console.log("mapRows for sorters 313", mapRows);
-              var copyObject = [...tmpData];
-              setMapRows(copyObject);
-              cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
           }
-      }
-    },[sorters]);
+        })
+        .catch((error) => {
+          console.error("Vehicle error", error);
+        });
+    }
+  }, [vehicleNeedsRefresh]);
 
-    useEffect(()=>{
-      if(mapRows && crewJobs){
-        setCrewJobsRefetch(true);
-      }
-    },[mapRows])
+  // Poll vehicles every 30 seconds
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setVehicleNeedsRefresh(true);
+    }, 30000);
+    return () => clearTimeout(timeoutId);
+  }, [vehicleRows]);
 
-    //Use effect for tasks with no locations (nomarkerrows)
-    useEffect(()=>{
-        if(noMarkerRows == null && mapRows){
-           setNoMarkerRows(mapRows.filter((row, index) => !row.geocoded));
+  // Show/hide features
+  useEffect(() => {
+    if (visibleItems == null) {
+      const tmp = window.localStorage.getItem("visibleItems");
+      let tmpParsed;
+      if (tmp) {
+        tmpParsed = JSON.parse(tmp);
+      }
+      if (Array.isArray(tmpParsed)) {
+        setVisibleItems(tmpParsed);
+      } else {
+        setVisibleItems(["crewJobs", "vehicles"]);
+      }
+    } else {
+      window.localStorage.setItem("visibleItems", JSON.stringify(visibleItems));
+    }
+  }, [visibleItems]);
+
+  // Load tasks for map
+  useEffect(() => {
+    if (
+      (mapRows == null || mapRowsRefetch === true) &&
+      filterInOrOut != null &&
+      filterAndOr != null &&
+      filters != null &&
+      installDateFilters != null &&
+      drillDateFilters != null &&
+      arrivalDateFilters != null &&
+      drillCrewFilters != null &&
+      installCrewFilters != null
+    ) {
+      if (taskLists && taskListToMap && taskListToMap.id) {
+        if (mapRowsRefetch) {
+          setMapRowsRefetch(false);
         }
-        //Find and set geolocation of unset rows
-        if(noMarkerRows && noMarkerRows.length > 0 && mapRows){
-          console.log("noMarkerRows in if");
-          var tmpMapRows = [...mapRows];
-          noMarkerRows.forEach((row, i)=> {
-            if(!row.address){
+
+        TaskLists.getTaskList(taskListToMap.id)
+          .then((data) => {
+            if (!Array.isArray(data)) {
+              console.error("Bad tasklist data", data);
               return;
             }
-                
-            Tasks.getCoordinates(row.address, row.city, row.state, row.zip)
-            .then((data)=>{
-              if(!data){
-                throw new Error("Bad return from getCoordinates from GoogleAPI");
+            let tmpData = [];
+
+            // Apply filters
+            if (filters?.length > 0) {
+              const properties = new Set(filters.map((v) => v.property));
+              properties.forEach((prop) => {
+                const tmpFilter = filters.filter((f) => f.property === prop);
+                let filteredData;
+                if (
+                  (filterAndOr === "or" && filterInOrOut === "in") ||
+                  (filterAndOr === "and" && filterInOrOut === "out")
+                ) {
+                  // Start from blank and add
+                  filteredData = data.filter(
+                    createFilter([...tmpFilter], filterInOrOut, "or")
+                  );
+                  tmpData.push(...filteredData);
+                  tmpData = [...new Set(tmpData)]; // remove duplicates
+                } else if (
+                  (filterAndOr === "and" && filterInOrOut === "in") ||
+                  (filterAndOr === "or" && filterInOrOut === "out")
+                ) {
+                  // Start from entire set, then refine
+                  if (tmpData.length <= 0) {
+                    tmpData = [...data];
+                  }
+                  filteredData = tmpData.filter(
+                    createFilter([...tmpFilter], filterInOrOut, "or")
+                  );
+                  tmpData = filteredData;
+                }
+              });
+            }
+
+            setTaskListTasksSaved(data);
+            setTLTasksExtraSaved(tmpData);
+
+            // Additional date or crew filters
+            const applyInOrFilters = (base, extraFilters) => {
+              if (extraFilters.length > 0) {
+                if (base.length <= 0 && filters?.length === 0) {
+                  base = [...data];
+                }
+                return base.filter(createFilter([...extraFilters], "in", "or"));
               }
-              //Update MapRows with lat, lng, geocoded instead of refreshing
-              var mapRowIndex = mapRows.indexOf(row)
-              var tmpRow = {...row};
-              
-              tmpRow["lat"] = data.lat;
-              tmpRow["lng"] = data.lng;
-              tmpRow["geocoded"] = 1;
-              tmpMapRows[mapRowIndex] = tmpRow;
-              setMapRows(tmpMapRows);
-              console.log("SETTING MAPROWS nomarker", tmpMapRows);
-              setNoMarkerRows(tmpMapRows.filter((row, index) => !row.geocoded));
-              //Save lat, lng, geocoded to db
-              Tasks.saveCoordinates(row.address_id, data)
-              .then((ok)=>{
-                if(!ok){
-                  console.warn("Did not save coordinates.");
-                }
-                if(i == noMarkerRows.length){
-                  cogoToast.info('Unmapped Markers have been added to map', {hideAfter: 4});
-                }     
-              })
-              .catch((error)=> {
-                console.error(error);
-                cogoToast.error(`Error Saving Coordinates`, {hideAfter: 4});
-                setNoMarkerRows([]);
-              })
-            })
-            .catch((error)=> {
-              console.error(error);
-              cogoToast.error(`Error getting coordinates`, {hideAfter: 4});
-              setNoMarkerRows([]);
-            })
+              return base;
+            };
+
+            tmpData = applyInOrFilters(tmpData, installDateFilters);
+            tmpData = applyInOrFilters(tmpData, drillDateFilters);
+            tmpData = applyInOrFilters(tmpData, arrivalDateFilters);
+            tmpData = applyInOrFilters(tmpData, drillCrewFilters);
+            tmpData = applyInOrFilters(tmpData, installCrewFilters);
+
+            // If no filters at all
+            if (
+              filters?.length === 0 &&
+              installDateFilters?.length === 0 &&
+              drillDateFilters?.length === 0 &&
+              arrivalDateFilters?.length === 0 &&
+              drillCrewFilters?.length === 0 &&
+              installCrewFilters?.length === 0
+            ) {
+              tmpData = [...data];
+            }
+
+            // Sort
+            if (sorters && sorters.length > 0) {
+              tmpData = tmpData.sort(createSorter(...sorters));
+            }
+
+            if (Array.isArray(tmpData)) {
+              setMapRows(tmpData);
+              console.log("SETTING MAP ROWS main", tmpData);
+            }
+            setWoiData(null);
           })
-          
-        }
-    }, [noMarkerRows, mapRows])
+          .catch((error) => {
+            cogoToast.error(`Error getting Task List`, { hideAfter: 4 });
+            console.error("Error getting tasklist", error);
+          });
+      } else {
+        console.log("No valid TaskList to map or missing ID");
+      }
+    }
 
-    useEffect(()=>{
-      //we get crewJobs and then filter using the mapRows (because mapRows is already filtered to what our tasklist is)
-      if( mapRows && (crewToMap || taskListToMap) && (crewJobs == null || crewJobsRefetch == true) && crewFilters && crewJobSorters && crewJobsLoading != true ){
-        
-          if(crewJobsRefetch == true){
-            setCrewJobsRefetch(false);
-          }
-          if(taskListToMap){
-            console.log("mapRows to setCrewJobs", mapRows);
-            setCrewJobsLoading(true);
-            Crew.getCrewJobsByTaskList(taskListToMap.id)
-            .then((data)=>{
-                if(data){
-                    //Filter using mapRows (ie tasks from TL + filters + sorters)
-                    var updateData = data.filter((item)=>{
-                      return (mapRows.find((row)=> row.t_id === item.task_id)) ? true : false
-                    })
+    if (mapRows) {
+      const tmp = mapRows.filter((row) => row.geocoded);
+      setMarkedRows(tmp);
+    }
+  }, [
+    mapRows,
+    mapRowsRefetch,
+    filterInOrOut,
+    filterAndOr,
+    taskLists,
+    taskListToMap,
+    filters,
+    installDateFilters,
+    drillDateFilters,
+    arrivalDateFilters,
+    drillCrewFilters,
+    installCrewFilters,
+  ]);
 
-                    //Filter out completed (seperate list)
-                    //This also filters out items with no crew_job (j.completed is null so fails filter check)
-                    updateData = updateData.filter((j)=>j.completed == 0)
-                    
-                    //Filter using crewFilterButton items if enabled
-                    if(crewFilters?.length){
-                      updateData = updateData.filter((job)=>{
-                        
-                        let return_value = (_.find(crewFilters,function(filter) { 
-                          //handle unassigned items
-                          if(filter === 'unassigned' && job.crew_id === null){
-                            return true;
-                          }
-                          return filter == job.crew_id 
-                        }))
+  // Sort watch
+  useEffect(() => {
+    if (Array.isArray(sorters) && sorters.length) {
+      if (mapRows && mapRows.length) {
+        const tmpData = mapRows.sort(createSorter(...sorters));
+        console.log("SETTING MAP ROWS sorters", tmpData);
+        setMapRows([...tmpData]);
+        cogoToast.success(`Sorting by ${sorters.map((v) => v.property).join(", ")}`);
+      }
+    }
+  }, [sorters]);
 
-                        return return_value;
-                      })
+  // If mapRows changed, refetch crew
+  useEffect(() => {
+    if (mapRows && crewJobs) {
+      setCrewJobsRefetch(true);
+    }
+  }, [mapRows]);
+
+  // Geocode any tasks that lack lat/lng
+  useEffect(() => {
+    if (noMarkerRows == null && mapRows) {
+      setNoMarkerRows(mapRows.filter((row) => !row.geocoded));
+    }
+    if (noMarkerRows && noMarkerRows.length > 0 && mapRows) {
+      const tmpMapRows = [...mapRows];
+      noMarkerRows.forEach((row, idx) => {
+        if (!row.address) return;
+
+        Tasks.getCoordinates(row.address, row.city, row.state, row.zip)
+          .then((data) => {
+            if (!data) {
+              throw new Error("Bad return from getCoordinates");
+            }
+            const mapRowIndex = mapRows.indexOf(row);
+            const tmpRow = { ...row, lat: data.lat, lng: data.lng, geocoded: 1 };
+            tmpMapRows[mapRowIndex] = tmpRow;
+            setMapRows(tmpMapRows);
+
+            setNoMarkerRows(tmpMapRows.filter((r) => !r.geocoded));
+
+            Tasks.saveCoordinates(row.address_id, data).catch((error) => {
+              console.warn("Did not save coordinates", error);
+            });
+            if (idx === noMarkerRows.length - 1) {
+              cogoToast.info("Unmapped Markers have been added to map", {
+                hideAfter: 4,
+              });
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+            cogoToast.error("Error getting coordinates", { hideAfter: 4 });
+            setNoMarkerRows([]);
+          });
+      });
+    }
+  }, [noMarkerRows, mapRows]);
+
+  // Crew
+  useEffect(() => {
+    if (
+      mapRows &&
+      (crewToMap || taskListToMap) &&
+      (crewJobs == null || crewJobsRefetch === true) &&
+      crewFilters &&
+      crewJobSorters &&
+      crewJobsLoading !== true
+    ) {
+      if (crewJobsRefetch) {
+        setCrewJobsRefetch(false);
+      }
+      if (taskListToMap) {
+        setCrewJobsLoading(true);
+        Crew.getCrewJobsByTaskList(taskListToMap.id)
+          .then((data) => {
+            if (data) {
+              // Filter to tasks in our map
+              let updateData = data.filter((item) =>
+                mapRows.find((row) => row.t_id === item.task_id)
+              );
+              // Only incomplete
+              updateData = updateData.filter((j) => j.completed === 0);
+
+              // Filter by crew
+              if (crewFilters?.length) {
+                updateData = updateData.filter((job) => {
+                  return _.find(crewFilters, function (filter) {
+                    if (filter === "unassigned" && job.crew_id === null) {
+                      return true;
                     }
+                    return filter == job.crew_id;
+                  });
+                });
+              }
 
-                    //filter using to and from dates if enabled
-                    if(crewJobDateRange){
-                        updateData = updateData.filter((job,i)=>{
-                            var date;
-                            if(job.job_type == "install"){
-                                date = Util.convertISODateToMySqlDate(job.sch_install_date) || null;
-                            }else{
-                              if(job.job_type == "drill"){
-                                date = Util.convertISODateToMySqlDate(job.drill_date) || null;
-                              }else{
-                                date = Util.convertISODateToMySqlDate(job.job_date) || null;
-                              }
-                            }
-                            
-                            if(date != null && crewJobDateRangeActive){
-                                return moment(date).isAfter( moment(Util.convertISODateToMySqlDate(crewJobDateRange.from)).subtract(1, 'days')) && moment(date).isBefore( moment(Util.convertISODateToMySqlDate(crewJobDateRange.to)).add(1,'days'))
-                            }else{
-                                //Date not assigned or we are not filtering out dates
-                                return true
-                            }
-                        })
-                    }
+              // Filter by date range
+              if (crewJobDateRange) {
+                updateData = updateData.filter((job) => {
+                  let date = null;
+                  if (job.job_type === "install") {
+                    date = Util.convertISODateToMySqlDate(job.sch_install_date);
+                  } else if (job.job_type === "drill") {
+                    date = Util.convertISODateToMySqlDate(job.drill_date);
+                  } else {
+                    date = Util.convertISODateToMySqlDate(job.job_date);
+                  }
+                  if (date && crewJobDateRangeActive) {
+                    return (
+                      moment(date).isAfter(
+                        moment(
+                          Util.convertISODateToMySqlDate(crewJobDateRange.from)
+                        ).subtract(1, "days")
+                      ) &&
+                      moment(date).isBefore(
+                        moment(
+                          Util.convertISODateToMySqlDate(crewJobDateRange.to)
+                        ).add(1, "days")
+                      )
+                    );
+                  }
+                  return true;
+                });
+              }
 
-                    //sort
-                    if(crewJobSorters?.length){
-                        if (crewJobs && crewJobs.length) {
-                            updateData = updateData.sort(createSorter(...crewJobSorters))
-                        }
-                    }
+              // Sort
+              if (crewJobSorters?.length) {
+                updateData = updateData.sort(createSorter(...crewJobSorters));
+              }
 
-                    console.log("Final updateData", updateData);
-                    setUnfilteredJobs([...data]);
-                    setCrewJobs( updateData);
-                    setCrewJobsLoading(false)
+              setUnfilteredJobs([...data]);
+              setCrewJobs(updateData);
+              setCrewJobsLoading(false);
 
-                    //reset activemarker with new data
-                    if(activeMarker && activeMarker.type === 'crew'){
-                      let newMarker = data.find((item)=> item.id === activeMarker.item.id);
-                      if(newMarker){
-                        setActiveMarker({type: 'crew', item: newMarker});
-                      }else{
-                        console.error("Failed to get new activemarker");
-                      }
-                    }
+              // If active marker is a crew item, refresh it
+              if (activeMarker && activeMarker.type === "crew") {
+                const newMarker = data.find(
+                  (item) => item.id === activeMarker.item.id
+                );
+                if (newMarker) {
+                  setActiveMarker({ type: "crew", item: newMarker });
                 }
-            })
-            .catch((error)=>{
-                console.error("Error getting crewJobs", error);
-                cogoToast.error("Failed to get crew jobs");
-            })
-          }
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error getting crewJobs", error);
+            cogoToast.error("Failed to get crew jobs");
+          });
       }
-  
-    },[ mapRows, crewJobs, crewJobsRefetch, crewToMap, taskListToMap, crewFilters, crewJobSorters])
-    
-    const updateActiveMarker = (id, type) => (props, marker, e) =>{
-      var item;
-      if(type === "task"){
-        item = mapRows.filter((row, i) => row.t_id === id)[0];
-      }
-      if(type === "vehicle"){
-        item = vehicleRows.filter((row, i) => row.vin === id)[0];
-      }
-      if(type === "crew"){
-        item = crewJobs.filter((row, i) => row.id === id)[0];
-      }
+    }
+  }, [
+    mapRows,
+    crewJobs,
+    crewJobsRefetch,
+    crewToMap,
+    taskListToMap,
+    crewFilters,
+    crewJobSorters,
+  ]);
 
-      if(!item){
-        console.error("Bad marker type or item not found");
-        return
-      }else{
-        setMultipleMarkersOneLocation(null);
-        setActiveMarker({type, item});
-        setShowingInfoWindow(true);
-      }
-
-
+  // Marker click logic
+  const updateActiveMarker = (id, type) => (props, marker, e) => {
+    let item;
+    if (type === "task") {
+      item = mapRows.find((row) => row.t_id === id);
+    } else if (type === "vehicle") {
+      item = vehicleRows.find((row) => row.vin === id);
+    } else if (type === "crew") {
+      item = crewJobs.find((row) => row.id === id);
     }
 
-    const handleFindVehicleIcon = (vehicle)=>{
-      if(!vehicle){
-        console.error("Bad vehilce for handleFindVehcileIcon");
-        return
-      }
-      let selected = false;
-      if(activeMarker?.type === "vehicle" && vehicle.vin === activeMarker?.item.vin){
-        selected = true;
-      }
-      let url = "";
-      let direction = Util.getDirectionFromDegree(vehicle.direction);
-      switch (vehicle.service){
-        case 'bouncie':
-          // if(selected){
-          //   url = vehicle.active ? 'static/vehicle_icons/bouncie_active_selected.png' : 'static/vehicle_icons/bouncie_stop_selected.png';
-          // }else{
-          //   url = vehicle.active ? 'static/vehicle_icons/bouncie_active_nonselected.png' : 'static/vehicle_icons/bouncie_stop_nonselected.png';
-          // }
-          url = vehicle.active ?  `static/vehicle_icons/bouncie_active_${direction.toLowerCase()}.png` 
-                :   `static/vehicle_icons/bouncie_stop.png`;
-          
-          break;
-        case 'linxup':
-          url = vehicle.active ?  `static/vehicle_icons/linxup_active_${direction.toLowerCase()}.png` 
-                :   `static/vehicle_icons/linxup_stop.png`;
-          break;
-      }
-      return url;
+    if (!item) {
+      console.error("Bad marker type or item not found");
+      return;
     }
+    setMultipleMarkersOneLocation(null);
+    setActiveMarker({ type, item });
+    setShowingInfoWindow(true);
+  };
 
-    const handleFindCrewIcon = (job)=>{
-      if(!job){
-        console.error("Bad vehilce for handleFindVehcileIcon");
-        return
-      }
-      
-      let selected = false;
-      if(activeMarker?.type === "crew" && job.id === activeMarker?.item.id){
-        selected = true;
-      }
-      let url = "";
-
-      if(!job.job_type){
-        console.error("No job type ")
-        return;
-      }
-
-      switch (job.job_type){
-        case 'drill':
-          url =   `static/crew_icons/drill_marker.png` ;
-          break;
-        case 'install':
-          url =   `static/crew_icons/install_marker.png` ;
-          break;
-      }
-      return url;
+  // Utility function to pick icons
+  const handleFindVehicleIcon = (vehicle) => {
+    if (!vehicle) return;
+    const direction = Util.getDirectionFromDegree(vehicle.direction);
+    if (vehicle.service === "bouncie") {
+      return vehicle.active
+        ? `static/vehicle_icons/bouncie_active_${direction.toLowerCase()}.png`
+        : `static/vehicle_icons/bouncie_stop.png`;
+    } else if (vehicle.service === "linxup") {
+      return vehicle.active
+        ? `static/vehicle_icons/linxup_active_${direction.toLowerCase()}.png`
+        : `static/vehicle_icons/linxup_stop.png`;
     }
+  };
 
-    const getBorderColorBasedOnDate = (date)=>{
-      
-      if(date == null){
-          return '#888'; //default border color
-      }
+  const handleFindCrewIcon = (job) => {
+    if (!job) return;
+    if (job.job_type === "drill") {
+      return `static/crew_icons/drill_marker.png`;
+    } else if (job.job_type === "install") {
+      return `static/crew_icons/install_marker.png`;
+    }
+  };
 
-      //Is after today
-      if(moment(date).isBefore(moment())){
-          return '#ff0000';
-      }
-      //Between today and 2 days from now
-      if(moment(date).isAfter(moment()) && moment(date).isBefore(moment().add(2, "day"))){
-          return '#ff8000';
-      }
-      //between 2 days from now and 5 days from now
-      if(moment(date).isAfter(moment().add(2, "day")) && moment(date).isBefore(moment().add(5, "day"))){
-          return '#fff600';
-      }
-      if(moment(date).isAfter(moment().add(5, "day"))){
-          return '#55c200';
-      }
+  const getBorderColorBasedOnDate = (date) => {
+    if (!date) return "#888";
+    if (moment(date).isBefore(moment())) {
+      return "#ff0000";
+    }
+    if (moment(date).isBefore(moment().add(2, "day"))) {
+      return "#ff8000";
+    }
+    if (moment(date).isBefore(moment().add(5, "day"))) {
+      return "#fff600";
+    }
+    // else
+    return "#55c200";
+  };
 
-      return '#888';
-  }
-
-    return (
-      <MapContext.Provider value={ {showingInfoWindow, setShowingInfoWindow, activeMarker, setActiveMarker, mapRows, setMapRows,mapRowsRefetch, setMapRowsRefetch,resetBounds, setResetBounds,markedRows, setMarkedRows,noMarkerRows, setNoMarkerRows,
-        multipleMarkersOneLocation,setMultipleMarkersOneLocation, infoWeather, setInfoWeather, vehicleRows, setVehicleRows, vehicleNeedsRefresh, setVehicleNeedsRefresh,
-        bouncieAuthNeeded,setBouncieAuthNeeded, visibleItems, setVisibleItems,crewJobs, setCrewJobs, crewJobsRefetch, setCrewJobsRefetch, crewJobsLoading, setCrewJobsLoading,
-        unfilteredJobs, setUnfilteredJobs, showCompletedJobs, setShowCompletedJobs, radarControl, setRadarControl, timestamps,setTimestamps,
-        radarOpacity, setRadarOpacity, radarSpeed, setRadarSpeed, visualTimestamp, setVisualTimestamp, crewFilters,setCrewFilters,
-        crewJobSorters, setCrewJobSorters, getBorderColorBasedOnDate, changeStateSoMapUpdates, setChangeStateSoMapUpdates,woiData, setWoiData}} >
+  return (
+    <MapContext.Provider
+      value={{
+        showingInfoWindow,
+        setShowingInfoWindow,
+        activeMarker,
+        setActiveMarker,
+        mapRows,
+        setMapRows,
+        mapRowsRefetch,
+        setMapRowsRefetch,
+        resetBounds,
+        setResetBounds,
+        markedRows,
+        setMarkedRows,
+        noMarkerRows,
+        setNoMarkerRows,
+        multipleMarkersOneLocation,
+        setMultipleMarkersOneLocation,
+        infoWeather,
+        setInfoWeather,
+        vehicleRows,
+        setVehicleRows,
+        vehicleNeedsRefresh,
+        setVehicleNeedsRefresh,
+        bouncieAuthNeeded,
+        setBouncieAuthNeeded,
+        visibleItems,
+        setVisibleItems,
+        crewJobs,
+        setCrewJobs,
+        crewJobsRefetch,
+        setCrewJobsRefetch,
+        crewJobsLoading,
+        setCrewJobsLoading,
+        unfilteredJobs,
+        setUnfilteredJobs,
+        showCompletedJobs,
+        setShowCompletedJobs,
+        radarControl,
+        setRadarControl,
+        timestamps,
+        setTimestamps,
+        radarOpacity,
+        setRadarOpacity,
+        radarSpeed,
+        setRadarSpeed,
+        visualTimestamp,
+        setVisualTimestamp,
+        crewFilters,
+        setCrewFilters,
+        crewJobSorters,
+        setCrewJobSorters,
+        getBorderColorBasedOnDate,
+        changeStateSoMapUpdates,
+        setChangeStateSoMapUpdates,
+        woiData,
+        setWoiData,
+      }}
+    >
       <div>
         <Grid container spacing={1}>
           <Grid item xs={12}>
-          <TaskListFilter filteredItems={mapRows}  setFilteredItems={setMapRows}/>
+            <TaskListFilter filteredItems={mapRows} setFilteredItems={setMapRows} />
           </Grid>
         </Grid>
-          <Grid container spacing={1} className={classes.mainContainer}>
-            
-            <Grid item xs={12} md={8}>
-                <CustomMap taskMarkers={markedRows} setTaskMarkers={setMarkedRows} vehicleMarkers={vehicleRows}
-                     crewMarkers={crewJobs} setCrewMarkers={setCrewJobs} 
-                     setCrewMarkersRefetch={setCrewJobsRefetch}
-                     crewMarkersRefetch={crewJobsRefetch} 
-                     visibleItems={visibleItems} 
-                      updateActiveMarker={updateActiveMarker} handleFindVehicleIcon={handleFindVehicleIcon}
-                      handleFindCrewIcon={handleFindCrewIcon}
-                      resetBounds={resetBounds}
-                      activeMarker={activeMarker} setActiveMarker={setActiveMarker} 
-                      
-                      
-                    />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <MapSidebar  />
-            </Grid>
+        <Grid container spacing={1} className={classes.mainContainer}>
+          <Grid item xs={12} md={8}>
+            <CustomMap
+              taskMarkers={markedRows}
+              setTaskMarkers={setMarkedRows}
+              vehicleMarkers={vehicleRows}
+              crewMarkers={crewJobs}
+              setCrewMarkers={setCrewJobs}
+              setCrewMarkersRefetch={setCrewJobsRefetch}
+              crewMarkersRefetch={crewJobsRefetch}
+              visibleItems={visibleItems}
+              updateActiveMarker={updateActiveMarker}
+              handleFindVehicleIcon={handleFindVehicleIcon}
+              handleFindCrewIcon={handleFindCrewIcon}
+              resetBounds={resetBounds}
+              activeMarker={activeMarker}
+              setActiveMarker={setActiveMarker}
+            />
           </Grid>
-        </div>
-        </MapContext.Provider>
-    );
-    }
-  
+          <Grid item xs={12} md={4}>
+            <MapSidebar />
+          </Grid>
+        </Grid>
+      </div>
+    </MapContext.Provider>
+  );
+};
 
 export default MapContainer;
