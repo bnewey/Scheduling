@@ -364,7 +364,6 @@ const TaskListMain = (props) => {
                         <>  
                                 <List >
                                     <ListItem className={classes.HeadListItem} classes={{container: classes.liContainer}}>
-                                        <div style={{flex: `0 0 2%`}}>&nbsp;</div>
                                     {tableInfo.map((item, i)=>{
                                         const isSorted =  sorters && sorters[0] && sorters[0].property == item.field;
                                         const isASC = sorters && sorters[0] && sorters[0].direction === 'ASC';
