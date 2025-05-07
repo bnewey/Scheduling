@@ -17,7 +17,8 @@ router.get('/getAllTasks', async (req,res) => {
     ' wo.completed as completed_wo, wo.invoiced as invoiced_wo, ' + 
     ' t.delivery_crew, t.delivery_order,t.install_order, e.name AS customer_name,' + 
     '  ea.name AS address_name, ea.address, ea.city, ea.state, ea.zip, ea.lat, ea.lng, ea.geocoded , ea.record_id AS address_id , ea.entities_id, '  +
-    ' concat(e.name, \', \', ea.city) AS t_name ' + 
+    ' e.name AS t_name, ' + 
+    ' ea.city AS city' +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id ' +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id ' + 
@@ -54,7 +55,8 @@ router.post('/getTask', async (req,res) => {
     ' cji.crew_id AS install_crew, cji.id AS install_job_id,  ' + 
     ' date_format(cji.job_date, \'%Y-%m-%d %H:%i:%S\') as sch_install_date, ea.name AS address_name, ea.address, ea.city, ea.state, ' + 
     ' ea.zip, ea.lat, ea.lng, ea.geocoded, ea.record_id AS address_id, ea.entities_id, tli.task_list_id, tli.id AS task_list_item_id, e.name AS customer_name, '  +
-    ' concat(e.name, \', \', ea.city ) AS t_name ' + 
+    ' e.name AS t_name, ' +
+    ' ea.city AS city' +
     ' FROM tasks t ' +
     ' LEFT JOIN work_orders wo ON t.table_id = wo.record_id '  +
     ' LEFT JOIN entities_addresses ea ON wo.customer_address_id = ea.record_id ' + 
