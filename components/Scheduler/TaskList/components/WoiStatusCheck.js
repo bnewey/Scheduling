@@ -78,6 +78,20 @@ const WoiStatusCheck = (props) => {
             })
         }
 
+        // Check for missing Art Approved (final_copy_approved)
+        const awaitingArtApproved = data.filter(item => item.final_copy_approved == null && item.vendor == 2);
+        if (awaitingArtApproved?.length > 0) {
+            awaitingArtApproved.forEach((item) => {
+                statusListUpdate.push({
+                    type: 'error',
+                    title: 'Art Not Approved',
+                    description: `Art not marked as approved.`,
+                    sign: `${item.description}`
+                });
+            });
+        }
+
+
         //console.log("Status lst update", statusListUpdate);
         setStatusList(statusListUpdate);
 
@@ -121,6 +135,39 @@ const WoiStatusCheck = (props) => {
         return <>{icons}</>;
     }
 
+    const getStatusIndicators = (data) => {
+        if (!data) return null;
+    
+        const allBuilt = data.every(item => item.sign_built != null);
+        const allArtApproved = data.every(item => item.final_copy_approved != null);
+        const allArtComplete = data.every(item => item.sign_popped_and_boxed != null);
+    
+        const indicators = [];
+    
+        const renderTag = (label, condition) => (
+            <span
+                key={label}
+                style={{
+                    color: condition ? 'green' : 'red',
+                    fontWeight: 'bold',
+                    padding: '0 2px',
+                }}
+            >
+                {label}
+            </span>
+        );
+    
+        if (data.every(item => item.sign_popped_and_boxed != null)) {
+            return null; // Blank if all signs are finished
+        }
+    
+        indicators.push(renderTag("B", allBuilt));
+        indicators.push(renderTag("AP", allArtApproved));
+        indicators.push(renderTag("AC", allArtComplete));
+    
+        return indicators;
+    };    
+
     return(
         <div className={classes.root}>
             { isLoadingState == true ?  <>Checking...</> :
@@ -129,11 +176,12 @@ const WoiStatusCheck = (props) => {
               
                 <div>
                   
-                  {statusList?.length > 0 ? 
+                    {(statusList?.length > 0 || getStatusIndicators(data)) &&
                         <div onMouseUp={event => handelOpenStatusPanel(event)}
-                            className={classes.openPanelSpan} >
-                         <WarningIcon className={classes.warningIcon} /><GetSpecialIconIndicators statusList={statusList}/>
-                        </div> : <></>}
+                            className={classes.openPanelSpan}>
+                            {getStatusIndicators(data)}
+                        </div>
+                    }
                   
                 </div> 
                 :<>Loading...</>}

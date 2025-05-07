@@ -65,7 +65,7 @@ const TaskListTasks = (props) =>{
     
     const { setShouldResetCrewState, allCrews } = useContext(CrewContext);
     const {arrivalDateFilters, drillDateFilters, installDateFilters, drillCrewFilters, installCrewFilters, setSorters,
-      tLTasksExtraSaved, setTLTasksExtraSaved} = useContext(TaskContext)
+      tLTasksExtraSaved, setTLTasksExtraSaved, taskViews} = useContext(TaskContext)
 
     useEffect(()=>{
       rebuildTooltip();
@@ -951,7 +951,13 @@ const TaskListTasks = (props) =>{
           }
         }
         case 'drill_date':{
-          if(task.type === "Install (Drill)"){
+          const NO_DRILL_VIEW_VALUE = 1;
+          if (activeTaskView === NO_DRILL_VIEW_VALUE) {
+            return value
+              ? moment(value).format('MM/DD/YYYY')
+              : '—';
+          }
+          else if(task.type === "Install (Drill)"){
             if(!task.drill_job_completed){
               return_value = <div className={classes.install_date_div}>
                 
@@ -1177,6 +1183,15 @@ const TaskListTasks = (props) =>{
                         task={task} />
               </MuiPickersUtilsProvider></div>
             break;
+
+          case 'date_desired':
+            const NO_DRILL_VIEW_VALUE = 1;
+            if (activeTaskView === NO_DRILL_VIEW_VALUE) {
+              return value
+                ? moment(value).format('MM/DD/YYYY')
+                : '';
+            }
+            break;
         case 'fp_order_number':
           return_value = <TLFpOrderPicker task={task} viewOnly={tableItem.viewOnly} setTaskListTasksRefetch={setTaskListTasksRefetch} user={user} />
           break;
@@ -1279,11 +1294,6 @@ const TaskListTasksRows = React.memo( ({taskListTasks,taskListTasksSaved,taskLis
                          provided.draggableProps.style),
                          ...style}}
                     >
-          { taskListToMap && sizeOfTable != 'small'
-          ? <div className={classes.checkBoxDiv}>
-              <Checkbox checked={isItemSelected} className={classes.tli_checkbox} onClick={event => handleClick(event, row.t_id)}/>
-            </div>
-          : <></>}
           {tableInfo.map((item, i)=>{
             var value = row[item.field];
             
