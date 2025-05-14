@@ -45,6 +45,9 @@ const AddEditModal = function(props) {
     const [entityBillingAddresses, setEntityBillingAddresses] = useState(null);
     const [entityVisibleUsers, setEntityVisibleUsers] = useState(null);
 
+    const [customerEntityDetails, setCustomerEntityDetails] = useState(null);
+    const [accountEntityDetails, setAccountEntityDetails]   = useState(null);
+
     //state variables for shipping and billing logic
     const [entityShippingEntityEditChanged, setEntityShippingEntityEditChanged ] = useState(false);
     const [entityShippingContactEditChanged, setEntityShippingContactEditChanged ] = useState(false);
@@ -87,6 +90,28 @@ const AddEditModal = function(props) {
           })
         }
       },[entityVisibleUsers])
+
+      // fetch the customer record whenever the id changes
+    useEffect(() => {
+        if (activeWorkOrder?.customer_id) {
+            Entities.getEntityById(activeWorkOrder.customer_id)
+                .then(data => setCustomerEntityDetails(data[0]))
+                .catch(err => console.error("Failed to load customer entity:", err));
+        } else {
+            setCustomerEntityDetails(null);
+        }
+    }, [activeWorkOrder?.customer_id]);
+  
+  // fetch the billing/account record whenever the id changes
+    useEffect(() => {
+        if (activeWorkOrder?.account_id) {
+            Entities.getEntityById(activeWorkOrder.account_id)
+                .then(data => setAccountEntityDetails(data[0]))
+                .catch(err => console.error("Failed to load billing entity:", err));
+        } else {
+            setAccountEntityDetails(null);
+        }
+    }, [activeWorkOrder?.account_id]);
    
     const fields = [
         //type: select must be hyphenated ex select-type
@@ -340,6 +365,15 @@ const AddEditModal = function(props) {
         })
     }
 
+    const alerts = [
+        customerEntityDetails?.purchase_order_required,
+        customerEntityDetails?.on_hold,
+        accountEntityDetails?.purchase_order_required,
+        accountEntityDetails?.on_hold,
+      ];
+
+    const hasAlerts = alerts.some(flag => flag);
+
     return(<>
         { editWOModalOpen && <Modal
             aria-labelledby="transition-modal-title"
@@ -362,12 +396,30 @@ const AddEditModal = function(props) {
                             {detailWOid && activeWorkOrder ? `Edit WO#: ${activeWorkOrder.wo_record_id}` : 'Add Work Order'} 
                         </span>
                     </div>
+
+
                 
 
                     {/* BODY */}
                     
                     <Grid container >  
                         <Grid item xs={entityDrawerOpen ? 2 : 12} md={entityDrawerOpen ? 6 : 12} className={classes.paperScroll}>
+                        {hasAlerts && (
+                        <div style={{ margin: '8px 0' }}>
+                            {customerEntityDetails?.purchase_order_required && (
+                                <div><strong>PO Required for Customer</strong></div>
+                            )}
+                            {customerEntityDetails?.on_hold && (
+                                <div><strong>On Hold for Customer</strong></div>
+                            )}
+                            {accountEntityDetails?.purchase_order_required && (
+                                <div><strong>PO Required for Bill Recipient</strong></div>
+                            )}
+                            {accountEntityDetails?.on_hold && (
+                                <div><strong>On Hold for Bill Recipient</strong></div>
+                            )}
+                        </div>
+                        )}
                             {/*FORM*/ console.log("Job types in parent", types)}
                             <FormBuilder 
                                 ref={saveRef}
