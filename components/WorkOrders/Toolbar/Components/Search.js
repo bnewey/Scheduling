@@ -64,6 +64,7 @@ const Search = function(props) {
     {value: 'wo.organization', displayValue: 'Account/Org'},
     {value: 'sc.city', displayValue: 'Customer City'},
     {value: 'sc.state', displayValue: 'Customer State'},
+    {value: 'wo.type', displayValue: 'Type'}
     // You can remove this from the dropdown if you don’t want the user
     // to see a “searchWithinSearch” option anymore
     // {value: 'searchWithinSearch', displayValue: 'Search Results'}
