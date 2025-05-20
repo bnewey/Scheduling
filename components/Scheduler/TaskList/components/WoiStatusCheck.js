@@ -138,17 +138,19 @@ const WoiStatusCheck = (props) => {
     const getStatusIndicators = (data) => {
         if (!data) return null;
     
-        const allBuilt = data.every(item => item.sign_built != null);
-        const allArtApproved = data.every(item => item.final_copy_approved != null);
-        const allArtComplete = data.every(item => item.sign_popped_and_boxed != null);
+        // Only consider Rainey-built items
+        const items = data.filter(i => i.vendor === 2);
+        if (items.length === 0) return null;
     
-        const indicators = [];
+        const allBuilt        = items.every(i => i.sign_built              != null);
+        const allArtApproved  = items.every(i => i.final_copy_approved     != null);
+        const allArtComplete  = items.every(i => i.sign_popped_and_boxed   != null);
     
-        const renderTag = (label, condition) => (
+        const renderTag = (label, ok) => (
             <span
                 key={label}
                 style={{
-                    color: condition ? 'green' : 'red',
+                    color: ok ? 'green' : 'red',
                     fontWeight: 'bold',
                     padding: '0 2px',
                 }}
@@ -157,16 +159,13 @@ const WoiStatusCheck = (props) => {
             </span>
         );
     
-        if (data.every(item => item.sign_popped_and_boxed != null)) {
-            return null; // Blank if all signs are finished
-        }
-    
-        indicators.push(renderTag("B", allBuilt));
-        indicators.push(renderTag("AP", allArtApproved));
-        indicators.push(renderTag("AC", allArtComplete));
-    
-        return indicators;
-    };    
+        return [
+            renderTag('B',  allBuilt),
+            renderTag('AP', allArtApproved),
+            renderTag('AC', allArtComplete)
+        ];
+    };
+     
 
     return(
         <div className={classes.root}>
@@ -176,7 +175,7 @@ const WoiStatusCheck = (props) => {
               
                 <div>
                   
-                    {(statusList?.length > 0 || getStatusIndicators(data)) &&
+                    {getStatusIndicators(data) &&
                         <div onMouseUp={event => handelOpenStatusPanel(event)}
                             className={classes.openPanelSpan}>
                             {getStatusIndicators(data)}
