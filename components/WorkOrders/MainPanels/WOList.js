@@ -1,6 +1,16 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
-import {makeStyles, withStyles, CircularProgress, Grid, IconButton} from '@material-ui/core';
-import {useRouter} from 'next/router';
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useContext,
+} from 'react';
+
+import {
+  makeStyles,
+  withStyles,
+} from '@material-ui/core';
+
+import { useRouter } from 'next/router';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -10,343 +20,292 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 
-
-
-
 import cogoToast from 'cogo-toast';
 
-
-import Util from  '../../../js/Util';
 import { ListContext } from '../WOContainer';
 
 
-const OrdersList = function(props) {
-  const {user} = props;
+const OrdersList = () => {
+  const {
+    workOrders,
+    handleSetView,
+    views,
+    setDetailWOid,
+  } = useContext(ListContext);
 
-  const { workOrders, setWorkOrders, rowDateRange, setDateRowRange, 
-    currentView, previousView, handleSetView, views, detailWOid,setDetailWOid} = useContext(ListContext);
   const classes = useStyles();
-
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(null);
-  const scrollRef = React.useRef(null);
   const router = useRouter();
-  const [pastWOids, setPastWOids] = useState(() => {
-    const saved = localStorage.getItem('pastWOids');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const scrollRef = useRef(null);
 
-  useEffect(()=>{
-    setPage(0);
-  },[workOrders]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(null);
+
+  const [filterCompleted, setFilterCompleted] = useState(false);
+  const [filterInvoiced, setFilterInvoiced]  = useState(false);
 
   useEffect(() => {
-    // Log to check structure and values of workOrders
-    console.log(workOrders);
-  }, [workOrders]);
+    setPage(0);
+  }, [filterCompleted, filterInvoiced]);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+  const toggleCompleted = () => setFilterCompleted(p => !p);
+  const toggleInvoiced  = () => setFilterInvoiced(p => !p);
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+  const filteredOrders = workOrders ? workOrders.filter(row => (
+    (!filterCompleted || row.completed !== 'Completed') &&
+    (!filterInvoiced  || row.invoiced  !== 'Invoiced')
+  )) : [];
+
+  const handleChangePage = (_e, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (e) => {
+    setRowsPerPage(+e.target.value);
     setPage(0);
   };
 
-  const resetScrollPosition = () => {
-    localStorage.removeItem('tableScrollPosition');
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-    }
-  };
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
 
-  const addWOPastSelection = (wo_id) => {
-    setPastWOids((prev) => {
-      const updated = [...new Set([...prev, wo_id])]; // Ensure uniqueness
-      localStorage.setItem('pastWOids', JSON.stringify(updated)); // Save to localStorage
-      return updated;
+    const save    = () => localStorage.setItem('woTableScroll', node.scrollTop.toString());
+    const restore = () => {
+      const pos = localStorage.getItem('woTableScroll');
+      if (pos) node.scrollTop = parseInt(pos, 10);
+    };
+
+    node.addEventListener('scroll', save);
+    restore();
+    return () => node.removeEventListener('scroll', save);
+  }, [filteredOrders]);
+
+  useEffect(() => {
+    if (rowsPerPage === null) {
+      const saved = JSON.parse(localStorage.getItem('rowsPerPage') || '25');
+      setRowsPerPage(saved);
+    } else {
+      localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
+    }
+  }, [rowsPerPage]);
+
+  const [pastWOids, setPastWOids] = useState(() =>
+    JSON.parse(localStorage.getItem('pastWOids') || '[]'),
+  );
+
+  const markVisited = (id) => {
+    setPastWOids(prev => {
+      const next = [...new Set([...prev, id])];
+      localStorage.setItem('pastWOids', JSON.stringify(next));
+      return next;
     });
   };
 
-  //Resets past woids and scroll position
-  useEffect(() => {
-    const handleRouterChange = (url) => {
-      if (!url.includes('/work-orders')) {
-        resetScrollPosition();
-        localStorage.removeItem('pastWOids');
-      }
-    };
-
-    router.events.on('routeChangeStart', handleRouterChange);
-
-    return () => {
-      router.events.off('routeChangeStart', handleRouterChange);
-    };
-  }, [router.events, resetScrollPosition]);
-
-
-  //Tracks scroll position
-  useEffect( () => {
-
-    const restoreScrollPosition = () => {
-        const savedScrollPos = localStorage.getItem('tableScrollPosition');
-
-        if (savedScrollPos && scrollRef.current) {
-            scrollRef.current.scrollTop = parseInt(savedScrollPos, 10);
-        }
-    };
-
-    const handleScroll = () => {
-        if (scrollRef.current) {
-            const scrollPosition = scrollRef.current.scrollTop;
-            localStorage.setItem('tableScrollPosition', scrollPosition.toString());
-        }
-    };
-
-    const scrollableElement = scrollRef.current;
-    if(scrollableElement) {
-        scrollableElement.addEventListener('scroll', handleScroll);
-        restoreScrollPosition();
-    }
-
-    if (workOrders && workOrders.length > 0) {
-      setTimeout(restoreScrollPosition, 50);
-    }
-
-    return () => {
-        if(scrollableElement) {
-            scrollableElement.removeEventListener('scroll', handleScroll);
-        }
-    };
-}, [workOrders]);
-
-
-
-  //Save and/or Fetch rowsPerPage to local storage
-  useEffect(() => {
-    if(rowsPerPage == null){
-      var tmp = window.localStorage.getItem('rowsPerPage');
-      var tmpParsed;
-      if(tmp){
-        tmpParsed = JSON.parse(tmp);
-      }
-      if(!isNaN(tmpParsed) && tmpParsed != null){
-        setRowsPerPage(tmpParsed);
-      }else{
-        setRowsPerPage(25);
-      }
-    }
-    if(!isNaN(rowsPerPage) && rowsPerPage != null){
-      window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
-    }
-    
-  }, [rowsPerPage]);
-
-  const handleShowDetailView = (wo_id) =>{
-    if(!wo_id){
-      cogoToast.error("Failed to get work order");
-      console.error("Bad id");
+  const openDetail = (id) => {
+    if (!id) {
+      cogoToast.error('Failed to get work order');
       return;
     }
-
-    addWOPastSelection(wo_id);
-    handleSetView(views && views.filter((view, i)=> view.value == "woDetail")[0]);
-    setDetailWOid(wo_id);
-
-  }
-
-  const renderStatus = (value) => {
-    // Handle numeric values (0 or 1)
-    if (typeof value === "number") {
-      return value === 1 ? "✓" : null;
-    }
-    
-    // Handle string values ("Completed" or "Invoiced")
-    if (typeof value === "string") {
-      return (value === "Completed" || value === "Invoiced") ? "✓" : null;
-    }
-    
-    // Fallback for unexpected data types
-    return null;
+    markVisited(id);
+    handleSetView(views.find(v => v.value === 'woDetail'));
+    setDetailWOid(id);
   };
-  
+
+  const renderStatus = (val) =>
+    val === 1 || val === 'Completed' || val === 'Invoiced' ? '✓' : null;
+
+
   const columns = [
-    { id: 'wo_record_id', label: 'WO#', minWidth: 20, maxWidth: 150, align: 'center',
-      format: (value)=> {
-        const prevSelected = pastWOids.includes(value);
-        return (
-          <span
-            onClick={() => handleShowDetailView(value)}
-            className={prevSelected ? classes.prevWOnumber : classes.clickableWOnumber}
-          >
-            {value}
-          </span>
-        )
-      } },
-    { id: "completed", label: 'C', maxWidth: 10, align: 'center',
-    format: (value) => {
-      return(
-        renderStatus(value)
-      )
-    } },
-    { id: "invoiced", label: 'I', maxWidth: 10, align: 'center',
-    format: (value) => {
-      return(
-        renderStatus(value)
-      )
-    } },
-    { id: 'date', label: 'Date', minWidth: 80, align: 'center' },
     {
-      id: 'wo_type',
-      label: 'Type',
-      minWidth: 50,
-      maxWidth: 150,
-      align: 'center',
+      id: 'wo_record_id', label: 'WO#', align: 'center', minWidth: 20, maxWidth: 120,
+      format: (v) => (
+        <span
+          onClick={() => openDetail(v)}
+          className={pastWOids.includes(v) ? classes.prevWOnumber : classes.clickableWOnumber}
+        >
+          {v}
+        </span>
+      ),
     },
     {
-      id: 'c_name',
-      label: 'Product Goes To',
-      minWidth: 200,
-      maxWidth: 250,
-      align: 'left',
+      id: 'completed', label: 'C', align: 'center', minWidth: 40, maxWidth: 50,
+      format: renderStatus, clickable: true, toggle: toggleCompleted, active: filterCompleted,
     },
-    { id: 'customer_city', label: 'City', minWidth: 45, align: 'left' },
-    { id: 'customer_state', label: 'State', minWidth: 35, align: 'left' },
-    { id: 'description', label: 'Description', minWidth: 150, maxWidth: 250, align: 'left' },
-    { id: 'job_reference', label: 'Job Reference', minWidth: 150, maxWidth: 250, align: 'left' },
-    { id: 'a_name', label: 'Bill Goes To', minWidth: 200, maxWidth: 250, align: 'left' },
+    {
+      id: 'invoiced', label: 'I', align: 'center', minWidth: 40, maxWidth: 50,
+      format: renderStatus, clickable: true, toggle: toggleInvoiced, active: filterInvoiced,
+    },
+    { id: 'date', label: 'Date', align: 'center', minWidth: 80 },
+    { id: 'wo_type', label: 'Type', align: 'center', minWidth: 80, maxWidth: 160 },
+    { id: 'c_name', label: 'Product Goes To', align: 'left', minWidth: 200, maxWidth: 260 },
+    { id: 'customer_city', label: 'City', align: 'left', minWidth: 60 },
+    { id: 'customer_state', label: 'State', align: 'left', minWidth: 40 },
+    { id: 'description', label: 'Description', align: 'left', minWidth: 150, maxWidth: 260 },
+    { id: 'job_reference', label: 'Job Reference', align: 'left', minWidth: 150, maxWidth: 260 },
+    { id: 'a_name', label: 'Bill Goes To', align: 'left', minWidth: 200, maxWidth: 260 },
   ];
 
-  const StyledTableRow = withStyles((theme) => ({
+  const StyledTableRow = withStyles(() => ({
     root: {
-      '&:nth-of-type(odd)': {
-        backgroundColor: "#e8e8e8",
-        '&:hover':{
-          backgroundColor: "#dcdcdc",
-        }
-      },
-      '&:nth-of-type(even)': {
-        backgroundColor: '#f7f7f7',
-        '&:hover':{
-          backgroundColor: "#dcdcdc",
-        }
-      },
+      '&:nth-of-type(odd)':  { background: '#e8e8e8' },
+      '&:nth-of-type(even)': { background: '#f7f7f7' },
+      '&:hover':             { background: '#dcdcdc' },
       border: '1px solid #111 !important',
-      '&:first-child':{
-        border: '2px solid #992222',
-      }
     },
   }))(TableRow);
 
   return (
     <div className={classes.root}>
-        <TableContainer className={classes.container} ref={scrollRef} style ={{overflowY: 'auto'}}>
-        <Table stickyHeader  size="small" aria-label="sticky table">
+      <TableContainer className={classes.container} ref={scrollRef}>
+        <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                className={classes.tableCellHead}
-                classes={{stickyHeader: classes.stickyHeader}}
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth, maxWidth: column.maxWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
+              {columns.map((col, idx) => {
+                const cellClasses = [classes.tableCellHead];
+                if (col.clickable) cellClasses.push(classes.headerClickable);
+                if (col.active)    cellClasses.push(classes.headerClickableActive);
+
+                // add spacing between C & I pills
+                const styleExtra = idx === 1 ? { marginRight: 6 } : undefined;
+
+                return (
+                  <TableCell
+                    key={col.id}
+                    align={col.align}
+                    style={{ minWidth: col.minWidth, maxWidth: col.maxWidth, padding: 0, ...styleExtra }}
+                    className={cellClasses.join(' ')}
+                    onClick={col.clickable ? col.toggle : undefined}
+                    title={col.clickable ? `${col.active ? 'Click to show' : 'Click to hide'} ${col.label === 'C' ? 'completed' : 'invoiced'}` : undefined}
+                  >
+                    <span className={classes.headerInner}>{col.label}</span>
+                  </TableCell>
+                );
+              })}
             </TableRow>
           </TableHead>
+
           <TableBody>
-            {workOrders && workOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              return (
-                <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell className={classes.tableCell} 
-                                key={column.id}
-                                align={column.align}
-                                style={{ minWidth: column.minWidth, maxWidth: column.maxWidth }}>
-                        {column.format ? column.format(value) : value}
-                      </TableCell>
-                    );
-                  })}
-                </StyledTableRow>
-              );
-            })}
+            {filteredOrders.slice(page * (rowsPerPage || 25), page * (rowsPerPage || 25) + (rowsPerPage || 25)).map(row => (
+              <StyledTableRow hover key={row.wo_record_id}>
+                {columns.map(col => (
+                  <TableCell
+                    key={col.id}
+                    align={col.align}
+                    style={{ minWidth: col.minWidth, maxWidth: col.maxWidth }}
+                    className={classes.tableCell}
+                  >
+                    {col.format ? col.format(row[col.id]) : row[col.id]}
+                  </TableCell>
+                ))}
+              </StyledTableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
+
       <TablePagination
         rowsPerPageOptions={[25, 50, 100]}
         component="div"
-        count={workOrders ? workOrders.length : 0}
-        rowsPerPage={rowsPerPage}
+        count={filteredOrders.length}
+        rowsPerPage={rowsPerPage || 25}
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
+
+      <div className={classes.filterNote}>
+        Click <strong>C</strong> to {filterCompleted ? 'show' : 'hide'} completed,{' '}
+        <strong>I</strong> to {filterInvoiced ? 'show' : 'hide'} invoiced
+      </div>
     </div>
   );
-}
+};
 
-export default OrdersList
-
+export default OrdersList;
 
 
 const useStyles = makeStyles(theme => ({
-  root:{
-    // border: '1px solid #339933',
+  /* Container shells */
+  root: {
     padding: '1%',
-    [theme.breakpoints.down('sm')]: {
-        //minHeight: '700px',
-    },
     [theme.breakpoints.up('md')]: {
-        minHeight: '730px',
+      minHeight: '730px',
     },
-    
   },
+
   container: {
     maxHeight: 650,
   },
-  stickyHeader:{
-    // background: 'linear-gradient(0deg, #a4dbe6, #cbf1f9)',
-    fontWeight: '600',
+
+  /* Table headers */
+  tableCellHead: {
+    fontWeight: 600,
     fontFamily: 'sans-serif',
-    fontSize: '15px',
+    fontSize: 15,
     color: '#1b1b1b',
-    backgroundColor: '#fff',
-    zIndex: '1',
-    
+    background: '#fff',
   },
-  tableCell:{
-    borderRight: '1px solid #c7c7c7' ,
-    '&:last-child' :{
-      borderRight: 'none' ,
+
+  headerInner: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    width: '100%',
+    minHeight: 24,
+  },
+
+  headerClickable: {
+    cursor: 'pointer',
+    border: '1px solid #bdbdbd',
+    borderRadius: 4,
+    background: '#f5f5f5',
+    transition: 'background-color 0.15s, box-shadow 0.15s',
+
+    '&:hover': {
+      background: '#e0e0e0',
+      boxShadow: '0 0 3px rgba(0,0,0,0.25)',
     },
+  },
+
+  headerClickableActive: {
+    border: '2px solid #4caf50',
+    background: '#e8f5e9',
+  },
+
+  /* Table cells */
+  tableCell: {
+    borderRight: '1px solid #c7c7c7',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    padding: "4px 6px",
+    padding: '4px 6px',
+
+    '&:last-child': {
+      borderRight: 'none',
+    },
   },
-  tableCellHead:{
-    
-  },
-  clickableWOnumber:{
+
+  /* Work‑order number links */
+  clickableWOnumber: {
     cursor: 'pointer',
     textDecoration: 'underline',
-    '&:hover':{
+
+    '&:hover': {
       color: '#ee3344',
     },
   },
-  prevWOnumber:{
+
+  prevWOnumber: {
     cursor: 'pointer',
     textDecoration: 'underline',
     color: 'purple',
-    '&:hover':{
+
+    '&:hover': {
       color: '#9174B6',
     },
+  },
+
+  /* Footer text */
+  filterNote: {
+    fontSize: '0.85em',
+    color: '#555',
+    marginTop: 4,
   },
 }));
