@@ -85,7 +85,7 @@ const TaskContainer = function(props) {
               {text: "Description", field: "description", width: (size)=> size == "small" ? '' : '21%', maxWidth: 230, style: 'smallListItemText', type: 'text',dontShowInSmall: true},
               //{text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '' : '10%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Arrival Date", field: "wo_arrival_dates", width: (size)=> size == "small" ? '14%' : '8%', maxWidth: 70, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true,viewOnly: true},
-              {text: "Job Date", field: "date_desired", width: (size)=> size == "small" ? '14%' : '8%', maxWidth: 70, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true,viewOnly: true},
+              {text: "Job Date", field: "date_desired", width: (size)=> size == "small" ? '14%' : '8%', maxWidth: 70, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true,viewOnly: true, dontShowInSmall: true},
               {text: "Status", field: "woi_status_check", width: (size)=> size == "small" ? '10%' : '3%', maxWidth: 100, style: 'artSignDrillSmallListItemText', type: 'text', dontShowInPdf: true},
               {text: "Install Date", field: "sch_install_date", width: (size)=> size == "small" ? '17%' : '7%', maxWidth: 100,style: 'installSmallListItemText', type: 'date'},
               {text: "Install Crew", field: "install_crew", width: (size)=> size == "small" ? '11%' : '7%', maxWidth: 100,style: 'installSmallListItemText',  type: 'text', pdfField: "install_crew_leader"}  ]},
