@@ -121,15 +121,18 @@ router.post('/createPackingSlipPdf', async (req,res) => {
         doc.font(`${process.env.PWD}/public/static/fonts/Arialnb.ttf`);
 
         doc.fontSize(8);
-        woiArray.forEach((item, i) => {
-        const y = 367 + i * 14;
-        const blankRow =
-            (!item.description || String(item.description).trim() === "") &&
-            (!item.quantity || Number(item.quantity) === 0);
+        (woiArray || []).forEach(function(raw, i) {
+        var item = raw || {};
+        var desc = (item.description == null ? '' : String(item.description)).trim();
+        var qtyNum = (item.quantity == null ? 0 : Number(item.quantity));
+        var part = (item.part_number == null ? '' : String(item.part_number));
+        var blankRow = (desc === '' && qtyNum === 0);
+        var y = 367 + i * 14;
 
-        doc.text(blankRow ? "" : (item.quantity ?? ""), 45, y);
-        doc.text(blankRow ? "" : (item.part_number ?? ""), 95, y);
-        doc.text(blankRow ? "" : (item.description ?? ""), 150, y);
+        // If it's the special blank row, print nothing; otherwise print values
+        doc.text(blankRow ? '' : (qtyNum !== 0 ? String(qtyNum) : ''), 45, y);
+        doc.text(blankRow ? '' : part,                                   95, y);
+        doc.text(blankRow ? '' : desc,                                  150, y);
         });
 
         doc.end();
