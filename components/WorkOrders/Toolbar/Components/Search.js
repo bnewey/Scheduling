@@ -274,16 +274,20 @@ const Search = function(props) {
   };
 
   const handleChangeSearchValue = (event, value, reason) => {
-    let str = value.trimStart();
-    if (str || str === '') {
-      if (reason === "reset" && savedSearchValue) {
-        setSearchValue(savedSearchValue);
-      } else {
-        setSearchValue(str);
-        setSavedSearchValue(str);
-      }
+    const str = (value ?? '').toString().trimStart();
+
+    // If the input was cleared via the UI, wipe state.
+    if (reason === 'clear') {
+      setSearchValue('');
+      setSavedSearchValue('');
+      return;
     }
-  };
+
+    // For typing ('input') and selecting an option ('reset'),
+    // reflect the new value in the text box.
+    setSearchValue(str);
+    setSavedSearchValue(str);
+};
 
   const handleHighLigh = (event, option, reason) => {
     // optional highlight logging
