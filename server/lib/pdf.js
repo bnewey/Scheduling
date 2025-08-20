@@ -121,12 +121,16 @@ router.post('/createPackingSlipPdf', async (req,res) => {
         doc.font(`${process.env.PWD}/public/static/fonts/Arialnb.ttf`);
 
         doc.fontSize(8);
-        woiArray.forEach((item,i)=>{
-            doc.text(item.quantity, 45 , (367 + i*14))
-            doc.text(item.part_number, 95, (367 + i*14))
-            doc.text(item.description, 150, (367 + i*14))
-            
-        })
+        woiArray.forEach((item, i) => {
+        const y = 367 + i * 14;
+        const blankRow =
+            (!item.description || String(item.description).trim() === "") &&
+            (!item.quantity || Number(item.quantity) === 0);
+
+        doc.text(blankRow ? "" : (item.quantity ?? ""), 45, y);
+        doc.text(blankRow ? "" : (item.part_number ?? ""), 95, y);
+        doc.text(blankRow ? "" : (item.description ?? ""), 150, y);
+        });
 
         doc.end();
         return await getStream.buffer(doc)
