@@ -573,17 +573,19 @@ const GetInputByType = function(props){
     switch(field.type){
         case 'text':
             return(<div className={classes.inputValue}>
-                <TextField id={`${id_pretext ? id_pretext : 'input'}-${field.field}`} 
-                        error={error || valid_error}
-                         variant="outlined"
-                         /*multiline={field.multiline}*/
-                         name={field.field}
-                         disabled={field.disabled}
-                         inputRef={ref_object[field.field]}
-                         inputProps={{className: classes.inputStyle}} 
-                         classes={{root: classes.inputRoot}}
-                         defaultValue={ formObject && formObject[field.field] ? formObject[field.field] : field?.defaultValue  }
-                         onChange={()=>handleShouldUpdate(true)}  /></div>
+            <TextField id={`${id_pretext ? id_pretext : 'input'}-${field.field}`} 
+                    error={error || valid_error}
+                    variant="outlined"
+                    multiline={!!field.multiline}
+                    rows={field.rows || (field.multiline ? 4 : undefined)}
+                    name={field.field}
+                    disabled={field.disabled}
+                    inputRef={ref_object[field.field]}
+                    inputProps={{className: classes.inputStyle}} 
+                    classes={{root: classes.inputRoot}}
+                    defaultValue={ formObject && formObject[field.field] ? formObject[field.field] : field?.defaultValue  }
+                    onChange={()=>handleShouldUpdate(true)}
+                    onKeyDown={field.onKeyDown} /></div>            
             )
             break;
         case 'number':

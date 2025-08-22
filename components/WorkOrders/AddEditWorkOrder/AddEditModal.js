@@ -130,9 +130,9 @@ const AddEditModal = function(props) {
         {field: 'maker', label: 'Maker', type: 'select-users', updateBy: 'ref'},
         {field: 'type', label: 'Type', type: 'select-type', updateBy: 'ref',required: true},
         {field: 'job_reference', label: 'Job Reference', type: 'text', updateBy: 'ref'},
-        {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true},
-        {field: 'advertising_notes', label: 'Ad Notes', type: 'text', updateBy: 'ref', multiline: true},
+        {field: 'description', label: 'Description', type: 'text', updateBy: 'ref', multiline: false},
+        {field: 'notes', label: 'Notes', type: 'text', updateBy: 'ref', multiline: true, onKeyDown: handleNotesCtrlEnter},
+        {field: 'advertising_notes', label: 'Ad Notes', type: 'text', updateBy: 'ref', multiline: false},
         {field: 'po_number', label: 'Purchase Order #', type: 'text', updateBy: 'ref'},
         {field: 'requested_arrival_date', label: 'Desired Date', type: 'date', updateBy: 'state'},
         {field: 'completed', label: 'Completed', type: 'check', updateBy: 'ref'},
@@ -278,6 +278,30 @@ const AddEditModal = function(props) {
         }
         
     },[activeWorkOrder,editWOModalOpen])
+
+    const handleNotesCtrlEnter = (e) => {
+        // Ctrl+Enter → hard return
+        if (e.ctrlKey && (e.key === 'Enter' || e.keyCode === 13)) {
+            e.preventDefault();
+            const el = e.target;
+
+            // Insert "\n" exactly at the caret range and keep focus
+            if (el && typeof el.setRangeText === 'function') {
+            const start = el.selectionStart ?? 0;
+            const end = el.selectionEnd ?? start;
+            el.setRangeText('\n', start, end, 'end'); // caret moves after newline
+
+            // Let React/MUI know value changed (important for uncontrolled inputs)
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            } else {
+            // Fallback
+            const start = el.selectionStart ?? 0;
+            const end = el.selectionEnd ?? start;
+            const v = el.value ?? '';
+            el.value = v.slice(0, start) + '\n' + v.slice(end);
+            }
+        }
+    };
 
         
 
