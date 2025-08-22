@@ -29,6 +29,29 @@ const Search = function(props) {
   const [additionalSearchValue, setAdditionalSearchValue] = useState("");
   const [isAdditionalSearchVisible, setIsAdditionalSearchVisible] = useState(false);
 
+  // Fixed Type options for the Search view
+const TYPE_OPTIONS = [
+  'All',
+  'Install',
+  'Install (Drill)',
+  'Delivery',
+  'Parts (Mfg.)',
+  'Parts (Service)',
+  'Field',
+  'Loaner',
+  'Shipment',
+  'Bench',
+  'Pickup'
+];
+
+const [typeFilter, setTypeFilter] = useState('All');
+
+// get a normalized type string from a row
+const getRowType = (r) =>
+  (r?.wo_type ?? r?.type ?? r?.['wo.type'] ?? '')
+    .toString()
+    .trim();
+
   const {
     savedSearch,
     setSavedSearch,
@@ -64,10 +87,7 @@ const Search = function(props) {
     {value: 'wo.organization', displayValue: 'Account/Org'},
     {value: 'sc.city', displayValue: 'Customer City'},
     {value: 'sc.state', displayValue: 'Customer State'},
-    {value: 'wo.type', displayValue: 'Type'}
-    // You can remove this from the dropdown if you don’t want the user
-    // to see a “searchWithinSearch” option anymore
-    // {value: 'searchWithinSearch', displayValue: 'Search Results'}
+    // {value: 'wo.type', displayValue: 'Type'}
   ];
 
   const classes = useStyles({searchOpen});
@@ -123,6 +143,45 @@ const Search = function(props) {
     }
   }, [searchTable]);
 
+  // Apply the Type dropdown behavior:
+  // - If "All": restore last text search (if any) otherwise clear list
+  // - If a Type is selected and we have saved text results: filter them in-memory
+  // - If a Type is selected and we have NO text results yet: fetch that type from server
+  useEffect(() => {
+  if (!searchOpen) return;
+
+  const run = async () => {
+    if (typeFilter === 'All') {
+      if (Array.isArray(savedSearch)) {
+        setWorkOrders(savedSearch);
+      } else {
+        // nothing searched yet; clear so user can start a fresh text search
+        setWorkOrders(null);
+      }
+      return;
+    }
+
+    // If we already have text-search results, just filter those locally
+    if (Array.isArray(savedSearch) && savedSearch.length) {
+      const filtered = savedSearch.filter((row) => getRowType(row) === typeFilter);
+      setWorkOrders(filtered);
+      return;
+    }
+
+    // No text search yet — treat the dropdown as its own search
+    try {
+      const data = await search('wo.type', typeFilter);
+      // IMPORTANT: do NOT setSavedSearch here; this keeps the text search independent
+      setWorkOrders(data);
+    } catch (e) {
+      cogoToast.error('Failed to load work orders by Type');
+      console.error(e);
+    }
+  };
+
+  run();
+}, [typeFilter, savedSearch, searchOpen, setWorkOrders]);
+
   // Save or fetch searchTable to local storage
   useEffect(() => {
     if (searchTable == null) {
@@ -161,6 +220,20 @@ const Search = function(props) {
     }
   }, [searchHistory]);
 
+  // Apply the filter whenever the selection or results change
+  useEffect(() => {
+    if (!Array.isArray(savedSearch)) return;
+    if (!typeFilter || typeFilter === 'All') {
+      setWorkOrders(savedSearch);
+      return;
+    }
+    const next = savedSearch.filter(r => {
+      const t = (r?.wo_type ?? r?.type ?? r?.['wo.type'] ?? '').toString().trim().toLowerCase();
+      return t === typeFilter.toLowerCase();
+    });
+    setWorkOrders(next);
+  }, [typeFilter, savedSearch, setWorkOrders]);
+
   const updateSearchHistory = (searchValue, searchTable, resultsCount) => {
     if (searchValue !== "") {
       var updateArray = searchHistory ? [...searchHistory] : [];
@@ -184,6 +257,17 @@ const Search = function(props) {
       }
     }
   };
+
+  // Build the dropdown options from whatever is currently in results
+  const typeOptions = React.useMemo(() => {
+    const src = Array.isArray(savedSearch) && savedSearch.length ? savedSearch : (workOrders || []);
+    const set = new Set(
+      (src || [])
+        .map(r => (r?.wo_type ?? r?.type ?? r?.['wo.type'] ?? '').toString().trim())
+        .filter(Boolean)
+    );
+    return ['All', ...Array.from(set).sort()];
+  }, [savedSearch, workOrders]);
 
   // Recursively check for searchValue in any nested fields
   const objectContainsSearchValue = (obj, sVal) => {
@@ -419,6 +503,21 @@ const Search = function(props) {
         </button>
       )}
 
+      {searchOpen && (
+        <Grid item className={classes.typeFilterWrap}>
+          <Select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            variant="outlined"
+            className={classes.typeSelect}
+          >
+            {TYPE_OPTIONS.map((opt) => (
+              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            ))}
+          </Select>
+        </Grid>
+      )}
+
         <Grid className={classes.searchGridItem} container direction="column" style={{ marginLeft: 325, marginTop: 8 }} xs={searchOpen ? 7 : 5} md={5}>
         {isAdditionalSearchVisible && (
           <Grid item style={{ marginTop: 8 }}>
@@ -450,6 +549,19 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       boxShadow: (props) => (props.searchOpen ? '1px 1px 2px #a2a2a2' : ''),
     }
+  },
+  typeFilterWrap: {
+    margin: '4px 10px',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  typeSelect: {
+    minWidth: 180,
+    height: 36,
+    fontSize: 13,
+    fontWeight: 600,
+    background: '#fff',
+    borderRadius: 18,
   },
   input: {
     fontSize: '15px',
