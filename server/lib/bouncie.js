@@ -1,101 +1,77 @@
-const passport = require('passport');
+const fetch = global.fetch || require('node-fetch');
 const User = require('./user');
 const logger = require('../../logs');
-const { response } = require('express');
 
-const exhangeCodeForToken = async (ROOT_URL, code)=>{
-    if(!code){
-        console.error("Bad or no code", code);
-        return false;
-    }
-    var url = 'https://auth.bouncie.com/oauth/token';
-    try{
-        var response = await fetch(url, {
-            method: 'POST',
-            headers: {
-            "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                client_id: "scheduling",
-                client_secret:"7heZf6gdpA1356uCt8W9FvF8qDfMn70iisxzJqBrGAoT3PVBRF",
-                grant_type: "authorization_code",
-                code: code,
-                redirect_uri: ROOT_URL + '/bouncieAuth/callback'
-            })
-        })
-        const json = await response.json();
-        return json;
+const AUTHORIZE_URL = 'https://auth.bouncie.com/dialog/authorize';
+const TOKEN_URL     = 'https://auth.bouncie.com/oauth/token';
 
-    }
-    catch(error){
-        logger.error("Bouncie (exhangeCodeForToken): " + error);
-        return false;
-    }
+function buildRedirectUri(ROOT_URL) {
+  if (!ROOT_URL) return (process.env.BOUNCIE_REDIRECT_URI ||
+    'https://icontrol.raineyelectronics.com:7000/bouncieAuth/callback');
+  return ROOT_URL.includes('/bouncieAuth/callback')
+    ? ROOT_URL
+    : (ROOT_URL.replace(/\/$/, '') + '/bouncieAuth/callback');
 }
 
-function bouncie({ROOT_URL, app, database}) {
+// helper used by vehicles.js
+const exhangeCodeForToken = async (ROOT_URL, code) => {
+  if (!code) { logger.error('Bouncie exchange: missing code'); return false; }
+  const clientSecret = process.env.Bouncie_clientsecret;
+  if (!clientSecret) { logger.error('Bouncie exchange: missing Bouncie_clientsecret'); return false; }
 
-    app.get('/bouncieAuth', function(req,res){
-        res.redirect('https://auth.bouncie.com/dialog/authorize?response_type=code&client_id=scheduling&redirect_uri=' + ROOT_URL+ '/bouncieAuth/callback');
-    })
+  const redirect_uri = buildRedirectUri(ROOT_URL);
 
-
-    
-
-    app.get('/bouncieAuth/callback', async function(req,res){
-        //console.log("bouncie auth", req);
-
-        let code = req.query.code;
-        if(!code){
-            console.error("No Auth code");
-        }
-        let user_id = req.user.id;
-        if(!user_id){
-            console.error("No User id");
-        }
-
-        try{
-            
-            exhangeCodeForToken(ROOT_URL,code)
-            .then((response)=>{
-                if(!response){
-                    throw new Error("No access code returned from exhangeCodeForToken");
-                }
-                console.log("date saved", response.expires_in);
-                User.updateUserBouncie(database,code, response.access_token, response.expires_in, user_id)
-                .then((data)=>{
-                    console.log("code", code)
-                    console.log("update response", data);
-                    console.log("session",req.session)
-                    res.redirect('/');
-                })
-                .catch((error)=>{
-                    console.error("Failed to update Bouncie access token", error);
-                    res.redirect('/');
-                })
-
-            })
-            .catch((error)=>{
-                console.error("Failed to exchanged for token.", error);
-                res.redirect('/');
-            })
-            
-
-
-            
-        }
-        catch(error){
-            console.error("Failed to update bouncie token", error);
-            res.redirect('/error');
-        }
-        
-        
-    })
-}
-
-module.exports = bouncie;
-
-module.exports = {
-    bouncie,
-    exhangeCodeForToken,
+  try {
+    const resp = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        client_id: 'scheduling',
+        client_secret: clientSecret,
+        grant_type: 'authorization_code',
+        code,                       // the long-lived code from portal (or from callback)
+        redirect_uri                // must match app settings in the portal
+      }),
+    });
+    const text = await resp.text();
+    const json = (() => { try { return JSON.parse(text); } catch { return null; } })();
+    if (!resp.ok) { logger.error('Bouncie token exchange failed', resp.status, text); return json || false; }
+    return json || false;   // { access_token, token_type: "bearer", expires_in: 3600 }
+  } catch (e) {
+    logger.error('Bouncie exchange exception:', e);
+    return false;
+  }
 };
+
+// keeps your two routes for manual auth when needed
+function bouncie({ ROOT_URL, app, database }) {
+  const redirectUri = buildRedirectUri(ROOT_URL);
+
+  app.get('/bouncieAuth', (req, res) => {
+    const url = `${AUTHORIZE_URL}?response_type=code&client_id=scheduling&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    res.redirect(url);
+  });
+
+  app.get('/bouncieAuth/callback', async (req, res) => {
+    try {
+      const code = req.query.code;
+      const user_id = req.user && req.user.id;
+      if (!code || !user_id) return res.redirect('/error?bouncie=missing_code_or_user');
+
+      const exch = await exhangeCodeForToken(redirectUri, code);
+      if (!exch || exch.error || !exch.access_token) return res.redirect('/error?bouncie=exchange_failed');
+
+      try {
+        await User.updateUserBouncie(database, code, exch.access_token, exch.expires_in, user_id);
+      } catch (persistErr) {
+        logger.error('Failed to update Bouncie token:', persistErr);
+      }
+      res.redirect('/?bouncie=connected');
+    } catch (e) {
+      logger.error('Bouncie callback exception:', e);
+      res.redirect('/error?bouncie=exception');
+    }
+  });
+}
+
+module.exports = { bouncie, exhangeCodeForToken };

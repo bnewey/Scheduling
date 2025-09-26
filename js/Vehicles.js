@@ -76,29 +76,21 @@ async function getLinxupLocations(){
 //eyJhbGciOiJIUzI1NiJ9.eyJjb21wYW55SWQiOiIzMjIyNzQiLCJpc3MiOiJhZ2lsaXMiLCJwZXJzb25JZCI6Ijg5MjA1MCIsImV4cCI6MTc1NDQxMzAyNCwiaWF0IjoxNTk2NjQ2NjI0LCJ1c2VybmFtZSI6ImJyYWluZXlAcmFpbmV5ZWxlY3Ryb25pY3MuY29tIn0.k_J9mOSXg2LaURjfSSpKl5E1VxCp1hB-S4hdPEH6pEs
 
 //BOUNCIE STUFF
-async function getBouncieLocations(){
-    const route = '/scheduling/vehicles/getBouncieLocations';
-    try{
-        var data = await fetch(route,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-        if(!data.ok){
-            throw new Error("getBouncieLocations returned empty list or bad query")
-        }
-        //console.log("data from getBouncieLocations", await data.json());
-        var list = await data.json();
-        if(list?.user_error || list?.error){
-            throw list;
-        }
-        return(list);
-    }catch(error){
-        throw error;
-    }
+export async function getBouncieLocations(){
+  const r = await fetch('/scheduling/vehicles/getBouncieLocations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin'
+  });
+  const t = await r.text();
+  let p = null; try { p = JSON.parse(t); } catch {}
 
+  if (r.status === 401 && p && p.error === 'reauthorize_required') {
+    window.location.href = p.authorize || '/bouncieAuth';
+    return [];
+  }
+  if (!r.ok) throw new Error('Bouncie ' + r.status + ': ' + (t || ''));
+  return p || [];
 }
     
 
