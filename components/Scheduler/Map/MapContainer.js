@@ -125,53 +125,62 @@ const MapContainer = (props) => {
     //useEffect for vehicleRows
     useEffect(()=>{
       if(vehicleNeedsRefresh == true){
-        var locations = [];
-        //Get all vehicle locations and combine into vehicleRows
-        Promise.all([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations()])
-        .then((values)=>{
-          console.log("valuies",values);
-          let linuxp_loc_array = values[0]["data"]["locations"];
-          let tmpData = linuxp_loc_array?.map((item,i )=> (
-                                                { latitude: item.latitude, 
-                                                  longitude: item.longitude, 
-                                                  make: item.make, 
-                                                  model: item.model, 
-                                                  name: item.firstName+' '+item.lastName,
-                                                  vin: item.vin,
-                                                  service: 'linxup',
-                                                  active: item.speed > 0 ? true : false,
-                                                  direction:  item.direction }))
-          locations.splice(locations.length, 0, ...tmpData);
-          let tmpData2 =[];
-          if(values[1]["error"] || !Array.isArray(values[1])){
-            console.error("Custom Error from bouncie", values[1]);
-            setBouncieAuthNeeded(true);
-          }else{
-            tmpData2 =  values[1]?.map((item,i )=> ({latitude: item['stats']['location'].lat, 
-                      longitude: item['stats']['location'].lon, 
-                      make: item['model'].make, 
-                      model: item['model'].name, 
-                      name: item.nickName,
-                      vin: item.vin,
-                      service: 'bouncie',
-                      active: item['stats'].isRunning,
-                      direction: item['stats']['location'].heading }))
-          }
-           
-          locations.splice(locations.length, 0, ...tmpData2);
-          setVehicleRows(locations);
-          setVehicleNeedsRefresh(false);
-          console.log('locatons',locations);
+        Promise.allSettled([Vehicles.getLinxupLocations(), Vehicles.getBouncieLocations()])
+          .then((results) => {
+            const [linxupRes, bouncieRes] = results;
+            const locations = [];
 
-          //Move our info window by resetting activeVehicle with update info
-          if(activeMarker?.type === "vehicle" && activeMarker?.item){
-            var refreshedActive = locations.filter((v, i)=> v.vin == activeMarker.item.vin)[0];
-            setActiveMarker({type: 'vehicle', item: refreshedActive});
-          }
-        })
-        .catch((error)=>{
-          console.error("Vehicle error", error);
-        })
+            // LINXUP
+            if (linxupRes.status === 'fulfilled' && linxupRes.value?.data?.locations) {
+              const linuxp_loc_array = linxupRes.value.data.locations;
+              const tmpData = linuxp_loc_array.map(item => ({
+                latitude: item.latitude,
+                longitude: item.longitude,
+                make: item.make,
+                model: item.model,
+                name: `${item.firstName} ${item.lastName}`,
+                vin: item.vin,
+                service: 'linxup',
+                active: item.speed > 0,
+                direction: item.direction
+              }));
+              locations.push(...tmpData);
+            } else {
+              console.warn('[vehicles] linxup unavailable; continuing with bouncie only');
+            }
+
+            // BOUNCIE
+            if (bouncieRes.status === 'fulfilled' && Array.isArray(bouncieRes.value)) {
+              const tmpData2 = bouncieRes.value.map(item => ({
+                latitude: item?.stats?.location?.lat,
+                longitude: item?.stats?.location?.lon,
+                make: item?.model?.make,
+                model: item?.model?.name,
+                name: item?.nickName,
+                vin: item?.vin,
+                service: 'bouncie',
+                active: !!item?.stats?.isRunning,
+                direction: item?.stats?.location?.heading
+              }));
+              locations.push(...tmpData2);
+            } else {
+              console.error('[vehicles] bouncie unavailable or needs auth', bouncieRes);
+              setBouncieAuthNeeded(true);
+            }
+
+            setVehicleRows(locations);
+            setVehicleNeedsRefresh(false);
+            console.log('[vehicles] placed on map => linxup:',
+              (linxupRes.status==='fulfilled' && linxupRes.value?.data?.locations?.length) || 0,
+              'bouncie:',
+              (bouncieRes.status==='fulfilled' && Array.isArray(bouncieRes.value) && bouncieRes.value.length) || 0
+            );
+          })
+          .catch(err => {
+            console.error('Vehicle error (combined)', err);
+            setVehicleNeedsRefresh(false);
+            // setVehicleRows([]); // optionally still clear/update the map
+          });
       }
     },[vehicleNeedsRefresh]);
 
