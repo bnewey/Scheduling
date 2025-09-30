@@ -14,6 +14,11 @@ const BOUNCIE_REDIRECT_URI =
   process.env.BOUNCIE_REDIRECT_URI ||
   'https://icontrol.raineyelectronics.com:7000/bouncieAuth/callback';
 
+
+const LINXUP_HOST =
+  (process.env.LINXUP_HOST && process.env.LINXUP_HOST.trim().replace(/\/+$/, ''))
+const LINXUP_API_BASE = LINXUP_HOST + '/ibis/rest/api/v2';
+
 function sanitizeToken(raw) {
   if (!raw) return null;
   var t = String(raw).trim();
@@ -140,6 +145,62 @@ router.post('/getBouncieLocations', async (req, res) => {
   } catch (err) {
     logger.error('getBouncieLocations failed: ' + (err && err.stack ? err.stack : String(err)));
     return res.status(502).json({ error: 'bouncie_fetch_failed' });
+  }
+});
+
+router.post('/getLinxupLocations', async (req, res) => {
+  try {
+    // Ensure user is logged in (same pattern you use elsewhere)
+    var sessUserId = req.session && req.session.passport && req.session.passport.user;
+    var user = await User.getUserById(database, sessUserId);
+    if (!user || !user.id) {
+      return res.status(401).json({ error: 'login_required' });
+    }
+
+    // Get token (prefer DB per-user; fallback to env)
+    var token = (user.linxupApiToken || process.env.LINXUP_API_TOKEN || '').trim();
+    if (!token) {
+      logger.error('[linxup] missing API token');
+      return res.status(400).json({ error: 'linxup_token_missing' });
+    }
+
+    var url = LINXUP_API_BASE + '/locations';
+    logger.info('[linxup] POST ' + url);
+
+    // Linxup expects Bearer <token> in the Authorization header
+    // (their Swagger says enter "Bearer <token>" when authorizing).
+    // Body can be empty JSON for "all locations".
+    var resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+
+    var text = await resp.text();
+    if (!resp.ok) {
+      logger.error('[linxup] ' + resp.status + ' ' + (text ? text.slice(0,200) : ''));
+      return res.status(resp.status).send(text || '');
+    }
+
+    var json;
+    try { json = JSON.parse(text); }
+    catch (_) {
+      logger.error('[linxup] non-JSON body: ' + (text ? text.slice(0,200) : ''));
+      return res.status(502).json({ error: 'linxup_non_json' });
+    }
+
+    // (Optional) tiny summary log
+    var count = (json && json.data && json.data.locations && json.data.locations.length) ? json.data.locations.length : 0;
+    logger.info('[linxup] locations=' + count);
+
+    return res.json(json);
+  } catch (err) {
+    logger.error('getLinxupLocations failed: ' + (err && err.stack ? err.stack : String(err)));
+    return res.status(502).json({ error: 'linxup_fetch_failed' });
   }
 });
 
