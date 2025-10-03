@@ -520,7 +520,8 @@ const CustomMap = compose(
             name={vehicle.name}
             icon={{
                 url: props.handleFindVehicleIcon(vehicle),
-                scaledSize: new google.maps.Size(30 ,30)
+                scaledSize: new google.maps.Size(30 ,30),
+                anchor: new google.maps.Point(15, 15)
             }}
             labelAnchor={new google.maps.Point( vehicle.name.length / 2 * 7 , 0)}
             labelStyle={{backgroundColor: "rgba(177, 177, 177, 0.3)", fontSize: "10px", padding: "2px"}}
