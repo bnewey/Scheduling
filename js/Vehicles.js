@@ -40,17 +40,15 @@ async function generateLinxupToken(){
 }
 
 export async function getLinxupLocations() {
-  const route = '/scheduling/vehicles/getLinxupLocations';
-  const r = await fetch(route, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-  const t = await r.text();
-  let p = null; try { p = JSON.parse(t); } catch {}
-
+  const r = await fetch('/scheduling/vehicles/getLinxupLocations', { method: 'POST' });
+  const text = await r.text();
+  let payload = null; try { payload = JSON.parse(text); } catch {}
   if (!r.ok) {
-    console.warn('[linxup] server returned', r.status, t);
-    // fail-soft so Bouncie can still render
-    return { data: { locations: [] } };
+    console.warn('[linxup] non-OK', r.status, text.slice(0,200));
+
+    return { data: { locations: [] }, error: 'linxup_unavailable' };
   }
-  return p || { data: { locations: [] } };
+  return payload || { data: { locations: [] } };
 }
 
 //BOUNCIE STUFF
