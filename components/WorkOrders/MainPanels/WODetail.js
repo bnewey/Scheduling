@@ -167,6 +167,8 @@ const useStyles = makeStyles(theme => ({
     fontWeight: '600',
     textAlign: 'left',
     width: '100%',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
   },
   detailsContainer:{
     background: 'linear-gradient(45deg, rgb(255, 255, 255), rgba(255, 255, 255, 0.36))',
