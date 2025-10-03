@@ -114,7 +114,33 @@ const PartsList = function(props) {
   //   })
   // }
     
+  const DIV_KEYS = ['shop','electronics','insulation'];
+  const DIV_LABEL = { shop:'S', electronics:'E', insulation:'I' };
 
+  const getSetFromCsv = (csv) =>
+    new Set((csv || '').split(',').map(s => s.trim()).filter(Boolean));
+
+  const getCsvFromSet = (set) =>
+    DIV_KEYS.filter(k => set.has(k)).join(',');
+
+  const handleToggleDivision = async (row, key) => {
+    const current = getSetFromCsv(row.divis);
+    current.has(key) ? current.delete(key) : current.add(key);
+    const newDivis = getCsvFromSet(current);
+
+    try {
+      await Inventory.updatePartDivis({ rainey_id: row.rainey_id, divis: newDivis }, user);
+      // optimistic local update
+      row.divis = newDivis;
+      setParts(prev => prev && prev.map(p =>
+        p.rainey_id === row.rainey_id ? { ...p, divis: newDivis } : p
+      ));
+      cogoToast.success('Division updated');
+    } catch (e) {
+      console.error(e);
+      cogoToast.error('Failed to update division');
+    }
+  };
   
   
   const columns = [
@@ -138,6 +164,28 @@ const PartsList = function(props) {
     { dataKey: 'date_entered', label: 'Date Entered',type: 'date', width: 80, align: 'center',
         format: (value)=> moment(value).format("MM-DD-YYYY") },
     { dataKey: 'obsolete', label: 'Obsolete',type: 'number', width: 40, align: 'center' },
+    { dataKey: 'divis', label: 'Div', type: 'text', width: 80, align: 'center',
+      format: (value, rowData) => {
+        const set = getSetFromCsv(value);
+        return (
+          <div className={classes.divisCell}>
+            {DIV_KEYS.map(k => {
+              const active = set.has(k);
+              return (
+                <span
+                  key={k}
+                  className={`${classes.divLetter} ${active ? classes.divOn : classes.divOff}`}
+                  onClick={(e) => { e.stopPropagation(); handleToggleDivision(rowData, k); }}
+                  title={k.charAt(0).toUpperCase() + k.slice(1)}
+                >
+                  {DIV_LABEL[k]}
+                </span>
+              );
+            })}
+          </div>
+        );
+      }
+    },
   ];
 
   const getRowClassName = ({ index }) => {
@@ -326,4 +374,33 @@ const useStyles = makeStyles(theme => ({
       color: '#ee3344',
     }
   },
+divisCell: {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 6,
+},
+divLetter: {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 20,
+  height: 20,
+  borderRadius: 4,
+  padding: 0,
+  cursor: 'pointer',
+  userSelect: 'none',
+  fontWeight: 700,
+},
+divOn: {
+  color: '#1B5E20',
+  border: '2px solid #1B5E20',
+  background: 'rgba(27,94,32,0.08)',
+},
+divOff: {
+  color: '#B71C1C',
+  border: 'none',
+  background: 'transparent',
+  opacity: 0.9,
+},
 }));

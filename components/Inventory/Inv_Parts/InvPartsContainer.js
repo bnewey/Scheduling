@@ -64,6 +64,7 @@ const InvPartsContainer = function(props) {
   const [columnState, setColumnState] = useState(null);
   const [sorters, setSorters] = useState(null);
   const [typeFilter, setTypeFilter] = useState(null);
+  const [divisFilter, setDivisFilter] = useState(null);
 
   const [recentParts, setRecentParts] = React.useState(null);
   const [activePart, setActivePart] = React.useState(null);
@@ -128,6 +129,12 @@ const InvPartsContainer = function(props) {
         //Filters
         if(typeFilter){
           tmpData = tmpData.filter(createFilter([{property: 'type', value: typeFilter}], "in", "or"))
+        }
+        if (divisFilter) {
+          const v = (divisFilter || '').toLowerCase();
+          tmpData = tmpData.filter(p =>
+            ((p.divis || '').toLowerCase().split(',').map(s => s.trim())).includes(v)
+          );
         }
 
         //SORT after filters -------------------------------------------------------------------------
@@ -209,6 +216,32 @@ const InvPartsContainer = function(props) {
       }
     },[typeFilter]);
 
+    useEffect(() => {
+      if (divisFilter == null) {
+        const tmp = window.localStorage.getItem('invDivisFilter');
+        const parsed = tmp ? JSON.parse(tmp) : '';
+        setDivisFilter(parsed ?? '');
+      }
+      if (divisFilter || divisFilter === '') {
+        window.localStorage.setItem('invDivisFilter', JSON.stringify(divisFilter));
+      }
+    }, [divisFilter]);
+
+    useEffect(() => {
+      if (partsSaved && partsSaved.length) {
+        let tmpData = [...partsSaved];
+        if (typeFilter) {
+          tmpData = tmpData.filter(createFilter([{ property: 'type', value: typeFilter }], "in", "or"));
+        }
+        if (divisFilter) {
+          const v = (divisFilter || '').toLowerCase();
+          tmpData = tmpData.filter(p =>
+            ((p.divis || '').toLowerCase().split(',').map(s => s.trim())).includes(v)
+          );
+        }
+        setParts(tmpData);
+      }
+    }, [typeFilter, divisFilter, partsSaved]);
 
   //Save and/or Fetch detailPartId to local storage
   useEffect(() => {
@@ -335,7 +368,7 @@ const InvPartsContainer = function(props) {
     <div className={classes.root}>
       <ListContext.Provider value={{user, parts, setParts, setPartsRefetch, partsSearchRefetch,setPartsSearchRefetch,currentView, setCurrentView, views,columnState, setColumnState, 
       detailPartId,  setDetailPartId,editPartModalMode,setEditPartModalMode, activePart, setActivePart, editPartModalOpen,setEditPartModalOpen,
-         recentParts, setRecentParts, sorters, setSorters, typeFilter, setTypeFilter, partsSaved, setPartsSaved, handleSetView,
+         recentParts, setRecentParts, sorters, setSorters, typeFilter, setTypeFilter, divisFilter, setDivisFilter, partsSaved, setPartsSaved, handleSetView,
          searchValue,setSearchValue, savedSearch, setSavedSearch, backToSearch, setBackToSearch,
            savedSearchValue, setSavedSearchValue,} } >
       <DetailContext.Provider value={{}} >

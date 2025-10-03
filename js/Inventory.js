@@ -549,6 +549,24 @@ async function checkPartExists(part_id){
 
 }
 
+async function updatePartDivis(part, user){
+  const route = '/scheduling/inventory/updatePartDivis';
+  try{
+    const data = await fetch(route, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({part, user})
+    });
+    const res = await data.json();
+    if(res?.user_error || res?.error){
+      throw res;
+    }
+    return res;
+  }catch(error){
+    throw error;
+  }
+}
+
 module.exports = {
     getAllParts,
     searchAllParts,
@@ -560,6 +578,7 @@ module.exports = {
     addNewPart,
     updatePart,
     updatePartInv,
+    updatePartDivis,
     //updateMultipleParts,
     deletePart,
     getPartManItems,
