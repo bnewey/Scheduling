@@ -123,9 +123,11 @@ const CustomMap = compose(
 
     },
     getPixelPositionOffset: () => (offsetWidth, offsetHeight, labelAnchor) => {
+        var ax = (labelAnchor && typeof labelAnchor.x === 'number') ? labelAnchor.x : 0;
+        var ay = (labelAnchor && typeof labelAnchor.y === 'number') ? labelAnchor.y : 0;
         return {
-            x: offsetWidth + labelAnchor.x,
-            y: offsetHeight + labelAnchor.y,
+            x: Math.round(ax - offsetWidth / 2),
+            y: Math.round(ay - offsetHeight / 2),
         };
     },
     
@@ -523,8 +525,15 @@ const CustomMap = compose(
                 scaledSize: new google.maps.Size(30 ,30),
                 anchor: new google.maps.Point(15, 15)
             }}
-            labelAnchor={new google.maps.Point( vehicle.name.length / 2 * 7 , 0)}
-            labelStyle={{backgroundColor: "rgba(177, 177, 177, 0.3)", fontSize: "10px", padding: "2px"}}
+            labelAnchor={new google.maps.Point(0, -17)}
+            labelStyle={{
+              backgroundColor: "rgba(177, 177, 177, 0.3)",
+              fontSize: "10px",
+              padding: "2px 4px",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+              transform: "translateX(-50%)"
+            }}
             ><div>{vehicle.name}</div></MarkerWithLabel>
         ))}
         </MarkerClusterer>
