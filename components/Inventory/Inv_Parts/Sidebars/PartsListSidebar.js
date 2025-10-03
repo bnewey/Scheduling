@@ -23,6 +23,7 @@ import {
   } from '@material-ui/pickers';
 import RecentParts from './components/RecentParts';
 import TypeFilterSelect from './components/TypeFilterSelect';
+import DivisionFilterSelect from './components/DivisionFilterSelect';
 
 
 const PartsListSidebar = function(props) {
@@ -59,6 +60,10 @@ const PartsListSidebar = function(props) {
             
             <TypeFilterSelect />
         </div>
+        <div className={classes.dateRangeDiv}>
+          
+            <DivisionFilterSelect />
+       </div>
         <div className={classes.dateRangeDiv}>
           <div className={classes.headDiv}>
                 <span className={classes.headSpan}>
