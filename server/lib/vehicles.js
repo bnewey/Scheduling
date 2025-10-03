@@ -150,26 +150,25 @@ router.post('/getBouncieLocations', async (req, res) => {
 
 router.post('/getLinxupLocations', async (req, res) => {
   try {
-    // Ensure user is logged in (same pattern you use elsewhere)
+    // auth gate (same pattern as your other routes)
     var sessUserId = req.session && req.session.passport && req.session.passport.user;
     var user = await User.getUserById(database, sessUserId);
     if (!user || !user.id) {
-      return res.status(401).json({ error: 'login_required' });
+      // keep it 200 + empty so layouts that call this don’t 500
+      return res.json({ data: { locations: [] }, error: 'login_required' });
     }
 
-    // Get token (prefer DB per-user; fallback to env)
+    // token: prefer per-user, else env
     var token = (user.linxupApiToken || process.env.LINXUP_API_TOKEN || '').trim();
     if (!token) {
       logger.error('[linxup] missing API token');
-      return res.status(400).json({ error: 'linxup_token_missing' });
+      return res.json({ data: { locations: [] }, error: 'linxup_token_missing' });
     }
 
     var url = LINXUP_API_BASE + '/locations';
     logger.info('[linxup] POST ' + url);
 
-    // Linxup expects Bearer <token> in the Authorization header
-    // (their Swagger says enter "Bearer <token>" when authorizing).
-    // Body can be empty JSON for "all locations".
+    // Linxup expects Bearer <token> in Authorization; body {} means "all locations"
     var resp = await fetch(url, {
       method: 'POST',
       headers: {
@@ -181,27 +180,43 @@ router.post('/getLinxupLocations', async (req, res) => {
     });
 
     var text = await resp.text();
+
     if (!resp.ok) {
-      logger.error('[linxup] ' + resp.status + ' ' + (text ? text.slice(0,200) : ''));
-      return res.status(resp.status).send(text || '');
+      logger.error('[linxup] upstream ' + resp.status);
+      // Do NOT propagate 4xx/5xx to the browser; return empty so UI doesn’t crash
+      return res.json({ data: { locations: [] }, error: 'linxup_upstream_' + resp.status });
     }
 
     var json;
     try { json = JSON.parse(text); }
-    catch (_) {
-      logger.error('[linxup] non-JSON body: ' + (text ? text.slice(0,200) : ''));
-      return res.status(502).json({ error: 'linxup_non_json' });
+    catch (e) {
+      logger.error('[linxup] non-JSON ');
+      return res.json({ data: { locations: [] }, error: 'linxup_non_json' });
     }
 
-    // (Optional) tiny summary log
-    var count = (json && json.data && json.data.locations && json.data.locations.length) ? json.data.locations.length : 0;
+    // Normalize shape for your React mapper
+    var out;
+    if (json && json.data && Array.isArray(json.data.locations)) {
+      out = json;
+    } else if (Array.isArray(json)) {
+      out = { data: { locations: json } };
+    } else if (json && Array.isArray(json.locations)) {
+      out = { data: { locations: json.locations } };
+    } else {
+      out = { data: { locations: [] } };
+    }
+
+    var count = out.data.locations.length;
     logger.info('[linxup] locations=' + count);
 
-    return res.json(json);
+    return res.json(out);
+
   } catch (err) {
     logger.error('getLinxupLocations failed: ' + (err && err.stack ? err.stack : String(err)));
-    return res.status(502).json({ error: 'linxup_fetch_failed' });
+    // Never return 5xx to callers; keep the app stable
+    return res.json({ data: { locations: [] }, error: 'linxup_route_error' });
   }
 });
+
 
 module.exports = router;
