@@ -800,4 +800,35 @@ router.post('/checkPartExists', async (req,res) => {
     }
 });
 
+router.post('/updatePartDivis', async (req, res) => {
+  let part, user;
+  if (req.body) {
+    part = req.body.part;
+    user = req.body.user;
+  }
+  if (!part || !part.rainey_id) {
+    return res.status(400).json({ user_error: 'Bad request: missing part.rainey_id' });
+  }
+
+  // Match the same permission pattern as other inventory updates
+  if (user && !checkPermission(user.perm_string, 'inventory') && !user.isAdmin) {
+    logger.error("Bad permission", [user]);
+    return res.status(400).json({ user_error: 'Failed permission check' });
+  }
+
+  const sql = ' UPDATE inv__parts SET divis = ?, date_updated = ? WHERE rainey_id = ? ';
+  try {
+    const results = await database.query(sql, [
+      part.divis || null,
+      Util.convertISODateTimeToMySqlDateTime(moment()),
+      part.rainey_id
+    ]);
+    logger.info("Inventory Part divis updated " + part.rainey_id);
+    res.json(results);
+  } catch (error) {
+    logger.error("Failed to updatePartDivis: " + error);
+    res.sendStatus(400);
+  }
+});
+
 module.exports = router;
