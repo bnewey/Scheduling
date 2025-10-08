@@ -294,7 +294,12 @@ const SignSchedulerList = function(props) {
         window.localStorage.setItem('currentView', JSON.stringify('woDetail'));
       }
     } catch {}
-    Router.push({ pathname: '/scheduling/work_orders', query: { wo_id } });
+
+    // IMPORTANT: include the id in the URL so SSR can load safely
+    Router.push({
+      pathname: '/scheduling/work_orders',
+      query: { wo_id: String(wo_id) },
+    });
   };
 
 
