@@ -7,7 +7,7 @@ import { ListContext } from '../../InvPartsContainer';
 const DIV_OPTIONS = [
   { value: 'shop', label: 'Shop' },
   { value: 'electronics', label: 'Electronics' },
-  { value: 'insulation', label: 'Insulation' },
+  { value: 'insulation', label: 'Installation' },
 ];
 
 const DivisionFilterSelect = () => {
