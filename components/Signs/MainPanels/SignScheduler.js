@@ -286,17 +286,17 @@ const SignSchedulerList = function(props) {
 
 
 
-  const handleGoToWorkOrderId = (wo_id, row) =>{
+  const handleGoToWorkOrderId = (wo_id) => {
     console.log("woi", wo_id);
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
+        window.localStorage.setItem('currentView', JSON.stringify('woDetail'));
+      }
+    } catch {}
+    Router.push({ pathname: '/scheduling/work_orders', query: { wo_id } });
+  };
 
-    //set detailWOIid in local data
-    window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
-    
-    //set detail view in local data
-    window.localStorage.setItem('currentView', JSON.stringify("woDetail"));
-
-    Router.push('/scheduling/work_orders')
-  }
 
 
   const StyledTableRow = withStyles((theme) => ({
