@@ -158,12 +158,6 @@ const PartsList = function(props) {
     { dataKey: 'cost_each', label: 'Cost Each', type: 'number', width: 100, align: 'right',
       format: (value)=> `$ ${value.toFixed(6)}` },
     { dataKey: 'type', label: 'Type', width: 150,type: 'text', align: 'center', },
-    { dataKey: 'storage_location', label: 'Strg Location', type: 'text', width: 50, align: 'center', },
-    { dataKey: 'notes', label: 'Notes', width: 200,type: 'text', align: 'left' }, 
-    { dataKey: 'reel_width', label: 'Reel Width', type: 'text',width: 50, align: 'center' },
-    { dataKey: 'date_entered', label: 'Date Entered',type: 'date', width: 80, align: 'center',
-        format: (value)=> moment(value).format("MM-DD-YYYY") },
-    { dataKey: 'obsolete', label: 'Obsolete',type: 'number', width: 40, align: 'center' },
     { dataKey: 'divis', label: 'Div', type: 'text', width: 80, align: 'center',
       format: (value, rowData) => {
         const set = getSetFromCsv(value);
@@ -186,6 +180,12 @@ const PartsList = function(props) {
         );
       }
     },
+    { dataKey: 'notes', label: 'Notes', width: 200,type: 'text', align: 'left' }, 
+    { dataKey: 'reel_width', label: 'Reel Width', type: 'text',width: 50, align: 'center' },
+    { dataKey: 'date_entered', label: 'Date Entered',type: 'date', width: 80, align: 'center',
+        format: (value)=> moment(value).format("MM-DD-YYYY") },
+    { dataKey: 'obsolete', label: 'Obsolete',type: 'number', width: 40, align: 'center' },
+    { dataKey: 'storage_location', label: 'Strg Location', type: 'text', width: 50, align: 'center', },
   ];
 
   const getRowClassName = ({ index }) => {
