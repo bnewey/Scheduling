@@ -27,7 +27,7 @@ import ModelContainer from './otherPages/ModelsAndColor/ModelContainer';
 //Extras
 import AddEditModal from './AddEditWorkOrder/AddEditModal'
 import moment from 'moment';
-
+import Router from 'next/router';
 
 
 var today =  new Date();
@@ -109,6 +109,32 @@ const WOContainer = function(props) {
   //
   
   const classes = useStyles();
+
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const initialWOId = params.get('wo_id');
+    const initialView = params.get('view');
+
+    if (initialView) {
+      // If you have handleSetView + views[], prefer those:
+      const v = views.find(v => v.value === initialView);
+      if (v) handleSetView(v);
+      // or fallback: setCurrentView(initialView);
+    }
+
+    if (initialWOId) {
+      setDetailWOid(initialWOId);
+      const detailView = views.find(v => v.value === 'woDetail');
+      if (detailView) handleSetView(detailView);
+      // (Optional) Clean the URL for aesthetics, no refetch:
+      Router.replace('/work_orders', undefined, { shallow: true });
+    }
+    // run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   //Get View from local storage if possible || set default
   useEffect(() => {

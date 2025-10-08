@@ -285,23 +285,20 @@ const SignSchedulerList = function(props) {
   },[columnState])
 
 
-
-  const handleGoToWorkOrderId = (wo_id) => {
+  const handleGoToWorkOrderId = (wo_id, row) => {
     console.log("woi", wo_id);
     try {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
-        window.localStorage.setItem('currentView', JSON.stringify('woDetail'));
-      }
+      // keep your localStorage writes (your detail view already uses them)
+      window.localStorage.setItem('detailWOid', JSON.stringify(wo_id));
+      window.localStorage.setItem('currentView', JSON.stringify('woDetail'));
     } catch {}
 
-    // IMPORTANT: include the id in the URL so SSR can load safely
+    // IMPORTANT: give the server an ID so it won’t 500 during SSR / GSSP fetch
     Router.push({
       pathname: '/work_orders',
-      query: { wo_id: String(wo_id) },
+      query: { wo_id: String(wo_id), view: 'woDetail' },
     });
   };
-
 
 
   const StyledTableRow = withStyles((theme) => ({
