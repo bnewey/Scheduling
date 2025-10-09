@@ -78,6 +78,30 @@ const AddEditModal = function(props) {
         setEntityDrawerOpen(true);
     }
 
+    const handleNotesCtrlEnter = (e) => {
+        // Ctrl+Enter → hard return
+        if (e.ctrlKey && (e.key === 'Enter' || e.keyCode === 13)) {
+            e.preventDefault();
+            const el = e.target;
+
+            // Insert "\n" exactly at the caret range and keep focus
+            if (el && typeof el.setRangeText === 'function') {
+            const start = el.selectionStart ?? 0;
+            const end = el.selectionEnd ?? start;
+            el.setRangeText('\n', start, end, 'end'); // caret moves after newline
+
+            // Let React/MUI know value changed (important for uncontrolled inputs)
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            } else {
+            // Fallback
+            const start = el.selectionStart ?? 0;
+            const end = el.selectionEnd ?? start;
+            const v = el.value ?? '';
+            el.value = v.slice(0, start) + '\n' + v.slice(end);
+            }
+        }
+    };
+
     useEffect(()=>{
         if(entityVisibleUsers == null){
           Settings.getVisibleRaineyUsers()
@@ -279,29 +303,7 @@ const AddEditModal = function(props) {
         
     },[activeWorkOrder,editWOModalOpen])
 
-    const handleNotesCtrlEnter = (e) => {
-        // Ctrl+Enter → hard return
-        if (e.ctrlKey && (e.key === 'Enter' || e.keyCode === 13)) {
-            e.preventDefault();
-            const el = e.target;
 
-            // Insert "\n" exactly at the caret range and keep focus
-            if (el && typeof el.setRangeText === 'function') {
-            const start = el.selectionStart ?? 0;
-            const end = el.selectionEnd ?? start;
-            el.setRangeText('\n', start, end, 'end'); // caret moves after newline
-
-            // Let React/MUI know value changed (important for uncontrolled inputs)
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            } else {
-            // Fallback
-            const start = el.selectionStart ?? 0;
-            const end = el.selectionEnd ?? start;
-            const v = el.value ?? '';
-            el.value = v.slice(0, start) + '\n' + v.slice(end);
-            }
-        }
-    };
 
         
 
