@@ -114,8 +114,8 @@ const PartsList = function(props) {
   //   })
   // }
     
-  const DIV_KEYS = ['shop','electronics','insulation'];
-  const DIV_LABEL = { shop:'S', electronics:'E', insulation:'I' };
+  const DIV_KEYS = ['shop','electronics','installation'];
+  const DIV_LABEL = { shop:'S', electronics:'E', installation:'I' };
 
   const getSetFromCsv = (csv) =>
     new Set((csv || '').split(',').map(s => s.trim()).filter(Boolean));
