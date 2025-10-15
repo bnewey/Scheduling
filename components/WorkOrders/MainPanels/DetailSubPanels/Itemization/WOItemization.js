@@ -39,6 +39,28 @@ const WOItemization = function(props) {
   const [packingSlips, setPackingSlips] = React.useState(null);
   const [refetchWOI, setRefetchWOI] = React.useState(false);
 
+  // --- Scroll persistence ---
+  const containerRef = React.useRef(null);
+  const lastScrollTopRef = React.useRef(0);
+
+  const rememberScroll = () => {
+    if (containerRef.current) {
+      lastScrollTopRef.current = containerRef.current.scrollTop;
+    }
+  };
+
+  useEffect(() => {
+    if (workOrderItems && containerRef.current) {
+      containerRef.current.scrollTop = lastScrollTopRef.current || 0;
+    }
+  }, [workOrderItems]);
+
+  useEffect(() => {
+    const remember = () => rememberScroll();
+    window.addEventListener('woi:remember-scroll', remember);
+    return () => window.removeEventListener('woi:remember-scroll', remember);
+  }, []);
+
   //WOI
   useEffect( () =>{
     //Gets data only on initial component mount or when rows is set to null
@@ -279,10 +301,13 @@ const WOItemization = function(props) {
                   
                   <Grid item xs={ editWOIModalOpen ? 12 : 12}>
                     <div className={classes.woiDiv}>
-                    { workOrderItems && workOrderItems.length > 0 ?
-                    <TableContainer className={ clsx( { [classes.container_small]: editWOIModalOpen,
-                                                        [classes.container]: !editWOIModalOpen
-                                                      }) }>
+                    
+                    <TableContainer
+                      ref={containerRef}
+                      onScroll={rememberScroll}
+                      className={ clsx( { [classes.container_small]: editWOIModalOpen,
+                                          [classes.container]: !editWOIModalOpen
+                                        }) }>
                       <Table stickyHeader  size="small" aria-label="sticky table">
                         <TableHead>
                           <TableRow>
@@ -300,9 +325,9 @@ const WOItemization = function(props) {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          { workOrderItems.map((row) => {
+                          {(workOrderItems ?? []).map((row) => {
                             return (
-                              <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code} >
+                              <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.record_id} >
                                 {columns.map((column,i) => {
                                   const value = row[column.id];
                                   return (
@@ -316,10 +341,24 @@ const WOItemization = function(props) {
                               </StyledTableRow>
                             );
                           })}
+                          {workOrderItems === null && (
+                            <TableRow>
+                              <TableCell colSpan={columns.length} align="center">
+                                <CircularProgress size={20} />
+                              </TableCell>
+                            </TableRow>
+                          )}
+                          {workOrderItems && workOrderItems.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={columns.length} align="center" className={classes.infoSpan}>
+                                No Work Order Items
+                              </TableCell>
+                            </TableRow>
+                          )}
                         </TableBody>
                       </Table>
                     </TableContainer>
-                    : <span className={classes.infoSpan}>No Work Order Items</span>}
+
 
 
                     </div>
