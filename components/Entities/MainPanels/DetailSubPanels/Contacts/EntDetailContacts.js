@@ -173,6 +173,8 @@ const EntContacts = function(props) {
                                 draggable: false,
                                 toolbar: false,
                                 showTitle: false,
+                                maxBodyHeight: '68vh',
+                                minBodyHeight: '250px',
                                 headerStyle:{
                                   fontSize: '14px',
                                   fontFamily: 'sans-serif',
@@ -184,7 +186,7 @@ const EntContacts = function(props) {
                                   fontWeight: 600,
                                   color: '#444',
                                   padding: '5px',
-                                  zIndex: '0',
+                                  zIndex: '1',
                                 },
                                 // actionsColumnIndex: -1,
                                 cellStyle: {
