@@ -2,6 +2,11 @@ const passport = require('passport');
 const Strategy = require('passport-google-oauth').OAuth2Strategy;
 const User = require('./lib/user');
 
+function isMobileUA(req) {
+  const ua = (req.headers['user-agent'] || '').toLowerCase();
+  return /mobi|android|iphone|ipad|ipod|windows phone/.test(ua);
+}
+
 function auth({ ROOT_URL, app, database }) {
   const verify = async (accessToken, refreshToken, profile, verified) => {
     let email;
@@ -73,7 +78,8 @@ function auth({ ROOT_URL, app, database }) {
       failureFlash: 'Invalid Google credentials. Try clearing site data in browser.'
     }),
     (req, res) => {
-      res.redirect('/');
+      const dest = isMobileUA(req) ? '/mobile' : '/';
+      res.redirect(dest);
     },
   );
 
