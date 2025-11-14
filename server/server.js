@@ -137,11 +137,11 @@ nextApp
     app.use('/calendar', calendar);
     //
 
-    // If a signed-in mobile user hits "/", nudge them to /mobile.
+    // If a signed-in mobile user hits "/", nudge them to /scheduling/mobile.
     app.get('/', (req, res, next) => {
       const ua = (req.headers['user-agent'] || '').toLowerCase();
       const isMobile = /mobi|android|iphone|ipad|ipod|windows phone/.test(ua);
-      if (req.user && isMobile) return res.redirect('/mobile');
+      if (req.user && isMobile) return res.redirect('/scheduling/mobile');
       return next(); // fall through to Next's handler below
     });
 
