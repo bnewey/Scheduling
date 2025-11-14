@@ -2,6 +2,11 @@ const passport = require('passport');
 const Strategy = require('passport-google-oauth').OAuth2Strategy;
 const User = require('./lib/user');
 
+function isMobileUA(req) {
+  const ua = (req.headers['user-agent'] || '').toLowerCase();
+  return /mobi|android|iphone|ipad|ipod|windows phone/.test(ua);
+}
+
 function auth({ ROOT_URL, app, database }) {
   const verify = async (accessToken, refreshToken, profile, verified) => {
     let email;
@@ -35,7 +40,7 @@ function auth({ ROOT_URL, app, database }) {
     {
       clientID: process.env.NODE_ENV == 'production' ? process.env.Google_clientID : process.env.Google_clientIDDEV,
       clientSecret: process.env.NODE_ENV == 'production' ? process.env.Google_clientSecret : process.env.Google_clientSecretDEV,
-      callbackURL: `${ROOT_URL}/scheduling/oauth2callback`,
+      callbackURL: `${ROOT_URL}/oauth2callback`,
     },
     verify,
   ));
@@ -73,7 +78,8 @@ function auth({ ROOT_URL, app, database }) {
       failureFlash: 'Invalid Google credentials. Try clearing site data in browser.'
     }),
     (req, res) => {
-      res.redirect('/scheduling');
+      const dest = isMobileUA(req) ? '/scheduling/mobile' : '/scheduling';
+      res.redirect(dest);
     },
   );
 
