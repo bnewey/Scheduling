@@ -18,6 +18,7 @@ import TaskLists from '../../../js/TaskLists';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
+import { CrewContext } from '../Crew/CrewContextContainer';
 import TaskListFilter from './TaskListFilter';
 import TLDrillDateFilter from './components/TLDrillDateFilter';
 import TLInstallDateFilter from './components/TLInstallDateFilter';
@@ -42,6 +43,7 @@ const TaskListMain = (props) => {
     
     //PROPS
     const { isPriorityOpen, setIsPriorityOpen, woiData, setWoiData} = props;
+    const { allCrewJobs } = useContext(CrewContext);
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
@@ -60,6 +62,22 @@ const TaskListMain = (props) => {
             setTaskListTasksRefetch(true)
         }
     },[refreshView])
+
+    const hideCrewCompletedTasks = (rows, allJobs) => {
+        if (!Array.isArray(rows) || rows.length === 0) return rows || [];
+        if (!Array.isArray(allJobs) || allJobs.length === 0) return rows; // do nothing if jobs not loaded yet
+
+        const isCompletedVal = (v) => v === 1 || v === '1' || v === true;
+
+        return rows.filter((row) => {
+            const taskId = row?.t_id ?? row?.id ?? row?.task_id ?? row?.taskID;
+            if (!taskId) return true;                 // keep if we can’t identify the task
+            const jobs = allJobs.filter((j) => j.task_id == taskId);
+            if (jobs.length === 0) return true;       // tasks with no crew jobs are NOT “completed”
+            const allDone = jobs.every((j) => isCompletedVal(j.completed));
+            return !allDone;                           // hide if all crew jobs are done
+        });
+    };
 
     //TaskListTasks
     useEffect( () =>{ 
@@ -185,6 +203,8 @@ const TaskListMain = (props) => {
                 }
 
                 // -------------------------------------------------------------------------------------------
+
+                tmpData = hideCrewCompletedTasks(tmpData.length ? tmpData : data, allCrewJobs);
                   
                 //SORT after filters -------------------------------------------------------------------------
                 if(sorters && sorters.length > 0){
@@ -215,7 +235,7 @@ const TaskListMain = (props) => {
             }
         }
     },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch, filters, installDateFilters,
-         drillDateFilters, arrivalDateFilters, drillCrewFilters, installCrewFilters]);
+         drillDateFilters, arrivalDateFilters, drillCrewFilters, installCrewFilters, allCrewJobs]);
 
     //WOIDATA 
     useEffect(()=>{
