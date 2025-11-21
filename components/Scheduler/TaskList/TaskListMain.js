@@ -18,7 +18,6 @@ import TaskLists from '../../../js/TaskLists';
 import cogoToast from 'cogo-toast';
 
 import {TaskContext} from '../TaskContainer';
-import { CrewContext } from '../Crew/CrewContextContainer';
 import TaskListFilter from './TaskListFilter';
 import TLDrillDateFilter from './components/TLDrillDateFilter';
 import TLInstallDateFilter from './components/TLInstallDateFilter';
@@ -27,6 +26,7 @@ import TLCrewFilter from './components/TLCrewFilter'
 
 import {createSorter} from '../../../js/Sort';
 import {createFilter} from '../../../js/Filter';
+import Crew from '../../../js/Crew'; // NEW
 
 const KeyBinding = dynamic(()=> import('react-keybinding-component'), {
     ssr: false
@@ -38,12 +38,8 @@ const TaskListMain = (props) => {
     const [taskListTasksRefetch, setTaskListTasksRefetch] = React.useState(false);
     const [selectedTasks, setSelectedTasks] = useState([]);
     
-    
-
-    
     //PROPS
     const { isPriorityOpen, setIsPriorityOpen, woiData, setWoiData} = props;
-    const { allCrewJobs } = useContext(CrewContext);
 
     const {taskLists, setTaskLists, tabValue, setTabValue,
         taskListToMap, setTaskListToMap,setModalTaskId, 
@@ -52,7 +48,6 @@ const TaskListMain = (props) => {
          sorters, setSorters,sorterState, setSorterState, installDateFilters , setInstallDateFilters,drillDateFilters, arrivalDateFilters, setArrivalDateFilters,
          taskListTasksSaved, setTaskListTasksSaved, tLTasksExtraSaved, setTLTasksExtraSaved, refreshView,tableInfo ,setTableInfo,setActiveTaskView, taskViews , activeTaskView,
          setRefreshView, setDrillDateFilters, drillCrewFilters, setDrillCrewFilters, installCrewFilters, setInstallCrewFilters, user, activeTVOrder,} = useContext(TaskContext);
-
 
     //CSS
     const classes = useStyles({sorterState, sorters});
@@ -63,27 +58,10 @@ const TaskListMain = (props) => {
         }
     },[refreshView])
 
-    const hideCrewCompletedTasks = (rows, allJobs) => {
-        if (!Array.isArray(rows) || rows.length === 0) return rows || [];
-        if (!Array.isArray(allJobs) || allJobs.length === 0) return rows; // do nothing if jobs not loaded yet
-
-        const isCompletedVal = (v) => v === 1 || v === '1' || v === true;
-
-        return rows.filter((row) => {
-            const taskId = row?.t_id ?? row?.id ?? row?.task_id ?? row?.taskID;
-            if (!taskId) return true;                 // keep if we can’t identify the task
-            const jobs = allJobs.filter((j) => j.task_id == taskId);
-            if (jobs.length === 0) return true;       // tasks with no crew jobs are NOT “completed”
-            const allDone = jobs.every((j) => isCompletedVal(j.completed));
-            return !allDone;                           // hide if all crew jobs are done
-        });
-    };
-
     //TaskListTasks
     useEffect( () =>{ 
         //Gets data only on initial component mount
         if(taskLists == null){
-            //setTaskListTasks(null);
             setTaskListTasksRefetch(true);
         }
         if(taskLists && taskListToMap && taskListToMap.id && (taskListTasks == null || taskListTasksRefetch == true)
@@ -93,7 +71,7 @@ const TaskListMain = (props) => {
                 setTaskListTasksRefetch(false);
             }
             TaskLists.getTaskList(taskListToMap.id)
-            .then( (data) => {
+            .then( async (data) => {
                 if(!Array.isArray(data)){
                     console.error("Bad tasklist data",data);
                     return;
@@ -107,7 +85,6 @@ const TaskListMain = (props) => {
                     let properties = new Set([...filters].map((v,i)=>v.property));
                     
                     properties.forEach((index,property)=>{
-                    
                         let tmpFilter = filters.filter((v,i)=> v.property == property);
                         let tmpTmpData;
     
@@ -119,7 +96,6 @@ const TaskListMain = (props) => {
                             }
                             if(tmpFilter.length <= 1){
                                 tmpTmpData = data.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
-                                //console.log("MapContainer tmpData in loop", tmpData);
                             }
                             //Add to our big array
                             tmpData.splice(tmpData.length, 0, ...tmpTmpData);
@@ -133,7 +109,6 @@ const TaskListMain = (props) => {
                               tmpData = [...data];
                             }  
                             if(tmpFilter.length > 1){
-                                //Always use 'or' on same property
                                 tmpData = tmpData.filter(createFilter([...tmpFilter], filterInOrOut, "or"));
                             }
                             if(tmpFilter.length <= 1){
@@ -146,21 +121,16 @@ const TaskListMain = (props) => {
 
                 //Save after initial filters
                 var savedTmpData = tmpData;
-                //Need to sort for our 
                 if(sorters && sorters.length > 0){
                     savedTmpData = savedTmpData.sort(createSorter(...sorters))
-                    //Set saved for filter list 
                 }
                 setTLTasksExtraSaved(savedTmpData);
-                console.log("tmpData for extra saved", savedTmpData);
                 
-
                 if(installDateFilters.length > 0){
                     if(tmpData.length <= 0 && filters && !filters.length){
                         tmpData = [...data];
                     }  
                     tmpData = tmpData.filter(createFilter([...installDateFilters], "in", "or"));
-
                 }
 
                 if(drillDateFilters.length > 0){
@@ -168,7 +138,6 @@ const TaskListMain = (props) => {
                         tmpData = [...data];
                     }  
                     tmpData = tmpData.filter(createFilter([...drillDateFilters], "in", "or"));
-
                 }
 
                 if(arrivalDateFilters.length > 0){
@@ -176,7 +145,6 @@ const TaskListMain = (props) => {
                         tmpData = [...data];
                     }  
                     tmpData = tmpData.filter(createFilter([...arrivalDateFilters], "in", "or"));
-
                 }
 
                 if(drillCrewFilters.length > 0){
@@ -198,26 +166,52 @@ const TaskListMain = (props) => {
                 //No filters or sorters
                 if(filters && !filters.length && installDateFilters && !installDateFilters.length && drillDateFilters && !drillDateFilters.length &&
                      arrivalDateFilters && !arrivalDateFilters.length && drillCrewFilters && !drillCrewFilters.length && installCrewFilters && !installCrewFilters.length){
-                    //no change to tmpData
                     tmpData = [...data];
                 }
 
                 // -------------------------------------------------------------------------------------------
-
-                tmpData = hideCrewCompletedTasks(tmpData.length ? tmpData : data, allCrewJobs);
                   
                 //SORT after filters -------------------------------------------------------------------------
                 if(sorters && sorters.length > 0){
                     tmpData = tmpData.sort(createSorter(...sorters))
-                    //Set saved for filter list 
                 }
                 //--------------------------------------------------------------------------------------------
-               
+
+                // FOREVER-DEFAULT: remove tasks where all related crew jobs are completed.
+                // Reuse the same endpoint your row UI calls (Crew.getCrewJobsByTask).
+                const isCompletedVal = (v) => v === 1 || v === '1' || v === true;
+                const ids = [...new Set((tmpData.length ? tmpData : data)
+                    .map(r => r?.t_id ?? r?.id ?? r?.task_id ?? r?.taskID)
+                    .filter(Boolean))];
+
+                try {
+                    const results = await Promise.all(ids.map(async (tid) => {
+                        try {
+                            const jobs = await Crew.getCrewJobsByTask(tid);
+                            const arr = Array.isArray(jobs) ? jobs : [];
+                            const allDone = arr.length > 0 && arr.every(j => isCompletedVal(j.completed));
+                            return [tid, allDone];
+                        } catch (e) {
+                            console.error('Crew.getCrewJobsByTask failed for task', tid, e);
+                            return [tid, false];
+                        }
+                    }));
+                    const doneMap = new Map(results); // tid -> allDone
+                    tmpData = (tmpData.length ? tmpData : data).filter(row => {
+                        const tid = row?.t_id ?? row?.id ?? row?.task_id ?? row?.taskID;
+                        if (!tid) return true;
+                        const allDone = doneMap.get(tid);
+                        // Keep row if unknown or not all done; hide only when all related jobs are done.
+                        return allDone !== true;
+                    });
+                } catch (e) {
+                    console.error('Error building completed-map', e);
+                    // In case of any issue, fall back to showing the unfiltered list.
+                }
 
                 //Save all originally fetched data
                 setTaskListTasksSaved(data);
                 
-
                 //Set TaskListTasks
                 if(Array.isArray(tmpData)){
                     setTaskListTasks(tmpData);
@@ -235,17 +229,13 @@ const TaskListMain = (props) => {
             }
         }
     },[taskListToMap,taskListTasks, taskLists, filterInOrOut, filterAndOr, taskListTasksRefetch, filters, installDateFilters,
-         drillDateFilters, arrivalDateFilters, drillCrewFilters, installCrewFilters, allCrewJobs]);
+         drillDateFilters, arrivalDateFilters, drillCrewFilters, installCrewFilters]);
 
     //WOIDATA 
     useEffect(()=>{
-        // if(taskListTasks == null){
-        //     setWoiData(null);
-        // }
         if(woiData == null && taskListToMap){
             TaskLists.getAllSignScbdWOIFromTL(taskListToMap.id)
             .then((data)=>{
-                //console.log("woi data", data);
                 setWoiData(data);
             })
             .catch((error)=>{
@@ -280,7 +270,6 @@ const TaskListMain = (props) => {
         if (Array.isArray(sorters) && sorters.length) {
             if (taskListTasks && taskListTasks.length) {
                 var tmpData = taskListTasks.sort(createSorter(...sorters))
-                console.log(tmpData);
                 var copyObject = [...tmpData];
                 setTaskListTasks(copyObject);
                 cogoToast.success(`Sorting by ${sorters.map((v, i)=> v.property + ", ")}`);
@@ -294,9 +283,6 @@ const TaskListMain = (props) => {
             cogoToast.error("Bad field while trying to sort");
             return;
         }
-        //sort taskListItems according to item
-        //this sort can take multiple sorters but i dont think its necessary
-           // if it is, you will have to change the [0] to a dynamic index!
         if(item.type == 'date' || item.type == 'datetime' || item.type == 'number' || item.type == 'text'){
             switch(sorterState){
                 case 0:
@@ -333,8 +319,6 @@ const TaskListMain = (props) => {
     }
 
     const handleRefreshView = () =>{
-        //Refreshes based on which tab is currently active
-        //only using taskList bc thats the only page with quick filter access for now
         var viewToRefresh;
         switch(tabValue){
             case 0:
@@ -346,12 +330,6 @@ const TaskListMain = (props) => {
             case 2:
                 viewToRefresh = "map"
                 break;
-            // case 3:
-            //     viewToRefresh = "crew"
-            //     break;
-            // case 4:
-            //     viewToRefresh = "allTasks"
-            //     break;
         }
         if(viewToRefresh){
             setRefreshView(viewToRefresh);
@@ -472,7 +450,6 @@ const useStyles = makeStyles(theme => ({
         margin: '-5px 0px 5px 5px',
         backgroundColor: '#fff',
         height: '100%',
-        //marginBottom: '15px',
     },
     HeadListItem:{
         backgroundColor: '#293a5a !important',
